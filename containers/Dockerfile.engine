@@ -1,0 +1,5 @@
+# Base only. U-P5 adds the pinned fork, BookSim 2 and Ramulator 2; U-P11 adds the native build.
+FROM ubuntu:24.04
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential cmake git ca-certificates python3 && rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/uarch

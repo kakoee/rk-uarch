@@ -1,0 +1,69 @@
+# U-P5 · U3 · Lane A — Fork selection, the engine container, and the adapter
+
+_From build-spec §8. One prompt, one fresh session._
+
+```text
+CONTEXT TO LOAD: CLAUDE.md, src/rkuarch/engines/README.md, third_party/README.md,
+containers/README.md, build-spec §2.5 (the engine protocol) and §4 gate G2 in
+docs/execution-plan.md. Read BOTH PAPERS IN FULL, not their abstracts. The planning documents
+only had the abstracts and say so:
+- PyTorchSim, MICRO 2025, doi 10.1145/3725843.3756045 (MIT; github.com/PSAL-POSTECH/PyTorchSim);
+- ONNXim, IEEE CAL 2024, arXiv 2406.08051 (MIT; github.com/PSAL-POSTECH/ONNXim).
+
+TASK: get a published cycle-level NPU simulator driven by a uarch request, reproducibly, and
+choose between the two candidates on pre-registered numbers.
+
+1. BEFORE RUNNING ANYTHING, write docs/decisions/U0005-fork-selection.md's "pre-registered
+   criteria" section and commit it. It holds G2's five criteria with the per-point wall-clock
+   budget made concrete: derive it from the grid you intend (build-spec §2.3.3's default grid
+   size) and a table build budget you state. A threshold chosen after seeing the number is a
+   retrospective, not a gate.
+2. containers/Dockerfile.engine — builds the candidate from a PINNED SHA, unattended, from a
+   script. The image carries BookSim2 and Ramulator2 at the SHAs the fork's submodules pin.
+   Build and run only on the Linux box, never on a laptop.
+3. third_party/<fork>/: pinned SHA in third_party/LICENSES.md, with the licence of every
+   component the image links (the fork, BookSim2, Ramulator2, and their dependencies). Local
+   changes ONLY as numbered patches third_party/patches/NNNN-<slug>.patch, each with a
+   one-line reason, applied at image build. CI job `patches` verifies they still apply.
+4. src/rkuarch/engines/fork/ — the adapter. FILES IN, FILES OUT, NO FOREIGN-FUNCTION
+   INTERFACE:
+   - config_writer.py: HardwareSpec (a large-core design) -> the fork's config JSON. Every
+     spec field the fork cannot represent is listed in the adapter's `unrepresented` output,
+     which becomes a table warning. Never silently dropped.
+   - workload_writer.py: (ModelSpec, ModelShape, precision, canonical query) -> the fork's
+     LLM input format. For ONNXim that is its custom language-model format with
+     iteration-level batching; for PyTorchSim, whatever its front end accepts. It is generated
+     from ModelSpec and ModelShape, and it is NEVER the source of truth: ONNX or PyTorch
+     graphs are an output of this writer, not an input to uarch.
+   - runner.py: runs the container as a subprocess with a timeout, captures stdout/stderr
+     and stats files, and records the image digest in the result.
+   - stats_parser.py: fork stats -> EngineResult (build-spec §2.5): duration_ps, per-resource
+     busy time, activity counts in contract channel names. MACs are converted to ops at
+     2 per MAC (P7b) by a named function.
+   - THE FORK'S MAPPING IS THE FORK'S. It tiles and schedules internally. Record it as
+     mapping_policy "fork:<name>-default@<sha>", a stipulation on every row. Do not pretend
+     uarch's mapping policies drove it.
+5. Evaluate ONNXim first (it is lighter). If it passes G2, you may skip PyTorchSim. Record
+   that you skipped it and why. If it fails, evaluate PyTorchSim with the same criteria.
+6. `uarch table ... --engine fork` for one-layer decode queries on npu-l4, driven from a
+   ModelSpec end to end.
+
+ACCEPTANCE TESTS (write first where they can be written first):
+1. G2(a): `make image` from a clean clone builds the engine image unattended.
+2. G2(b): three consecutive runs of the same query produce byte-identical stats files.
+3. G2(c): decode matrix-op counts at B ∈ {1,8,32}, context/seq ∈ {512,4096} match rk-sim's
+   parity fixtures within 0.5% after named deviations, no single deviation above 5%.
+4. G2(d): wall-clock per one-layer decode query at or under the pre-registered budget.
+5. G2(e): licence scan of the image green against the allow-list.
+6. The adapter's `unrepresented` list is non-empty for npu-l4 if anything is unrepresented,
+   and each entry appears as a table warning.
+
+GUARDRAILS: Do not patch the engine to make parity pass. Declare the deviation. Do not touch
+anything under src/rkuarch/engines/native/. Do not start U-P7 until a fork has passed G2. If
+BOTH fail, do not improvise a workaround: record the U-C1 fallback decision in ADR U0005
+(build a Python contention-aware model, ship it labelled C1, record "C2 via fork:
+unbuilt") and stop for the founders.
+
+ADR: docs/decisions/U0005-fork-selection.md, with pre-registered criteria, every measured
+number, the rejected candidate's numbers, and the image digest.
+```

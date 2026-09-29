@@ -1,0 +1,23 @@
+[importlinter]
+root_packages =
+    rkuarch
+    uarch_contract
+# `rk` (rk-sim) is not installed here; it must still be forbidden, so it is treated as external.
+include_external_packages = True
+
+[importlinter:contract:no-rk]
+name = rk-uarch never imports rk-sim
+type = forbidden
+source_modules =
+    rkuarch
+    uarch_contract
+forbidden_modules =
+    rk
+
+[importlinter:contract:contract-is-a-leaf]
+name = the contract imports nothing from the harness
+type = forbidden
+source_modules =
+    uarch_contract
+forbidden_modules =
+    rkuarch
