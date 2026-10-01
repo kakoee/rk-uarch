@@ -681,6 +681,7 @@ rk-uarch/
 │   ├── decisions/     U0000-record-architecture-decisions.md
 │   ├── prompts/       every U-P*, U-REVIEW, STANDING, TEMPLATE (from the kit)
 │   ├── reviews/  results/
+│   ├── server/        setup-dev.sh and RUNBOOK-server.md for the shared Linux box
 └── tests/
     ├── README.md
     ├── __init__.py
@@ -1112,7 +1113,8 @@ grids) so CI stays fast.
 
 build-spec.md (what and how) · execution-plan.md (when and who) · how-it-works.md (the
 system today, with real numbers) · glossary.md · decisions/ (U-numbered ADRs) · prompts/ (one
-task per session) · reviews/ (handoffs and U-REVIEW records) · results/ (published findings).
+task per session) · reviews/ (handoffs and U-REVIEW records) · results/ (published findings) ·
+server/ (setup-dev.sh and the runbook for the shared Linux box).
 ```
 
 ---
