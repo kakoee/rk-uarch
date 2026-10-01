@@ -41,13 +41,51 @@ jobs:
             uv run pytest -q -m determinism
           else echo "nothing yet: no golden scenarios"; fi
 
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - run: |
+          if [ -n "$(find contract/tests -name 'test_*.py' -print -quit)" ]; then
+            uv run pytest -q contract/tests
+          else echo "nothing yet: no contract tests"; fi
+
   licences-and-patches:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
       - run: uv sync --extra dev
-      - run: uv run python -m pytest -q tests/unit/test_third_party.py
+      - name: licences
+        run: uv run python -m pytest -q tests/unit/test_third_party.py
+      - name: patches
+        run: |
+          if [ -n "$(find third_party/patches -name '*.patch' -print -quit)" ]; then
+            echo "patches exist but no apply check is wired yet; U-P5 adds it"; exit 1
+          else echo "nothing yet: no patches"; fi
+
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if [ -n "$(find native/src -name '*.cpp' -print -quit)" ]; then
+            cmake -S native -B native/build && cmake --build native/build -j \
+              && ctest --test-dir native/build --output-on-failure
+          else echo "nothing yet: no native sources"; fi
+
+  perf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - run: |
+          if [ -n "$(find validation/perf -name '*.json' -print -quit 2>/dev/null)" ]; then
+            uv run pytest -q validation/perf
+          else echo "nothing yet: no perf baselines"; fi
 
   ordering:
     runs-on: ubuntu-latest

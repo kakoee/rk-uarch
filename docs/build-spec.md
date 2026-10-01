@@ -14,6 +14,13 @@ state, layer-reuse error, DRAM organisation and timing, per-job and barrier over
 matrix-engine dataflow, the KV page layout, the full applicability scope, an optional shared
 SRAM level, SRAM placement, energy evidence, mapping match at L3, workload fidelity, architect
 diagnostics, workload suites, the derated DRAM limit, and the mixed-iteration limit.
+**Rev 2.1, 2026-10-01.** Applies the fixes in `docs/reviews/rev2-plan-review.md` (its Findings
+1–12): the tensor-parallel shard and a ninth integration rule, durations in the parity
+fixtures, unit and preset rules the contract can satisfy, counts as SourcedValues, six more
+U0001 decisions, fidelity keys and the fork's levels, a fused attention operator, an
+end-to-end mesh class, accumulator and controller-queue state, structural study variants,
+split native-engine prompts, and deferred scope (shared-SRAM engine support, the energy rung,
+a gate on U9).
 
 **Companion documents.** `docs/execution-plan.md` is *when and who*: sprints, gates and effort.
 `rk-uarch-track-verdict-and-plan.md` (in the Project) holds the research and the reasoning
@@ -75,13 +82,13 @@ toward it from U1.
 | Min | Action | Output | What it proves |
 |---|---|---|---|
 | 0:00 | `uarch validate hw/designs/npu-m256.yaml`, then the same on a copy of `hw/references/blackhole-p100a.yaml` with one value turned into a stipulation | Counts of claims (each with a URL), stipulations (each with a rationale) and stubs; then a refusal naming the parameter path | Claims and design choices are different things, and the loader knows it |
-| 1:00 | `uarch table hw/designs/npu-m256.yaml --model llama-3.1-70b --precision fp8 --engine native --workers 10` | A table built in parallel across grid points. It prints composite **C2** with the per-subsystem detail, the model-card badge, the measured interpolation, composition and layer-reuse errors, and the FLOP-parity deviations | A cycle-level answer that says how it was computed and how well it knows itself |
+| 1:00 | `uarch table hw/designs/npu-m256.yaml --model llama-3.1-70b --precision fp8 --tp 8 --engine native --workers 10` | A table built in parallel across grid points, for one rank of an 8-way tensor-parallel split. It prints composite **C2** with the per-subsystem detail, the model-card badge, the measured interpolation, composition, layer-reuse and cold-vs-steady errors, and the FLOP-parity deviations | A cycle-level answer that says how it was computed and how well it knows itself |
 | 2:30 | `uarch report tables/<hash>` | An HTML report where every number is badged, marked "conditional · N stipulations", and shows its error band or "unknown", never "±0"; each C2 row sits beside its own U-C0 roofline; architect diagnostics (utilisation, critical-path attribution, NoC and DRAM statistics) render "not modelled" where a level does not model them | Honesty rendered, not asserted |
 | 4:00 | `uarch study hw/studies/npu-m256-sram-and-noc.yaml` | A two-variant diff over the versioned workload suite: which regime moved, with attribution, per workload and as a geometric-mean speedup; a one-at-a-time tornado labelled *local sensitivity*; energy per token with its own conditions, marked unverified until energy evidence exists | What a chip architect actually does with the tool |
 | 5:30 | `uarch ledger` | L3 rows for TPU v5e and Blackhole, predicted vs measured by class, with predictions provably committed first; model cards promoted only within their scope; error by fidelity level, answering *did more detail help?* | The method is graded against silicon, including where it lost |
-| 6:30 | rk-sim: a rack of 8 × `npu-m256` at **C2** against 8 × H100 at C0 → Run → Compare | The Fidelity Map row shows `C2 · uarch@x · <table hash>`; badges are conditional; Compare warns that the comparison is biased *against* the detailed part and shows its roofline beside it | The two products meet at a seam neither had to rewrite |
+| 6:30 | rk-sim: a rack of 8 × `npu-m256` at **C2**, tp = 8, against 8 × H100 at C0 → Run → Compare | The Fidelity Map row shows `C2 · uarch@x · <table hash>`; badges are conditional; Compare warns that the comparison is biased *against* the detailed part and shows its roofline beside it | The two products meet at a seam neither had to rewrite |
 | 8:00 | `uarch diff` of `npu-l4` at native vs fork, matched levels | Agreement fraction and speedup; disagreements attributed per subsystem | The native engine is checked against something that isn't itself |
-| 9:00 | Close | "N stipulations; validated band X% for {classes, shape regimes, precision} on {family}; everything else says unknown." | — |
+| 9:00 | Close | "N stipulations; validated band X% for {classes, shape regimes, precision} on {family}; everything else says unknown." If the evidence covers none of the 1:00 table's own rows (family, precision, end-to-end class), the close says so | — |
 
 ### 1.3 Scope boundaries: the agent's guardrails
 
@@ -89,16 +96,16 @@ toward it from U1.
 
 | Class | Fidelity range | Note |
 |---|---|---|
-| Hardware description | — | Proposed designs (stipulations allowed) and reference chips (claims only). Includes matrix-engine dataflow, DMA outstanding limits and request size, per-job and barrier overheads, DRAM organisation and timing, address interleaving, controller policy, and an optional shared SRAM |
-| Workload | — | Dense decoder with GQA, prefill and decode, from rk-sim `ModelSpec` + a `ModelShape` sidecar. MoE as active-parameter dense-equivalent only, as in rk-sim. KV in pages of rk-sim's block size. A stipulated initial state (`steady` or `cold`) |
+| Hardware description | — | Proposed designs (stipulations allowed) and reference chips (claims only). Includes matrix-engine dataflow, accumulator and operand-buffer capacity, DMA outstanding limits and request size, per-job and barrier overheads, DRAM organisation and timing, address interleaving, controller policy, queue depths and credits, and an optional shared SRAM |
+| Workload | — | Dense decoder with GQA, prefill and decode, from rk-sim `ModelSpec` + a `ModelShape` sidecar, as one rank of a tp-way tensor-parallel split. MoE as active-parameter dense-equivalent only, as in rk-sim. KV in pages of rk-sim's block size. Attention as one fused operator. A stipulated initial state (`steady` or `cold`) |
 | Mapping | — | Named, versioned, stipulated policies. No search |
 | Compute (core) | levels 0–2 | Roofline → tile-job intervals (dataflow-specific fill/drain, per-job overhead) → + SRAM banks (from the mapping's buffer placement) and DMA interleave |
 | NoC | levels 0–2 | Hop latency → reservation calendars with cycle timestamps → flit-level (BookSim2, reference) |
 | DRAM | levels 0–2 | Latency + bandwidth cap derated for refresh → per-channel queue with row buffer and the spec's page policy → Ramulator 2 (library), configured from the spec's organisation and timing |
-| Shared SRAM (optional) | levels 0–1 | Capacity + bandwidth cap → per-port queue, attached to the NoC like a memory controller |
+| Shared SRAM (optional) | levels 0–1 | Capacity + bandwidth cap → per-port queue, attached to the NoC like a memory controller. In the contract from 0.1; engine support is deferred until after U8, and until then a spec with a shared SRAM lists it as unrepresented, so its composite is never C2 |
 | Engines | — | Analytic (U-C0), fork (ONNXim or PyTorchSim, pinned), native (C++20) |
 | Parallelism | — | Across grid points from U4; inside a simulation from U9: exact conservative mode, plus a lax mode labelled approximate |
-| Evidence | — | L0 invariants, L0m metamorphic, L1 analytical limits, L2 differential, L3 two reference chips, ledger, model cards; workload fidelity against compiler-reported counts; an energy rung (L0 conservation, L2 per-access reference) |
+| Evidence | — | L0 invariants, L0m metamorphic, L1 analytical limits, L2 differential, L3 two reference chips, ledger, model cards; workload fidelity against compiler-reported counts; diagnostic fidelity against device counters where a chip exposes them; L0 energy conservation (the energy L2 rung is deferred until after U8) |
 | Product | — | Tables, CLI, static reports with architect diagnostics, `uarch characterize`, design studies over a versioned workload suite, rk-sim integration (U-P19, U-P20) |
 
 **Out of scope.** If an agent proposes any of these, the answer is no:
@@ -181,45 +188,62 @@ id: npu-m256
 design_status: proposed            # proposed | reference
 clock_domains:
   core: {freq_hz: {value: 1.2e9, unit: Hz, kind: stipulation, rationale: "target node"}}
-  noc:  {freq_hz: {...}}
-  dram: {freq_hz: {...}}
-cores:
-  grid: [16, 16]                   # composition: plain ints
+  noc:  {freq_hz: {...}, scales_with_core: false}   # frequency_ratio scales core and every
+  dram: {freq_hz: {...}, scales_with_core: false}   #   domain with scales_with_core: true
+cores:                             # *_cycles leaves under cores: core clock domain
+  grid: {rows: {...}, cols: {...}} # counts are SourcedValues with integral values
   core_type:
-    matrix_engine: {array: [32, 32], dataflows: [weight_stationary],     # F6: supported set
-                    macs_per_cycle: {bf16: {...}, fp8: {...}}}
+    matrix_engine: {array: {rows: {...}, cols: {...}}, dataflows: [weight_stationary],  # F6
+                    macs_per_cycle: {bf16: {...}, fp8: {...}},
+                    accumulator_bytes: {...},                    # output-tile / partial-sum capacity
+                    operand_buffer_bytes: {...}, operand_bytes_per_cycle: {...}}  # SRAM -> array staging
     vector_engine: {ops_per_cycle: {...}}
-    sram: {bytes: {...}, banks: 16, bytes_per_cycle_per_bank: {...}}
-    dma:  {engines: 2, bytes_per_cycle: {...},
+    sram: {bytes: {...}, banks: {...}, bytes_per_cycle_per_bank: {...}}
+    dma:  {engines: {...}, bytes_per_cycle: {...},
            max_outstanding: {...}, request_bytes: {...}}               # F1: memory-level parallelism
     job_overhead_cycles: {...}                                          # F5: issue + descriptor + semaphore, per tile job
-sync: {mechanism: noc_semaphore, barrier_latency_cycles: {...}}         # F5
+sync: {mechanism: noc_semaphore, barrier_latency_cycles: {...}}         # F5; noc clock domain
 shared_sram: null                  # F9, optional: {bytes, banks, bytes_per_cycle_per_bank,
-                                   #   latency_cycles, attach: [[r, c], ...]}
-nocs:
+                                   #   latency_cycles (noc domain), attach: [[r, c], ...]}
+nocs:                              # *_cycles leaves: noc clock domain
   - {topology: torus, direction: positive, link_bytes_per_cycle: {...},
-     router_latency_cycles: {...}, virtual_channels: 4, buffer_flits: {...}}
+     router_latency_cycles: {...}, virtual_channels: {...}, buffer_flits: {...}}
 memory:
   interleave: {granularity_bytes: {...}, scheme: channel_hash}          # F4: address -> channel -> controller
-  controllers: [{attach: [0, 0], scheduler: fr_fcfs, page_policy: open}, {attach: [0, 15], ...}, ...]
-  dram: {standard: gddr6, channels: 8, bw_bytes_per_s: {...}, capacity_bytes: {...},
+  controllers: [{attach: [0, 0], scheduler: fr_fcfs, page_policy: open,
+                 read_queue_depth: {...}, write_queue_depth: {...},     # a full queue withholds
+                 noc_credits: {...}},                                   #   NoC credits (back-pressure)
+                {attach: [0, 15], ...}, ...]
+  dram: {standard: gddr6, channels: {...}, bw_bytes_per_s: {...}, capacity_bytes: {...},
          organization: {ranks: {...}, bank_groups: {...}, banks_per_group: {...}, row_bytes: {...}},
+         timing_preset: null,      # or {file: <path in the simulator repo>, sha: <pinned commit>}
          timing: {t_rcd_cycles: {...}, t_rp_cycles: {...}, t_cl_cycles: {...},
                   t_rfc_cycles: {...}, t_refi_cycles: {...}}}         # F4: in the dram clock domain
-formats: {fp8: {bytes: 1, accumulate_bytes: 4, block_scale_bytes: {...}}}
+formats: {fp8: {bytes: 1, accumulate_bytes: {...}, block_scale_bytes: {...}}}
 energy: {pj_per_mac: {fp8: {...}}, pj_per_byte: {sram: {...}, noc_hop: {...}, dram: {...}},
          voltage_ratio: {0.6: {...}}}  # F11: V(f)/V(1) per frequency ratio; absent => energy at f≠1 is unknown
 static_power_w: {...}
 tdp_w: {...}
 ```
 
-**Rev 2 rules for the new fields.**
-- `dataflows`, `scheme`, `scheduler`, `page_policy` and `sync.mechanism` are categorical: plain
-  enum values, like `topology`. Every numeric leaf, including DRAM organisation and timing, is a
-  SourcedValue.
-- A simulator preset (Ramulator's GDDR6 or HBM timing tables, say) may supply DRAM timing only as
-  claims whose `source` names the preset file at a pinned SHA. An engine never falls back to a
-  preset the spec does not name (F4).
+**Rules for the fields (Rev 2, amended in Rev 2.1).**
+- Categorical fields (`topology`, `direction`, `dataflows`, `scheme`, `scheduler`,
+  `page_policy`, `sync.mechanism`) are plain enums. Structure is plain too: the lists of NoCs
+  and controllers, and every `attach` coordinate. Every numeric leaf is a SourcedValue, counts
+  included (grid, array, banks, DMA engines, virtual channels, DRAM channels and organisation,
+  queue depths, credits), and a count's value must be integral. So a reference marks an
+  unpublished count as a stub, and a study may vary a count of a proposed design. A format's
+  `bytes` is the format's definition and stays plain.
+- **Clock domains.** Every `*_cycles` and `*_per_cycle` leaf counts cycles of the domain that
+  owns its block: `cores` → core; `nocs`, `sync`, `shared_sram` and controller `noc_credits`
+  → noc; `memory.dram` → dram. A frequency ratio scales `clock_domains.core` and every domain
+  whose `scales_with_core` is true, and nothing else.
+- **Presets.** A simulator preset (Ramulator's GDDR6 or HBM tables, say) may supply DRAM timing
+  only through `memory.dram.timing_preset: {file, sha}`, and every timing leaf it supplies is a
+  claim whose `source` is `<file>@<sha>`. A timing claim that cites any other preset file, or a
+  `timing_preset` without a pinned sha, is refused (`UnnamedPreset`). No engine reads any
+  simulator configuration (timing, controller queues, scheduler parameters) from a preset or a
+  default the spec does not name; what the spec lacks is listed as unrepresented (F4).
 - `sram.bytes` and `energy.pj_per_byte.sram` travel together: a variant that changes one
   re-stipulates the other (F11).
 - A field an engine cannot represent goes into that engine's `unrepresented` list and becomes a
@@ -238,7 +262,7 @@ model: {name, total_params, active_params, n_experts, experts_per_token,
         n_layers, d_model, n_heads, kv_heads}           # rk-sim ModelSpec, verbatim
 model_shape: {d_ff, gated_mlp, vocab_size, attention: gqa, tie_embeddings, expert_d_ff}
 precision: {compute: fp8, kv_cache: fp8}                 # rk-sim PrecisionFormat
-tp: 1                                                    # the row is ONE chip's shard
+tp: 8                                                    # the shard: rows cost ONE rank of a tp-way split
 envelope:
   decode:  {batch_max: 128, context_per_seq_max: 32768}
   prefill: {prompt_tokens_max: 32768, prompts_per_iteration_max: 8}
@@ -248,7 +272,7 @@ grid:
   prefill: {n: [1,2,4,8], L: [128,512,2048,8192,32768]}                   # 20 × 2 f = 40 rows
   frequency_ratio: [1.0, 0.6]
 mapping_policy: summa-2d@1                               # stipulated
-uarch_fidelity: {compute: 2, noc: 1, dram: 2}
+uarch_fidelity: {compute: 2, noc: "1+ts", dram: 2}           # values as fidelity_detail (§2.4)
 initial_state: steady                                    # F2: steady | cold; a stipulation on every row
 kv_layout: {block_size_tokens: 16}                       # F7: rk-sim's KV block size
 visit_weights: null                                      # F15, optional: rk-sim's density over (B, T) and
@@ -263,6 +287,7 @@ contract: uarch-contract/0.1
 uarch_version: 0.3.0+g1a2b3c4
 request_hash: "sha256:…"
 table_hash:   "sha256:…"
+tp: 8                                  # the request's tp; rk-sim refuses it for any other tp (rule 9)
 composite_fidelity: C2
 fidelity_detail: {compute: 2, noc: "1+ts", dram: 2, sync: exact, layer_reuse: true}
 rows:                                  # seconds and bytes; never cycles
@@ -270,13 +295,15 @@ rows:                                  # seconds and bytes; never cycles
      duration_s: 3.1e-3, u_c0_duration_s: 2.2e-3,
      attribution_s: {compute: …, memory: …, noc: …, sync: …, overhead: …},   # critical path; sums to duration_s
      counts: {matrix_ops: …, vector_ops: …, memory_read_bytes: …, memory_write_bytes: …},
-     ext_counts: {sram_read_bytes: …, sram_write_bytes: …, noc_flit_hops: …},
+     ext_counts: {sram_read_bytes: …, sram_write_bytes: …, noc_flit_hop_count: …},
      peak_resident_bytes: {hbm: …, sram: …},
      diagnostics: {matrix_util_ratio: …, vector_util_ratio: …, dma_compute_overlap_ratio: …,
                    sram_bank_conflict_stall_ratio: …, noc_latency_p50_s: …, noc_latency_p99_s: …,
                    noc_max_link_util_ratio: …, dram_bw_util_ratio: …, dram_row_hit_ratio: …}}
                                        # F14: null where the level does not model it, never 0;
                                        #   uarch-internal (rk-sim ignores it)
+  - {phase: prefill, n_prompts: 2, prompt_tokens: 2048, frequency_ratio: 1.0, …}
+                                       # same fields as a decode row; keys (n_prompts, prompt_tokens)
 interpolation: {decode: "bilinear in (log B, log T); linear in 1/f",
                 prefill: "bilinear in (log n, log L); linear in 1/f", outside_grid: refuse}
 initial_state: steady
@@ -284,17 +311,21 @@ kv_layout: {block_size_tokens: 16}
 measured_error: {interpolation_loo: {median_rel: …, max_rel: …, weighted_median_rel: … | null},
                  composition_reduction: {decode: {…}, prefill: {…}, n_samples: …},
                  layer_reuse: {median_rel: …, max_rel: …, n_samples: …},            # F3
-                 cold_vs_steady: {median_rel: …, max_rel: …, n_samples: …}}         # F2
-flop_parity: {max_rel: …, declared_deviations: [{id, rel, reason}]}
+                 cold_vs_steady: {median_rel: …, max_rel: …, n_samples: …,
+                                  priming_2_vs_1_max_rel: …}}                         # F2; warm-up length
+flop_parity: {max_rel: …, declared_deviations: [{id, deviation_rel, reason}]}
 provenance: {params: [...], model_card: {hash, badge, evidence, validated_error_band,
                                          energy_verification},
              conditional_on: [...]}
 warnings: [...]                        # includes the declared omissions (§2.3.4)
 ```
 
-`validated_error_band.scope` is the full applicability vector: `{family, op_classes,
-precisions, shape_regimes, load_regimes, mapping_match}` (F8). `energy_verification` is `None`
-("unverified") until the energy rung exists (§2.7).
+`validated_error_band` is `None` or `{low_rel, high_rel, scope}`, and `scope` is the full
+applicability vector: `{family, op_classes, precisions, shape_regimes, load_regimes,
+mapping_match}` (F8). `energy_verification` is `None` ("unverified") until every coefficient
+family the energy figure uses (per MAC, SRAM, NoC hop, DRAM, static) has an L2 reference; the
+energy rung is deferred until after U8 (§2.7). The table embeds the model card's hash, badge,
+evidence, band and energy verification, so rk-sim reads the badge without the card file.
 
 #### 2.3.4 Canonical batches, and the reduction error
 
@@ -308,6 +339,14 @@ is not linear, because of padding and tile quantization. So the table evaluates 
 For a seeded sample of points the table then **measures** how far unequal batches with the same
 (B, T, Q) deviate, and reports that number. It never corrects it.
 
+**A row is one rank of a tp-way split, and uarch builds the split (rule 1, rule 9).** For
+`tp = N` the workload graph is one rank of a Megatron-style split: attention heads divided by N
+(KV heads too, replicated when `kv_heads < N`), FFN up and gate columns and down rows divided by
+N, embedding and lm_head split over the vocabulary. It has no collective operations: rk-sim
+prices those. A request whose heads or FFN width do not divide by N is refused, naming the
+dimension. A table is built for exactly one tp, carries it, and rk-sim uses it only for a plan
+with the same tp.
+
 **Layer reuse is sampling, so its error is measured too (F3).** With `layer_reuse: true` the
 engine simulates one decoder layer and scales it by `n_layers`: a representative interval with a
 weight, as SimPoint does. Anything that crosses a layer boundary is lost: the next layer's
@@ -319,7 +358,9 @@ sample of grid points the table simulates every layer and reports the deviation 
 iteration starts. `steady` (the default) simulates one priming iteration at the same point and
 reports the second; `cold` starts from empty SRAM, closed DRAM rows and no DMA in flight. The
 state is a stipulation on every row. L3 predictions use the state that matches the measurement
-kit's warm-up. Each table reports the cold-vs-steady deviation over a seeded sample of points.
+kit's warm-up. Each table reports the cold-vs-steady deviation over a seeded sample of points,
+and on the same sample how far one priming iteration is from two (`priming_2_vs_1_max_rel`), so
+the warm-up length is measured rather than assumed.
 
 **KV lives in pages (F7).** KV is stored in pages of `kv_layout.block_size_tokens`, which is
 rk-sim's block size. The workload graph emits KV reads as page-granular gathers, not one
@@ -334,7 +375,13 @@ not claim" lists them.
 
 `contract/uarch_contract/operators.py` starts from rk-sim P16's baseline list (QKV projection,
 QK score, softmax, AV, output projection, normalization, residual, FFN projections, activation)
-and adds only what tiling needs (e.g. `kv_write`, `embedding`, `lm_head`). Each operator carries
+and adds only what tiling needs (e.g. `kv_write`, `embedding`, `lm_head`, `attention_fused`).
+**Attention is one fused operator.** `attention_fused` is QK score → softmax → AV over KV tiles
+with the scores kept on chip, as real attention kernels do: its operation count is the sum of
+its three parts, and its DRAM traffic is Q, K, V and O only. The workload graph emits it for
+prefill and decode; the three unfused operators stay in the vocabulary, and a policy that
+materialises scores in DRAM says so in its name. Without this, a prefill row at L = 32768 would
+either be refused or charged an L × L score matrix per head. Each operator carries
 named dimensions, per-operand dtypes, per-operand layout (contiguous, or paged with a page size,
 as KV is) and its reduction axis. **A multiply-add is two operations**
 (rk-sim P7b). If rk-sim takes P16, the two lists are reconciled in P16's boundary ADR.
@@ -345,8 +392,8 @@ as KV is) and its reduction axis. **A multiply-add is two operations**
 |---|---|---|---|---|
 | Compute | Roofline of the core | Tile-job intervals: fill/drain for the declared dataflow, quantization, double-buffering, per-job overhead | + SRAM bank conflicts (from the mapping's buffer placement) and DMA interleave at cycle timestamps | Gemmini RTL on Verilator |
 | NoC | Hop latency, infinite bandwidth | Reservation calendars per link and port. **"1+ts"** when cycle-timestamped | Flit-level (BookSim2) | tt-npe; silicon |
-| DRAM | Latency + bandwidth cap, derated for refresh | Per-channel queue + row buffer with the spec's page policy | Ramulator 2, configured from the spec's organisation and timing | Silicon |
-| Shared SRAM (optional) | Capacity + bandwidth cap | Per-port queue; **"1+ts"** when cycle-timestamped | — | Silicon |
+| DRAM | Latency + bandwidth cap, derated for refresh | Per-channel queue + row buffer with the spec's page policy and queue depths. **"1+ts"** when cycle-timestamped | Ramulator 2, configured from the spec's organisation, timing and queues | Silicon |
+| Shared SRAM (optional) | Capacity + bandwidth cap | Per-port queue; **"1+ts"** when cycle-timestamped (engine support after U8) | — | Silicon |
 | Sync | exact | — | — | — |
 
 **Memory-level parallelism holds at every level (F1).** Every DMA engine honours
@@ -356,13 +403,24 @@ latency plus memory latency. In the native engine, barriers cost
 `sync.barrier_latency_cycles` at every level; U-C0 does not model them.
 The Sync row above is about the parallel simulation (§2.9), not about barriers in the workload.
 
+**`fidelity_detail`, the per-subsystem vector.** Keys and legal values are fixed:
+`compute` 0 | 1 | 2; `noc` 0 | 1 | "1+ts" | 2; `dram` 0 | 1 | "1+ts" | 2; `shared_sram`
+(present only when the spec has one) 0 | 1 | "1+ts" | "unrepresented"; `sync` "exact" |
+"approx(Q=<ps>)"; `layer_reuse` true | false. A request's `uarch_fidelity` uses the same keys
+and values. SRAM banks are modelled inside compute level 2, so they have no key of their own:
+below compute level 2 they are unmodelled.
+
 **The composite level reported to rk-sim:**
 
-- **C2** only if every shared resource (NoC, DRAM, SRAM banks, and shared SRAM when present) is
-  at level 2 or at "1+ts",
+- **C2** only if compute is at level 2 (which is where SRAM bank conflicts live), NoC and DRAM
+  are at level 2 or "1+ts", a shared SRAM (when present) is at "1+ts",
   **and** synchronisation is exact, or `approx(Q)` covered by a measured curve (§2.9).
 - **C1** otherwise, if any subsystem is at level 1.
 - **C0-equivalent** if every subsystem is at level 0.
+
+Every engine's levels come from this table, never from its name. The fork's sub-models are
+placed on the ladder once, per configuration, from its source, in ADR U0005 (U-P5), and its
+tables get the composite this rule gives them: C1 if the fork models no SRAM bank conflicts.
 
 A request for C2 that cannot be honoured degrades or raises as §7.4 says.
 
@@ -420,7 +478,8 @@ named function.
    - `spec_derived` never applies to a model.
 3. **Applicability** (rk-sim ADR 0021). Evidence that does not apply to this request (wrong
    family, class, precision, shape regime, load regime or mapping match) contributes `stub` for
-   this request. ADR U0001 fixes the bins (F8). The proposal:
+   this request. ADR U0001 fixes the bins (F8) and where applicability is judged (proposal: per
+   row, with every operator in the row covered). The proposal for the bins:
    - **shape regime**, per operator: operational intensity relative to the chip's ridge point
      (below 0.5×, 0.5–2×, above 2×) × array fill (the smaller of M and N below the array
      dimension, or not);
@@ -432,8 +491,10 @@ named function.
 5. **Error is "unknown", never zero.** `validated_error_band` comes only from in-scope ledger
    entries. A deterministic run never fills `ci95`.
 6. **Nothing may raise a badge**: no display code, fixture or spec file.
-7. **Energy has its own evidence (F11).** Duration evidence never validates energy. Until the
-   energy rung exists (§2.7), energy renders "unverified" and its model contributes `stub`.
+7. **Energy has its own evidence (F11).** Duration evidence never validates energy. Until every
+   coefficient family an energy figure uses has an L2 reference (§2.7; deferred until after
+   U8), energy renders "unverified" and its model contributes `stub`. A reference for one
+   family (SRAM pJ, say) never lifts the label for the others.
 8. **Unmodelled is `null`, never 0.** A diagnostic or energy figure that a level does not model
    is `null` in every output and renders "not modelled".
 
@@ -444,8 +505,8 @@ named function.
 | L0 invariants | No self-contradiction | MAC and byte conservation; utilisation ≤ 1; Little's law ≤ 1%; causality; byte-identical reruns; per-core SRAM occupancy ≤ capacity; attribution sums to duration; energy = Σ counts × coefficients + static × duration | none |
 | L0m metamorphic | Relations without an answer key | Bandwidth ×2 never slower; any latency ×2 never faster; fewer outstanding requests never faster; `cold` never faster than `steady`; clock ×k → compute-bound ÷k; monotone in batch and context; symmetry; idle-core invariance | none |
 | L1 analytical limits | Closed forms where exact | Transfer = hops × latency + serialisation; streaming = peak derated for refresh ±5% (levels 0–1; level 2 ≤ derated peak, efficiency recorded); latency-bound stream = outstanding × request size ÷ round trip ±5%; resident GEMM pipeline formula for the declared dataflow; **C2 ≥ own U-C0 roofline**; two hand-computed fixtures | none |
-| L2 differential | Same abstraction as independent models | BookSim2, Ramulator 2, SCALE-Sim v3 (per declared dataflow), Gemmini RTL (optional), tt-npe; native vs fork; Accelergy per-access energy (energy rung); Timeloop mapping reference (optional, recorded, never used to change a policy) | none: "verified", not "validated" |
-| L3 same-class silicon | How far the method misses on a real chip | TPU v5e (large-core), Blackhole p100a (mesh); predictions committed before results, with ordering enforced by git; device-side time only; each benchmark tagged `matched` or `compiler-chosen` mapping; compiler-reported FLOPs and bytes checked against the workload graph (workload fidelity) | `estimated`, scoped |
+| L2 differential | Same abstraction as independent models | BookSim2, Ramulator 2, SCALE-Sim v3 (per declared dataflow), Gemmini RTL (optional), tt-npe; native vs fork; Timeloop mapping reference (optional, recorded, never used to change a policy); per-access energy references, one per coefficient family (deferred until after U8). A comparison of a sub-model with the same code (a fork whose NoC is BookSim 2, against BookSim 2) is refused as not independent | none: "verified", not "validated" |
+| L3 same-class silicon | How far the method misses on a real chip | TPU v5e (large-core), Blackhole p100a (mesh); predictions committed before results, with ordering enforced by git; device-side time only; each benchmark tagged `matched` or `compiler-chosen` mapping; compiler-reported FLOPs and bytes checked against the workload graph (workload fidelity); device counters, where the chip exposes them, checked against the row diagnostics (diagnostic fidelity) | `estimated`, scoped |
 | L4 target silicon | The actual chip | A design partner's silicon | `measured`, via the ledger |
 
 **Four rules the harness enforces:**
@@ -564,7 +625,7 @@ rk-uarch/
 │   ├── workload/              README.md, __init__.py                             (later: U-P3)
 │   ├── mapping/               README.md, __init__.py, policies/__init__.py       (later: U-P7)
 │   ├── engines/               README.md, __init__.py, protocol.py,
-│   │                          analytic/, fork/, native/  (each __init__.py)      (later: U-P3, U-P5, U-P11)
+│   │                          analytic/, fork/, native/  (each __init__.py)      (later: U-P3, U-P5, U-P11a)
 │   ├── table/                 README.md, __init__.py                             (later: U-P3, U-P7)
 │   ├── provenance/            README.md, __init__.py                             (later: U-P4)
 │   ├── report/                README.md, __init__.py, templates/                 (later: U-P4)
@@ -572,7 +633,7 @@ rk-uarch/
 ├── native/
 │   ├── README.md
 │   ├── CMakeLists.txt         empty project at bootstrap
-│   ├── include/uarch/  src/  tests/                                             (later: U-P11)
+│   ├── include/uarch/  src/  tests/                                             (later: U-P11a)
 ├── third_party/
 │   ├── README.md
 │   ├── LICENSES.md            allow-list + empty register
@@ -754,14 +815,17 @@ designs/     chips that do not exist (design_status: proposed). Design choices a
 references/  real chips (design_status: reference). CLAIMS ONLY, each with a URL to a vendor
              page or document. What the vendor does not publish is provenance: stub with
              source: null — never a stipulation. The loader refuses a stipulation here.
-studies/     StudySpecs: variants of a proposed design that change stipulations only.
+studies/     StudySpecs: variants of a proposed design that change only what the design is
+             free to choose (stipulated values, counts included, and categorical fields).
 
 derive_rk_params() turns a spec into the params rk-sim's component entry must carry. If they
 disagree, the spec is right and the component is wrong. Stipulations propagate as
 stipulations; a derived claim is only as good as its worst input.
 
-DRAM organisation and timing are SourcedValues too. A simulator preset supplies them only as
-claims citing the preset file at a pinned SHA. SRAM size and SRAM pJ/byte travel together: a
+Every numeric leaf is a SourcedValue, counts and DRAM organisation and timing included. A
+simulator preset supplies DRAM timing only through memory.dram.timing_preset {file, sha}, as
+claims citing that file@sha. Each *_cycles leaf is in its block's clock domain (build-spec
+§2.3.2). SRAM size and SRAM pJ/byte travel together: a
 variant that changes one re-stipulates the other. studies/ also holds the versioned workload
 suite (workload-suite@N.yaml) that studies and L3 shape selection read.
 ```
@@ -782,9 +846,12 @@ does not know which engine ran except through EngineResult.fidelity_detail.
 ```markdown
 # workload — one iteration's operator graph
 
-Input: rk-sim ModelSpec + ModelShape (parity ≤ 1% or loading fails) + precision + a canonical
-query (decode: B sequences of T/B; prefill: n prompts of L). Output: an operator graph using
-contract/operators.py only. A multiply-add is two operations. Layer reuse must be declared in
+Input: rk-sim ModelSpec + ModelShape (parity ≤ 1% or loading fails) + precision + tp + a
+canonical query (decode: B sequences of T/B; prefill: n prompts of L). Output: the operator
+graph of ONE rank of a tp-way tensor-parallel split (heads, KV heads, FFN and vocabulary
+divided by tp; no collectives), using contract/operators.py only. Attention is one
+attention_fused operator: scores stay on chip and never reach DRAM. A multiply-add is two
+operations. Layer reuse must be declared in
 the graph, and its error is measured by table/. KV is read in pages of the request's
 block_size_tokens. MoE is active-parameter dense-equivalent only. `omissions` lists routing,
 imbalance, all-to-all, host/runtime time, address translation, coherence and mixed
@@ -868,8 +935,10 @@ table does not claim, including the declared omissions.
 ```markdown
 # study — comparing designs
 
-A StudySpec names a base design, stipulated parameters to vary, a versioned workload suite
-(or one request template), one engine and fidelity. Variants may change stipulations only.
+A StudySpec names a base design, the parameters to vary, a versioned workload suite (or one
+request template), one engine and fidelity. Variants may change only what a proposed design
+is free to choose: stipulated values (counts included), categorical fields, and the mapping
+policy; each change is recorded in conditional_on. A reference is never varied.
 Tables are cached by request hash. The diff report shows which regime moved and why, per
 workload and as a geometric mean of normalised speedup (never an arithmetic mean of ratios), a
 one-at-a-time tornado labelled "local sensitivity at these points, not a ranking", energy with
@@ -928,7 +997,7 @@ L0m_metamorphic/  relations that must hold without an answer key (property tests
 mutants/          deliberately broken engines each suite must catch (nightly)
 L1_limits/        closed forms where exact, the U-C0 floor, and hand/ fixtures worked on paper
 L2_differential/  BookSim 2, Ramulator 2, SCALE-Sim v3, Gemmini/Verilator, tt-npe, native↔fork,
-                  Accelergy (energy), Timeloop (mapping reference, optional)
+                  Timeloop (mapping reference, optional); energy references after U8
 L3_silicon/       frozen predictions and immutable results per reference chip
 ledger/           one entry per comparison; the only source of a model card's rung
 perf/ sync/       simulator metrics; the error-vs-quantum curve
@@ -945,7 +1014,9 @@ engine; never relax a suite because an engine fails it — that is a finding.
 Each comparison records deviations as data, attributes each one it can to a named mechanism,
 and reports the fraction of >5% deviations that carry a mechanism. Only the NoC bound
 (within 10% of BookSim 2 below 70% of saturation) is enforced. native↔fork comparisons run only
-on matched mapping and matched levels. Agreement here is never called validation.
+on matched mapping and matched levels. A comparison of a sub-model with the same code (a fork
+whose NoC is BookSim 2, against BookSim 2) is refused as not independent. Agreement here is
+never called validation.
 ```
 
 ### 4.18 · `/validation/L3_silicon/README.md`
@@ -971,8 +1042,8 @@ dimensions (family, op class, precision, shape regime, load regime, mapping matc
 measured, signed relative error, engine and spec versions. A duplicate key with a different
 prediction is refused. Promotion is scoped to exactly what the entries cover; never by hand;
 never by averaging across classes. Workload-fidelity entries (FLOPs and bytes vs the
-compiler's counts) never promote a duration card. Failing verdicts are published like
-passing ones.
+compiler's counts) and diagnostic-fidelity entries (row diagnostics vs device counters) never
+promote a duration card. Failing verdicts are published like passing ones.
 ```
 
 ### 4.20 · `/measure/README.md`
@@ -983,7 +1054,8 @@ passing ones.
 Written and dry-run before any paid hour or real card run: CPU JAX for tpu-v5e/, ttsim
 (functional only) for blackhole/. Dry-run outputs are labelled SYNTHETIC and the ledger refuses
 them. Real runs happen only after check_ordering passes. Every result captures its environment.
-Timing is device-side only; kits also record the compiler-reported FLOPs and bytes.
+Timing is device-side only; kits also record the compiler-reported FLOPs and bytes, and the
+device counters the chip exposes.
 ```
 
 ### 4.21 · `/tests/README.md`
@@ -1035,9 +1107,14 @@ task per session) · reviews/ (handoffs and U-REVIEW records) · results/ (publi
 
 ## §6 · CONVENTIONS
 
-**6.1 Units live in names.** Allowed suffixes: `_s`, `_ps`, `_bytes`, `_hz`, `_ratio`, `_w`,
-`_j`, `_pj`, `_per_s`, `_per_cycle`, `_flits`. Counts are `n_*` or `*_count`. Converting is a
-named function, never an inline multiply.
+**6.1 Units live in names.** Allowed suffixes: `_s`, `_ps`, `_bytes`, `_hz`, `_ratio`, `_rel`
+(a relative error), `_w`, `_j`, `_pj`, `_per_s`, `_per_cycle`, `_flits`. Counts are `n_*` or
+`*_count`. A mapping field carries the unit in its own name and its keys name resources
+(`attribution_s: {compute: …}`, `peak_resident_bytes: {hbm: …}`); every value inherits the
+unit. rk-sim Channel names (`matrix_ops`, `vector_ops`) are copied verbatim, and U-P2's
+round-trip pins them. HardwareSpec leaves may also end in `_cycles`, in the clock domain
+§2.3.2 assigns, and may name counts plainly (`banks`, `engines`); cycles never appear in a
+request or a table. Converting is a named function, never an inline multiply.
 
 **6.2 Decimal units.** 1 GB = 1e9 bytes, as datasheets quote them. Bandwidth is per direction.
 
@@ -1054,11 +1131,14 @@ Every table carries the spec, request and table hashes.
 worker counts and, from U9, thread counts in exact mode. Nothing that reaches output may
 depend on iteration order, wall-clock time or thread interleaving.
 
-**6.7 CI.** Jobs: lint, types, import-linter, tests (unit + contract + validation), golden,
+**6.7 CI.** Jobs: lint, types, import-linter, tests (unit + contract + validation), contract
+(the contract tests, the vendored-snapshot manifest and the schema-staleness check), golden,
 determinism, licences, patches, native, ordering, perf. A job may report "nothing yet" and pass
 **only while the thing it checks does not exist yet**:
+- contract: no tests under `contract/tests/`;
 - golden: no expected files;
 - determinism: no golden scenarios;
+- patches: no files under `third_party/patches/`;
 - native: no sources under `native/src/`;
 - ordering: no `predictions/`;
 - perf: no baselines.
@@ -1086,7 +1166,7 @@ renders "not modelled". A zero means the model computed zero.
 rk-sim never invokes uarch during a run. It reads a hashed table. That keeps rk-sim's engine
 pure (its invariant 4). Neither codebase imports the other at any point.
 
-### 7.2 The seam, and the eight rules
+### 7.2 The seam, and the nine rules
 
 The seam is rk-sim's `rk/engine/f0/compute.py::IterationCost`. Its comment already calls it
 *the seam*, and says a later term makes the struct *"gain a field, not get replaced."* A
@@ -1094,17 +1174,21 @@ table-backed cost satisfies the same interface the R1 DES already calls:
 
 1. **A row is one shard; the tp divisor is 1.** Collectives stay rk-sim's. `_time_s` divides
    by tp today, so carrying that into the table path silently double-counts tensor parallelism.
-2. **Canonical batch compositions** are used, and the measured reduction and layer-reuse
-   errors are surfaced as run warnings.
+2. **Canonical batch compositions** are used, and the measured interpolation, reduction and
+   layer-reuse errors are surfaced as run warnings.
 3. **The envelope is checked at build time.** Extrapolation is refused.
 4. **DVFS uses the table's frequency axis.** DVFS without one is a hard error.
 5. **Counts use rk-sim's channel names.** Extension channels are carried as "unmodelled".
 6. **One chip, one set of facts.** The component's params equal `derive_rk_params` of the
-   cited spec, checked by hash.
+   cited spec: the spec hash matches, and the table's `provenance.params` (which are
+   `derive_rk_params` of that spec) equal the component's params field by field.
 7. **Steady state for back-to-back iterations.** R1 prices back-to-back iterations, so it reads
    `initial_state: steady` tables. A `cold` table in an R1 run is refused at build time.
 8. **The KV layout matches.** The table's `kv_layout.block_size_tokens` equals the plan's block
    size, checked at build time.
+9. **The tp matches.** A table is one rank of a tp-way split that uarch's workload graph built
+   (§2.3.4). Its `tp` equals the plan's tp for that component, checked at build time; a table
+   built for another tp is refused, never rescaled.
 
 ### 7.3 What lands in rk-sim
 
@@ -1128,9 +1212,11 @@ raises; nothing degrades silently.*
 | No table for this component | STUB for that component, with a warning naming the missing table | `NoTableForComponent` |
 | Workload envelope exceeds the grid | Degrade, with a warning naming the region | `EnvelopeExceedsGrid` at build time |
 | Table spec hash ≠ component's | `SpecHashMismatch` | same |
+| Table `provenance.params` ≠ component's params | `ParamsMismatch` | same |
+| Table tp ≠ plan's tp | `TpMismatch` | same |
 | Contract major-version mismatch | `ContractMajorMismatch` | same |
 | Contract minor-version mismatch | Warning | Warning |
-| Peak resident HBM > declared capacity | Hard error for weights; warning for KV (rk-sim's M0 rule) | same |
+| Peak resident HBM > declared capacity | `ResidencyExceedsCapacity` for weights; warning for KV (rk-sim's M0 rule) | same |
 | Non-finite or negative row | `NonFiniteRow` | same |
 | DVFS declared, no frequency axis | `MissingFrequencyAxis` | same |
 | `cold` table in an R1 run | `InitialStateMismatch` | same |
@@ -1153,7 +1239,9 @@ Neither requires changing rk-sim now.
 
 Ready-to-paste prompts for a coding agent. The same texts live one per file in `docs/prompts/`, and `tests/unit/test_prompt_sync.py` fails if the two ever differ.
 
-**Conventions.** One prompt = one fresh session, started with `docs/prompts/TEMPLATE-implementation-session.md`. Each prompt assumes `CLAUDE.md` is loaded and names the files to read, so it does not repeat the standing rules. **Every prompt carries acceptance tests the agent writes first and must show passing.** That check is the entire productivity mechanism. Where a prompt says *stop*, the agent stopping is the correct outcome. The sprint and lane of each prompt are in `docs/execution-plan.md` §6.
+**Conventions.** The native engine's two largest steps are split so that each fits one
+session: U-P11a–c (sprint U6) and U-P13a–d (sprint U7); "U-P11" and "U-P13" name those groups.
+One prompt = one fresh session, started with `docs/prompts/TEMPLATE-implementation-session.md`. Each prompt assumes `CLAUDE.md` is loaded and names the files to read, so it does not repeat the standing rules. **Every prompt carries acceptance tests the agent writes first and must show passing.** That check is the entire productivity mechanism. Where a prompt says *stop*, the agent stopping is the correct outcome. The sprint and lane of each prompt are in `docs/execution-plan.md` §6.
 
 
 ### U-P0 · U0 · either, run once — Repo bootstrap
@@ -1211,6 +1299,10 @@ docs/prompts/P16-symbolic-operators-and-parallelism.md for its baseline operator
 TASK: contract/uarch_contract/, the only vocabulary uarch shares with rk-sim. Pydantic v2,
 frozen=True, extra="forbid" on every model.
 
+AUTHORITY: CLAUDE.md says agents propose and stop on contract/ and docs/decisions/. This
+prompt is that proposal. Write contract/ and docs/decisions/U0001 in full, leave them
+uncommitted, and stop; both founders review them and commit with UARCH_HUMAN=1.
+
 1. sourced.py — SourcedValue. rk-sim's five fields VERBATIM (value, unit, provenance, source,
    date) with rk-sim's validator semantics: provenance=stub requires source=None, anything
    else requires a non-empty source, non-finite values refused. PLUS one field:
@@ -1224,26 +1316,34 @@ frozen=True, extra="forbid" on every model.
    - A "reference" describes a real chip and may contain ONLY claims.
    - A "proposed" design may contain stipulations.
    - The loader refuses a stipulation anywhere in a reference, naming the parameter path.
-   Structure, per build-spec §2.3.2 (Rev 2): clock_domains; cores (grid shape; core_type with
-   a matrix engine and its supported dataflows, a vector engine, SRAM with banks, DMA engines
-   with max_outstanding and request_bytes, and job_overhead_cycles); sync (mechanism,
-   barrier_latency_cycles); an optional shared_sram; one or more NoCs (topology mesh|torus,
-   link_bytes_per_cycle, router_latency_cycles, virtual_channels, buffer_flits, direction for
-   multi-NoC designs); memory (interleave granularity and scheme; controllers with attachment
-   coordinates, scheduler and page_policy; DRAM standard, channels, bandwidth, capacity,
-   organization and timing); numeric formats per engine (byte width, accumulation width,
-   block-scale bytes); energy coefficients per activity, with voltage_ratio per frequency
-   ratio; static power; tdp. EVERY NUMERIC LEAF IS A SourcedValue, DRAM organisation and
-   timing included; a preset may supply DRAM timing only as claims whose source names the
-   preset file at a pinned SHA. Categorical fields (dataflows, scheme, scheduler,
-   page_policy, sync mechanism) are plain enums. Integer counts that define composition
-   (grid rows, number of NoCs) are plain ints, exactly as rk-sim treats device counts.
+   Structure, per build-spec §2.3.2 (Rev 2.1): clock_domains (each with scales_with_core);
+   cores (grid rows and cols; core_type with a matrix engine, its array, supported dataflows,
+   accumulator_bytes, operand_buffer_bytes and operand_bytes_per_cycle, a vector engine, SRAM
+   with banks, DMA engines with max_outstanding and request_bytes, and job_overhead_cycles);
+   sync (mechanism, barrier_latency_cycles); an optional shared_sram; one or more NoCs
+   (topology mesh|torus, link_bytes_per_cycle, router_latency_cycles, virtual_channels,
+   buffer_flits, direction for multi-NoC designs); memory (interleave granularity and scheme;
+   controllers with attachment coordinates, scheduler, page_policy, read and write queue
+   depths and noc_credits; DRAM standard, channels, bandwidth, capacity, organization,
+   timing_preset and timing); numeric formats (byte width, accumulation width, block-scale
+   bytes); energy coefficients per activity, with voltage_ratio per frequency ratio; static
+   power; tdp. EVERY NUMERIC LEAF IS A SourcedValue, counts included (grid, array, banks, DMA
+   engines, virtual channels, DRAM channels and organisation, queue depths, credits), with an
+   integral value for counts; a reference marks an unpublished count as a stub. Only these
+   stay plain: categorical enums (topology, direction, dataflows, scheme, scheduler,
+   page_policy, sync mechanism), list structure (how many NoCs and controllers), attach
+   coordinates, and a format's byte width. A preset supplies DRAM timing only through
+   memory.dram.timing_preset {file, sha}; each timing claim it supplies has source
+   "<file>@<sha>". Each *_cycles leaf is in its block's clock domain (build-spec §2.3.2).
 3. operators.py — THE OPERATOR VOCABULARY. uarch holds the pen here because it has the
    harder requirement: a roofline needs a name and a FLOP count; a tiled model needs
    shapes, layouts, reduction axes and per-operand precision. Start from rk-sim P16's baseline
    list and use its names where they exist: Q/K/V projection, QK score, softmax, AV
    application, output projection, normalization, residual addition, FFN projections,
-   activation. Add only what tiling needs (e.g. kv_write, embedding, lm_head). Each OpSpec
+   activation. Add only what tiling needs (e.g. kv_write, embedding, lm_head) and
+   attention_fused (QK score -> softmax -> AV over KV tiles, scores on chip; its operation
+   count is the sum of its three parts, and its DRAM operands are Q, K, V and O only; build-spec
+   §2.3.5). Each OpSpec
    carries its M/N/K (or equivalent) as named dimensions, operand dtypes and the reduction
    axis. COUNTING FOLLOWS rk-sim P7b: A MULTIPLY-ADD IS TWO OPERATIONS. Restate it in the
    module docstring; do not re-decide it.
@@ -1257,63 +1357,78 @@ frozen=True, extra="forbid" on every model.
 6. request.py — CharacterizationRequest, field for field as build-spec §2.3.3 lays it out:
    contract version, rk_schema_snapshot, component_id, hardware_spec_hash, model, model_shape,
    precision {compute, kv_cache}, tp, envelope, grid (decode B × context_per_seq, prefill
-   n × L, frequency_ratio), mapping_policy, uarch_fidelity, initial_state (steady | cold),
-   kv_layout {block_size_tokens}, visit_weights (optional), seed.
+   n × L, frequency_ratio), mapping_policy, uarch_fidelity (the fidelity_detail keys and
+   values of build-spec §2.4), initial_state (steady | cold), kv_layout {block_size_tokens},
+   visit_weights (optional), seed. tp is the shard: the table is ONE rank of a tp-way split
+   (build-spec §2.3.4).
 7. table.py — UarchCostTable and Row. A ROW IS ONE CHIP'S SHARD, ONE ITERATION, ALL LAYERS,
-   WITHOUT INTER-CHIP COLLECTIVES. Write that sentence in the class docstring. Fields per
-   build-spec §2.3.3: duration_s, u_c0_duration_s (uarch's own aggregate roofline for the
+   WITHOUT INTER-CHIP COLLECTIVES. Write that sentence in the class docstring. Row keys:
+   decode {phase, batch, total_context_tokens, frequency_ratio}; prefill {phase, n_prompts,
+   prompt_tokens, frequency_ratio}. Fields per build-spec §2.3.3: duration_s, u_c0_duration_s (uarch's own aggregate roofline for the
    same point, which is the floor every C2 row must respect and the "detail delta" rk-sim's
    Compare shows), attribution_s {compute, memory, noc, sync, overhead} (a critical-path
    split whose parts sum to duration_s), counts {matrix_ops, vector_ops, memory_read_bytes,
    memory_write_bytes} (rk-sim Channel names), ext_counts {sram_read_bytes, sram_write_bytes,
-   noc_flit_hops}, peak_resident_bytes {hbm, sram}, and diagnostics (build-spec §2.3.3):
+   noc_flit_hop_count}, peak_resident_bytes {hbm, sram}, and diagnostics (build-spec §2.3.3):
    every diagnostic is Optional with NO default of 0, because null means "not modelled".
-   Table-level: initial_state, kv_layout, interpolation spec, measured_error
-   {interpolation_loo (with weighted_median_rel), composition_reduction, layer_reuse,
-   cold_vs_steady; each sampled error with n_samples}, flop_parity {max_rel,
-   declared_deviations[]}, composite_fidelity, fidelity_detail, provenance {params,
-   model_card hash, conditional_on}, warnings (the declared omissions of build-spec §2.3.4
-   among them).
+   Table-level: contract, uarch_version, request_hash, table_hash, tp, initial_state,
+   kv_layout, interpolation spec, measured_error {interpolation_loo (with
+   weighted_median_rel), composition_reduction, layer_reuse, cold_vs_steady (with
+   priming_2_vs_1_max_rel); each sampled error with n_samples}, flop_parity {max_rel,
+   declared_deviations[{id, deviation_rel, reason}]}, composite_fidelity, fidelity_detail
+   (build-spec §2.4's keys and values), provenance {params (derive_rk_params of the spec),
+   model_card {hash, badge, evidence, validated_error_band, energy_verification},
+   conditional_on}, warnings (the declared omissions of build-spec §2.3.4 among them).
 8. model_card.py — ModelCard: model_id (engine, engine version, fidelity_detail, mapping
    policy), badge, evidence (ledger ids), verification {L0, L0m, L1, L2: report hash or
-   None}, validated_error_band: None | {rel_low, rel_high, scope {family, op_classes,
+   None}, validated_error_band: None | {low_rel, high_rel, scope {family, op_classes,
    precisions, shape_regimes, load_regimes, mapping_match}}, energy_verification: None |
-   {L0, L2: report hash}. None means "unknown" (for energy, "unverified"). THERE IS NO ZERO
+   {L0, L2: report hash per coefficient family}. None means "unknown" (for energy, "unverified"). THERE IS NO ZERO
    DEFAULT ANYWHERE IN THIS FILE.
 9. hashing.py — canonical_json (sorted keys, floats via repr round-trip, no NaN), sha256,
    spec_hash / request_hash / table_hash. CONTRACT_VERSION = "uarch-contract/0.1".
-10. errors.py — one exception class per row of build-spec §7.4's error table:
-    NoTableForComponent, EnvelopeExceedsGrid, SpecHashMismatch, ContractMajorMismatch,
-    ContractMinorMismatch (a warning), ResidencyExceedsCapacity, NonFiniteRow,
-    MissingFrequencyAxis, InitialStateMismatch, KvLayoutMismatch, StipulationOnReference,
-    ClaimWithoutSource, SramCapacityExceeded, UnnamedPreset (a DRAM timing preset the spec
-    does not cite). Each carries the sentence the user will read.
+10. errors.py — one exception class per raising row of build-spec §7.4's error table:
+    NoTableForComponent, EnvelopeExceedsGrid, SpecHashMismatch, ParamsMismatch, TpMismatch,
+    ContractMajorMismatch, ContractMinorMismatch (a warning), ResidencyExceedsCapacity,
+    NonFiniteRow, MissingFrequencyAxis, InitialStateMismatch, KvLayoutMismatch; plus the
+    uarch-side errors StipulationOnReference, ClaimWithoutSource, SramCapacityExceeded,
+    UnnamedPreset (a DRAM timing claim citing a preset other than
+    memory.dram.timing_preset, or a timing_preset without a pinned sha) and ShardIndivisible
+    (heads or FFN width not divisible by tp). Each carries the sentence the user will read.
 11. make gen writes contract/schema/*.json from the models; CI fails if it is stale.
 
 ACCEPTANCE TESTS (write first):
 1. Round-trip: every model survives model_validate(model_dump(mode="json")) unchanged.
 2. Hash stability: table_hash of the toy table is identical across two fresh interpreter
    processes (subprocess, not the same process twice) and invariant to input key order.
-3. One test per error class, each constructed from a minimal failing input.
+3. One test per error class. Where contract code raises it (StipulationOnReference,
+   ClaimWithoutSource, UnnamedPreset, ShardIndivisible), build it from a minimal failing
+   input; for errors raised later or in rk-sim, assert the class exists, carries its
+   sentence, and round-trips through the schema.
 4. SourcedValue: a stipulation with a source is refused; a claim with a rationale is
    refused; a non-stub claim without a source is refused; a stub with a source is refused.
 5. A reference HardwareSpec holding one stipulation deep in the tree is refused, and the
    message names the full parameter path.
 6. UNITS LIVE IN NAMES. A test walks every float field of request.py and table.py and fails
-   on any name without a unit suffix from the allow-list in build-spec §6.1.
+   on any name without a unit suffix from the allow-list in build-spec §6.1, applying §6.1's
+   two exceptions exactly (keys of a mapping field inherit its unit; rk-sim Channel names
+   are verbatim). The real field names of build-spec §2.3.3 pass.
 7. CYCLES NEVER CROSS. A test fails if any field in request.py or table.py is named *_cycles
    or carries unit "cycle". Cycles are an engine-internal quantity.
 8. ModelShape parity: a Llama-3.1-70B-shaped sidecar passes against its ModelSpec; the same
    sidecar with d_ff off by 10% fails with both numbers in the message.
 9. contract/tests/fixtures/toy_table.json (hand-written by you, two decode rows and one
    prefill row) validates, and the contract CI job is green against it.
-10. Rev-2 fields: a reference spec whose DRAM timing names a preset without a pinned source is
-    refused (UnnamedPreset); a design with sram.bytes but no energy.pj_per_byte.sram is
-    refused, naming both paths.
+10. Rev-2 fields: a reference spec whose timing_preset has no sha, or one timing claim of
+    which cites a preset file other than timing_preset, is refused (UnnamedPreset); a design
+    with sram.bytes but no energy.pj_per_byte.sram is refused, naming both paths; a reference
+    with a stub bank count loads.
 11. NULL, NOT ZERO: a test fails if any diagnostics field in table.py, or any field in
     model_card.py, has a numeric default.
-12. The toy table carries initial_state, kv_layout, all four measured errors, and a
-    diagnostics block with at least one null.
+12. The toy table carries tp, initial_state, kv_layout, all four measured errors, the
+    embedded model card, and a diagnostics block with at least one null.
+13. A fidelity_detail value outside build-spec §2.4's legal set (dram: "2+ts", say) is
+    refused, naming the key.
 
 GUARDRAILS: Import nothing from rk: copy rk-sim names by reading its source, and let U-P2's
 vendored round-trip prove the copy is exact. Do not add a workload IR or an ONNX path. Do not
@@ -1323,13 +1438,29 @@ cannot use one lists it as unrepresented. If P16's baseline names and tiling's n
 conflict, write both options into ADR U0001 and STOP. That is a founders' decision.
 
 ADR: docs/decisions/U0001-the-integration-contract.md, written with both founders. It must
-state build-spec §7.2's eight semantic rules in your own words and record the rk-sim SHA the
-contract was read against. Rule 1 matters most: a row is one shard, and the rk-sim side must
-use a tp divisor of 1. It is the likeliest silent bug in the project. U0001 also records the
-Rev-2 decisions, with build-spec §2.6's proposals as the defaults: the shape-regime and
-load-regime bins; whether BLOCKFP8 evidence can cover an fp8 request (proposal: no); whether
-shared_sram is in contract 0.1 (proposal: yes, optional); the initial_state default
-(proposal: steady); and the declared omissions, mixed prefill/decode iterations among them.
+state build-spec §7.2's nine semantic rules in your own words and record the rk-sim SHA the
+contract was read against. Rules 1 and 9 matter most: a row is one rank of a tp-way split
+that uarch built, the rk-sim side uses a tp divisor of 1, and it refuses a table built for
+another tp. Getting this wrong is the likeliest silent bug in the project. U0001 also records
+these decisions, each with its proposed default:
+- the shape-regime and load-regime bins (build-spec §2.6's proposal);
+- whether BLOCKFP8 evidence can cover an fp8 request (proposal: no);
+- whether shared_sram is in contract 0.1 (proposal: yes, optional; engines list it as
+  unrepresented until after U8);
+- the initial_state default (proposal: steady);
+- the declared omissions, mixed prefill/decode iterations among them;
+- the shard (proposal: build-spec §2.3.4's Megatron-style split; one tp per table);
+- where applicability is judged (proposal: per row; a row's evidence applies only if every
+  operator in it has its op class and shape regime covered, and its load regime for NoC and
+  DRAM classes);
+- clock domains (proposal: build-spec §2.3.2's assignment; a frequency ratio scales the core
+  domain and every domain with scales_with_core: true);
+- fidelity values (proposal: build-spec §2.4's keys and legal values, the same in requests
+  and tables);
+- row keys (proposal: decode {batch, total_context_tokens}, prefill {n_prompts,
+  prompt_tokens});
+- the model card in the table (proposal: embedded, as build-spec §2.3.3 shows);
+- attention (proposal: one attention_fused operator; scores never in DRAM).
 ```
 
 
@@ -1343,8 +1474,8 @@ rk/engine/f0/compute.py, rk/schema/ (and the schema bundle `make gen` writes), M
 TASK: prove, mechanically and on every CI run, that uarch's copy of rk-sim's vocabulary is
 exact and that uarch counts work the way rk-sim does, without CI ever touching rk-sim.
 
-1. scripts/vendor_rk.py and `make vendor-rk SHA=<sha> RK=<path-to-rk-sim-clone>`. A HUMAN
-   RUNS IT; CI never does. It:
+1. scripts/vendor_rk.py and `make vendor-rk SHA=<sha> RK=<path-to-rk-sim-clone>
+   [PARAMS=<component.yaml> ...]`. A HUMAN RUNS IT; CI never does. It:
    a. checks the clone is at <sha> with a clean tree and refuses otherwise;
    b. copies rk-sim's generated schema bundle plus the source of rk/provenance.py,
       rk/schema/{fidelity,channels,execution,workloads}.py into
@@ -1352,9 +1483,15 @@ exact and that uarch counts work the way rk-sim does, without CI ever touching r
    c. GENERATES PARITY FIXTURES BY EXECUTING rk-sim's OWN iteration_cost(), in rk-sim's own
       environment (subprocess `uv run --project <rk>`), never by reimplementing the formula.
       Fixtures cover at least 3 ModelSpecs (one dense GQA ~8B, one dense ~70B, one MoE) ×
-      2 precisions × at least 24 queries spanning decode (B, T) and prefill (T, Q). Each
-      fixture records IterationCounts.matrix_ops, memory_read_bytes, memory_write_bytes and
-      the query.
+      2 precisions × tp ∈ {1, 8} × at least 24 queries spanning decode (B, T) and prefill
+      (T, Q); the decode queries include B ∈ {1, 8, 32} × context per sequence ∈ {512, 4096}
+      (gate G2(c)'s points). Each fixture records IterationCounts.matrix_ops,
+      memory_read_bytes, memory_write_bytes, the query, the tp, and rk-sim's own durations
+      (decode_s or prefill_s from IterationCost) for each component params file it was run
+      with: rk-sim's library entries asic_placeholder.yaml and nvidia_h100_sxm.yaml always,
+      plus every PARAMS file the human passes (in U2, `uarch rk-component` output for the
+      designs). A duration is rk-sim's output, never ours: these are the oracle for U-P3's
+      U-C0 parity test.
    A REIMPLEMENTED FORMULA IS A MIRROR, NOT AN ORACLE. If you find yourself writing
    2*P_active anywhere under contract/, stop: the point is that rk-sim's code produced it.
 2. contract/tests/test_vendored_round_trip.py. Load the vendored classes by path, not by
@@ -1386,6 +1523,8 @@ ACCEPTANCE TESTS (write first):
 4. import-linter: nothing under src/ or contract/uarch_contract/ imports from
    contract/vendor/.
 5. `make vendor-rk` run twice at the same SHA produces byte-identical output.
+6. Every fixture carries a tp, a component params file name and rk-sim's duration for it,
+   and the fixture set contains G2(c)'s six decode points.
 
 GUARDRAILS: Never hand-edit anything under contract/vendor/; regenerate it. Never give CI
 access to rk-sim. Do not "fix" a parity failure by widening the tolerance. Declare the
@@ -1430,9 +1569,15 @@ later.
    STIPULATIONS STAY STIPULATIONS. A peak computed from stipulated MACs/cycle and a
    stipulated clock is a stipulation, never a claim. Plus `uarch rk-component <spec>`, which
    emits the rk-sim library YAML for the chip (kind: compute_resource, role: asic,
-   design_status carried in a comment until rk-sim's schema has the field).
-3. src/rkuarch/workload/ — (ModelSpec, ModelShape, precision, query) -> one iteration's
-   operator graph at decoder-layer granularity, using contract/operators.py only. A query is
+   design_status carried in a comment until rk-sim's schema has the field; uarch's proposed
+   maps to rk-sim's proposed and reference to shipping).
+3. src/rkuarch/workload/ — (ModelSpec, ModelShape, precision, tp, query) -> the operator
+   graph of ONE RANK of a tp-way tensor-parallel split, for one iteration, at decoder-layer
+   granularity, using contract/operators.py only. The split is build-spec §2.3.4's: heads
+   and KV heads (replicated when kv_heads < tp), FFN columns and rows, and the vocabulary
+   divided by tp; no collective ops, because rk-sim prices them; ShardIndivisible if a
+   dimension does not divide. Attention is one attention_fused operator per layer (scores on
+   chip, DRAM operands Q, K, V, O). A query is
    a canonical batch (build-spec §2.3.4): decode = B sequences of context T/B; prefill =
    n prompts of L. layer_reuse=True means "one decoder layer instantiated n_layers times
    plus the non-repeated head and tail ops", and the graph says so in a field. MoE is
@@ -1459,16 +1604,19 @@ later.
    UarchCostTable, single process, no interpolation (U-P7 owns that). Hash it.
 7. src/rkuarch/cli.py (typer): `uarch validate <spec>` (lists claims / stipulations / stubs
    with counts; refuses a bad spec with the path) and `uarch table <spec> --model <name>
-   --precision <fmt> --engine analytic`.
+   --precision <fmt> [--tp N] --engine analytic` (tp defaults to 1).
 8. `uarch characterize <spec> --model <name> --precision <fmt>`: for every op across the
    request's grid, its FLOPs, bytes, operational intensity, op class and shape regime (the
    bins ADR U0001 fixed), as hashed JSON plus a Markdown twin. U-P9 and U-P15 pick their
    benchmark shapes from it, and U-P14 picks its workload suite from it.
 
 ACCEPTANCE TESTS (write first):
-1. U-C0 AGGREGATE REPRODUCES rk-sim C0: fed derive_rk_params(spec), aggregate-mode duration
-   equals the parity fixtures' rk-sim durations within ±0.1% on every fixture (decode and
-   prefill, both precisions). A test, not a claim.
+1. U-C0 AGGREGATE REPRODUCES rk-sim C0: fed each fixture's own component params (U-P2
+   records the file and rk-sim's duration for it), aggregate-mode duration equals that rk-sim
+   duration within ±0.1% on every fixture (decode and prefill, both precisions, tp 1 and 8).
+   A test, not a claim. Then a human runs `make vendor-rk ... PARAMS=<uarch rk-component
+   output for npu-l4>` and the same test covers derive_rk_params(npu-l4). Never compute an
+   expected duration yourself.
 2. per_op >= aggregate on every fixture query (a property test over random queries too).
 3. FLOP parity: the workload graph passes the harness with every deviation named.
 4. derive_rk_params: a stipulated-clock design yields stipulation-kind peaks. A reference
@@ -1483,8 +1631,13 @@ ACCEPTANCE TESTS (write first):
    hash-stable report in which every op has a shape regime.
 9. KV reads are page-granular: the number of KV page reads per sequence per layer equals
    ceil(context / block_size_tokens).
+10. The shard: at tp = 8 the graph's matrix_ops equals the tp = 1 graph's divided by 8, except
+    for named deviations (replicated KV heads, vocabulary padding), and a model whose heads do
+    not divide by tp raises ShardIndivisible.
+11. Attention: a prefill at L = 32768 yields an attention_fused operator whose DRAM bytes are
+    Q, K, V and O only, and the graph contains no L × L tensor.
 
-GUARDRAILS: Do not touch the fork or the native engine; they are U-P5 and U-P11. Do not add
+GUARDRAILS: Do not touch the fork or the native engine; they are U-P5 and U-P11a–c. Do not add
 interpolation or a process pool; that is U-P7. Do not tune the operator graph to hit rk-sim's
 numbers, because the deviations are findings. Never write a number you cannot source as a claim:
 stipulate it in designs/ with a rationale, or stub it in references/.
@@ -1525,10 +1678,12 @@ U-P3 to have landed.
    fidelity_detail, mapping policy, ledger entries). validated_error_band is None unless
    ledger entries whose scope covers this request (family, op class, precision, shape regime,
    load regime, mapping match) supply it. None renders as "unknown". energy_verification is
-   None until U-P8's energy reports exist, and None renders energy as "unverified".
+   None until every coefficient family an energy figure uses has an L2 reference (deferred
+   until after U8), and None renders energy as "unverified".
 3. provenance/applicability.py — rk-sim ADR 0021's shape for uarch: for a request, which
    evidence dimensions MATCH, MISMATCH or are UNKNOWN (architecture family, op class,
-   precision, shape regime, load regime, mapping match), using the bins ADR U0001 fixed.
+   precision, shape regime, load regime, mapping match), using the bins ADR U0001 fixed, and
+   judged where U0001 says (proposal: per row, with every operator in the row covered).
    Precision matches by format name: BLOCKFP8 evidence does not cover fp8 unless U0001 says
    why it should. A model card whose evidence does not apply to this
    request contributes stub for this request, whatever its best rung elsewhere.
@@ -1564,7 +1719,10 @@ ACCEPTANCE TESTS (write first):
 7. A null diagnostic renders "not modelled": no diagnostic that is null in the toy table
    appears as 0 in the rendered report.
 8. Precision scope: an fp8 request against BLOCKFP8-only evidence gets stub, naming precision.
-9. Energy renders "unverified" when energy_verification is None.
+9. Energy renders "unverified" when energy_verification is None, and stays "unverified" when
+   only one coefficient family has a reference.
+10. Applicability per row: a row with one operator whose shape regime the evidence does not
+    cover gets stub, naming that operator.
 
 GUARDRAILS: Do not read from an engine or compute a physical number here. Do not compute
 error bars from a deterministic run; a deterministic simulator has no replication variance,
@@ -1629,6 +1787,13 @@ choose between the two candidates on pre-registered numbers.
    - initial_state: steady runs the query twice in one simulation where the fork allows it
      and reports the second; where it does not, initial_state is listed as unrepresented and
      the table warns. Never report a cold run as steady.
+   - FIDELITY: place each of the fork's sub-models (compute, SRAM banks, NoC, DRAM) on
+     build-spec §2.4's ladder, per configuration you run (its default, and any simpler NoC or
+     DRAM mode it offers), from its source, cited by file and line. The table goes into ADR
+     U0005. stats_parser emits that fidelity_detail, and the composite comes from §2.4's rule,
+     never from the fork's name: if the fork models no SRAM bank conflicts, its compute is
+     level 1 and its tables are C1. Record which sub-models ARE BookSim 2 or Ramulator 2, so
+     U-P8 never compares them with themselves.
 5. Evaluate ONNXim first (it is lighter). If it passes G2, you may skip PyTorchSim. Record
    that you skipped it and why. If it fails, evaluate PyTorchSim with the same criteria.
 6. `uarch table ... --engine fork` for one-layer decode queries on npu-l4, driven from a
@@ -1643,8 +1808,10 @@ ACCEPTANCE TESTS (write first where they can be written first):
 5. G2(e): licence scan of the image green against the allow-list.
 6. The adapter's `unrepresented` list is non-empty for npu-l4 if anything is unrepresented,
    and each entry appears as a table warning.
-7. The fork's own default DRAM preset is never used silently: a spec that names a preset the
+7. The fork's own default DRAM preset is never used silently: a spec whose timing_preset the
    fork cannot load is refused (UnnamedPreset) or listed as unrepresented.
+8. ADR U0005 holds the fork's per-configuration ladder table with citations, and a table
+   built by the fork reports exactly the composite §2.4's rule gives for those levels.
 
 GUARDRAILS: Do not patch the engine to make parity pass. Declare the deviation. Do not touch
 anything under src/rkuarch/engines/native/. Do not start U-P7 until a fork has passed G2. If
@@ -1653,7 +1820,7 @@ BOTH fail, do not improvise a workaround: record the U-C1 fallback decision in A
 unbuilt") and stop for the founders.
 
 ADR: docs/decisions/U0005-fork-selection.md, with pre-registered criteria, every measured
-number, the rejected candidate's numbers, and the image digest.
+number, the rejected candidate's numbers, the image digest, and the fork's ladder table.
 ```
 
 
@@ -1727,23 +1894,26 @@ another simulator, is not agreement with silicon.
 ```
 
 
-### U-P7 · U4 · Lane A — Mapping policies, the grid, interpolation, and the first C2 table
+### U-P7 · U4 · Lane A — Mapping policies, the grid, interpolation, and the first full table
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, src/rkuarch/{mapping,table,workload}/README.md, build-spec §2.3.3
-and §2.3.4 (canonical batches and the reduction error), §7.2 (the eight rules), ADR U0005,
+and §2.3.4 (canonical batches and the reduction error), §7.2 (the nine rules), ADR U0005,
 contract/uarch_contract/{request,table}.py. From rk-sim READ-ONLY: rk/engine/f0/compute.py's
 comment block above IterationCounts, which says why (B, T, Q) is sufficient for a
 roofline and warns that it is exact only while cost is linear.
 
-TASK: turn a CharacterizationRequest into a complete, hashed, honestly-errored C2 table,
-driven by the fork.
+TASK: turn a CharacterizationRequest into a complete, hashed, honestly-errored table, driven
+by the fork, at the composite build-spec §2.4's rule gives for the fork's levels as ADR U0005
+records them: C2 only if they qualify, and C1, said so, if they do not.
 
 1. mapping/ — named, versioned policies, each a pure function (op graph, HardwareSpec) ->
    TaskGraph (build-spec §2.5): per-core compute jobs, DMA jobs, NoC transfers (unicast and
    multicast), barriers, dependencies.
    - ws-rowsplit@1 for the large-core class (weight-stationary, output rows split across
      cores).
+   - os-tiled@1 for the large-core class (output-stationary, output tiles split across
+     cores), so a dataflow study has a second policy to compare (U-P14).
    - onnxim-compat@1: reproduces the chosen fork's own tiling decisions, read from its source
      and cited by file and line in the policy's docstring. It exists so a native engine can
      later be compared with the fork ON THE SAME WORK. Without it every future disagreement
@@ -1753,7 +1923,9 @@ driven by the fork.
    needs (refused on a spec whose dataflows lack it) and its buffer depth (double or triple
    buffering, part of name@version). It places every SRAM-resident buffer (core,
    offset_bytes, bank) and refuses a tile that does not fit with SramCapacityExceeded,
-   naming the core and the bytes. KV reads are page-granular DMA jobs.
+   naming the core and the bytes. KV reads are page-granular DMA jobs. attention_fused is
+   tiled so its score tile (query block × KV page block) fits in SRAM: scores never become
+   DMA jobs.
 2. table/grid.py — the grid from the request's envelope. Refuse a request whose grid does not
    cover its envelope, naming the uncovered region, at REQUEST time.
 3. table/pool.py — one process per grid point, parallel ACROSS POINTS only. Results are
@@ -1772,7 +1944,9 @@ driven by the fork.
       its own sufficient-statistic reduction costs at C2.
    c. layer_reuse: for a seeded sample of grid points, simulate every layer (no reuse) and
       report how far the reused result deviates (build-spec §2.3.4).
-   d. cold_vs_steady: for a seeded sample, run both initial states and report the deviation.
+   d. cold_vs_steady: for a seeded sample, run both initial states and report the deviation;
+      on the same sample, run steady with two priming iterations and report how far one is
+      from two (priming_2_vs_1_max_rel), so the warm-up length is measured.
    Each sampled error reports n_samples. interpolation_loo also reports
    weighted_median_rel, weighted by the request's visit_weights, or null when there are
    none.
@@ -1782,7 +1956,8 @@ driven by the fork.
 7. Rows carry peak_resident_bytes. If HBM residency exceeds the spec's capacity, raise
    ResidencyExceedsCapacity for weights, and warn for KV, mirroring rk-sim's M0 rule.
 8. `uarch table ... --engine fork --workers N` builds the full default grid for npu-l4 ×
-   Llama-3.1-70B-class × fp8 and bf16, tp=1.
+   Llama-3.1-70B-class × fp8 and bf16, tp = 8, and also tp = 1 where the weights fit the
+   spec's capacity (a weight-residency refusal at tp = 1 is recorded, never worked around).
 9. initial_state travels in every EngineJob; steady primes one iteration at the same point
    and reports the second.
 
@@ -1799,6 +1974,11 @@ ACCEPTANCE TESTS (write first):
 8. A tile larger than a core's SRAM is refused with SramCapacityExceeded, naming the core and
    the bytes.
 9. With uniform visit_weights, weighted_median_rel equals median_rel.
+10. os-tiled@1 is refused on a spec whose dataflows lack output_stationary, and runs on one
+    that has it.
+11. A prefill row at L = 32768 builds with no SramCapacityExceeded, and its attention DRAM
+    bytes equal Q, K, V and O within named deviations.
+12. The table's composite equals what build-spec §2.4's rule gives for ADR U0005's levels.
 
 GUARDRAILS: No mapping search. Never silently clamp an out-of-grid query. Do not correct the
 composition or layer-reuse error, because disclosure is the deliverable. Do not let
@@ -1812,8 +1992,8 @@ ADR: docs/decisions/U0007-canonical-batches-and-the-reduction-error.md.
 ### U-P8 · U4 · Lane B — L1 analytical limits and L2 differential references
 
 ```text
-CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7, third_party/README.md.
-Documentation for BookSim 2 (BSD-2, Stanford), Ramulator 2 (MIT, CMU SAFARI), SCALE-Sim v3
+CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7, third_party/README.md,
+ADR U0005 (which fork sub-models are BookSim 2 or Ramulator 2). Documentation for BookSim 2 (BSD-2, Stanford), Ramulator 2 (MIT, CMU SAFARI), SCALE-Sim v3
 (MIT). Optionally Gemmini (BSD-3, UC Berkeley) and Verilator (LGPL-3.0/Artistic-2.0).
 
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
@@ -1841,7 +2021,10 @@ engine protocol against every engine in the matrix.
    these the defence against plausible garbage; the same reason applies here.
 2. validation/L2_differential/ (the nightly job):
    - NoC: the engine's NoC vs STANDALONE BookSim2 (built in the engine image) on
-     uniform-random, transpose and hotspot traffic, over an injection-rate sweep. ENFORCED:
+     uniform-random, transpose and hotspot traffic, over an injection-rate sweep. If the
+     engine's NoC IS BookSim 2 (ADR U0005 says which fork sub-models are), the comparison is
+     refused as not independent and the report says so; the bound then waits for the native
+     NoC (U-P13a). ENFORCED:
      latency within 10% below 70% of BookSim's saturation throughput. Above that, record,
      don't assert;
    - DRAM: vs Ramulator 2 standalone on streaming, random and strided traces;
@@ -1850,11 +2033,9 @@ engine protocol against every engine in the matrix.
    - optional: one systolic tile vs Gemmini RTL under Verilator (a cycle-exact reference for
      THAT design);
    - Tenstorrent tt-npe (Apache-2.0) as a second NoC reference for mesh specs, once
-     U-P13 lands a mesh engine;
-   - energy (the energy rung): Accelergy with its CACTI plug-in estimates pJ per SRAM access
-     for every SRAM size in hw/designs/ and hw/studies/, and each stipulated
-     pj_per_byte.sram's deviation from that estimate is recorded as data. With U-P6's energy
-     conservation invariant, this report is what model_card.energy_verification cites;
+     U-P13a lands the native mesh NoC;
+   - energy references are DEFERRED until after U8: energy stays "unverified", and
+     energy_verification stays None, until every coefficient family has a reference;
    - optional, a mapping reference: Timeloop's best mapping for representative GEMMs on the
      same array, recorded next to each named policy's efficiency. It never changes a policy:
      mapping search stays out of scope.
@@ -1876,12 +2057,13 @@ ACCEPTANCE TESTS:
    and shows up in L2.
 5. The derated DRAM check and the latency-bound stream check run for every engine they apply
    to; a mutant DMA that ignores max_outstanding fails the latency-bound check.
-6. The energy L2 report exists and is hash-stable, and at least one hand fixture covers the
-   latency-bound stream.
+6. At least one hand fixture covers the latency-bound stream.
+7. The harness refuses to compare a sub-model with itself (a fork NoC that is BookSim 2,
+   against BookSim 2), naming both.
 
 GUARDRAILS: Do not tune engine parameters to close an L2 gap. Record it and attribute it.
 Agreement between two simulators is L2 and NOTHING MORE. It never appears in a model card as
-validation. BookSim, Ramulator, SCALE-Sim, Accelergy and Timeloop run as standalone references
+validation. BookSim, Ramulator, SCALE-Sim and Timeloop run as standalone references
 here; they are not new dependencies of rkuarch.
 
 ADR: docs/decisions/U0008-the-L2-reference-set-and-its-limits.md.
@@ -1902,7 +2084,7 @@ measurement. That is its whole design.
 
 1. Agree the microbenchmark list with Lane B FIRST, in writing, in
    validation/L3_silicon/tpu-v5e/SUITE.md. Lane B's U-P10 builds the kit that runs it. At
-   least 24 benchmarks across at least 5 classes:
+   least 24 benchmarks, covering every one of these six classes:
    - matrix: isolated matmuls at ≥ 6 shapes spanning MXU-underfilled to saturated, bf16 and
      int8 where the chip supports them;
    - memory: HBM streaming read, write, and copy at ≥ 3 sizes;
@@ -1933,7 +2115,8 @@ measurement. That is its whole design.
 3. Predictions: for each benchmark, uarch's predicted duration, FLOPs and bytes, from the
    fork AND from U-C0 aggregate and per_op, written to
    validation/L3_silicon/tpu-v5e/predictions/<id>.json with engine versions, image digest,
-   spec hash, mapping policy, mapping match and initial state. Commit them in ONE commit
+   spec hash, mapping policy, mapping match, initial state, and the row diagnostics where the
+   engine reports them (U-P10 compares them with device counters). Commit them in ONE commit
    whose message begins "FROZEN PREDICTIONS:".
 4. validation/L3_silicon/check_ordering.py and a CI job: fails if any file under results/
    exists in a commit earlier than, or equal to, the commit that added its prediction file.
@@ -1942,8 +2125,8 @@ measurement. That is its whole design.
 ACCEPTANCE TESTS:
 1. SUITE.md signed off by both lanes (both names, in the file) before predictions are
    generated.
-2. ≥ 24 prediction files, ≥ 5 classes, each with full provenance fields, mapping match,
-   initial state, and predicted FLOPs and bytes.
+2. ≥ 24 prediction files covering all six classes, each with full provenance fields, mapping
+   match, initial state, and predicted FLOPs and bytes.
 3. The ordering check fails on a synthetic history where a result precedes its prediction.
 4. UNKNOWNS.md lists every stub in the reference spec that the engine actually read.
 
@@ -1973,7 +2156,8 @@ and only the ledger, decide what the model card may say.
    benchmark in SUITE.md, runnable end to end on CPU JAX as a dry run that produces
    correctly shaped (fake, labelled SYNTHETIC) result files. Warm-up and repetition counts
    stated per benchmark; device-side timing via the XLA/JAX profiler at the granularity SUITE.md
-   fixes; XLA's compiled cost analysis (FLOPs and bytes accessed) per benchmark;
+   fixes; XLA's compiled cost analysis (FLOPs and bytes accessed) per benchmark; whatever
+   device counters the profiler exposes (HBM bytes, utilisation), recorded as data;
    environment capture (TPU type, runtime and library versions, VM image) into every result.
 2. Run it on Cloud TPU v5e ONLY AFTER check_ordering passes for every prediction. Raw results
    go to validation/L3_silicon/tpu-v5e/results/, and are immutable once committed. These are
@@ -1985,11 +2169,14 @@ and only the ledger, decide what the model card may say.
    the same key and a different prediction, as rk-sim's does. Workload fidelity is its own
    entry type: predicted vs compiler-reported FLOPs and bytes, with declared deviations for
    fusions, layout copies and padding. It never promotes a duration card; a deviation above
-   5% with no declared reason is published as a finding.
+   5% with no declared reason is published as a finding. Diagnostic fidelity is another
+   entry type: each predicted diagnostic against the device counter that measures it, where
+   one exists. It never promotes a duration card either.
 4. Gate G4 (execution-plan §4), evaluated by script and written to the ledger either way:
    median |relative error| ≤ 25% across all benchmarks, and no class median above 50%. It is
    evaluated separately for matched and compiler-chosen benchmarks, and the verdict names the
-   group.
+   group; an empty group is reported as "no evidence", never as a pass. The same script
+   computes G4's fail-branch attribution exactly as execution-plan §4 defines it.
 5. Promotion: provenance/ reads the ledger. A model card moves from stub to estimated ONLY
    through ledger entries, ONLY for the family and op classes those entries cover, with
    validated_error_band set to the observed band for that scope. Never by hand, and never
@@ -2023,7 +2210,7 @@ table of errors by class.
 ```
 
 
-### U-P11 · U6 · Lane A — The native engine core
+### U-P11a · U6 · Lane A — Native engine kernel: time, events, the wheel, ownership, and the protocol
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/engines/README.md, build-spec §2.5
@@ -2032,12 +2219,15 @@ spec, not background), ADR U0005, U0007. Javid's docs/vision/elements_of_paralle
 from rk-sim, READ-ONLY, for the parts §2.8 adopts, and build-spec §2.8's "departures" table
 for the parts it rejects and why.
 
-TASK: native/, uarch's own event-driven engine, C++20, built in the engine container,
-behind exactly the same engine protocol as the fork: EngineJob JSON in, EngineResult JSON out,
-invoked as a subprocess binary `uarch-engine`. Single-threaded in this prompt.
+TASK: the kernel of native/, uarch's own event-driven engine, C++20, built in the engine
+container, and the plumbing that puts it behind exactly the same engine protocol as the
+fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
+`uarch-engine`. Single-threaded. No subsystem models yet: U-P11b adds them.
 
-1. BEFORE MEASURING ANYTHING, write in ADR U0011 the speed factor over the fork that you
-   expect on npu-l4 and on a 16×16 mesh, and why. G5 checks it.
+1. BEFORE MEASURING ANYTHING, write in ADR U0011 (a) the speed factor over the fork that you
+   expect on npu-l4 and on a 16×16 mesh, and why (G5 checks it), and (b) a single-point
+   wall-clock budget for the npu-m256 and 32×32 grids, above which parallelism inside one
+   simulation is needed (U9's gate reads it).
 2. Build: native/CMakeLists.txt; dependencies via FetchContent at pinned tags, ONLY
    nlohmann/json (MIT) and doctest (MIT), added to third_party/LICENSES.md. -Wall -Wextra
    -Werror; a sanitizer preset (ASan+UBSan) used by the nightly job.
@@ -2063,11 +2253,52 @@ invoked as a subprocess binary `uarch-engine`. Single-threaded in this prompt.
    direction on torus); multiple NoCs, each with its own direction. Sorted vectors wherever
    iteration order could reach a result. NO std::unordered_map ITERATION ON ANY PATH THAT
    PRODUCES OUTPUT.
-8. Models at the levels this prompt builds (build-spec §2.4):
+8. A fixed-delay executor: a TaskGraph whose jobs are fixed delays (no models yet),
+   dependencies resolved by events, so the kernel runs end to end before any model exists.
+9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
+   parser, identical in shape to engines/fork/, so `uarch table ... --engine native` reaches
+   the binary.
+
+ACCEPTANCE TESTS (write first):
+1. doctest: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
+   domain boundaries, owner-assertion fires on a foreign mutation (debug build).
+2. The build passes with -Wall -Wextra -Werror, and the sanitizer preset runs the doctests
+   clean.
+3. A fixed-delay TaskGraph's duration equals its critical path worked by hand in the test,
+   and its EngineResult is byte-identical across 3 runs and under the sanitizer build.
+4. The Python side round-trips an EngineJob through `uarch-engine`, and the EngineResult
+   validates against the engine protocol.
+5. Ties: events with equal t_ps resolve by (phase, target, seq), whatever order they were
+   scheduled in.
+
+GUARDRAILS: No subsystem models; they are U-P11b. No threads, no SIMD intrinsics, no GPU, no
+MPI; those are U-P17 at the earliest, and only what it builds. Do not delete or bypass the
+fork: it is the permanent L2 reference. Cycles never leave native/ and engines/. Do not
+optimise before determinism holds.
+
+ADR: docs/decisions/U0011-the-native-engine-core.md, started here: the expected speed factor
+and the single-point budget (both written before any measurement), and each departure from
+the vision note. The lookahead-collapse premise in particular: real routers take several
+cycles per hop (Tenstorrent documents ~9 router-to-router on Blackhole), so it is not L = 1.
+```
+
+
+### U-P11b · U6 · Lane A — Native engine models: compute level 1, NoC and DRAM level 0, and the TaskGraph executor
+
+```text
+CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, build-spec §2.4
+(the ladder and fidelity_detail), §2.5 (the TaskGraph and EngineResult) and §2.8, ADR U0011
+as U-P11a left it, and U-P11a's handoff.
+
+TASK: the models at the levels this sprint builds, and the executor that runs a real
+TaskGraph through them, so the native engine produces real rows.
+
+1. Models (build-spec §2.4):
    - compute level 1: tile-job intervals, meaning pipeline fill and drain for the job's
      declared dataflow, tile quantisation and padding, double-buffer overlap of DMA and
-     compute, and job_overhead_cycles on every tile job. A tensor job is O(1–10) events, not
-     O(cycles);
+     compute, operand staging at operand_bytes_per_cycle, an output tile bounded by
+     accumulator_bytes (partial sums beyond it go to SRAM where the policy placed them), and
+     job_overhead_cycles on every tile job. A tensor job is O(1–10) events, not O(cycles);
    - NoC level 0: hop latency, infinite bandwidth;
    - DRAM level 0: fixed latency plus a bandwidth cap per channel, derated for refresh from
      the spec's timing;
@@ -2075,40 +2306,73 @@ invoked as a subprocess binary `uarch-engine`. Single-threaded in this prompt.
      distant core's bandwidth is latency-bound; barriers cost sync.barrier_latency_cycles.
    EngineResult reports fidelity_detail honestly: {compute: 1, noc: 0, dram: 0}. The
    composite for that is C1 at best, and the table must say so.
-9. TaskGraph executor: runs the TaskGraph from mapping/ (both ws-rowsplit@1 and
-   onnxim-compat@1), resolving dependencies by events. initial_state steady primes one
-   iteration inside the same simulation and reports the second.
-10. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
-    parser, identical in shape to engines/fork/, so `uarch table ... --engine native` works.
-    EngineResult carries the critical-path attribution, diagnostics (null for whatever the
-    running levels do not model: NoC contention statistics at NoC level 0, for example) and,
-    with --trace, a Chrome-trace JSON timeline.
+2. TaskGraph executor: runs the TaskGraph from mapping/ (ws-rowsplit@1, os-tiled@1 and
+   onnxim-compat@1; npu-m256 uses ws-rowsplit@1 until the mesh policies land in U-P13d),
+   resolving dependencies by events, attention_fused tiles included. initial_state steady
+   primes one iteration inside the same simulation and reports the second (two priming
+   iterations when the job asks for the warm-up check).
+3. Critical-path attribution: each interval on the critical path is charged to the resource
+   that bounded it, and the parts sum to duration_ps.
 
 ACCEPTANCE TESTS (write first):
-1. doctest: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
-   domain boundaries, owner-assertion fires on a foreign mutation (debug build).
-2. The FULL L0, L0m and L1 suites pass against the native engine through the engine
+1. The FULL L0, L0m and L1 suites pass against the native engine through the engine
    protocol, with no suite code changed.
-3. Determinism: same job → byte-identical EngineResult across 3 runs and under the sanitizer
+2. Determinism: same job → byte-identical EngineResult across 3 runs and under the sanitizer
    build.
-4. G5 (with U-P12's harness): with the fork configured at MATCHING levels (its simple NoC,
-   simple DRAM) and onnxim-compat@1 driving both, durations agree within 3% on ≥ 95% of the
-   npu-l4 grid, and the speed factor is measured against the one you wrote down.
-5. `uarch table hw/designs/npu-m256.yaml ... --engine native` builds a full table: the mesh
+3. `uarch table hw/designs/npu-m256.yaml ... --engine native` builds a full table: the mesh
    class, which the fork cannot represent.
-6. The latency-bound stream fixture (U-P8) passes, and lowering max_outstanding lowers a
+4. The latency-bound stream fixture (U-P8) passes, and lowering max_outstanding lowers a
    distant core's achieved bandwidth.
-7. Diagnostics: at NoC level 0 every NoC statistic is null; attribution sums to duration.
+5. Halving accumulator_bytes on a GEMM whose output tile then no longer fits never shortens
+   it, and the extra SRAM traffic appears in ext_counts.
+6. attribution_s sums to duration_s on every row.
 
-GUARDRAILS: No threads, no SIMD intrinsics, no GPU, no MPI; those are U-P17 at the earliest,
-and only what it builds. Do not delete or bypass the fork: it is the permanent L2 reference.
-Cycles never leave native/ and engines/. Do not optimise before the determinism and L0–L1
-suites pass. If the speed factor disappoints, record it; do not trade determinism for it.
+GUARDRAILS: Only the levels above: NoC "1+ts", DRAM 1 and 2, and compute 2 are U-P13a–c. No
+threads. Do not optimise before the determinism and L0–L1 suites pass. Do not tune a model
+toward the fork; U-P11c measures agreement.
 
-ADR: docs/decisions/U0011-the-native-engine-core.md, with the expected speed factor
-(written first), the measured one, and each departure from the vision note. The
-lookahead-collapse premise in particular: real routers take several cycles per hop
-(Tenstorrent documents ~9 router-to-router on Blackhole), so it is not L = 1.
+ADR: append to docs/decisions/U0011-the-native-engine-core.md the models built and every spec
+field the native engine lists as unrepresented at these levels.
+```
+
+
+### U-P11c · U6 · Lane A — Native engine diagnostics, traces, G5 and the measured speed factor
+
+```text
+CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/engines/README.md, build-spec
+§2.3.3 (diagnostics), §2.5 and §2.8, ADR U0005 (the fork's ladder table), U0011, U-P11b's
+handoff, and U-P12's harness (validation/L2_differential/native_vs_fork/).
+
+TASK: make the native engine's output complete and checked: diagnostics, traces, agreement
+with the fork at matched levels, and the speed factor against the one written first.
+
+1. Diagnostics: fill the row diagnostics the running levels model, and null for everything
+   else (NoC contention statistics at NoC level 0, for example). Never 0 for unmodelled.
+2. With --trace, a Chrome-trace JSON per-resource timeline from STAT_SAMPLE and job events.
+3. G5 with U-P12's harness: onnxim-compat@1 driving both engines, the fork in the
+   configuration ADR U0005 classifies as matching native's levels. If no fork configuration
+   matches {compute: 1, noc: 0, dram: 0}, do not compare mismatched levels: record which
+   subsystem mismatches, and G5 moves to U7, after U-P13a–c, at the closest matching
+   configuration.
+4. Measure the speed factor against the fork on npu-l4 and the 16×16 mesh, and the
+   single-point wall-clock on the npu-m256 grid against U0011's budget.
+
+ACCEPTANCE TESTS (write first):
+1. G5: durations agree within 3% on ≥ 95% of the npu-l4 grid at matched levels, or the level
+   mismatch is recorded and G5 rescheduled as item 3 says.
+2. Diagnostics: at NoC level 0 every NoC statistic is null, and no null diagnostic renders as
+   0 in `uarch report`.
+3. The trace of a golden request loads as valid Chrome-trace JSON, and no two intervals on
+   one resource overlap.
+4. The speed factor and the single-point wall-clock are recorded next to the numbers written
+   first.
+
+GUARDRAILS: If the speed factor disappoints, record it; do not trade determinism for it. Do
+not fix a disagreement with the fork by tuning: bisect it with U-P12's attribution and record
+it. No threads.
+
+ADR: complete docs/decisions/U0011-the-native-engine-core.md with the measured speed factor,
+the single-point wall-clock against the budget, and G5's result or its rescheduling.
 ```
 
 
@@ -2168,73 +2432,161 @@ per-subsystem attribution of what did not agree, and the performance noise floor
 ```
 
 
-### U-P13 · U7 · Lane A — Native engine depth: contention, the mesh class, and composite C2
+### U-P13a · U7 · Lane A — Native NoC at "1+ts": reservation calendars and NoC barriers
 
 ```text
-CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, build-spec §2.4
-(the per-subsystem ladder and the composite rule), §2.8, ADR U0011, U0012 (what did not
-agree, and why). Ramulator 2 documentation (its External frontend, for use as a library).
+CONTEXT TO LOAD: CLAUDE.md, native/README.md, build-spec §2.4 (the per-subsystem ladder and
+fidelity_detail) and §2.8, ADR U0011, U0012 (what did not agree, and why), and U0008's NoC
+L2 report.
 
-TASK: take the native engine from C1 to an honest composite C2, and make the mesh class a
-first-class target.
+TASK: the first contention-aware subsystem of the native engine: the NoC at level 1 with
+cycle timestamps.
 
-1. NoC level 1 WITH CYCLE TIMESTAMPS: reservation calendars per link and per router output
-   port (the vision note's "F2a"). A packet reserves [start, start + serialisation) at each
-   resource along its precomputed route. Head and tail timing propagate wormhole
+1. NoC level 1 WITH CYCLE TIMESTAMPS ("1+ts"): reservation calendars per link and per router
+   output port (the vision note's "F2a"). A packet reserves [start, start + serialisation)
+   at each resource along its precomputed route. Head and tail timing propagate wormhole
    dependencies; virtual-channel occupancy and credit backpressure are modelled at packet
    granularity; multicast along rows and columns. BookSim2 STAYS the L2 reference. Do not
    build a flit-level router of your own, and do not build a third NoC backend.
-2. DRAM level 2: Ramulator 2 linked as a library through its External frontend, at the SHA the
-   engine image pins, one instance per memory controller, configured from the spec's DRAM
-   organisation and timing (never from a preset the spec does not name). Keep DRAM level 1
-   (a per-channel queue with a row-buffer approximation and the spec's page policy) as the
-   fast path. Addresses map to channels and controllers by memory.interleave, so the NoC sees
-   the traffic pattern the interleaving creates. The job chooses; EngineResult
-   reports which ran.
-3. Compute level 2: SRAM bank conflicts (from the mapping's buffer placement) and
-   DMA/compute interleaving at cycle timestamps, still O(1–10) events per tensor job wherever
-   no conflict occurs. When the spec has a shared_sram, model it at level 0 (capacity and
-   bandwidth cap) and level 1 (a per-port queue with cycle timestamps, "1+ts"), attached to the
-   NoC like a memory controller. Barriers follow sync.mechanism: with noc_semaphore they are
-   NoC messages and contend like any other traffic.
-4. Mesh-class mapping policies in src/rkuarch/mapping/ (Python, shared by every engine):
-   - summa-2d@1: GEMM outputs blocked over the core grid, operands multicast along rows
-     and columns;
-   - head-parallel@1: attention heads distributed over cores, KV resident per head group
-     and read in pages of the request's block size.
-   Each carries its own docstring derivation of per-core bytes and MACs. L0 checks those
-   against the graph.
-5. THE COMPOSITE RULE (build-spec §2.4), enforced in native/ and re-checked in Python:
-   - report C2 ONLY IF every shared resource (NoC, DRAM, SRAM banks, shared SRAM when
-     present) is at level 2, or at
-     level 1 with cycle timestamps, AND synchronisation is exact;
-   - otherwise C1, if any subsystem is at level 1;
-   - otherwise C0-equivalent.
-   Emit the full per-subsystem vector as fidelity_detail. A request that asks for C2 and
-   cannot get it degrades or raises exactly as build-spec §7.4 says for default vs override.
-6. Scale: build full tables for npu-m256 (16×16) and a 32×32 variant. Record the simulator
-   metrics from U-P12 for both.
+2. Barriers follow sync.mechanism: with noc_semaphore they are NoC messages and contend like
+   any other traffic.
+3. The NoC diagnostics that level models (latency p50 and p99, maximum link utilisation) are
+   filled; the rest stay null.
 
 ACCEPTANCE TESTS (write first):
-1. L0, L0m, L1 pass at every new level; L2 NoC (vs BookSim2) and L2 DRAM (vs standalone
-   Ramulator 2) pass their U-P8 bounds against the native engine.
-2. G6: the npu-m256 table reports composite C2 with detail {compute: 2, noc: 1+ts,
-   dram: 2 or 1+ts, sync: exact}. A job with any subsystem at level 0 is refused C2, with
-   the reason.
-3. Roofline floor: no row of any native table is faster than its U-C0 roofline.
-4. Contention actually bites: a hotspot mapping on npu-m256 is measurably slower than a
-   uniform one at equal MACs and bytes. At level 0 the two are identical, and the test asserts
-   both halves.
-5. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
-6. Interleaving bites: changing memory.interleave's granularity changes the per-controller
+1. L0, L0m and L1 pass at the new level; L2 NoC (vs standalone BookSim2) passes U-P8's bound
+   against the native engine.
+2. Contention actually bites: a hotspot mapping on npu-m256 is measurably slower than a
+   uniform one at equal MACs and bytes. At NoC level 0 the two are identical, and the test
+   asserts both halves.
+3. A barrier across 64 cores takes longer under background NoC traffic than on an idle NoC.
+4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+
+GUARDRAILS: No threads yet. Do not remove the level-0 path: it is a fast mode. Do not tune
+reservation parameters to match BookSim. Record the gap and its mechanism in the L2 report.
+
+ADR: none here; U-P13d's U0013 records this level and its BookSim gap.
+```
+
+
+### U-P13b · U7 · Lane A — Native DRAM: queues with back-pressure, Ramulator 2, and interleaving
+
+```text
+CONTEXT TO LOAD: CLAUDE.md, native/README.md, build-spec §2.3.2 (memory, presets, queues and
+credits), §2.4 and §2.8, ADR U0011, U0012, and U0008's DRAM L2 report. Ramulator 2
+documentation (its External frontend, for use as a library).
+
+TASK: DRAM at levels 1 and 2, with the controller back-pressure the spec now describes, and
+the address interleaving that decides which cores talk to which controller.
+
+1. DRAM level 1 with cycle timestamps ("1+ts"): a per-channel queue with a row-buffer
+   approximation, the spec's page policy, and the spec's read and write queue depths. It
+   stays the fast path.
+2. DRAM level 2: Ramulator 2 linked as a library through its External frontend, at the SHA the
+   engine image pins, one instance per memory controller, configured from the spec's DRAM
+   organisation, timing, timing_preset and queue depths, and never from a preset or default
+   the spec does not name; what Ramulator needs and the spec lacks is listed as
+   unrepresented. Add Ramulator 2 to native/CMakeLists.txt and third_party/LICENSES.md.
+3. Back-pressure: a controller whose queue is full withholds NoC credits (noc_credits), so
+   requests wait in the network rather than vanishing into an unbounded queue.
+4. Addresses map to channels and controllers by memory.interleave, so the NoC sees the
+   traffic pattern the interleaving creates. The job chooses the DRAM level; EngineResult
+   reports which ran, and fills dram_bw_util_ratio and dram_row_hit_ratio where the level
+   models them.
+
+ACCEPTANCE TESTS (write first):
+1. L0, L0m and L1 pass at both new levels; L2 DRAM (vs standalone Ramulator 2) is recorded
+   against the native engine, with each >5% deviation attributed where it can be.
+2. Interleaving bites: changing memory.interleave's granularity changes the per-controller
    traffic split and the NoC diagnostics, at equal bytes.
-7. With a shared_sram at level 0, C2 is refused, with the reason.
+3. Back-pressure bites: halving a controller's queue depth under saturating traffic never
+   shortens duration, and raises NoC latency at that controller's attach point.
+4. No preset fallback: a spec without timing and without timing_preset is refused at DRAM
+   level 2, naming the missing fields.
+5. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
 
-GUARDRAILS: Do not claim C2 with any subsystem at level 0. No threads yet. Do not remove the
-level-0 and level-1 paths: they are the fast modes, and the ladder is a feature. Do not tune
-reservation parameters to match BookSim. Record the gap and its mechanism.
+GUARDRAILS: No threads yet. Keep DRAM level 0 and level 1: they are the fast modes. Do not
+tune DRAM parameters toward Ramulator's defaults; record the gap.
 
-ADR: docs/decisions/U0013-the-composite-fidelity-rule.md.
+ADR: none here; U-P13d's U0013 records these levels and the fields Ramulator could not take.
+```
+
+
+### U-P13c · U7 · Lane A — Native compute level 2: SRAM bank conflicts and DMA interleave
+
+```text
+CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, build-spec §2.4
+and §2.8, ADR U0011, U0012.
+
+TASK: compute at level 2, the last piece the composite rule needs for C2.
+
+1. Compute level 2: SRAM bank conflicts, from the mapping's buffer placement (core,
+   offset_bytes, bank), and DMA/compute interleaving at cycle timestamps, still O(1–10)
+   events per tensor job wherever no conflict occurs. sram_bank_conflict_stall_ratio and
+   dma_compute_overlap_ratio are filled at this level.
+2. Shared SRAM: engine support is deferred until after U8. A spec with a shared_sram is run
+   with that field listed as unrepresented, fidelity_detail.shared_sram = "unrepresented",
+   and the table warns.
+
+ACCEPTANCE TESTS (write first):
+1. L0, L0m and L1 pass at compute level 2.
+2. Conflicts bite: a placement that puts two concurrently read operands in one bank is
+   slower than one that spreads them, at equal bytes; at compute level 1 the two are
+   identical, and the test asserts both halves.
+3. A spec with a shared_sram reports it as unrepresented and is refused C2, with the reason.
+4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+
+GUARDRAILS: No threads yet. Keep compute level 1: it is the fast mode. Do not model the
+shared SRAM in this prompt.
+
+ADR: none here; U-P13d's U0013 records this level.
+```
+
+
+### U-P13d · U7 · Lane A — Mesh mapping policies, the composite rule, and C2 at mesh scale
+
+```text
+CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, build-spec §2.4
+(the per-subsystem ladder and the composite rule), §2.8, ADR U0011, U0012, and the handoffs
+of U-P13a, U-P13b and U-P13c.
+
+TASK: make the mesh class a first-class target and the composite honest: mesh policies, the
+composite rule in code, and full C2 tables at mesh scale.
+
+1. Mesh-class mapping policies in src/rkuarch/mapping/ (Python, shared by every engine):
+   - summa-2d@1: GEMM outputs blocked over the core grid, operands multicast along rows
+     and columns;
+   - head-parallel@1: attention heads distributed over cores, attention_fused tiled per head
+     group, KV resident per head group and read in pages of the request's block size.
+   Each carries its own docstring derivation of per-core bytes and MACs. L0 checks those
+   against the graph.
+2. THE COMPOSITE RULE (build-spec §2.4), enforced in native/ and re-checked in Python:
+   - report C2 ONLY IF compute is at level 2, NoC and DRAM are at level 2 or "1+ts", a
+     shared SRAM (when present) is at "1+ts", AND synchronisation is exact;
+   - otherwise C1, if any subsystem is at level 1;
+   - otherwise C0-equivalent.
+   Emit the full per-subsystem vector as fidelity_detail, with build-spec §2.4's keys and
+   values only. A request that asks for C2 and cannot get it degrades or raises exactly as
+   build-spec §7.4 says for default vs override.
+3. Scale: build full tables for npu-m256 (16×16) and a 32×32 variant. Record the simulator
+   metrics from U-P12 for both, and the single-point wall-clock against ADR U0011's budget.
+4. If G5 was rescheduled from U6 (U-P11c item 3), run it now at the closest matching
+   configuration.
+
+ACCEPTANCE TESTS (write first):
+1. G6: the npu-m256 table reports composite C2 with detail {compute: 2, noc: "1+ts",
+   dram: 2 or "1+ts", sync: "exact"}. A job with any subsystem below the rule is refused C2,
+   with the reason.
+2. Roofline floor: no row of any native table is faster than its U-C0 roofline.
+3. summa-2d@1 and head-parallel@1 pass L0's per-core bytes and MACs check against the graph.
+4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+5. The 32×32 table builds, and its metrics and wall-clock are recorded.
+
+GUARDRAILS: Do not claim C2 below the rule. No threads yet. Do not remove the level-0 and
+level-1 paths: they are the fast modes, and the ladder is a feature.
+
+ADR: docs/decisions/U0013-the-composite-fidelity-rule.md, covering the rule as built, each
+level U-P13a–c added, and their L2 gaps with mechanisms.
 ```
 
 
@@ -2249,13 +2601,17 @@ one-at-a-time tornado is labelled local sensitivity rather than a ranking).
 TASK: the thing a chip architect actually does with this tool, which is to compare designs. A
 study is a set of tables over stipulated variants, and a report that says what moved and why.
 
-1. src/rkuarch/study/: a StudySpec (YAML) names a base design, a list of stipulated
-   parameter paths with values (one-at-a-time, or a small full grid), a versioned workload
+1. src/rkuarch/study/: a StudySpec (YAML) names a base design, a list of parameter paths with
+   values (one-at-a-time, or a small full grid), a versioned workload
    suite (or one request template), and one engine and fidelity. `uarch study <studyspec>`
    builds each variant's table through the existing pipeline. Tables are cached by request
    hash, so a rerun rebuilds nothing.
-2. VARIANTS MAY ONLY CHANGE STIPULATIONS. A study that edits a claim in a reference spec is
-   refused. It would be a counterfactual about a real chip wearing that chip's evidence. A
+2. VARIANTS MAY ONLY CHANGE WHAT A PROPOSED DESIGN IS FREE TO CHOOSE: its stipulated values
+   (counts included: array, grid, banks, channels, queue depths), its categorical fields
+   (dataflows, topology, interleave scheme, scheduler, page policy, sync mechanism) and the
+   request's mapping policy. Every change is recorded in conditional_on as path=value, and
+   the mapping is re-run per variant. A study that edits a reference spec, or any claim, is
+   refused: it would be a counterfactual about a real chip wearing that chip's evidence. A
    variant that changes sram.bytes without re-stipulating energy.pj_per_byte.sram is refused,
    naming both paths.
 3. The diff report (uarch diff from U-P12, extended):
@@ -2267,9 +2623,8 @@ study is a set of tables over stipulated variants, and a report that says what m
      StudySpec names, LABELLED "local sensitivity at these points, not a ranking";
    - energy per token from activity counts × per-activity coefficients, which are claims
      or stipulations from the spec, so the energy number carries its own conditional_on. It
-     renders "unverified" while energy_verification is None, uses voltage_ratio at frequency
-     ratios ≠ 1 ("unknown" without it), and shows U-P8's Accelergy estimate beside each
-     stipulated pj_per_byte.sram;
+     renders "unverified" while energy_verification is None (the energy rung is deferred
+     until after U8), and uses voltage_ratio at frequency ratios ≠ 1 ("unknown" without it);
    - "detail delta": each variant's C2 duration next to its own U-C0 roofline, so the study
      shows how much of each change the roofline would have predicted anyway.
 4. Every number renders through report/badged.py. A study over a proposed design says, at
@@ -2278,14 +2633,16 @@ study is a set of tables over stipulated variants, and a report that says what m
 5. hw/studies/: three example studies. hw/studies/npu-m256-sram-and-noc.yaml: SRAM per core
    1.5 MB → 3 MB (pj_per_byte.sram re-stipulated per size), and NoC link width 32 → 64
    B/cycle. hw/studies/npu-l4-hbm.yaml: HBM bandwidth ±25%. hw/studies/npu-l4-dataflow.yaml:
-   weight- vs output-stationary.
+   weight- vs output-stationary (dataflows and mapping policy together: ws-rowsplit@1 vs
+   os-tiled@1).
 6. hw/studies/workload-suite@1.yaml: models × precisions × phases × named operating points,
    chosen from `uarch characterize` coverage, with a one-line reason per entry. A new suite
    is a new version, never an edit.
 
 ACCEPTANCE TESTS (write first):
 1. A study over two variants rebuilds nothing on rerun (cache hit, by request hash).
-2. A variant that edits a claim is refused, and names the path.
+2. A variant that edits a claim, or any field of a reference spec, is refused, and names the
+   path.
 3. The tornado is labelled local sensitivity, and a test greps the rendered report for it.
 4. Energy per token carries conditional_on and renders "unknown" error when there is no band.
 5. A variant that changes nothing the mapping touches produces a diff of exactly zero at every
@@ -2295,6 +2652,9 @@ ACCEPTANCE TESTS (write first):
 7. A variant that changes sram.bytes without pj_per_byte.sram is refused, naming both paths.
 8. Energy renders "unverified" with no energy_verification, and "unknown" at frequency ratio
    0.6 when voltage_ratio is absent.
+9. The dataflow study runs: each variant's conditional_on names its dataflows and mapping
+   policy, and a variant whose dataflows lack its policy's dataflow is refused.
+10. A count variant (npu-m256 SRAM banks 16 → 32) runs, and its change is in conditional_on.
 
 GUARDRAILS: No optimiser and no design search. A study is a set of runs a human chose. No
 fitted surrogate; rk-sim deliberately refuses fitted Sobol indices, and so does this.
@@ -2323,15 +2683,18 @@ sees one.
    channels and bandwidth, the numeric formats including BLOCKFP8 with its scale bytes. List
    every stub the engine reads in predictions/UNKNOWNS.md. Fill the Rev-2 fields from the docs
    where they exist (GDDR6 organisation and timing, interleaving, DMA/NIU outstanding
-   requests, barrier mechanism); otherwise stub them.
+   requests, barrier mechanism, accumulator and operand-buffer capacity, controller queues
+   and credits); otherwise stub them, counts included.
 2. Agree validation/L3_silicon/blackhole/SUITE.md with Lane B FIRST, signed by both, with
-   at least 32 benchmarks across at least 7 classes:
+   at least 36 benchmarks covering every one of these eight classes:
    - NoC: point-to-point latency vs hop count on each NoC; k-to-1 contention at k ∈ {2,4,8};
      row multicast;
    - DRAM: streaming read and write per channel, and all channels at once;
    - core compute: single-core matmul at ≥ 4 shapes in at least two formats;
-   - multi-core: summa-2d@1-style matmul across 1, 4, 16, 64 cores; one decoder-layer
-     operator set at a decode shape;
+   - multi-core: summa-2d@1-style matmul across 1, 4, 16, 64 cores;
+   - end-to-end: one full decoder layer (summa-2d@1 and head-parallel@1 style) across ≥ 64
+     cores, at decode B ∈ {1, 8, 32} and at one prefill shape. Only this class can validate
+     whole-iteration rows (U-P10's rule), so it is what the demo's table needs;
    - latency-bound transfer: achieved bandwidth against transfer size × hop distance
      (memory-level parallelism);
    - DRAM gather: page-granular reads at rk-sim's block size;
@@ -2339,16 +2702,20 @@ sees one.
      device-side cost of launching an empty program.
    Shapes are chosen with `uarch characterize` to cover the demo request's per-op shape
    regimes (npu-m256 × Llama-3.1-70B × fp8) where the card can express them. Precision
-   follows U0001's rule: BLOCKFP8 benchmarks are BLOCKFP8 evidence. Kernels programmed to a
+   follows U0001's rule: BLOCKFP8 benchmarks are BLOCKFP8 evidence. Core-compute and
+   end-to-end benchmarks run in the demo request's precision (fp8) if the card runs it, and
+   in bf16 and BLOCKFP8; if the card cannot run fp8, SUITE.md and ADR U0015 say so, and say
+   that the demo table's rows stay stub on precision. Kernels programmed to a
    uarch policy (summa-2d@1-style) are `matched`; anything else is `compiler-chosen`.
    Each benchmark states its GRANULARITY IN PROFILER ZONES: which zone start/end on which
    RISC-V core. The profiler timestamps in cycles since reset and holds 125 zones per core
    buffer. Inter-core clocks are "closely synced but may have minor skews", so a
    cross-core latency benchmark states how skew is bounded or cancelled.
-3. Predictions from the native engine (all fidelity levels it has: detail 0/0/0, the level-1
-   fast path, and composite C2) AND from U-C0, written to
+3. Predictions from the native engine at every level it has (the level-1 fast path
+   {compute: 1, noc: "1+ts", dram: "1+ts"} and composite C2) AND from U-C0 (aggregate, and per_op,
+   which stands for level 0), written to
    validation/L3_silicon/blackhole/predictions/<id>.json with full provenance, mapping match,
-   initial state, and predicted FLOPs and bytes. Also run
+   initial state, predicted FLOPs and bytes, and the row diagnostics. Also run
    tt-npe on the NoC benchmarks and commit its outputs as a SECOND prediction set, labelled
    as the vendor's estimator. It is an L2 reference, and its own error against silicon is
    information too.
@@ -2357,8 +2724,8 @@ sees one.
 
 ACCEPTANCE TESTS:
 1. SUITE.md signed by both lanes before prediction generation.
-2. ≥ 32 prediction files across ≥ 7 classes; each has a native prediction per available level
-   and a U-C0 prediction; NoC benchmarks also have tt-npe predictions.
+2. ≥ 36 prediction files covering all eight classes; each has a native prediction per
+   available level and U-C0 predictions; NoC benchmarks also have tt-npe predictions.
 3. The reference spec loads as design_status: reference, with zero stipulations.
 4. UNKNOWNS.md is complete: a test cross-checks it against the stubs the engine read.
 
@@ -2390,8 +2757,9 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    where it supports the kernel. ttsim does not model timing, so dry-run outputs are labelled
    SYNTHETIC and are refused by the ledger. Environment capture per result: firmware, tt-metal
    version, clocks as reported, card serial. Timing is device-side only. Where TT-Metalium
-   reports op counts, record them for the workload-fidelity check; where tt-smi exposes board
-   power, record it as coarse energy context, labelled so.
+   reports op counts, record them for the workload-fidelity check; record whatever device
+   counters the card exposes (NoC, DRAM) for diagnostic-fidelity entries; where tt-smi
+   exposes board power, record it as coarse energy context, labelled so.
 2. Run on the card only after check_ordering passes. Raw results (profiler CSVs as emitted,
    plus the derived durations and the derivation script's hash) are committed immutable under
    validation/L3_silicon/blackhole/results/.
@@ -2399,8 +2767,9 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    U-C0, and tt-npe. The same key discipline as U-P10, and classes split by mapping match.
 4. THE NEW THING THIS VERDICT CAN SAY, which the first could not: whether MORE DETAIL IS
    MORE ACCURATE for this class. Report the error by class for each native fidelity level
-   side by side. If composite C2 is not closer to silicon than level-1, the report says so on
-   its first page. Detail is fidelity, not evidence; this is the one place you can test
+   side by side. "Closer" means a lower median |error| in that class; it is reported per
+   class and as the median across classes, never pooled. If composite C2 is not closer to
+   silicon than level-1, the report says so on its first page. Detail is fidelity, not evidence; this is the one place you can test
    whether it is also accuracy.
 5. Gate G7 (execution-plan §4): the same thresholds as G4, applied to native composite C2 on
    the mesh family. Promotion is scoped to the mesh family and the passing classes only.
@@ -2410,7 +2779,8 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
 ACCEPTANCE TESTS (write first):
 1. The dry run completes and the ledger refuses its SYNTHETIC outputs.
 2. Every result file postdates its prediction file (the ordering check is green).
-3. The per-level error table exists, with ≥ 3 levels × ≥ 7 classes.
+3. The per-level error table exists, with ≥ 3 levels (U-C0 per_op, level-1 fast path,
+   composite C2) × all eight classes.
 4. G7 is evaluated and recorded either way; promotion, if any, is scoped to the mesh family.
 5. A large-core design's request still gets stub from mesh evidence (applicability).
 
@@ -2437,7 +2807,7 @@ appears.
 
 1. Partitioning: logical processes are rectangular sub-meshes (row bands first; blocks behind
    a flag). Every owner id belongs to exactly one partition, so the ownership discipline from
-   U-P11 becomes the partition boundary, and the owner assertion now also fails a
+   U-P11a becomes the partition boundary, and the owner assertion now also fails a
    cross-partition mutation. Memory controllers, and the shared SRAM when present, may be
    their own partition.
 2. EXACT MODE: windowed conservative synchronisation. Lookahead L = the minimum latency of any
@@ -2453,7 +2823,7 @@ appears.
 4. LAX MODE (a flag, off by default): a synchronisation quantum Q > L. Events that cross a
    partition boundary within a window are delivered at the next window boundary (temporal
    decoupling, as in a TLM-2.0 quantum keeper). EngineResult then reports sync: approx(Q),
-   and the composite rule (U-P13) DROPS THE COMPOSITE TO C1 unless the model card cites a
+   and the composite rule (U-P13d) DROPS THE COMPOSITE TO C1 unless the model card cites a
    measured error-vs-Q curve that covers this Q (U-P18 produces it).
 5. The U-P12 metrics become live: cross-thread messages per simulated cycle and sync
    operations per million simulated cycles, recorded for npu-m256 and the 32×32 variant at
@@ -2545,7 +2915,7 @@ _fidelity_map), rk/engine/f1/serving.py (how R1 consumes IterationCost), rk/sche
 draft is in the uarch kit at rk-sim-side/decisions/DRAFT-admit-characterized-c2-tables.md.
 It must be ACCEPTED, and its schema PR MERGED, before this prompt starts: build-spec §1.3 rules
 out memoization surrogates for the prototype, and a characterization table is one. From
-rk-uarch, READ-ONLY: docs/decisions/U0001 (the eight rules), contract/schema/*.json at the
+rk-uarch, READ-ONLY: docs/decisions/U0001 (the nine rules), contract/schema/*.json at the
 contract version the boundary ADR names, and one committed table.
 
 TASK: a component whose effective compute fidelity is C2 is priced, every iteration, from a
@@ -2553,19 +2923,21 @@ uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
 
 1. rk/engine/characterized/ (new; engine layer; Lane A): loader.py reads a table file, verifies
    table_hash by recomputing it, checks the contract MAJOR version, checks the table's
-   spec_hash against the component's characterization.spec_hash, and returns a frozen object.
+   spec_hash against the component's characterization.spec_hash and the table's tp against
+   the plan's tp for that component, and returns a frozen object.
    cost.py: CharacterizedIterationCost, satisfying EXACTLY the interface f1 already calls on
    IterationCost (decode_s, prefill_s, decode_counts, prefill_counts, collective_s, spill_s,
    power_point, kv_byte_per_context_token, tp, and whatever else f1 reads). If f1 annotates
    the concrete class, introduce a Protocol in f0/compute.py that both satisfy, and change
    ONLY the annotation in f1. The DES's behaviour does not change.
-2. THE EIGHT RULES, each with its own test:
+2. THE NINE RULES, each with its own test:
    a. A ROW IS ONE SHARD. THE TP DIVISOR IS 1. `_time_s` divides by tp today; carrying that
       into the table path double-counts tensor parallelism silently. Collectives still come
       from the orchestrator's _collective_coefficients, exactly as for C0.
    b. Canonical compositions: decode (B, T) maps to the table directly; prefill (T, Q) maps to
-      n = T²/Q, L = Q/T. The table's measured composition_reduction and layer_reuse errors
-      are copied into run warnings, each stating its own provenance (ADR 0027).
+      n = T²/Q, L = Q/T. The table's measured interpolation_loo, composition_reduction and
+      layer_reuse errors are copied into run warnings, each stating its own provenance
+      (ADR 0027).
    c. The envelope is checked at BUILD time, where UnsupportedPrecision is raised today, from
       the workload's reachable (B, T, Q) region. Never discovered mid-run; never extrapolated.
    d. DVFS: duration_at(f) interpolates the table's frequency axis. A plan that declares DVFS
@@ -2574,11 +2946,15 @@ uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
    e. Counts map onto rk-sim's Channel names; ext_counts are carried through to channel
       diagnostics as coverage "unmodelled" until rk-sim adopts SRAM/NoC channels.
    f. One chip, one set of facts: the component's top-level params must equal
-      derive_rk_params of the spec the table cites. Check the hash, not the numbers.
+      derive_rk_params of the spec the table cites. Check the spec hash, and compare the
+      table's provenance.params with the component's params field by field
+      (ParamsMismatch).
    g. Steady state: an R1 run reads initial_state: steady tables. A cold table in an R1 run
       is InitialStateMismatch at build time.
    h. KV layout: the table's kv_layout.block_size_tokens equals the plan's block size, or
       KvLayoutMismatch at build time.
+   i. tp: the table's tp equals the plan's tp for that component, or TpMismatch at build
+      time. A table is never rescaled to another tp.
 3. Registry: a C2 row for (compute_resource, compute, C2) naming
    rk.engine.characterized.cost, with requires=("characterization",). ADR 0016's three sets:
    C2 joins the ADMISSIBLE set via the schema PR; it is BUILT for a component only if that
@@ -2599,16 +2975,16 @@ uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
    committed with an ADR. Bump ENGINE_VERSION.
 
 ACCEPTANCE TESTS (write first):
-1. TP, HAND-COMPUTED: a two-row fixture table and tp = 8. decode_s equals the row's duration
-   plus the collective, NOT duration/8 plus collective. The expected value is worked on
-   paper and committed.
+1. TP, HAND-COMPUTED: a two-row fixture table built for tp = 8, in a plan with tp = 8.
+   decode_s equals the row's duration plus the collective, NOT duration/8 plus collective.
+   The expected value is worked on paper and committed.
 2. PLUMBING WITHOUT UARCH: generate a table from rk-sim's own C0 closed form on a grid. At grid
    points the characterized cost reproduces IterationCost exactly (==), and between points
    within the declared interpolation error. This proves the path independently of uarch's
    physics.
-3. Envelope refusal at build time; spec-hash mismatch; contract-major mismatch; non-finite
-   row; DVFS without a frequency axis; a cold table in R1; a KV block-size mismatch: one test
-   each, each raising the named error.
+3. Envelope refusal at build time; spec-hash mismatch; params mismatch; tp mismatch;
+   contract-major mismatch; non-finite row; DVFS without a frequency axis; a cold table in
+   R1; a KV block-size mismatch: one test each, each raising the named error.
 4. Default-degrades / override-raises asserted as a pair in one test.
 5. Every existing golden is byte-identical. The C0 and R0/R1 paths are untouched.
 6. R1 with a C2 component: determinism, Little's law and conservation (P5's tests) still hold.
@@ -2648,8 +3024,8 @@ a C2 component shows its evidence where the user is looking.
    together.
 4. A chip panel in the inspector and Results for a C2 component: composite fidelity plus the
    per-subsystem detail vector; the model card (badge, evidence scope, validated band or
-   "unknown"); uarch version and table hash; measured interpolation, composition and
-   layer-reuse errors; the initial state and KV block size; energy marked "unverified" while
+   "unknown"); uarch version and table hash; tp; measured interpolation, composition,
+   layer-reuse and cold-vs-steady errors; the initial state and KV block size; energy marked "unverified" while
    the card has no energy evidence; flop-parity deviations; the conditional_on list. EMBED
    IT IN THE EXISTING COMPONENT/RUN RESPONSES. Do not add a route: test_contract.py freezes the
    canonical route list, and the
@@ -2701,7 +3077,8 @@ including the other lane's parts.
 4. README: a stranger reaches a built table from a clean clone following only the README,
    engine image included, and the README says how long each step takes on the reference box.
 5. docs/what-this-is.md: what a uarch number is, what it is not, the two validation verdicts
-   with their scopes and bands, the sync curve's verdict, the stipulation ceiling, the
+   with their scopes and bands, the sync curve's verdict (or that U9 was deferred, and why),
+   the stipulation ceiling, the
    declared omissions, and the state of energy evidence, in one page.
 6. A fresh session runs STANDING-how-it-works-refresh.md afterwards; not this one.
 
@@ -2742,7 +3119,8 @@ CHECK, in order:
 3. Did any golden change? If so, is there a docs/decisions/U*.md for it, and does it match the
    diff?
 4. Numerical smells: units missing from names; cycles crossing out of engines/ or native/;
-   time converted anywhere but next_edge(); MACs counted as one op; the tp rule; seeds not
+   time converted anywhere but next_edge(); MACs counted as one op; the tp rules (divisor 1,
+   table tp equals plan tp); seeds not
    plumbed into a new randomness source; unordered iteration reaching output; a diagnostic
    or energy figure rendered as 0 where the level does not model it; an engine reading a
    DRAM preset the spec does not name. Re-derive the
@@ -2753,8 +3131,9 @@ CHECK, in order:
 6. Evidence: any model card promoted without ledger entries? Any promotion wider than its
    entries' scope? Any error band of zero? Any prediction file edited after its freeze commit?
    Any L3 prediction without its mapping match and initial state? Run check_ordering yourself.
-7. Fidelity: any composite C2 with a subsystem at level 0, or in lax sync mode without a
-   covering curve? Any C2 row faster than its u_c0_duration_s?
+7. Fidelity: any composite C2 that breaks build-spec §2.4's rule (compute below 2, NoC or DRAM
+   below "1+ts"), any engine whose levels were not derived from §2.4's table, or any lax sync
+   result without a covering curve? Any C2 row faster than its u_c0_duration_s?
 8. Determinism: build one golden table at --workers 1 and --workers N yourself and diff the
    bytes. From U9, also at 1 and 4 threads in exact mode.
 9. From U6: run the native-vs-fork harness on one matched configuration yourself.

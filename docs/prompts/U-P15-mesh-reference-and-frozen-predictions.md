@@ -19,15 +19,18 @@ sees one.
    channels and bandwidth, the numeric formats including BLOCKFP8 with its scale bytes. List
    every stub the engine reads in predictions/UNKNOWNS.md. Fill the Rev-2 fields from the docs
    where they exist (GDDR6 organisation and timing, interleaving, DMA/NIU outstanding
-   requests, barrier mechanism); otherwise stub them.
+   requests, barrier mechanism, accumulator and operand-buffer capacity, controller queues
+   and credits); otherwise stub them, counts included.
 2. Agree validation/L3_silicon/blackhole/SUITE.md with Lane B FIRST, signed by both, with
-   at least 32 benchmarks across at least 7 classes:
+   at least 36 benchmarks covering every one of these eight classes:
    - NoC: point-to-point latency vs hop count on each NoC; k-to-1 contention at k ∈ {2,4,8};
      row multicast;
    - DRAM: streaming read and write per channel, and all channels at once;
    - core compute: single-core matmul at ≥ 4 shapes in at least two formats;
-   - multi-core: summa-2d@1-style matmul across 1, 4, 16, 64 cores; one decoder-layer
-     operator set at a decode shape;
+   - multi-core: summa-2d@1-style matmul across 1, 4, 16, 64 cores;
+   - end-to-end: one full decoder layer (summa-2d@1 and head-parallel@1 style) across ≥ 64
+     cores, at decode B ∈ {1, 8, 32} and at one prefill shape. Only this class can validate
+     whole-iteration rows (U-P10's rule), so it is what the demo's table needs;
    - latency-bound transfer: achieved bandwidth against transfer size × hop distance
      (memory-level parallelism);
    - DRAM gather: page-granular reads at rk-sim's block size;
@@ -35,16 +38,20 @@ sees one.
      device-side cost of launching an empty program.
    Shapes are chosen with `uarch characterize` to cover the demo request's per-op shape
    regimes (npu-m256 × Llama-3.1-70B × fp8) where the card can express them. Precision
-   follows U0001's rule: BLOCKFP8 benchmarks are BLOCKFP8 evidence. Kernels programmed to a
+   follows U0001's rule: BLOCKFP8 benchmarks are BLOCKFP8 evidence. Core-compute and
+   end-to-end benchmarks run in the demo request's precision (fp8) if the card runs it, and
+   in bf16 and BLOCKFP8; if the card cannot run fp8, SUITE.md and ADR U0015 say so, and say
+   that the demo table's rows stay stub on precision. Kernels programmed to a
    uarch policy (summa-2d@1-style) are `matched`; anything else is `compiler-chosen`.
    Each benchmark states its GRANULARITY IN PROFILER ZONES: which zone start/end on which
    RISC-V core. The profiler timestamps in cycles since reset and holds 125 zones per core
    buffer. Inter-core clocks are "closely synced but may have minor skews", so a
    cross-core latency benchmark states how skew is bounded or cancelled.
-3. Predictions from the native engine (all fidelity levels it has: detail 0/0/0, the level-1
-   fast path, and composite C2) AND from U-C0, written to
+3. Predictions from the native engine at every level it has (the level-1 fast path
+   {compute: 1, noc: "1+ts", dram: "1+ts"} and composite C2) AND from U-C0 (aggregate, and per_op,
+   which stands for level 0), written to
    validation/L3_silicon/blackhole/predictions/<id>.json with full provenance, mapping match,
-   initial state, and predicted FLOPs and bytes. Also run
+   initial state, predicted FLOPs and bytes, and the row diagnostics. Also run
    tt-npe on the NoC benchmarks and commit its outputs as a SECOND prediction set, labelled
    as the vendor's estimator. It is an L2 reference, and its own error against silicon is
    information too.
@@ -53,8 +60,8 @@ sees one.
 
 ACCEPTANCE TESTS:
 1. SUITE.md signed by both lanes before prediction generation.
-2. ≥ 32 prediction files across ≥ 7 classes; each has a native prediction per available level
-   and a U-C0 prediction; NoC benchmarks also have tt-npe predictions.
+2. ≥ 36 prediction files covering all eight classes; each has a native prediction per
+   available level and U-C0 predictions; NoC benchmarks also have tt-npe predictions.
 3. The reference spec loads as design_status: reference, with zero stipulations.
 4. UNKNOWNS.md is complete: a test cross-checks it against the stubs the engine read.
 

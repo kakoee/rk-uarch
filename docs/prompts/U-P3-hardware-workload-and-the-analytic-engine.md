@@ -34,9 +34,15 @@ later.
    STIPULATIONS STAY STIPULATIONS. A peak computed from stipulated MACs/cycle and a
    stipulated clock is a stipulation, never a claim. Plus `uarch rk-component <spec>`, which
    emits the rk-sim library YAML for the chip (kind: compute_resource, role: asic,
-   design_status carried in a comment until rk-sim's schema has the field).
-3. src/rkuarch/workload/ — (ModelSpec, ModelShape, precision, query) -> one iteration's
-   operator graph at decoder-layer granularity, using contract/operators.py only. A query is
+   design_status carried in a comment until rk-sim's schema has the field; uarch's proposed
+   maps to rk-sim's proposed and reference to shipping).
+3. src/rkuarch/workload/ — (ModelSpec, ModelShape, precision, tp, query) -> the operator
+   graph of ONE RANK of a tp-way tensor-parallel split, for one iteration, at decoder-layer
+   granularity, using contract/operators.py only. The split is build-spec §2.3.4's: heads
+   and KV heads (replicated when kv_heads < tp), FFN columns and rows, and the vocabulary
+   divided by tp; no collective ops, because rk-sim prices them; ShardIndivisible if a
+   dimension does not divide. Attention is one attention_fused operator per layer (scores on
+   chip, DRAM operands Q, K, V, O). A query is
    a canonical batch (build-spec §2.3.4): decode = B sequences of context T/B; prefill =
    n prompts of L. layer_reuse=True means "one decoder layer instantiated n_layers times
    plus the non-repeated head and tail ops", and the graph says so in a field. MoE is
@@ -63,16 +69,19 @@ later.
    UarchCostTable, single process, no interpolation (U-P7 owns that). Hash it.
 7. src/rkuarch/cli.py (typer): `uarch validate <spec>` (lists claims / stipulations / stubs
    with counts; refuses a bad spec with the path) and `uarch table <spec> --model <name>
-   --precision <fmt> --engine analytic`.
+   --precision <fmt> [--tp N] --engine analytic` (tp defaults to 1).
 8. `uarch characterize <spec> --model <name> --precision <fmt>`: for every op across the
    request's grid, its FLOPs, bytes, operational intensity, op class and shape regime (the
    bins ADR U0001 fixed), as hashed JSON plus a Markdown twin. U-P9 and U-P15 pick their
    benchmark shapes from it, and U-P14 picks its workload suite from it.
 
 ACCEPTANCE TESTS (write first):
-1. U-C0 AGGREGATE REPRODUCES rk-sim C0: fed derive_rk_params(spec), aggregate-mode duration
-   equals the parity fixtures' rk-sim durations within ±0.1% on every fixture (decode and
-   prefill, both precisions). A test, not a claim.
+1. U-C0 AGGREGATE REPRODUCES rk-sim C0: fed each fixture's own component params (U-P2
+   records the file and rk-sim's duration for it), aggregate-mode duration equals that rk-sim
+   duration within ±0.1% on every fixture (decode and prefill, both precisions, tp 1 and 8).
+   A test, not a claim. Then a human runs `make vendor-rk ... PARAMS=<uarch rk-component
+   output for npu-l4>` and the same test covers derive_rk_params(npu-l4). Never compute an
+   expected duration yourself.
 2. per_op >= aggregate on every fixture query (a property test over random queries too).
 3. FLOP parity: the workload graph passes the harness with every deviation named.
 4. derive_rk_params: a stipulated-clock design yields stipulation-kind peaks. A reference
@@ -87,8 +96,13 @@ ACCEPTANCE TESTS (write first):
    hash-stable report in which every op has a shape regime.
 9. KV reads are page-granular: the number of KV page reads per sequence per layer equals
    ceil(context / block_size_tokens).
+10. The shard: at tp = 8 the graph's matrix_ops equals the tp = 1 graph's divided by 8, except
+    for named deviations (replicated KV heads, vocabulary padding), and a model whose heads do
+    not divide by tp raises ShardIndivisible.
+11. Attention: a prefill at L = 32768 yields an attention_fused operator whose DRAM bytes are
+    Q, K, V and O only, and the graph contains no L × L tensor.
 
-GUARDRAILS: Do not touch the fork or the native engine; they are U-P5 and U-P11. Do not add
+GUARDRAILS: Do not touch the fork or the native engine; they are U-P5 and U-P11a–c. Do not add
 interpolation or a process pool; that is U-P7. Do not tune the operator graph to hit rk-sim's
 numbers, because the deviations are findings. Never write a number you cannot source as a claim:
 stipulate it in designs/ with a rationale, or stub it in references/.

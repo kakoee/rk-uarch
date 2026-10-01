@@ -32,8 +32,8 @@ a C2 component shows its evidence where the user is looking.
    together.
 4. A chip panel in the inspector and Results for a C2 component: composite fidelity plus the
    per-subsystem detail vector; the model card (badge, evidence scope, validated band or
-   "unknown"); uarch version and table hash; measured interpolation, composition and
-   layer-reuse errors; the initial state and KV block size; energy marked "unverified" while
+   "unknown"); uarch version and table hash; tp; measured interpolation, composition,
+   layer-reuse and cold-vs-steady errors; the initial state and KV block size; energy marked "unverified" while
    the card has no energy evidence; flop-parity deviations; the conditional_on list. EMBED
    IT IN THE EXISTING COMPONENT/RUN RESPONSES. Do not add a route: test_contract.py freezes the
    canonical route list, and the

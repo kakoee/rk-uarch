@@ -6,6 +6,10 @@ run at the end.
 
 **Rev 2, 2026-09-28.** Adds the book-coverage gaps (F1–F17; see build-spec Rev 2). The gates
 below carry the new checks, and §7's effort is re-derived from the amended prompts.
+**Rev 2.1, 2026-10-01.** Applies `docs/reviews/rev2-plan-review.md`: G3 and G5 read the fork's
+levels from ADR U0005, G4 and G7 gain class lists and defined fail-branch metrics, U6 and U7
+run split prompts (U-P11a–c, U-P13a–d), U9 is gated on a measured need, and §7.4's calendar
+takes the longer lane per sprint.
 
 **Canonical for:** *what order and who*. For *what* and *how* (architecture, contract, repo
 layout, conventions and the prompt texts) see `docs/build-spec.md`.
@@ -20,7 +24,8 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 
 | | |
 |---|---|
-| **U0 in progress** | Bootstrap committed locally (`0868dd3`), not tagged. Still to add by hand: `Makefile`, `.pre-commit-config.yaml`, `.github/` (CODEOWNERS, PR template, `ci.yml`, `nightly.yml`) and executable hooks; then a private remote, green CI, and the `u00-end` tag |
+| **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
+| **Next** | U1 (U-P1 ∥ U-P2), once both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` |
 | **Not started** | U1–U11 |
 
 Update this block and `docs/how-it-works.md` at every sprint boundary.
@@ -60,8 +65,8 @@ did not finish.
 | U-P3 ∥ U-P4 | Provenance works on the table's shape, which U-P1 fixed; a toy table is enough |
 | U-P5 ∥ U-P6 | L0 and L0m run against U-C0; they do not need the fork |
 | U-P7 ∥ U-P8 | L1 is written against closed forms; L2 against standalone references |
-| U-P11 ∥ U-P12 | The harness needs the engine protocol, not the native engine |
-| U-P13 ∥ U-P14 | Studies run on any engine through the table interface |
+| U-P11a–c ∥ U-P12 | The harness needs the engine protocol, not the native engine |
+| U-P13a–d ∥ U-P14 | Studies run on any engine through the table interface |
 | U-P17 ∥ U-P18 | Pre-registration and the harness can land before the parallel engine does |
 
 **Serial inside a sprint.** Named so nobody schedules them together:
@@ -71,11 +76,13 @@ did not finish.
 | U-P9 → U-P10 (measurement step) | Predictions must be committed before any measurement exists. Lane B writes and dry-runs its kit in parallel, and measures only after the freeze |
 | U-P15 → U-P16 (measurement step) | Same rule |
 | Boundary schema PR → U-P19 → U-P20 | Both run in rk-sim and touch provenance. The schema PR comes first, then P18, then P19 |
+| U-P11a → U-P11b → U-P11c | Kernel, then models, then diagnostics and G5 |
+| U-P13a, U-P13b, U-P13c → U-P13d | The three subsystems in any order, then the composite rule that needs all three |
 
-**Where the lanes are uneven.** U6, U7 and U9 are bound by Lane A (§7). If you want those
-sprints to close sooner, the cleanest work to move to Lane B is the mesh mapping policies
-(U-P13 item 4) and the Ramulator 2 library linking (U-P13 item 2). Both sit behind existing
-interfaces.
+**Where the lanes are uneven.** U6, U7 and U9 are bound by Lane A; U5, U8 and U10 by Lane B
+(§7). If you want U7 to close sooner, the cleanest work to move to Lane B is the mesh mapping
+policies (U-P13d item 1) and the Ramulator 2 library linking (U-P13b). Both sit behind
+existing interfaces.
 
 ---
 
@@ -112,7 +119,7 @@ interfaces.
 | **Goal** | A hashed table end to end, whose every number says what it may claim |
 | **Lane A** | Four hardware specs (with the Rev-2 fields), `derive_rk_params`, the workload graph with FLOP parity and paged KV, U-C0 (aggregate and per-op), the minimal table path, `uarch validate`, `uarch table` and `uarch characterize` → **U-P3** |
 | **Lane B** | Badges (claims, stipulations, the model as contributor, the ceiling), model cards, applicability over the full scope vector, `uarch report` through `badged()` with diagnostics and a per-op roofline → **U-P4** |
-| **Joint exit criterion** | `uarch table hw/designs/npu-l4.yaml … --engine analytic` → `uarch report` shows "conditional · N stipulations", "error: unknown", "not modelled" for null diagnostics, composite C0 · U-C0 aggregate = rk-sim C0 within ±0.1% on every parity fixture · `uarch characterize` runs on the demo request |
+| **Joint exit criterion** | `uarch table hw/designs/npu-l4.yaml … --engine analytic` → `uarch report` shows "conditional · N stipulations", "error: unknown", "not modelled" for null diagnostics, composite C0 · U-C0 aggregate = rk-sim C0 within ±0.1% on every parity fixture, each fed that fixture's own component params · the graph is one rank of a tp-way split, with attention fused · `uarch characterize` runs on the demo request |
 | **Effort** | A 41 · B 35 |
 | **Depends on** | G1 |
 | **Not in this sprint** | Fork; native; interpolation |
@@ -133,10 +140,10 @@ interfaces.
 
 | | |
 |---|---|
-| **Goal** | A complete C2 table: verified, with its own errors measured, and badged STUB because it has not yet met silicon |
-| **Lane A** | Mapping policies (`ws-rowsplit@1`, `onnxim-compat@1`) with declared dataflow and SRAM placement, grid, pool, interpolation, LOO, composition, layer-reuse and cold-vs-steady errors, frequency axis → **U-P7** |
-| **Lane B** | L1 analytical limits (derated DRAM, latency-bound streams), including two hand-computed fixtures; L2 differential against BookSim 2, Ramulator 2 and SCALE-Sim v3; the energy rung (Accelergy) → **U-P8** |
-| **Joint exit criterion** | **Gate G3**: the `npu-l4` × 70B-class table, fp8 and bf16 · byte-identical at 1 and N workers · L0, L0m and L1 pass · NoC L2 bound met · model card `stub` |
+| **Goal** | A complete table from the fork, at the composite its levels earn (C2 only if they qualify): verified, with its own errors measured, and badged STUB because it has not yet met silicon |
+| **Lane A** | Mapping policies (`ws-rowsplit@1`, `os-tiled@1`, `onnxim-compat@1`) with declared dataflow and SRAM placement, fused attention tiling, grid, pool, interpolation, LOO, composition, layer-reuse and cold-vs-steady (with warm-up) errors, frequency axis → **U-P7** |
+| **Lane B** | L1 analytical limits (derated DRAM, latency-bound streams), including two hand-computed fixtures; L2 differential against BookSim 2, Ramulator 2 and SCALE-Sim v3, refusing self-comparisons → **U-P8** |
+| **Joint exit criterion** | **Gate G3**: the `npu-l4` × 70B-class table, fp8 and bf16, tp = 8 · composite as §2.4's rule gives for ADR U0005's levels · byte-identical at 1 and N workers · L0, L0m and L1 pass · NoC L2 bound met, or recorded as not independent · model card `stub` |
 | **Effort** | A 61 · B 47 |
 | **Depends on** | G2 |
 | **Not in this sprint** | Silicon; native |
@@ -158,9 +165,9 @@ interfaces.
 | | |
 |---|---|
 | **Goal** | Our own engine, checked against the fork on the same work |
-| **Lane A** | The C++20 engine: time base, events, wheel, ownership, compute level 1, NoC and DRAM level 0, TaskGraph executor → **U-P11** |
+| **Lane A** | The C++20 engine, in three sessions: time base, events, wheel, ownership and the protocol → **U-P11a**; compute level 1, NoC and DRAM level 0, the TaskGraph executor and attribution → **U-P11b**; diagnostics, traces, G5 and the measured speed factor → **U-P11c** |
 | **Lane B** | Native-vs-fork differential harness with attribution, determinism gates, simulator metrics and the regression gate → **U-P12** |
-| **Joint exit criterion** | **Gate G5** · the full L0, L0m and L1 suites pass on native · npu-m256 (a mesh the fork cannot model) builds a table |
+| **Joint exit criterion** | **Gate G5**, or its recorded rescheduling to U7 if no fork configuration matches native's levels · the full L0, L0m and L1 suites pass on native · npu-m256 (a mesh the fork cannot model) builds a table |
 | **Effort** | A 175 · B 49 |
 | **Depends on** | G3 (G4 need not have passed: a native engine is worth building either way; it just cannot claim accuracy yet) |
 | **Not in this sprint** | Threads, SIMD, GPU |
@@ -170,9 +177,9 @@ interfaces.
 | | |
 |---|---|
 | **Goal** | An honest composite C2 from our own engine, at mesh scale, and the first thing a chip architect would use it for |
-| **Lane A** | Reservation NoC with cycle timestamps, Ramulator 2 as a library configured from the spec, address interleaving, SRAM banks and DMA interleave, optional shared SRAM, mesh mapping policies, the composite rule → **U-P13** |
+| **Lane A** | In four sessions: reservation NoC with cycle timestamps and NoC barriers → **U-P13a**; DRAM queues with back-pressure, Ramulator 2 as a library configured from the spec, address interleaving → **U-P13b**; SRAM bank conflicts and DMA interleave (shared SRAM listed as unrepresented) → **U-P13c**; mesh mapping policies, the composite rule, mesh-scale tables → **U-P13d** |
 | **Lane B** | Design studies over a versioned workload suite: variants, the diff report with geometric-mean speedup, a local-sensitivity tornado, energy with conditions → **U-P14** |
-| **Joint exit criterion** | **Gate G6**: npu-m256 composite C2 with honest detail · contention visibly bites at level ≥1 and not at level 0 · the two example studies render |
+| **Joint exit criterion** | **Gate G6**: npu-m256 composite C2 with honest detail · contention, interleaving, back-pressure and bank conflicts visibly bite at level ≥1 and not below · the three example studies render · G5, if it was rescheduled from U6 |
 | **Effort** | A 145 · B 49 |
 | **Depends on** | G5 |
 | **Not in this sprint** | Parallelism inside a simulation |
@@ -182,7 +189,7 @@ interfaces.
 | | |
 |---|---|
 | **Goal** | Find out whether our engine tracks a real mesh chip, and whether more detail was more accurate |
-| **Lane A** | Blackhole reference model; SUITE.md signed with B; predictions frozen at every fidelity level, plus tt-npe's → **U-P15** |
+| **Lane A** | Blackhole reference model; SUITE.md signed with B, with an end-to-end class; predictions frozen at every fidelity level, plus tt-npe's → **U-P15** |
 | **Lane B** | TT-Metalium kit, dry-run on ttsim, then measure on the card after the freeze; ledger; the per-level error table → **U-P16** |
 | **Joint exit criterion** | **Gate G7** evaluated and published · the error table by fidelity level is on the first page · `check_ordering` green |
 | **Effort** | A 41 · B 75 · plus the Blackhole p100a and its host (§7) |
@@ -198,7 +205,7 @@ interfaces.
 | **Lane B** | Pre-registered error-vs-quantum experiment at a credit-backpressured boundary; published curve; the enforcement rule → **U-P18** |
 | **Joint exit criterion** | **Gate G8**: exact mode byte-identical at 1, 2, 4 and 8 threads · the curve published with its verdict in the first sentence · a lax result outside a covering curve reports C1 |
 | **Effort** | A 125 · B 61 |
-| **Depends on** | G6 |
+| **Depends on** | G6, and a recorded need: the native engine breaches ADR U0011's single-point wall-clock budget (measured in U-P11c and U-P13d), or both founders record in an ADR that they want the synchronisation experiment (the funded plan's G1) regardless. Without either, U9 is deferred until after U11, which does not depend on it |
 | **Not in this sprint** | Optimistic sync, SIMD, GPU, MPI |
 
 ### U10 · Integration into rk-sim
@@ -207,9 +214,9 @@ interfaces.
 |---|---|
 | **Goal** | A custom ASIC priced at C2 inside a whole-rack rk-sim run, with its conditions visible |
 | **Both, first** | rk-sim boundary ADR accepted and its schema PR merged (draft in `rk-sim-side/decisions/`) |
-| **Lane A** | rk-sim **P18** (= **U-P19**): the table-backed cost, the eight rules, registry, badges, golden |
+| **Lane A** | rk-sim **P18** (= **U-P19**): the table-backed cost, the nine rules, registry, badges, golden |
 | **Lane B** | rk-sim **P19** (= **U-P20**): `<Badged>` conditional, the chip panel, picker rules, the Compare banner, Assumptions |
-| **Joint exit criterion** | **Gate G9**: rk-sim golden `asic_c2.yaml` runs · the Fidelity Map shows `C2 · uarch@x · <hash>` · tp double-count test, envelope test and mixed-fidelity pair pass · every rk-sim gate green · rk-sim's own P14 ACCEPTED |
+| **Joint exit criterion** | **Gate G9**: rk-sim golden `asic_c2.yaml` runs · the Fidelity Map shows `C2 · uarch@x · <hash>` · tp double-count test, tp-mismatch test, envelope test and mixed-fidelity pair pass · every rk-sim gate green · rk-sim's own P14 ACCEPTED |
 | **Effort** | A 43 · B 55 |
 | **Depends on** | G3 at minimum (G6 recommended) · an rk-sim sprint boundary |
 | **Not in this sprint** | Any change to rk-sim beyond the ADR, P18 and P19 |
@@ -252,9 +259,12 @@ before measuring:
 - U6 proceeds with the native engine and no fork reference, and its G5 criterion becomes
   "agrees with U-C1 at matched levels".
 
-**G3 · A C2 table exists (U4).**
-- *Pass:* one proposed design, one ModelSpec, fp8 and bf16, tp = 1, over a declared envelope.
-  L0, L0m and L1 pass. The NoC is within 10% of BookSim 2 below 70% saturation.
+**G3 · A full table exists (U4).**
+- *Pass:* one proposed design, one ModelSpec, fp8 and bf16, tp = 8, over a declared envelope.
+  Its composite is what build-spec §2.4's rule gives for the fork's levels in ADR U0005: C2
+  only if they qualify, otherwise C1, said so. L0, L0m and L1 pass. The NoC is within 10% of
+  BookSim 2 below 70% saturation, unless the fork's NoC is BookSim 2 itself, in which case the
+  check is recorded as not independent and waits for U-P13a.
   Leave-one-out interpolation error is ≤5% median and ≤15% max. Composition, layer-reuse and
   cold-vs-steady errors are reported. The derated-DRAM and latency-bound L1 checks pass.
   Builds are byte-identical. The model card says stub.
@@ -262,36 +272,45 @@ before measuring:
   error nobody can attribute. Fix what failed, then rerun G3.
 
 **G4 · The large-core method tracks silicon (U5).**
-- *Setup:* predictions frozen first; ≥24 measurements across ≥5 classes, each tagged with its
+- *Setup:* predictions frozen first; ≥24 measurements covering all six classes of U-P9
+  (matrix, memory, operator, end-to-end, DRAM gather, launch overhead), each tagged with its
   mapping match and initial state; device-side timing only.
 - *Pass:* median |error| ≤25% and no class median above 50% (the funded plan's E6a bar).
   Cards are promoted to estimated for the large-core family and passing classes only. The
-  verdict is stated per mapping-match group (matched, compiler-chosen).
+  verdict is stated per mapping-match group (matched, compiler-chosen); an empty group is "no
+  evidence", never a pass.
 - *Fail:* the card stays stub, and **the errors are published anyway**.
   - If one subsystem explains ≥70% of the error, allow one bounded fix prompt, measured against
-    a **new** frozen prediction set.
+    a **new** frozen prediction set. "Explains" is computed by script from the frozen
+    predictions: each benchmark's |error| is assigned to the subsystem with the largest share
+    of that prediction's `attribution_s`, and the test is whether one subsystem receives ≥70%
+    of the summed |error|.
   - Otherwise the honest status is "verified, unvalidated", and the plan continues on that
     basis.
 
 **G5 · Native agrees with fork (U6).**
-- *Pass:* at matched mapping and levels, durations agree within 3% on ≥95% of grid points;
-  results are byte-identical at 1 and N workers; the speed factor is measured against the one
-  written in ADR U0011.
+- *Pass:* at matched mapping and levels (the fork's levels as ADR U0005 classifies them),
+  durations agree within 3% on ≥95% of grid points; results are byte-identical at 1 and N
+  workers; the speed factor is measured against the one written in ADR U0011. If no fork
+  configuration matches native's U6 levels, G5 is not run on mismatched levels: the mismatch
+  is recorded and G5 runs in U7, after U-P13a–c, at the closest matching configuration.
 - *Fail:* the disagreement is the finding. Bisect it by subsystem with U-P12's attribution,
   then fix it, or narrow the native engine's declared scope in an ADR.
 
 **G6 · Native composite C2 (U7).**
-- *Pass:* every shared resource is at level 2 or 1+ts and sync is exact; no row is faster than
-  its U-C0 roofline; L2 bounds hold against the native engine.
+- *Pass:* compute is at level 2, NoC and DRAM at level 2 or 1+ts, and sync is exact (build-spec
+  §2.4); no row is faster than its U-C0 roofline; L2 bounds hold against the native engine.
 - *Fail:* report the composite as C1. That is still a shippable, honest answer.
 
 **G7 · The mesh method tracks silicon (U8).** G4's thresholds, applied to native composite C2
-on the mesh family, over ≥32 measurements across ≥7 classes.
+on the mesh family, over ≥36 measurements covering all eight classes of U-P15 (end-to-end
+among them).
 - *Pass:* cards are promoted for the mesh family.
 - *Fail:* the same branch as G4.
-- *Either way:* the per-level error table answers whether detail helped. If C2 is not closer
-  than level 1, say so on the first page, and keep the level-1 fast path as the default for
-  studies.
+- *Either way:* the per-level error table answers whether detail helped. "Closer" means a
+  lower median |error| per class, reported per class and as the median across classes, never
+  pooled. If C2 is not closer than level 1, say so on the first page, and keep the level-1
+  fast path as the default for studies.
 
 **G8 · Synchronisation verdict (U9).**
 - *Pass:* exact mode is byte-identical at every thread count, and the error-vs-quantum curve
@@ -346,13 +365,18 @@ This is the same list U-REVIEW walks.
 | **U-P4** | U2 · B | Badges, model cards, applicability, the report |
 | **U-P5** | U3 · A | Fork selection, engine image, adapter |
 | **U-P6** | U3 · B | L0 invariants, L0m metamorphic, mutants |
-| **U-P7** | U4 · A | Mapping policies, grid, interpolation, measured errors, the C2 table |
+| **U-P7** | U4 · A | Mapping policies, grid, interpolation, measured errors, the first full table |
 | **U-P8** | U4 · B | L1 limits (with hand fixtures), L2 differential |
 | **U-P9** | U5 · A | TPU v5e reference model; frozen predictions |
 | **U-P10** | U5 · B | TPU measurement kit; ledger; promotion; G4 |
-| **U-P11** | U6 · A | Native engine core |
+| **U-P11a** | U6 · A | Native kernel: time, events, wheel, ownership, protocol |
+| **U-P11b** | U6 · A | Native models (compute 1, NoC 0, DRAM 0), TaskGraph executor, attribution |
+| **U-P11c** | U6 · A | Native diagnostics, traces, G5, measured speed factor |
 | **U-P12** | U6 · B | Differential harness; determinism; simulator metrics |
-| **U-P13** | U7 · A | Native depth: contention, Ramulator 2, mesh policies, composite rule |
+| **U-P13a** | U7 · A | Native NoC at 1+ts; NoC barriers |
+| **U-P13b** | U7 · A | Native DRAM: queues with back-pressure, Ramulator 2, interleaving |
+| **U-P13c** | U7 · A | Native compute level 2: bank conflicts, DMA interleave |
+| **U-P13d** | U7 · A | Mesh policies, the composite rule, C2 at mesh scale |
 | **U-P14** | U7 · B | Design studies |
 | **U-P15** | U8 · A | Blackhole reference model; frozen predictions per level |
 | **U-P16** | U8 · B | Blackhole measurement kit; the per-level verdict; G7 |
@@ -376,13 +400,16 @@ rk-sim's plan. Every sprint also carries U-REVIEW and the how-it-works refresh: 
 The spread is deliberately wide. Lane A in rk-sim's S3 ran about 60 h against about 35
 nominal. In the other direction, rk-sim's recorded actuals for S1–S3 ran at a third to a half
 of committed. So for the non-engine prompts the "best" column may be the honest one. The
-native-engine prompts (U-P11, U-P13, U-P17) are the softest numbers here, and the least likely
-to come in early.
+native-engine prompts (U-P11a–c, U-P13a–d, U-P17) are the softest numbers here, and the least
+likely to come in early.
 
 ### 7.1 Per prompt
 
 Rev 2 raised U-P1, U-P3–U-P11, U-P13–U-P16, U-P19 and U-P20 for the book-coverage items.
-That adds about 94 h realistic in total.
+That adds about 94 h realistic in total. Rev 2.1 split U-P11 and U-P13 without changing their
+totals. The other Rev 2.1 fixes (tp sharding, fused attention, the end-to-end mesh class, an
+output-stationary policy, controller queues, the deferred energy rung and shared-SRAM support)
+are **not yet re-estimated**; until they are, treat every row they touch as a lower bound.
 
 | Prompt | Lane | Best | Realistic |
 |---|---|---|---|
@@ -397,9 +424,14 @@ That adds about 94 h realistic in total.
 | U-P8 L1 + L2 | B | 27 | 52 |
 | U-P9 TPU reference + predictions | A | 18 | 34 |
 | U-P10 TPU measurement + ledger | B | 30 | 56 |
-| U-P11 native core | A | 95 | 180 |
+| U-P11a native kernel | A | 25 | 45 |
+| U-P11b native models + executor | A | 45 | 90 |
+| U-P11c native diagnostics + G5 | A | 25 | 45 |
 | U-P12 differential + metrics | B | 24 | 44 |
-| U-P13 native depth + mesh | A | 78 | 156 |
+| U-P13a native NoC 1+ts | A | 22 | 44 |
+| U-P13b native DRAM + Ramulator 2 | A | 20 | 40 |
+| U-P13c native compute level 2 | A | 18 | 36 |
+| U-P13d mesh policies + composite | A | 18 | 36 |
 | U-P14 design studies | B | 27 | 50 |
 | U-P15 Blackhole reference + predictions | A | 22 | 40 |
 | U-P16 Blackhole measurement + ledger | B | 39 | 76 |
@@ -433,24 +465,28 @@ That adds about 94 h realistic in total.
 
 | Reached at the end of | What exists | Best | Realistic |
 |---|---|---|---|
-| U4 | A verified C2 table from a published engine, badged STUB | ~190 h | ~364 h |
+| U4 | A verified table from a published engine (C2 if its levels qualify), badged STUB | ~190 h | ~364 h |
 | U5 | …validated (or not, and published) against a large-core chip | ~243 h | ~464 h |
 | U7 | Our own engine at composite C2, mesh scale, design studies | ~477 h | ~914 h |
 | U8 | …validated (or not) against a mesh chip, with the "did detail help" answer | ~543 h | ~1,040 h |
-| U9 | Parallel exact mode; the synchronisation verdict | ~638 h | ~1,226 h |
+| U9 | Parallel exact mode; the synchronisation verdict (if U9's gate opens) | ~638 h | ~1,226 h |
 | U11 | Integrated in rk-sim, demo performed cold: **done** | **~714 h** | **~1,368 h** |
 
 ### 7.4 Converting to calendar
 
-Converting to calendar time depends only on hours per week, and Lane A is the critical path
-(~434 h best, ~836 h realistic).
+A sprint ends only when both lanes integrate (§1), so the calendar follows the longer lane in
+each sprint, not either lane's total. Lane A is longer in U0–U4, U6, U7, U9 and U11; Lane B in
+U5, U8 and U10. Summing the longer lane per sprint from §7.2 gives ~469 h best and ~906 h
+realistic.
 
 At rk-sim's own planning rate of 20 h/week per person (its execution-plan §2):
-- best case ≈ 22 weeks;
-- realistic ≈ 42 weeks.
+- best case ≈ 23 weeks;
+- realistic ≈ 45 weeks.
 
-U6, U7 and U9 hold most of that. Moving the two items named in §2 to Lane B shortens those
-sprints.
+That is before U5 and U8's serial step (measurement starts only after the freeze), before the
+Rev 2.1 fixes are re-estimated (§7.1), and with U9 included. U6, U7 and U9 hold most of it.
+Moving the two items named in §2 to Lane B shortens U7; a deferred U9 removes ~125 h realistic
+from the calendar.
 
 ### 7.5 Money
 
@@ -484,6 +520,8 @@ These costs are listed as facts, not as constraints. Prices were checked on 2026
 | "Unmodelled? Just put 0" | Zero is a result. Null is the honest answer when a level does not model something |
 | "Average the speedups across the suite" | An arithmetic mean of ratios rewards whichever workload moved most. Use the geometric mean, and show each workload |
 | "The kit warms up; the simulator doesn't need to" | Then every L3 error mixes warm silicon with a cold prediction. Stipulate the initial state |
+| "The fork is a cycle-level simulator, so its table is C2" | Levels come from build-spec §2.4's table, per sub-model, recorded in ADR U0005. A fork with no bank-conflict model gives C1 |
+| "Build the table at tp = 1 and let rk-sim divide" | The tp divisor is 1. A table is one rank of the split uarch built, for one tp; any other tp is refused |
 
 ---
 

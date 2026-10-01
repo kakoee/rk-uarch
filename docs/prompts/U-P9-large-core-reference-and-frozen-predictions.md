@@ -14,7 +14,7 @@ measurement. That is its whole design.
 
 1. Agree the microbenchmark list with Lane B FIRST, in writing, in
    validation/L3_silicon/tpu-v5e/SUITE.md. Lane B's U-P10 builds the kit that runs it. At
-   least 24 benchmarks across at least 5 classes:
+   least 24 benchmarks, covering every one of these six classes:
    - matrix: isolated matmuls at ≥ 6 shapes spanning MXU-underfilled to saturated, bf16 and
      int8 where the chip supports them;
    - memory: HBM streaming read, write, and copy at ≥ 3 sizes;
@@ -45,7 +45,8 @@ measurement. That is its whole design.
 3. Predictions: for each benchmark, uarch's predicted duration, FLOPs and bytes, from the
    fork AND from U-C0 aggregate and per_op, written to
    validation/L3_silicon/tpu-v5e/predictions/<id>.json with engine versions, image digest,
-   spec hash, mapping policy, mapping match and initial state. Commit them in ONE commit
+   spec hash, mapping policy, mapping match, initial state, and the row diagnostics where the
+   engine reports them (U-P10 compares them with device counters). Commit them in ONE commit
    whose message begins "FROZEN PREDICTIONS:".
 4. validation/L3_silicon/check_ordering.py and a CI job: fails if any file under results/
    exists in a commit earlier than, or equal to, the commit that added its prediction file.
@@ -54,8 +55,8 @@ measurement. That is its whole design.
 ACCEPTANCE TESTS:
 1. SUITE.md signed off by both lanes (both names, in the file) before predictions are
    generated.
-2. ≥ 24 prediction files, ≥ 5 classes, each with full provenance fields, mapping match,
-   initial state, and predicted FLOPs and bytes.
+2. ≥ 24 prediction files covering all six classes, each with full provenance fields, mapping
+   match, initial state, and predicted FLOPs and bytes.
 3. The ordering check fails on a synthetic history where a result precedes its prediction.
 4. UNKNOWNS.md lists every stub in the reference spec that the engine actually read.
 

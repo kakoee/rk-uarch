@@ -1,22 +1,25 @@
-# U-P7 · U4 · Lane A — Mapping policies, the grid, interpolation, and the first C2 table
+# U-P7 · U4 · Lane A — Mapping policies, the grid, interpolation, and the first full table
 
 _From build-spec §8. One prompt, one fresh session._
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, src/rkuarch/{mapping,table,workload}/README.md, build-spec §2.3.3
-and §2.3.4 (canonical batches and the reduction error), §7.2 (the eight rules), ADR U0005,
+and §2.3.4 (canonical batches and the reduction error), §7.2 (the nine rules), ADR U0005,
 contract/uarch_contract/{request,table}.py. From rk-sim READ-ONLY: rk/engine/f0/compute.py's
 comment block above IterationCounts, which says why (B, T, Q) is sufficient for a
 roofline and warns that it is exact only while cost is linear.
 
-TASK: turn a CharacterizationRequest into a complete, hashed, honestly-errored C2 table,
-driven by the fork.
+TASK: turn a CharacterizationRequest into a complete, hashed, honestly-errored table, driven
+by the fork, at the composite build-spec §2.4's rule gives for the fork's levels as ADR U0005
+records them: C2 only if they qualify, and C1, said so, if they do not.
 
 1. mapping/ — named, versioned policies, each a pure function (op graph, HardwareSpec) ->
    TaskGraph (build-spec §2.5): per-core compute jobs, DMA jobs, NoC transfers (unicast and
    multicast), barriers, dependencies.
    - ws-rowsplit@1 for the large-core class (weight-stationary, output rows split across
      cores).
+   - os-tiled@1 for the large-core class (output-stationary, output tiles split across
+     cores), so a dataflow study has a second policy to compare (U-P14).
    - onnxim-compat@1: reproduces the chosen fork's own tiling decisions, read from its source
      and cited by file and line in the policy's docstring. It exists so a native engine can
      later be compared with the fork ON THE SAME WORK. Without it every future disagreement
@@ -26,7 +29,9 @@ driven by the fork.
    needs (refused on a spec whose dataflows lack it) and its buffer depth (double or triple
    buffering, part of name@version). It places every SRAM-resident buffer (core,
    offset_bytes, bank) and refuses a tile that does not fit with SramCapacityExceeded,
-   naming the core and the bytes. KV reads are page-granular DMA jobs.
+   naming the core and the bytes. KV reads are page-granular DMA jobs. attention_fused is
+   tiled so its score tile (query block × KV page block) fits in SRAM: scores never become
+   DMA jobs.
 2. table/grid.py — the grid from the request's envelope. Refuse a request whose grid does not
    cover its envelope, naming the uncovered region, at REQUEST time.
 3. table/pool.py — one process per grid point, parallel ACROSS POINTS only. Results are
@@ -45,7 +50,9 @@ driven by the fork.
       its own sufficient-statistic reduction costs at C2.
    c. layer_reuse: for a seeded sample of grid points, simulate every layer (no reuse) and
       report how far the reused result deviates (build-spec §2.3.4).
-   d. cold_vs_steady: for a seeded sample, run both initial states and report the deviation.
+   d. cold_vs_steady: for a seeded sample, run both initial states and report the deviation;
+      on the same sample, run steady with two priming iterations and report how far one is
+      from two (priming_2_vs_1_max_rel), so the warm-up length is measured.
    Each sampled error reports n_samples. interpolation_loo also reports
    weighted_median_rel, weighted by the request's visit_weights, or null when there are
    none.
@@ -55,7 +62,8 @@ driven by the fork.
 7. Rows carry peak_resident_bytes. If HBM residency exceeds the spec's capacity, raise
    ResidencyExceedsCapacity for weights, and warn for KV, mirroring rk-sim's M0 rule.
 8. `uarch table ... --engine fork --workers N` builds the full default grid for npu-l4 ×
-   Llama-3.1-70B-class × fp8 and bf16, tp=1.
+   Llama-3.1-70B-class × fp8 and bf16, tp = 8, and also tp = 1 where the weights fit the
+   spec's capacity (a weight-residency refusal at tp = 1 is recorded, never worked around).
 9. initial_state travels in every EngineJob; steady primes one iteration at the same point
    and reports the second.
 
@@ -72,6 +80,11 @@ ACCEPTANCE TESTS (write first):
 8. A tile larger than a core's SRAM is refused with SramCapacityExceeded, naming the core and
    the bytes.
 9. With uniform visit_weights, weighted_median_rel equals median_rel.
+10. os-tiled@1 is refused on a spec whose dataflows lack output_stationary, and runs on one
+    that has it.
+11. A prefill row at L = 32768 builds with no SramCapacityExceeded, and its attention DRAM
+    bytes equal Q, K, V and O within named deviations.
+12. The table's composite equals what build-spec §2.4's rule gives for ADR U0005's levels.
 
 GUARDRAILS: No mapping search. Never silently clamp an out-of-grid query. Do not correct the
 composition or layer-reuse error, because disclosure is the deliverable. Do not let

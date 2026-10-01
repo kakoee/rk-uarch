@@ -3,8 +3,8 @@
 _From build-spec §8. One prompt, one fresh session._
 
 ```text
-CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7, third_party/README.md.
-Documentation for BookSim 2 (BSD-2, Stanford), Ramulator 2 (MIT, CMU SAFARI), SCALE-Sim v3
+CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7, third_party/README.md,
+ADR U0005 (which fork sub-models are BookSim 2 or Ramulator 2). Documentation for BookSim 2 (BSD-2, Stanford), Ramulator 2 (MIT, CMU SAFARI), SCALE-Sim v3
 (MIT). Optionally Gemmini (BSD-3, UC Berkeley) and Verilator (LGPL-3.0/Artistic-2.0).
 
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
@@ -32,7 +32,10 @@ engine protocol against every engine in the matrix.
    these the defence against plausible garbage; the same reason applies here.
 2. validation/L2_differential/ (the nightly job):
    - NoC: the engine's NoC vs STANDALONE BookSim2 (built in the engine image) on
-     uniform-random, transpose and hotspot traffic, over an injection-rate sweep. ENFORCED:
+     uniform-random, transpose and hotspot traffic, over an injection-rate sweep. If the
+     engine's NoC IS BookSim 2 (ADR U0005 says which fork sub-models are), the comparison is
+     refused as not independent and the report says so; the bound then waits for the native
+     NoC (U-P13a). ENFORCED:
      latency within 10% below 70% of BookSim's saturation throughput. Above that, record,
      don't assert;
    - DRAM: vs Ramulator 2 standalone on streaming, random and strided traces;
@@ -41,11 +44,9 @@ engine protocol against every engine in the matrix.
    - optional: one systolic tile vs Gemmini RTL under Verilator (a cycle-exact reference for
      THAT design);
    - Tenstorrent tt-npe (Apache-2.0) as a second NoC reference for mesh specs, once
-     U-P13 lands a mesh engine;
-   - energy (the energy rung): Accelergy with its CACTI plug-in estimates pJ per SRAM access
-     for every SRAM size in hw/designs/ and hw/studies/, and each stipulated
-     pj_per_byte.sram's deviation from that estimate is recorded as data. With U-P6's energy
-     conservation invariant, this report is what model_card.energy_verification cites;
+     U-P13a lands the native mesh NoC;
+   - energy references are DEFERRED until after U8: energy stays "unverified", and
+     energy_verification stays None, until every coefficient family has a reference;
    - optional, a mapping reference: Timeloop's best mapping for representative GEMMs on the
      same array, recorded next to each named policy's efficiency. It never changes a policy:
      mapping search stays out of scope.
@@ -67,12 +68,13 @@ ACCEPTANCE TESTS:
    and shows up in L2.
 5. The derated DRAM check and the latency-bound stream check run for every engine they apply
    to; a mutant DMA that ignores max_outstanding fails the latency-bound check.
-6. The energy L2 report exists and is hash-stable, and at least one hand fixture covers the
-   latency-bound stream.
+6. At least one hand fixture covers the latency-bound stream.
+7. The harness refuses to compare a sub-model with itself (a fork NoC that is BookSim 2,
+   against BookSim 2), naming both.
 
 GUARDRAILS: Do not tune engine parameters to close an L2 gap. Record it and attribute it.
 Agreement between two simulators is L2 and NOTHING MORE. It never appears in a model card as
-validation. BookSim, Ramulator, SCALE-Sim, Accelergy and Timeloop run as standalone references
+validation. BookSim, Ramulator, SCALE-Sim and Timeloop run as standalone references
 here; they are not new dependencies of rkuarch.
 
 ADR: docs/decisions/U0008-the-L2-reference-set-and-its-limits.md.

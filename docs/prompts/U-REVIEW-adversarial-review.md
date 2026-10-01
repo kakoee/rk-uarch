@@ -26,7 +26,8 @@ CHECK, in order:
 3. Did any golden change? If so, is there a docs/decisions/U*.md for it, and does it match the
    diff?
 4. Numerical smells: units missing from names; cycles crossing out of engines/ or native/;
-   time converted anywhere but next_edge(); MACs counted as one op; the tp rule; seeds not
+   time converted anywhere but next_edge(); MACs counted as one op; the tp rules (divisor 1,
+   table tp equals plan tp); seeds not
    plumbed into a new randomness source; unordered iteration reaching output; a diagnostic
    or energy figure rendered as 0 where the level does not model it; an engine reading a
    DRAM preset the spec does not name. Re-derive the
@@ -37,8 +38,9 @@ CHECK, in order:
 6. Evidence: any model card promoted without ledger entries? Any promotion wider than its
    entries' scope? Any error band of zero? Any prediction file edited after its freeze commit?
    Any L3 prediction without its mapping match and initial state? Run check_ordering yourself.
-7. Fidelity: any composite C2 with a subsystem at level 0, or in lax sync mode without a
-   covering curve? Any C2 row faster than its u_c0_duration_s?
+7. Fidelity: any composite C2 that breaks build-spec §2.4's rule (compute below 2, NoC or DRAM
+   below "1+ts"), any engine whose levels were not derived from §2.4's table, or any lax sync
+   result without a covering curve? Any C2 row faster than its u_c0_duration_s?
 8. Determinism: build one golden table at --workers 1 and --workers N yourself and diff the
    bytes. From U9, also at 1 and 4 threads in exact mode.
 9. From U6: run the native-vs-fork harness on one matched configuration yourself.

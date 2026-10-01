@@ -10,8 +10,8 @@ rk/engine/f0/compute.py, rk/schema/ (and the schema bundle `make gen` writes), M
 TASK: prove, mechanically and on every CI run, that uarch's copy of rk-sim's vocabulary is
 exact and that uarch counts work the way rk-sim does, without CI ever touching rk-sim.
 
-1. scripts/vendor_rk.py and `make vendor-rk SHA=<sha> RK=<path-to-rk-sim-clone>`. A HUMAN
-   RUNS IT; CI never does. It:
+1. scripts/vendor_rk.py and `make vendor-rk SHA=<sha> RK=<path-to-rk-sim-clone>
+   [PARAMS=<component.yaml> ...]`. A HUMAN RUNS IT; CI never does. It:
    a. checks the clone is at <sha> with a clean tree and refuses otherwise;
    b. copies rk-sim's generated schema bundle plus the source of rk/provenance.py,
       rk/schema/{fidelity,channels,execution,workloads}.py into
@@ -19,9 +19,15 @@ exact and that uarch counts work the way rk-sim does, without CI ever touching r
    c. GENERATES PARITY FIXTURES BY EXECUTING rk-sim's OWN iteration_cost(), in rk-sim's own
       environment (subprocess `uv run --project <rk>`), never by reimplementing the formula.
       Fixtures cover at least 3 ModelSpecs (one dense GQA ~8B, one dense ~70B, one MoE) ×
-      2 precisions × at least 24 queries spanning decode (B, T) and prefill (T, Q). Each
-      fixture records IterationCounts.matrix_ops, memory_read_bytes, memory_write_bytes and
-      the query.
+      2 precisions × tp ∈ {1, 8} × at least 24 queries spanning decode (B, T) and prefill
+      (T, Q); the decode queries include B ∈ {1, 8, 32} × context per sequence ∈ {512, 4096}
+      (gate G2(c)'s points). Each fixture records IterationCounts.matrix_ops,
+      memory_read_bytes, memory_write_bytes, the query, the tp, and rk-sim's own durations
+      (decode_s or prefill_s from IterationCost) for each component params file it was run
+      with: rk-sim's library entries asic_placeholder.yaml and nvidia_h100_sxm.yaml always,
+      plus every PARAMS file the human passes (in U2, `uarch rk-component` output for the
+      designs). A duration is rk-sim's output, never ours: these are the oracle for U-P3's
+      U-C0 parity test.
    A REIMPLEMENTED FORMULA IS A MIRROR, NOT AN ORACLE. If you find yourself writing
    2*P_active anywhere under contract/, stop: the point is that rk-sim's code produced it.
 2. contract/tests/test_vendored_round_trip.py. Load the vendored classes by path, not by
@@ -53,6 +59,8 @@ ACCEPTANCE TESTS (write first):
 4. import-linter: nothing under src/ or contract/uarch_contract/ imports from
    contract/vendor/.
 5. `make vendor-rk` run twice at the same SHA produces byte-identical output.
+6. Every fixture carries a tp, a component params file name and rk-sim's duration for it,
+   and the fixture set contains G2(c)'s six decode points.
 
 GUARDRAILS: Never hand-edit anything under contract/vendor/; regenerate it. Never give CI
 access to rk-sim. Do not "fix" a parity failure by widening the tolerance. Declare the

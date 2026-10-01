@@ -52,6 +52,13 @@ choose between the two candidates on pre-registered numbers.
    - initial_state: steady runs the query twice in one simulation where the fork allows it
      and reports the second; where it does not, initial_state is listed as unrepresented and
      the table warns. Never report a cold run as steady.
+   - FIDELITY: place each of the fork's sub-models (compute, SRAM banks, NoC, DRAM) on
+     build-spec §2.4's ladder, per configuration you run (its default, and any simpler NoC or
+     DRAM mode it offers), from its source, cited by file and line. The table goes into ADR
+     U0005. stats_parser emits that fidelity_detail, and the composite comes from §2.4's rule,
+     never from the fork's name: if the fork models no SRAM bank conflicts, its compute is
+     level 1 and its tables are C1. Record which sub-models ARE BookSim 2 or Ramulator 2, so
+     U-P8 never compares them with themselves.
 5. Evaluate ONNXim first (it is lighter). If it passes G2, you may skip PyTorchSim. Record
    that you skipped it and why. If it fails, evaluate PyTorchSim with the same criteria.
 6. `uarch table ... --engine fork` for one-layer decode queries on npu-l4, driven from a
@@ -66,8 +73,10 @@ ACCEPTANCE TESTS (write first where they can be written first):
 5. G2(e): licence scan of the image green against the allow-list.
 6. The adapter's `unrepresented` list is non-empty for npu-l4 if anything is unrepresented,
    and each entry appears as a table warning.
-7. The fork's own default DRAM preset is never used silently: a spec that names a preset the
+7. The fork's own default DRAM preset is never used silently: a spec whose timing_preset the
    fork cannot load is refused (UnnamedPreset) or listed as unrepresented.
+8. ADR U0005 holds the fork's per-configuration ladder table with citations, and a table
+   built by the fork reports exactly the composite §2.4's rule gives for those levels.
 
 GUARDRAILS: Do not patch the engine to make parity pass. Declare the deviation. Do not touch
 anything under src/rkuarch/engines/native/. Do not start U-P7 until a fork has passed G2. If
@@ -76,5 +85,5 @@ BOTH fail, do not improvise a workaround: record the U-C1 fallback decision in A
 unbuilt") and stop for the founders.
 
 ADR: docs/decisions/U0005-fork-selection.md, with pre-registered criteria, every measured
-number, the rejected candidate's numbers, and the image digest.
+number, the rejected candidate's numbers, the image digest, and the fork's ladder table.
 ```

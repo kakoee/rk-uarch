@@ -31,10 +31,12 @@ U-P3 to have landed.
    fidelity_detail, mapping policy, ledger entries). validated_error_band is None unless
    ledger entries whose scope covers this request (family, op class, precision, shape regime,
    load regime, mapping match) supply it. None renders as "unknown". energy_verification is
-   None until U-P8's energy reports exist, and None renders energy as "unverified".
+   None until every coefficient family an energy figure uses has an L2 reference (deferred
+   until after U8), and None renders energy as "unverified".
 3. provenance/applicability.py — rk-sim ADR 0021's shape for uarch: for a request, which
    evidence dimensions MATCH, MISMATCH or are UNKNOWN (architecture family, op class,
-   precision, shape regime, load regime, mapping match), using the bins ADR U0001 fixed.
+   precision, shape regime, load regime, mapping match), using the bins ADR U0001 fixed, and
+   judged where U0001 says (proposal: per row, with every operator in the row covered).
    Precision matches by format name: BLOCKFP8 evidence does not cover fp8 unless U0001 says
    why it should. A model card whose evidence does not apply to this
    request contributes stub for this request, whatever its best rung elsewhere.
@@ -70,7 +72,10 @@ ACCEPTANCE TESTS (write first):
 7. A null diagnostic renders "not modelled": no diagnostic that is null in the toy table
    appears as 0 in the rendered report.
 8. Precision scope: an fp8 request against BLOCKFP8-only evidence gets stub, naming precision.
-9. Energy renders "unverified" when energy_verification is None.
+9. Energy renders "unverified" when energy_verification is None, and stays "unverified" when
+   only one coefficient family has a reference.
+10. Applicability per row: a row with one operator whose shape regime the evidence does not
+    cover gets stub, naming that operator.
 
 GUARDRAILS: Do not read from an engine or compute a physical number here. Do not compute
 error bars from a deterministic run; a deterministic simulator has no replication variance,

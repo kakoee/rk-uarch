@@ -15,7 +15,7 @@ appears.
 
 1. Partitioning: logical processes are rectangular sub-meshes (row bands first; blocks behind
    a flag). Every owner id belongs to exactly one partition, so the ownership discipline from
-   U-P11 becomes the partition boundary, and the owner assertion now also fails a
+   U-P11a becomes the partition boundary, and the owner assertion now also fails a
    cross-partition mutation. Memory controllers, and the shared SRAM when present, may be
    their own partition.
 2. EXACT MODE: windowed conservative synchronisation. Lookahead L = the minimum latency of any
@@ -31,7 +31,7 @@ appears.
 4. LAX MODE (a flag, off by default): a synchronisation quantum Q > L. Events that cross a
    partition boundary within a window are delivered at the next window boundary (temporal
    decoupling, as in a TLM-2.0 quantum keeper). EngineResult then reports sync: approx(Q),
-   and the composite rule (U-P13) DROPS THE COMPOSITE TO C1 unless the model card cites a
+   and the composite rule (U-P13d) DROPS THE COMPOSITE TO C1 unless the model card cites a
    measured error-vs-Q curve that covers this Q (U-P18 produces it).
 5. The U-P12 metrics become live: cross-thread messages per simulated cycle and sync
    operations per million simulated cycles, recorded for npu-m256 and the 32×32 variant at

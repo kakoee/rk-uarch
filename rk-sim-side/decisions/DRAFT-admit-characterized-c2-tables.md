@@ -13,9 +13,9 @@ That is the same shape as ADR 0011's schema PR.
 ## Context
 
 rk-uarch produces **characterization tables**: for one proposed or reference chip, the
-per-iteration cost of one tensor-parallel shard over a grid of (batch, context) points, with its
-own fidelity detail, measured interpolation and composition errors, and a model card saying what
-evidence stands behind it. The contract is rk-uarch's `uarch-contract/<MAJOR.MINOR>`.
+per-iteration cost of one rank of a tp-way tensor-parallel split over a grid of (batch, context)
+points, with its own fidelity detail, its measured interpolation, composition, layer-reuse and
+cold-vs-steady errors, and a model card saying what evidence stands behind it. The contract is rk-uarch's `uarch-contract/<MAJOR.MINOR>`.
 
 Two things in rk-sim currently refuse this, correctly:
 
@@ -44,9 +44,10 @@ no C1 anywhere, no M1+ or N1+, no online co-simulation, no uarch import. rk-sim 
 2. `rk/schema/fidelity.py`: `IMPLEMENTED["compute"]` gains `C2` (admissible). Whether it is
    **built** for a component stays the registry's answer (ADR 0016).
 3. `rk/schema/components.py`: `ComponentDescriptor` gains
-   `design_status: Literal["shipping","proposed"] = "shipping"` and
+   `design_status: Literal["shipping","proposed"] = "shipping"` (rk-uarch's `reference`
+   chips map to `shipping`, its `proposed` designs to `proposed`) and
    `characterization: Characterization | None`, where
-   `Characterization = {table_path, table_hash, spec_hash, contract_version}`. The loader
+   `Characterization = {table_path, table_hash, spec_hash, contract_version, tp}`. The loader
    refuses a stipulation on a `shipping` component.
 4. `rk/schema/results.py`: `FidelityMapEntry` gains optional `model_origin`, `fidelity_detail`
    and `table_hash`.
@@ -59,18 +60,21 @@ no C1 anywhere, no M1+ or N1+, no online co-simulation, no uarch import. rk-sim 
 
 ### 3 · The rules the engine must follow
 
-These are rk-uarch ADR U0001's eight rules, restated as rk-sim obligations. P18 tests each one.
+These are rk-uarch ADR U0001's nine rules, restated as rk-sim obligations. P18 tests each one.
 
 1. A row is one shard, so the table-backed cost uses a **tp divisor of 1**, and collectives
    stay rk-sim's.
-2. Canonical compositions; the table's measured composition and layer-reuse errors are
-   surfaced as warnings.
+2. Canonical compositions; the table's measured interpolation, composition and layer-reuse
+   errors are surfaced as warnings.
 3. The envelope is checked at build time; extrapolation is refused.
 4. DVFS uses the table's frequency axis. DVFS without one is a hard error.
 5. Counts use rk-sim's channel names. Extension channels are carried as "unmodelled".
-6. The component's params equal `derive_rk_params` of the cited spec, checked by hash.
+6. The component's params equal `derive_rk_params` of the cited spec: the spec hash matches,
+   and the table's `provenance.params` equal the component's params field by field.
 7. R1 reads `initial_state: steady` tables; a `cold` table in an R1 run is refused at build time.
 8. The table's KV block size equals the plan's `block_size`, checked at build time.
+9. The table's `tp` equals the plan's tp for that component, checked at build time; a table is
+   never rescaled to another tp.
 
 ### 4 · Badges
 

@@ -20,7 +20,8 @@ including the other lane's parts.
 4. README: a stranger reaches a built table from a clean clone following only the README,
    engine image included, and the README says how long each step takes on the reference box.
 5. docs/what-this-is.md: what a uarch number is, what it is not, the two validation verdicts
-   with their scopes and bands, the sync curve's verdict, the stipulation ceiling, the
+   with their scopes and bands, the sync curve's verdict (or that U9 was deferred, and why),
+   the stipulation ceiling, the
    declared omissions, and the state of energy evidence, in one page.
 6. A fresh session runs STANDING-how-it-works-refresh.md afterwards; not this one.
 

@@ -18,8 +18,9 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    where it supports the kernel. ttsim does not model timing, so dry-run outputs are labelled
    SYNTHETIC and are refused by the ledger. Environment capture per result: firmware, tt-metal
    version, clocks as reported, card serial. Timing is device-side only. Where TT-Metalium
-   reports op counts, record them for the workload-fidelity check; where tt-smi exposes board
-   power, record it as coarse energy context, labelled so.
+   reports op counts, record them for the workload-fidelity check; record whatever device
+   counters the card exposes (NoC, DRAM) for diagnostic-fidelity entries; where tt-smi
+   exposes board power, record it as coarse energy context, labelled so.
 2. Run on the card only after check_ordering passes. Raw results (profiler CSVs as emitted,
    plus the derived durations and the derivation script's hash) are committed immutable under
    validation/L3_silicon/blackhole/results/.
@@ -27,8 +28,9 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    U-C0, and tt-npe. The same key discipline as U-P10, and classes split by mapping match.
 4. THE NEW THING THIS VERDICT CAN SAY, which the first could not: whether MORE DETAIL IS
    MORE ACCURATE for this class. Report the error by class for each native fidelity level
-   side by side. If composite C2 is not closer to silicon than level-1, the report says so on
-   its first page. Detail is fidelity, not evidence; this is the one place you can test
+   side by side. "Closer" means a lower median |error| in that class; it is reported per
+   class and as the median across classes, never pooled. If composite C2 is not closer to
+   silicon than level-1, the report says so on its first page. Detail is fidelity, not evidence; this is the one place you can test
    whether it is also accuracy.
 5. Gate G7 (execution-plan §4): the same thresholds as G4, applied to native composite C2 on
    the mesh family. Promotion is scoped to the mesh family and the passing classes only.
@@ -38,7 +40,8 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
 ACCEPTANCE TESTS (write first):
 1. The dry run completes and the ledger refuses its SYNTHETIC outputs.
 2. Every result file postdates its prediction file (the ordering check is green).
-3. The per-level error table exists, with ≥ 3 levels × ≥ 7 classes.
+3. The per-level error table exists, with ≥ 3 levels (U-C0 per_op, level-1 fast path,
+   composite C2) × all eight classes.
 4. G7 is evaluated and recorded either way; promotion, if any, is scoped to the mesh family.
 5. A large-core design's request still gets stub from mesh evidence (applicability).
 
