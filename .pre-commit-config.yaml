@@ -1,0 +1,13 @@
+repos:
+  - repo: local
+    hooks:
+      - id: human-owned
+        name: agents do not write human-owned paths
+        entry: scripts/hooks/human_owned.sh
+        language: script
+        pass_filenames: false
+      - id: frozen-predictions
+        name: committed predictions are never edited
+        entry: scripts/hooks/frozen_predictions.sh
+        language: script
+        pass_filenames: false

@@ -1,0 +1,60 @@
+name: ci
+on:
+  push: {branches: [main]}
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - name: lint
+        run: uv run ruff check .
+      - name: typecheck
+        run: uv run mypy
+      - name: imports
+        run: uv run lint-imports
+      - name: tests (fails on an empty suite, by design)
+        run: uv run pytest -q -m "not nightly and not silicon and not native and not golden and not determinism"
+
+  golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - run: |
+          if [ -n "$(find tests/golden/expected -name '*.json' -print -quit)" ]; then
+            uv run pytest -q -m golden
+          else echo "nothing yet: no expected files"; fi
+
+  determinism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - run: |
+          if [ -n "$(find tests/golden/scenarios -name '*.yaml' -print -quit)" ]; then
+            uv run pytest -q -m determinism
+          else echo "nothing yet: no golden scenarios"; fi
+
+  licences-and-patches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - run: uv run python -m pytest -q tests/unit/test_third_party.py
+
+  ordering:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - run: |
+          if [ -n "$(find validation/L3_silicon -path '*/predictions/*' -type f -print -quit)" ]; then
+            python3 validation/L3_silicon/check_ordering.py
+          else echo "nothing yet: no predictions"; fi

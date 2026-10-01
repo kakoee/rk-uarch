@@ -1,0 +1,20 @@
+name: nightly
+on:
+  schedule: [{cron: "17 9 * * *"}]
+  workflow_dispatch:
+
+# Runs on the Linux box, registered as a self-hosted runner labelled `uarch`.
+# Registering it is a human step (GitHub → Settings → Actions → Runners).
+jobs:
+  nightly:
+    runs-on: [self-hosted, linux, uarch]
+    steps:
+      - uses: actions/checkout@v4
+      - run: uv sync --extra dev
+      - name: native (nothing yet until U-P11)
+        run: |
+          if [ -n "$(find native/src -name '*.cpp' -print -quit)" ]; then
+            make native-test
+          else echo "nothing yet: no native sources"; fi
+      - name: nightly suites (mutants, L2)
+        run: uv run pytest -q -m nightly || test $? -eq 5
