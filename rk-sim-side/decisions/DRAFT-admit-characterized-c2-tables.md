@@ -59,15 +59,18 @@ no C1 anywhere, no M1+ or N1+, no online co-simulation, no uarch import. rk-sim 
 
 ### 3 · The rules the engine must follow
 
-These are rk-uarch ADR U0001's six rules, restated as rk-sim obligations. P18 tests each one.
+These are rk-uarch ADR U0001's eight rules, restated as rk-sim obligations. P18 tests each one.
 
 1. A row is one shard, so the table-backed cost uses a **tp divisor of 1**, and collectives
    stay rk-sim's.
-2. Canonical compositions; the table's measured composition error is surfaced as a warning.
+2. Canonical compositions; the table's measured composition and layer-reuse errors are
+   surfaced as warnings.
 3. The envelope is checked at build time; extrapolation is refused.
 4. DVFS uses the table's frequency axis. DVFS without one is a hard error.
 5. Counts use rk-sim's channel names. Extension channels are carried as "unmodelled".
 6. The component's params equal `derive_rk_params` of the cited spec, checked by hash.
+7. R1 reads `initial_state: steady` tables; a `cold` table in an R1 run is refused at build time.
+8. The table's KV block size equals the plan's `block_size`, checked at build time.
 
 ### 4 · Badges
 

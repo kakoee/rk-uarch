@@ -13,7 +13,8 @@ and make simulator performance a regression-tested quantity rather than an anecd
 1. validation/L2_differential/native_vs_fork/: given a request and a list of
    (engine, level-config) pairs, build both tables through the table interface, then report
    per-point relative deviation, the fraction of points within 3%, and per-subsystem
-   attribution. Attribution uses each engine's attribution_s and busy times, so a
+   attribution. Attribution uses each engine's critical-path attribution_s, busy times and
+   diagnostics (where both report them), so a
    disagreement can be bisected to compute, NoC, DRAM or sync. Only configurations where both
    engines run the SAME mapping (onnxim-compat@1) and MATCHING sub-model levels are
    comparable, and the harness refuses the rest with the mismatch named.

@@ -41,17 +41,25 @@ invoked as a subprocess binary `uarch-engine`. Single-threaded in this prompt.
    iteration order could reach a result. NO std::unordered_map ITERATION ON ANY PATH THAT
    PRODUCES OUTPUT.
 8. Models at the levels this prompt builds (build-spec §2.4):
-   - compute level 1: tile-job intervals, meaning pipeline fill and drain, tile quantisation
-     and padding, and double-buffer overlap of DMA and compute. A tensor job is O(1–10)
-     events, not O(cycles);
+   - compute level 1: tile-job intervals, meaning pipeline fill and drain for the job's
+     declared dataflow, tile quantisation and padding, double-buffer overlap of DMA and
+     compute, and job_overhead_cycles on every tile job. A tensor job is O(1–10) events, not
+     O(cycles);
    - NoC level 0: hop latency, infinite bandwidth;
-   - DRAM level 0: fixed latency plus a bandwidth cap per channel.
+   - DRAM level 0: fixed latency plus a bandwidth cap per channel, derated for refresh from
+     the spec's timing;
+   - at every level, each DMA engine honours dma.max_outstanding and request_bytes, so a
+     distant core's bandwidth is latency-bound; barriers cost sync.barrier_latency_cycles.
    EngineResult reports fidelity_detail honestly: {compute: 1, noc: 0, dram: 0}. The
    composite for that is C1 at best, and the table must say so.
 9. TaskGraph executor: runs the TaskGraph from mapping/ (both ws-rowsplit@1 and
-   onnxim-compat@1), resolving dependencies by events.
+   onnxim-compat@1), resolving dependencies by events. initial_state steady primes one
+   iteration inside the same simulation and reports the second.
 10. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
     parser, identical in shape to engines/fork/, so `uarch table ... --engine native` works.
+    EngineResult carries the critical-path attribution, diagnostics (null for whatever the
+    running levels do not model: NoC contention statistics at NoC level 0, for example) and,
+    with --trace, a Chrome-trace JSON timeline.
 
 ACCEPTANCE TESTS (write first):
 1. doctest: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
@@ -65,6 +73,9 @@ ACCEPTANCE TESTS (write first):
    npu-l4 grid, and the speed factor is measured against the one you wrote down.
 5. `uarch table hw/designs/npu-m256.yaml ... --engine native` builds a full table: the mesh
    class, which the fork cannot represent.
+6. The latency-bound stream fixture (U-P8) passes, and lowering max_outstanding lowers a
+   distant core's achieved bandwidth.
+7. Diagnostics: at NoC level 0 every NoC statistic is null; attribution sums to duration.
 
 GUARDRAILS: No threads, no SIMD intrinsics, no GPU, no MPI; those are U-P17 at the earliest,
 and only what it builds. Do not delete or bypass the fork: it is the permanent L2 reference.

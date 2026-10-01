@@ -17,19 +17,28 @@ first-class target.
    granularity; multicast along rows and columns. BookSim2 STAYS the L2 reference. Do not
    build a flit-level router of your own, and do not build a third NoC backend.
 2. DRAM level 2: Ramulator 2 linked as a library through its External frontend, at the SHA the
-   engine image pins, one instance per memory controller. Keep DRAM level 1 (a per-channel
-   queue with a row-buffer approximation) as the fast path. The job chooses; EngineResult
+   engine image pins, one instance per memory controller, configured from the spec's DRAM
+   organisation and timing (never from a preset the spec does not name). Keep DRAM level 1
+   (a per-channel queue with a row-buffer approximation and the spec's page policy) as the
+   fast path. Addresses map to channels and controllers by memory.interleave, so the NoC sees
+   the traffic pattern the interleaving creates. The job chooses; EngineResult
    reports which ran.
-3. Compute level 2: SRAM bank conflicts and DMA/compute interleaving at cycle timestamps,
-   still O(1–10) events per tensor job wherever no conflict occurs.
+3. Compute level 2: SRAM bank conflicts (from the mapping's buffer placement) and
+   DMA/compute interleaving at cycle timestamps, still O(1–10) events per tensor job wherever
+   no conflict occurs. When the spec has a shared_sram, model it at level 0 (capacity and
+   bandwidth cap) and level 1 (a per-port queue with cycle timestamps, "1+ts"), attached to the
+   NoC like a memory controller. Barriers follow sync.mechanism: with noc_semaphore they are
+   NoC messages and contend like any other traffic.
 4. Mesh-class mapping policies in src/rkuarch/mapping/ (Python, shared by every engine):
    - summa-2d@1: GEMM outputs blocked over the core grid, operands multicast along rows
      and columns;
-   - head-parallel@1: attention heads distributed over cores, KV resident per head group.
+   - head-parallel@1: attention heads distributed over cores, KV resident per head group
+     and read in pages of the request's block size.
    Each carries its own docstring derivation of per-core bytes and MACs. L0 checks those
    against the graph.
 5. THE COMPOSITE RULE (build-spec §2.4), enforced in native/ and re-checked in Python:
-   - report C2 ONLY IF every shared resource (NoC, DRAM, SRAM banks) is at level 2, or at
+   - report C2 ONLY IF every shared resource (NoC, DRAM, SRAM banks, shared SRAM when
+     present) is at level 2, or at
      level 1 with cycle timestamps, AND synchronisation is exact;
    - otherwise C1, if any subsystem is at level 1;
    - otherwise C0-equivalent.
@@ -49,6 +58,9 @@ ACCEPTANCE TESTS (write first):
    uniform one at equal MACs and bytes. At level 0 the two are identical, and the test asserts
    both halves.
 5. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+6. Interleaving bites: changing memory.interleave's granularity changes the per-controller
+   traffic split and the NoC diagnostics, at equal bytes.
+7. With a shared_sram at level 0, C2 is refused, with the reason.
 
 GUARDRAILS: Do not claim C2 with any subsystem at level 0. No threads yet. Do not remove the
 level-0 and level-1 paths: they are the fast modes, and the ladder is a feature. Do not tune

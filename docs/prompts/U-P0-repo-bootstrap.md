@@ -21,7 +21,8 @@ understand the whole system before a single model exists.
    do not summarise, merge or improve them.
 3. Tooling: pyproject.toml (uv, Python 3.12, hatchling with
    [tool.hatch.build.targets.wheel] packages = ["src/rkuarch", "contract/uarch_contract"]),
-   Makefile, .importlinter, .pre-commit-config.yaml, .gitignore, .github/CODEOWNERS,
+   .python-version (3.12), Makefile, .importlinter, .pre-commit-config.yaml, .gitignore,
+   .github/CODEOWNERS,
    .github/workflows/{ci.yml,nightly.yml}, native/CMakeLists.txt (an empty project that
    builds nothing yet), containers/Dockerfile.engine (base image only), and
    third_party/LICENSES.md with the allow-list and an empty register.

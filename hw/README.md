@@ -10,3 +10,8 @@ studies/     StudySpecs: variants of a proposed design that change stipulations 
 derive_rk_params() turns a spec into the params rk-sim's component entry must carry. If they
 disagree, the spec is right and the component is wrong. Stipulations propagate as
 stipulations; a derived claim is only as good as its worst input.
+
+DRAM organisation and timing are SourcedValues too. A simulator preset supplies them only as
+claims citing the preset file at a pinned SHA. SRAM size and SRAM pJ/byte travel together: a
+variant that changes one re-stipulates the other. studies/ also holds the versioned workload
+suite (workload-suite@N.yaml) that studies and L3 shape selection read.

@@ -27,14 +27,16 @@ CHECK, in order:
    diff?
 4. Numerical smells: units missing from names; cycles crossing out of engines/ or native/;
    time converted anywhere but next_edge(); MACs counted as one op; the tp rule; seeds not
-   plumbed into a new randomness source; unordered iteration reaching output. Re-derive the
+   plumbed into a new randomness source; unordered iteration reaching output; a diagnostic
+   or energy figure rendered as 0 where the level does not model it; an engine reading a
+   DRAM preset the spec does not name. Re-derive the
    three most-touched formulas from their docstrings and say whether the code matches.
 5. Provenance: any stipulation outside hw/designs/? Any claim without a source? Any reference
    spec that loads with a stipulation? Any derived value whose kind or provenance is better
    than its worst input?
 6. Evidence: any model card promoted without ledger entries? Any promotion wider than its
    entries' scope? Any error band of zero? Any prediction file edited after its freeze commit?
-   Run check_ordering yourself.
+   Any L3 prediction without its mapping match and initial state? Run check_ordering yourself.
 7. Fidelity: any composite C2 with a subsystem at level 0, or in lax sync mode without a
    covering curve? Any C2 row faster than its u_c0_duration_s?
 8. Determinism: build one golden table at --workers 1 and --workers N yourself and diff the

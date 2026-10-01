@@ -32,9 +32,11 @@ a C2 component shows its evidence where the user is looking.
    together.
 4. A chip panel in the inspector and Results for a C2 component: composite fidelity plus the
    per-subsystem detail vector; the model card (badge, evidence scope, validated band or
-   "unknown"); uarch version and table hash; measured interpolation and composition errors;
-   flop-parity deviations; the conditional_on list. EMBED IT IN THE EXISTING COMPONENT/RUN
-   RESPONSES. Do not add a route: test_contract.py freezes the canonical route list, and the
+   "unknown"); uarch version and table hash; measured interpolation, composition and
+   layer-reuse errors; the initial state and KV block size; energy marked "unverified" while
+   the card has no energy evidence; flop-parity deviations; the conditional_on list. EMBED
+   IT IN THE EXISTING COMPONENT/RUN RESPONSES. Do not add a route: test_contract.py freezes the
+   canonical route list, and the
    boundary ADR does not amend it.
 5. Compare: when the two sides differ in compute fidelity (C2 vs C0), a banner states that the
    comparison is biased AGAINST the detailed part, because it charges stalls the roofline cannot

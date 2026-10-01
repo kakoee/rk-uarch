@@ -16,7 +16,8 @@ appears.
 1. Partitioning: logical processes are rectangular sub-meshes (row bands first; blocks behind
    a flag). Every owner id belongs to exactly one partition, so the ownership discipline from
    U-P11 becomes the partition boundary, and the owner assertion now also fails a
-   cross-partition mutation. Memory controllers may be their own partition.
+   cross-partition mutation. Memory controllers, and the shared SRAM when present, may be
+   their own partition.
 2. EXACT MODE: windowed conservative synchronisation. Lookahead L = the minimum latency of any
    cross-partition link, which is router pipeline plus link, and SEVERAL CYCLES on any real
    design. It is not 1, and this is where the vision note's lookahead-collapse premise gets

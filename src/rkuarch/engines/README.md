@@ -7,4 +7,6 @@ function. No foreign-function interface.
 - fork/      the pinned published simulator in the engine container. Its mapping is its own,
              recorded as fork:<name>-default@<sha>. Fields it cannot represent are listed.
 - native/    the Python side of our C++ engine (native/ at the repo root).
-Cycles live here and in native/, and nowhere else. EngineResult carries duration_ps.
+Cycles live here and in native/, and nowhere else. EngineResult carries duration_ps, a
+critical-path attribution that sums to it, and diagnostics that are null wherever the level
+does not model them, never 0.

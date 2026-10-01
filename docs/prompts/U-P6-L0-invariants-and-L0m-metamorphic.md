@@ -20,7 +20,13 @@ them once.
      rate × mean residence);
    - causality: no event or interval begins before the one it depends on (for engines that
      emit traces);
-   - byte-identical reruns.
+   - byte-identical reruns;
+   - per-core SRAM occupancy ≤ sram.bytes at every event (engines that report placement);
+   - attribution_s parts sum to duration_s within 1e-9 relative;
+   - energy = Σ counts × coefficients + static power × duration, on every row that reports
+     energy;
+   - null, not zero: a diagnostic of a subsystem running at a level that does not model it is
+     null.
 2. validation/L0m_metamorphic/ — relations over PAIRS of runs:
    - doubling any bandwidth (DRAM, NoC link, SRAM port) never increases duration;
    - scaling every core-domain clock by k scales a compute-bound query's duration by 1/k
@@ -29,16 +35,21 @@ them once.
    - permuting core ids on a symmetric topology (torus, or mesh with a symmetric mapping)
      leaves duration unchanged;
    - adding an idle core (one the mapping does not use) changes nothing;
-   - a stipulated-parameter change that the mapping does not touch changes nothing.
+   - a stipulated-parameter change that the mapping does not touch changes nothing;
+   - raising any latency (router, DRAM timing, job overhead, barrier) never shortens duration;
+   - lowering dma.max_outstanding never shortens duration;
+   - a cold run is never faster than the steady run at the same point.
 3. Write them as HYPOTHESIS PROPERTY TESTS over generated HardwareSpecs and queries, with
    strategies in validation/strategies.py that only generate valid specs. Examples alone
-   prove only the examples.
+   prove only the examples. A relation an engine cannot express (U-C0 models no latency and
+   no initial state, for example) SKIPS for that engine with its reason; it never passes.
 4. Each suite writes a machine-readable report (JSON, hashed) that the model card cites under
    verification.L0 / verification.L0m. A card may cite only a report produced by the same
    engine version.
-5. POWER, DEMONSTRATED NOT ASSERTED: for at least three relations, commit a deliberately
+5. POWER, DEMONSTRATED NOT ASSERTED: for at least five relations, commit a deliberately
    injected bug under validation/mutants/ (a bandwidth read from the wrong field; an
-   off-by-one tile count; a queue that drops requests), and a test that runs the suite
+   off-by-one tile count; a queue that drops requests; an attribution that double-counts
+   overlap; an allocator that ignores SRAM capacity), and a test that runs the suite
    against the mutant and asserts it FAILS. Mark these tests so they run nightly.
 
 ACCEPTANCE TESTS:

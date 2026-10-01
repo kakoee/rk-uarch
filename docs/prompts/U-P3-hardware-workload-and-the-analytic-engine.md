@@ -23,7 +23,11 @@ later.
      header comment as "unknown for this chip", because U-P9/U-P15 measure against these
      specs and the model card must say how many unknowns the method carried.
    Every stipulation in designs/ carries a rationale. Do not invent a number you would
-   have to call a claim.
+   have to call a claim. All four specs fill the Rev-2 fields: dataflows, DMA
+   max_outstanding and request_bytes, job_overhead_cycles, sync, DRAM organisation and timing
+   (a reference cites JEDEC, the vendor, or a preset file at a pinned SHA), interleave and
+   controller policy, and a pj_per_byte.sram consistent with sram.bytes. Unknown for a
+   reference means stub.
 2. src/rkuarch/hw/derive.py — derive_rk_params(spec) -> the rk-sim component params
    (fp16_tflops and the other per-format peaks that apply, hbm_bw, hbm_capacity, tdp) as
    SourcedValues whose provenance is the WORST of the spec leaves each was computed from.
@@ -37,7 +41,10 @@ later.
    n prompts of L. layer_reuse=True means "one decoder layer instantiated n_layers times
    plus the non-repeated head and tail ops", and the graph says so in a field. MoE is
    active-parameter dense-equivalent ONLY, exactly as rk-sim: routing, imbalance and
-   all-to-all are declared absent in a graph-level `omissions` list.
+   all-to-all are declared absent in a graph-level `omissions` list, together with
+   host/runtime time, address translation, coherence and mixed prefill/decode iterations
+   (build-spec §2.3.4). KV operands are paged: the graph carries page-granular KV reads for
+   the request's kv_layout.block_size_tokens.
 4. Plug the graph into the parity harness (contract/tests/test_flop_parity.py) as its first
    real callable. Every difference from rk-sim's closed form above 0.5% gets a named
    declared deviation in src/rkuarch/workload/deviations.py with a one-line reason: embedding
@@ -49,12 +56,18 @@ later.
    - per_op: the sum over ops of each op's own roofline. Always >= aggregate. It is the first
      place the chip's structure shows up.
    Both return a Row (the contract's row, via table/) with attribution_s split by which roof
-   bound. Units in names. Seconds at the boundary.
+   bound, its parts summing to duration_s. Units in names. Seconds at the boundary. U-C0
+   uses peak DRAM bandwidth with no refresh derating, because it is the parity anchor for
+   rk-sim C0; derating starts at native level 0. U-C0 leaves every diagnostic null.
 6. src/rkuarch/table/ — the minimal path only: request -> grid points -> engine -> rows ->
    UarchCostTable, single process, no interpolation (U-P7 owns that). Hash it.
 7. src/rkuarch/cli.py (typer): `uarch validate <spec>` (lists claims / stipulations / stubs
    with counts; refuses a bad spec with the path) and `uarch table <spec> --model <name>
    --precision <fmt> --engine analytic`.
+8. `uarch characterize <spec> --model <name> --precision <fmt>`: for every op across the
+   request's grid, its FLOPs, bytes, operational intensity, op class and shape regime (the
+   bins ADR U0001 fixed), as hashed JSON plus a Markdown twin. U-P9 and U-P15 pick their
+   benchmark shapes from it, and U-P14 picks its workload suite from it.
 
 ACCEPTANCE TESTS (write first):
 1. U-C0 AGGREGATE REPRODUCES rk-sim C0: fed derive_rk_params(spec), aggregate-mode duration
@@ -69,7 +82,11 @@ ACCEPTANCE TESTS (write first):
    against the contract, and whose composite_fidelity is "C0" with engine "analytic".
 6. `uarch validate` on a reference spec with a stipulation injected fails and names the path.
 7. Omissions: an MoE ModelSpec's graph lists routing/imbalance/all-to-all as omitted, and
-   the table's warnings carry that sentence.
+   the table's warnings carry that sentence, alongside the other declared omissions.
+8. `uarch characterize` on the demo request (npu-m256 × Llama-3.1-70B × fp8) writes a
+   hash-stable report in which every op has a shape regime.
+9. KV reads are page-granular: the number of KV page reads per sequence per layer equals
+   ceil(context / block_size_tokens).
 
 GUARDRAILS: Do not touch the fork or the native engine; they are U-P5 and U-P11. Do not add
 interpolation or a process pool; that is U-P7. Do not tune the operator graph to hit rk-sim's

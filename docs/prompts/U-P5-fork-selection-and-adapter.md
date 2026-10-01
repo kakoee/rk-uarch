@@ -29,7 +29,11 @@ choose between the two candidates on pre-registered numbers.
    INTERFACE:
    - config_writer.py: HardwareSpec (a large-core design) -> the fork's config JSON. Every
      spec field the fork cannot represent is listed in the adapter's `unrepresented` output,
-     which becomes a table warning. Never silently dropped.
+     which becomes a table warning. Never silently dropped. That includes the Rev-2 fields:
+     the fork's dataflow, DRAM organisation and timing (its Ramulator config comes from the
+     spec, never from the fork's default preset unless the spec names that preset),
+     outstanding-request limits and per-job overhead are mapped where the fork has them and
+     listed as unrepresented where it does not.
    - workload_writer.py: (ModelSpec, ModelShape, precision, canonical query) -> the fork's
      LLM input format. For ONNXim that is its custom language-model format with
      iteration-level batching; for PyTorchSim, whatever its front end accepts. It is generated
@@ -39,10 +43,15 @@ choose between the two candidates on pre-registered numbers.
      and stats files, and records the image digest in the result.
    - stats_parser.py: fork stats -> EngineResult (build-spec §2.5): duration_ps, per-resource
      busy time, activity counts in contract channel names. MACs are converted to ops at
-     2 per MAC (P7b) by a named function.
+     2 per MAC (P7b) by a named function. Diagnostics are filled from the fork's stats where
+     they exist and null otherwise; attribution follows the critical path and sums to the
+     duration.
    - THE FORK'S MAPPING IS THE FORK'S. It tiles and schedules internally. Record it as
      mapping_policy "fork:<name>-default@<sha>", a stipulation on every row. Do not pretend
      uarch's mapping policies drove it.
+   - initial_state: steady runs the query twice in one simulation where the fork allows it
+     and reports the second; where it does not, initial_state is listed as unrepresented and
+     the table warns. Never report a cold run as steady.
 5. Evaluate ONNXim first (it is lighter). If it passes G2, you may skip PyTorchSim. Record
    that you skipped it and why. If it fails, evaluate PyTorchSim with the same criteria.
 6. `uarch table ... --engine fork` for one-layer decode queries on npu-l4, driven from a
@@ -57,6 +66,8 @@ ACCEPTANCE TESTS (write first where they can be written first):
 5. G2(e): licence scan of the image green against the allow-list.
 6. The adapter's `unrepresented` list is non-empty for npu-l4 if anything is unrepresented,
    and each entry appears as a table warning.
+7. The fork's own default DRAM preset is never used silently: a spec that names a preset the
+   fork cannot load is refused (UnnamedPreset) or listed as unrepresented.
 
 GUARDRAILS: Do not patch the engine to make parity pass. Declare the deviation. Do not touch
 anything under src/rkuarch/engines/native/. Do not start U-P7 until a fork has passed G2. If

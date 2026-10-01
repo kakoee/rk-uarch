@@ -17,12 +17,14 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    puts them. The dry run executes on Tenstorrent's functional simulator (ttsim, Apache-2.0)
    where it supports the kernel. ttsim does not model timing, so dry-run outputs are labelled
    SYNTHETIC and are refused by the ledger. Environment capture per result: firmware, tt-metal
-   version, clocks as reported, card serial.
+   version, clocks as reported, card serial. Timing is device-side only. Where TT-Metalium
+   reports op counts, record them for the workload-fidelity check; where tt-smi exposes board
+   power, record it as coarse energy context, labelled so.
 2. Run on the card only after check_ordering passes. Raw results (profiler CSVs as emitted,
    plus the derived durations and the derivation script's hash) are committed immutable under
    validation/L3_silicon/blackhole/results/.
 3. Ledger entries, one per (benchmark × prediction source): native at each fidelity level,
-   U-C0, and tt-npe. The same key discipline as U-P10.
+   U-C0, and tt-npe. The same key discipline as U-P10, and classes split by mapping match.
 4. THE NEW THING THIS VERDICT CAN SAY, which the first could not: whether MORE DETAIL IS
    MORE ACCURATE for this class. Report the error by class for each native fidelity level
    side by side. If composite C2 is not closer to silicon than level-1, the report says so on
@@ -36,7 +38,7 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
 ACCEPTANCE TESTS (write first):
 1. The dry run completes and the ledger refuses its SYNTHETIC outputs.
 2. Every result file postdates its prediction file (the ordering check is green).
-3. The per-level error table exists, with ≥ 3 levels × ≥ 4 classes.
+3. The per-level error table exists, with ≥ 3 levels × ≥ 7 classes.
 4. G7 is evaluated and recorded either way; promotion, if any, is scoped to the mesh family.
 5. A large-core design's request still gets stub from mesh evidence (applicability).
 

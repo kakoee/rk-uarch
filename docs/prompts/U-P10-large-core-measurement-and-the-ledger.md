@@ -14,18 +14,24 @@ and only the ledger, decide what the model card may say.
 1. measure/tpu-v5e/, the kit, WRITTEN AND DRY-RUN BEFORE ANY PAID HOUR. Code for every
    benchmark in SUITE.md, runnable end to end on CPU JAX as a dry run that produces
    correctly shaped (fake, labelled SYNTHETIC) result files. Warm-up and repetition counts
-   stated per benchmark; timing via the XLA/JAX profiler at the granularity SUITE.md fixes;
+   stated per benchmark; device-side timing via the XLA/JAX profiler at the granularity SUITE.md
+   fixes; XLA's compiled cost analysis (FLOPs and bytes accessed) per benchmark;
    environment capture (TPU type, runtime and library versions, VM image) into every result.
 2. Run it on Cloud TPU v5e ONLY AFTER check_ordering passes for every prediction. Raw results
    go to validation/L3_silicon/tpu-v5e/results/, and are immutable once committed. These are
    records of spent money, like rk-sim's measure/results/.
 3. validation/ledger/: one entry per comparison, recording the question it answers
    (benchmark id and granularity), its applicability dimensions (architecture family, op
-   class, precision, shape regime), predicted, measured, signed relative error, and the
-   engine and spec versions. The ledger REFUSES a second entry with the same key and a
-   different prediction, as rk-sim's does.
+   class, precision, shape regime, load regime, mapping match), predicted, measured, signed
+   relative error, and the engine and spec versions. The ledger REFUSES a second entry with
+   the same key and a different prediction, as rk-sim's does. Workload fidelity is its own
+   entry type: predicted vs compiler-reported FLOPs and bytes, with declared deviations for
+   fusions, layout copies and padding. It never promotes a duration card; a deviation above
+   5% with no declared reason is published as a finding.
 4. Gate G4 (execution-plan §4), evaluated by script and written to the ledger either way:
-   median |relative error| ≤ 25% across all benchmarks, and no class median above 50%.
+   median |relative error| ≤ 25% across all benchmarks, and no class median above 50%. It is
+   evaluated separately for matched and compiler-chosen benchmarks, and the verdict names the
+   group.
 5. Promotion: provenance/ reads the ledger. A model card moves from stub to estimated ONLY
    through ledger entries, ONLY for the family and op classes those entries cover, with
    validated_error_band set to the observed band for that scope. Never by hand, and never
@@ -45,7 +51,10 @@ ACCEPTANCE TESTS (write first):
    estimated for {matrix, memory, operator, end-to-end}; npu-m256's card stays stub, and
    says the family mismatched.
 4. Subsystem-only fixture evidence does not promote end-to-end rows.
-5. G4 is evaluated and recorded, pass or fail.
+5. G4 is evaluated and recorded, pass or fail, per mapping-match group.
+6. Workload-fidelity entries exist for every benchmark that has compiler-reported counts.
+7. A fixture where only the compiler-chosen group passes promotes only within that group's
+   scope.
 
 GUARDRAILS: Do not run paid hardware until predictions are frozen and ordering passes. If G4
 fails, PUBLISH THE ERRORS ANYWAY. Then follow G4's fail branch (execution-plan §4), and do not

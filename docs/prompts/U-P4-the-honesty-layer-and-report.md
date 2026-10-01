@@ -28,11 +28,15 @@ U-P3 to have landed.
       badge is never better than the worst claim contributor and never better than the model
       card's rung.
 2. provenance/model_card.py — build a ModelCard from (engine id, engine version,
-   fidelity_detail, mapping policy, ledger entries). validated_error_band is None unless a
-   ledger entry scoped to this family and op class supplies it. None renders as "unknown".
+   fidelity_detail, mapping policy, ledger entries). validated_error_band is None unless
+   ledger entries whose scope covers this request (family, op class, precision, shape regime,
+   load regime, mapping match) supply it. None renders as "unknown". energy_verification is
+   None until U-P8's energy reports exist, and None renders energy as "unverified".
 3. provenance/applicability.py — rk-sim ADR 0021's shape for uarch: for a request, which
    evidence dimensions MATCH, MISMATCH or are UNKNOWN (architecture family, op class,
-   precision, shape regime, load regime). A model card whose evidence does not apply to this
+   precision, shape regime, load regime, mapping match), using the bins ADR U0001 fixed.
+   Precision matches by format name: BLOCKFP8 evidence does not cover fp8 unless U0001 says
+   why it should. A model card whose evidence does not apply to this
    request contributes stub for this request, whatever its best rung elsewhere.
 4. report/ — `uarch report <table>` writes a self-contained static HTML file (plus a
    Markdown twin for agents), with no JavaScript framework and no network fetches:
@@ -43,8 +47,15 @@ U-P3 to have landed.
    - error band shown as the band, or "unknown", NEVER "±0";
    - the fidelity chip (composite plus the per-subsystem detail), the model card, the
      measured interpolation and composition errors, and the flop-parity deviations;
-   - a one-paragraph "what this table does not claim" generated from omissions, warnings,
-     stubs and the badge ceiling.
+   - a diagnostics section: a null diagnostic renders "not modelled", never 0 and never a
+     blank that reads as zero;
+   - a per-op roofline as static inline SVG (operational intensity against achieved
+     throughput, from the table's counts; no JavaScript);
+   - all four measured errors (interpolation, composition, layer reuse, cold vs steady), the
+     initial state and the KV layout;
+   - energy marked "unverified" while the model card's energy_verification is None;
+   - a one-paragraph "what this table does not claim" generated from omissions (the declared
+     ones included), warnings, stubs and the badge ceiling.
 
 ACCEPTANCE TESTS (write first):
 1. A stipulation does not lower a badge; a stub claim does; both appear in the right list.
@@ -56,6 +67,10 @@ ACCEPTANCE TESTS (write first):
 5. Template lint catches an injected raw {{ row.duration_s }}.
 6. The report for the toy table is byte-identical across two runs (no timestamps in the
    body; the generation time goes in a comment block excluded from the hash).
+7. A null diagnostic renders "not modelled": no diagnostic that is null in the toy table
+   appears as 0 in the rendered report.
+8. Precision scope: an fp8 request against BLOCKFP8-only evidence gets stub, naming precision.
+9. Energy renders "unverified" when energy_verification is None.
 
 GUARDRAILS: Do not read from an engine or compute a physical number here. Do not compute
 error bars from a deterministic run; a deterministic simulator has no replication variance,

@@ -11,7 +11,7 @@ _fidelity_map), rk/engine/f1/serving.py (how R1 consumes IterationCost), rk/sche
 draft is in the uarch kit at rk-sim-side/decisions/DRAFT-admit-characterized-c2-tables.md.
 It must be ACCEPTED, and its schema PR MERGED, before this prompt starts: build-spec §1.3 rules
 out memoization surrogates for the prototype, and a characterization table is one. From
-rk-uarch, READ-ONLY: docs/decisions/U0001 (the six rules), contract/schema/*.json at the
+rk-uarch, READ-ONLY: docs/decisions/U0001 (the eight rules), contract/schema/*.json at the
 contract version the boundary ADR names, and one committed table.
 
 TASK: a component whose effective compute fidelity is C2 is priced, every iteration, from a
@@ -25,13 +25,13 @@ uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
    power_point, kv_byte_per_context_token, tp, and whatever else f1 reads). If f1 annotates
    the concrete class, introduce a Protocol in f0/compute.py that both satisfy, and change
    ONLY the annotation in f1. The DES's behaviour does not change.
-2. THE SIX RULES, each with its own test:
+2. THE EIGHT RULES, each with its own test:
    a. A ROW IS ONE SHARD. THE TP DIVISOR IS 1. `_time_s` divides by tp today; carrying that
       into the table path double-counts tensor parallelism silently. Collectives still come
       from the orchestrator's _collective_coefficients, exactly as for C0.
    b. Canonical compositions: decode (B, T) maps to the table directly; prefill (T, Q) maps to
-      n = T²/Q, L = Q/T. The table's measured composition_reduction error is copied into a
-      run warning, stating its own provenance (ADR 0027).
+      n = T²/Q, L = Q/T. The table's measured composition_reduction and layer_reuse errors
+      are copied into run warnings, each stating its own provenance (ADR 0027).
    c. The envelope is checked at BUILD time, where UnsupportedPrecision is raised today, from
       the workload's reachable (B, T, Q) region. Never discovered mid-run; never extrapolated.
    d. DVFS: duration_at(f) interpolates the table's frequency axis. A plan that declares DVFS
@@ -41,6 +41,10 @@ uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
       diagnostics as coverage "unmodelled" until rk-sim adopts SRAM/NoC channels.
    f. One chip, one set of facts: the component's top-level params must equal
       derive_rk_params of the spec the table cites. Check the hash, not the numbers.
+   g. Steady state: an R1 run reads initial_state: steady tables. A cold table in an R1 run
+      is InitialStateMismatch at build time.
+   h. KV layout: the table's kv_layout.block_size_tokens equals the plan's block size, or
+      KvLayoutMismatch at build time.
 3. Registry: a C2 row for (compute_resource, compute, C2) naming
    rk.engine.characterized.cost, with requires=("characterization",). ADR 0016's three sets:
    C2 joins the ADMISSIBLE set via the schema PR; it is BUILT for a component only if that
@@ -69,7 +73,8 @@ ACCEPTANCE TESTS (write first):
    within the declared interpolation error. This proves the path independently of uarch's
    physics.
 3. Envelope refusal at build time; spec-hash mismatch; contract-major mismatch; non-finite
-   row; DVFS without a frequency axis: one test each, each raising the named error.
+   row; DVFS without a frequency axis; a cold table in R1; a KV block-size mismatch: one test
+   each, each raising the named error.
 4. Default-degrades / override-raises asserted as a pair in one test.
 5. Every existing golden is byte-identical. The C0 and R0/R1 paths are untouched.
 6. R1 with a C2 component: determinism, Little's law and conservation (P5's tests) still hold.
