@@ -17,7 +17,9 @@ appears.
    a flag). Every owner id belongs to exactly one partition, so the ownership discipline from
    U-P11a becomes the partition boundary, and the owner assertion now also fails a
    cross-partition mutation. Memory controllers, and the shared SRAM when present, may be
-   their own partition.
+   their own partition. A Ramulator 2 instance never ticks past its partition's window end
+   (build-spec §2.8), and a controller in its own partition contributes its L_in to the
+   lookahead like any other cross-partition link.
 2. EXACT MODE: windowed conservative synchronisation. Lookahead L = the minimum latency of any
    cross-partition link, which is router pipeline plus link, and SEVERAL CYCLES on any real
    design. It is not 1, and this is where the vision note's lookahead-collapse premise gets

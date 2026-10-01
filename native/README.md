@@ -5,7 +5,10 @@ the engine container; `make native`, `make native-test`. Binary: uarch-engine
 (EngineJob → EngineResult), behind the same subprocess protocol as every engine.
 
 ## Rules
-- Time is u64 picoseconds; next_edge() is the only time↔cycle conversion.
+- Time is u64 picoseconds; next_edge() is the only time↔cycle conversion. Clocks are
+  integer freq_hz; edges are rounded up to the picosecond, periods never are.
+- Ramulator 2 ticks in batches to a conservative horizon, catches up over idle gaps, and
+  must match the tick-every-cycle debug mode byte for byte (build-spec §2.8).
 - Events are 32-byte `#[repr(C)]` `Copy` structs, totally ordered by (t_ps, phase, target,
   seq). Dispatch is a `match` on kind; no `dyn` on the hot path.
 - One owner per resource; only events targeted at it mutate it (asserted in debug builds).

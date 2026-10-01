@@ -12,6 +12,10 @@ run split prompts (U-P11a–c, U-P13a–d), U9 is gated on a measured need, and 
 takes the longer lane per sprint.
 **Rev 2.2, 2026-10-01.** The native engine is Rust (build-spec Rev 2.2). Sprint content and
 effort are unchanged; the seam with rk-sim is unchanged.
+**Rev 2.3, 2026-10-01.** Two native-engine time decisions (build-spec Rev 2.3), recorded in
+the spec rather than an ADR: resolved integer clock frequencies with rounded edges, and how
+Ramulator 2 ticks inside the event kernel. U-P11a and U-P13b gain acceptance tests; sprint
+content, gates and effort are unchanged.
 
 **Canonical for:** *what order and who*. For *what* and *how* (architecture, contract, repo
 layout, conventions and the prompt texts) see `docs/build-spec.md`.

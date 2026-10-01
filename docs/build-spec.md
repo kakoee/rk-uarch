@@ -25,6 +25,17 @@ a gate on U9).
 written by coding agents, and safe Rust turns their likeliest bugs (undefined behaviour, data
 races) into compile errors. `unsafe` lives only in the crate that bridges to Ramulator 2. The
 seam with rk-sim is unchanged and language-neutral (§7.1).
+**Rev 2.3, 2026-10-01.** Two native-engine time decisions, recorded here instead of in an ADR.
+(1) **Edges are rounded, periods are not.** An integer `period_ps` cannot represent a 1.2 GHz
+clock (833.33… ps): rounding down makes the engine faster than its own U-C0 roofline
+(invariant 6), and rounding up biases every row. Each domain's frequency is now resolved
+once to integer hertz, used by every engine and U-C0 alike, and edge k of a domain sits at
+⌈k·10¹²/f⌉ ps. Time stays `u64` picoseconds; an edge is never early and is less than 1 ps
+late, so no drift accumulates (§2.3.2, §2.5, §2.8). (2) **How the cycle-ticked Ramulator 2
+runs inside the event-driven kernel.** Batched ticks up to a conservative horizon while a
+controller is busy, exact catch-up ticks over idle gaps (so refresh still happens), one new
+event kind `MEM_TICK`, and a tick-every-cycle debug mode that the batched mode must match byte
+for byte (§2.8, §2.9, U-P13b, U-P17).
 
 **Companion documents.** `docs/execution-plan.md` is *when and who*: sprints, gates and effort.
 `rk-uarch-track-verdict-and-plan.md` (in the Project) holds the research and the reasoning
@@ -242,6 +253,11 @@ tdp_w: {...}
   owns its block: `cores` → core; `nocs`, `sync`, `shared_sram` and controller `noc_credits`
   → noc; `memory.dram` → dram. A frequency ratio scales `clock_domains.core` and every domain
   whose `scales_with_core` is true, and nothing else.
+- **Resolved frequencies (Rev 2.3).** For each grid point the harness resolves every domain's
+  frequency once to a whole number of hertz: `round(freq_hz × ratio)` for a domain the ratio
+  scales, `round(freq_hz)` otherwise. Every engine, U-C0 included, uses those integers and
+  nothing else, so a roofline and the cycle-level run it bounds share one clock. Clocks are
+  never stored as a rounded period (§2.8).
 - **Presets.** A simulator preset (Ramulator's GDDR6 or HBM tables, say) may supply DRAM timing
   only through `memory.dram.timing_preset: {file, sha}`, and every timing leaf it supplies is a
   claim whose `source` is `<file>@<sha>`. A timing claim that cites any other preset file, or a
@@ -439,7 +455,7 @@ native engine's Rust types are tested against that schema, so the two sides cann
 - the resolved HardwareSpec (numbers only, with a hash back to the spec);
 - the `TaskGraph`;
 - the per-subsystem levels;
-- the frequency ratio;
+- the frequency ratio, and each domain's resolved integer `freq_hz` (§2.3.2);
 - the initial state;
 - the seed.
 
@@ -524,9 +540,16 @@ named function.
 
 ### 2.8 The native engine
 
-- **Time:** a `u64` count of picoseconds. Clock domains have integer `period_ps`, and
-  `next_edge(domain, t_ps)` is the only conversion to cycles. DVFS is a per-domain frequency
-  ratio fixed when the simulation is constructed.
+- **Time:** a `u64` count of picoseconds. Each clock domain has a resolved integer `freq_hz`
+  (§2.3.2), never a rounded period. **Edges are rounded, periods are not:** edge k of a
+  domain sits at `t_k = ⌈k · 10¹² / freq_hz⌉` ps, computed exactly in `u128`, so
+  `0 ≤ t_k − k·10¹²/freq_hz < 1 ps` for every k. An edge is never early, and rounding never
+  accumulates: 10⁹ cycles at 1.2 GHz end at 833,333,333,334 ps, not 833,000,000,000. Cycle
+  lengths therefore differ by up to 1 ps from one cycle to the next (833 or 834 ps at
+  1.2 GHz), deterministically. `next_edge(domain, t_ps, n_cycles)` returns `t_{k+n}`, where
+  `t_k` is the first edge at or after `t_ps`. It is the only conversion between time and
+  cycles, and `n_cycles = 0` is the plain next edge. DVFS is a per-domain frequency ratio,
+  fixed when the simulation is constructed through the resolved `freq_hz`.
 - **Language:** Rust (stable, pinned in `native/rust-toolchain.toml`), a Cargo workspace with a
   committed `Cargo.lock`. Every crate carries `#![forbid(unsafe_code)]` except
   `uarch-ramulator-sys`, the bridge to Ramulator 2, where each `unsafe` block has a `SAFETY:`
@@ -536,7 +559,8 @@ named function.
   on its size.
   - Total order: `(t_ps, phase, target, seq)`.
   - Kinds: `TASK_READY`, `COMPUTE_DONE`, `DMA_ISSUE`, `DMA_DONE`, `NOC_HEAD`, `NOC_TAIL`,
-    `MEM_REQ`, `MEM_RESP`, `SYNC_ARRIVE`, `BARRIER_RELEASE`, `STAT_SAMPLE`, `END`.
+    `MEM_REQ`, `MEM_RESP`, `MEM_TICK`, `SYNC_ARRIVE`, `BARRIER_RELEASE`, `STAT_SAMPLE`, `END`.
+    `MEM_TICK` exists only for cycle-ticked memory models (below).
   - Dispatch is a `match` on kind, with no trait objects (`dyn`) on the hot path.
 - **Ownership:** one owner id per resource. State is structure-of-arrays indexed by owner.
   Only the handler of an event targeted at an owner gets `&mut` access to that owner's state,
@@ -544,7 +568,8 @@ named function.
   a cross-partition mutation does not compile.
 - **Data structures:**
   - an event arena with a free list;
-  - a two-level timing wheel (4,096 slots) with heap overflow;
+  - a two-level timing wheel (4,096 slots, each `⌊10¹² / max freq_hz⌋` ps wide, at least 1)
+    with heap overflow;
   - CSR topology;
   - precomputed dimension-order routes;
   - `busy_until_ps[]` per link and port;
@@ -553,6 +578,45 @@ named function.
   - sorted vectors or `BTreeMap` wherever iteration order could reach output; `HashMap` and
     `HashSet` are banned in the engine crate by clippy's `disallowed-types`, because Rust
     randomises their iteration order.
+- **Cycle-ticked models inside the event kernel (Ramulator 2, DRAM level 2).** Ramulator 2
+  advances by `tick()`, one DRAM cycle at a time. The engine drives it so that the result is
+  exactly what ticking every cycle would give, without an event per cycle:
+  - *Clock.* One instance per memory controller, owned by that controller's owner id.
+    Ramulator cycle c is DRAM-domain edge `next_edge(dram, 0, c)`. The bridge configures
+    Ramulator's clock from `clock_domains.dram`. A Ramulator configuration whose clock
+    disagrees with that domain, including a data-to-command clock ratio the spec does not
+    give, is refused with both values named. It is never silently aligned.
+  - *Requests.* A `MEM_REQ` arriving at `t_ps` enters at the first DRAM edge at or after
+    `t_ps`. The instance is first ticked up to that edge, and requests that enter at the same
+    edge are sent in event total order. A DMA request larger than Ramulator's transaction
+    splits by `memory.interleave`, and its `MEM_RESP` fires when the last part completes.
+    Request ids come from a per-controller counter in arrival order. If Ramulator refuses a
+    request because its queue is full, the request waits in the controller, NoC credits are
+    withheld (back-pressure), and waiting requests are retried oldest first on later ticks.
+  - *Busy* (anything queued, waiting or in flight): a `MEM_TICK` targeted at the controller
+    ticks the instance, in one bridge call, through every cycle whose edge is before a
+    horizon `H`. It stops early after the first cycle that completes a request or admits a
+    waiting one, because both produce events (a `MEM_RESP`, or released NoC credits). `H` is
+    the earliest of: the next pending event's `t_ps` plus `L_in`; the earliest `MEM_REQ`
+    already scheduled for this controller, which the controller tracks in a sorted
+    structure; and the window end (U9). `L_in` is the minimum delay with which any handler
+    can schedule a `MEM_REQ` for this controller. It is computed from the spec (the final
+    router and link at the controller's attach point), not configured. Debug builds assert,
+    on every `MEM_REQ`, that the instance has not ticked past the arrival edge. `L_in = 0` is
+    legal: it costs speed, not correctness. Completions come back as a vector sorted by
+    (cycle, request id), and each becomes a `MEM_RESP` at its cycle's edge. The next
+    `MEM_TICK` is scheduled at the first edge not yet ticked.
+  - *Idle* (nothing queued, waiting or in flight): no events. The next `MEM_REQ` first
+    advances the instance through the idle cycles in one bridge call, with no requests, so
+    nothing can complete. Refresh and every other internal timer therefore run exactly as if
+    the instance had ticked throughout. Catch-up costs host time in proportion to idle DRAM
+    cycles, but no events. A faster skip (jumping whole `t_REFI` periods, say) is allowed only
+    if it is byte-identical to catch-up on the golden requests. Otherwise it is an
+    approximation, and the composite rule treats it like lax sync.
+  - *Reference mode.* A debug flag ticks every cycle with one `MEM_TICK` per DRAM cycle. The
+    batched mode must match it byte for byte, which is how batching is proven exact.
+  - DRAM levels 0 and 1 are event-driven and never tick. Simulator metrics report busy ticks
+    and catch-up ticks per simulated DRAM cycle separately.
 - **Dependencies:** `serde` and `serde_json` (MIT/Apache-2.0), `proptest` (dev, MIT/Apache-2.0),
   and from U7 Ramulator 2 (MIT) behind `cxx` (MIT/Apache-2.0) in `uarch-ramulator-sys`; from
   U9, `loom` (dev, MIT) to check the mailboxes. Nothing else without an ADR. `cargo-deny`
@@ -582,6 +646,9 @@ their own partition. Every owner id belongs to exactly one partition.
 - At each window barrier, mailboxes merge in the global total order. Cross-partition `seq`
   values are derived deterministically.
 - Output is byte-identical to the single-threaded engine at any thread count.
+- A Ramulator 2 instance (§2.8) never ticks past its partition's window end. A memory
+  controller in its own partition contributes its `L_in` to the lookahead like any other
+  cross-partition link.
 
 **Lax mode** (off by default). A quantum Q > L; crossing events are delivered at the window
 boundary (temporal decoupling).
@@ -977,7 +1044,10 @@ the engine container; `make native`, `make native-test`. Binary: uarch-engine
 (EngineJob → EngineResult), behind the same subprocess protocol as every engine.
 
 ## Rules
-- Time is u64 picoseconds; next_edge() is the only time↔cycle conversion.
+- Time is u64 picoseconds; next_edge() is the only time↔cycle conversion. Clocks are
+  integer freq_hz; edges are rounded up to the picosecond, periods never are.
+- Ramulator 2 ticks in batches to a conservative horizon, catches up over idle gaps, and
+  must match the tick-every-cycle debug mode byte for byte (build-spec §2.8).
 - Events are 32-byte `#[repr(C)]` `Copy` structs, totally ordered by (t_ps, phase, target,
   seq). Dispatch is a `match` on kind; no `dyn` on the hot path.
 - One owner per resource; only events targeted at it mutate it (asserted in debug builds).
@@ -1492,7 +1562,8 @@ these decisions, each with its proposed default:
   operator in it has its op class and shape regime covered, and its load regime for NoC and
   DRAM classes);
 - clock domains (proposal: build-spec §2.3.2's assignment; a frequency ratio scales the core
-  domain and every domain with scales_with_core: true);
+  domain and every domain with scales_with_core: true; each domain's frequency is resolved
+  once per grid point to integer hertz, and every engine, U-C0 included, uses that integer);
 - fidelity values (proposal: build-spec §2.4's keys and legal values, the same in requests
   and tables);
 - row keys (proposal: decode {batch, total_context_tokens}, prefill {n_prompts,
@@ -2283,19 +2354,25 @@ fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
    clippy runs with -D warnings and disallows HashMap and HashSet; rustfmt is enforced.
    Add the Rust toolchain to containers/Dockerfile.engine, and wire `make native` and
    `make native-test` to cargo.
-3. Time: u64 picoseconds. Each clock domain has an integer period_ps.
-   next_edge(domain, t_ps) is THE ONLY conversion between time and cycles; units in every
-   name (_ps, _cycles). DVFS is a per-domain frequency ratio applied when the Simulation is
-   constructed.
+3. Time: u64 picoseconds. Each clock domain has the resolved integer freq_hz from the
+   EngineJob, NEVER A ROUNDED PERIOD (1.2 GHz is 833.33… ps, and rounding it either way
+   biases every row or breaks the roofline floor). EDGES ARE ROUNDED, PERIODS ARE NOT: edge k
+   sits at t_k = ceil(k · 10^12 / freq_hz) ps, computed exactly in u128.
+   next_edge(domain, t_ps, n_cycles) returns t_{k+n}, where t_k is the first edge at or after
+   t_ps. It is THE ONLY conversion between time and cycles; units in every name (_ps,
+   _cycles, _hz). DVFS is a per-domain frequency ratio, applied through the resolved freq_hz
+   when the Simulation is constructed.
 4. Event: a 32-byte #[repr(C)] Copy struct {t_ps: u64, seq: u64, target: u32, kind: u16,
    phase: u8, flags: u8, payload: u32, pad: u32} with a compile-time assertion that its size
    is 32. The total order is (t_ps, phase, target, seq), and seq is assigned at schedule time
    from one counter.
    Kinds: TASK_READY, COMPUTE_DONE, DMA_ISSUE, DMA_DONE, NOC_HEAD, NOC_TAIL, MEM_REQ,
-   MEM_RESP, SYNC_ARRIVE, BARRIER_RELEASE, STAT_SAMPLE, END. Dispatch is a match on kind,
+   MEM_RESP, MEM_TICK, SYNC_ARRIVE, BARRIER_RELEASE, STAT_SAMPLE, END (MEM_TICK is unused
+   until U-P13b's Ramulator 2 path, build-spec §2.8). Dispatch is a match on kind,
    with no trait objects (dyn) on the hot path.
 5. Scheduling: an event arena with a free list (no per-event heap allocation after warm-up);
-   a two-level timing wheel (4,096 slots at the finest domain period) with a min-heap for
+   a two-level timing wheel (4,096 slots, each floor(10^12 / max freq_hz) ps wide, at least
+   1) with a min-heap for
    overflow. Ties within a slot are resolved by the total order, never by insertion order.
 6. State ownership: every resource (core matrix engine, core vector engine, SRAM bank group,
    DMA engine, router output port, link, memory channel) has exactly ONE owner id. State lives
@@ -2320,6 +2397,10 @@ ACCEPTANCE TESTS (write first):
 1. cargo test: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
    domain boundaries, owner assertion fires on a foreign mutation (debug build); proptest
    checks the wheel against a sorted reference over random schedules.
+1a. Clock edges: at 1.2 GHz, next_edge(core, 0, 3) == 2500 and next_edge(core, 0, 10^9) ==
+   833_333_333_334 (no drift); proptest over random freq_hz and k asserts
+   0 <= t_k · freq_hz − k · 10^12 < freq_hz (never early, under 1 ps late); a fixed-delay job
+   of N core cycles started at t = 0 never ends before N / freq_hz exactly.
 2. cargo fmt --check, cargo clippy --all-targets -- -D warnings and cargo deny check
    licenses pass; the engine crate forbids unsafe.
 3. A fixed-delay TaskGraph's duration equals its critical path worked by hand in the test,
@@ -2340,6 +2421,7 @@ optimise before determinism holds.
 
 ADR: docs/decisions/U0011-the-native-engine-core.md, started here: the expected speed factor
 and the single-point budget (both written before any measurement), the pinned Rust version,
+the time base as built (build-spec Rev 2.3: resolved integer freq_hz, rounded edges),
 and each departure from the vision note. The lookahead-collapse premise in particular: real routers take several
 cycles per hop (Tenstorrent documents ~9 router-to-router on Blackhole), so it is not L = 1.
 ```
@@ -2554,6 +2636,25 @@ the address interleaving that decides which cores talk to which controller.
    unsafe, every unsafe block with a SAFETY comment. The engine crate calls it through a safe
    API and stays #![forbid(unsafe_code)]. Register Ramulator 2 and cxx in
    third_party/LICENSES.md.
+2a. Driving a cycle-ticked library from the event kernel, EXACTLY AS build-spec §2.8
+   ("Cycle-ticked models inside the event kernel") SAYS:
+   - Ramulator cycle c is edge next_edge(dram, 0, c); its clock comes from
+     clock_domains.dram, and a configuration whose clock disagrees (including a
+     data-to-command clock ratio the spec does not give) is refused with both values named;
+   - busy: one MEM_TICK ticks the instance in one bridge call through every cycle before the
+     horizon H = min(next pending event's t_ps + L_in, earliest MEM_REQ already scheduled
+     for this controller, window end), stopping early after the first cycle that completes a
+     request or admits a waiting one. L_in is computed from the spec (the final router and
+     link at the attach point), never configured;
+   - idle: no events; the next MEM_REQ first catches the instance up through the idle cycles
+     in one bridge call, so refresh happens exactly as if it had ticked throughout. No
+     shortcut that is not byte-identical to catch-up;
+   - completions are returned sorted by (cycle, request id); request ids come from a
+     per-controller counter in arrival order; same-edge requests are sent in event total
+     order;
+   - a debug flag ticks every DRAM cycle with one MEM_TICK each: the REFERENCE MODE.
+   Simulator metrics report busy ticks and catch-up ticks per simulated DRAM cycle
+   separately.
 3. Back-pressure: a controller whose queue is full withholds NoC credits (noc_credits), so
    requests wait in the network rather than vanishing into an unbounded queue.
 4. Addresses map to channels and controllers by memory.interleave, so the NoC sees the
@@ -2573,11 +2674,23 @@ ACCEPTANCE TESTS (write first):
 5. Determinism: byte-identical at 1 and N workers; the bridge's tests run clean under
    AddressSanitizer in the nightly job.
 6. unsafe appears nowhere outside crates/uarch-ramulator-sys (a test greps the workspace).
+7. Batching is exact: at DRAM level 2, every golden request and a saturating-stream fixture
+   produce byte-identical EngineResults in batched mode and in the tick-every-cycle
+   reference mode (simulator metrics excluded).
+8. Idle refresh: a request arriving after an idle gap longer than t_REFI sees the same
+   latency in batched and reference modes, and a different latency from a run with refresh
+   disabled in Ramulator, which proves catch-up is not skipping refresh.
+9. Causality: the debug build's assertion (no MEM_REQ arrives at an edge the instance has
+   already ticked past) holds on every golden request, and a test that forces L_in too
+   large makes it fire.
+10. Clock agreement: a spec whose Ramulator configuration implies a clock different from
+   clock_domains.dram is refused, naming both values.
 
 GUARDRAILS: No threads yet. Keep DRAM level 0 and level 1: they are the fast modes. Do not
 tune DRAM parameters toward Ramulator's defaults; record the gap.
 
-ADR: none here; U-P13d's U0013 records these levels and the fields Ramulator could not take.
+ADR: none here; U-P13d's U0013 records these levels, the fields Ramulator could not take,
+the measured cost of busy and catch-up ticking, and each controller's L_in.
 ```
 
 
@@ -2878,7 +2991,9 @@ appears.
    a flag). Every owner id belongs to exactly one partition, so the ownership discipline from
    U-P11a becomes the partition boundary, and the owner assertion now also fails a
    cross-partition mutation. Memory controllers, and the shared SRAM when present, may be
-   their own partition.
+   their own partition. A Ramulator 2 instance never ticks past its partition's window end
+   (build-spec §2.8), and a controller in its own partition contributes its L_in to the
+   lookahead like any other cross-partition link.
 2. EXACT MODE: windowed conservative synchronisation. Lookahead L = the minimum latency of any
    cross-partition link, which is router pipeline plus link, and SEVERAL CYCLES on any real
    design. It is not 1, and this is where the vision note's lookahead-collapse premise gets

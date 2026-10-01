@@ -28,19 +28,25 @@ fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
    clippy runs with -D warnings and disallows HashMap and HashSet; rustfmt is enforced.
    Add the Rust toolchain to containers/Dockerfile.engine, and wire `make native` and
    `make native-test` to cargo.
-3. Time: u64 picoseconds. Each clock domain has an integer period_ps.
-   next_edge(domain, t_ps) is THE ONLY conversion between time and cycles; units in every
-   name (_ps, _cycles). DVFS is a per-domain frequency ratio applied when the Simulation is
-   constructed.
+3. Time: u64 picoseconds. Each clock domain has the resolved integer freq_hz from the
+   EngineJob, NEVER A ROUNDED PERIOD (1.2 GHz is 833.33… ps, and rounding it either way
+   biases every row or breaks the roofline floor). EDGES ARE ROUNDED, PERIODS ARE NOT: edge k
+   sits at t_k = ceil(k · 10^12 / freq_hz) ps, computed exactly in u128.
+   next_edge(domain, t_ps, n_cycles) returns t_{k+n}, where t_k is the first edge at or after
+   t_ps. It is THE ONLY conversion between time and cycles; units in every name (_ps,
+   _cycles, _hz). DVFS is a per-domain frequency ratio, applied through the resolved freq_hz
+   when the Simulation is constructed.
 4. Event: a 32-byte #[repr(C)] Copy struct {t_ps: u64, seq: u64, target: u32, kind: u16,
    phase: u8, flags: u8, payload: u32, pad: u32} with a compile-time assertion that its size
    is 32. The total order is (t_ps, phase, target, seq), and seq is assigned at schedule time
    from one counter.
    Kinds: TASK_READY, COMPUTE_DONE, DMA_ISSUE, DMA_DONE, NOC_HEAD, NOC_TAIL, MEM_REQ,
-   MEM_RESP, SYNC_ARRIVE, BARRIER_RELEASE, STAT_SAMPLE, END. Dispatch is a match on kind,
+   MEM_RESP, MEM_TICK, SYNC_ARRIVE, BARRIER_RELEASE, STAT_SAMPLE, END (MEM_TICK is unused
+   until U-P13b's Ramulator 2 path, build-spec §2.8). Dispatch is a match on kind,
    with no trait objects (dyn) on the hot path.
 5. Scheduling: an event arena with a free list (no per-event heap allocation after warm-up);
-   a two-level timing wheel (4,096 slots at the finest domain period) with a min-heap for
+   a two-level timing wheel (4,096 slots, each floor(10^12 / max freq_hz) ps wide, at least
+   1) with a min-heap for
    overflow. Ties within a slot are resolved by the total order, never by insertion order.
 6. State ownership: every resource (core matrix engine, core vector engine, SRAM bank group,
    DMA engine, router output port, link, memory channel) has exactly ONE owner id. State lives
@@ -65,6 +71,10 @@ ACCEPTANCE TESTS (write first):
 1. cargo test: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
    domain boundaries, owner assertion fires on a foreign mutation (debug build); proptest
    checks the wheel against a sorted reference over random schedules.
+1a. Clock edges: at 1.2 GHz, next_edge(core, 0, 3) == 2500 and next_edge(core, 0, 10^9) ==
+   833_333_333_334 (no drift); proptest over random freq_hz and k asserts
+   0 <= t_k · freq_hz − k · 10^12 < freq_hz (never early, under 1 ps late); a fixed-delay job
+   of N core cycles started at t = 0 never ends before N / freq_hz exactly.
 2. cargo fmt --check, cargo clippy --all-targets -- -D warnings and cargo deny check
    licenses pass; the engine crate forbids unsafe.
 3. A fixed-delay TaskGraph's duration equals its critical path worked by hand in the test,
@@ -85,6 +95,7 @@ optimise before determinism holds.
 
 ADR: docs/decisions/U0011-the-native-engine-core.md, started here: the expected speed factor
 and the single-point budget (both written before any measurement), the pinned Rust version,
+the time base as built (build-spec Rev 2.3: resolved integer freq_hz, rounded edges),
 and each departure from the vision note. The lookahead-collapse premise in particular: real routers take several
 cycles per hop (Tenstorrent documents ~9 router-to-router on Blackhole), so it is not L = 1.
 ```

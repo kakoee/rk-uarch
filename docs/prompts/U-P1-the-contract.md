@@ -173,7 +173,8 @@ these decisions, each with its proposed default:
   operator in it has its op class and shape regime covered, and its load regime for NoC and
   DRAM classes);
 - clock domains (proposal: build-spec §2.3.2's assignment; a frequency ratio scales the core
-  domain and every domain with scales_with_core: true);
+  domain and every domain with scales_with_core: true; each domain's frequency is resolved
+  once per grid point to integer hertz, and every engine, U-C0 included, uses that integer);
 - fidelity values (proposal: build-spec §2.4's keys and legal values, the same in requests
   and tables);
 - row keys (proposal: decode {batch, total_context_tokens}, prefill {n_prompts,
