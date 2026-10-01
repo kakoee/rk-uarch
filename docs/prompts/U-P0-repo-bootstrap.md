@@ -23,7 +23,7 @@ understand the whole system before a single model exists.
    [tool.hatch.build.targets.wheel] packages = ["src/rkuarch", "contract/uarch_contract"]),
    .python-version (3.12), Makefile, .importlinter, .pre-commit-config.yaml, .gitignore,
    .github/CODEOWNERS,
-   .github/workflows/{ci.yml,nightly.yml}, native/CMakeLists.txt (an empty project that
+   .github/workflows/{ci.yml,nightly.yml}, native/Cargo.toml (an empty workspace that
    builds nothing yet), containers/Dockerfile.engine (base image only), and
    third_party/LICENSES.md with the allow-list and an empty register.
 4. tests/unit/test_prompt_sync.py: asserts every ```text block in build-spec §8 equals the

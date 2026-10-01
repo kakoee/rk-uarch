@@ -10,6 +10,8 @@ below carry the new checks, and §7's effort is re-derived from the amended prom
 levels from ADR U0005, G4 and G7 gain class lists and defined fail-branch metrics, U6 and U7
 run split prompts (U-P11a–c, U-P13a–d), U9 is gated on a measured need, and §7.4's calendar
 takes the longer lane per sprint.
+**Rev 2.2, 2026-10-01.** The native engine is Rust (build-spec Rev 2.2). Sprint content and
+effort are unchanged; the seam with rk-sim is unchanged.
 
 **Canonical for:** *what order and who*. For *what* and *how* (architecture, contract, repo
 layout, conventions and the prompt texts) see `docs/build-spec.md`.
@@ -165,7 +167,7 @@ existing interfaces.
 | | |
 |---|---|
 | **Goal** | Our own engine, checked against the fork on the same work |
-| **Lane A** | The C++20 engine, in three sessions: time base, events, wheel, ownership and the protocol → **U-P11a**; compute level 1, NoC and DRAM level 0, the TaskGraph executor and attribution → **U-P11b**; diagnostics, traces, G5 and the measured speed factor → **U-P11c** |
+| **Lane A** | The Rust engine, in three sessions: time base, events, wheel, ownership and the protocol → **U-P11a**; compute level 1, NoC and DRAM level 0, the TaskGraph executor and attribution → **U-P11b**; diagnostics, traces, G5 and the measured speed factor → **U-P11c** |
 | **Lane B** | Native-vs-fork differential harness with attribution, determinism gates, simulator metrics and the regression gate → **U-P12** |
 | **Joint exit criterion** | **Gate G5**, or its recorded rescheduling to U7 if no fork configuration matches native's levels · the full L0, L0m and L1 suites pass on native · npu-m256 (a mesh the fork cannot model) builds a table |
 | **Effort** | A 175 · B 49 |
@@ -520,6 +522,7 @@ These costs are listed as facts, not as constraints. Prices were checked on 2026
 | "Unmodelled? Just put 0" | Zero is a result. Null is the honest answer when a level does not model something |
 | "Average the speedups across the suite" | An arithmetic mean of ratios rewards whichever workload moved most. Use the geometric mean, and show each workload |
 | "The kit warms up; the simulator doesn't need to" | Then every L3 error mixes warm silicon with a cold prediction. Stipulate the initial state |
+| "Use `unsafe` in the hot loop; it's faster" | Only the Ramulator 2 bridge may hold `unsafe`. Measure first: the engine's speed comes from its event design, not from skipping bounds checks |
 | "The fork is a cycle-level simulator, so its table is C2" | Levels come from build-spec §2.4's table, per sub-model, recorded in ADR U0005. A fork with no bank-conflict model gives C1 |
 | "Build the table at tp = 1 and let rk-sim divide" | The tp divisor is 1. A table is one rank of the split uarch built, for one tp; any other tp is refused |
 

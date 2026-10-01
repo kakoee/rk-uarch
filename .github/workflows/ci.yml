@@ -71,9 +71,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          if [ -n "$(find native/src -name '*.cpp' -print -quit)" ]; then
-            cmake -S native -B native/build && cmake --build native/build -j \
-              && ctest --test-dir native/build --output-on-failure
+          if [ -n "$(find native/crates -name '*.rs' -print -quit 2>/dev/null)" ]; then
+            cd native
+            cargo fmt --check
+            cargo clippy --all-targets -- -D warnings
+            cargo test
+            cargo install --locked cargo-deny && cargo deny check licenses
           else echo "nothing yet: no native sources"; fi
 
   perf:

@@ -21,6 +21,10 @@ U0001 decisions, fidelity keys and the fork's levels, a fused attention operator
 end-to-end mesh class, accumulator and controller-queue state, structural study variants,
 split native-engine prompts, and deferred scope (shared-SRAM engine support, the energy rung,
 a gate on U9).
+**Rev 2.2, 2026-10-01.** The native engine is written in **Rust**, not C++20: most of it is
+written by coding agents, and safe Rust turns their likeliest bugs (undefined behaviour, data
+races) into compile errors. `unsafe` lives only in the crate that bridges to Ramulator 2. The
+seam with rk-sim is unchanged and language-neutral (§7.1).
 
 **Companion documents.** `docs/execution-plan.md` is *when and who*: sprints, gates and effort.
 `rk-uarch-track-verdict-and-plan.md` (in the Project) holds the research and the reasoning
@@ -103,7 +107,7 @@ toward it from U1.
 | NoC | levels 0–2 | Hop latency → reservation calendars with cycle timestamps → flit-level (BookSim2, reference) |
 | DRAM | levels 0–2 | Latency + bandwidth cap derated for refresh → per-channel queue with row buffer and the spec's page policy → Ramulator 2 (library), configured from the spec's organisation and timing |
 | Shared SRAM (optional) | levels 0–1 | Capacity + bandwidth cap → per-port queue, attached to the NoC like a memory controller. In the contract from 0.1; engine support is deferred until after U8, and until then a spec with a shared SRAM lists it as unrepresented, so its composite is never C2 |
-| Engines | — | Analytic (U-C0), fork (ONNXim or PyTorchSim, pinned), native (C++20) |
+| Engines | — | Analytic (U-C0), fork (ONNXim or PyTorchSim, pinned), native (Rust) |
 | Parallelism | — | Across grid points from U4; inside a simulation from U9: exact conservative mode, plus a lax mode labelled approximate |
 | Evidence | — | L0 invariants, L0m metamorphic, L1 analytical limits, L2 differential, L3 two reference chips, ledger, model cards; workload fidelity against compiler-reported counts; diagnostic fidelity against device counters where a chip exposes them; L0 energy conservation (the energy L2 rung is deferred until after U8) |
 | Product | — | Tables, CLI, static reports with architect diagnostics, `uarch characterize`, design studies over a versioned workload suite, rk-sim integration (U-P19, U-P20) |
@@ -143,7 +147,7 @@ toward it from U1.
  │ (B,T,Q) envelope                       │                           │ hw/           designs (stipulated) · refs     │
  │                                        │                           │ workload/     ModelSpec+ModelShape → op graph │
  │ R1 DES ── IterationCost protocol ──┐   │                           │ mapping/      named policies → TaskGraph      │
- │                                    │   │                           │ engines/  analytic(U-C0) │ fork │ native(C++) │
+ │                                    │   │                           │ engines/ analytic(U-C0) │ fork │ native(Rust) │
  │   rk/engine/characterized/  ◀──────┘   │◀─────── UarchCostTable ───┤ table/        grid · pool · interp · errors   │
  │   (table-backed cost, P18)             │     (JSON, hashed)        │ provenance/   badges · cards · applicability  │
  │   <Badged> conditional · chip panel    │                           │ report/ study/  what a human reads            │
@@ -161,7 +165,7 @@ toward it from U1.
 | `src/rkuarch/workload/` | A | Operator graph per iteration; `uarch characterize` | Layer reuse declared; omissions listed; KV pages |
 | `src/rkuarch/mapping/` | A | Policies → `TaskGraph` | `name@version`; stipulated; declares dataflow; places SRAM buffers |
 | `src/rkuarch/engines/` | A | Engine protocol; analytic, fork, native adapters | Files in, files out |
-| `native/` | A | The C++20 engine | Built in the engine container |
+| `native/` | A | The Rust engine (a Cargo workspace) | Built in the engine container; `unsafe` only in the Ramulator 2 bridge crate |
 | `src/rkuarch/table/` | A | Grid, pool, interpolation, measured errors (LOO, composition, layer reuse, cold vs steady) | Refuses extrapolation |
 | `src/rkuarch/provenance/` | B | Badges, model cards, applicability | Never raises a badge |
 | `src/rkuarch/report/`, `study/` | B | Reports, diagnostics, studies over workload suites, diffs | Every number through `badged()`; unmodelled renders "not modelled" |
@@ -427,7 +431,9 @@ A request for C2 that cannot be honoured degrades or raises as §7.4 says.
 ### 2.5 The engine protocol and the TaskGraph
 
 Every engine runs as a subprocess: **`EngineJob` JSON in, `EngineResult` JSON out.** There is no
-foreign-function interface.
+foreign-function interface between the harness and any engine. `engines/protocol.py` defines
+both messages, `make gen` exports their JSON Schema to `src/rkuarch/engines/schema/`, and the
+native engine's Rust types are tested against that schema, so the two sides cannot drift.
 
 **`EngineJob` contains:**
 - the resolved HardwareSpec (numbers only, with a hash back to the spec);
@@ -521,14 +527,21 @@ named function.
 - **Time:** a `u64` count of picoseconds. Clock domains have integer `period_ps`, and
   `next_edge(domain, t_ps)` is the only conversion to cycles. DVFS is a per-domain frequency
   ratio fixed when the simulation is constructed.
-- **Event:** a 32-byte trivially-copyable struct,
-  `{u64 t_ps; u64 seq; u32 target; u16 kind; u8 phase; u8 flags; u32 payload; u32 pad}`.
+- **Language:** Rust (stable, pinned in `native/rust-toolchain.toml`), a Cargo workspace with a
+  committed `Cargo.lock`. Every crate carries `#![forbid(unsafe_code)]` except
+  `uarch-ramulator-sys`, the bridge to Ramulator 2, where each `unsafe` block has a `SAFETY:`
+  comment. `cargo clippy -- -D warnings` and `cargo fmt --check` gate every change.
+- **Event:** a 32-byte `#[repr(C)]` `Copy` struct, `{t_ps: u64, seq: u64, target: u32,
+  kind: u16, phase: u8, flags: u8, payload: u32, pad: u32}`, with a compile-time assertion
+  on its size.
   - Total order: `(t_ps, phase, target, seq)`.
   - Kinds: `TASK_READY`, `COMPUTE_DONE`, `DMA_ISSUE`, `DMA_DONE`, `NOC_HEAD`, `NOC_TAIL`,
     `MEM_REQ`, `MEM_RESP`, `SYNC_ARRIVE`, `BARRIER_RELEASE`, `STAT_SAMPLE`, `END`.
-  - Dispatch is a `switch` on kind, with no virtual calls on the hot path.
+  - Dispatch is a `match` on kind, with no trait objects (`dyn`) on the hot path.
 - **Ownership:** one owner id per resource. State is structure-of-arrays indexed by owner.
-  Only events targeted at an owner may mutate it, and debug builds assert this.
+  Only the handler of an event targeted at an owner gets `&mut` access to that owner's state,
+  and debug builds assert the target. From U9 each partition owns its slice of that state, so
+  a cross-partition mutation does not compile.
 - **Data structures:**
   - an event arena with a free list;
   - a two-level timing wheel (4,096 slots) with heap overflow;
@@ -537,9 +550,13 @@ named function.
   - `busy_until_ps[]` per link and port;
   - outstanding-request counters per DMA engine (F1);
   - ring buffers for memory queues;
-  - sorted vectors wherever iteration order could reach output.
-- **Dependencies:** nlohmann/json (MIT), doctest (MIT), and Ramulator 2 (MIT) linked as a
-  library from U7.
+  - sorted vectors or `BTreeMap` wherever iteration order could reach output; `HashMap` and
+    `HashSet` are banned in the engine crate by clippy's `disallowed-types`, because Rust
+    randomises their iteration order.
+- **Dependencies:** `serde` and `serde_json` (MIT/Apache-2.0), `proptest` (dev, MIT/Apache-2.0),
+  and from U7 Ramulator 2 (MIT) behind `cxx` (MIT/Apache-2.0) in `uarch-ramulator-sys`; from
+  U9, `loom` (dev, MIT) to check the mailboxes. Nothing else without an ADR. `cargo-deny`
+  checks every crate's licence against the allow-list.
 
 **Departures from the vision note (`elements_of_parallel_DES.md`), and why:**
 
@@ -561,7 +578,7 @@ their own partition. Every owner id belongs to exactly one partition.
 **Exact mode.** Windowed conservative synchronisation.
 - Lookahead L is the minimum cross-partition latency.
 - Within a window, cross-partition events travel through single-producer/single-consumer
-  mailboxes.
+  mailboxes. `loom` checks the mailbox protocol over every thread interleaving it explores.
 - At each window barrier, mailboxes merge in the global total order. Cross-partition `seq`
   values are derived deterministically.
 - Output is byte-identical to the single-threaded engine at any thread count.
@@ -578,7 +595,7 @@ boundary (temporal decoupling).
 |---|---|
 | Harness | Python 3.12, uv, Pydantic v2, NumPy, PyYAML, Typer, Jinja2 for reports |
 | Development | pytest, hypothesis, mypy (strict), ruff, import-linter |
-| Engine | C++20, CMake, FetchContent-pinned dependencies, doctest; ASan, UBSan and TSan in the nightly job |
+| Engine | Rust (stable, pinned), Cargo with a committed lockfile, serde_json, proptest; clippy `-D warnings`, rustfmt, cargo-deny for licences; in the nightly job, the debug build (overflow checks on) runs the golden requests, AddressSanitizer covers the Ramulator 2 bridge, and loom plus ThreadSanitizer cover the U9 mailboxes |
 | Container | Docker, built on the Linux box only |
 | References | BookSim 2 (BSD-2), Ramulator 2 (MIT), SCALE-Sim v3 (MIT), Gemmini (BSD-3) with Verilator (LGPL-3.0/Artistic-2.0), tt-npe and ttsim (Apache-2.0); Accelergy and Timeloop, each only after its licence passes the allow-list |
 | Measurement | JAX on Cloud TPU v5e (plus XLA's compiled cost analysis for workload fidelity); TT-Metalium with the device profiler on Blackhole p100a |
@@ -624,7 +641,7 @@ rk-uarch/
 │   ├── hw/                    __init__.py, derive.py                             (later: U-P3)
 │   ├── workload/              README.md, __init__.py                             (later: U-P3)
 │   ├── mapping/               README.md, __init__.py, policies/__init__.py       (later: U-P7)
-│   ├── engines/               README.md, __init__.py, protocol.py,
+│   ├── engines/               README.md, __init__.py, protocol.py, schema/ (U-P11a),
 │   │                          analytic/, fork/, native/  (each __init__.py)      (later: U-P3, U-P5, U-P11a)
 │   ├── table/                 README.md, __init__.py                             (later: U-P3, U-P7)
 │   ├── provenance/            README.md, __init__.py                             (later: U-P4)
@@ -632,8 +649,10 @@ rk-uarch/
 │   └── study/                 README.md, __init__.py                             (later: U-P14)
 ├── native/
 │   ├── README.md
-│   ├── CMakeLists.txt         empty project at bootstrap
-│   ├── include/uarch/  src/  tests/                                             (later: U-P11a)
+│   ├── Cargo.toml             empty workspace at bootstrap
+│   ├── rust-toolchain.toml  deny.toml                                           (later: U-P11a)
+│   ├── crates/uarch-engine/                                                     (later: U-P11a)
+│   ├── crates/uarch-ramulator-sys/                                              (later: U-P13b)
 ├── third_party/
 │   ├── README.md
 │   ├── LICENSES.md            allow-list + empty register
@@ -685,7 +704,7 @@ check 11).
 
 ## What this is
 A harness around simulation engines (analytic, a pinned published fork, and our own native
-C++ engine) that produces characterization tables rk-sim reads as the C2 compute answer.
+Rust engine) that produces characterization tables rk-sim reads as the C2 compute answer.
 The product is the honesty: every row carries its fidelity, its evidence, and the
 stipulations it is conditional on. Detail is not accuracy.
 
@@ -725,7 +744,8 @@ stipulations it is conditional on. Detail is not accuracy.
 - Don't add a workload IR or an ONNX import path. Workloads = rk-sim ModelSpec + ModelShape.
 - Don't add mapping search, SIMD, GPU, MPI, optimistic sync, a simulation compiler, or a web UI.
 - Don't tune any model parameter to pass an L2 or L3 comparison. Record the gap.
-- Don't add dependencies beyond pyproject.toml / native/CMakeLists.txt without asking.
+- Don't add dependencies beyond pyproject.toml / native/Cargo.toml without asking.
+- Don't write `unsafe` Rust outside native/crates/uarch-ramulator-sys/.
 - Don't read rk-sim's docs/vision/ unless a prompt names a section; never edit rk-sim, except
   in U-P19 and U-P20, which run inside rk-sim under its own rules.
 
@@ -764,7 +784,7 @@ earned only against real silicon. rk-sim reads those tables to price a custom AS
 
 ## Repo map
 contract/ the shared vocabulary · hw/ designs and references · src/rkuarch/ the harness ·
-native/ the C++ engine · validation/ the evidence · measure/ silicon kits · docs/ everything else
+native/ the Rust engine · validation/ the evidence · measure/ silicon kits · docs/ everything else
 
 ## Working here
 Read CLAUDE.md, then docs/build-spec.md §0. Sprints and prompts: docs/execution-plan.md.
@@ -885,7 +905,7 @@ function. No foreign-function interface.
              per_op mode is always ≥ aggregate. Anchors every L1 test.
 - fork/      the pinned published simulator in the engine container. Its mapping is its own,
              recorded as fork:<name>-default@<sha>. Fields it cannot represent are listed.
-- native/    the Python side of our C++ engine (native/ at the repo root).
+- native/    the Python side of our Rust engine (native/ at the repo root).
 Cycles live here and in native/, and nowhere else. EngineResult carries duration_ps, a
 critical-path attribution that sums to it, and diagnostics that are null wherever the level
 does not model them, never 0.
@@ -949,18 +969,24 @@ its own U-C0. No optimiser, no fitted surrogate, no area model.
 ### 4.13 · `/native/README.md`
 
 ```markdown
-# native — our event-driven engine (C++20)
+# native — our event-driven engine (Rust)
 
-Spec: docs/build-spec.md §2.8 (and §2.9 for parallel execution). Built in the engine
-container; `make native`, `make native-test`. Binary: uarch-engine (EngineJob → EngineResult).
+Spec: docs/build-spec.md §2.8 (and §2.9 for parallel execution). A Cargo workspace, built in
+the engine container; `make native`, `make native-test`. Binary: uarch-engine
+(EngineJob → EngineResult), behind the same subprocess protocol as every engine.
 
 ## Rules
 - Time is u64 picoseconds; next_edge() is the only time↔cycle conversion.
-- Events are 32 bytes, totally ordered by (t_ps, phase, target, seq). No virtual dispatch on
-  the hot path.
+- Events are 32-byte `#[repr(C)]` `Copy` structs, totally ordered by (t_ps, phase, target,
+  seq). Dispatch is a `match` on kind; no `dyn` on the hot path.
 - One owner per resource; only events targeted at it mutate it (asserted in debug builds).
-- No unordered-container iteration on any path that reaches output.
-- Dependencies: nlohmann/json, doctest, Ramulator 2 (from U7). Nothing else without an ADR.
+- No HashMap or HashSet on any path that reaches output (clippy disallowed-types).
+- `unsafe` only in crates/uarch-ramulator-sys, the C++ bridge to Ramulator 2; every other
+  crate has #![forbid(unsafe_code)].
+- Dependencies: serde, serde_json, proptest (dev); cxx and Ramulator 2 (from U7); loom (dev,
+  from U9). Nothing else without an ADR; cargo-deny checks every licence.
+- The engine protocol's JSON Schema (src/rkuarch/engines/schema/) is the contract with the
+  harness; a Rust test holds the serde types to it.
 - Determinism before speed. A speed-up that changes bytes is a bug.
 ```
 
@@ -1139,12 +1165,13 @@ determinism, licences, patches, native, ordering, perf. A job may report "nothin
 - golden: no expected files;
 - determinism: no golden scenarios;
 - patches: no files under `third_party/patches/`;
-- native: no sources under `native/src/`;
+- native: no Rust sources under `native/crates/`;
 - ordering: no `predictions/`;
 - perf: no baselines.
 
 The tests job fails on an empty suite. Nightly (on the Linux box as a self-hosted runner) runs
-the mutants, the L2 suite and the sanitizer builds.
+the mutants, the L2 suite, the native debug build over the golden requests, AddressSanitizer on
+the Ramulator 2 bridge, and (from U9) loom and ThreadSanitizer on the mailboxes.
 
 **6.8 Patches.** `third_party/patches/NNNN-<slug>.patch`, one reason line each.
 
@@ -1165,6 +1192,15 @@ renders "not modelled". A zero means the model computed zero.
 
 rk-sim never invokes uarch during a run. It reads a hashed table. That keeps rk-sim's engine
 pure (its invariant 4). Neither codebase imports the other at any point.
+
+**The seam is language-neutral.** rk-sim sees only `UarchCostTable` JSON, validated by the
+contract's JSON Schema, which the Python harness assembles from `EngineResult` JSON. The
+native engine's language (Rust) never reaches rk-sim, which needs no Rust toolchain, no
+binary, no bindings. rk-sim's `IterationCost` anticipates a future native-code DES that
+evaluates costs locally with no per-event calls back into Python; a table-backed cost stays
+compatible with that, because the table's interpolation is declared in closed form and
+`contract/fixtures/interpolation_vectors.json` pins expected values, so any implementation,
+in any language, can prove it reproduces them (U-P7).
 
 ### 7.2 The seam, and the nine rules
 
@@ -1262,7 +1298,7 @@ understand the whole system before a single model exists.
    [tool.hatch.build.targets.wheel] packages = ["src/rkuarch", "contract/uarch_contract"]),
    .python-version (3.12), Makefile, .importlinter, .pre-commit-config.yaml, .gitignore,
    .github/CODEOWNERS,
-   .github/workflows/{ci.yml,nightly.yml}, native/CMakeLists.txt (an empty project that
+   .github/workflows/{ci.yml,nightly.yml}, native/Cargo.toml (an empty workspace that
    builds nothing yet), containers/Dockerfile.engine (base image only), and
    third_party/LICENSES.md with the allow-list and an empty register.
 4. tests/unit/test_prompt_sync.py: asserts every ```text block in build-spec §8 equals the
@@ -1932,7 +1968,12 @@ records them: C2 only if they qualify, and C1, said so, if they do not.
    reassembled in grid order, so the table is byte-identical at 1 worker and at N.
 4. table/interpolate.py — exactly the declared scheme: decode bilinear in (log B, log T),
    prefill bilinear in (log n, log L), linear in 1/f across the frequency axis. OUTSIDE THE
-   GRID IS AN ERROR (EnvelopeExceedsGrid), never a clamp and never an extrapolation.
+   GRID IS AN ERROR (EnvelopeExceedsGrid), never a clamp and never an extrapolation. It also
+   writes contract/fixtures/interpolation_vectors.json (proposed to both founders, since
+   contract/ is theirs): query points inside and on the edges of the toy table's grid, with
+   the expected interpolated value of every row field. rk-sim's table-backed cost (U-P19)
+   and any later native-code reader must reproduce them within 1e-12 relative; that is what
+   keeps the table usable from any language.
 5. table/errors.py — the table measures its own errors and reports them. It never
    corrects them.
    a. interpolation_loo: leave each interior point out, predict it from the rest, report the
@@ -1979,6 +2020,8 @@ ACCEPTANCE TESTS (write first):
 11. A prefill row at L = 32768 builds with no SramCapacityExceeded, and its attention DRAM
     bytes equal Q, K, V and O within named deviations.
 12. The table's composite equals what build-spec §2.4's rule gives for ADR U0005's levels.
+13. interpolate.py reproduces interpolation_vectors.json, and a query outside the grid in
+    that file is refused.
 
 GUARDRAILS: No mapping search. Never silently clamp an out-of-grid query. Do not correct the
 composition or layer-reuse error, because disclosure is the deliverable. Do not let
@@ -2219,7 +2262,7 @@ spec, not background), ADR U0005, U0007. Javid's docs/vision/elements_of_paralle
 from rk-sim, READ-ONLY, for the parts §2.8 adopts, and build-spec §2.8's "departures" table
 for the parts it rejects and why.
 
-TASK: the kernel of native/, uarch's own event-driven engine, C++20, built in the engine
+TASK: the kernel of native/, uarch's own event-driven engine, in Rust, built in the engine
 container, and the plumbing that puts it behind exactly the same engine protocol as the
 fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
 `uarch-engine`. Single-threaded. No subsystem models yet: U-P11b adds them.
@@ -2228,57 +2271,74 @@ fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
    expect on npu-l4 and on a 16×16 mesh, and why (G5 checks it), and (b) a single-point
    wall-clock budget for the npu-m256 and 32×32 grids, above which parallelism inside one
    simulation is needed (U9's gate reads it).
-2. Build: native/CMakeLists.txt; dependencies via FetchContent at pinned tags, ONLY
-   nlohmann/json (MIT) and doctest (MIT), added to third_party/LICENSES.md. -Wall -Wextra
-   -Werror; a sanitizer preset (ASan+UBSan) used by the nightly job.
-3. Time: std::uint64_t picoseconds. Each clock domain has an integer period_ps.
+2. Build: native/Cargo.toml (workspace) with crates/uarch-engine (the `uarch-engine`
+   binary); native/rust-toolchain.toml pinning the current stable Rust, recorded in U0011;
+   a committed Cargo.lock. Dependencies ONLY serde and serde_json, plus proptest as a
+   dev-dependency, each added to third_party/LICENSES.md. native/deny.toml makes cargo-deny
+   check every crate's licence against the allow-list; if a core crate needs a licence
+   outside it (serde_derive's unicode-ident carries Unicode-3.0, for example), stop and
+   propose the allow-list change in an ADR. The crate has #![forbid(unsafe_code)];
+   clippy runs with -D warnings and disallows HashMap and HashSet; rustfmt is enforced.
+   Add the Rust toolchain to containers/Dockerfile.engine, and wire `make native` and
+   `make native-test` to cargo.
+3. Time: u64 picoseconds. Each clock domain has an integer period_ps.
    next_edge(domain, t_ps) is THE ONLY conversion between time and cycles; units in every
    name (_ps, _cycles). DVFS is a per-domain frequency ratio applied when the Simulation is
    constructed.
-4. Event: a 32-byte trivially copyable struct {u64 t_ps; u64 seq; u32 target; u16 kind;
-   u8 phase; u8 flags; u32 payload; u32 pad} with static_assert(sizeof(Event)==32). The total
-   order is (t_ps, phase, target, seq), and seq is assigned at schedule time from one counter.
+4. Event: a 32-byte #[repr(C)] Copy struct {t_ps: u64, seq: u64, target: u32, kind: u16,
+   phase: u8, flags: u8, payload: u32, pad: u32} with a compile-time assertion that its size
+   is 32. The total order is (t_ps, phase, target, seq), and seq is assigned at schedule time
+   from one counter.
    Kinds: TASK_READY, COMPUTE_DONE, DMA_ISSUE, DMA_DONE, NOC_HEAD, NOC_TAIL, MEM_REQ,
-   MEM_RESP, SYNC_ARRIVE, BARRIER_RELEASE, STAT_SAMPLE, END. Dispatch is a switch on kind,
-   with no virtual calls on the hot path.
+   MEM_RESP, SYNC_ARRIVE, BARRIER_RELEASE, STAT_SAMPLE, END. Dispatch is a match on kind,
+   with no trait objects (dyn) on the hot path.
 5. Scheduling: an event arena with a free list (no per-event heap allocation after warm-up);
    a two-level timing wheel (4,096 slots at the finest domain period) with a min-heap for
    overflow. Ties within a slot are resolved by the total order, never by insertion order.
 6. State ownership: every resource (core matrix engine, core vector engine, SRAM bank group,
    DMA engine, router output port, link, memory channel) has exactly ONE owner id. State lives
    in structure-of-arrays indexed by owner id. Only events whose target is that id may mutate
-   it; debug builds check this with an owner assertion on every mutation. Single-threaded,
-   this is discipline; in U-P17 it becomes the partition boundary.
+   it: only that event's handler gets &mut access to the owner's state, and debug builds
+   assert the target on every mutation. Single-threaded, this is discipline; in U-P17 it
+   becomes the partition boundary, enforced by the compiler.
 7. Topology: CSR adjacency; precomputed dimension-order routes (XY on mesh, shortest
    direction on torus); multiple NoCs, each with its own direction. Sorted vectors wherever
-   iteration order could reach a result. NO std::unordered_map ITERATION ON ANY PATH THAT
-   PRODUCES OUTPUT.
+   iteration order could reach a result. NO HashMap OR HashSet ON ANY PATH THAT PRODUCES
+   OUTPUT: Rust randomises their iteration order. Use BTreeMap or sorted Vecs.
 8. A fixed-delay executor: a TaskGraph whose jobs are fixed delays (no models yet),
    dependencies resolved by events, so the kernel runs end to end before any model exists.
 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
    parser, identical in shape to engines/fork/, so `uarch table ... --engine native` reaches
    the binary.
+10. The protocol as a schema: `make gen` also exports EngineJob and EngineResult's JSON Schema
+    from engines/protocol.py to src/rkuarch/engines/schema/, with fixture messages. The Rust
+    serde types are tested against those fixtures, so neither side can drift alone.
 
 ACCEPTANCE TESTS (write first):
-1. doctest: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
-   domain boundaries, owner-assertion fires on a foreign mutation (debug build).
-2. The build passes with -Wall -Wextra -Werror, and the sanitizer preset runs the doctests
-   clean.
+1. cargo test: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
+   domain boundaries, owner assertion fires on a foreign mutation (debug build); proptest
+   checks the wheel against a sorted reference over random schedules.
+2. cargo fmt --check, cargo clippy --all-targets -- -D warnings and cargo deny check
+   licenses pass; the engine crate forbids unsafe.
 3. A fixed-delay TaskGraph's duration equals its critical path worked by hand in the test,
-   and its EngineResult is byte-identical across 3 runs and under the sanitizer build.
+   and its EngineResult is byte-identical across 3 runs and between debug and release
+   builds.
 4. The Python side round-trips an EngineJob through `uarch-engine`, and the EngineResult
    validates against the engine protocol.
 5. Ties: events with equal t_ps resolve by (phase, target, seq), whatever order they were
    scheduled in.
+6. Protocol drift: the Rust types parse and re-emit every schema fixture unchanged, and a
+   fixture with an unknown field is refused, as Pydantic's extra="forbid" refuses it.
 
-GUARDRAILS: No subsystem models; they are U-P11b. No threads, no SIMD intrinsics, no GPU, no
-MPI; those are U-P17 at the earliest, and only what it builds. Do not delete or bypass the
+GUARDRAILS: No subsystem models; they are U-P11b. No unsafe. No threads, no SIMD intrinsics
+(std::simd, core::arch), no GPU, no MPI; those are U-P17 at the earliest, and only what it
+builds. Do not delete or bypass the
 fork: it is the permanent L2 reference. Cycles never leave native/ and engines/. Do not
 optimise before determinism holds.
 
 ADR: docs/decisions/U0011-the-native-engine-core.md, started here: the expected speed factor
-and the single-point budget (both written before any measurement), and each departure from
-the vision note. The lookahead-collapse premise in particular: real routers take several
+and the single-point budget (both written before any measurement), the pinned Rust version,
+and each departure from the vision note. The lookahead-collapse premise in particular: real routers take several
 cycles per hop (Tenstorrent documents ~9 router-to-router on Blackhole), so it is not L = 1.
 ```
 
@@ -2317,8 +2377,8 @@ TaskGraph through them, so the native engine produces real rows.
 ACCEPTANCE TESTS (write first):
 1. The FULL L0, L0m and L1 suites pass against the native engine through the engine
    protocol, with no suite code changed.
-2. Determinism: same job → byte-identical EngineResult across 3 runs and under the sanitizer
-   build.
+2. Determinism: same job → byte-identical EngineResult across 3 runs, and between debug and
+   release builds.
 3. `uarch table hw/designs/npu-m256.yaml ... --engine native` builds a full table: the mesh
    class, which the fork cannot represent.
 4. The latency-bound stream fixture (U-P8) passes, and lowering max_outstanding lowers a
@@ -2397,7 +2457,8 @@ and make simulator performance a regression-tested quantity rather than an anecd
 2. Determinism gates in CI, for every engine in the matrix:
    - table built twice → byte-identical;
    - --workers 1 vs --workers N → byte-identical;
-   - nightly: the native engine's sanitizer build runs the golden requests clean.
+   - nightly: the native engine's debug build (overflow checks on) runs the golden requests
+     clean, and from U-P13b the Ramulator 2 bridge runs its tests under AddressSanitizer.
 3. validation/perf/: simulator-performance metrics recorded per golden request, per engine
    version, as data:
    - HOST INSTRUCTIONS PER SIMULATED CYCLE, via `perf stat` where the box permits it.
@@ -2460,7 +2521,7 @@ ACCEPTANCE TESTS (write first):
    uniform one at equal MACs and bytes. At NoC level 0 the two are identical, and the test
    asserts both halves.
 3. A barrier across 64 cores takes longer under background NoC traffic than on an idle NoC.
-4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+4. Determinism: byte-identical at 1 and N workers; the debug build runs clean.
 
 GUARDRAILS: No threads yet. Do not remove the level-0 path: it is a fast mode. Do not tune
 reservation parameters to match BookSim. Record the gap and its mechanism in the L2 report.
@@ -2486,7 +2547,11 @@ the address interleaving that decides which cores talk to which controller.
    engine image pins, one instance per memory controller, configured from the spec's DRAM
    organisation, timing, timing_preset and queue depths, and never from a preset or default
    the spec does not name; what Ramulator needs and the spec lacks is listed as
-   unrepresented. Add Ramulator 2 to native/CMakeLists.txt and third_party/LICENSES.md.
+   unrepresented. The bridge is its own crate, crates/uarch-ramulator-sys: a thin C++ shim over
+   the External frontend, compiled by build.rs, bound with cxx, and the ONLY crate allowed
+   unsafe, every unsafe block with a SAFETY comment. The engine crate calls it through a safe
+   API and stays #![forbid(unsafe_code)]. Register Ramulator 2 and cxx in
+   third_party/LICENSES.md.
 3. Back-pressure: a controller whose queue is full withholds NoC credits (noc_credits), so
    requests wait in the network rather than vanishing into an unbounded queue.
 4. Addresses map to channels and controllers by memory.interleave, so the NoC sees the
@@ -2503,7 +2568,9 @@ ACCEPTANCE TESTS (write first):
    shortens duration, and raises NoC latency at that controller's attach point.
 4. No preset fallback: a spec without timing and without timing_preset is refused at DRAM
    level 2, naming the missing fields.
-5. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+5. Determinism: byte-identical at 1 and N workers; the bridge's tests run clean under
+   AddressSanitizer in the nightly job.
+6. unsafe appears nowhere outside crates/uarch-ramulator-sys (a test greps the workspace).
 
 GUARDRAILS: No threads yet. Keep DRAM level 0 and level 1: they are the fast modes. Do not
 tune DRAM parameters toward Ramulator's defaults; record the gap.
@@ -2534,7 +2601,7 @@ ACCEPTANCE TESTS (write first):
    slower than one that spreads them, at equal bytes; at compute level 1 the two are
    identical, and the test asserts both halves.
 3. A spec with a shared_sram reports it as unrepresented and is refused C2, with the reason.
-4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+4. Determinism: byte-identical at 1 and N workers; the debug build runs clean.
 
 GUARDRAILS: No threads yet. Keep compute level 1: it is the fast mode. Do not model the
 shared SRAM in this prompt.
@@ -2579,7 +2646,7 @@ ACCEPTANCE TESTS (write first):
    with the reason.
 2. Roofline floor: no row of any native table is faster than its U-C0 roofline.
 3. summa-2d@1 and head-parallel@1 pass L0's per-core bytes and MACs check against the graph.
-4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+4. Determinism: byte-identical at 1 and N workers; the debug build runs clean.
 5. The 32×32 table builds, and its metrics and wall-clock are recorded.
 
 GUARDRAILS: Do not claim C2 below the rule. No threads yet. Do not remove the level-0 and
@@ -2818,8 +2885,12 @@ appears.
    drained and merged in the global total order (t_ps, phase, target, seq). seq for a
    cross-partition event is derived deterministically, NOT from a shared atomic counter
    whose value depends on thread interleaving.
-3. Threads: a fixed pool pinned to cores, static partition affinity, no work stealing in this
-   prompt. No mutex on the hot path; the only synchronisation is the window barrier.
+3. Threads: a fixed pool (std::thread::scope), static partition affinity, no work stealing in
+   this prompt. Each partition owns its state slice, handed to exactly one thread as &mut, so
+   the compiler forbids a cross-partition mutation. No mutex on the hot path; the only
+   synchronisation is the window barrier. Mailboxes use std's synchronisation primitives;
+   core pinning, or a lock-free crate (crossbeam, MIT/Apache-2.0), only with an ADR. Still no
+   unsafe.
 4. LAX MODE (a flag, off by default): a synchronisation quantum Q > L. Events that cross a
    partition boundary within a window are delivered at the next window boundary (temporal
    decoupling, as in a TLM-2.0 quantum keeper). EngineResult then reports sync: approx(Q),
@@ -2831,9 +2902,10 @@ appears.
 
 ACCEPTANCE TESTS (write first):
 1. EXACT MODE IS BYTE-IDENTICAL to single-threaded for every golden request, at 1, 2, 4 and
-   8 threads, under the sanitizer build too (TSan added to the nightly for this binary).
-2. A mailbox fuzz test with randomised thread sleeps produces identical output across 50
-   runs.
+   8 threads, and under ThreadSanitizer in the nightly job.
+2. A loom model of the mailbox protocol (two producers' windows, one merge) yields the same
+   merged order in every interleaving loom explores; and a fuzz test with randomised thread
+   sleeps produces identical output across 50 runs.
 3. The lookahead is computed from the spec, not configured. A test changes a router latency
    and asserts L changes with it.
 4. Lax mode at Q = L is byte-identical to exact mode. At Q > L, EngineResult says
@@ -2916,7 +2988,8 @@ draft is in the uarch kit at rk-sim-side/decisions/DRAFT-admit-characterized-c2-
 It must be ACCEPTED, and its schema PR MERGED, before this prompt starts: build-spec §1.3 rules
 out memoization surrogates for the prototype, and a characterization table is one. From
 rk-uarch, READ-ONLY: docs/decisions/U0001 (the nine rules), contract/schema/*.json at the
-contract version the boundary ADR names, and one committed table.
+contract version the boundary ADR names, contract/fixtures/interpolation_vectors.json, and one
+committed table.
 
 TASK: a component whose effective compute fidelity is C2 is priced, every iteration, from a
 uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
@@ -2981,7 +3054,8 @@ ACCEPTANCE TESTS (write first):
 2. PLUMBING WITHOUT UARCH: generate a table from rk-sim's own C0 closed form on a grid. At grid
    points the characterized cost reproduces IterationCost exactly (==), and between points
    within the declared interpolation error. This proves the path independently of uarch's
-   physics.
+   physics. The characterized cost also reproduces rk-uarch's
+   contract/fixtures/interpolation_vectors.json within 1e-12 relative.
 3. Envelope refusal at build time; spec-hash mismatch; params mismatch; tp mismatch;
    contract-major mismatch; non-finite row; DVFS without a frequency axis; a cold table in
    R1; a KV block-size mismatch: one test each, each raising the named error.
@@ -3123,7 +3197,8 @@ CHECK, in order:
    table tp equals plan tp); seeds not
    plumbed into a new randomness source; unordered iteration reaching output; a diagnostic
    or energy figure rendered as 0 where the level does not model it; an engine reading a
-   DRAM preset the spec does not name. Re-derive the
+   DRAM preset the spec does not name; `unsafe` Rust outside crates/uarch-ramulator-sys, or a
+   HashMap or HashSet on a path that reaches output. Re-derive the
    three most-touched formulas from their docstrings and say whether the code matches.
 5. Provenance: any stipulation outside hw/designs/? Any claim without a source? Any reference
    spec that loads with a stipulation? Any derived value whose kind or provenance is better

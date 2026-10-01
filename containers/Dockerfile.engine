@@ -1,4 +1,5 @@
-# Base only. U-P5 adds the pinned fork, BookSim 2 and Ramulator 2; U-P11 adds the native build.
+# Base only. U-P5 adds the pinned fork, BookSim 2 and Ramulator 2; U-P11a adds the Rust
+# toolchain and the native build (cmake stays: the fork, BookSim 2 and Ramulator 2 need it).
 FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential cmake git ca-certificates python3 && rm -rf /var/lib/apt/lists/*

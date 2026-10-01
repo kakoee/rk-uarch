@@ -12,7 +12,7 @@
 | attention_fused | attention as one operator (QK → softmax → AV over KV tiles, scores on chip); its DRAM traffic is Q, K, V and O only |
 | canonical batch | equal-length sequences standing for a (B, T, Q) query; the reduction error measures the cost of that stand-in |
 | fork | the pinned published simulator (ONNXim or PyTorchSim); the native engine's permanent L2 reference |
-| native | our C++20 event-driven engine |
+| native | our event-driven engine, in Rust (`native/`, binary `uarch-engine`); `unsafe` only in the Ramulator 2 bridge crate |
 | L0 · L0m · L1 · L2 · L3 · L4 | invariants · metamorphic · analytical limits · differential · same-class silicon · target silicon |
 | verified / validated | L0–L2 / L3+. Only validated evidence moves a badge |
 | initial_state | `steady` (one priming iteration simulated, the second reported) or `cold` (empty SRAM, closed rows); a stipulation on every row |

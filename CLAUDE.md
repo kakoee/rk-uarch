@@ -2,7 +2,7 @@
 
 ## What this is
 A harness around simulation engines (analytic, a pinned published fork, and our own native
-C++ engine) that produces characterization tables rk-sim reads as the C2 compute answer.
+Rust engine) that produces characterization tables rk-sim reads as the C2 compute answer.
 The product is the honesty: every row carries its fidelity, its evidence, and the
 stipulations it is conditional on. Detail is not accuracy.
 
@@ -42,7 +42,8 @@ stipulations it is conditional on. Detail is not accuracy.
 - Don't add a workload IR or an ONNX import path. Workloads = rk-sim ModelSpec + ModelShape.
 - Don't add mapping search, SIMD, GPU, MPI, optimistic sync, a simulation compiler, or a web UI.
 - Don't tune any model parameter to pass an L2 or L3 comparison. Record the gap.
-- Don't add dependencies beyond pyproject.toml / native/CMakeLists.txt without asking.
+- Don't add dependencies beyond pyproject.toml / native/Cargo.toml without asking.
+- Don't write `unsafe` Rust outside native/crates/uarch-ramulator-sys/.
 - Don't read rk-sim's docs/vision/ unless a prompt names a section; never edit rk-sim, except
   in U-P19 and U-P20, which run inside rk-sim under its own rules.
 

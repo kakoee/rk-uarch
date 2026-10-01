@@ -38,7 +38,12 @@ records them: C2 only if they qualify, and C1, said so, if they do not.
    reassembled in grid order, so the table is byte-identical at 1 worker and at N.
 4. table/interpolate.py — exactly the declared scheme: decode bilinear in (log B, log T),
    prefill bilinear in (log n, log L), linear in 1/f across the frequency axis. OUTSIDE THE
-   GRID IS AN ERROR (EnvelopeExceedsGrid), never a clamp and never an extrapolation.
+   GRID IS AN ERROR (EnvelopeExceedsGrid), never a clamp and never an extrapolation. It also
+   writes contract/fixtures/interpolation_vectors.json (proposed to both founders, since
+   contract/ is theirs): query points inside and on the edges of the toy table's grid, with
+   the expected interpolated value of every row field. rk-sim's table-backed cost (U-P19)
+   and any later native-code reader must reproduce them within 1e-12 relative; that is what
+   keeps the table usable from any language.
 5. table/errors.py — the table measures its own errors and reports them. It never
    corrects them.
    a. interpolation_loo: leave each interior point out, predict it from the rest, report the
@@ -85,6 +90,8 @@ ACCEPTANCE TESTS (write first):
 11. A prefill row at L = 32768 builds with no SramCapacityExceeded, and its attention DRAM
     bytes equal Q, K, V and O within named deviations.
 12. The table's composite equals what build-spec §2.4's rule gives for ADR U0005's levels.
+13. interpolate.py reproduces interpolation_vectors.json, and a query outside the grid in
+    that file is refused.
 
 GUARDRAILS: No mapping search. Never silently clamp an out-of-grid query. Do not correct the
 composition or layer-reuse error, because disclosure is the deliverable. Do not let

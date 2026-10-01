@@ -22,7 +22,7 @@ ACCEPTANCE TESTS (write first):
    slower than one that spreads them, at equal bytes; at compute level 1 the two are
    identical, and the test asserts both halves.
 3. A spec with a shared_sram reports it as unrepresented and is refused C2, with the reason.
-4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+4. Determinism: byte-identical at 1 and N workers; the debug build runs clean.
 
 GUARDRAILS: No threads yet. Keep compute level 1: it is the fast mode. Do not model the
 shared SRAM in this prompt.

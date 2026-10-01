@@ -30,7 +30,8 @@ CHECK, in order:
    table tp equals plan tp); seeds not
    plumbed into a new randomness source; unordered iteration reaching output; a diagnostic
    or energy figure rendered as 0 where the level does not model it; an engine reading a
-   DRAM preset the spec does not name. Re-derive the
+   DRAM preset the spec does not name; `unsafe` Rust outside crates/uarch-ramulator-sys, or a
+   HashMap or HashSet on a path that reaches output. Re-derive the
    three most-touched formulas from their docstrings and say whether the code matches.
 5. Provenance: any stipulation outside hw/designs/? Any claim without a source? Any reference
    spec that loads with a stipulation? Any derived value whose kind or provenance is better

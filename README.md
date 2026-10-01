@@ -13,7 +13,7 @@ earned only against real silicon. rk-sim reads those tables to price a custom AS
 
 ## Repo map
 contract/ the shared vocabulary · hw/ designs and references · src/rkuarch/ the harness ·
-native/ the C++ engine · validation/ the evidence · measure/ silicon kits · docs/ everything else
+native/ the Rust engine · validation/ the evidence · measure/ silicon kits · docs/ everything else
 
 ## Working here
 Read CLAUDE.md, then docs/build-spec.md §0. Sprints and prompts: docs/execution-plan.md.

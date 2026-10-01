@@ -6,7 +6,7 @@ function. No foreign-function interface.
              per_op mode is always ≥ aggregate. Anchors every L1 test.
 - fork/      the pinned published simulator in the engine container. Its mapping is its own,
              recorded as fork:<name>-default@<sha>. Fields it cannot represent are listed.
-- native/    the Python side of our C++ engine (native/ at the repo root).
+- native/    the Python side of our Rust engine (native/ at the repo root).
 Cycles live here and in native/, and nowhere else. EngineResult carries duration_ps, a
 critical-path attribution that sums to it, and diagnostics that are null wherever the level
 does not model them, never 0.

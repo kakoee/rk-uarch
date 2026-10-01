@@ -21,7 +21,8 @@ and make simulator performance a regression-tested quantity rather than an anecd
 2. Determinism gates in CI, for every engine in the matrix:
    - table built twice → byte-identical;
    - --workers 1 vs --workers N → byte-identical;
-   - nightly: the native engine's sanitizer build runs the golden requests clean.
+   - nightly: the native engine's debug build (overflow checks on) runs the golden requests
+     clean, and from U-P13b the Ramulator 2 bridge runs its tests under AddressSanitizer.
 3. validation/perf/: simulator-performance metrics recorded per golden request, per engine
    version, as data:
    - HOST INSTRUCTIONS PER SIMULATED CYCLE, via `perf stat` where the box permits it.

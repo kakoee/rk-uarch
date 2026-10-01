@@ -36,7 +36,7 @@ ACCEPTANCE TESTS (write first):
    with the reason.
 2. Roofline floor: no row of any native table is faster than its U-C0 roofline.
 3. summa-2d@1 and head-parallel@1 pass L0's per-core bytes and MACs check against the graph.
-4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+4. Determinism: byte-identical at 1 and N workers; the debug build runs clean.
 5. The 32×32 table builds, and its metrics and wall-clock are recorded.
 
 GUARDRAILS: Do not claim C2 below the rule. No threads yet. Do not remove the level-0 and

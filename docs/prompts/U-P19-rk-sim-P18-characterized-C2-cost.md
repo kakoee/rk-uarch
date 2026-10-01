@@ -15,7 +15,8 @@ draft is in the uarch kit at rk-sim-side/decisions/DRAFT-admit-characterized-c2-
 It must be ACCEPTED, and its schema PR MERGED, before this prompt starts: build-spec §1.3 rules
 out memoization surrogates for the prototype, and a characterization table is one. From
 rk-uarch, READ-ONLY: docs/decisions/U0001 (the nine rules), contract/schema/*.json at the
-contract version the boundary ADR names, and one committed table.
+contract version the boundary ADR names, contract/fixtures/interpolation_vectors.json, and one
+committed table.
 
 TASK: a component whose effective compute fidelity is C2 is priced, every iteration, from a
 uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
@@ -80,7 +81,8 @@ ACCEPTANCE TESTS (write first):
 2. PLUMBING WITHOUT UARCH: generate a table from rk-sim's own C0 closed form on a grid. At grid
    points the characterized cost reproduces IterationCost exactly (==), and between points
    within the declared interpolation error. This proves the path independently of uarch's
-   physics.
+   physics. The characterized cost also reproduces rk-uarch's
+   contract/fixtures/interpolation_vectors.json within 1e-12 relative.
 3. Envelope refusal at build time; spec-hash mismatch; params mismatch; tp mismatch;
    contract-major mismatch; non-finite row; DVFS without a frequency axis; a cold table in
    R1; a KV block-size mismatch: one test each, each raising the named error.

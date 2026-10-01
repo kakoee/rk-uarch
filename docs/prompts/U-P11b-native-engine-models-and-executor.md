@@ -34,8 +34,8 @@ TaskGraph through them, so the native engine produces real rows.
 ACCEPTANCE TESTS (write first):
 1. The FULL L0, L0m and L1 suites pass against the native engine through the engine
    protocol, with no suite code changed.
-2. Determinism: same job → byte-identical EngineResult across 3 runs and under the sanitizer
-   build.
+2. Determinism: same job → byte-identical EngineResult across 3 runs, and between debug and
+   release builds.
 3. `uarch table hw/designs/npu-m256.yaml ... --engine native` builds a full table: the mesh
    class, which the fork cannot represent.
 4. The latency-bound stream fixture (U-P8) passes, and lowering max_outstanding lowers a

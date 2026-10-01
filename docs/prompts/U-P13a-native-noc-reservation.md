@@ -28,7 +28,7 @@ ACCEPTANCE TESTS (write first):
    uniform one at equal MACs and bytes. At NoC level 0 the two are identical, and the test
    asserts both halves.
 3. A barrier across 64 cores takes longer under background NoC traffic than on an idle NoC.
-4. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+4. Determinism: byte-identical at 1 and N workers; the debug build runs clean.
 
 GUARDRAILS: No threads yet. Do not remove the level-0 path: it is a fast mode. Do not tune
 reservation parameters to match BookSim. Record the gap and its mechanism in the L2 report.

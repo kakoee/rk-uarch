@@ -26,8 +26,12 @@ appears.
    drained and merged in the global total order (t_ps, phase, target, seq). seq for a
    cross-partition event is derived deterministically, NOT from a shared atomic counter
    whose value depends on thread interleaving.
-3. Threads: a fixed pool pinned to cores, static partition affinity, no work stealing in this
-   prompt. No mutex on the hot path; the only synchronisation is the window barrier.
+3. Threads: a fixed pool (std::thread::scope), static partition affinity, no work stealing in
+   this prompt. Each partition owns its state slice, handed to exactly one thread as &mut, so
+   the compiler forbids a cross-partition mutation. No mutex on the hot path; the only
+   synchronisation is the window barrier. Mailboxes use std's synchronisation primitives;
+   core pinning, or a lock-free crate (crossbeam, MIT/Apache-2.0), only with an ADR. Still no
+   unsafe.
 4. LAX MODE (a flag, off by default): a synchronisation quantum Q > L. Events that cross a
    partition boundary within a window are delivered at the next window boundary (temporal
    decoupling, as in a TLM-2.0 quantum keeper). EngineResult then reports sync: approx(Q),
@@ -39,9 +43,10 @@ appears.
 
 ACCEPTANCE TESTS (write first):
 1. EXACT MODE IS BYTE-IDENTICAL to single-threaded for every golden request, at 1, 2, 4 and
-   8 threads, under the sanitizer build too (TSan added to the nightly for this binary).
-2. A mailbox fuzz test with randomised thread sleeps produces identical output across 50
-   runs.
+   8 threads, and under ThreadSanitizer in the nightly job.
+2. A loom model of the mailbox protocol (two producers' windows, one merge) yields the same
+   merged order in every interleaving loom explores; and a fuzz test with randomised thread
+   sleeps produces identical output across 50 runs.
 3. The lookahead is computed from the spec, not configured. A test changes a router latency
    and asserts L changes with it.
 4. Lax mode at Q = L is byte-identical to exact mode. At Q > L, EngineResult says

@@ -9,7 +9,7 @@ spec, not background), ADR U0005, U0007. Javid's docs/vision/elements_of_paralle
 from rk-sim, READ-ONLY, for the parts §2.8 adopts, and build-spec §2.8's "departures" table
 for the parts it rejects and why.
 
-TASK: the kernel of native/, uarch's own event-driven engine, C++20, built in the engine
+TASK: the kernel of native/, uarch's own event-driven engine, in Rust, built in the engine
 container, and the plumbing that puts it behind exactly the same engine protocol as the
 fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
 `uarch-engine`. Single-threaded. No subsystem models yet: U-P11b adds them.
@@ -18,56 +18,73 @@ fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
    expect on npu-l4 and on a 16×16 mesh, and why (G5 checks it), and (b) a single-point
    wall-clock budget for the npu-m256 and 32×32 grids, above which parallelism inside one
    simulation is needed (U9's gate reads it).
-2. Build: native/CMakeLists.txt; dependencies via FetchContent at pinned tags, ONLY
-   nlohmann/json (MIT) and doctest (MIT), added to third_party/LICENSES.md. -Wall -Wextra
-   -Werror; a sanitizer preset (ASan+UBSan) used by the nightly job.
-3. Time: std::uint64_t picoseconds. Each clock domain has an integer period_ps.
+2. Build: native/Cargo.toml (workspace) with crates/uarch-engine (the `uarch-engine`
+   binary); native/rust-toolchain.toml pinning the current stable Rust, recorded in U0011;
+   a committed Cargo.lock. Dependencies ONLY serde and serde_json, plus proptest as a
+   dev-dependency, each added to third_party/LICENSES.md. native/deny.toml makes cargo-deny
+   check every crate's licence against the allow-list; if a core crate needs a licence
+   outside it (serde_derive's unicode-ident carries Unicode-3.0, for example), stop and
+   propose the allow-list change in an ADR. The crate has #![forbid(unsafe_code)];
+   clippy runs with -D warnings and disallows HashMap and HashSet; rustfmt is enforced.
+   Add the Rust toolchain to containers/Dockerfile.engine, and wire `make native` and
+   `make native-test` to cargo.
+3. Time: u64 picoseconds. Each clock domain has an integer period_ps.
    next_edge(domain, t_ps) is THE ONLY conversion between time and cycles; units in every
    name (_ps, _cycles). DVFS is a per-domain frequency ratio applied when the Simulation is
    constructed.
-4. Event: a 32-byte trivially copyable struct {u64 t_ps; u64 seq; u32 target; u16 kind;
-   u8 phase; u8 flags; u32 payload; u32 pad} with static_assert(sizeof(Event)==32). The total
-   order is (t_ps, phase, target, seq), and seq is assigned at schedule time from one counter.
+4. Event: a 32-byte #[repr(C)] Copy struct {t_ps: u64, seq: u64, target: u32, kind: u16,
+   phase: u8, flags: u8, payload: u32, pad: u32} with a compile-time assertion that its size
+   is 32. The total order is (t_ps, phase, target, seq), and seq is assigned at schedule time
+   from one counter.
    Kinds: TASK_READY, COMPUTE_DONE, DMA_ISSUE, DMA_DONE, NOC_HEAD, NOC_TAIL, MEM_REQ,
-   MEM_RESP, SYNC_ARRIVE, BARRIER_RELEASE, STAT_SAMPLE, END. Dispatch is a switch on kind,
-   with no virtual calls on the hot path.
+   MEM_RESP, SYNC_ARRIVE, BARRIER_RELEASE, STAT_SAMPLE, END. Dispatch is a match on kind,
+   with no trait objects (dyn) on the hot path.
 5. Scheduling: an event arena with a free list (no per-event heap allocation after warm-up);
    a two-level timing wheel (4,096 slots at the finest domain period) with a min-heap for
    overflow. Ties within a slot are resolved by the total order, never by insertion order.
 6. State ownership: every resource (core matrix engine, core vector engine, SRAM bank group,
    DMA engine, router output port, link, memory channel) has exactly ONE owner id. State lives
    in structure-of-arrays indexed by owner id. Only events whose target is that id may mutate
-   it; debug builds check this with an owner assertion on every mutation. Single-threaded,
-   this is discipline; in U-P17 it becomes the partition boundary.
+   it: only that event's handler gets &mut access to the owner's state, and debug builds
+   assert the target on every mutation. Single-threaded, this is discipline; in U-P17 it
+   becomes the partition boundary, enforced by the compiler.
 7. Topology: CSR adjacency; precomputed dimension-order routes (XY on mesh, shortest
    direction on torus); multiple NoCs, each with its own direction. Sorted vectors wherever
-   iteration order could reach a result. NO std::unordered_map ITERATION ON ANY PATH THAT
-   PRODUCES OUTPUT.
+   iteration order could reach a result. NO HashMap OR HashSet ON ANY PATH THAT PRODUCES
+   OUTPUT: Rust randomises their iteration order. Use BTreeMap or sorted Vecs.
 8. A fixed-delay executor: a TaskGraph whose jobs are fixed delays (no models yet),
    dependencies resolved by events, so the kernel runs end to end before any model exists.
 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
    parser, identical in shape to engines/fork/, so `uarch table ... --engine native` reaches
    the binary.
+10. The protocol as a schema: `make gen` also exports EngineJob and EngineResult's JSON Schema
+    from engines/protocol.py to src/rkuarch/engines/schema/, with fixture messages. The Rust
+    serde types are tested against those fixtures, so neither side can drift alone.
 
 ACCEPTANCE TESTS (write first):
-1. doctest: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
-   domain boundaries, owner-assertion fires on a foreign mutation (debug build).
-2. The build passes with -Wall -Wextra -Werror, and the sanitizer preset runs the doctests
-   clean.
+1. cargo test: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
+   domain boundaries, owner assertion fires on a foreign mutation (debug build); proptest
+   checks the wheel against a sorted reference over random schedules.
+2. cargo fmt --check, cargo clippy --all-targets -- -D warnings and cargo deny check
+   licenses pass; the engine crate forbids unsafe.
 3. A fixed-delay TaskGraph's duration equals its critical path worked by hand in the test,
-   and its EngineResult is byte-identical across 3 runs and under the sanitizer build.
+   and its EngineResult is byte-identical across 3 runs and between debug and release
+   builds.
 4. The Python side round-trips an EngineJob through `uarch-engine`, and the EngineResult
    validates against the engine protocol.
 5. Ties: events with equal t_ps resolve by (phase, target, seq), whatever order they were
    scheduled in.
+6. Protocol drift: the Rust types parse and re-emit every schema fixture unchanged, and a
+   fixture with an unknown field is refused, as Pydantic's extra="forbid" refuses it.
 
-GUARDRAILS: No subsystem models; they are U-P11b. No threads, no SIMD intrinsics, no GPU, no
-MPI; those are U-P17 at the earliest, and only what it builds. Do not delete or bypass the
+GUARDRAILS: No subsystem models; they are U-P11b. No unsafe. No threads, no SIMD intrinsics
+(std::simd, core::arch), no GPU, no MPI; those are U-P17 at the earliest, and only what it
+builds. Do not delete or bypass the
 fork: it is the permanent L2 reference. Cycles never leave native/ and engines/. Do not
 optimise before determinism holds.
 
 ADR: docs/decisions/U0011-the-native-engine-core.md, started here: the expected speed factor
-and the single-point budget (both written before any measurement), and each departure from
-the vision note. The lookahead-collapse premise in particular: real routers take several
+and the single-point budget (both written before any measurement), the pinned Rust version,
+and each departure from the vision note. The lookahead-collapse premise in particular: real routers take several
 cycles per hop (Tenstorrent documents ~9 router-to-router on Blackhole), so it is not L = 1.
 ```

@@ -17,7 +17,11 @@ the address interleaving that decides which cores talk to which controller.
    engine image pins, one instance per memory controller, configured from the spec's DRAM
    organisation, timing, timing_preset and queue depths, and never from a preset or default
    the spec does not name; what Ramulator needs and the spec lacks is listed as
-   unrepresented. Add Ramulator 2 to native/CMakeLists.txt and third_party/LICENSES.md.
+   unrepresented. The bridge is its own crate, crates/uarch-ramulator-sys: a thin C++ shim over
+   the External frontend, compiled by build.rs, bound with cxx, and the ONLY crate allowed
+   unsafe, every unsafe block with a SAFETY comment. The engine crate calls it through a safe
+   API and stays #![forbid(unsafe_code)]. Register Ramulator 2 and cxx in
+   third_party/LICENSES.md.
 3. Back-pressure: a controller whose queue is full withholds NoC credits (noc_credits), so
    requests wait in the network rather than vanishing into an unbounded queue.
 4. Addresses map to channels and controllers by memory.interleave, so the NoC sees the
@@ -34,7 +38,9 @@ ACCEPTANCE TESTS (write first):
    shortens duration, and raises NoC latency at that controller's attach point.
 4. No preset fallback: a spec without timing and without timing_preset is refused at DRAM
    level 2, naming the missing fields.
-5. Determinism: byte-identical at 1 and N workers; sanitizer build clean.
+5. Determinism: byte-identical at 1 and N workers; the bridge's tests run clean under
+   AddressSanitizer in the nightly job.
+6. unsafe appears nowhere outside crates/uarch-ramulator-sys (a test greps the workspace).
 
 GUARDRAILS: No threads yet. Keep DRAM level 0 and level 1: they are the fast modes. Do not
 tune DRAM parameters toward Ramulator's defaults; record the gap.

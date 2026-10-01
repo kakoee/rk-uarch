@@ -11,9 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: uv sync --extra dev
-      - name: native (nothing yet until U-P11)
+      - name: native (nothing yet until U-P11a)
         run: |
-          if [ -n "$(find native/src -name '*.cpp' -print -quit)" ]; then
+          if [ -n "$(find native/crates -name '*.rs' -print -quit 2>/dev/null)" ]; then
             make native-test
           else echo "nothing yet: no native sources"; fi
       - name: nightly suites (mutants, L2)
