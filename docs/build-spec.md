@@ -9,7 +9,7 @@ coding agent through the build.
 **Team:** Ray (kakoee), Lane A, Engine · Javid (jjaffari), Lane B, Evidence & Product ·
 one shared GitHub repo · the shared Linux box · Apple Silicon laptops for the Python harness.
 **Rev 2, 2026-09-28.** Rev 2 closes the gaps the book-coverage review found (F1–F17 in
-`rk-uarch-book-coverage-review.md`, in the Project): memory-level parallelism, the initial
+`docs/reviews/rk-uarch-book-coverage-review.md`): memory-level parallelism, the initial
 state, layer-reuse error, DRAM organisation and timing, per-job and barrier overheads,
 matrix-engine dataflow, the KV page layout, the full applicability scope, an optional shared
 SRAM level, SRAM placement, energy evidence, mapping match at L3, workload fidelity, architect
@@ -19,8 +19,9 @@ diagnostics, workload suites, the derated DRAM limit, and the mixed-iteration li
 `rk-uarch-track-verdict-and-plan.md` (in the Project) holds the research and the reasoning
 behind every choice here: prior art, licences, the badge answer, and the validation ladder.
 Nothing in that document needs to be fed to a coding agent. Everything in *this* one does.
-`rk-uarch-book-coverage-review.md` (also in the Project) checks this plan against a
-performance-modeling textbook's full table of contents; the F-numbers in Rev 2 point to it.
+`docs/reviews/rk-uarch-book-coverage-review.md` checks this plan against a performance-modeling
+textbook's full table of contents (`docs/reviews/book-toc-performance-modeling.md`); the
+F-numbers in Rev 2 point to it. Both are also in the Project.
 The verdict's advice to wait was overtaken by the founders' decision to open this track; its
 research still stands. An earlier prompt pack (U-P0…U-P17, eight sprints) was superseded by
 this document and the execution plan, and deleted from the Project on 2026-10-01. Its numbering
