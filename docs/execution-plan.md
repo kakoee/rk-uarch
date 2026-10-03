@@ -31,7 +31,9 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 | | |
 |---|---|
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
-| **Next** | U1 (U-P1 ∥ U-P2), once both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` |
+| **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
+| **rk-sim pin** | `11bb5306d2f92842417e532c220e3d2cfe6a8fd7` (rk-sim `main`, 2026-09-30), fixed before U1 so U-P1 and U-P2 can start together; U-P1 records it in ADR U0001 |
+| **Next** | U1: U-P1 (Lane A) ∥ U-P2 (Lane B), both against the rk-sim pin above |
 | **Not started** | U1–U11 |
 
 Update this block and `docs/how-it-works.md` at every sprint boundary.
@@ -113,7 +115,7 @@ existing interfaces.
 | **Lane B** | Vendored rk-sim snapshot, FLOP-parity fixtures from rk-sim's own code, round-trip tests → **U-P2** |
 | **Joint exit criterion** | **Gate G1** · the `contract` CI job green against the toy table · parity fixtures for ≥3 ModelSpecs × ≥24 queries · ADR U0001 accepted by both, including the Rev-2 decisions (applicability bins, the BLOCKFP8 rule, shared SRAM, the initial-state default, the declared omissions) |
 | **Effort** | A 31 · B 21 h realistic |
-| **Depends on** | U0 · a local rk-sim clone at a named SHA |
+| **Depends on** | U0 · a local rk-sim clone at the pinned SHA in STATUS (`11bb530`). U-P2 starts from that SHA without waiting for U0001; U-P1 writes the same SHA into U0001, and a different SHA there is a stop |
 | **Not in this sprint** | Any engine; any field for a later sprint |
 
 > U-P1 is the one prompt both of you should sit through. Everything downstream codes against it.
