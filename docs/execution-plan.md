@@ -35,6 +35,7 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 | **rk-sim pin** | `11bb5306d2f92842417e532c220e3d2cfe6a8fd7` (rk-sim `main`, 2026-09-30), fixed before U1 so U-P1 and U-P2 can start together; U-P1 records it in ADR U0001 |
 | **Next** | U1: U-P1 (Lane A) ∥ U-P2 (Lane B), both against the rk-sim pin above |
 | **Not started** | U1–U11 |
+| **Paused** | The `nightly` workflow's schedule (2026-10-03): no self-hosted runner yet. Re-enable it when U3 starts (U3, "Before it starts") |
 
 Update this block and `docs/how-it-works.md` at every sprint boundary.
 
@@ -142,6 +143,7 @@ existing interfaces.
 | **Joint exit criterion** | **Gate G2** decided and recorded in ADR U0005 · a one-layer decode query built by the fork from a ModelSpec · L0 and L0m green on U-C0 and run on the fork |
 | **Effort** | A 53 · B 27 |
 | **Depends on** | U2 |
+| **Before it starts** | Register the Linux box as a self-hosted runner labelled `uarch` (GitHub → Settings → Actions → Runners), then **re-enable the `schedule:` line in `.github/workflows/nightly.yml`**, paused since 2026-10-03. Trigger one run by hand and see it go green before U-P5 starts |
 | **Not in this sprint** | Mapping policies; grids |
 
 ### U4 · The real table

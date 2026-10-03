@@ -1,6 +1,9 @@
 name: nightly
 on:
-  schedule: [{cron: "17 9 * * *"}]
+  # PAUSED until U3: no self-hosted runner is registered yet, so scheduled runs queued for 24 h
+  # and were cancelled. Re-enable this line when U3 starts, after registering the Linux box
+  # (execution-plan U3, "Before it starts"). Manual runs still work via workflow_dispatch.
+  # schedule: [{cron: "17 9 * * *"}]
   workflow_dispatch:
 
 # Runs on the Linux box, registered as a self-hosted runner labelled `uarch`.
