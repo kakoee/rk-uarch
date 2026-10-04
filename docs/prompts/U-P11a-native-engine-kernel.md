@@ -5,7 +5,7 @@ _From build-spec §8. One prompt, one fresh session._
 ```text
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/engines/README.md, build-spec §2.5
 (the engine protocol and TaskGraph) and §2.8 (the native engine specification; it is the
-spec, not background), ADR U0005, U0007. Javid's docs/vision/elements_of_parallel_DES.md
+spec, not background), ADR U0005, U0007. Javid's ../rk-sim/docs/vision/elements_of_parallel_DES.md
 from rk-sim, READ-ONLY, for the parts §2.8 adopts, and build-spec §2.8's "departures" table
 for the parts it rejects and why.
 
