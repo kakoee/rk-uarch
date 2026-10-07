@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "max_rel": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Max Rel"
+    },
+    "median_rel": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Median Rel"
+    },
+    "n_samples": {
+      "minimum": 0,
+      "title": "N Samples",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "median_rel",
+    "max_rel",
+    "n_samples"
+  ],
+  "title": "SampledError",
+  "type": "object"
+}

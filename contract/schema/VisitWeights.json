@@ -1,0 +1,82 @@
+{
+  "$defs": {
+    "DecodeVisitWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        },
+        "weight_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "batch",
+        "total_context_tokens",
+        "weight_ratio"
+      ],
+      "title": "DecodeVisitWeight",
+      "type": "object"
+    },
+    "PrefillVisitWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "weight_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "n_prompts",
+        "prompt_tokens",
+        "weight_ratio"
+      ],
+      "title": "PrefillVisitWeight",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decode": {
+      "items": {
+        "$ref": "#/$defs/DecodeVisitWeight"
+      },
+      "title": "Decode",
+      "type": "array"
+    },
+    "prefill": {
+      "items": {
+        "$ref": "#/$defs/PrefillVisitWeight"
+      },
+      "title": "Prefill",
+      "type": "array"
+    }
+  },
+  "required": [
+    "decode",
+    "prefill"
+  ],
+  "title": "VisitWeights",
+  "type": "object"
+}

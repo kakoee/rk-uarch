@@ -1,0 +1,309 @@
+{
+  "$defs": {
+    "Counts": {
+      "additionalProperties": false,
+      "properties": {
+        "matrix_ops": {
+          "minimum": 0,
+          "title": "Matrix Ops",
+          "type": "number"
+        },
+        "memory_read_bytes": {
+          "minimum": 0,
+          "title": "Memory Read Bytes",
+          "type": "number"
+        },
+        "memory_write_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Memory Write Bytes"
+        },
+        "vector_ops": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vector Ops"
+        }
+      },
+      "required": [
+        "matrix_ops",
+        "vector_ops",
+        "memory_read_bytes",
+        "memory_write_bytes"
+      ],
+      "title": "Counts",
+      "type": "object"
+    },
+    "Diagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "dma_compute_overlap_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dma Compute Overlap Ratio"
+        },
+        "dram_bw_util_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dram Bw Util Ratio"
+        },
+        "dram_row_hit_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dram Row Hit Ratio"
+        },
+        "matrix_util_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matrix Util Ratio"
+        },
+        "noc_latency_p50_s": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Noc Latency P50 S"
+        },
+        "noc_latency_p99_s": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Noc Latency P99 S"
+        },
+        "noc_max_link_util_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Noc Max Link Util Ratio"
+        },
+        "sram_bank_conflict_stall_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sram Bank Conflict Stall Ratio"
+        },
+        "vector_util_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vector Util Ratio"
+        }
+      },
+      "title": "Diagnostics",
+      "type": "object"
+    },
+    "ExtCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "noc_flit_hop_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Noc Flit Hop Count"
+        },
+        "sram_read_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sram Read Bytes"
+        },
+        "sram_write_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sram Write Bytes"
+        }
+      },
+      "required": [
+        "sram_read_bytes",
+        "sram_write_bytes",
+        "noc_flit_hop_count"
+      ],
+      "title": "ExtCounts",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A row is one chip's shard, one iteration, all layers, without inter-chip collectives.",
+  "properties": {
+    "attribution_s": {
+      "additionalProperties": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "propertyNames": {
+        "enum": [
+          "compute",
+          "memory",
+          "noc",
+          "sync",
+          "overhead"
+        ]
+      },
+      "title": "Attribution S",
+      "type": "object"
+    },
+    "counts": {
+      "$ref": "#/$defs/Counts"
+    },
+    "diagnostics": {
+      "$ref": "#/$defs/Diagnostics"
+    },
+    "duration_s": {
+      "minimum": 0,
+      "title": "Duration S",
+      "type": "number"
+    },
+    "ext_counts": {
+      "$ref": "#/$defs/ExtCounts"
+    },
+    "frequency_ratio": {
+      "exclusiveMinimum": 0,
+      "title": "Frequency Ratio",
+      "type": "number"
+    },
+    "peak_resident_bytes": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "propertyNames": {
+        "enum": [
+          "hbm",
+          "sram"
+        ]
+      },
+      "title": "Peak Resident Bytes",
+      "type": "object"
+    },
+    "u_c0_duration_s": {
+      "minimum": 0,
+      "title": "U C0 Duration S",
+      "type": "number"
+    }
+  },
+  "required": [
+    "frequency_ratio",
+    "duration_s",
+    "u_c0_duration_s",
+    "attribution_s",
+    "counts",
+    "ext_counts",
+    "peak_resident_bytes",
+    "diagnostics"
+  ],
+  "title": "Row",
+  "type": "object"
+}

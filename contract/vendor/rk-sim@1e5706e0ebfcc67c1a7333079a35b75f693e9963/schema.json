@@ -1,0 +1,4438 @@
+{
+  "$defs": {
+    "AgenticProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "context_growth_factor": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "cpu_cores_active": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "id": {
+          "type": "string"
+        },
+        "remote_wait": {
+          "$ref": "#/$defs/DurationDistribution"
+        },
+        "second_model_as_tool": {
+          "default": false,
+          "type": "boolean"
+        },
+        "split_provenance": {
+          "$ref": "#/$defs/Calibration"
+        },
+        "split_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tool_cpu": {
+          "$ref": "#/$defs/DurationDistribution"
+        },
+        "turns_max": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "turns_min": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "id",
+        "turns_min",
+        "turns_max",
+        "tool_cpu",
+        "remote_wait",
+        "cpu_cores_active",
+        "context_growth_factor",
+        "split_provenance"
+      ],
+      "title": "AgenticProfile",
+      "type": "object"
+    },
+    "AnalyticalPoint": {
+      "additionalProperties": false,
+      "description": "Declared lengths for a trace run's analytical half; never inferred (ADR 0037).",
+      "properties": {
+        "output_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prompt_tokens",
+        "output_tokens"
+      ],
+      "title": "AnalyticalPoint",
+      "type": "object"
+    },
+    "Anchor": {
+      "additionalProperties": false,
+      "description": "One hand-reviewed fact about the world. The platform spec's PerformanceRecord.",
+      "properties": {
+        "clock_power_state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "component_refs": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "confidence_error_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "date": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "device": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "dtype_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "energy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "held_out": {
+          "default": false,
+          "type": "boolean"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "metric_name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "model_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "needs_review": {
+          "type": "boolean"
+        },
+        "needs_review_reasons": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "observed": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "phase": {
+          "$ref": "#/$defs/Phase"
+        },
+        "precision_compute": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrecisionFormat"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "precision_kv": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrecisionFormat"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "resource_occupancy": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "runtime_version": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "scenario": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "scope_gap": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shape": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "software_version": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "sparsity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "supersedes": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "system_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tolerance_pct": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "upstream": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UpstreamRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "url": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "source_kind",
+        "url",
+        "date",
+        "software_version",
+        "runtime_version",
+        "observed",
+        "metric_name",
+        "phase",
+        "tolerance_pct",
+        "needs_review"
+      ],
+      "title": "Anchor",
+      "type": "object"
+    },
+    "AnchorApplicability": {
+      "additionalProperties": false,
+      "description": "Whether one naming anchor's evidence reaches this run.\n\nADR 0045 retains excluded anchors with reasons; their applies is always false.\n\n`applies` is computed over every dimension EXCEPT `STACK_VERSION` \u2014 ADR 0021's decided\nitem 2, option (b). Every third-party anchor differs from our stack, so counting it\nwould make `applies` false essentially everywhere, and a readout that is always red\ncarries as much information as one that is always green. The gap stays visible as a\nfinding; it just does not disqualify. `applies_excludes_stack_version` puts that rule in\nthe data rather than only in the ADR, so a UI can state it beside the verdict.",
+      "properties": {
+        "anchor_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "applies": {
+          "type": "boolean"
+        },
+        "applies_excludes_stack_version": {
+          "default": true,
+          "type": "boolean"
+        },
+        "dimensions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DimensionFinding"
+          },
+          "type": "array"
+        },
+        "exclusion_reasons": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "anchor_id",
+        "applies"
+      ],
+      "title": "AnchorApplicability",
+      "type": "object"
+    },
+    "AnnualCharge": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "category": {
+          "enum": [
+            "electricity",
+            "infrastructure",
+            "other"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "category",
+        "amount"
+      ],
+      "title": "AnnualCharge",
+      "type": "object"
+    },
+    "ApplicabilityDimension": {
+      "description": "The nine ways an anchor's measurement can fail to reach the run in front of you.\n\nThe first eight are already fields on `Anchor`. Nothing there asks for a new anchor, a\nrefetch or a remeasurement \u2014 that much is a derivation over evidence the repo already\nholds.\n\n**The ninth is not an anchor's property but the run's** (ADR 0026 \u00a74, landed by\nADR 0036 \u00a73): `PARAMS_EDITED` says the user typed over a library parameter of the\ncomponent this anchor names, so the part measured and the part simulated are no longer\nthe same part. It is read from the run's `ParamOverride`s, never from a fabricated\nanchor field, and ADR 0021's \"may only ever weaken\" validator then forces `applies`\nfalse with no further work.",
+      "enum": [
+        "model",
+        "precision_compute",
+        "precision_kv",
+        "runtime_level",
+        "arrival_regime",
+        "device",
+        "stack_version",
+        "phase",
+        "params_edited"
+      ],
+      "title": "ApplicabilityDimension",
+      "type": "string"
+    },
+    "Available": {
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "$ref": "#/$defs/Metric"
+        },
+        "state": {
+          "const": "available",
+          "default": "available",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "Available",
+      "type": "object"
+    },
+    "Batching": {
+      "additionalProperties": false,
+      "properties": {
+        "max_batch": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_tokens_in_flight": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "policy": {
+          "$ref": "#/$defs/BatchingPolicy"
+        }
+      },
+      "required": [
+        "policy",
+        "max_batch",
+        "max_tokens_in_flight"
+      ],
+      "title": "Batching",
+      "type": "object"
+    },
+    "BatchingPolicy": {
+      "enum": [
+        "static",
+        "continuous"
+      ],
+      "title": "BatchingPolicy",
+      "type": "string"
+    },
+    "Calibration": {
+      "description": "How a number came to be known. Serializes lower_snake in YAML and JSON.\n\nThere is no `spec` member \u2014 the vendor-datasheet value is `SPEC_DERIVED`.",
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "CalibrationRef": {
+      "additionalProperties": false,
+      "description": "A recorded comparison of this component against an anchor. Written by P6, not by hand.\n\nADR 0017 \u00a75. `rk calibrate promote` is its only writer, and every field is derivable\nfrom the ledger entry it names. `error` is a Metric because a bare float cannot render\nthrough <Badged>. `term` says which SplitEfficiency term the anchor supports, from the\nentry's phase; it is required (non-None) exactly when the component carries a\nSplitEfficiency \u2014 see `ComponentDescriptor._calibration_names_its_term`.",
+      "properties": {
+        "anchor": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/$defs/Metric"
+        },
+        "ledger_entry": {
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "term": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EfficiencyTerm"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "anchor",
+        "metric",
+        "error",
+        "date",
+        "ledger_entry",
+        "term"
+      ],
+      "title": "CalibrationRef",
+      "type": "object"
+    },
+    "CandidateOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "engine_version": {
+          "type": "string"
+        },
+        "feasibility": {
+          "$ref": "#/$defs/PhysicalFeasibility"
+        },
+        "plan": {
+          "$ref": "#/$defs/ExecutionPlan"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "valid",
+            "invalid",
+            "unknown",
+            "unsupported"
+          ],
+          "type": "string"
+        },
+        "system": {
+          "$ref": "#/$defs/SystemConfig"
+        },
+        "workload": {
+          "$ref": "#/$defs/WorkloadSpec"
+        }
+      },
+      "required": [
+        "system",
+        "plan",
+        "workload",
+        "seed",
+        "engine_version",
+        "feasibility",
+        "status"
+      ],
+      "title": "CandidateOutcome",
+      "type": "object"
+    },
+    "ChannelCount": {
+      "additionalProperties": false,
+      "properties": {
+        "channel": {
+          "enum": [
+            "matrix_ops",
+            "vector_ops",
+            "memory_read",
+            "memory_write",
+            "network_send",
+            "network_receive"
+          ],
+          "type": "string"
+        },
+        "component_id": {
+          "type": "string"
+        },
+        "count": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "coverage": {
+          "enum": [
+            "modelled",
+            "partial",
+            "unmodelled"
+          ],
+          "type": "string"
+        },
+        "instance_path": {
+          "type": "string"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "omissions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "operator_id": {
+          "type": "string"
+        },
+        "phase": {
+          "enum": [
+            "prefill",
+            "decode"
+          ],
+          "type": "string"
+        },
+        "transfer_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "channel",
+        "phase",
+        "operator_id",
+        "component_id",
+        "instance_path",
+        "count",
+        "coverage"
+      ],
+      "title": "ChannelCount",
+      "type": "object"
+    },
+    "Collective": {
+      "additionalProperties": false,
+      "description": "Names only, never costs. The cost is the fabric model's business (N0, P3).",
+      "properties": {
+        "allreduce": {
+          "type": "string"
+        },
+        "alltoall": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "allreduce",
+        "alltoall"
+      ],
+      "title": "Collective",
+      "type": "object"
+    },
+    "ComponentApplicability": {
+      "additionalProperties": false,
+      "description": "One component's evidence, judged against the run that was just made.\n\n**It may only ever weaken.** `applies_to_this_run` is false wherever `covered` is false\nand is never true where `covered` is false \u2014 applicability narrows what coverage claims\nand can never widen it. That is CLAUDE.md invariant 3's rule one level up, and it is a\nvalidator rather than a convention so the bad state cannot be constructed at all.",
+      "properties": {
+        "anchors": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AnchorApplicability"
+          },
+          "type": "array"
+        },
+        "applies_to_this_run": {
+          "type": "boolean"
+        },
+        "component_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "covered": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "component_id",
+        "covered",
+        "applies_to_this_run"
+      ],
+      "title": "ComponentApplicability",
+      "type": "object"
+    },
+    "ComponentCoverage": {
+      "additionalProperties": false,
+      "description": "Evidence for one component. Coverage is per component, never per system shape.\n\n`covered` is a stored field checked against `reviewed_anchor_ids`, not a computed one:\nthe schema export runs in validation mode, which omits computed fields, and the UI\ntype would lose it.\n\n`params_edited` narrows what `covered` may say (ADR 0026 \u00a74, landed at the S3\u2192S4\nboundary by ADR 0036 \u00a73). An anchor names a component by `component_id`, and a typed\nparameter value keeps that id while changing the part the anchor measured \u2014 so without\nthis field a user edits an accelerator's bandwidth in the Builder and watches the\ncoverage banner stay green. It defaults to `False`, so every report written before it\nexisted reads exactly as it did.\n\n**Populated by P6c (ADR 0042)** from all instances of the stored system.\nP6b must still compute the ninth applicability dimension for a run.",
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "covered": {
+          "type": "boolean"
+        },
+        "params_edited": {
+          "default": false,
+          "type": "boolean"
+        },
+        "pending_anchor_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "reviewed_anchor_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "scope_gap_anchor_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "component_id",
+        "covered"
+      ],
+      "title": "ComponentCoverage",
+      "type": "object"
+    },
+    "ComponentDescriptor": {
+      "additionalProperties": false,
+      "description": "One entry in the component library. Every param is a SourcedValue, always.",
+      "properties": {
+        "calibration": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CalibrationRef"
+          },
+          "type": "array"
+        },
+        "execution_model": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "scalar_efficiency": "#/$defs/ScalarEfficiency",
+                  "split_efficiency": "#/$defs/SplitEfficiency"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ScalarEfficiency"
+                },
+                {
+                  "$ref": "#/$defs/SplitEfficiency"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fidelity_available": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ComponentKind"
+        },
+        "params": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "type": "object"
+        },
+        "role": {
+          "$ref": "#/$defs/ComponentRole"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "role"
+      ],
+      "title": "ComponentDescriptor",
+      "type": "object"
+    },
+    "ComponentInstance": {
+      "additionalProperties": false,
+      "description": "N copies of a library component, slotted into a scope.\n\n`fidelity` is this component's optional answer to how much the run may claim about\nit; unset axes fall through to `SystemConfig.fidelity` (ADR 0011 \u00a71). It defaults to\nNone, so a config written before this field existed resolves to exactly the levels it\nalways did.\n\n`params` is what a user typed over the library's numbers (ADR 0026). A tuple rather\nthan a dict because this model is `frozen=True` and therefore hashable, and a dict\nfield would make `hash()` raise.",
+      "properties": {
+        "component_id": {
+          "type": "string"
+        },
+        "count": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "fidelity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FidelityOverride"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "params": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ParamOverride"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "component_id"
+      ],
+      "title": "ComponentInstance",
+      "type": "object"
+    },
+    "ComponentKind": {
+      "description": "The generic primitive. Adding one means a registry entry in the engine too.",
+      "enum": [
+        "compute_resource",
+        "memory_space",
+        "endpoint",
+        "link",
+        "forwarding_element",
+        "relay_element",
+        "packaging_domain",
+        "hierarchy_scope",
+        "storage",
+        "runtime"
+      ],
+      "title": "ComponentKind",
+      "type": "string"
+    },
+    "ComponentRole": {
+      "description": "The product category. A label for humans and presets \u2014 no engine work to add one.",
+      "enum": [
+        "accelerator",
+        "cpu",
+        "asic",
+        "hbm",
+        "ddr",
+        "cxl_pool",
+        "sram",
+        "port",
+        "attachment_point",
+        "pcie",
+        "nvlink_c2c",
+        "ualink",
+        "apu_unified",
+        "switch",
+        "nic",
+        "retimer",
+        "optical_engine",
+        "die",
+        "chiplet",
+        "package",
+        "board",
+        "node",
+        "rack",
+        "nvme_tier",
+        "serving_stack"
+      ],
+      "title": "ComponentRole",
+      "type": "string"
+    },
+    "ComputeFidelity": {
+      "description": "C0 analytical \u00b7 C1 contention-aware \u00b7 C2 cycle-approximate \u00b7 C3 external/RTL.",
+      "enum": [
+        "C0",
+        "C1",
+        "C2",
+        "C3",
+        "STUB"
+      ],
+      "title": "ComputeFidelity",
+      "type": "string"
+    },
+    "CostDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "active_electricity_usd": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "active_seconds": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "active_throughput": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "annual_cost_usd": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "annual_tokens": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "basis": {
+          "enum": [
+            "legacy_rental",
+            "rental",
+            "owned"
+          ],
+          "type": "string"
+        },
+        "billed_hours": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "excluded_usd": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "hardware_depreciation_usd": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "idle_electricity_usd": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "infrastructure_depreciation_usd": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "inventory_basis": {
+          "enum": [
+            "installed",
+            "allocated"
+          ],
+          "type": "string"
+        },
+        "omissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rental_usd": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "type": "string"
+        },
+        "tco_usd_per_year": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "throughput_basis": {
+          "default": "active_window",
+          "enum": [
+            "active_window",
+            "annual_average"
+          ],
+          "type": "string"
+        },
+        "usd_per_mtok": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "window_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "basis",
+        "inventory_basis",
+        "window_id",
+        "active_seconds",
+        "billed_hours",
+        "active_throughput",
+        "annual_tokens",
+        "hardware_depreciation_usd",
+        "infrastructure_depreciation_usd",
+        "active_electricity_usd",
+        "idle_electricity_usd",
+        "rental_usd",
+        "excluded_usd",
+        "annual_cost_usd",
+        "usd_per_mtok",
+        "tco_usd_per_year",
+        "omissions"
+      ],
+      "title": "CostDiagnostic",
+      "type": "object"
+    },
+    "CoverageReport": {
+      "additionalProperties": false,
+      "description": "`GET /calibration/coverage`. `config_hash` is None when it reports the whole library.",
+      "properties": {
+        "components": {
+          "items": {
+            "$ref": "#/$defs/ComponentCoverage"
+          },
+          "type": "array"
+        },
+        "config_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "config_hash",
+        "components"
+      ],
+      "title": "CoverageReport",
+      "type": "object"
+    },
+    "DiagnosticsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "energy": {
+          "items": {
+            "$ref": "#/$defs/EnergyDiagnostic"
+          },
+          "type": "array"
+        },
+        "omissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "phases": {
+          "items": {
+            "$ref": "#/$defs/PhaseDiagnostic"
+          },
+          "type": "array"
+        },
+        "runtime_windows": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RuntimeChannelWindow"
+          },
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "type": "string"
+        }
+      },
+      "required": [
+        "phases",
+        "energy",
+        "omissions"
+      ],
+      "title": "DiagnosticsV1",
+      "type": "object"
+    },
+    "DimensionFinding": {
+      "additionalProperties": false,
+      "description": "One dimension, its verdict, and one sentence saying why.\n\nADR 0021 \u00a73 sketched this as a bare 3-tuple. It is a model instead, for the reason\nADR 0017 gave for `ComponentCoverage.covered`: the UI reads it, and a tuple generates a\npositional TypeScript type that nothing can read by name.",
+      "properties": {
+        "dimension": {
+          "$ref": "#/$defs/ApplicabilityDimension"
+        },
+        "reason": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/DimensionVerdict"
+        }
+      },
+      "required": [
+        "dimension",
+        "verdict",
+        "reason"
+      ],
+      "title": "DimensionFinding",
+      "type": "object"
+    },
+    "DimensionVerdict": {
+      "description": "Three-valued, and `UNKNOWN` is never folded into `MATCHES`.\n\nMost MLPerf rows state weight precision and no row states KV precision, so\n`PRECISION_KV` is `UNKNOWN` on most anchors. A dimension the anchor is silent on is not\nagreement, and a report that rounded it to agreement would claim evidence nobody has.",
+      "enum": [
+        "matches",
+        "differs",
+        "unknown"
+      ],
+      "title": "DimensionVerdict",
+      "type": "string"
+    },
+    "DurationDistribution": {
+      "additionalProperties": false,
+      "description": "Lognormal in milliseconds: median * exp(sigma * standard_normal).",
+      "properties": {
+        "median_ms": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "sigma": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "median_ms",
+        "sigma"
+      ],
+      "title": "DurationDistribution",
+      "type": "object"
+    },
+    "DvfsParameters": {
+      "additionalProperties": false,
+      "properties": {
+        "alpha": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bandwidth_exponent": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "idle_w": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "minimum_frequency_ratio": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "peak_w": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "power_cap_w": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "voltage_max": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "voltage_min": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "idle_w",
+        "peak_w",
+        "alpha",
+        "voltage_min",
+        "voltage_max",
+        "bandwidth_exponent",
+        "minimum_frequency_ratio"
+      ],
+      "title": "DvfsParameters",
+      "type": "object"
+    },
+    "EconomicsArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "legacy_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "library_snapshot": {
+          "items": {
+            "$ref": "#/$defs/ComponentDescriptor"
+          },
+          "type": "array"
+        },
+        "migration": {
+          "anyOf": [
+            {
+              "const": "system_v1_to_v2_economics",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resolved_hash": {
+          "type": "string"
+        },
+        "resolved_system": {
+          "$ref": "#/$defs/SystemConfig"
+        }
+      },
+      "required": [
+        "migration",
+        "legacy_hash",
+        "resolved_hash",
+        "resolved_system",
+        "library_snapshot"
+      ],
+      "title": "EconomicsArtifact",
+      "type": "object"
+    },
+    "EconomicsOverride": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "path",
+        "value",
+        "unit"
+      ],
+      "title": "EconomicsOverride",
+      "type": "object"
+    },
+    "EconomicsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "enum": [
+            "legacy_rental",
+            "rental",
+            "owned"
+          ],
+          "type": "string"
+        },
+        "coefficients": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EnergyCoefficient"
+          },
+          "type": "array"
+        },
+        "dvfs": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DvfsParameters"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "inventory_basis": {
+          "default": "installed",
+          "enum": [
+            "installed",
+            "allocated"
+          ],
+          "type": "string"
+        },
+        "legacy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LegacyTerms"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "overhead_fraction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "overrides": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EconomicsOverride"
+          },
+          "type": "array"
+        },
+        "owned": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OwnedTerms"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "power_model": {
+          "default": "tdp_ceiling",
+          "enum": [
+            "tdp_ceiling",
+            "utilization_dvfs",
+            "channel_energy"
+          ],
+          "type": "string"
+        },
+        "rental": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RentalTerms"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "required_static": {
+          "anyOf": [
+            {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "type": "string"
+        },
+        "static_power": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/StaticPower"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "basis"
+      ],
+      "title": "EconomicsV1",
+      "type": "object"
+    },
+    "EfficiencyTerm": {
+      "enum": [
+        "compute",
+        "memory"
+      ],
+      "title": "EfficiencyTerm",
+      "type": "string"
+    },
+    "EnergyCoefficient": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "enum": [
+            "MAC",
+            "FLOP",
+            "byte_transferred",
+            "byte_endpoint"
+          ],
+          "type": "string"
+        },
+        "channel": {
+          "enum": [
+            "matrix_ops",
+            "vector_ops",
+            "memory_read",
+            "memory_write",
+            "network_send",
+            "network_receive"
+          ],
+          "type": "string"
+        },
+        "component_id": {
+          "type": "string"
+        },
+        "instance_path": {
+          "type": "string"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pj_per_unit": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "transfer_charge": {
+          "enum": [
+            "once",
+            "endpoint"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "component_id",
+        "instance_path",
+        "channel",
+        "basis",
+        "pj_per_unit",
+        "transfer_charge"
+      ],
+      "title": "EnergyCoefficient",
+      "type": "object"
+    },
+    "EnergyDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_s": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "dynamic_j": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "identity": {
+          "$ref": "#/$defs/PowerIdentity"
+        },
+        "it_j": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "omissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "static_j": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "window_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "identity",
+        "window_id",
+        "duration_s",
+        "dynamic_j",
+        "static_j",
+        "it_j",
+        "omissions"
+      ],
+      "title": "EnergyDiagnostic",
+      "type": "object"
+    },
+    "EpisodeCostNormalization": {
+      "additionalProperties": false,
+      "description": "ADR 0059: producer-owned conversion matching the selected price estimator.\n\nIncludes output from unfinished episodes; this is amortized window cost per\ncompletion; task quality is unmodelled. Availability does not upgrade STUB.",
+      "properties": {
+        "aggregation": {
+          "enum": [
+            "mean_replication_rates",
+            "pooled_counts"
+          ],
+          "type": "string"
+        },
+        "cost_window_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "output_tokens_per_completed_episode": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        }
+      },
+      "required": [
+        "cost_window_id",
+        "aggregation",
+        "output_tokens_per_completed_episode"
+      ],
+      "title": "EpisodeCostNormalization",
+      "type": "object"
+    },
+    "EpisodeMetrics": {
+      "additionalProperties": false,
+      "description": "Agentic episodes: how many finished, how long they took, and where the time went.\n\nADR 0023; P8a populates this for agentic R1 runs. It remains `None` on chat runs.\nADR 0049 specifies mean counts across replications and completed-episode mean\nshares scaled to E2E p50, then averaged across replications. These are allocations\nof p50, not term percentiles; scaling and completion censoring can change the\ndisplayed remote term even when raw per-episode waits are unchanged.\nWhen any replication has no completed episodes, latency fields are\nzero STUB placeholders with a no-samples contributor and warning, not percentiles.\n\n**It is not a fifth metric family.** `RunResult`'s nine named fields are the metrics and\nthey stay nine (build-spec \u00a72.3.3, CLAUDE.md). Everything here decomposes family 2\n(latency) or counts episodes.\n\n**Every number is a `Metric`, counts included**, because the UI renders them through\n`<Badged>` and invariant 2 says numbers leave the engine badged. `seed` and `replications`\non `RunResult` are plain ints because they are *inputs*; these are outputs.\n\n**`remote_wait_ms` is separate from `tool_cpu_ms` on purpose** (ADR 0023 \u00a72). An agent\nwaiting on a remote service consumes no host CPU and no accelerator, so under contention\nCPU time gets worse and remote wait does not. Folded together, a workload that is mostly\nwaiting looks like one that needs more cores, which is the opposite of the truth and the\nexact recommendation this prototype exists to get right.\n\nThe four `*_ms` terms sum to `e2e_latency_p50_ms` within floating-point tolerance.",
+      "properties": {
+        "e2e_latency_p50_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "e2e_latency_p99_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "episodes_completed": {
+          "$ref": "#/$defs/Metric"
+        },
+        "episodes_started": {
+          "$ref": "#/$defs/Metric"
+        },
+        "llm_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "queue_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "remote_wait_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "tool_cpu_ms": {
+          "$ref": "#/$defs/Metric"
+        }
+      },
+      "required": [
+        "episodes_started",
+        "episodes_completed",
+        "e2e_latency_p50_ms",
+        "e2e_latency_p99_ms",
+        "llm_ms",
+        "tool_cpu_ms",
+        "remote_wait_ms",
+        "queue_ms"
+      ],
+      "title": "EpisodeMetrics",
+      "type": "object"
+    },
+    "EvictionPolicy": {
+      "enum": [
+        "none",
+        "lru",
+        "fifo"
+      ],
+      "title": "EvictionPolicy",
+      "type": "string"
+    },
+    "EvidenceApplicability": {
+      "additionalProperties": false,
+      "description": "Does the evidence behind this system reach THIS run? Rendered on Results and Compare.\n\nKeyed on the run rather than the system: a user composing a system in the Builder has no\nworkload and no plan, so the question has no referent there, and `CoverageReport` stays\nthe right answer on that screen (ADR 0021 \u00a71). Computed by `rk/calibration/`, never by\nthe engine \u2014 reading anchors is I/O and the engine is pure.",
+      "properties": {
+        "components": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ComponentApplicability"
+          },
+          "type": "array"
+        },
+        "config_hash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "plan_hash": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "config_hash",
+        "plan_hash"
+      ],
+      "title": "EvidenceApplicability",
+      "type": "object"
+    },
+    "ExecutionPlan": {
+      "additionalProperties": false,
+      "description": "WHERE + **HOW** + WHAT. This is the HOW.",
+      "properties": {
+        "batching": {
+          "$ref": "#/$defs/Batching"
+        },
+        "collective": {
+          "$ref": "#/$defs/Collective"
+        },
+        "fusion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kernel_selection": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kv": {
+          "$ref": "#/$defs/KVPolicy"
+        },
+        "layout": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "parallelism": {
+          "$ref": "#/$defs/Parallelism",
+          "default": {
+            "dp": 1,
+            "ep": 1,
+            "pp": 1,
+            "tp": 1
+          }
+        },
+        "placement": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "precision": {
+          "$ref": "#/$defs/Precision",
+          "default": {
+            "compute": "fp16",
+            "kv_cache": "fp16"
+          }
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "type": "string"
+        },
+        "sparsity": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tiling": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "batching",
+        "kv",
+        "collective"
+      ],
+      "title": "ExecutionPlan",
+      "type": "object"
+    },
+    "FidelityMap": {
+      "additionalProperties": false,
+      "description": "The C/M/N/R level a run asks for. Anything unimplemented fails loudly, by axis.",
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/ComputeFidelity"
+        },
+        "memory": {
+          "$ref": "#/$defs/MemoryFidelity"
+        },
+        "network": {
+          "$ref": "#/$defs/NetworkFidelity"
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeFidelity"
+        }
+      },
+      "required": [
+        "compute",
+        "memory",
+        "network",
+        "runtime"
+      ],
+      "title": "FidelityMap",
+      "type": "object"
+    },
+    "FidelityMapEntry": {
+      "additionalProperties": false,
+      "description": "What actually ran for one component, and how well calibrated it is.\n\nThe fidelity matrix as data \u2014 this is what the Results screen renders as its\nFidelity Map panel.\n\n`calibration` is the WORST provenance among everything the component declares \u2014 all\nof its `params`, plus its `execution_model` if it has one. It answers \"how well do we\nknow this part\", so one unsourced parameter takes the whole entry down, and a\ncomponent built entirely from datasheet numbers still reads `stub` if its efficiency\nfactor is a placeholder. Same worst-of rule `provenance.combine()` applies to a\nMetric, applied to a component rather than to a number.\n\nIt is NOT a statement that the component's model has been validated against a\ncalibration anchor. That is a different axis, it needs the ledger P6 builds, and it\narrives as a separate field rather than by redefining this one \u2014 ADR 0009 \u00a74.",
+      "properties": {
+        "calibration": {
+          "$ref": "#/$defs/Calibration"
+        },
+        "component_id": {
+          "type": "string"
+        },
+        "compute": {
+          "$ref": "#/$defs/ComputeFidelity"
+        },
+        "memory": {
+          "$ref": "#/$defs/MemoryFidelity"
+        },
+        "network": {
+          "$ref": "#/$defs/NetworkFidelity"
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeFidelity"
+        }
+      },
+      "required": [
+        "component_id",
+        "compute",
+        "memory",
+        "network",
+        "runtime",
+        "calibration"
+      ],
+      "title": "FidelityMapEntry",
+      "type": "object"
+    },
+    "FidelityOverride": {
+      "additionalProperties": false,
+      "description": "One component instance's answer to \"how much may you claim about me?\".\n\nEvery axis is optional: an unset axis falls through to `SystemConfig.fidelity`, which\nis the run's default rather than its only answer (ADR 0011 \u00a71). The engine has always\ndispatched per component and `RunResult.fidelity_map` has always reported per\ncomponent; before this, only the *input* was system-wide, so the Fidelity Map panel\nwould have rendered a constant as a per-component fact.\n\nThe same `IMPLEMENTED` gate applies here as to `FidelityMap` \u2014 one rule, called twice,\nnever reimplemented. In practice that leaves two live choices per axis today: the\nimplemented level, or STUB. STUB is not a degenerate option; it is a user saying\n\"claim nothing about this part\", which is the honest answer for a component whose\nnumbers we could not source.",
+      "properties": {
+        "compute": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComputeFidelity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "memory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MemoryFidelity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "network": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkFidelity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "runtime": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuntimeFidelity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "FidelityOverride",
+      "type": "object"
+    },
+    "InventoryPrice": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "enum": [
+            "silicon",
+            "memory",
+            "network",
+            "infrastructure"
+          ],
+          "type": "string"
+        },
+        "count": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "instance_path": {
+          "type": "string"
+        },
+        "price": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "instance_path",
+        "count",
+        "category",
+        "price"
+      ],
+      "title": "InventoryPrice",
+      "type": "object"
+    },
+    "KVPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "eviction": {
+          "$ref": "#/$defs/EvictionPolicy"
+        },
+        "placement_order": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "prefix_reuse": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "block_size",
+        "placement_order",
+        "eviction",
+        "prefix_reuse"
+      ],
+      "title": "KVPolicy",
+      "type": "object"
+    },
+    "LedgerEntry": {
+      "additionalProperties": false,
+      "description": "One comparison of the simulator against one anchor.",
+      "properties": {
+        "anchor_hash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "anchor_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "config_hash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "date": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "engine_version": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "entry_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "observed": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "params_edited": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "phase": {
+          "$ref": "#/$defs/Phase"
+        },
+        "plan_hash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "precision": {
+          "$ref": "#/$defs/Precision"
+        },
+        "predicted": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "predicted_metric": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "signed_error_pct": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "status": {
+          "$ref": "#/$defs/LedgerStatus"
+        },
+        "unmapped_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "workload_hash": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "entry_id",
+        "anchor_id",
+        "config_hash",
+        "plan_hash",
+        "engine_version",
+        "phase",
+        "anchor_hash",
+        "precision",
+        "status",
+        "observed",
+        "date"
+      ],
+      "title": "LedgerEntry",
+      "type": "object"
+    },
+    "LedgerStatus": {
+      "enum": [
+        "compared",
+        "unmapped"
+      ],
+      "title": "LedgerStatus",
+      "type": "string"
+    },
+    "LegacyTerms": {
+      "additionalProperties": false,
+      "properties": {
+        "values": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/LegacyValue"
+          },
+          "type": "array"
+        }
+      },
+      "title": "LegacyTerms",
+      "type": "object"
+    },
+    "LegacyValue": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "type": "string"
+        },
+        "count": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "instance_path": {
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "capex_usd",
+            "amortization_years",
+            "usd_per_kwh",
+            "utilization",
+            "power_overhead_fraction",
+            "usd_per_hr"
+          ],
+          "type": "string"
+        },
+        "quantity": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "component_id",
+        "instance_path",
+        "count",
+        "name",
+        "quantity"
+      ],
+      "title": "LegacyValue",
+      "type": "object"
+    },
+    "MemoryFidelity": {
+      "description": "M0 analytical capacity+bandwidth \u00b7 M1 queueing/contention.",
+      "enum": [
+        "M0",
+        "M1",
+        "STUB"
+      ],
+      "title": "MemoryFidelity",
+      "type": "string"
+    },
+    "Metric": {
+      "additionalProperties": false,
+      "description": "A number leaving the engine, with how much to trust it.\n\n`contributors` is required and has no default: a metric that cannot name what fed\nit is exactly the case `combine([])` badges STUB.\n\n`ci95_low`/`ci95_high` stay None until the R1 DES reports replications in P5. They\nexist in v0 so S4's error bars are not a schema break.",
+      "properties": {
+        "badge": {
+          "$ref": "#/$defs/Calibration"
+        },
+        "ci95_high": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ci95_low": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "contributors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "badge",
+        "contributors"
+      ],
+      "title": "Metric",
+      "type": "object"
+    },
+    "ModelSpec": {
+      "additionalProperties": false,
+      "description": "MoE is active-vs-total and nothing more (build-spec \u00a72.3.5).",
+      "properties": {
+        "active_params": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "d_model": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "experts_per_token": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "kv_heads": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "n_experts": {
+          "default": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "n_heads": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "n_layers": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "total_params": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "total_params",
+        "active_params",
+        "n_layers",
+        "d_model",
+        "n_heads",
+        "kv_heads"
+      ],
+      "title": "ModelSpec",
+      "type": "object"
+    },
+    "NetworkFidelity": {
+      "description": "N0 analytical transfer \u00b7 N1 flow-level \u00b7 N2 packet \u00b7 N3 flit/credit.",
+      "enum": [
+        "N0",
+        "N1",
+        "N2",
+        "N3",
+        "STUB"
+      ],
+      "title": "NetworkFidelity",
+      "type": "string"
+    },
+    "OwnedTerms": {
+      "additionalProperties": false,
+      "properties": {
+        "electricity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "excluded_charges": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AnnualCharge"
+          },
+          "type": "array"
+        },
+        "hardware_life": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "idle_it_w": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "infrastructure_life": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "inventory": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/InventoryPrice"
+          },
+          "type": "array"
+        },
+        "operating_utilization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pue": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "OwnedTerms",
+      "type": "object"
+    },
+    "Parallelism": {
+      "additionalProperties": false,
+      "properties": {
+        "dp": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ep": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "pp": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tp": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "title": "Parallelism",
+      "type": "object"
+    },
+    "ParamOverride": {
+      "additionalProperties": false,
+      "description": "A value a user typed over a library parameter. ADR 0026.\n\n**There is deliberately no `provenance` field.** A field here could spell `measured`,\nand nothing downstream could then tell a typed number from the library's own. The badge\nis DERIVED where the override is applied, as `combine([ESTIMATED, library.provenance])`\n\u2014 worst-of, so a measured or spec-derived value becomes `estimated` and a STUB stays a\nSTUB, because typing over no evidence creates none.\n\nThat is CLAUDE.md invariant 3 made unrepresentable rather than merely checked: the\nbrowser refuses to improve a badge, and so does a hand-written YAML reaching the loader\nby another route.\n\nIt is NOT an exception to invariant 1. The library's claim on the world is still a\n`SourcedValue` with a source and a date; this is a user's what-if about a part, and it\ncarries no source precisely because there is none.",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "title": "ParamOverride",
+      "type": "object"
+    },
+    "Phase": {
+      "description": "Which half of SplitEfficiency an observation can inform. ADR 0015, P3b.",
+      "enum": [
+        "prefill",
+        "decode",
+        "blended"
+      ],
+      "title": "Phase",
+      "type": "string"
+    },
+    "PhaseDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_size": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "channels": {
+          "items": {
+            "$ref": "#/$defs/ChannelCount"
+          },
+          "type": "array"
+        },
+        "communication_s": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "compute_precision": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "compute_s": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "context_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "kv_precision": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "limiting_resource": {
+          "anyOf": [
+            {
+              "enum": [
+                "compute",
+                "memory",
+                "network"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "memory_s": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "omissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "phase": {
+          "enum": [
+            "prefill",
+            "decode"
+          ],
+          "type": "string"
+        },
+        "scope": {
+          "const": "analytical_representative_rank",
+          "default": "analytical_representative_rank",
+          "type": "string"
+        },
+        "tensor_parallel_degree": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "total_s": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        }
+      },
+      "required": [
+        "phase",
+        "batch_size",
+        "context_tokens",
+        "tensor_parallel_degree",
+        "compute_precision",
+        "kv_precision",
+        "channels",
+        "compute_s",
+        "memory_s",
+        "communication_s",
+        "total_s",
+        "limiting_resource",
+        "omissions"
+      ],
+      "title": "PhaseDiagnostic",
+      "type": "object"
+    },
+    "PhysicalCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "input_path": {
+          "type": "string"
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reason": {
+          "type": "string"
+        },
+        "required": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rule": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "valid",
+            "invalid",
+            "unknown",
+            "unsupported"
+          ],
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "input_path",
+        "scope",
+        "rule",
+        "status",
+        "unit",
+        "reason"
+      ],
+      "title": "PhysicalCheck",
+      "type": "object"
+    },
+    "PhysicalFeasibility": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/PhysicalCheck"
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "valid",
+            "invalid",
+            "unknown",
+            "unsupported"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "checks",
+        "status"
+      ],
+      "title": "PhysicalFeasibility",
+      "type": "object"
+    },
+    "PowerDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "converged": {
+          "type": "boolean"
+        },
+        "delivered_tokens": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "duration_s": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "dynamic_j": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "energy_j_per_token": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "facility_w": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "identity": {
+          "$ref": "#/$defs/PowerIdentity"
+        },
+        "omissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "per_chip_w": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "rack_it_w": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "type": "string"
+        },
+        "static_j": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "window_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "identity",
+        "window_id",
+        "per_chip_w",
+        "rack_it_w",
+        "facility_w",
+        "dynamic_j",
+        "static_j",
+        "duration_s",
+        "delivered_tokens",
+        "energy_j_per_token",
+        "converged",
+        "omissions"
+      ],
+      "title": "PowerDiagnostic",
+      "type": "object"
+    },
+    "PowerEnvelope": {
+      "additionalProperties": false,
+      "description": "Limits, not predictions. Violations become warnings; they never silently clamp.",
+      "properties": {
+        "cooling_cap_kw": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "max_kw": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "max_kw",
+        "cooling_cap_kw"
+      ],
+      "title": "PowerEnvelope",
+      "type": "object"
+    },
+    "PowerIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "contributors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "coverage": {
+          "enum": [
+            "complete",
+            "partial",
+            "unmodelled"
+          ],
+          "type": "string"
+        },
+        "formula_version": {
+          "type": "string"
+        },
+        "model": {
+          "enum": [
+            "tdp_ceiling",
+            "utilization_dvfs",
+            "channel_energy"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "formula_version",
+        "coverage",
+        "contributors"
+      ],
+      "title": "PowerIdentity",
+      "type": "object"
+    },
+    "Precision": {
+      "additionalProperties": false,
+      "description": "What the plan asks the hardware to compute in, and to store the KV cache in.\n\nTwo fields, not one: `compute` moves the compute roof and the weight bytes together,\n`kv_cache` moves the memory roof's KV term on its own. ADR 0015's items 1 and 3 are\nseparate for exactly that reason \u2014 either alone leaves one roof precision-blind.\n\n`compute` COVERS WEIGHTS AS WELL. A stack running fp8 GEMMs holds fp8 weights.\nW8A16 \u2014 quantized weights with higher-precision compute \u2014 is NOT modelled, and is\nrecorded in ADR 0015 \u00a71 as the first thing this shape would need to grow. It would be\na third field here, not a redesign.\n\nDefaults are fp16/fp16, which is what `BYTES_PER_WEIGHT_FP16` and\n`BYTES_PER_KV_ELEM_FP16` hardcoded before P3b, so an existing plan resolves to the\nnumbers it already produced.",
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat",
+          "default": "fp16"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat",
+          "default": "fp16"
+        }
+      },
+      "title": "Precision",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "description": "The numeric formats a plan may ask for. ADR 0015 \u00a71.\n\nEXACTLY these eight. There is deliberately no FP64 member: rk-sim is an inference\nsimulator and nothing in scope runs fp64, so a declared fp64 peak could be loaded and\nunit-checked and then never selected by any plan \u2014 a dead number in a library whose\nwhole point is that numbers are accountable. Decided 2026-09-13, ADR 0015 \u00a77.6 item 2.\nP3b asserts one peak-param name per member of this enum, which is what keeps the set\nand the library in agreement by construction rather than by care.\n\n`tf32` is 4 bytes. It is a 19-BIT FORMAT (1 sign + 8 exponent + 10 mantissa) held in a\n32-bit slot, so its saving is in the multiplier array and not in memory. It is the one\na reader gets wrong, which is why it is called out here and in P3b's byte table.",
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "RentalTerms": {
+      "additionalProperties": false,
+      "properties": {
+        "billed_hours_per_year": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "electricity_included": {
+          "type": "boolean"
+        },
+        "excluded_charges": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AnnualCharge"
+          },
+          "type": "array"
+        },
+        "infrastructure_included": {
+          "type": "boolean"
+        },
+        "inventory": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/InventoryPrice"
+          },
+          "type": "array"
+        },
+        "operating_utilization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "electricity_included",
+        "infrastructure_included"
+      ],
+      "title": "RentalTerms",
+      "type": "object"
+    },
+    "RequestE2E": {
+      "additionalProperties": false,
+      "description": "Arrival to last output token. R0 has no sampled percentiles (ADR 0038).",
+      "properties": {
+        "analytical_ms": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "enum": [
+            "analytical",
+            "simulated"
+          ],
+          "type": "string"
+        },
+        "p50_ms": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "p99_ms": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "RequestE2E",
+      "type": "object"
+    },
+    "RunResult": {
+      "additionalProperties": false,
+      "properties": {
+        "config_hash": {
+          "type": "string"
+        },
+        "cost_diagnostic": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CostDiagnostic"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "diagnostics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DiagnosticsV1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "economics_artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EconomicsArtifact"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "energy_j_per_token": {
+          "$ref": "#/$defs/Metric"
+        },
+        "engine_version": {
+          "type": "string"
+        },
+        "episode_cost_normalization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpisodeCostNormalization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "episodes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpisodeMetrics"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fidelity_map": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FidelityMapEntry"
+          },
+          "type": "array"
+        },
+        "plan_hash": {
+          "type": "string"
+        },
+        "power_diagnostic": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PowerDiagnostic"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "power_kw_per_rack": {
+          "$ref": "#/$defs/Metric"
+        },
+        "replications": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "request_e2e": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequestE2E"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "runtime_timeline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuntimeTimeline"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "slo": {
+          "$ref": "#/$defs/SloVerdict",
+          "default": {
+            "caveat": "",
+            "certifiable": false,
+            "met": null,
+            "targets": []
+          }
+        },
+        "tco_usd_per_year": {
+          "$ref": "#/$defs/Metric"
+        },
+        "throughput_output_tok_per_s": {
+          "$ref": "#/$defs/Metric"
+        },
+        "tpot_p50_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "tpot_p99_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "ttft_p50_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "ttft_p99_ms": {
+          "$ref": "#/$defs/Metric"
+        },
+        "usd_per_mtok": {
+          "$ref": "#/$defs/Metric"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "workload_hash": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "throughput_output_tok_per_s",
+        "ttft_p50_ms",
+        "ttft_p99_ms",
+        "tpot_p50_ms",
+        "tpot_p99_ms",
+        "power_kw_per_rack",
+        "energy_j_per_token",
+        "usd_per_mtok",
+        "tco_usd_per_year",
+        "seed",
+        "engine_version",
+        "config_hash",
+        "plan_hash",
+        "workload_hash"
+      ],
+      "title": "RunResult",
+      "type": "object"
+    },
+    "RuntimeChannelWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "items": {
+            "$ref": "#/$defs/ChannelCount"
+          },
+          "type": "array"
+        },
+        "delivered_tokens": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "duration_s": {
+          "discriminator": {
+            "mapping": {
+              "available": "#/$defs/Available",
+              "unavailable": "#/$defs/Unavailable"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Available"
+            },
+            {
+              "$ref": "#/$defs/Unavailable"
+            }
+          ]
+        },
+        "omissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "scope": {
+          "const": "simulated_representative_rank",
+          "default": "simulated_representative_rank",
+          "type": "string"
+        },
+        "window_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "window_id",
+        "channels",
+        "duration_s",
+        "delivered_tokens",
+        "omissions"
+      ],
+      "title": "RuntimeChannelWindow",
+      "type": "object"
+    },
+    "RuntimeFidelity": {
+      "description": "R0 ideal scheduler \u00b7 R1 native-policy DES \u00b7 R2 trace replay.",
+      "enum": [
+        "R0",
+        "R1",
+        "R2",
+        "STUB"
+      ],
+      "title": "RuntimeFidelity",
+      "type": "string"
+    },
+    "RuntimeTimeline": {
+      "additionalProperties": false,
+      "description": "Replication zero of one representative replica, never an averaged timeline.\n\nBusy fractions use full bucket widths (including final padding); KV is sampled\nat bucket starts, not a peak. Null pool/occupancy means unbounded, not zero.",
+      "properties": {
+        "kv_pool_blocks": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "makespan_s": {
+          "$ref": "#/$defs/Metric"
+        },
+        "origin_s": {
+          "$ref": "#/$defs/Metric"
+        },
+        "replica_count": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "replica_index": {
+          "const": 0,
+          "default": 0,
+          "type": "integer"
+        },
+        "replication_index": {
+          "const": 0,
+          "default": 0,
+          "type": "integer"
+        },
+        "replication_seed": {
+          "type": "integer"
+        },
+        "sample_interval_s": {
+          "$ref": "#/$defs/Metric"
+        },
+        "samples": {
+          "items": {
+            "$ref": "#/$defs/RuntimeTimelineSample"
+          },
+          "maxItems": 512,
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "type": "string"
+        },
+        "scope": {
+          "const": "representative_replica",
+          "default": "representative_replica",
+          "type": "string"
+        },
+        "time_origin": {
+          "const": "simulation_start",
+          "default": "simulation_start",
+          "type": "string"
+        }
+      },
+      "required": [
+        "replication_seed",
+        "replica_count",
+        "origin_s",
+        "sample_interval_s",
+        "makespan_s",
+        "kv_pool_blocks",
+        "samples"
+      ],
+      "title": "RuntimeTimeline",
+      "type": "object"
+    },
+    "RuntimeTimelineSample": {
+      "additionalProperties": false,
+      "description": "One aligned bucket: scheduler busy fraction, start-sampled KV (ADR 0046).",
+      "properties": {
+        "at_s": {
+          "$ref": "#/$defs/Metric"
+        },
+        "gpu_busy_ratio": {
+          "$ref": "#/$defs/Metric"
+        },
+        "kv_blocks_in_use": {
+          "$ref": "#/$defs/Metric"
+        },
+        "kv_occupancy_ratio": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "at_s",
+        "gpu_busy_ratio",
+        "kv_blocks_in_use",
+        "kv_occupancy_ratio"
+      ],
+      "title": "RuntimeTimelineSample",
+      "type": "object"
+    },
+    "SLO": {
+      "additionalProperties": false,
+      "properties": {
+        "tpot_p99_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ttft_p99_ms": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "SLO",
+      "type": "object"
+    },
+    "ScalarEfficiency": {
+      "additionalProperties": false,
+      "description": "Realized-vs-peak as one number. The weakest value in the repo, and boxed.\n\nbuild-spec \u00a72.3.4: the platform spec says a constant efficiency factor is not good\nenough in general, and it is right. We ship it anyway because per-operator kernel\nefficiency needs silicon we do not have \u2014 badged ESTIMATED, named wherever a\ncross-vendor comparison is shown, and sitting behind `kind` so a better model\nreplaces it without a schema break.",
+      "properties": {
+        "kind": {
+          "const": "scalar_efficiency",
+          "default": "scalar_efficiency",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "ScalarEfficiency",
+      "type": "object"
+    },
+    "ScopeNode": {
+      "additionalProperties": false,
+      "description": "A rack or a node. Scopes nest; components hang off them.",
+      "properties": {
+        "children": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ScopeNode"
+          },
+          "type": "array"
+        },
+        "components": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ComponentInstance"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/ComponentRole"
+        }
+      },
+      "required": [
+        "id",
+        "role"
+      ],
+      "title": "ScopeNode",
+      "type": "object"
+    },
+    "SloTargetVerdict": {
+      "additionalProperties": false,
+      "description": "One target the workload declared, and whether this run met it.\n\n`metric_field` names the `RunResult` field the target was compared against, so a screen\ncan put the verdict beside the number it judged rather than beside a label.\n\n**`actual` is a `Metric` and `target_ms` is a bare float, and the asymmetry is the\npoint** (ADR 0036 \u00a71). `actual` is a number this engine computed \u2014 invariant 2 says it\nleaves badged, the way `EpisodeMetrics` in this file already does for every one of its\nterms. `target_ms` is the workload's own declaration: it defines the run and asserts\nnothing about the world, which is the line invariant 1 draws for `n_layers` and ADR 0027\ndraws for composition counts.\n\n`actual` IS the metric `metric_field` names \u2014 same value, unit, badge, contributors and\ninterval \u2014 because `run()` stamps the result's own object in after the latency badge\nexists. Until it does, `_warn_about_the_slo` carries a provisional STUB-badged copy: a\nmissed stamp can then only ever degrade a badge, never improve one (invariant 3).",
+      "properties": {
+        "actual": {
+          "$ref": "#/$defs/Metric"
+        },
+        "met": {
+          "type": "boolean"
+        },
+        "metric_field": {
+          "type": "string"
+        },
+        "target_ms": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "metric_field",
+        "target_ms",
+        "actual",
+        "met"
+      ],
+      "title": "SloTargetVerdict",
+      "type": "object"
+    },
+    "SloVerdict": {
+      "additionalProperties": false,
+      "description": "Whether the declared SLO was met \u2014 and whether the number that said so was real.\n\nADR 0022. The engine has always computed this; until that ADR it existed only inside a\nsentence in `warnings`, which meant no sweep point could be marked infeasible, no\ncomparison could be sorted by feasibility, and no export could carry it. The warning is\nstill emitted, unchanged: it is what the Results screen's constraint banner reads.\n\n**`certifiable` is the honest half, and it is the point of the record.** It is true only\nwhen the number that decided the verdict is a real percentile \u2014 that is, when the run\nexecuted at runtime R1. At R0 there is no distribution: the \"p99\" compared against the\ntarget is the analytical p50 wearing a p99's name, so a met target at R0 is\n`met=True, certifiable=False` and a UI must not render it as a green tick. That is\nbuild-spec \u00a72.4's rule \u2014 never answer a different question than the one asked without\nsaying so \u2014 expressed as a field instead of a paragraph.\n\nNothing enforces an SLO at either level. No admission control turns requests away to\nprotect a latency target, and `caveat` says so in the words the warning uses.\n\nAn empty verdict (`targets=()`, `met=None`) means the workload declared no SLO. It is the\ndefault, so a run without one is not a run with an unanswered question.",
+      "properties": {
+        "caveat": {
+          "default": "",
+          "type": "string"
+        },
+        "certifiable": {
+          "default": false,
+          "type": "boolean"
+        },
+        "met": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "targets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SloTargetVerdict"
+          },
+          "type": "array"
+        }
+      },
+      "title": "SloVerdict",
+      "type": "object"
+    },
+    "SourceKind": {
+      "enum": [
+        "mlperf",
+        "inferencemax",
+        "vidur_profile",
+        "own_measurement"
+      ],
+      "title": "SourceKind",
+      "type": "string"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "description": "A number entering the system, with the evidence that lets it in.\n\nExactly five fields. `extra=\"forbid\"` is load-bearing: it is what rejects the\nstray `note:` key that earlier drafts of the component YAML carried.",
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "provenance": {
+          "$ref": "#/$defs/Calibration"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "provenance"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    },
+    "SplitEfficiency": {
+      "additionalProperties": false,
+      "description": "Realized-vs-peak as TWO numbers: one per roof. `kernel-efficiency.md` \u00a75 option C.\n\n\u00a73 of that file established that `kernel_efficiency` is a COMPUTE-BOUND efficiency \u2014\nit multiplies the compute roof and nothing else, so for a compute-bound phase the\nmodel's achieved-vs-peak IS that constant, while a memory-bound phase's low\nachieved-vs-peak already falls out of the memory roof with nothing configured. One\nscalar cannot describe both regimes.\n\nP3's oracle measured how completely: sweeping the compute term from 1.0 to 0.1 moves\nprefill 45.11 -> 451.11 ms and leaves decode BIT-IDENTICAL at 6.8726 ms at every\nvalue, and derating bandwidth does the converse. The two axes are exactly orthogonal,\nso a single term cannot reach the memory-bound phase at all (ADR 0015 \u00a77.1).\n\nBOTH VALUES SHIP `provenance: stub`. This member is a PLACE for evidence, not\nevidence. `kernel-efficiency.md` \u00a78's ban on fitting applies to `memory` exactly as it\napplies to `compute`: nobody may put a number in either because it makes an oracle\ndelta smaller. And note the direction, so the temptation is visible \u2014 rk-sim's decode\nis already SLOWER than GenZ, so a physically meaningful `memory` below 1 widens that\ngap rather than closing it. The term is justified by physics, not by the delta's sign.",
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "kind": {
+          "const": "split_efficiency",
+          "default": "split_efficiency",
+          "type": "string"
+        },
+        "memory": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "compute",
+        "memory"
+      ],
+      "title": "SplitEfficiency",
+      "type": "object"
+    },
+    "StaticPower": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "type": "string"
+        },
+        "instance_path": {
+          "type": "string"
+        },
+        "watts": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "component_id",
+        "instance_path",
+        "watts"
+      ],
+      "title": "StaticPower",
+      "type": "object"
+    },
+    "SyntheticGenerator": {
+      "additionalProperties": false,
+      "description": "Seeded synthetic request stream. Real traces arrive as `trace_ref` in P6.",
+      "properties": {
+        "arrival_rate_req_per_s": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "n_requests": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "output_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prompt_tokens",
+        "output_tokens",
+        "n_requests",
+        "arrival_rate_req_per_s"
+      ],
+      "title": "SyntheticGenerator",
+      "type": "object"
+    },
+    "SystemConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "economics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EconomicsV1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fidelity": {
+          "$ref": "#/$defs/FidelityMap"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "power_envelope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PowerEnvelope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "root": {
+          "$ref": "#/$defs/ScopeNode"
+        },
+        "schema_version": {
+          "default": "1",
+          "enum": [
+            "1",
+            "2"
+          ],
+          "type": "string"
+        },
+        "vcpus_per_gpu": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "root",
+        "fidelity"
+      ],
+      "title": "SystemConfig",
+      "type": "object"
+    },
+    "TraceArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "arrival_unit": {
+          "const": "s",
+          "default": "s",
+          "type": "string"
+        },
+        "dataset_id": {
+          "type": "string"
+        },
+        "loader": {
+          "type": "string"
+        },
+        "normalization_version": {
+          "const": "1",
+          "default": "1",
+          "type": "string"
+        },
+        "raw_sha256": {
+          "type": "string"
+        },
+        "replication_policy": {
+          "const": "fixed_trace",
+          "default": "fixed_trace",
+          "type": "string"
+        },
+        "requests": {
+          "items": {
+            "$ref": "#/$defs/TraceRequest"
+          },
+          "type": "array"
+        },
+        "selection": {
+          "$ref": "#/$defs/TraceSelection"
+        },
+        "stream_hash": {
+          "type": "string"
+        },
+        "time_origin": {
+          "const": "first_selected_request",
+          "default": "first_selected_request",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset_id",
+        "raw_sha256",
+        "loader",
+        "selection",
+        "requests",
+        "stream_hash"
+      ],
+      "title": "TraceArtifact",
+      "type": "object"
+    },
+    "TraceCatalogEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "citation": {
+          "type": "string"
+        },
+        "citation_url": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "loader": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "source_pin": {
+          "type": "string"
+        },
+        "source_url": {
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "not_configured",
+            "missing",
+            "present_unverified",
+            "error"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "loader",
+        "source_url",
+        "source_pin",
+        "sha256",
+        "license",
+        "citation",
+        "citation_url",
+        "state",
+        "detail"
+      ],
+      "title": "TraceCatalogEntry",
+      "type": "object"
+    },
+    "TracePreview": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "$ref": "#/$defs/TraceArtifact"
+        },
+        "duration_s": {
+          "$ref": "#/$defs/Metric"
+        },
+        "output_p50_tokens": {
+          "$ref": "#/$defs/Metric"
+        },
+        "output_p99_tokens": {
+          "$ref": "#/$defs/Metric"
+        },
+        "prompt_p50_tokens": {
+          "$ref": "#/$defs/Metric"
+        },
+        "prompt_p99_tokens": {
+          "$ref": "#/$defs/Metric"
+        },
+        "request_count": {
+          "$ref": "#/$defs/Metric"
+        }
+      },
+      "required": [
+        "artifact",
+        "request_count",
+        "duration_s",
+        "prompt_p50_tokens",
+        "prompt_p99_tokens",
+        "output_p50_tokens",
+        "output_p99_tokens"
+      ],
+      "title": "TracePreview",
+      "type": "object"
+    },
+    "TraceRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "arrival_time_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "output_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "arrival_time_s",
+        "prompt_tokens",
+        "output_tokens"
+      ],
+      "title": "TraceRequest",
+      "type": "object"
+    },
+    "TraceSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "drop_failed": {
+          "default": true,
+          "type": "boolean"
+        },
+        "end_time_s": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "limit_requests": {
+          "maximum": 10000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "log_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "start_time_s": {
+          "default": 0,
+          "minimum": 0,
+          "type": "number"
+        },
+        "time_compression": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "limit_requests"
+      ],
+      "title": "TraceSelection",
+      "type": "object"
+    },
+    "Unavailable": {
+      "additionalProperties": false,
+      "properties": {
+        "badge": {
+          "const": "stub",
+          "default": "stub",
+          "type": "string"
+        },
+        "contributors": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "reason": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "state": {
+          "const": "unavailable",
+          "default": "unavailable",
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "unit",
+        "reason"
+      ],
+      "title": "Unavailable",
+      "type": "object"
+    },
+    "UpstreamRef": {
+      "additionalProperties": false,
+      "description": "Which pinned file, and which row of it, an anchor was copied from.\n\n`manifest_path` is the file's `local_path` in `rk/calibration/upstream/manifest.yaml`,\nwhich remains the single record of source, pin and licence \u2014 so no `commit_sha` here:\ntwo vendored sources (a CI artifact, a dashboard response) have no commit to pin.",
+      "properties": {
+        "file_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "manifest_path": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "row_ref": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "manifest_path",
+        "file_sha256",
+        "row_ref"
+      ],
+      "title": "UpstreamRef",
+      "type": "object"
+    },
+    "WorkloadClass": {
+      "enum": [
+        "chat",
+        "agentic"
+      ],
+      "title": "WorkloadClass",
+      "type": "string"
+    },
+    "WorkloadSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "agentic_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgenticProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "analytical_point": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnalyticalPoint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "episode_horizon_s": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "generator": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyntheticGenerator"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "model": {
+          "$ref": "#/$defs/ModelSpec"
+        },
+        "replications": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "type": "string"
+        },
+        "seed": {
+          "default": 0,
+          "type": "integer"
+        },
+        "slo": {
+          "$ref": "#/$defs/SLO",
+          "default": {
+            "tpot_p99_ms": null,
+            "ttft_p99_ms": null
+          }
+        },
+        "trace_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "trace_selection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TraceSelection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "workload_class": {
+          "$ref": "#/$defs/WorkloadClass"
+        }
+      },
+      "required": [
+        "workload_class",
+        "model"
+      ],
+      "title": "WorkloadSpec",
+      "type": "object"
+    }
+  },
+  "description": "Manifest of the rk-sim contract. Not a value to construct \u2014 each property names one exported model so every type is reachable from the document root.",
+  "properties": {
+    "Anchor": {
+      "$ref": "#/$defs/Anchor"
+    },
+    "CandidateOutcome": {
+      "$ref": "#/$defs/CandidateOutcome"
+    },
+    "ComponentDescriptor": {
+      "$ref": "#/$defs/ComponentDescriptor"
+    },
+    "CoverageReport": {
+      "$ref": "#/$defs/CoverageReport"
+    },
+    "EvidenceApplicability": {
+      "$ref": "#/$defs/EvidenceApplicability"
+    },
+    "ExecutionPlan": {
+      "$ref": "#/$defs/ExecutionPlan"
+    },
+    "LedgerEntry": {
+      "$ref": "#/$defs/LedgerEntry"
+    },
+    "Metric": {
+      "$ref": "#/$defs/Metric"
+    },
+    "PhysicalFeasibility": {
+      "$ref": "#/$defs/PhysicalFeasibility"
+    },
+    "RunResult": {
+      "$ref": "#/$defs/RunResult"
+    },
+    "SourcedValue": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "SystemConfig": {
+      "$ref": "#/$defs/SystemConfig"
+    },
+    "TraceArtifact": {
+      "$ref": "#/$defs/TraceArtifact"
+    },
+    "TraceCatalogEntry": {
+      "$ref": "#/$defs/TraceCatalogEntry"
+    },
+    "TracePreview": {
+      "$ref": "#/$defs/TracePreview"
+    },
+    "WorkloadSpec": {
+      "$ref": "#/$defs/WorkloadSpec"
+    }
+  },
+  "title": "rk-sim schema",
+  "type": "object"
+}

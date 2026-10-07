@@ -1,0 +1,210 @@
+{
+  "contract": "uarch-contract/0.1",
+  "uarch_version": "0.1.0-synthetic-proposal",
+  "request_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "table_hash": "sha256:0d4d5039659f831ac0a8aee2ef87fd60c41cf8e5b0e9284c73824bb867ec230b",
+  "tp": 8,
+  "initial_state": "steady",
+  "kv_layout": {
+    "block_size_tokens": 16
+  },
+  "composite_fidelity": "C0",
+  "fidelity_detail": {
+    "compute": 0,
+    "noc": 0,
+    "dram": 0,
+    "sync": "exact",
+    "layer_reuse": false
+  },
+  "rows": [
+    {
+      "phase": "decode",
+      "batch": 1,
+      "total_context_tokens": 128,
+      "frequency_ratio": 1.0,
+      "duration_s": 0.001,
+      "u_c0_duration_s": 0.001,
+      "attribution_s": {
+        "compute": 0.0003,
+        "memory": 0.0007,
+        "noc": 0.0,
+        "sync": 0.0,
+        "overhead": 0.0
+      },
+      "counts": {
+        "matrix_ops": 1000000.0,
+        "vector_ops": null,
+        "memory_read_bytes": 2000000.0,
+        "memory_write_bytes": null
+      },
+      "ext_counts": {
+        "sram_read_bytes": null,
+        "sram_write_bytes": null,
+        "noc_flit_hop_count": null
+      },
+      "peak_resident_bytes": {
+        "hbm": 4000000.0,
+        "sram": null
+      },
+      "diagnostics": {
+        "matrix_util_ratio": null,
+        "vector_util_ratio": null,
+        "dma_compute_overlap_ratio": null,
+        "sram_bank_conflict_stall_ratio": null,
+        "noc_latency_p50_s": null,
+        "noc_latency_p99_s": null,
+        "noc_max_link_util_ratio": null,
+        "dram_bw_util_ratio": null,
+        "dram_row_hit_ratio": null
+      }
+    },
+    {
+      "phase": "decode",
+      "batch": 2,
+      "total_context_tokens": 256,
+      "frequency_ratio": 1.0,
+      "duration_s": 0.002,
+      "u_c0_duration_s": 0.002,
+      "attribution_s": {
+        "compute": 0.0008,
+        "memory": 0.0012,
+        "noc": 0.0,
+        "sync": 0.0,
+        "overhead": 0.0
+      },
+      "counts": {
+        "matrix_ops": 2000000.0,
+        "vector_ops": null,
+        "memory_read_bytes": 3000000.0,
+        "memory_write_bytes": null
+      },
+      "ext_counts": {
+        "sram_read_bytes": null,
+        "sram_write_bytes": null,
+        "noc_flit_hop_count": null
+      },
+      "peak_resident_bytes": {
+        "hbm": 5000000.0,
+        "sram": null
+      },
+      "diagnostics": {
+        "matrix_util_ratio": null,
+        "vector_util_ratio": null,
+        "dma_compute_overlap_ratio": null,
+        "sram_bank_conflict_stall_ratio": null,
+        "noc_latency_p50_s": null,
+        "noc_latency_p99_s": null,
+        "noc_max_link_util_ratio": null,
+        "dram_bw_util_ratio": null,
+        "dram_row_hit_ratio": null
+      }
+    },
+    {
+      "phase": "prefill",
+      "n_prompts": 1,
+      "prompt_tokens": 128,
+      "frequency_ratio": 1.0,
+      "duration_s": 0.004,
+      "u_c0_duration_s": 0.004,
+      "attribution_s": {
+        "compute": 0.003,
+        "memory": 0.001,
+        "noc": 0.0,
+        "sync": 0.0,
+        "overhead": 0.0
+      },
+      "counts": {
+        "matrix_ops": 128000000.0,
+        "vector_ops": null,
+        "memory_read_bytes": 4000000.0,
+        "memory_write_bytes": 1000000.0
+      },
+      "ext_counts": {
+        "sram_read_bytes": null,
+        "sram_write_bytes": null,
+        "noc_flit_hop_count": null
+      },
+      "peak_resident_bytes": {
+        "hbm": 6000000.0,
+        "sram": null
+      },
+      "diagnostics": {
+        "matrix_util_ratio": null,
+        "vector_util_ratio": null,
+        "dma_compute_overlap_ratio": null,
+        "sram_bank_conflict_stall_ratio": null,
+        "noc_latency_p50_s": null,
+        "noc_latency_p99_s": null,
+        "noc_max_link_util_ratio": null,
+        "dram_bw_util_ratio": null,
+        "dram_row_hit_ratio": null
+      }
+    }
+  ],
+  "interpolation": {
+    "decode": "bilinear in (log B, log T); linear in 1/f",
+    "prefill": "bilinear in (log n, log L); linear in 1/f",
+    "outside_grid": "refuse"
+  },
+  "measured_error": {
+    "interpolation_loo": {
+      "median_rel": null,
+      "max_rel": null,
+      "weighted_median_rel": null,
+      "n_samples": 0
+    },
+    "composition_reduction": {
+      "decode": {
+        "median_rel": null,
+        "max_rel": null,
+        "n_samples": 0
+      },
+      "prefill": {
+        "median_rel": null,
+        "max_rel": null,
+        "n_samples": 0
+      },
+      "n_samples": 0
+    },
+    "layer_reuse": {
+      "median_rel": null,
+      "max_rel": null,
+      "n_samples": 0
+    },
+    "cold_vs_steady": {
+      "median_rel": null,
+      "max_rel": null,
+      "n_samples": 0,
+      "priming_2_vs_1_max_rel": null
+    }
+  },
+  "flop_parity": {
+    "kind": "not_run",
+    "reference_basis": "rk_sim_aggregate_divided_by_tp",
+    "fixture_set_id": null,
+    "oracle_manifest_sha256": null,
+    "candidate_identity": null,
+    "n_fixtures": 0,
+    "max_rel": null,
+    "comparisons": []
+  },
+  "provenance": {
+    "params": [],
+    "model_card": {
+      "hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "badge": "stub",
+      "evidence": [],
+      "validated_error_band": null,
+      "energy_verification": null
+    },
+    "conditional_on": []
+  },
+  "warnings": [
+    "SYNTHETIC handwritten contract example; not engine output, parity evidence or calibration.",
+    "Host and runtime time outside the device is unmodelled.",
+    "Address translation is unmodelled.",
+    "Cache coherence is unmodelled.",
+    "Mixed prefill/decode iterations are unmodelled."
+  ],
+  "hardware_spec_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

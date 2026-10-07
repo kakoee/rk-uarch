@@ -13,7 +13,7 @@ jobs:
       - name: lint
         run: uv run ruff check .
       - name: typecheck
-        run: uv run mypy
+        run: uv run mypy src contract scripts
       - name: imports
         run: uv run lint-imports
       - name: tests (fails on an empty suite, by design)
@@ -47,10 +47,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
       - run: uv sync --extra dev
-      - run: |
-          if [ -n "$(find contract/tests -name 'test_*.py' -print -quit)" ]; then
-            uv run pytest -q contract/tests
-          else echo "nothing yet: no contract tests"; fi
+      - name: verify committed rk-sim snapshot (no upstream checkout or credentials)
+        run: uv run python scripts/vendor_rk.py --check
+      - name: contract and parity harness self-tests (not workload parity)
+        run: uv run python -m pytest -q -rs contract/tests --require-vendor
+      # Same read-only check as Lane A's test_schema_freshness / make gen-check.
+      - name: schema freshness (Lane A generator)
+        run: uv run python -m uarch_contract.generate --check
 
   licences-and-patches:
     runs-on: ubuntu-latest

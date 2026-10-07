@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "max_rel": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Max Rel"
+    },
+    "median_rel": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Median Rel"
+    },
+    "n_samples": {
+      "minimum": 0,
+      "title": "N Samples",
+      "type": "integer"
+    },
+    "priming_2_vs_1_max_rel": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Priming 2 Vs 1 Max Rel"
+    }
+  },
+  "required": [
+    "median_rel",
+    "max_rel",
+    "n_samples",
+    "priming_2_vs_1_max_rel"
+  ],
+  "title": "ColdVsSteadyError",
+  "type": "object"
+}

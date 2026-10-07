@@ -1,0 +1,132 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "buffer_flits": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "direction": {
+      "enum": [
+        "positive",
+        "negative",
+        "bidirectional"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "link_bytes_per_cycle": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "router_latency_cycles": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "topology": {
+      "enum": [
+        "mesh",
+        "torus"
+      ],
+      "title": "Topology",
+      "type": "string"
+    },
+    "virtual_channels": {
+      "$ref": "#/$defs/SourcedValue"
+    }
+  },
+  "required": [
+    "topology",
+    "direction",
+    "link_bytes_per_cycle",
+    "router_latency_cycles",
+    "virtual_channels",
+    "buffer_flits"
+  ],
+  "title": "Noc",
+  "type": "object"
+}

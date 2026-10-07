@@ -1,0 +1,258 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "DramOrganization": {
+      "additionalProperties": false,
+      "properties": {
+        "bank_groups": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "banks_per_group": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "ranks": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "row_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "ranks",
+        "bank_groups",
+        "banks_per_group",
+        "row_bytes"
+      ],
+      "title": "DramOrganization",
+      "type": "object"
+    },
+    "DramTiming": {
+      "additionalProperties": false,
+      "properties": {
+        "t_cl_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rcd_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_refi_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rfc_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rp_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "t_rcd_cycles",
+        "t_rp_cycles",
+        "t_cl_cycles",
+        "t_rfc_cycles",
+        "t_refi_cycles"
+      ],
+      "title": "DramTiming",
+      "type": "object"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    },
+    "TimingPreset": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "File",
+          "type": "string"
+        },
+        "sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Sha",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "sha"
+      ],
+      "title": "TimingPreset",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "timing_source": {
+            "const": "direct"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "timing_preset": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "timing_source": {
+            "const": "preset"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "timing_preset": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "timing_preset"
+        ]
+      }
+    }
+  ],
+  "description": "Explicit timing origin; source strings are citations, never mode selectors.",
+  "properties": {
+    "bw_bytes_per_s": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "capacity_bytes": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "channels": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "organization": {
+      "$ref": "#/$defs/DramOrganization"
+    },
+    "standard": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Standard",
+      "type": "string"
+    },
+    "timing": {
+      "$ref": "#/$defs/DramTiming"
+    },
+    "timing_preset": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TimingPreset"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "timing_source": {
+      "enum": [
+        "direct",
+        "preset"
+      ],
+      "title": "Timing Source",
+      "type": "string"
+    }
+  },
+  "required": [
+    "standard",
+    "channels",
+    "bw_bytes_per_s",
+    "capacity_bytes",
+    "organization",
+    "timing_source",
+    "timing"
+  ],
+  "title": "Dram",
+  "type": "object"
+}

@@ -1,0 +1,255 @@
+{
+  "op": {
+    "operator": "attention_fused",
+    "dimensions": {
+      "M": 1,
+      "N": 128,
+      "K": 128
+    },
+    "operands": {
+      "Q": {
+        "dtype": "bf16",
+        "dimensions": [
+          "M",
+          "K"
+        ],
+        "layout": "contiguous",
+        "block_size_tokens": null
+      },
+      "K": {
+        "dtype": "bf16",
+        "dimensions": [
+          "N",
+          "K"
+        ],
+        "layout": "paged",
+        "block_size_tokens": 16
+      },
+      "V": {
+        "dtype": "bf16",
+        "dimensions": [
+          "N",
+          "K"
+        ],
+        "layout": "paged",
+        "block_size_tokens": 16
+      },
+      "O": {
+        "dtype": "bf16",
+        "dimensions": [
+          "M",
+          "K"
+        ],
+        "layout": "contiguous",
+        "block_size_tokens": null
+      }
+    },
+    "reduction_axes": [
+      "N",
+      "K"
+    ]
+  },
+  "card": {
+    "model_id": {
+      "engine": "synthetic",
+      "engine_version": "0",
+      "fidelity_detail": {
+        "compute": 0,
+        "noc": 0,
+        "dram": 0,
+        "sync": "exact",
+        "layer_reuse": false
+      },
+      "mapping_policy": "synthetic@1"
+    },
+    "badge": "stub",
+    "evidence": [],
+    "verification": {
+      "L0": null,
+      "L0m": null,
+      "L1": null,
+      "L2": null
+    },
+    "validated_error_band": null,
+    "energy_verification": null
+  },
+  "error": {
+    "code": "NoTableForComponent",
+    "message": "No table exists."
+  },
+  "additional": {
+    "Row": {
+      "frequency_ratio": 1.0,
+      "duration_s": 0.001,
+      "u_c0_duration_s": 0.001,
+      "attribution_s": {
+        "compute": 0.0003,
+        "memory": 0.0007,
+        "noc": 0.0,
+        "sync": 0.0,
+        "overhead": 0.0
+      },
+      "counts": {
+        "matrix_ops": 1000000.0,
+        "vector_ops": null,
+        "memory_read_bytes": 2000000.0,
+        "memory_write_bytes": null
+      },
+      "ext_counts": {
+        "sram_read_bytes": null,
+        "sram_write_bytes": null,
+        "noc_flit_hop_count": null
+      },
+      "peak_resident_bytes": {
+        "hbm": 4000000.0,
+        "sram": null
+      },
+      "diagnostics": {
+        "matrix_util_ratio": null,
+        "vector_util_ratio": null,
+        "dma_compute_overlap_ratio": null,
+        "sram_bank_conflict_stall_ratio": null,
+        "noc_latency_p50_s": null,
+        "noc_latency_p99_s": null,
+        "noc_max_link_util_ratio": null,
+        "dram_bw_util_ratio": null,
+        "dram_row_hit_ratio": null
+      }
+    },
+    "SharedSram": {
+      "bytes": {
+        "value": 1,
+        "unit": "byte",
+        "provenance": "stub",
+        "source": null,
+        "date": null
+      },
+      "banks": {
+        "value": 1,
+        "unit": "count",
+        "provenance": "stub",
+        "source": null,
+        "date": null
+      },
+      "bytes_per_cycle_per_bank": {
+        "value": 1,
+        "unit": "byte/cycle",
+        "provenance": "stub",
+        "source": null,
+        "date": null
+      },
+      "latency_cycles": {
+        "value": 1,
+        "unit": "cycle",
+        "provenance": "stub",
+        "source": null,
+        "date": null
+      },
+      "attach": [
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "TimingPreset": {
+      "file": "synthetic.yaml",
+      "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "VisitWeights": {
+      "decode": [
+        {
+          "batch": 1,
+          "total_context_tokens": 128,
+          "weight_ratio": 1
+        }
+      ],
+      "prefill": [
+        {
+          "n_prompts": 1,
+          "prompt_tokens": 128,
+          "weight_ratio": 1
+        }
+      ]
+    },
+    "ValidatedErrorBand": {
+      "low_rel": 0.1,
+      "high_rel": 0.2,
+      "scope": {
+        "family": "synthetic",
+        "op_classes": [
+          "matrix"
+        ],
+        "precisions": [
+          "bf16"
+        ],
+        "shape_regimes": [
+          "ridge-low:underfilled"
+        ],
+        "load_regimes": [
+          "low"
+        ],
+        "mapping_match": "matched"
+      }
+    },
+    "EnergyVerification": {
+      "L0": {
+        "mac": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "L2": {
+        "mac": null
+      }
+    },
+    "Parameter": {
+      "name": "synthetic",
+      "value": {
+        "value": 1,
+        "unit": "count",
+        "provenance": "stub",
+        "source": null,
+        "date": null
+      }
+    },
+    "Condition": {
+      "path": "cores.grid.rows",
+      "value": {
+        "value": 1,
+        "unit": "count",
+        "kind": "stipulation",
+        "provenance": null,
+        "source": null,
+        "date": null,
+        "rationale": "synthetic"
+      }
+    },
+    "FlopDeviation": {
+      "id": "synthetic",
+      "deviation_rel": 0.03,
+      "reason": "example only"
+    },
+    "ParityChannelComparison": {
+      "fixture_id": "synthetic/adjusted",
+      "channel": "matrix_ops",
+      "unit": "op",
+      "actual": 105.5,
+      "reference": 100.0,
+      "reference_state": "positive",
+      "raw_rel": 0.055,
+      "signed_adjustment_rel": 0.05,
+      "absolute_adjustment_rel": 0.05,
+      "residual_rel": 0.0049999999999999975,
+      "declared_deviations": [
+        {
+          "id": "a",
+          "deviation_rel": 0.03,
+          "reason": "Synthetic term A"
+        },
+        {
+          "id": "b",
+          "deviation_rel": 0.02,
+          "reason": "Synthetic term B"
+        }
+      ]
+    }
+  }
+}

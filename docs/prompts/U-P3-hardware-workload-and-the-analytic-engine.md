@@ -4,7 +4,8 @@ _From build-spec §8. One prompt, one fresh session._
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, hw/README.md, src/rkuarch/{workload,engines,table}/README.md,
-contract/uarch_contract/, ADR U0001, contract/tests/test_flop_parity.py, build-spec §2.2–§2.4.
+contract/uarch_contract/, ADRs U0001 and U0002, docs/reviews/U2-kickoff-obligations.md,
+contract/tests/test_flop_parity.py, build-spec §2.2–§2.4.
 From rk-sim READ-ONLY: rk/components/library/compute/asic_placeholder.yaml and
 nvidia_h100_sxm.yaml (the param names derive_rk_params must produce).
 
@@ -13,6 +14,10 @@ ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
 Keep the high-level standalone CLI and add file-based prepare/replay without requiring
 rk-sim or a compiler. First propose and obtain acceptance of U0003's prepared-input schema,
 hashing/provenance and any public request/table schema revision; coordinate it with U-P4.
+At U0003 kickoff carry forward B-F16's component-precision and prepared-bundle parity
+requirements, and the separately unresolved embedding-accounting obligation, from the
+kickoff record and U0002. Preserve the approved parity budget, nominal inputs and explicit
+unsupported-projection policy; U1 harness self-tests do not discharge actual U2 parity.
 Use the existing OpSpec vocabulary and engine protocol. Workload construction belongs to
 preparation; analytic engines consume resolved operators. No detailed mapper lands in U2.
 
@@ -55,7 +60,10 @@ later.
    a canonical batch (build-spec §2.3.4): decode = B sequences of context T/B; prefill =
    n prompts of L. layer_reuse=True means "one decoder layer instantiated n_layers times
    plus the non-repeated head and tail ops", and the graph says so in a field. MoE is
-   active-parameter dense-equivalent ONLY, exactly as rk-sim: routing, imbalance and
+   active-parameter dense-equivalent ONLY. MoE d_ff and expert_d_ff both name one
+   expert's width and must agree. Multiply expert work by experts_per_token exactly
+   once; total expert weights use n_experts once; account shared terms separately.
+   Dense d_ff is unchanged. As in rk-sim, routing, imbalance and
    all-to-all are declared absent in a graph-level `omissions` list, together with
    host/runtime time, address translation, coherence and mixed prefill/decode iterations
    (build-spec §2.3.4). KV operands are paged: the graph carries page-granular KV reads for
@@ -64,7 +72,10 @@ later.
    real callable. Every difference from rk-sim's closed form above 0.5% gets a named
    declared deviation in src/rkuarch/workload/deviations.py with a one-line reason: embedding
    or lm_head accounting, norm parameters, and whatever else you actually find. Report them;
-   do not tune the graph to hide them.
+   do not tune the graph to hide them. B's adapter emits the revised typed FlopParity:
+   kind, identities, fixture/channel/unit attribution and all four ratios must survive.
+   Total absolute adjustments <=5% per fixture/channel, residual <=0.5%; refuse adjustments
+   for raw-inside-tolerance or zero/null references. Self-tests are never workload parity.
 5. src/rkuarch/engines/analytic/ — U-C0, consuming a validated prepared operator graph and
    resolved HardwareSpec without importing/calling the workload builder or mapping policies.
    Record the explicit analytic mapping scope and preparation identity. Two modes:
@@ -80,6 +91,21 @@ later.
    OR validated prepared bundle -> engine -> rows -> UarchCostTable. Both paths share engine
    execution and hashing; imported payloads bypass local preparation. Single process, no
    interpolation (U-P7 owns that). Include input content and producer versions in identity.
+   Require table.hardware_spec_hash == request.hardware_spec_hash == spec_hash(spec).
+   Resolve every conditional_on path in the referenced proposed HardwareSpec and require
+   its complete stipulated SourcedValue to match; refuse missing/mismatched paths or values.
+   This is the producer's artifact-aware check, not a guarantee supplied by the U1 carrier.
+   Producer enforcement: when request.model.n_experts > 0, copy the contract's
+   MOE_OMISSION warning (routing, imbalance and all-to-all) into table.warnings, alongside
+   every common omission. Test with the Mixtral sidecar. The U1 table carrier has no
+   model payload and cannot infer this condition from request_hash; no new MoE indicator
+   is added here. Cross-check HardwareSpec against fidelity_detail: an existing shared
+   SRAM must have an explicit level, including unrepresented when unsupported.
+   Javid approved the interim A-F12 rule: Lane B must refuse parity comparisons requiring
+   replicated KV or padded vocabulary that uniform /tp cannot represent, pending an approved
+   component-aware projection. Keep A's legitimate shape support; do not change oracle counts,
+   conceal the mismatch with deviations, or widen tolerances. Aggregate compatibility is
+   not proof of physical rank-local correctness; U-P3 must test the latter independently.
 7. src/rkuarch/cli.py (typer): `uarch validate <spec>` (lists claims / stipulations / stubs
    with counts; refuses a bad spec with the path) and `uarch table <spec> --model <name>
    --precision <fmt> [--tp N] --engine analytic` (tp defaults to 1).

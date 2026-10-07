@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "prompt_tokens_max": {
+      "minimum": 1,
+      "title": "Prompt Tokens Max",
+      "type": "integer"
+    },
+    "prompts_per_iteration_max": {
+      "minimum": 1,
+      "title": "Prompts Per Iteration Max",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "prompt_tokens_max",
+    "prompts_per_iteration_max"
+  ],
+  "title": "PrefillEnvelope",
+  "type": "object"
+}

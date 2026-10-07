@@ -47,7 +47,11 @@ no C1 anywhere, no M1+ or N1+, no online co-simulation, no uarch import. rk-sim 
    `design_status: Literal["shipping","proposed"] = "shipping"` (rk-uarch's `reference`
    chips map to `shipping`, its `proposed` designs to `proposed`) and
    `characterization: Characterization | None`, where
-   `Characterization = {table_path, table_hash, spec_hash, contract_version, tp}`. The loader
+   `Characterization = {table_path, table_hash, spec_hash, contract_version, tp}`.
+   The table carries required `hardware_spec_hash`, compared with this component `spec_hash`;
+   `table_hash` includes hardware_spec_hash. The field's format does not verify unavailable
+   HardwareSpec contents; the producer must check table/request/spec correspondence.
+   The loader
    refuses a stipulation on a `shipping` component.
 4. `rk/schema/results.py`: `FidelityMapEntry` gains optional `model_origin`, `fidelity_detail`
    and `table_hash`.

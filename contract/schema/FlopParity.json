@@ -1,0 +1,246 @@
+{
+  "$defs": {
+    "FlopDeviation": {
+      "additionalProperties": false,
+      "properties": {
+        "deviation_rel": {
+          "ge": -0.05,
+          "le": 0.05,
+          "title": "Deviation Rel",
+          "type": "number"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "deviation_rel",
+        "reason"
+      ],
+      "title": "FlopDeviation",
+      "type": "object"
+    },
+    "ParityChannelComparison": {
+      "additionalProperties": false,
+      "description": "One successful fixture/channel comparison against a projected oracle count.\n\nRatios use reference as denominator; positive adjustment means extra actual work.\nArithmetic follows B's binary64 division and math.fsum, without widening its limits.\nThe carrier verifies supplied arithmetic, not oracle/candidate authenticity.",
+      "properties": {
+        "absolute_adjustment_rel": {
+          "le": 0.05,
+          "minimum": 0,
+          "title": "Absolute Adjustment Rel",
+          "type": "number"
+        },
+        "actual": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual"
+        },
+        "channel": {
+          "enum": [
+            "matrix_ops",
+            "vector_ops",
+            "memory_read_bytes",
+            "memory_write_bytes"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "declared_deviations": {
+          "items": {
+            "$ref": "#/$defs/FlopDeviation"
+          },
+          "title": "Declared Deviations",
+          "type": "array"
+        },
+        "fixture_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Fixture Id",
+          "type": "string"
+        },
+        "raw_rel": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Raw Rel"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference"
+        },
+        "reference_state": {
+          "enum": [
+            "positive",
+            "zero",
+            "unmodelled"
+          ],
+          "title": "Reference State",
+          "type": "string"
+        },
+        "residual_rel": {
+          "anyOf": [
+            {
+              "ge": -0.005,
+              "le": 0.005,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Residual Rel"
+        },
+        "signed_adjustment_rel": {
+          "title": "Signed Adjustment Rel",
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "op",
+            "byte"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fixture_id",
+        "channel",
+        "unit",
+        "actual",
+        "reference",
+        "reference_state",
+        "raw_rel",
+        "signed_adjustment_rel",
+        "absolute_adjustment_rel",
+        "residual_rel",
+        "declared_deviations"
+      ],
+      "title": "ParityChannelComparison",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Explicit classification; self-tests never establish actual workload parity.\n\nAll fields are required, including nullable identities. Manifest digests use B's\nraw 64-hex spelling, unlike hardware_spec_hash's sha256: prefix. External oracle,\nfixture completeness, projection eligibility and callable identity need B/U-P3 checks.",
+  "properties": {
+    "candidate_identity": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Candidate Identity"
+    },
+    "comparisons": {
+      "items": {
+        "$ref": "#/$defs/ParityChannelComparison"
+      },
+      "title": "Comparisons",
+      "type": "array"
+    },
+    "fixture_set_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Fixture Set Id"
+    },
+    "kind": {
+      "enum": [
+        "not_run",
+        "harness_self_test",
+        "workload_parity"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "max_rel": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Max Rel"
+    },
+    "n_fixtures": {
+      "minimum": 0,
+      "title": "N Fixtures",
+      "type": "integer"
+    },
+    "oracle_manifest_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Oracle Manifest Sha256"
+    },
+    "reference_basis": {
+      "const": "rk_sim_aggregate_divided_by_tp",
+      "title": "Reference Basis",
+      "type": "string"
+    }
+  },
+  "required": [
+    "kind",
+    "reference_basis",
+    "fixture_set_id",
+    "oracle_manifest_sha256",
+    "candidate_identity",
+    "n_fixtures",
+    "max_rel",
+    "comparisons"
+  ],
+  "title": "FlopParity",
+  "type": "object"
+}

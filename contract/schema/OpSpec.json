@@ -1,0 +1,135 @@
+{
+  "$defs": {
+    "Operand": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Size Tokens"
+        },
+        "dimensions": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "dtype": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "layout": {
+          "enum": [
+            "contiguous",
+            "paged"
+          ],
+          "title": "Layout",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dtype",
+        "dimensions",
+        "layout"
+      ],
+      "title": "Operand",
+      "type": "object"
+    },
+    "Operator": {
+      "enum": [
+        "q_projection",
+        "k_projection",
+        "v_projection",
+        "qk_score",
+        "softmax",
+        "av_application",
+        "output_projection",
+        "normalization",
+        "residual_addition",
+        "ffn_up",
+        "ffn_gate",
+        "ffn_down",
+        "activation",
+        "kv_write",
+        "embedding",
+        "lm_head",
+        "attention_fused"
+      ],
+      "title": "Operator",
+      "type": "string"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "dimensions": {
+      "patternProperties": {
+        "\\S": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "propertyNames": {
+        "minLength": 1
+      },
+      "title": "Dimensions",
+      "type": "object"
+    },
+    "operands": {
+      "patternProperties": {
+        "\\S": {
+          "$ref": "#/$defs/Operand"
+        }
+      },
+      "propertyNames": {
+        "minLength": 1
+      },
+      "title": "Operands",
+      "type": "object"
+    },
+    "operator": {
+      "$ref": "#/$defs/Operator"
+    },
+    "reduction_axes": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Reduction Axes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "operator",
+    "dimensions",
+    "operands",
+    "reduction_axes"
+  ],
+  "title": "OpSpec",
+  "type": "object"
+}

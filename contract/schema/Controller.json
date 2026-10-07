@@ -1,0 +1,144 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attach": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "minimum": 0,
+          "type": "integer"
+        }
+      ],
+      "title": "Attach",
+      "type": "array"
+    },
+    "noc_credits": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "page_policy": {
+      "enum": [
+        "open",
+        "closed"
+      ],
+      "title": "Page Policy",
+      "type": "string"
+    },
+    "read_queue_depth": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "scheduler": {
+      "enum": [
+        "fr_fcfs",
+        "fcfs"
+      ],
+      "title": "Scheduler",
+      "type": "string"
+    },
+    "write_queue_depth": {
+      "$ref": "#/$defs/SourcedValue"
+    }
+  },
+  "required": [
+    "attach",
+    "scheduler",
+    "page_policy",
+    "read_queue_depth",
+    "write_queue_depth",
+    "noc_credits"
+  ],
+  "title": "Controller",
+  "type": "object"
+}

@@ -1,0 +1,80 @@
+{
+  "$defs": {
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "family": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Family",
+      "type": "string"
+    },
+    "load_regimes": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Load Regimes",
+      "type": "array"
+    },
+    "mapping_match": {
+      "enum": [
+        "matched",
+        "compiler-chosen"
+      ],
+      "title": "Mapping Match",
+      "type": "string"
+    },
+    "op_classes": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Op Classes",
+      "type": "array"
+    },
+    "precisions": {
+      "items": {
+        "$ref": "#/$defs/PrecisionFormat"
+      },
+      "title": "Precisions",
+      "type": "array"
+    },
+    "shape_regimes": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Shape Regimes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "family",
+    "op_classes",
+    "precisions",
+    "shape_regimes",
+    "load_regimes",
+    "mapping_match"
+  ],
+  "title": "ApplicabilityScope",
+  "type": "object"
+}

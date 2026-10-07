@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "noc_flit_hop_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Noc Flit Hop Count"
+    },
+    "sram_read_bytes": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sram Read Bytes"
+    },
+    "sram_write_bytes": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sram Write Bytes"
+    }
+  },
+  "required": [
+    "sram_read_bytes",
+    "sram_write_bytes",
+    "noc_flit_hop_count"
+  ],
+  "title": "ExtCounts",
+  "type": "object"
+}

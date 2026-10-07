@@ -1,0 +1,168 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "HardwareGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "cols": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "rows": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "rows",
+        "cols"
+      ],
+      "title": "HardwareGrid",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accumulator_bytes": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "array": {
+      "$ref": "#/$defs/HardwareGrid"
+    },
+    "dataflows": {
+      "items": {
+        "enum": [
+          "weight_stationary",
+          "output_stationary"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Dataflows",
+      "type": "array"
+    },
+    "macs_per_cycle": {
+      "additionalProperties": {
+        "$ref": "#/$defs/SourcedValue"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/PrecisionFormat"
+      },
+      "title": "Macs Per Cycle",
+      "type": "object"
+    },
+    "operand_buffer_bytes": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "operand_bytes_per_cycle": {
+      "$ref": "#/$defs/SourcedValue"
+    }
+  },
+  "required": [
+    "array",
+    "dataflows",
+    "macs_per_cycle",
+    "accumulator_bytes",
+    "operand_buffer_bytes",
+    "operand_bytes_per_cycle"
+  ],
+  "title": "MatrixEngine",
+  "type": "object"
+}

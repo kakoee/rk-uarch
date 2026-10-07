@@ -33,12 +33,16 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | Complete U1 proposal review and integration, including the preparation ownership amendment; G1 and final ADR acceptance remain pending |
-| **In progress** | U1: both lane proposals and human-generated parity artifacts exist locally; independent reviews and closure remain pending |
+| **Next** | Commit and push as separately authorized steps, then hosted CI and Linux-box cold-clone validation; G1/U1 closure remains pending |
+| **In progress** | U1: both lane reviews ACCEPTED; Javid accepted complete U0001/U0002 and authorized snapshot adoption/integration on 2026-10-06; integrated locally, uncommitted |
 | **Not started** | U2–U11 |
 | **Paused** | The `nightly` workflow's schedule (2026-10-03): no self-hosted runner yet. Re-enable it when U3 starts (U3, "Before it starts") |
 
 Update this block and `docs/how-it-works.md` at every sprint boundary.
+
+Current U1 acceptance and artifact identities are recorded in
+[U1 acceptance and adoption](reviews/U1-acceptance-and-adoption.md). Earlier proposal
+and partial-approval notes below remain historical; they do not override that acceptance.
 
 **U1 pin update, 2026-10-04:** Javid (@jjaffari) approved advancing from `11bb530` to
 `1e5706e` before implementation. The seven intervening commits leave `rk/schema/`,
@@ -133,14 +137,14 @@ existing interfaces.
 | | |
 |---|---|
 | **Goal** | The one thing everything else codes against exists, and it is proven identical to rk-sim's vocabulary |
-| **Lane A** | *Both founders present:* the contract → **U-P1** |
+| **Lane A** | Contract → **U-P1**, with Javid acting as human owner/approver for both U1 lanes |
 | **Lane B** | Vendored rk-sim snapshot, FLOP-parity fixtures from rk-sim's own code, round-trip tests → **U-P2** |
-| **Joint exit criterion** | **Gate G1** · the `contract` CI job green against the toy table · parity fixtures for ≥3 ModelSpecs × ≥24 queries · ADR U0001 accepted by both, including the Rev-2 decisions (applicability bins, the BLOCKFP8 rule, shared SRAM, the initial-state default, the declared omissions) |
+| **Joint exit criterion** | **Gate G1** · the `contract` CI job green against the toy table · parity fixtures for ≥3 ModelSpecs × ≥24 queries · ADR U0001 accepted by Javid (@jjaffari), acting human approver for both U1 lanes, including the Rev-2 decisions (applicability bins, the BLOCKFP8 rule, shared SRAM, the initial-state default, the declared omissions) |
 | **Effort** | A 31 · B 21 h realistic |
 | **Depends on** | U0 · a local rk-sim clone at the pinned SHA in STATUS (`1e5706e`). U-P2 starts from that SHA without waiting for U0001; U-P1 writes the same SHA into U0001, and a different SHA there is a stop |
 | **Not in this sprint** | Any engine; any field for a later sprint |
 
-> U-P1 is the one prompt both of you should sit through. Everything downstream codes against it.
+> U-P1 receives Javid's complete contract review under the recorded U1 delegation. Everything downstream codes against it.
 
 ### U2 · The first honest number
 
@@ -270,13 +274,19 @@ Every threshold is written before the experiment it judges. A gate decided in th
 the result was discovered is a retrospective.
 
 **G1 · Contract frozen (U1).**
+For U1, Javid (@jjaffari) is the already-authorized acting owner and human approver
+for both lanes while Reza is off duty. No Reza approval is claimed or required again
+under that recorded delegation. Reviewer acceptance does not accept ADRs or close G1.
 - *Pass:* ADR U0001 accepted under the recorded human ownership, with the Rev-2 decisions
   and standalone/prepared-input ownership recorded (concrete payload fields remain U2); the
   `contract` job is green against the toy table; parity fixtures are complete.
 - *Fail:* do not start U-P3. A contract that is not frozen is the rework that grows with every
   prompt built on it.
 
-**U2 preparation boundary prerequisite and exit.** Before implementation, accept U0003's
+**U2 preparation boundary prerequisite and exit.** At U0003 kickoff, load
+[U2 kickoff obligations](reviews/U2-kickoff-obligations.md) and U0002: carry forward
+B-F16 and unresolved embedding accounting with their existing owners, budgets and acceptance
+requirements; neither is resolved by U1's self-tests. Before implementation, accept U0003's
 prepared envelope, identity/validation rules and any public contract revision, then share
 its schema with Lane B. Before U3, prove standalone preparation and file replay agree, run
 an external fixture without producer dependencies, and prove mismatches fail before execution.

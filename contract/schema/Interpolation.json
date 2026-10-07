@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decode": {
+      "const": "bilinear in (log B, log T); linear in 1/f",
+      "title": "Decode",
+      "type": "string"
+    },
+    "outside_grid": {
+      "const": "refuse",
+      "title": "Outside Grid",
+      "type": "string"
+    },
+    "prefill": {
+      "const": "bilinear in (log n, log L); linear in 1/f",
+      "title": "Prefill",
+      "type": "string"
+    }
+  },
+  "required": [
+    "decode",
+    "prefill",
+    "outside_grid"
+  ],
+  "title": "Interpolation",
+  "type": "object"
+}

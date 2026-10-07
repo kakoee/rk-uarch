@@ -1,0 +1,62 @@
+{
+  "$defs": {
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "block_size_tokens": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Block Size Tokens"
+    },
+    "dimensions": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Dimensions",
+      "type": "array"
+    },
+    "dtype": {
+      "$ref": "#/$defs/PrecisionFormat"
+    },
+    "layout": {
+      "enum": [
+        "contiguous",
+        "paged"
+      ],
+      "title": "Layout",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dtype",
+    "dimensions",
+    "layout"
+  ],
+  "title": "Operand",
+  "type": "object"
+}

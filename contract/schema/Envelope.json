@@ -1,0 +1,62 @@
+{
+  "$defs": {
+    "DecodeEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_max": {
+          "minimum": 1,
+          "title": "Batch Max",
+          "type": "integer"
+        },
+        "context_per_seq_max": {
+          "minimum": 1,
+          "title": "Context Per Seq Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "batch_max",
+        "context_per_seq_max"
+      ],
+      "title": "DecodeEnvelope",
+      "type": "object"
+    },
+    "PrefillEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "prompt_tokens_max": {
+          "minimum": 1,
+          "title": "Prompt Tokens Max",
+          "type": "integer"
+        },
+        "prompts_per_iteration_max": {
+          "minimum": 1,
+          "title": "Prompts Per Iteration Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prompt_tokens_max",
+        "prompts_per_iteration_max"
+      ],
+      "title": "PrefillEnvelope",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decode": {
+      "$ref": "#/$defs/DecodeEnvelope"
+    },
+    "prefill": {
+      "$ref": "#/$defs/PrefillEnvelope"
+    }
+  },
+  "required": [
+    "decode",
+    "prefill"
+  ],
+  "title": "Envelope",
+  "type": "object"
+}

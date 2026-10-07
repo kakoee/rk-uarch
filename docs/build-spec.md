@@ -240,7 +240,8 @@ memory:
                 {attach: [0, 15], ...}, ...]
   dram: {standard: gddr6, channels: {...}, bw_bytes_per_s: {...}, capacity_bytes: {...},
          organization: {ranks: {...}, bank_groups: {...}, banks_per_group: {...}, row_bytes: {...}},
-         timing_preset: null,      # or {file: <path in the simulator repo>, sha: <pinned commit>}
+         timing_source: direct,  # required: direct | preset; never inferred from source strings
+         timing_preset: null,      # preset mode requires {file, sha: <full 40-hex commit>}
          timing: {t_rcd_cycles: {...}, t_rp_cycles: {...}, t_cl_cycles: {...},
                   t_rfc_cycles: {...}, t_refi_cycles: {...}}}         # F4: in the dram clock domain
 formats: {fp8: {bytes: 1, accumulate_bytes: {...}, block_scale_bytes: {...}}}
@@ -267,18 +268,33 @@ tdp_w: {...}
   scales, `round(freq_hz)` otherwise. Every engine, U-C0 included, uses those integers and
   nothing else, so a roofline and the cycle-level run it bounds share one clock. Clocks are
   never stored as a rounded period (§2.8).
-- **Presets.** A simulator preset (Ramulator's GDDR6 or HBM tables, say) may supply DRAM timing
-  only through `memory.dram.timing_preset: {file, sha}`, and every timing leaf it supplies is a
-  claim whose `source` is `<file>@<sha>`. A timing claim that cites any other preset file, or a
-  `timing_preset` without a pinned sha, is refused (`UnnamedPreset`). No engine reads any
-  simulator configuration (timing, controller queues, scheduler parameters) from a preset or a
-  default the spec does not name; what the spec lacks is listed as unrepresented (F4).
+- **Timing origin (U1 revision direction approved by Javid, 2026-10-06; U0001 remains
+  proposed).** Required `memory.dram.timing_source: direct | preset` is typed metadata.
+  In direct mode `timing_preset` is null or omitted; all timing values carry their own
+  claims/stipulations and no preset fallback is permitted. Source strings containing `@`
+  or ending in `.yaml`, `.yml` or `.cfg` are ordinary citations, not mode selectors.
+  In preset mode exactly one `memory.dram.timing_preset: {file, sha}` is required, with
+  a full pinned 40-hex SHA. Every non-stub timing claim must cite exactly `<file>@<sha>`;
+  a missing/unpinned preset or mismatched claim raises `UnnamedPreset`. Mixed preset/
+  datasheet claim sources remain unsupported in 0.1. Stubs retain source=null; stipulations
+  retain their rationale and null provenance/source/date and are allowed only in proposed
+  designs. Direct mode with a named preset is refused. Declarations do not independently
+  prove a citation truthful; the loader does not fetch or inspect cited documents.
+  No engine reads simulator configuration or defaults the spec does not name; what the
+  spec lacks is listed as unrepresented (F4).
 - `sram.bytes` and `energy.pj_per_byte.sram` travel together: a variant that changes one
   re-stipulates the other (F11).
 - A field an engine cannot represent goes into that engine's `unrepresented` list and becomes a
   table warning, as for every other field.
 
 #### 2.3.3 Request and table
+
+HardwareSpec enforces the explicit field-path → unit vocabulary in U0001, also
+published as x-hardware-unit-rules in its schema. This applies to claims, stubs and
+stipulations without changing values, labels or citations. byte and B are equivalent
+labels only; MHz in freq_hz, GB in capacity_bytes and ns in *_cycles are refused.
+Coordinates are count indices, format bytes is an implicit byte width, and voltage_ratio
+keys are dimensionless frequency ratios. Generic SourcedValue remains unchanged.
 
 rk-sim → uarch: **`CharacterizationRequest`**
 
@@ -301,7 +317,7 @@ grid:
   prefill: {n: [1,2,4,8], L: [128,512,2048,8192,32768]}                   # 20 × 2 f = 40 rows
   frequency_ratio: [1.0, 0.6]
 mapping_policy: summa-2d@1                               # stipulated
-uarch_fidelity: {compute: 2, noc: "1+ts", dram: 2}           # values as fidelity_detail (§2.4)
+uarch_fidelity: {compute: 2, noc: "1+ts", dram: 2, sync: exact, layer_reuse: true}           # values as fidelity_detail (§2.4)
 initial_state: steady                                    # F2: steady | cold; a stipulation on every row
 kv_layout: {block_size_tokens: 16}                       # F7: rk-sim's KV block size
 visit_weights: null                                      # F15, optional: rk-sim's density over (B, T) and
@@ -314,10 +330,11 @@ uarch → rk-sim: **`UarchCostTable`**
 ```yaml
 contract: uarch-contract/0.1
 uarch_version: 0.3.0+g1a2b3c4
+hardware_spec_hash: "sha256:…"       # canonical HardwareSpec identity, same as request
 request_hash: "sha256:…"
 table_hash:   "sha256:…"
 tp: 8                                  # the request's tp; rk-sim refuses it for any other tp (rule 9)
-composite_fidelity: C2
+composite_fidelity: C2                 # shared_sram omitted: hardware has none
 fidelity_detail: {compute: 2, noc: "1+ts", dram: 2, sync: exact, layer_reuse: true}
 rows:                                  # seconds and bytes; never cycles
   - {phase: decode, batch: 8, total_context_tokens: 32768, frequency_ratio: 1.0,
@@ -342,7 +359,9 @@ measured_error: {interpolation_loo: {median_rel: …, max_rel: …, weighted_med
                  layer_reuse: {median_rel: …, max_rel: …, n_samples: …},            # F3
                  cold_vs_steady: {median_rel: …, max_rel: …, n_samples: …,
                                   priming_2_vs_1_max_rel: …}}                         # F2; warm-up length
-flop_parity: {max_rel: …, declared_deviations: [{id, deviation_rel, reason}]}
+flop_parity: {kind: not_run, reference_basis: rk_sim_aggregate_divided_by_tp,
+              fixture_set_id: null, oracle_manifest_sha256: null, candidate_identity: null,
+              n_fixtures: 0, max_rel: null, comparisons: []}  # no workload parity claimed
 provenance: {params: [...], model_card: {hash, badge, evidence, validated_error_band,
                                          energy_verification},
              conditional_on: [...]}
@@ -441,13 +460,30 @@ The Sync row above is about the parallel simulation (§2.9), not about barriers 
 and values. SRAM banks are modelled inside compute level 2, so they have no key of their own:
 below compute level 2 they are unmodelled.
 
-**The composite level reported to rk-sim:**
+**The composite level reported to rk-sim (contract 0.1):**
 
-- **C2** only if compute is at level 2 (which is where SRAM bank conflicts live), NoC and DRAM
-  are at level 2 or "1+ts", a shared SRAM (when present) is at "1+ts",
-  **and** synchronisation is exact, or `approx(Q)` covered by a measured curve (§2.9).
-- **C1** otherwise, if any subsystem is at level 1.
-- **C0-equivalent** if every subsystem is at level 0.
+Javid approved this revision direction on 2026-10-06; the complete U0001 remains proposed.
+Evaluate hardware detail first; synchronization cannot add hardware detail:
+
+- **C0-equivalent** if all represented hardware subsystems are at level 0, regardless
+  of exact or approximate synchronization. Omitted/unrepresented shared SRAM contributes
+  no detail, so it cannot turn an otherwise all-zero vector into C1.
+- **C2** only if compute is 2, NoC and DRAM are 2 or "1+ts", sync is exact, and shared
+  SRAM **when present** is "1+ts". Omitted shared_sram means hardware has none, so no
+  shared-SRAM prerequisite applies. "unrepresented", 0 and 1 do not satisfy that
+  prerequisite for an existing resource.
+- **C1** for every configuration with higher hardware detail that misses any C2 prerequisite.
+
+**Hardware/detail consistency (later producer integration).** Omission means physical
+absence, never unknown or unmodelled. A producer must compare with HardwareSpec: when
+shared_sram is declared, it must emit a level in fidelity_detail ("unrepresented" if
+unsupported); it must not omit that key. When hardware has none, omit the key. This
+cross-artifact check belongs to the later producer, not to the standalone detail vector.
+
+Contract 0.1 admits no measured approximate-sync support yet; approximate sync is at most
+C1 and cannot raise the composite relative to exact sync. Keep sync and unrepresented
+resources visible in fidelity_detail. A future measured-curve extension (§2.9/U-P18)
+requires contract admission before approximate sync may earn C2.
 
 Every engine's levels come from this table, never from its name. The fork's sub-models are
 placed on the ladder once, per configuration, from its source, in ADR U0005 (U-P5), and its
@@ -736,8 +772,10 @@ their own partition. Every owner id belongs to exactly one partition.
 **Lax mode** (off by default). A quantum Q > L; crossing events are delivered at the window
 boundary (temporal decoupling).
 - The result reports `sync: approx(Q)`.
-- The composite is C1 unless a measured error-vs-Q curve (U-P18) covers this Q, boundary type
-  and family.
+- Contract 0.1 keeps all-zero represented hardware at C0 and higher detail at C1.
+  A future contract may admit C2 only when every resource prerequisite holds and a
+  measured error-vs-Q curve (U-P18) covers this Q, boundary type and family. Switching
+  from exact to approximate synchronization must never raise composite fidelity.
 
 ### 2.10 Tech stack
 
@@ -956,10 +994,12 @@ kind claim|stipulation), HardwareSpec, the operator vocabulary, ModelShape, the
 CharacterizationRequest, the UarchCostTable, the ModelCard, hashing and the error taxonomy.
 
 ## Rules
-- Agents propose changes and stop. Both founders approve; every change has an ADR.
+- Agents propose changes for human review; every change has an ADR. For U1, Javid
+  (@jjaffari) is acting approver for both lanes while Reza is off duty; U0001 is proposed.
 - Additive change = MINOR bump of uarch-contract; breaking change = MAJOR bump.
 - Names copy rk-sim's where rk-sim has the concept. The vendored round-trip test proves it.
-- Units live in names; no field carries cycles.
+- Units live in names. HardwareSpec inputs may carry cycles; execution results must not.
+  Only conditional_on[*].value may echo hardware stipulations in cycles; U-P3 checks the spec.
 - After changing anything: `make gen`, commit contract/schema/, update fixtures.
 
 ## After integration
@@ -996,8 +1036,10 @@ disagree, the spec is right and the component is wrong. Stipulations propagate a
 stipulations; a derived claim is only as good as its worst input.
 
 Every numeric leaf is a SourcedValue, counts and DRAM organisation and timing included. A
-simulator preset supplies DRAM timing only through memory.dram.timing_preset {file, sha}, as
-claims citing that file@sha. Each *_cycles leaf is in its block's clock domain (build-spec
+simulator preset supplies DRAM timing only with memory.dram.timing_source: preset and
+memory.dram.timing_preset {file, sha}, as claims citing that file@sha. Direct mode uses
+explicit timing values and forbids preset fallback; source strings never select a mode.
+Each *_cycles leaf is in its block's clock domain (build-spec
 §2.3.2). SRAM size and SRAM pJ/byte travel together: a
 variant that changes one re-stipulates the other. studies/ also holds the versioned workload
 suite (workload-suite@N.yaml) that studies and L3 shape selection read.
@@ -1026,7 +1068,10 @@ divided by tp; no collectives), using contract/operators.py only. Attention is o
 attention_fused operator: scores stay on chip and never reach DRAM. A multiply-add is two
 operations. Layer reuse must be declared in
 the graph, and its error is measured by table/. KV is read in pages of the request's
-block_size_tokens. MoE is active-parameter dense-equivalent only. `omissions` lists routing,
+block_size_tokens. MoE is active-parameter dense-equivalent only. Its d_ff and expert_d_ff
+are redundant compatibility fields for one expert's width. Total expert parameters use
+n_experts, active expert parameters/work use experts_per_token, each exactly once;
+shared/non-expert terms remain separate. Dense d_ff semantics are unchanged. `omissions` lists routing,
 imbalance, all-to-all, host/runtime time, address translation, coherence and mixed
 prefill/decode iterations; they become table warnings. FLOP parity against rk-sim's own counts
 runs on every change; every deviation above 0.5% has a name and a reason in deviations.py.
@@ -1314,9 +1359,18 @@ server/ (setup-dev.sh and the runbook for the shared Linux box).
 `*_count`. A mapping field carries the unit in its own name and its keys name resources
 (`attribution_s: {compute: …}`, `peak_resident_bytes: {hbm: …}`); every value inherits the
 unit. rk-sim Channel names (`matrix_ops`, `vector_ops`) are copied verbatim, and U-P2's
-round-trip pins them. HardwareSpec leaves may also end in `_cycles`, in the clock domain
-§2.3.2 assigns, and may name counts plainly (`banks`, `engines`); cycles never appear in a
-request or a table. Converting is a named function, never an inline multiply.
+round-trip pins them. The unit-bearing Row keys `memory_read_bytes` and `memory_write_bytes`
+map by name only to Channel `memory_read` and `memory_write` (U0001); values and nulls are
+unchanged. Every Row.counts field must have one unique, valid destination; unknown fields
+fail. HardwareSpec leaves may also end in `_cycles`, in the clock domain
+§2.3.2 assigns, and may name counts plainly (`banks`, `engines`). Cycle quantities are
+forbidden in requests and table execution results. The only table exception is an unchanged
+hardware stipulation echo in provenance.conditional_on[*].value, with a hardware path and
+allowed unit; provenance.params remains cycle-free. U-P3 must verify each condition's exact
+path/value against the referenced proposed HardwareSpec. U1 has no spec artifact at this
+boundary and does not claim that check. Parity comparison actual/reference counts carry an
+explicit unit (op or byte), just as SourcedValue.value has an explicit unit carrier.
+Converting is a named function, never an inline multiply.
 
 **6.2 Decimal units.** 1 GB = 1e9 bytes, as datasheets quote them. Bandwidth is per direction.
 
@@ -1327,7 +1381,11 @@ request or a table. Converting is a named function, never an inline multiply.
 rk-sim → uarch output files, from U10. Enforced by import-linter.
 
 **6.5 Hashing.** Canonical JSON (sorted keys, repr-round-trip floats, no NaN) → sha256.
-Every table carries the spec, request and table hashes.
+Every table requires hardware_spec_hash, request_hash and table_hash. hardware_spec_hash
+uses spec_hash(HardwareSpec) and must equal the request's hardware_spec_hash; it is included
+in table_hash, which excludes only its own top-level field. U-P3 checks actual spec contents;
+U-P19 checks the component characterization.spec_hash. Syntax validation alone does not
+verify an unavailable spec or authenticate any supplied artifact.
 
 **6.6 Determinism.** Pure function of (inputs, version, seed). Byte-identical across runs,
 worker counts and, from U9, thread counts in exact mode. Nothing that reaches output may
@@ -1390,9 +1448,12 @@ table-backed cost satisfies the same interface the R1 DES already calls:
    layer-reuse errors are surfaced as run warnings.
 3. **The envelope is checked at build time.** Extrapolation is refused.
 4. **DVFS uses the table's frequency axis.** DVFS without one is a hard error.
-5. **Counts use rk-sim's channel names.** Extension channels are carried as "unmodelled".
+5. **Counts map by name only to rk-sim channels (approved by Javid).** matrix_ops ->
+   matrix_ops, vector_ops -> vector_ops, memory_read_bytes -> memory_read, and
+   memory_write_bytes -> memory_write. No scaling, tp division or null conversion;
+   unknown fields fail and destinations are unique. Extension channels remain "unmodelled".
 6. **One chip, one set of facts.** The component's params equal `derive_rk_params` of the
-   cited spec: the spec hash matches, and the table's `provenance.params` (which are
+   cited spec: table.hardware_spec_hash matches characterization.spec_hash, and the table's `provenance.params` (which are
    `derive_rk_params` of that spec) equal the component's params field by field.
 7. **Steady state for back-to-back iterations.** R1 prices back-to-back iterations, so it reads
    `initial_state: steady` tables. A `cold` table in an R1 run is refused at build time.
@@ -1423,7 +1484,7 @@ raises; nothing degrades silently.*
 |---|---|---|
 | No table for this component | STUB for that component, with a warning naming the missing table | `NoTableForComponent` |
 | Workload envelope exceeds the grid | Degrade, with a warning naming the region | `EnvelopeExceedsGrid` at build time |
-| Table spec hash ≠ component's | `SpecHashMismatch` | same |
+| Table hardware_spec_hash ≠ component characterization.spec_hash | `SpecHashMismatch` | same |
 | Table `provenance.params` ≠ component's params | `ParamsMismatch` | same |
 | Table tp ≠ plan's tp | `TpMismatch` | same |
 | Contract major-version mismatch | `ContractMajorMismatch` | same |
@@ -1521,7 +1582,9 @@ frozen=True, extra="forbid" on every model.
 
 AUTHORITY: CLAUDE.md says agents propose and stop on contract/ and docs/decisions/. This
 prompt is that proposal. Write contract/ and docs/decisions/U0001 in full, leave them
-uncommitted, and stop; both founders review them and commit with UARCH_HUMAN=1.
+uncommitted, and stop; Javid (@jjaffari), acting human approver for both U1 lanes while
+Reza is off duty, reviews the complete proposals. Human acceptance/publication is separate;
+no Reza approval is claimed. UARCH_HUMAN=1 authorizes the human-only vendor operation.
 
 1. sourced.py — SourcedValue. rk-sim's five fields VERBATIM (value, unit, provenance, source,
    date) with rk-sim's validator semantics: provenance=stub requires source=None, anything
@@ -1545,16 +1608,30 @@ uncommitted, and stop; both founders review them and commit with UARCH_HUMAN=1.
    buffer_flits, direction for multi-NoC designs); memory (interleave granularity and scheme;
    controllers with attachment coordinates, scheduler, page_policy, read and write queue
    depths and noc_credits; DRAM standard, channels, bandwidth, capacity, organization,
-   timing_preset and timing); numeric formats (byte width, accumulation width, block-scale
+   timing_source, timing_preset and timing); numeric formats (byte width, accumulation width, block-scale
    bytes); energy coefficients per activity, with voltage_ratio per frequency ratio; static
    power; tdp. EVERY NUMERIC LEAF IS A SourcedValue, counts included (grid, array, banks, DMA
    engines, virtual channels, DRAM channels and organisation, queue depths, credits), with an
    integral value for counts; a reference marks an unpublished count as a stub. Only these
    stay plain: categorical enums (topology, direction, dataflows, scheme, scheduler,
-   page_policy, sync mechanism), list structure (how many NoCs and controllers), attach
-   coordinates, and a format's byte width. A preset supplies DRAM timing only through
-   memory.dram.timing_preset {file, sha}; each timing claim it supplies has source
-   "<file>@<sha>". Each *_cycles leaf is in its block's clock domain (build-spec §2.3.2).
+   page_policy, sync mechanism, timing_source), list structure (how many NoCs and controllers), attach
+   coordinates, and a format's byte width. memory.dram.timing_source is a required
+   Literal["direct", "preset"]. Direct mode requires timing_preset=null (or omitted),
+   uses each timing value's own claim/stipulation, and has no preset fallback. Never infer
+   mode from "@" or filename extensions in a citation. Preset mode requires exactly one
+   timing_preset {file, sha}, with a full pinned 40-hex SHA; every non-stub timing claim
+   must cite that exact "<file>@<sha>". Stubs and proposed-design stipulations keep their
+   existing provenance rules. Mixed preset/datasheet claims remain unsupported in 0.1.
+   These declarations cannot independently prove a citation truthful. Each *_cycles leaf
+   is in its block's clock domain (build-spec §2.3.2).
+   HardwareSpec validates every sourced numeric leaf against an explicit full field-path
+   unit map (U0001; schema x-hardware-unit-rules), including stubs and stipulations.
+   No conversion or suffix-only inference: Hz, byte|B, cycle, byte/cycle, byte/s,
+   MAC/cycle, op/cycle, count, pJ/MAC, pJ/byte, ratio and W at their documented paths.
+   byte and B are the only byte-label aliases; preserve the supplied label and value.
+   Mismatches name path, supplied unit and allowed units. These are semantic checks,
+   not generic SourcedValue restrictions. Core scales_with_core defaults true and cannot
+   be false; other clock domains retain explicit scaling flags.
 3. operators.py — THE OPERATOR VOCABULARY. uarch holds the pen here because it has the
    harder requirement: a roofline needs a name and a FLOP count; a tiled model needs
    shapes, layouts, reduction axes and per-operand precision. Start from rk-sim P16's baseline
@@ -1573,6 +1650,14 @@ uncommitted, and stop; both founders review them and commit with UARCH_HUMAN=1.
    implied_params(spec, shape) -> (total, active). check_parity() raises unless both are
    within 1% of ModelSpec's total_params and active_params. Two sources describing
    different models is the failure this exists to make impossible.
+   For MoE, d_ff == expert_d_ff: redundant compatibility fields naming one expert's
+   intermediate width. Check this relation at the model/shape boundary. Total expert
+   parameters multiply by n_experts; active expert parameters/work multiply by
+   experts_per_token, each exactly once. Shared terms stay separate; dense d_ff is unchanged.
+   Numeric parsing boundary (Javid-approved F4): copied ModelSpec and generic SourcedValue
+   retain pinned coercions even when embedded; A-owned numeric fields reject boolean/string
+   coercion. Hash accepted carriers from validated normalized values. JSON Schema rejects
+   numeric strings that copied Pydantic carriers accept; do not claim identical acceptance.
 5. precision.py — rk-sim's PrecisionFormat, all eight members, same string values.
 6. request.py — CharacterizationRequest, field for field as build-spec §2.3.3 lays it out:
    contract version, rk_schema_snapshot, component_id, hardware_spec_hash, model, model_shape,
@@ -1588,17 +1673,41 @@ uncommitted, and stop; both founders review them and commit with UARCH_HUMAN=1.
    same point, which is the floor every C2 row must respect and the "detail delta" rk-sim's
    Compare shows), attribution_s {compute, memory, noc, sync, overhead} (a critical-path
    split whose parts sum to duration_s), counts {matrix_ops, vector_ops, memory_read_bytes,
-   memory_write_bytes} (rk-sim Channel names), ext_counts {sram_read_bytes, sram_write_bytes,
+   memory_write_bytes} (mapped to rk-sim Channel names as below), ext_counts {sram_read_bytes, sram_write_bytes,
    noc_flit_hop_count}, peak_resident_bytes {hbm, sram}, and diagnostics (build-spec §2.3.3):
    every diagnostic is Optional with NO default of 0, because null means "not modelled".
-   Table-level: contract, uarch_version, request_hash, table_hash, tp, initial_state,
+   Table-level: contract, uarch_version, hardware_spec_hash, request_hash, table_hash, tp, initial_state,
    kv_layout, interpolation spec, measured_error {interpolation_loo (with
    weighted_median_rel), composition_reduction, layer_reuse, cold_vs_steady (with
-   priming_2_vs_1_max_rel); each sampled error with n_samples}, flop_parity {max_rel,
-   declared_deviations[{id, deviation_rel, reason}]}, composite_fidelity, fidelity_detail
+   priming_2_vs_1_max_rel); each sampled error with n_samples}, flop_parity {kind,
+   reference_basis, fixture_set_id, oracle_manifest_sha256, candidate_identity, n_fixtures,
+   max_rel, comparisons}, composite_fidelity, fidelity_detail
    (build-spec §2.4's keys and values), provenance {params (derive_rk_params of the spec),
    model_card {hash, badge, evidence, validated_error_band, energy_verification},
    conditional_on}, warnings (the declared omissions of build-spec §2.3.4 among them).
+   hardware_spec_hash is required, same format/semantics as the request, and included in
+   table_hash. U-P3 must verify table/request/spec identity correspondence when it has those
+   artifacts. U1 validates the identity field, not unavailable HardwareSpec contents.
+   conditional_on holds only hardware stipulations; only each value may carry cycles.
+   Apply the explicit hardware path/unit map; U-P3 verifies actual path/value equality.
+   B-F8 carrier follows B's U1-lane-B-flop-parity-interface.md: explicit kind not_run |
+   harness_self_test | workload_parity (required, never inferred/defaulted); reference_basis
+   rk_sim_aggregate_divided_by_tp; nonblank fixture_set_id/candidate_identity when run;
+   raw 64-lowercase-hex oracle_manifest_sha256 required for workload_parity (self-tests may
+   use null). not_run has null identities/max_rel, zero n_fixtures and empty comparisons.
+   Each ParityChannelComparison has fixture_id, channel (Row.counts name), unit (op or byte),
+   actual/reference (finite nonnegative or null), reference_state positive|zero|unmodelled,
+   raw_rel, signed_adjustment_rel, absolute_adjustment_rel, residual_rel, and
+   declared_deviations[{id, deviation_rel, reason}]. For reference R>0: raw=(actual-R)/R,
+   signed=sum(deviations), absolute=sum(abs(deviations)), residual=raw-signed. Ratios are
+   dimensionless; positive means extra actual work. Use B's binary64 arithmetic/math.fsum;
+   reject inconsistent reported arithmetic, absolute>0.05, abs(residual)>0.005, and any
+   declarations when abs(raw)<=0.005. No cross-fixture/channel budget pooling. Zero/null
+   references require matching actual, no declarations, null raw/residual and zero
+   adjustments. Enforce units, unique fixture/channel pairs and local deviation ids,
+   distinct-fixture n_fixtures and max_rel=max(abs(raw)) over positive references (else null).
+   External oracle/candidate authenticity, completeness and projection eligibility remain
+   B/U-P3 checks; self-test success never establishes actual workload parity.
 8. model_card.py — ModelCard: model_id (engine, engine version, fidelity_detail, mapping
    policy), badge, evidence (ledger ids), verification {L0, L0m, L1, L2: report hash or
    None}, validated_error_band: None | {low_rel, high_rel, scope {family, op_classes,
@@ -1612,8 +1721,8 @@ uncommitted, and stop; both founders review them and commit with UARCH_HUMAN=1.
     ContractMajorMismatch, ContractMinorMismatch (a warning), ResidencyExceedsCapacity,
     NonFiniteRow, MissingFrequencyAxis, InitialStateMismatch, KvLayoutMismatch; plus the
     uarch-side errors StipulationOnReference, ClaimWithoutSource, SramCapacityExceeded,
-    UnnamedPreset (a DRAM timing claim citing a preset other than
-    memory.dram.timing_preset, or a timing_preset without a pinned sha) and ShardIndivisible
+    UnnamedPreset (explicit preset mode without a valid named preset/full pinned sha,
+    or a non-stub timing claim not citing the selected preset's exact file@sha) and ShardIndivisible
     (heads or FFN width not divisible by tp). Each carries the sentence the user will read.
 11. make gen writes contract/schema/*.json from the models; CI fails if it is stale.
 
@@ -1631,24 +1740,39 @@ ACCEPTANCE TESTS (write first):
    message names the full parameter path.
 6. UNITS LIVE IN NAMES. A test walks every float field of request.py and table.py and fails
    on any name without a unit suffix from the allow-list in build-spec §6.1, applying §6.1's
-   two exceptions exactly (keys of a mapping field inherit its unit; rk-sim Channel names
-   are verbatim). The real field names of build-spec §2.3.3 pass.
+   explicit-unit exceptions too (mapping values inherit the field unit; rk-sim Channel names
+   are verbatim; SourcedValue.value and parity actual/reference have a required unit field). The real field names of build-spec §2.3.3 pass.
 7. CYCLES NEVER CROSS. A test fails if any field in request.py or table.py is named *_cycles
-   or carries unit "cycle". Cycles are an engine-internal quantity.
+   or carries unit "cycle" in execution results. The sole table exception is a hardware
+   stipulation echo in provenance.conditional_on[*].value. Test positive cycle/per-cycle
+   echoes and negative leakage into params, rows, diagnostics and other table fields.
 8. ModelShape parity: a Llama-3.1-70B-shaped sidecar passes against its ModelSpec; the same
    sidecar with d_ff off by 10% fails with both numbers in the message.
 9. contract/tests/fixtures/toy_table.json (hand-written by you, two decode rows and one
    prefill row) validates, and the contract CI job is green against it.
-10. Rev-2 fields: a reference spec whose timing_preset has no sha, or one timing claim of
-    which cites a preset file other than timing_preset, is refused (UnnamedPreset); a design
-    with sram.bytes but no energy.pj_per_byte.sram is refused, naming both paths; a reference
-    with a stub bank count loads.
+10. Rev-2 fields: direct and preset timing examples load and round-trip. Direct citations
+    containing "@" or .yaml/.yml/.cfg stay valid. Explicit preset mode without a named,
+    full pinned SHA fails; every non-stub claim must cite the exact file@sha. Mixed-source
+    claims fail. Direct mode with a preset fails. Both modes preserve stub and reference-
+    versus proposed-design stipulation rules. A design with sram.bytes but no
+    energy.pj_per_byte.sram is refused, naming both paths; a reference stub bank count loads.
 11. NULL, NOT ZERO: a test fails if any diagnostics field in table.py, or any field in
     model_card.py, has a numeric default.
 12. The toy table carries tp, initial_state, kv_layout, all four measured errors, the
     embedded model card, and a diagnostics block with at least one null.
 13. A fidelity_detail value outside build-spec §2.4's legal set (dram: "2+ts", say) is
     refused, naming the key.
+14. Composite branches: all represented hardware at level 0 is C0 regardless of sync.
+    Omitted shared_sram means physically absent, not unknown or unmodelled. C2 requires
+    compute=2, noc/dram in {2,"1+ts"}, exact sync, and shared_sram="1+ts" only if present.
+    With those other prerequisites, omission or "1+ts" gives C2; "unrepresented", 0 or 1
+    gives C1. Higher hardware detail otherwise is C1. A later producer must match
+    HardwareSpec: emit a level whenever shared SRAM exists, using "unrepresented" when
+    unsupported; never omit an existing resource. Omit the key when hardware has none.
+    Across every legal hardware-level combination and both layer_reuse values, changing
+    exact to approximate sync must never raise the composite; approximate sync cannot
+    earn C2 in 0.1. Preserve sync and unrepresented detail. Test the no-shared-SRAM C2
+    case and assert that a C2 table without shared SRAM still enforces its roofline floor.
 
 GUARDRAILS: Import nothing from rk: copy rk-sim names by reading its source, and let U-P2's
 vendored round-trip prove the copy is exact. Do not add a workload IR or an ONNX path. Do not
@@ -1657,7 +1781,19 @@ by MINOR bumps with an ADR each. The Rev-2 fields are not later-sprint fields: a
 cannot use one lists it as unrepresented. If P16's baseline names and tiling's needs genuinely
 conflict, write both options into ADR U0001 and STOP. That is a founders' decision.
 
-ADR: docs/decisions/U0001-the-integration-contract.md, written with both founders. It must
+U1 naming decision approved by Javid (@jjaffari), acting human approver: Row.counts
+retains its four specified keys. Its diagnostic Channel mapping is exactly matrix_ops ->
+matrix_ops, vector_ops -> vector_ops, memory_read_bytes -> memory_read, and
+memory_write_bytes -> memory_write. The mapping only renames; values, tp scope and nulls
+are unchanged. Unknown fields fail. Record this in U0001; U0002 references the decision.
+
+U1 revision direction approved by Javid on 2026-10-06: correct composite monotonicity
+and replace DRAM source-string heuristics with explicit direct/preset metadata, as above.
+C2 requires exact sync in contract 0.1 until measured approximate-sync support is admitted.
+The complete revised U0001 remains proposed pending final review.
+
+ADR: docs/decisions/U0001-the-integration-contract.md, proposed for Javid's complete review
+under his recorded acting ownership of both U1 lanes. It must
 state build-spec §7.2's nine semantic rules in your own words and record the rk-sim SHA the
 contract was read against. Rules 1 and 9 matter most: a row is one rank of a tp-way split
 that uarch built, the rk-sim side uses a tp divisor of 1, and it refuses a table built for
@@ -1700,11 +1836,15 @@ exact and that uarch counts work the way rk-sim does, without CI ever touching r
    a. checks the clone is at <sha> with a clean tree and refuses otherwise;
    b. copies rk-sim's generated schema bundle plus the source of rk/provenance.py,
       rk/schema/{fidelity,channels,execution,workloads}.py into
-      contract/vendor/rk-sim@<sha>/, read-only (chmod a-w), with a MANIFEST listing sha256s;
+      contract/vendor/rk-sim@<sha>/, locally chmod a-w as a local precaution, with a MANIFEST listing sha256s;
+      Git may restore mode 0644. Manifests detect edits, strict checks bind generator/oracle
+      identity and environment metadata, human review controls adoption, and Git history
+      preserves published revisions. Modes alone neither prevent edits nor prove approval;
    c. GENERATES PARITY FIXTURES BY EXECUTING rk-sim's OWN iteration_cost(), in rk-sim's own
       environment (subprocess `uv run --project <rk>`), never by reimplementing the formula.
       Fixtures cover at least 3 ModelSpecs (one dense GQA ~8B, one dense ~70B, one MoE) ×
-      2 precisions × tp ∈ {1, 8} × at least 24 queries spanning decode (B, T) and prefill
+      2 common precision configurations (compute/kv_cache: FP16/FP16 and FP16/FP8)
+      × tp ∈ {1, 8} × at least 24 queries spanning decode (B, T) and prefill
       (T, Q); the decode queries include B ∈ {1, 8, 32} × context per sequence ∈ {512, 4096}
       (gate G2(c)'s points). Each fixture records IterationCounts.matrix_ops,
       memory_read_bytes, memory_write_bytes, the query, the tp, and rk-sim's own durations
@@ -1712,7 +1852,11 @@ exact and that uarch counts work the way rk-sim does, without CI ever touching r
       with: rk-sim's library entries asic_placeholder.yaml and nvidia_h100_sxm.yaml always,
       plus every PARAMS file the human passes (in U2, `uarch rk-component` output for the
       designs). A duration is rk-sim's output, never ours: these are the oracle for U-P3's
-      U-C0 parity test.
+      U-C0 parity test. Additionally run H100-only BF16/BF16 and FP8/FP8 over the same
+      models, tp values and queries. The two required components yield 576 common records
+      plus 288 H100-only records (864 total at 24 queries). Record compute and kv_cache
+      separately. Keep the placeholder unchanged: assert rk-sim's UnsupportedPrecision
+      for its BF16 and FP8 compute requests, with no substituted peak or synthetic duration.
    A REIMPLEMENTED FORMULA IS A MIRROR, NOT AN ORACLE. If you find yourself writing
    2*P_active anywhere under contract/, stop: the point is that rk-sim's code produced it.
 2. contract/tests/test_vendored_round_trip.py. Load the vendored classes by path, not by
@@ -1723,11 +1867,29 @@ exact and that uarch counts work the way rk-sim does, without CI ever touching r
      honestly: the day rk-sim adopts the stipulation kind (rk-sim P19), this test fails
      loudly and is updated in the same ADR, never quietly deleted;
    - ModelSpec and PrecisionFormat: every field and member name and value identical;
-   - uarch Row.counts keys are a subset of rk-sim's Channel literal values.
+   - Row.counts keeps matrix_ops, vector_ops, memory_read_bytes, memory_write_bytes.
+     The exact naming map to rk-sim Channel is matrix_ops -> matrix_ops,
+     vector_ops -> vector_ops, memory_read_bytes -> memory_read,
+     memory_write_bytes -> memory_write (U0001, Javid-approved). Every Row.counts field
+     has exactly one mapping; destinations are unique and valid vendored Channel literals.
+     Unknown fields fail. This is naming only: no scaling, tp division or null-to-zero.
+     Test the exact four mappings; do not implement the later rk-sim integration in U1.
 3. contract/tests/test_flop_parity.py, the harness later prompts plug into. Given a
    callable (ModelSpec, ModelShape, precision, query) -> counts, compare against every
-   fixture: pass if within 0.5%, or if the difference is fully attributed to named declared
-   deviations with no single deviation above 5%. U-P3's workload graph is the first callable.
+   fixture/channel: signed relative error = (actual - reference) / reference for positive
+   references. Named adjustments have total absolute magnitude <=5%; the signed residual
+   after adjustment must be <=0.5% in magnitude. Reject unnecessary adjustments when raw
+   error is already within 0.5%, and adjustments on zero/null references. Zero requires exact
+   zero; null requires null; relative errors are null for both cases. Report raw error,
+   signed adjustment, total absolute adjustment and residual separately. No budget may be
+   evaded by stacking/cancellation. Self-test is the conservative default; explicit workload
+   classification is a caller assertion, not automatic authentication. U-P3 supplies the
+   first actual workload callable. Under Javid's approved A-F12 policy, refuse uniform-/tp
+   projections requiring replication/padding before numerical agreement can count as workload
+   parity. Keep every fixture in coverage, including unsupported projections and numerical
+   failures, while preserving supported tp>1 baselines. No new physical-correctness claim or
+   relabelled workload result is introduced. Embedding accounting remains separately pending;
+   ordinary over-budget errors remain visible failures. No oracle changes or widened tolerances.
    Until then the test runs against a stub callable that returns the fixture itself, and is
    marked so the report says it is a harness self-test, not a parity result.
 4. ModelShape sidecars for the three fixture models under contract/fixtures/model_shapes/,
@@ -1760,7 +1922,8 @@ ADR: docs/decisions/U0002-the-vendored-snapshot-and-parity-discipline.md.
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, hw/README.md, src/rkuarch/{workload,engines,table}/README.md,
-contract/uarch_contract/, ADR U0001, contract/tests/test_flop_parity.py, build-spec §2.2–§2.4.
+contract/uarch_contract/, ADRs U0001 and U0002, docs/reviews/U2-kickoff-obligations.md,
+contract/tests/test_flop_parity.py, build-spec §2.2–§2.4.
 From rk-sim READ-ONLY: rk/components/library/compute/asic_placeholder.yaml and
 nvidia_h100_sxm.yaml (the param names derive_rk_params must produce).
 
@@ -1769,6 +1932,10 @@ ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
 Keep the high-level standalone CLI and add file-based prepare/replay without requiring
 rk-sim or a compiler. First propose and obtain acceptance of U0003's prepared-input schema,
 hashing/provenance and any public request/table schema revision; coordinate it with U-P4.
+At U0003 kickoff carry forward B-F16's component-precision and prepared-bundle parity
+requirements, and the separately unresolved embedding-accounting obligation, from the
+kickoff record and U0002. Preserve the approved parity budget, nominal inputs and explicit
+unsupported-projection policy; U1 harness self-tests do not discharge actual U2 parity.
 Use the existing OpSpec vocabulary and engine protocol. Workload construction belongs to
 preparation; analytic engines consume resolved operators. No detailed mapper lands in U2.
 
@@ -1811,7 +1978,10 @@ later.
    a canonical batch (build-spec §2.3.4): decode = B sequences of context T/B; prefill =
    n prompts of L. layer_reuse=True means "one decoder layer instantiated n_layers times
    plus the non-repeated head and tail ops", and the graph says so in a field. MoE is
-   active-parameter dense-equivalent ONLY, exactly as rk-sim: routing, imbalance and
+   active-parameter dense-equivalent ONLY. MoE d_ff and expert_d_ff both name one
+   expert's width and must agree. Multiply expert work by experts_per_token exactly
+   once; total expert weights use n_experts once; account shared terms separately.
+   Dense d_ff is unchanged. As in rk-sim, routing, imbalance and
    all-to-all are declared absent in a graph-level `omissions` list, together with
    host/runtime time, address translation, coherence and mixed prefill/decode iterations
    (build-spec §2.3.4). KV operands are paged: the graph carries page-granular KV reads for
@@ -1820,7 +1990,10 @@ later.
    real callable. Every difference from rk-sim's closed form above 0.5% gets a named
    declared deviation in src/rkuarch/workload/deviations.py with a one-line reason: embedding
    or lm_head accounting, norm parameters, and whatever else you actually find. Report them;
-   do not tune the graph to hide them.
+   do not tune the graph to hide them. B's adapter emits the revised typed FlopParity:
+   kind, identities, fixture/channel/unit attribution and all four ratios must survive.
+   Total absolute adjustments <=5% per fixture/channel, residual <=0.5%; refuse adjustments
+   for raw-inside-tolerance or zero/null references. Self-tests are never workload parity.
 5. src/rkuarch/engines/analytic/ — U-C0, consuming a validated prepared operator graph and
    resolved HardwareSpec without importing/calling the workload builder or mapping policies.
    Record the explicit analytic mapping scope and preparation identity. Two modes:
@@ -1836,6 +2009,21 @@ later.
    OR validated prepared bundle -> engine -> rows -> UarchCostTable. Both paths share engine
    execution and hashing; imported payloads bypass local preparation. Single process, no
    interpolation (U-P7 owns that). Include input content and producer versions in identity.
+   Require table.hardware_spec_hash == request.hardware_spec_hash == spec_hash(spec).
+   Resolve every conditional_on path in the referenced proposed HardwareSpec and require
+   its complete stipulated SourcedValue to match; refuse missing/mismatched paths or values.
+   This is the producer's artifact-aware check, not a guarantee supplied by the U1 carrier.
+   Producer enforcement: when request.model.n_experts > 0, copy the contract's
+   MOE_OMISSION warning (routing, imbalance and all-to-all) into table.warnings, alongside
+   every common omission. Test with the Mixtral sidecar. The U1 table carrier has no
+   model payload and cannot infer this condition from request_hash; no new MoE indicator
+   is added here. Cross-check HardwareSpec against fidelity_detail: an existing shared
+   SRAM must have an explicit level, including unrepresented when unsupported.
+   Javid approved the interim A-F12 rule: Lane B must refuse parity comparisons requiring
+   replicated KV or padded vocabulary that uniform /tp cannot represent, pending an approved
+   component-aware projection. Keep A's legitimate shape support; do not change oracle counts,
+   conceal the mismatch with deviations, or widen tolerances. Aggregate compatibility is
+   not proof of physical rank-local correctness; U-P3 must test the latter independently.
 7. src/rkuarch/cli.py (typer): `uarch validate <spec>` (lists claims / stipulations / stubs
    with counts; refuses a bad spec with the path) and `uarch table <spec> --model <name>
    --precision <fmt> [--tp N] --engine analytic` (tp defaults to 1).
@@ -3414,7 +3602,7 @@ uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
 
 1. rk/engine/characterized/ (new; engine layer; Lane A): loader.py reads a table file, verifies
    table_hash by recomputing it, checks the contract MAJOR version, checks the table's
-   spec_hash against the component's characterization.spec_hash and the table's tp against
+   hardware_spec_hash against the component's characterization.spec_hash and the table's tp against
    the plan's tp for that component, and returns a frozen object.
    cost.py: CharacterizedIterationCost, satisfying EXACTLY the interface f1 already calls on
    IterationCost (decode_s, prefill_s, decode_counts, prefill_counts, collective_s, spill_s,

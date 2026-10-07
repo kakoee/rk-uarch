@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "file": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "File",
+      "type": "string"
+    },
+    "sha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Sha",
+      "type": "string"
+    }
+  },
+  "required": [
+    "file",
+    "sha"
+  ],
+  "title": "TimingPreset",
+  "type": "object"
+}

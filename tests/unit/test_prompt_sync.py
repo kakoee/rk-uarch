@@ -6,6 +6,8 @@ and that file's text blocks equal the section's, in order. No prompt file lacks 
 import re
 from pathlib import Path
 
+import pytest
+
 DOCS = Path(__file__).resolve().parents[2] / "docs"
 BLOCK = re.compile(r"```text\n(.*?)\n```", re.S)
 
@@ -45,3 +47,18 @@ def test_every_prompt_file_has_a_section_8_entry() -> None:
     sections = _sections()
     for title in _prompt_files():
         assert title in sections, f"docs/prompts/ file {title!r} has no build-spec §8 section"
+
+
+@pytest.mark.parametrize(
+    "shipped,canonical",
+    [
+        ("P18-characterized-c2-cost.md", "U-P19-rk-sim-P18-characterized-C2-cost.md"),
+        ("P19-stipulations-and-chip-views.md", "U-P20-rk-sim-P19-stipulations-and-chip-views.md"),
+    ],
+)
+def test_shipped_rk_sim_prompt_mirrors(shipped: str, canonical: str) -> None:
+    """Shipping a stale boundary prompt can lose required contract checks."""
+    expected = BLOCK.findall((DOCS / "prompts" / canonical).read_text())
+    actual = BLOCK.findall((DOCS.parent / "rk-sim-side/prompts" / shipped).read_text())
+    assert expected, f"{canonical}: missing canonical text block"
+    assert actual == expected, f"{shipped}: text blocks differ from {canonical}"

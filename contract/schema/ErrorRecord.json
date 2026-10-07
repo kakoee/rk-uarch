@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "enum": [
+        "NoTableForComponent",
+        "EnvelopeExceedsGrid",
+        "SpecHashMismatch",
+        "ParamsMismatch",
+        "TpMismatch",
+        "ContractMajorMismatch",
+        "ContractMinorMismatch",
+        "ResidencyExceedsCapacity",
+        "NonFiniteRow",
+        "MissingFrequencyAxis",
+        "InitialStateMismatch",
+        "KvLayoutMismatch",
+        "StipulationOnReference",
+        "ClaimWithoutSource",
+        "SramCapacityExceeded",
+        "UnnamedPreset",
+        "ShardIndivisible"
+      ],
+      "title": "Code",
+      "type": "string"
+    },
+    "message": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Message",
+      "type": "string"
+    }
+  },
+  "required": [
+    "code",
+    "message"
+  ],
+  "title": "ErrorRecord",
+  "type": "object"
+}

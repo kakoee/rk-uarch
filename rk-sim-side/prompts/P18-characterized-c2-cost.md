@@ -28,7 +28,7 @@ uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
 
 1. rk/engine/characterized/ (new; engine layer; Lane A): loader.py reads a table file, verifies
    table_hash by recomputing it, checks the contract MAJOR version, checks the table's
-   spec_hash against the component's characterization.spec_hash and the table's tp against
+   hardware_spec_hash against the component's characterization.spec_hash and the table's tp against
    the plan's tp for that component, and returns a frozen object.
    cost.py: CharacterizedIterationCost, satisfying EXACTLY the interface f1 already calls on
    IterationCost (decode_s, prefill_s, decode_counts, prefill_counts, collective_s, spill_s,

@@ -1,0 +1,94 @@
+[
+  {
+    "check": "mypy",
+    "command": [
+      "uv",
+      "run",
+      "--no-sync",
+      "mypy",
+      "src",
+      "contract",
+      "scripts"
+    ],
+    "cwd": "/tmp/u1-publication-proposal-ns9fp_nu",
+    "exit_code": 0,
+    "elapsed_s": 4.491,
+    "output": "Success: no issues found in 47 source files\n"
+  },
+  {
+    "check": "ruff",
+    "command": [
+      "uv",
+      "run",
+      "--no-sync",
+      "ruff",
+      "check",
+      "."
+    ],
+    "cwd": "/tmp/u1-publication-proposal-ns9fp_nu",
+    "exit_code": 0,
+    "elapsed_s": 0.028,
+    "output": "All checks passed!\n"
+  },
+  {
+    "check": "imports",
+    "command": [
+      "uv",
+      "run",
+      "--no-sync",
+      "lint-imports"
+    ],
+    "cwd": "/tmp/u1-publication-proposal-ns9fp_nu",
+    "exit_code": 0,
+    "elapsed_s": 0.265,
+    "output": "\n\u2554\u2550\u2550\u2557\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25b6\u2554\u2557 \u2554\u2557      \u2554\u2557\u25c0\u2500\u2500\u2500\u2510\n\u255a\u2563\u2560\u255d\u25c0\u2500\u2500\u2500\u2500\u2500\u2510  \u2554\u255d\u255a\u2557\u2551\u2551\u2500\u2500\u2500\u2500\u25b6\u2554\u255d\u255a\u2557   \u2502\n \u2551\u2551   \u2554\u2550\u2550\u2566\u2550\u2550\u2566\u2569\u2557\u2554\u255d\u2551\u2551  \u2554\u2566\u2550\u2569\u2557\u2554\u255d\u2554\u2550\u2566\u2550\u2550\u2557\n \u2551\u2551\u2554\u2550\u2550\u2563\u2554\u2557\u2551\u2554\u2557\u2551\u2554\u2563\u2551 \u2551\u2551 \u2554\u256c\u2563\u2554\u2557\u2551\u2551 \u2551\u2502\u2551\u2554\u2550\u255d\n\u2554\u2563\u2560\u2563\u2551\u2551\u2551\u255a\u255d\u2551\u255a\u255d\u2551\u2551\u2551\u255a\u2557\u2551\u255a\u2550\u255d\u2551\u2551\u2551\u2551\u2551\u255a\u2557\u2551\u2550\u2563\u2551\n\u255a\u2550\u2550\u2569\u2569\u2569\u2563\u2554\u2550\u2569\u2550\u2550\u2569\u255d\u255a\u2550\u255d\u255a\u2550\u2550\u2550\u2569\u2569\u255d\u255a\u2569\u2550\u2569\u2569\u2550\u2569\u255d\n  \u2514\u2500\u2500\u25b6\u2551\u2551                    \u25b2 \n      \u255a\u255d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n\n---------\nContracts\n---------\n\nAnalyzed 42 files, 87 dependencies.\n-----------------------------------\n\nrk-uarch never imports rk-sim KEPT\nthe contract imports nothing from the harness KEPT\n\nContracts: 2 kept, 0 broken.\n"
+  },
+  {
+    "check": "schema-freshness",
+    "command": [
+      "uv",
+      "run",
+      "--no-sync",
+      "python",
+      "-B",
+      "-m",
+      "uarch_contract.generate",
+      "--check"
+    ],
+    "cwd": "/tmp/u1-publication-proposal-ns9fp_nu",
+    "exit_code": 0,
+    "elapsed_s": 0.169,
+    "output": "Contract schemas are fresh.\n"
+  },
+  {
+    "check": "prompt-sync",
+    "command": [
+      "uv",
+      "run",
+      "--no-sync",
+      "pytest",
+      "-q",
+      "tests/unit/test_prompt_sync.py"
+    ],
+    "cwd": "/tmp/u1-publication-proposal-ns9fp_nu",
+    "exit_code": 0,
+    "elapsed_s": 0.212,
+    "output": "....                                                                     [100%]\n4 passed in 0.08s\n"
+  },
+  {
+    "check": "vendor",
+    "command": [
+      "uv",
+      "run",
+      "--no-sync",
+      "python",
+      "-B",
+      "scripts/vendor_rk.py",
+      "--check"
+    ],
+    "cwd": "/tmp/u1-publication-proposal-ns9fp_nu",
+    "exit_code": 0,
+    "elapsed_s": 0.097,
+    "output": "snapshot manifest, matrix and current compatibility verified: /tmp/u1-publication-proposal-ns9fp_nu/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963\n"
+  }
+]

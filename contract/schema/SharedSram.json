@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attach": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "minimum": 0,
+            "type": "integer"
+          }
+        ],
+        "type": "array"
+      },
+      "minItems": 1,
+      "title": "Attach",
+      "type": "array"
+    },
+    "banks": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "bytes": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "bytes_per_cycle_per_bank": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "latency_cycles": {
+      "$ref": "#/$defs/SourcedValue"
+    }
+  },
+  "required": [
+    "bytes",
+    "banks",
+    "bytes_per_cycle_per_bank",
+    "latency_cycles",
+    "attach"
+  ],
+  "title": "SharedSram",
+  "type": "object"
+}

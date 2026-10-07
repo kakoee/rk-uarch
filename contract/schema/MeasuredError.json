@@ -1,0 +1,200 @@
+{
+  "$defs": {
+    "ColdVsSteadyError": {
+      "additionalProperties": false,
+      "properties": {
+        "max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Rel"
+        },
+        "median_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Median Rel"
+        },
+        "n_samples": {
+          "minimum": 0,
+          "title": "N Samples",
+          "type": "integer"
+        },
+        "priming_2_vs_1_max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Priming 2 Vs 1 Max Rel"
+        }
+      },
+      "required": [
+        "median_rel",
+        "max_rel",
+        "n_samples",
+        "priming_2_vs_1_max_rel"
+      ],
+      "title": "ColdVsSteadyError",
+      "type": "object"
+    },
+    "CompositionError": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/SampledError"
+        },
+        "n_samples": {
+          "minimum": 0,
+          "title": "N Samples",
+          "type": "integer"
+        },
+        "prefill": {
+          "$ref": "#/$defs/SampledError"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill",
+        "n_samples"
+      ],
+      "title": "CompositionError",
+      "type": "object"
+    },
+    "InterpolationError": {
+      "additionalProperties": false,
+      "properties": {
+        "max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Rel"
+        },
+        "median_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Median Rel"
+        },
+        "n_samples": {
+          "minimum": 0,
+          "title": "N Samples",
+          "type": "integer"
+        },
+        "weighted_median_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Weighted Median Rel"
+        }
+      },
+      "required": [
+        "median_rel",
+        "max_rel",
+        "n_samples",
+        "weighted_median_rel"
+      ],
+      "title": "InterpolationError",
+      "type": "object"
+    },
+    "SampledError": {
+      "additionalProperties": false,
+      "properties": {
+        "max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Rel"
+        },
+        "median_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Median Rel"
+        },
+        "n_samples": {
+          "minimum": 0,
+          "title": "N Samples",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "median_rel",
+        "max_rel",
+        "n_samples"
+      ],
+      "title": "SampledError",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cold_vs_steady": {
+      "$ref": "#/$defs/ColdVsSteadyError"
+    },
+    "composition_reduction": {
+      "$ref": "#/$defs/CompositionError"
+    },
+    "interpolation_loo": {
+      "$ref": "#/$defs/InterpolationError"
+    },
+    "layer_reuse": {
+      "$ref": "#/$defs/SampledError"
+    }
+  },
+  "required": [
+    "interpolation_loo",
+    "composition_reduction",
+    "layer_reuse",
+    "cold_vs_steady"
+  ],
+  "title": "MeasuredError",
+  "type": "object"
+}

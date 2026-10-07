@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "deviation_rel": {
+      "ge": -0.05,
+      "le": 0.05,
+      "title": "Deviation Rel",
+      "type": "number"
+    },
+    "id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Id",
+      "type": "string"
+    },
+    "reason": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Reason",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "deviation_rel",
+    "reason"
+  ],
+  "title": "FlopDeviation",
+  "type": "object"
+}

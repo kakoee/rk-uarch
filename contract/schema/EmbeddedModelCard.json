@@ -1,0 +1,223 @@
+{
+  "$defs": {
+    "ApplicabilityScope": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Family",
+          "type": "string"
+        },
+        "load_regimes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Load Regimes",
+          "type": "array"
+        },
+        "mapping_match": {
+          "enum": [
+            "matched",
+            "compiler-chosen"
+          ],
+          "title": "Mapping Match",
+          "type": "string"
+        },
+        "op_classes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Op Classes",
+          "type": "array"
+        },
+        "precisions": {
+          "items": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Precisions",
+          "type": "array"
+        },
+        "shape_regimes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Shape Regimes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "family",
+        "op_classes",
+        "precisions",
+        "shape_regimes",
+        "load_regimes",
+        "mapping_match"
+      ],
+      "title": "ApplicabilityScope",
+      "type": "object"
+    },
+    "EnergyVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "L0": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minProperties": 1,
+          "propertyNames": {
+            "enum": [
+              "mac",
+              "sram",
+              "noc_hop",
+              "dram",
+              "static"
+            ]
+          },
+          "title": "L0",
+          "type": "object"
+        },
+        "L2": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minProperties": 1,
+          "propertyNames": {
+            "enum": [
+              "mac",
+              "sram",
+              "noc_hop",
+              "dram",
+              "static"
+            ]
+          },
+          "title": "L2",
+          "type": "object"
+        }
+      },
+      "required": [
+        "L0",
+        "L2"
+      ],
+      "title": "EnergyVerification",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "ValidatedErrorBand": {
+      "additionalProperties": false,
+      "properties": {
+        "high_rel": {
+          "exclusiveMinimum": 0,
+          "title": "High Rel",
+          "type": "number"
+        },
+        "low_rel": {
+          "minimum": 0,
+          "title": "Low Rel",
+          "type": "number"
+        },
+        "scope": {
+          "$ref": "#/$defs/ApplicabilityScope"
+        }
+      },
+      "required": [
+        "low_rel",
+        "high_rel",
+        "scope"
+      ],
+      "title": "ValidatedErrorBand",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "badge": {
+      "enum": [
+        "stub",
+        "estimated",
+        "measured"
+      ],
+      "title": "Badge",
+      "type": "string"
+    },
+    "energy_verification": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EnergyVerification"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "evidence": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Hash",
+      "type": "string"
+    },
+    "validated_error_band": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ValidatedErrorBand"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "hash",
+    "badge",
+    "evidence"
+  ],
+  "title": "EmbeddedModelCard",
+  "type": "object"
+}

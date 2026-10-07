@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attention": {
+      "enum": [
+        "mha",
+        "gqa"
+      ],
+      "title": "Attention",
+      "type": "string"
+    },
+    "d_ff": {
+      "minimum": 1,
+      "title": "D Ff",
+      "type": "integer"
+    },
+    "expert_d_ff": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expert D Ff"
+    },
+    "gated_mlp": {
+      "title": "Gated Mlp",
+      "type": "boolean"
+    },
+    "tie_embeddings": {
+      "title": "Tie Embeddings",
+      "type": "boolean"
+    },
+    "vocab_size": {
+      "minimum": 1,
+      "title": "Vocab Size",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "d_ff",
+    "gated_mlp",
+    "vocab_size",
+    "attention",
+    "tie_embeddings"
+  ],
+  "title": "ModelShape",
+  "type": "object"
+}

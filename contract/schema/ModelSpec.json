@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "MoE is active-vs-total and nothing more (build-spec \u00a72.3.5).",
+  "properties": {
+    "active_params": {
+      "minimum": 1,
+      "title": "Active Params",
+      "type": "integer"
+    },
+    "d_model": {
+      "minimum": 1,
+      "title": "D Model",
+      "type": "integer"
+    },
+    "experts_per_token": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Experts Per Token",
+      "type": "integer"
+    },
+    "kv_heads": {
+      "minimum": 1,
+      "title": "Kv Heads",
+      "type": "integer"
+    },
+    "n_experts": {
+      "default": 0,
+      "minimum": 0,
+      "title": "N Experts",
+      "type": "integer"
+    },
+    "n_heads": {
+      "minimum": 1,
+      "title": "N Heads",
+      "type": "integer"
+    },
+    "n_layers": {
+      "minimum": 1,
+      "title": "N Layers",
+      "type": "integer"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "total_params": {
+      "minimum": 1,
+      "title": "Total Params",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "name",
+    "total_params",
+    "active_params",
+    "n_layers",
+    "d_model",
+    "n_heads",
+    "kv_heads"
+  ],
+  "title": "ModelSpec",
+  "type": "object"
+}

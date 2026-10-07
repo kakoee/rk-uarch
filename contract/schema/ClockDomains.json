@@ -1,0 +1,146 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "ClockDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "freq_hz": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scales_with_core": {
+          "title": "Scales With Core",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "freq_hz",
+        "scales_with_core"
+      ],
+      "title": "ClockDomain",
+      "type": "object"
+    },
+    "CoreClockDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "freq_hz": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scales_with_core": {
+          "const": true,
+          "default": true,
+          "title": "Scales With Core",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "freq_hz"
+      ],
+      "title": "CoreClockDomain",
+      "type": "object"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "core": {
+      "$ref": "#/$defs/CoreClockDomain"
+    },
+    "dram": {
+      "$ref": "#/$defs/ClockDomain"
+    },
+    "noc": {
+      "$ref": "#/$defs/ClockDomain"
+    }
+  },
+  "required": [
+    "core",
+    "noc",
+    "dram"
+  ],
+  "title": "ClockDomains",
+  "type": "object"
+}

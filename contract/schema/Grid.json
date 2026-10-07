@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "DecodeGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Batch",
+          "type": "array"
+        },
+        "context_per_seq": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Context Per Seq",
+          "type": "array"
+        }
+      },
+      "required": [
+        "batch",
+        "context_per_seq"
+      ],
+      "title": "DecodeGrid",
+      "type": "object"
+    },
+    "PrefillGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "L": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "L",
+          "type": "array"
+        },
+        "n": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "N",
+          "type": "array"
+        }
+      },
+      "required": [
+        "n",
+        "L"
+      ],
+      "title": "PrefillGrid",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decode": {
+      "$ref": "#/$defs/DecodeGrid"
+    },
+    "frequency_ratio": {
+      "items": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "minItems": 1,
+      "title": "Frequency Ratio",
+      "type": "array"
+    },
+    "prefill": {
+      "$ref": "#/$defs/PrefillGrid"
+    }
+  },
+  "required": [
+    "decode",
+    "prefill",
+    "frequency_ratio"
+  ],
+  "title": "Grid",
+  "type": "object"
+}

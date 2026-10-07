@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "batch": {
+      "items": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Batch",
+      "type": "array"
+    },
+    "context_per_seq": {
+      "items": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Context Per Seq",
+      "type": "array"
+    }
+  },
+  "required": [
+    "batch",
+    "context_per_seq"
+  ],
+  "title": "DecodeGrid",
+  "type": "object"
+}

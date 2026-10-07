@@ -23,6 +23,7 @@ packages = ["src/rkuarch", "contract/uarch_contract"]
 [tool.pytest.ini_options]
 testpaths = ["tests", "contract/tests", "validation"]
 addopts = "--import-mode=importlib"
+pythonpath = [".", "src", "contract"]
 markers = [
   "golden: full-request regressions against tests/golden/expected",
   "nightly: slow suites (mutants, L2 differential), run on the Linux box",
@@ -32,6 +33,7 @@ markers = [
 ]
 
 [tool.ruff]
+extend-exclude = ["contract/vendor"]
 line-length = 100
 target-version = "py312"
 
@@ -39,6 +41,7 @@ target-version = "py312"
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.mypy]
+exclude = ["^contract/vendor/"]
 python_version = "3.12"
 strict = true
 mypy_path = ["src", "contract"]
