@@ -15,6 +15,14 @@ iteration_cost, IterationCounts), rk/engine/f0/power.py (operating_point), rk/sc
 {fidelity,channels,execution,workloads}.py, docs/decisions/0011, 0016, 0021, 0026, 0027, and
 docs/prompts/P16-symbolic-operators-and-parallelism.md for its baseline operator list.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Record the ownership decision in U0001: retain the standalone model-to-workload and
+policy-to-mapping frontend; engines consume resolved inputs. Supplied prepared workloads
+carry authoritative rank shapes, and supplied mappings are not silently replaced. U-P3's
+U0003 owns the concrete prepared-input schemas and public-field revision before U2 coding.
+Do not add those future payload fields in U1. Keep final U0001 acceptance explicit.
+
 TASK: contract/uarch_contract/, the only vocabulary uarch shares with rk-sim. Pydantic v2,
 frozen=True, extra="forbid" on every model.
 

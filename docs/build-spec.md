@@ -56,6 +56,15 @@ draft ADR and the rk-sim-side prompt files ship in this kit under `rk-sim-side/`
 
 ---
 
+**Preparation-boundary amendment, 2026-10-06 (Javid approved the direction).**
+Rationale, alternatives and rollout: [ADR U0019](decisions/U0019-standalone-preparation-and-prepared-input-replay.md).
+Preserve standalone operation and the existing EngineJob/TaskGraph boundary. Make local
+preparation a separately versioned producer, and admit validated file-based import/replay of
+prepared inputs without requiring a compiler or a live rk-sim installation. §2.5.1 defines
+ownership and staged delivery. U0001 remains subject to its U1 acceptance process; U0003
+must settle concrete prepared-input schemas and any public contract revision before U2
+implementation. This amendment implements no simulator or upstream integration.
+
 ## §0 · HOW TO USE THIS DOCUMENT WITH A CODING AGENT
 
 | Step | Do this |
@@ -173,9 +182,9 @@ toward it from U1.
 | `contract/` | both | Carriers, hardware spec, operators, model shape, request, table, model card, hashing, errors | Human-owned. Agents propose and stop |
 | `hw/` | B | Designs, references, studies (YAML) | References are claims only |
 | `src/rkuarch/hw/` | A | `derive_rk_params` | One chip, one set of facts |
-| `src/rkuarch/workload/` | A | Operator graph per iteration; `uarch characterize` | Layer reuse declared; omissions listed; KV pages |
-| `src/rkuarch/mapping/` | A | Policies → `TaskGraph` | `name@version`; stipulated; declares dataflow; places SRAM buffers |
-| `src/rkuarch/engines/` | A | Engine protocol; analytic, fork, native adapters | Files in, files out |
+| `src/rkuarch/workload/` | A | Standalone workload preparation and validated prepared-graph loading; `uarch characterize` | Existing OpSpec vocabulary; explicit rank scope, producer identity, omissions and KV pages |
+| `src/rkuarch/mapping/` | A | Standalone policies → `TaskGraph`; validation of supplied mappings | Runs before simulation; `name@version`; dataflow, placement and content identity are explicit |
+| `src/rkuarch/engines/` | A | Prepared-input protocol; analytic, fork, native adapters | Execute validated inputs; fork-delegated mapping is explicitly qualified (§2.5.1) |
 | `native/` | A | The Rust engine (a Cargo workspace) | Built in the engine container; `unsafe` only in the Ramulator 2 bridge crate |
 | `src/rkuarch/table/` | A | Grid, pool, interpolation, measured errors (LOO, composition, layer reuse, cold vs steady) | Refuses extrapolation |
 | `src/rkuarch/provenance/` | B | Badges, model cards, applicability | Never raises a badge |
@@ -359,8 +368,10 @@ is not linear, because of padding and tile quantization. So the table evaluates 
 For a seeded sample of points the table then **measures** how far unequal batches with the same
 (B, T, Q) deviate, and reports that number. It never corrects it.
 
-**A row is one rank of a tp-way split, and uarch builds the split (rule 1, rule 9).** For
-`tp = N` the workload graph is one rank of a Megatron-style split: attention heads divided by N
+**A row is one rank of a tp-way split (rule 1, rule 9).** The standalone preparation
+frontend builds the split; a supplied prepared workload already carries its authoritative
+rank scope and is validated without re-sharding (§2.5.1). The initial supported policy, for
+`tp = N`, produces one rank of a Megatron-style split: attention heads divided by N
 (KV heads too, replicated when `kv_heads < N`), FFN up and gate columns and down rows divided by
 N, embedding and lm_head split over the vocabulary. It has no collective operations: rk-sim
 prices those. A request whose heads or FFN width do not divide by N is refused, naming the
@@ -453,7 +464,9 @@ native engine's Rust types are tested against that schema, so the two sides cann
 
 **`EngineJob` contains:**
 - the resolved HardwareSpec (numbers only, with a hash back to the spec);
-- the `TaskGraph`;
+- the validated prepared workload and mapping identity (§2.5.1): U2 analytic jobs carry
+  resolved operators/dependencies and an explicit analytic mapping scope; detailed jobs carry
+  the resolved `TaskGraph`. Payload kind and unsupported mapping detail are explicit;
 - the per-subsystem levels;
 - the frequency ratio, and each domain's resolved integer `freq_hz` (§2.3.2);
 - the initial state;
@@ -468,10 +481,12 @@ native engine's Rust types are tested against that schema, so the two sides cann
 - barriers;
 - dependency edges.
 
-The fork is an exception: it takes its own workload format and tiles internally. The fork
-adapter records that as mapping policy `fork:<name>-default@<sha>`. The mapping policy
-`onnxim-compat@1` reproduces the fork's tiling, so the native engine can be compared with the
-fork on the same work.
+The fork is an explicit delegated-mapping mode: the adapter translates the prepared
+workload to its format and the fork tiles internally. Record policy
+`fork:<name>-default@<sha>` and the input scope actually represented. It must refuse supplied
+placements it cannot honor; it cannot silently replace them with its own mapping. The policy
+`onnxim-compat@1` reproduces the fork's tiling, with evidence of correspondence, so native can
+be compared on the same work. A common policy name alone does not establish equivalence.
 
 **`EngineResult` contains:**
 - `duration_ps`;
@@ -487,6 +502,74 @@ fork on the same work.
 
 Cycles stay inside `engines/` and `native/`; `table/` converts `duration_ps` to seconds with a
 named function.
+
+### 2.5.1 Standalone preparation and externally supplied inputs
+
+**Two entry paths, one execution boundary.** Standalone operation is a requirement: a user
+can run rk-uarch from ModelSpec + a sourced ModelShape + precision + tp + query/grid + hardware
+and a selected versioned mapping policy, with no compiler or live rk-sim. The workload and
+mapping modules prepare engine inputs before simulation. An optional file-based prepared
+input follows the same validation and engine boundary without invoking those producers.
+The existing EngineJob/TaskGraph boundary remains; this exposes its preparation step.
+
+**Ownership.** The upstream execution plan chooses inter-chip partitioning. The local
+frontend is a bootstrap producer implementing the explicitly selected supported split when
+no external producer exists. Supplied rank-local operators must already identify their split,
+rank/equivalence scope, shapes, dtypes, layouts, dependency edges, fusion, padding/replication,
+KV layout and omissions. Imported inputs are never silently re-sharded, divided by tp again,
+or given an inferred fusion policy. Initially accept only the declared balanced TP and
+representative-rank cases; unsupported heterogeneous/unequal-rank or other parallelism must
+fail explicitly. This does not introduce PP/EP/CP support or a second operator language.
+
+Within a chip, the selected mapping producer resolves tile shapes, cores/resources, dataflow,
+buffer placement, transfers, barriers and scheduling policies. At the mapped execution
+boundary these choices are inputs. Actual issue/completion timestamps, contention, stalls,
+and critical-path attribution are simulator outputs. Engines may apply declared resource
+arbitration, but cannot search, re-tile or substitute a different mapping to make a job fit.
+If an external producer supplies only operators, a caller may explicitly select a local
+mapping policy; that is recorded local preparation, not exact replay of a supplied mapping.
+
+**Small file contract.** Reuse contract/operators.py and the existing TaskGraph. U0003 fixes
+one versioned prepared-input envelope and fixture set, rather than a generic workload IR,
+compiler frontend or ONNX input path. Include producer name/version, supported scope,
+canonical workload/mapping content identities, hardware binding, and the run conditions
+required for replay. A bundle manifest maps exact queries to payloads and declares coverage;
+it never substitutes one point for another. Level-0 analytic input declares aggregate/per-op
+scope; it must not fabricate tile placement or claim to model an imported detailed schedule.
+Validate schema/version, hashes, rank/tp, precision, dimensions, dependency references and
+hardware/layout compatibility before executing. A mapping for different hardware is refused.
+
+**Identity and replay.** High-level intent, resolved contents and actual execution have
+separate roles: content hashes of imported files and versioned local preparation choices must
+participate in request/cache identity; path names alone never identify inputs. Each result
+and table must trace the prepared inputs it used. Replaying the same captured bundle with the
+same engine/version/run conditions is byte-identical regardless of path or local producer
+availability. Equivalent externally produced payloads have equivalent numerical results;
+different producer metadata remains honestly distinct provenance. Changing a shape, placement
+or mapping version invalidates the corresponding identity/cache entry. Do not mutate a frozen
+mapping when changing hardware; explicitly prepare a new compatible mapping or refuse it.
+
+U0003 specifies exact field names, canonicalization and validation cases before coding. Any
+new request/table field follows the normal human-owned contract revision procedure; include
+its schema/fixtures and advance the contract version as required. U1 records this ownership
+decision without speculatively adding U2 payload fields. U2's report lane starts against the
+accepted revised boundary, so it never invents its own preparation metadata.
+
+**Delivery.** U-P3 (U2) implements the local producer, `uarch prepare <request> --out <bundle>`,
+and `uarch table --prepared-input <bundle> --engine analytic`, alongside the existing high-level
+CLI. Save/load/replay works without invoking the producer; U2 includes no detailed mapper.
+U-P5 preserves prepared workload semantics through the fork's declared mapping mode. U-P7
+(U4) adds serialized TaskGraph mapping artifacts and mapped import/replay; preparation includes
+the additional query/state cases requested by error experiments. Imported bundles with missing
+coverage fail instead of invoking hidden preparation. U-P11a/b consume the established boundary
+in Rust; U-P12 checks resolved mapping correspondence before comparing engines. U-P14 explicitly
+separates re-preparation for design variants from replay of a fixed external mapping.
+
+The external-producer capability is exercised with standalone file fixtures; no running
+compiler, rk-sim P16, live service or production rk-sim change is a prerequisite. Later upstream
+adapters require their own accepted boundary and must use this format rather than create a
+second sharding implementation inside the engine. U-P19 remains a table-file consumer at run
+time; it does not start a compiler or rk-uarch during an rk-sim simulation.
 
 ### 2.6 Badges
 
@@ -708,7 +791,7 @@ rk-uarch/
 │   ├── hw/                    __init__.py, derive.py                             (later: U-P3)
 │   ├── workload/              README.md, __init__.py                             (later: U-P3)
 │   ├── mapping/               README.md, __init__.py, policies/__init__.py       (later: U-P7)
-│   ├── engines/               README.md, __init__.py, protocol.py, schema/ (U-P11a),
+│   ├── engines/               README.md, __init__.py, protocol.py, schema/ (U-P3/U-P7),
 │   │                          analytic/, fork/, native/  (each __init__.py)      (later: U-P3, U-P5, U-P11a)
 │   ├── table/                 README.md, __init__.py                             (later: U-P3, U-P7)
 │   ├── provenance/            README.md, __init__.py                             (later: U-P4)
@@ -809,7 +892,9 @@ stipulations it is conditional on. Detail is not accuracy.
 12. third_party/ changes only as numbered patches; licences only from the allow-list.
 
 ## Don't
-- Don't add a workload IR or an ONNX import path. Workloads = rk-sim ModelSpec + ModelShape.
+- Don't add a new workload IR or an ONNX import path. Keep standalone ModelSpec + ModelShape
+  preparation and support versioned prepared-input replay using OpSpec/TaskGraph (build-spec
+  §2.5.1). Engines consume resolved inputs; imported mappings are never silently rebuilt.
 - Don't add mapping search, SIMD, GPU, MPI, optimistic sync, a simulation compiler, or a web UI.
 - Don't tune any model parameter to pass an L2 or L3 comparison. Record the gap.
 - Don't add dependencies beyond pyproject.toml / native/Cargo.toml without asking.
@@ -947,6 +1032,12 @@ prefill/decode iterations; they become table warnings. FLOP parity against rk-si
 runs on every change; every deviation above 0.5% has a name and a reason in deviations.py.
 `uarch characterize` reports FLOPs, bytes, operational intensity and shape regime per op
 across the grid; L3 suites and workload suites pick shapes from it.
+
+Preparation boundary (build-spec §2.5.1): this module is the standalone, versioned producer
+and loader of prepared OpSpec graphs. Engines receive its resolved output. A supplied
+rank-local graph bypasses model expansion and sharding; validate its identity, supported
+scope, precision, dependencies and omissions. Keep the high-level convenience path usable
+without rk-sim or a compiler. U-P3 adds export/import/replay; no second workload IR is added.
 ```
 
 ### 4.7 · `/src/rkuarch/mapping/README.md`
@@ -960,6 +1051,12 @@ and no autotuning. A better policy is a new version, never an edit. A policy dec
 matrix dataflow it needs and its buffer depth, and places every SRAM-resident buffer (core,
 offset, bank); a tile that does not fit is refused, never spilled silently. onnxim-compat@N
 exists only so the native engine can be compared with the fork on the same work.
+
+Policies execute in preparation, before simulation. U-P7 serializes their complete TaskGraph
+output for inspection and replay. An externally supplied mapping follows the same validated
+format and bypasses these policies. Engines never silently remap an input. Record producer
+versions, hardware binding and content hashes; moving a file is not a mapping change, while
+changing placements under the same policy label is. Keep local preparation as the default.
 ```
 
 ### 4.8 · `/src/rkuarch/engines/README.md`
@@ -977,6 +1074,13 @@ function. No foreign-function interface.
 Cycles live here and in native/, and nowhere else. EngineResult carries duration_ps, a
 critical-path attribution that sums to it, and diagnostics that are null wherever the level
 does not model them, never 0.
+
+Prepared-input ownership (build-spec §2.5.1): engines consume validated resolved work,
+not high-level model recipes that invoke a builder. U2 analytic jobs carry resolved OpSpecs
+and an explicit analytic scope; U4 detailed jobs carry mapped TaskGraphs. U2 establishes
+versioned protocol fixtures for later fork/Rust consumers. Replay requires neither local
+producer execution nor a compiler. Fork-delegated mapping is explicit and supplied mappings
+that it cannot honor are refused. Resource timing and contention remain simulation outputs.
 ```
 
 ### 4.9 · `/src/rkuarch/table/README.md`
@@ -1404,6 +1508,14 @@ iteration_cost, IterationCounts), rk/engine/f0/power.py (operating_point), rk/sc
 {fidelity,channels,execution,workloads}.py, docs/decisions/0011, 0016, 0021, 0026, 0027, and
 docs/prompts/P16-symbolic-operators-and-parallelism.md for its baseline operator list.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Record the ownership decision in U0001: retain the standalone model-to-workload and
+policy-to-mapping frontend; engines consume resolved inputs. Supplied prepared workloads
+carry authoritative rank shapes, and supplied mappings are not silently replaced. U-P3's
+U0003 owns the concrete prepared-input schemas and public-field revision before U2 coding.
+Do not add those future payload fields in U1. Keep final U0001 acceptance explicit.
+
 TASK: contract/uarch_contract/, the only vocabulary uarch shares with rk-sim. Pydantic v2,
 frozen=True, extra="forbid" on every model.
 
@@ -1652,6 +1764,14 @@ contract/uarch_contract/, ADR U0001, contract/tests/test_flop_parity.py, build-s
 From rk-sim READ-ONLY: rk/components/library/compute/asic_placeholder.yaml and
 nvidia_h100_sxm.yaml (the param names derive_rk_params must produce).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Keep the high-level standalone CLI and add file-based prepare/replay without requiring
+rk-sim or a compiler. First propose and obtain acceptance of U0003's prepared-input schema,
+hashing/provenance and any public request/table schema revision; coordinate it with U-P4.
+Use the existing OpSpec vocabulary and engine protocol. Workload construction belongs to
+preparation; analytic engines consume resolved operators. No detailed mapper lands in U2.
+
 TASK: the first honest number end to end. Analytic only; the fork and the native engine come
 later.
 
@@ -1680,7 +1800,8 @@ later.
    emits the rk-sim library YAML for the chip (kind: compute_resource, role: asic,
    design_status carried in a comment until rk-sim's schema has the field; uarch's proposed
    maps to rk-sim's proposed and reference to shipping).
-3. src/rkuarch/workload/ — (ModelSpec, ModelShape, precision, tp, query) -> the operator
+3. src/rkuarch/workload/ — the standalone, separately versioned preparation producer:
+   (ModelSpec, ModelShape, precision, tp, query) -> the operator
    graph of ONE RANK of a tp-way tensor-parallel split, for one iteration, at decoder-layer
    granularity, using contract/operators.py only. The split is build-spec §2.3.4's: heads
    and KV heads (replicated when kv_heads < tp), FFN columns and rows, and the vocabulary
@@ -1700,7 +1821,9 @@ later.
    declared deviation in src/rkuarch/workload/deviations.py with a one-line reason: embedding
    or lm_head accounting, norm parameters, and whatever else you actually find. Report them;
    do not tune the graph to hide them.
-5. src/rkuarch/engines/analytic/ — U-C0, uarch's own roofline of a HardwareSpec. Two modes:
+5. src/rkuarch/engines/analytic/ — U-C0, consuming a validated prepared operator graph and
+   resolved HardwareSpec without importing/calling the workload builder or mapping policies.
+   Record the explicit analytic mapping scope and preparation identity. Two modes:
    - aggregate: max(compute_time, memory_time) over the whole iteration, the same shape as
      rk-sim's IterationCost._time_s. This is the parity anchor.
    - per_op: the sum over ops of each op's own roofline. Always >= aggregate. It is the first
@@ -1709,8 +1832,10 @@ later.
    bound, its parts summing to duration_s. Units in names. Seconds at the boundary. U-C0
    uses peak DRAM bandwidth with no refresh derating, because it is the parity anchor for
    rk-sim C0; derating starts at native level 0. U-C0 leaves every diagnostic null.
-6. src/rkuarch/table/ — the minimal path only: request -> grid points -> engine -> rows ->
-   UarchCostTable, single process, no interpolation (U-P7 owns that). Hash it.
+6. src/rkuarch/table/ — the minimal path: high-level request -> grid-point preparation
+   OR validated prepared bundle -> engine -> rows -> UarchCostTable. Both paths share engine
+   execution and hashing; imported payloads bypass local preparation. Single process, no
+   interpolation (U-P7 owns that). Include input content and producer versions in identity.
 7. src/rkuarch/cli.py (typer): `uarch validate <spec>` (lists claims / stipulations / stubs
    with counts; refuses a bad spec with the path) and `uarch table <spec> --model <name>
    --precision <fmt> [--tp N] --engine analytic` (tp defaults to 1).
@@ -1718,6 +1843,15 @@ later.
    request's grid, its FLOPs, bytes, operational intensity, op class and shape regime (the
    bins ADR U0001 fixed), as hashed JSON plus a Markdown twin. U-P9 and U-P15 pick their
    benchmark shapes from it, and U-P14 picks its workload suite from it.
+
+9. Add `uarch prepare <request> --out <bundle>` and
+   `uarch table --prepared-input <bundle> --engine analytic`. The bundle explicitly covers
+   its grid/query points, their resolved OpSpecs/dependencies, precision, shard scope,
+   hardware binding, producer identity and analytic mapping scope. Reject ambiguous mixed
+   high-level/prepared overrides. Round-trip the actual prepared payload, not a recipe that
+   calls the builder again. Preserve model-based table/characterize convenience commands.
+10. Implement the U0003-approved protocol/schema fixtures and a read-only freshness check.
+    Reuse these fixtures in the fork adapter and Rust protocol work; do not create another IR.
 
 ACCEPTANCE TESTS (write first):
 1. U-C0 AGGREGATE REPRODUCES rk-sim C0: fed each fixture's own component params (U-P2
@@ -1746,13 +1880,27 @@ ACCEPTANCE TESTS (write first):
 11. Attention: a prefill at L = 32768 yields an attention_fused operator whose DRAM bytes are
     Q, K, V and O only, and the graph contains no L × L tensor.
 
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- Export locally prepared inputs and replay them with the local builder unavailable:
+  engine results and table bytes match under identical engine/version/run conditions.
+- A hand-authored supported prepared fixture executes with no rk-sim clone or compiler.
+  Independent expected operator dimensions/dependencies pin the local producer's output.
+- A changed operator shape or declared preparation/mapping version changes request/cache
+  identity; moving unchanged files does not. Tampering with a declared hash is refused.
+- Wrong tp/rank scope, precision, hardware binding, unknown schema version, missing query
+  coverage and unsupported detailed mapping fail before engine execution.
+- Architecture checks prove the analytic execution path does not invoke preparation.
+  Public schemas, prompt-sync and the protocol fixtures are fresh.
+
 GUARDRAILS: Do not touch the fork or the native engine; they are U-P5 and U-P11a–c. Do not add
 interpolation or a process pool; that is U-P7. Do not tune the operator graph to hit rk-sim's
 numbers, because the deviations are findings. Never write a number you cannot source as a claim:
 stipulate it in designs/ with a rationale, or stub it in references/.
 
-ADR: docs/decisions/U0003-one-chip-one-set-of-facts.md, covering derive_rk_params and
-the rule that a stipulation propagates as a stipulation.
+ADR: docs/decisions/U0003-one-chip-one-set-of-facts.md, covering derive_rk_params,
+stipulation propagation, the standalone/prepared-input boundary, payload/schema ownership,
+content identity, import refusals, and any public contract-version revision. Settle its
+boundary and share the schema with Lane B before implementation; record validation after.
 ```
 
 
@@ -1763,6 +1911,13 @@ CONTEXT TO LOAD: CLAUDE.md, src/rkuarch/{provenance,report}/README.md, build-spe
 and §2.7 (the validation ladder), contract/uarch_contract/{sourced,model_card,table}.py.
 From rk-sim READ-ONLY: rk/provenance.py (combine), docs/decisions/0009, 0011 §5.4, 0021,
 0027, docs/glossary.md §2, web/src/components/Badged.tsx (the rule you are porting).
+
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Use U0003's accepted preparation/provenance fields from U-P3. Reports distinguish the
+standalone producer, an imported mapping and fork-delegated mapping when interpreting a
+result; they must not claim compiler-matched execution from a policy name alone. Existing
+toy tables suffice after the schema prerequisite; do not implement a producer in this lane.
 
 TASK: provenance/ decides what a number may claim. report/ is the only way a number reaches
 a human. Develop both against contract/tests/fixtures/toy_table.json; you do not need
@@ -1854,6 +2009,13 @@ only had the abstracts and say so:
 - PyTorchSim, MICRO 2025, doi 10.1145/3725843.3756045 (MIT; github.com/PSAL-POSTECH/PyTorchSim);
 - ONNXim, IEEE CAL 2024, arXiv 2406.08051 (MIT; github.com/PSAL-POSTECH/ONNXim).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Consume the U2 prepared workload and preserve its already resolved rank shapes. The
+adapter translates supported prepared operators to fork input; it does not independently
+rebuild/shard the model. Keep the high-level CLI through the standalone producer. The fork's
+internal tiling is a declared delegated-mapping mode, not proof it honored a supplied mapping.
+
 TASK: get a published cycle-level NPU simulator driven by a uarch request, reproducibly, and
 choose between the two candidates on pre-registered numbers.
 
@@ -1878,11 +2040,11 @@ choose between the two candidates on pre-registered numbers.
      spec, never from the fork's default preset unless the spec names that preset),
      outstanding-request limits and per-job overhead are mapped where the fork has them and
      listed as unrepresented where it does not.
-   - workload_writer.py: (ModelSpec, ModelShape, precision, canonical query) -> the fork's
-     LLM input format. For ONNXim that is its custom language-model format with
-     iteration-level batching; for PyTorchSim, whatever its front end accepts. It is generated
-     from ModelSpec and ModelShape, and it is NEVER the source of truth: ONNX or PyTorch
-     graphs are an output of this writer, not an input to uarch.
+   - workload_writer.py: validated prepared workload -> the fork's LLM input format.
+     Preserve its declared shapes, tp/rank scope, precision, fusion and omissions. Use
+     provenance model metadata only when it faithfully represents those resolved operators;
+     refuse inputs the fork format cannot express. ONNX or PyTorch graphs remain adapter
+     outputs, never a new source-of-truth input language. No duplicate sharding logic.
    - runner.py: runs the container as a subprocess with a timeout, captures stdout/stderr
      and stats files, and records the image digest in the result.
    - stats_parser.py: fork stats -> EngineResult (build-spec §2.5): duration_ps, per-resource
@@ -1922,6 +2084,14 @@ ACCEPTANCE TESTS (write first where they can be written first):
 8. ADR U0005 holds the fork's per-configuration ladder table with citations, and a table
    built by the fork reports exactly the composite §2.4's rule gives for those levels.
 
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- Model-based preparation and replay of its saved bundle preserve identical workload
+  semantics through the adapter, with independent shape/count checks at the fork boundary.
+- A caller supplying an exact mapped TaskGraph that the fork cannot honor receives an
+  explicit refusal. Selecting fork-delegated preparation is a separate declared choice.
+- Result provenance identifies prepared content and pinned fork mapping/version; no claim
+  of mapping equivalence is made without evidence of resolved correspondence.
+
 GUARDRAILS: Do not patch the engine to make parity pass. Declare the deviation. Do not touch
 anything under src/rkuarch/engines/native/. Do not start U-P7 until a fork has passed G2. If
 BOTH fail, do not improvise a workaround: record the U-C1 fallback decision in ADR U0005
@@ -1939,6 +2109,13 @@ number, the rejected candidate's numbers, the image digest, and the fork's ladde
 CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7 (the ladder), tests/README.md,
 src/rkuarch/engines/README.md (the engine protocol every suite runs through). From rk-sim
 READ-ONLY: tests/properties/ (the house style for property tests).
+
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Exercise saved prepared jobs as well as the standalone frontend. Keep tests of the
+producer's counts/shape resolution separate from engine invariants on fixed inputs. Apply
+metamorphic graph/mapping changes explicitly, update their content identity, and never let
+an engine repair a deliberately invalid mapping through hidden re-preparation.
 
 TASK: the rungs that establish that the simulator does not contradict itself, and relations
 that must hold even though nobody knows the right answer. They run against ANY engine through
@@ -2012,11 +2189,19 @@ contract/uarch_contract/{request,table}.py. From rk-sim READ-ONLY: rk/engine/f0/
 comment block above IterationCounts, which says why (B, T, Q) is sufficient for a
 roofline and warns that it is exact only while cost is linear.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Extend U2's saved-input path with the existing TaskGraph; policies are versioned
+preparation producers outside engines. Imported mapped inputs bypass policy execution and
+are validated unchanged. The fork's declared internal-mapping exception remains explicit;
+a supplied native mapping cannot silently turn into a fork default.
+
 TASK: turn a CharacterizationRequest into a complete, hashed, honestly-errored table, driven
 by the fork, at the composite build-spec §2.4's rule gives for the fork's levels as ADR U0005
 records them: C2 only if they qualify, and C1, said so, if they do not.
 
-1. mapping/ — named, versioned policies, each a pure function (op graph, HardwareSpec) ->
+1. mapping/ — standalone preparation: named, versioned policies, each a pure function
+   (validated prepared op graph, HardwareSpec) ->
    TaskGraph (build-spec §2.5): per-core compute jobs, DMA jobs, NoC transfers (unicast and
    multicast), barriers, dependencies.
    - ws-rowsplit@1 for the large-core class (weight-stationary, output rows split across
@@ -2075,6 +2260,14 @@ records them: C2 only if they qualify, and C1, said so, if they do not.
 9. initial_state travels in every EngineJob; steady primes one iteration at the same point
    and reports the second.
 
+10. Extend prepare/export and prepared-input loading with complete TaskGraph payloads and
+    their hashes: placements, tiles, DMA/NoC transfers, dependencies, barriers and policies.
+    Schema and producer versions are explicit. Validate hardware/resource references, SRAM
+    capacity, dimensions and dependency consistency before launching an engine. Reject a
+    hardware-incompatible imported mapping rather than re-running a local policy.
+    Materialize all requested grid and seeded error-experiment jobs during preparation;
+    imported bundles must declare sufficient query/state coverage or refuse the experiment.
+
 ACCEPTANCE TESTS (write first):
 1. Determinism: two builds byte-identical; --workers 1 vs --workers 8 byte-identical.
 2. An out-of-envelope query raises EnvelopeExceedsGrid at request time, naming the region.
@@ -2096,6 +2289,16 @@ ACCEPTANCE TESTS (write first):
 13. interpolate.py reproduces interpolation_vectors.json, and a query outside the grid in
     that file is refused.
 
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- A locally prepared mapped bundle replays with mapping policies disabled and yields
+  identical EngineResults/tables for the same engine/version/run conditions.
+- A supported external TaskGraph fixture executes without the local mapper. Changing its
+  placement changes content/cache identity even if the model and policy label are unchanged.
+- Unsupported supplied mapping, stale hardware binding, bad dependencies, and missing error
+  sample coverage are refused; no implicit retiling or regeneration occurs.
+- Fork/native correspondence compares the resolved work supported by the fork; a shared
+  policy label alone cannot pass the mapping-match check.
+
 GUARDRAILS: No mapping search. Never silently clamp an out-of-grid query. Do not correct the
 composition or layer-reuse error, because disclosure is the deliverable. Do not let
 attribution_s feed back into anything. Do not add parallelism inside a simulation:
@@ -2111,6 +2314,13 @@ ADR: docs/decisions/U0007-canonical-batches-and-the-reduction-error.md.
 CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7, third_party/README.md,
 ADR U0005 (which fork sub-models are BookSim 2 or Ramulator 2). Documentation for BookSim 2 (BSD-2, Stanford), Ramulator 2 (MIT, CMU SAFARI), SCALE-Sim v3
 (MIT). Optionally Gemmini (BSD-3, UC Berkeley) and Verilator (LGPL-3.0/Artistic-2.0).
+
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Pin the prepared workload/mapping identity and represented scope for each reference
+comparison. A difference caused by another mapping is not an engine discrepancy. References
+that cannot consume equivalent resolved inputs must be reported as unmatched rather than
+being compared solely by model name, tp or a policy label.
 
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
 implements the same abstraction as independent, published models. Both run through the
@@ -2193,6 +2403,14 @@ CONTEXT TO LOAD: CLAUDE.md, validation/README.md, validation/L3_silicon/README.m
 §2.7 (rung L3), hw/references/tpu-v5e.yaml, ADR U0005, the chosen fork's paper (its TPU
 validation section: what it measured, and how). From rk-sim READ-ONLY: docs/prompts/P11-*.md
 and docs/execution-plan.md S7–S8 (the A100-fits, H100-held-out discipline this copies).
+
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Freeze the exact prepared workload/mapping artifacts or a resolvable immutable manifest
+alongside predictions, including producer versions, content hashes, hardware binding and run
+conditions. Measurements use the declared mapping match; a compiler-chosen mapping is not
+assumed equal to the local policy. Replaying predictions must not silently re-prepare inputs
+with a newer producer.
 
 TASK: produce, and COMMIT BEFORE ANY MEASUREMENT EXISTS, uarch's predictions for a suite of
 microbenchmarks on Google Cloud TPU v5e, the large-core reference. This prompt never sees a
@@ -2335,6 +2553,13 @@ spec, not background), ADR U0005, U0007. Javid's ../rk-sim/docs/vision/elements_
 from rk-sim, READ-ONLY, for the parts §2.8 adopts, and build-spec §2.8's "departures" table
 for the parts it rejects and why.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Reuse the U2/U4 versioned prepared-job protocol and fixtures. Rust receives resolved
+shapes, resource assignments, dependencies and policies; no model builder or mapper runs
+inside the engine. Timing/events are outputs of executing those inputs. Extend the accepted
+protocol only through its versioned schema procedure, not a parallel Rust-only format.
+
 TASK: the kernel of native/, uarch's own event-driven engine, in Rust, built in the engine
 container, and the plumbing that puts it behind exactly the same engine protocol as the
 fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
@@ -2389,9 +2614,10 @@ fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
    parser, identical in shape to engines/fork/, so `uarch table ... --engine native` reaches
    the binary.
-10. The protocol as a schema: `make gen` also exports EngineJob and EngineResult's JSON Schema
-    from engines/protocol.py to src/rkuarch/engines/schema/, with fixture messages. The Rust
-    serde types are tested against those fixtures, so neither side can drift alone.
+10. The protocol as a schema: reuse U2/U4's EngineJob/EngineResult schemas and fixture
+    messages from engines/protocol.py in src/rkuarch/engines/schema/. `make gen` keeps exporting
+    them; the freshness check remains read-only. Test Rust serde types against those fixtures,
+    including prepared input versions/hashes and refusal cases, so neither side drifts alone.
 
 ACCEPTANCE TESTS (write first):
 1. cargo test: event ordering, wheel overflow into heap and back, arena reuse, next_edge at
@@ -2434,6 +2660,13 @@ CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, bui
 (the ladder and fidelity_detail), §2.5 (the TaskGraph and EngineResult) and §2.8, ADR U0011
 as U-P11a left it, and U-P11a's handoff.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Execute locally produced or imported validated TaskGraphs through the same path.
+Mapping policy identifiers are provenance, not instructions for the native engine to invoke
+Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
+placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
+
 TASK: the models at the levels this sprint builds, and the executor that runs a real
 TaskGraph through them, so the native engine produces real rows.
 
@@ -2470,6 +2703,11 @@ ACCEPTANCE TESTS (write first):
 5. Halving accumulator_bytes on a GEMM whose output tile then no longer fits never shortens
    it, and the extra SRAM traffic appears in ext_counts.
 6. attribution_s sums to duration_s on every row.
+
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- Replay a saved mapped job with local workload/mapping producers unavailable and compare
+  its complete EngineResult with the original. Invalid placement is refused before events
+  run. No hidden reconstruction from ModelSpec or tp is allowed.
 
 GUARDRAILS: Only the levels above: NoC "1+ts", DRAM 1 and 2, and compute 2 are U-P13a–c. No
 threads. Do not optimise before the determinism and L0–L1 suites pass. Do not tune a model
@@ -2527,6 +2765,13 @@ CONTEXT TO LOAD: CLAUDE.md, validation/L2_differential/README.md, build-spec §2
 (determinism), ADR U0011's expected speed factor. You do not need the native engine to be
 finished: you need the engine protocol, which already exists.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Compare prepared workload content and resolved mapping correspondence before comparing
+engine results. Preserve each producer/version and engine identity. Byte-identical shared
+TaskGraphs are preferred; fork-specific encoding needs explicit audited equivalence evidence.
+Matching policy names without matching shapes, placement, precision and run conditions fails.
+
 TASK: make "native agrees with fork" a measured, attributable, continuously checked fact,
 and make simulator performance a regression-tested quantity rather than an anecdote.
 
@@ -2567,6 +2812,11 @@ ACCEPTANCE TESTS:
 3. The harness refuses a comparison with mismatched mapping or levels, naming the mismatch.
 4. Performance baselines are recorded for every golden request, and the regression gate trips
    on a synthetic 2× slowdown.
+
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- Two inputs with the same model/tp/policy label but different resolved tiles or placements
+  are refused as an engine-equivalence comparison. A numerical gap must not be attributed
+  to engine physics until input and mapping correspondence is established.
 
 GUARDRAILS: Do not call agreement "validation" anywhere, in code, reports or ADRs. It is L2.
 Do not fix a disagreement here. Report it with its attribution and hand it to Lane A.
@@ -2732,6 +2982,13 @@ CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, bui
 (the per-subsystem ladder and the composite rule), §2.8, ADR U0011, U0012, and the handoffs
 of U-P13a, U-P13b and U-P13c.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Mesh mapping policies extend the standalone preparation frontend and emit the same
+versioned TaskGraph format that external producers can supply. The native engine consumes
+resolved mapped inputs, never chooses SUMMA/head placement itself. Export/import preserves
+policy version, hardware binding and content identity; no search or compiler integration.
+
 TASK: make the mesh class a first-class target and the composite honest: mesh policies, the
 composite rule in code, and full C2 tables at mesh scale.
 
@@ -2780,6 +3037,14 @@ acceptance demo: the study is minutes 4–5 of it) and §2.6. From rk-sim READ-O
 docs/prompts/P9a-sweep-engine.md and P9b-*.md (its sweep and tornado conventions, and why a
 one-at-a-time tornado is labelled local sensitivity rather than a ranking).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Declare whether a study re-prepares each variant with a named local policy or replays
+an externally supplied mapping. Local preparation records a new hardware/mapping identity
+per variant. Fixed imported mappings are validated against each variant and refused when
+incompatible; re-mapping requires an explicit study choice and recorded producer. Cache
+identity includes prepared content and its bindings, not just model/tp or policy label.
+
 TASK: the thing a chip architect actually does with this tool, which is to compare designs. A
 study is a set of tables over stipulated variants, and a report that says what moved and why.
 
@@ -2791,8 +3056,9 @@ study is a set of tables over stipulated variants, and a report that says what m
 2. VARIANTS MAY ONLY CHANGE WHAT A PROPOSED DESIGN IS FREE TO CHOOSE: its stipulated values
    (counts included: array, grid, banks, channels, queue depths), its categorical fields
    (dataflows, topology, interleave scheme, scheduler, page policy, sync mechanism) and the
-   request's mapping policy. Every change is recorded in conditional_on as path=value, and
-   the mapping is re-run per variant. A study that edits a reference spec, or any claim, is
+   request's mapping policy. Every change is recorded in conditional_on as path=value.
+   In local-preparation mode the mapping is re-run per variant; fixed imported mappings
+   follow the validation/refusal rule above. A study that edits a reference spec, or any claim, is
    refused: it would be a counterfactual about a real chip wearing that chip's evidence. A
    variant that changes sram.bytes without re-stipulating energy.pj_per_byte.sram is refused,
    naming both paths.
@@ -2838,6 +3104,11 @@ ACCEPTANCE TESTS (write first):
    policy, and a variant whose dataflows lack its policy's dataflow is refused.
 10. A count variant (npu-m256 SRAM banks 16 → 32) runs, and its change is in conditional_on.
 
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- A variant invalidating a supplied mapping is refused without calling a local mapper.
+  An explicitly re-prepared variant records the new mapping identity. Changing prepared
+  content under the same input filename causes a cache miss.
+
 GUARDRAILS: No optimiser and no design search. A study is a set of runs a human chose. No
 fitted surrogate; rk-sim deliberately refuses fitted Sobol indices, and so does this.
 No area model: area is not modelled, and the report says so.
@@ -2854,6 +3125,14 @@ ADR U0009, U0010, U0013. Tenstorrent's public documentation: the Blackhole produ
 tt-isa-documentation/BlackholeA0/NoC/README.md (two opposite-direction 2-D torus NoCs,
 64-byte flits, about 9 cycles router-to-router, about 5 cycles NIU↔router), the TT-Metalium
 device program profiler page, and tt-npe (Apache-2.0).
+
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Freeze the exact prepared workload/mapping artifacts or a resolvable immutable manifest
+alongside predictions, including producer versions, content hashes, hardware binding and run
+conditions. Measurements use the declared mapping match; a compiler-chosen mapping is not
+assumed equal to the local policy. Replaying predictions must not silently re-prepare inputs
+with a newer producer.
 
 TASK: the same discipline as U-P9, for the class the native engine exists for: a mesh of many
 small cores. Predictions are committed before any measurement exists, and this prompt never
@@ -2983,6 +3262,13 @@ READ-ONLY: ../rk-sim/docs/vision/elements_of_parallel_DES.md §§6–15 and 30�
 epochs, determinism) and docs/vision/rack-to-kernel-24-month-execution-plan.md (E6 and the funded plan's G1).
 SST's documentation on conservative synchronisation with link-latency lookahead.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Compare worker/thread/synchronization configurations using the same saved prepared
+workload and mapped TaskGraph. Partitioning simulator ownership must not repartition model
+tensors or change the declared chip mapping. Record prepared input identity with every run
+so timing differences cannot hide a change in the workload producer.
+
 TASK: parallelism INSIDE one simulation, built so that the exact mode is byte-identical to the
 single-threaded engine. Only then comes a lax mode, and it is labelled as approximate everywhere it
 appears.
@@ -3047,6 +3333,13 @@ READ-ONLY: docs/vision/rack-to-kernel-24-month-execution-plan.md: E6, the FUNDED
 criterion. That is the company's central technical bet, and this prompt is where it gets
 measured. docs/context-and-decisions.md §2.3 (why the prototype deferred it).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Compare worker/thread/synchronization configurations using the same saved prepared
+workload and mapped TaskGraph. Partitioning simulator ownership must not repartition model
+tensors or change the declared chip mapping. Record prepared input identity with every run
+so timing differences cannot hide a change in the workload producer.
+
 TASK: measure whether lax synchronisation survives a BACKPRESSURED boundary, publish the curve
 whatever its shape, and wire the result into what the composite fidelity may claim.
 
@@ -3107,6 +3400,14 @@ out memoization surrogates for the prototype, and a characterization table is on
 rk-uarch, READ-ONLY: docs/decisions/U0001 (the nine rules), contract/schema/*.json at the
 contract version the boundary ADR names, contract/fixtures/interpolation_vectors.json, and one
 committed table.
+
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR (in rk-uarch, READ-ONLY): docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Read the accepted U0003 and later public contract revisions as well as U0001. Preserve
+and validate the table's declared preparation identity/scope through the adopted boundary.
+This prompt remains table consumption at runtime: no live rk-uarch, compiler or preparation
+invocation, and no new tensor sharding in the reader. A future rk-sim prepared-input exporter
+is a separately approved integration; it is not a prerequisite or an implicit part of P18.
 
 TASK: a component whose effective compute fidelity is C2 is priced, every iteration, from a
 uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
@@ -3195,6 +3496,13 @@ web/src/screens/{Builder,Results}.tsx and the Compare and Assumptions screens fr
 rk/api/README.md, tests/api/test_contract.py (canonical routes), ADRs 0009, 0011 §5, 0016,
 0021, 0027, the accepted boundary ADR, and P18's handoff.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR (in rk-uarch, READ-ONLY): docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Use the accepted table/preparation provenance from the boundary schema. Where mapping
+assumptions affect interpretation, disclose whether preparation was local, externally
+supplied or delegated to a fork. Do not imply a compiler mapping was reproduced solely from
+a policy name, and do not build a compiler or prepared-input exporter in this UI prompt.
+
 TASK: a stipulation reaches a human as what it is — a scoped question, not a weak claim — and
 a C2 component shows its evidence where the user is looking.
 
@@ -3254,6 +3562,13 @@ Tailwind defaults, as web/README.md says.
 CONTEXT TO LOAD: CLAUDE.md, README.md, build-spec §1.2 (the acceptance demo: the definition of
 done), docs/execution-plan.md U11, docs/how-it-works.md, every docs/reviews/*-closeout.md.
 From rk-sim READ-ONLY: docs/prompts/P13-demo-hardening.md (same discipline).
+
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Demonstrate both the standalone model-based path and replay of a saved prepared bundle
+on the cold setup. Neither path requires a live rk-sim clone or a compiler to produce uarch
+results. Verify replay with local producers disabled, including input-content/cache identity;
+keep the later rk-sim table-consumption demo independent of preparation services.
 
 TASK: a stranger can run it, and either founder can perform the build-spec §1.2 demo cold,
 including the other lane's parts.

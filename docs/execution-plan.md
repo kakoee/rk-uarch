@@ -33,8 +33,9 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | U1: U-P1 (Lane A) ∥ U-P2 (Lane B), both against the rk-sim pin above |
-| **Not started** | U1–U11 |
+| **Next** | Complete U1 proposal review and integration, including the preparation ownership amendment; G1 and final ADR acceptance remain pending |
+| **In progress** | U1: both lane proposals and human-generated parity artifacts exist locally; independent reviews and closure remain pending |
+| **Not started** | U2–U11 |
 | **Paused** | The `nightly` workflow's schedule (2026-10-03): no self-hosted runner yet. Re-enable it when U3 starts (U3, "Before it starts") |
 
 Update this block and `docs/how-it-works.md` at every sprint boundary.
@@ -48,6 +49,18 @@ checked source identity; it was not a new rk-sim test-suite run. Keep this exact
 U1; both U0001 and the vendored snapshot must record the full SHA above.
 
 ---
+
+**Preparation-boundary amendment, 2026-10-06:**
+[ADR U0019](decisions/U0019-standalone-preparation-and-prepared-input-replay.md) records the
+rationale, alternatives, consequences and affected prompts. Javid approved preserving the standalone
+frontend while exposing validated prepared-input import/replay (build-spec §2.5.1). This
+approves the architecture direction, not U0001/U0002 in full or G1. U1 records ownership;
+U2 first settles U0003's concrete schema/identity revision, then implements local preparation
+and analytic replay; U4 adds mapped TaskGraph replay. Fork/native adapters, comparisons,
+prediction freezes and studies consume that boundary. No compiler or live rk-sim dependency
+is added, and no implementation work is claimed by this planning amendment. Existing effort
+figures remain historical baselines; re-estimate affected work at U0003 and update the
+overall schedule, particularly for U2/U4, before treating those figures as commitments.
 
 ## §1 · THE SPRINT LOOP
 
@@ -79,7 +92,7 @@ did not finish.
 | Pair | Why it works |
 |---|---|
 | U-P1 ∥ U-P2 | One writes schemas; the other vendors rk-sim's and generates fixtures by running rk-sim |
-| U-P3 ∥ U-P4 | Provenance works on the table's shape, which U-P1 fixed; a toy table is enough |
+| U-P3 ∥ U-P4 | After U0003's prepared-input/public-schema prerequisite is accepted, provenance uses the fixed table shape and a toy table; it need not wait for the producer/engine implementation |
 | U-P5 ∥ U-P6 | L0 and L0m run against U-C0; they do not need the fork |
 | U-P7 ∥ U-P8 | L1 is written against closed forms; L2 against standalone references |
 | U-P11a–c ∥ U-P12 | The harness needs the engine protocol, not the native engine |
@@ -134,12 +147,12 @@ existing interfaces.
 | | |
 |---|---|
 | **Goal** | A hashed table end to end, whose every number says what it may claim |
-| **Lane A** | Four hardware specs (with the Rev-2 fields), `derive_rk_params`, the workload graph with FLOP parity and paged KV, U-C0 (aggregate and per-op), the minimal table path, `uarch validate`, `uarch table` and `uarch characterize` → **U-P3** |
+| **Lane A** | U0003 schema/identity prerequisite; four hardware specs, `derive_rk_params`, standalone versioned workload preparation with FLOP parity/paged KV, prepared bundle export/import, U-C0 over resolved operators, minimal table path and existing CLI → **U-P3** |
 | **Lane B** | Badges (claims, stipulations, the model as contributor, the ceiling), model cards, applicability over the full scope vector, `uarch report` through `badged()` with diagnostics and a per-op roofline → **U-P4** |
-| **Joint exit criterion** | `uarch table hw/designs/npu-l4.yaml … --engine analytic` → `uarch report` shows "conditional · N stipulations", "error: unknown", "not modelled" for null diagnostics, composite C0 · U-C0 aggregate = rk-sim C0 within ±0.1% on every parity fixture, each fed that fixture's own component params · the graph is one rank of a tp-way split, with attention fused · `uarch characterize` runs on the demo request |
-| **Effort** | A 41 · B 35 |
-| **Depends on** | G1 |
-| **Not in this sprint** | Fork; native; interpolation |
+| **Joint exit criterion** | `uarch table hw/designs/npu-l4.yaml … --engine analytic` → `uarch report` shows "conditional · N stipulations", "error: unknown", "not modelled" for null diagnostics, composite C0 · U-C0 aggregate = rk-sim C0 within ±0.1% on every parity fixture, each fed that fixture's own component params · the graph is one rank of a tp-way split, with attention fused · `uarch characterize` runs on the demo request · local preparation exports a bundle whose analytic replay is byte-identical with the producer disabled; imported supported fixtures run without rk-sim/compiler; input mismatches and stale hashes fail |
+| **Effort** | Original baseline A 41 · B 35; re-estimate prepare/replay work at U0003 before scheduling (§7 has the unamended baseline) |
+| **Depends on** | G1; settle U0003's concrete prepared-input and any public contract revision before the two lane implementations diverge |
+| **Not in this sprint** | Fork; native; interpolation; detailed tiling/mapping policies; compiler or rk-sim exporter |
 
 ### U3 · The fork
 
@@ -148,7 +161,7 @@ existing interfaces.
 | **Goal** | A published cycle-level NPU simulator, driven by a uarch request, reproducibly |
 | **Lane A** | Pre-register G2, build the engine image, write the adapter, evaluate ONNXim (then PyTorchSim if needed) → **U-P5** |
 | **Lane B** | L0 invariants and L0m metamorphic property suites, with mutants that prove they bite → **U-P6** |
-| **Joint exit criterion** | **Gate G2** decided and recorded in ADR U0005 · a one-layer decode query built by the fork from a ModelSpec · L0 and L0m green on U-C0 and run on the fork |
+| **Joint exit criterion** | **Gate G2** decided and recorded in ADR U0005 · standalone model preparation and saved prepared-workload replay reach the fork with preserved rank shapes · fork mapping delegation/unsupported exact mappings are explicit · L0 and L0m green on U-C0 and run on the fork |
 | **Effort** | A 53 · B 27 |
 | **Depends on** | U2 |
 | **Before it starts** | Register the Linux box as a self-hosted runner labelled `uarch` (GitHub → Settings → Actions → Runners), then **re-enable the `schedule:` line in `.github/workflows/nightly.yml`**, paused since 2026-10-03. Trigger one run by hand and see it go green before U-P5 starts |
@@ -161,8 +174,8 @@ existing interfaces.
 | **Goal** | A complete table from the fork, at the composite its levels earn (C2 only if they qualify): verified, with its own errors measured, and badged STUB because it has not yet met silicon |
 | **Lane A** | Mapping policies (`ws-rowsplit@1`, `os-tiled@1`, `onnxim-compat@1`) with declared dataflow and SRAM placement, fused attention tiling, grid, pool, interpolation, LOO, composition, layer-reuse and cold-vs-steady (with warm-up) errors, frequency axis → **U-P7** |
 | **Lane B** | L1 analytical limits (derated DRAM, latency-bound streams), including two hand-computed fixtures; L2 differential against BookSim 2, Ramulator 2 and SCALE-Sim v3, refusing self-comparisons → **U-P8** |
-| **Joint exit criterion** | **Gate G3**: the `npu-l4` × 70B-class table, fp8 and bf16, tp = 8 · composite as §2.4's rule gives for ADR U0005's levels · byte-identical at 1 and N workers · L0, L0m and L1 pass · NoC L2 bound met, or recorded as not independent · model card `stub` |
-| **Effort** | A 61 · B 47 |
+| **Joint exit criterion** | **Gate G3**: the `npu-l4` × 70B-class table, fp8 and bf16, tp = 8 · composite as §2.4's rule gives for ADR U0005's levels · byte-identical at 1 and N workers · mapped TaskGraph export/import/replay preserves inputs and refuses incompatible mappings · L0, L0m and L1 pass · NoC L2 bound met, or recorded as not independent · model card `stub` |
+| **Effort** | Original baseline A 61 · B 47; re-estimate mapped import/replay when U0003 fixes the schema |
 | **Depends on** | G2 |
 | **Not in this sprint** | Silicon; native |
 
@@ -185,7 +198,7 @@ existing interfaces.
 | **Goal** | Our own engine, checked against the fork on the same work |
 | **Lane A** | The Rust engine, in three sessions: time base, events, wheel, ownership and the protocol → **U-P11a**; compute level 1, NoC and DRAM level 0, the TaskGraph executor and attribution → **U-P11b**; diagnostics, traces, G5 and the measured speed factor → **U-P11c** |
 | **Lane B** | Native-vs-fork differential harness with attribution, determinism gates, simulator metrics and the regression gate → **U-P12** |
-| **Joint exit criterion** | **Gate G5**, or its recorded rescheduling to U7 if no fork configuration matches native's levels · the full L0, L0m and L1 suites pass on native · npu-m256 (a mesh the fork cannot model) builds a table |
+| **Joint exit criterion** | **Gate G5**, or its recorded rescheduling to U7 if no fork configuration matches native's levels · the full L0, L0m and L1 suites pass on native · saved mapped inputs execute with producers disabled and comparisons verify resolved mapping correspondence · npu-m256 (a mesh the fork cannot model) builds a table |
 | **Effort** | A 175 · B 49 |
 | **Depends on** | G3 (G4 need not have passed: a native engine is worth building either way; it just cannot claim accuracy yet) |
 | **Not in this sprint** | Threads, SIMD, GPU |
@@ -257,10 +270,17 @@ Every threshold is written before the experiment it judges. A gate decided in th
 the result was discovered is a retrospective.
 
 **G1 · Contract frozen (U1).**
-- *Pass:* ADR U0001 accepted by both founders, with the Rev-2 decisions recorded; the
+- *Pass:* ADR U0001 accepted under the recorded human ownership, with the Rev-2 decisions
+  and standalone/prepared-input ownership recorded (concrete payload fields remain U2); the
   `contract` job is green against the toy table; parity fixtures are complete.
 - *Fail:* do not start U-P3. A contract that is not frozen is the rework that grows with every
   prompt built on it.
+
+**U2 preparation boundary prerequisite and exit.** Before implementation, accept U0003's
+prepared envelope, identity/validation rules and any public contract revision, then share
+its schema with Lane B. Before U3, prove standalone preparation and file replay agree, run
+an external fixture without producer dependencies, and prove mismatches fail before execution.
+This is part of U2's exit, not a new claim of accuracy or a dependency on rk-sim P16.
 
 **G2 · Fork chosen (U3).** All five must hold, and the per-point budget is set in ADR U0005
 before measuring:
@@ -276,6 +296,9 @@ before measuring:
 - U5 still runs, against C1;
 - U6 proceeds with the native engine and no fork reference, and its G5 criterion becomes
   "agrees with U-C1 at matched levels".
+
+For G2, the fork adapter must preserve the prepared workload and disclose internal mapping.
+It refuses an exact imported mapping it cannot honor; passing G2 never establishes otherwise.
 
 **G3 · A full table exists (U4).**
 - *Pass:* one proposed design, one ModelSpec, fp8 and bf16, tp = 8, over a declared envelope.

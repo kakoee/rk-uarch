@@ -8,6 +8,14 @@ contract/uarch_contract/, ADR U0001, contract/tests/test_flop_parity.py, build-s
 From rk-sim READ-ONLY: rk/components/library/compute/asic_placeholder.yaml and
 nvidia_h100_sxm.yaml (the param names derive_rk_params must produce).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Keep the high-level standalone CLI and add file-based prepare/replay without requiring
+rk-sim or a compiler. First propose and obtain acceptance of U0003's prepared-input schema,
+hashing/provenance and any public request/table schema revision; coordinate it with U-P4.
+Use the existing OpSpec vocabulary and engine protocol. Workload construction belongs to
+preparation; analytic engines consume resolved operators. No detailed mapper lands in U2.
+
 TASK: the first honest number end to end. Analytic only; the fork and the native engine come
 later.
 
@@ -36,7 +44,8 @@ later.
    emits the rk-sim library YAML for the chip (kind: compute_resource, role: asic,
    design_status carried in a comment until rk-sim's schema has the field; uarch's proposed
    maps to rk-sim's proposed and reference to shipping).
-3. src/rkuarch/workload/ — (ModelSpec, ModelShape, precision, tp, query) -> the operator
+3. src/rkuarch/workload/ — the standalone, separately versioned preparation producer:
+   (ModelSpec, ModelShape, precision, tp, query) -> the operator
    graph of ONE RANK of a tp-way tensor-parallel split, for one iteration, at decoder-layer
    granularity, using contract/operators.py only. The split is build-spec §2.3.4's: heads
    and KV heads (replicated when kv_heads < tp), FFN columns and rows, and the vocabulary
@@ -56,7 +65,9 @@ later.
    declared deviation in src/rkuarch/workload/deviations.py with a one-line reason: embedding
    or lm_head accounting, norm parameters, and whatever else you actually find. Report them;
    do not tune the graph to hide them.
-5. src/rkuarch/engines/analytic/ — U-C0, uarch's own roofline of a HardwareSpec. Two modes:
+5. src/rkuarch/engines/analytic/ — U-C0, consuming a validated prepared operator graph and
+   resolved HardwareSpec without importing/calling the workload builder or mapping policies.
+   Record the explicit analytic mapping scope and preparation identity. Two modes:
    - aggregate: max(compute_time, memory_time) over the whole iteration, the same shape as
      rk-sim's IterationCost._time_s. This is the parity anchor.
    - per_op: the sum over ops of each op's own roofline. Always >= aggregate. It is the first
@@ -65,8 +76,10 @@ later.
    bound, its parts summing to duration_s. Units in names. Seconds at the boundary. U-C0
    uses peak DRAM bandwidth with no refresh derating, because it is the parity anchor for
    rk-sim C0; derating starts at native level 0. U-C0 leaves every diagnostic null.
-6. src/rkuarch/table/ — the minimal path only: request -> grid points -> engine -> rows ->
-   UarchCostTable, single process, no interpolation (U-P7 owns that). Hash it.
+6. src/rkuarch/table/ — the minimal path: high-level request -> grid-point preparation
+   OR validated prepared bundle -> engine -> rows -> UarchCostTable. Both paths share engine
+   execution and hashing; imported payloads bypass local preparation. Single process, no
+   interpolation (U-P7 owns that). Include input content and producer versions in identity.
 7. src/rkuarch/cli.py (typer): `uarch validate <spec>` (lists claims / stipulations / stubs
    with counts; refuses a bad spec with the path) and `uarch table <spec> --model <name>
    --precision <fmt> [--tp N] --engine analytic` (tp defaults to 1).
@@ -74,6 +87,15 @@ later.
    request's grid, its FLOPs, bytes, operational intensity, op class and shape regime (the
    bins ADR U0001 fixed), as hashed JSON plus a Markdown twin. U-P9 and U-P15 pick their
    benchmark shapes from it, and U-P14 picks its workload suite from it.
+
+9. Add `uarch prepare <request> --out <bundle>` and
+   `uarch table --prepared-input <bundle> --engine analytic`. The bundle explicitly covers
+   its grid/query points, their resolved OpSpecs/dependencies, precision, shard scope,
+   hardware binding, producer identity and analytic mapping scope. Reject ambiguous mixed
+   high-level/prepared overrides. Round-trip the actual prepared payload, not a recipe that
+   calls the builder again. Preserve model-based table/characterize convenience commands.
+10. Implement the U0003-approved protocol/schema fixtures and a read-only freshness check.
+    Reuse these fixtures in the fork adapter and Rust protocol work; do not create another IR.
 
 ACCEPTANCE TESTS (write first):
 1. U-C0 AGGREGATE REPRODUCES rk-sim C0: fed each fixture's own component params (U-P2
@@ -102,11 +124,25 @@ ACCEPTANCE TESTS (write first):
 11. Attention: a prefill at L = 32768 yields an attention_fused operator whose DRAM bytes are
     Q, K, V and O only, and the graph contains no L × L tensor.
 
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- Export locally prepared inputs and replay them with the local builder unavailable:
+  engine results and table bytes match under identical engine/version/run conditions.
+- A hand-authored supported prepared fixture executes with no rk-sim clone or compiler.
+  Independent expected operator dimensions/dependencies pin the local producer's output.
+- A changed operator shape or declared preparation/mapping version changes request/cache
+  identity; moving unchanged files does not. Tampering with a declared hash is refused.
+- Wrong tp/rank scope, precision, hardware binding, unknown schema version, missing query
+  coverage and unsupported detailed mapping fail before engine execution.
+- Architecture checks prove the analytic execution path does not invoke preparation.
+  Public schemas, prompt-sync and the protocol fixtures are fresh.
+
 GUARDRAILS: Do not touch the fork or the native engine; they are U-P5 and U-P11a–c. Do not add
 interpolation or a process pool; that is U-P7. Do not tune the operator graph to hit rk-sim's
 numbers, because the deviations are findings. Never write a number you cannot source as a claim:
 stipulate it in designs/ with a rationale, or stub it in references/.
 
-ADR: docs/decisions/U0003-one-chip-one-set-of-facts.md, covering derive_rk_params and
-the rule that a stipulation propagates as a stipulation.
+ADR: docs/decisions/U0003-one-chip-one-set-of-facts.md, covering derive_rk_params,
+stipulation propagation, the standalone/prepared-input boundary, payload/schema ownership,
+content identity, import refusals, and any public contract-version revision. Settle its
+boundary and share the schema with Lane B before implementation; record validation after.
 ```

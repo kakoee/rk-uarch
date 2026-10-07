@@ -10,3 +10,10 @@ function. No foreign-function interface.
 Cycles live here and in native/, and nowhere else. EngineResult carries duration_ps, a
 critical-path attribution that sums to it, and diagnostics that are null wherever the level
 does not model them, never 0.
+
+Prepared-input ownership (build-spec §2.5.1): engines consume validated resolved work,
+not high-level model recipes that invoke a builder. U2 analytic jobs carry resolved OpSpecs
+and an explicit analytic scope; U4 detailed jobs carry mapped TaskGraphs. U2 establishes
+versioned protocol fixtures for later fork/Rust consumers. Replay requires neither local
+producer execution nor a compiler. Fork-delegated mapping is explicit and supplied mappings
+that it cannot honor are refused. Resource timing and contention remain simulation outputs.

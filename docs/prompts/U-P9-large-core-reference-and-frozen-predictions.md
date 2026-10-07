@@ -8,6 +8,14 @@ CONTEXT TO LOAD: CLAUDE.md, validation/README.md, validation/L3_silicon/README.m
 validation section: what it measured, and how). From rk-sim READ-ONLY: docs/prompts/P11-*.md
 and docs/execution-plan.md S7–S8 (the A100-fits, H100-held-out discipline this copies).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Freeze the exact prepared workload/mapping artifacts or a resolvable immutable manifest
+alongside predictions, including producer versions, content hashes, hardware binding and run
+conditions. Measurements use the declared mapping match; a compiler-chosen mapping is not
+assumed equal to the local policy. Replaying predictions must not silently re-prepare inputs
+with a newer producer.
+
 TASK: produce, and COMMIT BEFORE ANY MEASUREMENT EXISTS, uarch's predictions for a suite of
 microbenchmarks on Google Cloud TPU v5e, the large-core reference. This prompt never sees a
 measurement. That is its whole design.

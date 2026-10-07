@@ -7,6 +7,13 @@ CONTEXT TO LOAD: CLAUDE.md, validation/L2_differential/README.md, build-spec §2
 (determinism), ADR U0011's expected speed factor. You do not need the native engine to be
 finished: you need the engine protocol, which already exists.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Compare prepared workload content and resolved mapping correspondence before comparing
+engine results. Preserve each producer/version and engine identity. Byte-identical shared
+TaskGraphs are preferred; fork-specific encoding needs explicit audited equivalence evidence.
+Matching policy names without matching shapes, placement, precision and run conditions fails.
+
 TASK: make "native agrees with fork" a measured, attributable, continuously checked fact,
 and make simulator performance a regression-tested quantity rather than an anecdote.
 
@@ -47,6 +54,11 @@ ACCEPTANCE TESTS:
 3. The harness refuses a comparison with mismatched mapping or levels, naming the mismatch.
 4. Performance baselines are recorded for every golden request, and the regression gate trips
    on a synthetic 2× slowdown.
+
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- Two inputs with the same model/tp/policy label but different resolved tiles or placements
+  are refused as an engine-equivalence comparison. A numerical gap must not be attributed
+  to engine physics until input and mapping correspondence is established.
 
 GUARDRAILS: Do not call agreement "validation" anywhere, in code, reports or ADRs. It is L2.
 Do not fix a disagreement here. Report it with its attribution and hand it to Lane A.

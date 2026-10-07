@@ -7,6 +7,13 @@ CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, bui
 (the ladder and fidelity_detail), §2.5 (the TaskGraph and EngineResult) and §2.8, ADR U0011
 as U-P11a left it, and U-P11a's handoff.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Execute locally produced or imported validated TaskGraphs through the same path.
+Mapping policy identifiers are provenance, not instructions for the native engine to invoke
+Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
+placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
+
 TASK: the models at the levels this sprint builds, and the executor that runs a real
 TaskGraph through them, so the native engine produces real rows.
 
@@ -43,6 +50,11 @@ ACCEPTANCE TESTS (write first):
 5. Halving accumulator_bytes on a GEMM whose output tile then no longer fits never shortens
    it, and the extra SRAM traffic appears in ext_counts.
 6. attribution_s sums to duration_s on every row.
+
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- Replay a saved mapped job with local workload/mapping producers unavailable and compare
+  its complete EngineResult with the original. Invalid placement is refused before events
+  run. No hidden reconstruction from ModelSpec or tp is allowed.
 
 GUARDRAILS: Only the levels above: NoC "1+ts", DRAM 1 and 2, and compute 2 are U-P13a–c. No
 threads. Do not optimise before the determinism and L0–L1 suites pass. Do not tune a model

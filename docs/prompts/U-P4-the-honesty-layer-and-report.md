@@ -8,6 +8,13 @@ and §2.7 (the validation ladder), contract/uarch_contract/{sourced,model_card,t
 From rk-sim READ-ONLY: rk/provenance.py (combine), docs/decisions/0009, 0011 §5.4, 0021,
 0027, docs/glossary.md §2, web/src/components/Badged.tsx (the rule you are porting).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Use U0003's accepted preparation/provenance fields from U-P3. Reports distinguish the
+standalone producer, an imported mapping and fork-delegated mapping when interpreting a
+result; they must not claim compiler-matched execution from a policy name alone. Existing
+toy tables suffice after the schema prerequisite; do not implement a producer in this lane.
+
 TASK: provenance/ decides what a number may claim. report/ is the only way a number reaches
 a human. Develop both against contract/tests/fixtures/toy_table.json; you do not need
 U-P3 to have landed.

@@ -10,6 +10,13 @@ only had the abstracts and say so:
 - PyTorchSim, MICRO 2025, doi 10.1145/3725843.3756045 (MIT; github.com/PSAL-POSTECH/PyTorchSim);
 - ONNXim, IEEE CAL 2024, arXiv 2406.08051 (MIT; github.com/PSAL-POSTECH/ONNXim).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Consume the U2 prepared workload and preserve its already resolved rank shapes. The
+adapter translates supported prepared operators to fork input; it does not independently
+rebuild/shard the model. Keep the high-level CLI through the standalone producer. The fork's
+internal tiling is a declared delegated-mapping mode, not proof it honored a supplied mapping.
+
 TASK: get a published cycle-level NPU simulator driven by a uarch request, reproducibly, and
 choose between the two candidates on pre-registered numbers.
 
@@ -34,11 +41,11 @@ choose between the two candidates on pre-registered numbers.
      spec, never from the fork's default preset unless the spec names that preset),
      outstanding-request limits and per-job overhead are mapped where the fork has them and
      listed as unrepresented where it does not.
-   - workload_writer.py: (ModelSpec, ModelShape, precision, canonical query) -> the fork's
-     LLM input format. For ONNXim that is its custom language-model format with
-     iteration-level batching; for PyTorchSim, whatever its front end accepts. It is generated
-     from ModelSpec and ModelShape, and it is NEVER the source of truth: ONNX or PyTorch
-     graphs are an output of this writer, not an input to uarch.
+   - workload_writer.py: validated prepared workload -> the fork's LLM input format.
+     Preserve its declared shapes, tp/rank scope, precision, fusion and omissions. Use
+     provenance model metadata only when it faithfully represents those resolved operators;
+     refuse inputs the fork format cannot express. ONNX or PyTorch graphs remain adapter
+     outputs, never a new source-of-truth input language. No duplicate sharding logic.
    - runner.py: runs the container as a subprocess with a timeout, captures stdout/stderr
      and stats files, and records the image digest in the result.
    - stats_parser.py: fork stats -> EngineResult (build-spec §2.5): duration_ps, per-resource
@@ -77,6 +84,14 @@ ACCEPTANCE TESTS (write first where they can be written first):
    fork cannot load is refused (UnnamedPreset) or listed as unrepresented.
 8. ADR U0005 holds the fork's per-configuration ladder table with citations, and a table
    built by the fork reports exactly the composite §2.4's rule gives for those levels.
+
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- Model-based preparation and replay of its saved bundle preserve identical workload
+  semantics through the adapter, with independent shape/count checks at the fork boundary.
+- A caller supplying an exact mapped TaskGraph that the fork cannot honor receives an
+  explicit refusal. Selecting fork-delegated preparation is a separate declared choice.
+- Result provenance identifies prepared content and pinned fork mapping/version; no claim
+  of mapping equivalence is made without evidence of resolved correspondence.
 
 GUARDRAILS: Do not patch the engine to make parity pass. Declare the deviation. Do not touch
 anything under src/rkuarch/engines/native/. Do not start U-P7 until a fork has passed G2. If

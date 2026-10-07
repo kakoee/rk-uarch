@@ -39,7 +39,9 @@ stipulations it is conditional on. Detail is not accuracy.
 12. third_party/ changes only as numbered patches; licences only from the allow-list.
 
 ## Don't
-- Don't add a workload IR or an ONNX import path. Workloads = rk-sim ModelSpec + ModelShape.
+- Don't add a new workload IR or an ONNX import path. Keep standalone ModelSpec + ModelShape
+  preparation and support versioned prepared-input replay using OpSpec/TaskGraph (build-spec
+  §2.5.1). Engines consume resolved inputs; imported mappings are never silently rebuilt.
 - Don't add mapping search, SIMD, GPU, MPI, optimistic sync, a simulation compiler, or a web UI.
 - Don't tune any model parameter to pass an L2 or L3 comparison. Record the gap.
 - Don't add dependencies beyond pyproject.toml / native/Cargo.toml without asking.

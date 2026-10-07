@@ -8,6 +8,14 @@ acceptance demo: the study is minutes 4–5 of it) and §2.6. From rk-sim READ-O
 docs/prompts/P9a-sweep-engine.md and P9b-*.md (its sweep and tornado conventions, and why a
 one-at-a-time tornado is labelled local sensitivity rather than a ranking).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Declare whether a study re-prepares each variant with a named local policy or replays
+an externally supplied mapping. Local preparation records a new hardware/mapping identity
+per variant. Fixed imported mappings are validated against each variant and refused when
+incompatible; re-mapping requires an explicit study choice and recorded producer. Cache
+identity includes prepared content and its bindings, not just model/tp or policy label.
+
 TASK: the thing a chip architect actually does with this tool, which is to compare designs. A
 study is a set of tables over stipulated variants, and a report that says what moved and why.
 
@@ -19,8 +27,9 @@ study is a set of tables over stipulated variants, and a report that says what m
 2. VARIANTS MAY ONLY CHANGE WHAT A PROPOSED DESIGN IS FREE TO CHOOSE: its stipulated values
    (counts included: array, grid, banks, channels, queue depths), its categorical fields
    (dataflows, topology, interleave scheme, scheduler, page policy, sync mechanism) and the
-   request's mapping policy. Every change is recorded in conditional_on as path=value, and
-   the mapping is re-run per variant. A study that edits a reference spec, or any claim, is
+   request's mapping policy. Every change is recorded in conditional_on as path=value.
+   In local-preparation mode the mapping is re-run per variant; fixed imported mappings
+   follow the validation/refusal rule above. A study that edits a reference spec, or any claim, is
    refused: it would be a counterfactual about a real chip wearing that chip's evidence. A
    variant that changes sram.bytes without re-stipulating energy.pj_per_byte.sram is refused,
    naming both paths.
@@ -65,6 +74,11 @@ ACCEPTANCE TESTS (write first):
 9. The dataflow study runs: each variant's conditional_on names its dataflows and mapping
    policy, and a variant whose dataflows lack its policy's dataflow is refused.
 10. A count variant (npu-m256 SRAM banks 16 → 32) runs, and its change is in conditional_on.
+
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- A variant invalidating a supplied mapping is refused without calling a local mapper.
+  An explicitly re-prepared variant records the new mapping identity. Changing prepared
+  content under the same input filename causes a cache miss.
 
 GUARDRAILS: No optimiser and no design search. A study is a set of runs a human chose. No
 fitted surrogate; rk-sim deliberately refuses fitted Sobol indices, and so does this.

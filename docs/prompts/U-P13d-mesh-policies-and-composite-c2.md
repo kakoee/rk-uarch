@@ -7,6 +7,13 @@ CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, bui
 (the per-subsystem ladder and the composite rule), §2.8, ADR U0011, U0012, and the handoffs
 of U-P13a, U-P13b and U-P13c.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Mesh mapping policies extend the standalone preparation frontend and emit the same
+versioned TaskGraph format that external producers can supply. The native engine consumes
+resolved mapped inputs, never chooses SUMMA/head placement itself. Export/import preserves
+policy version, hardware binding and content identity; no search or compiler integration.
+
 TASK: make the mesh class a first-class target and the composite honest: mesh policies, the
 composite rule in code, and full C2 tables at mesh scale.
 

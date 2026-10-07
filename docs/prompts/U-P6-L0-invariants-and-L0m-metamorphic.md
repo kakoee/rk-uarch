@@ -7,6 +7,13 @@ CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7 (the ladder),
 src/rkuarch/engines/README.md (the engine protocol every suite runs through). From rk-sim
 READ-ONLY: tests/properties/ (the house style for property tests).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Exercise saved prepared jobs as well as the standalone frontend. Keep tests of the
+producer's counts/shape resolution separate from engine invariants on fixed inputs. Apply
+metamorphic graph/mapping changes explicitly, update their content identity, and never let
+an engine repair a deliberately invalid mapping through hidden re-preparation.
+
 TASK: the rungs that establish that the simulator does not contradict itself, and relations
 that must hold even though nobody knows the right answer. They run against ANY engine through
 the engine protocol: today U-C0, the fork when U-P5 lands, the native engine later. Write

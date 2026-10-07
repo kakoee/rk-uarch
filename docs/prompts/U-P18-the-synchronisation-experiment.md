@@ -8,6 +8,13 @@ READ-ONLY: docs/vision/rack-to-kernel-24-month-execution-plan.md: E6, the FUNDED
 criterion. That is the company's central technical bet, and this prompt is where it gets
 measured. docs/context-and-decisions.md §2.3 (why the prototype deferred it).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Compare worker/thread/synchronization configurations using the same saved prepared
+workload and mapped TaskGraph. Partitioning simulator ownership must not repartition model
+tensors or change the declared chip mapping. Record prepared input identity with every run
+so timing differences cannot hide a change in the workload producer.
+
 TASK: measure whether lax synchronisation survives a BACKPRESSURED boundary, publish the curve
 whatever its shape, and wire the result into what the composite fidelity may claim.
 

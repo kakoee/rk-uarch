@@ -9,6 +9,13 @@ READ-ONLY: ../rk-sim/docs/vision/elements_of_parallel_DES.md §§6–15 and 30�
 epochs, determinism) and docs/vision/rack-to-kernel-24-month-execution-plan.md (E6 and the funded plan's G1).
 SST's documentation on conservative synchronisation with link-latency lookahead.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Compare worker/thread/synchronization configurations using the same saved prepared
+workload and mapped TaskGraph. Partitioning simulator ownership must not repartition model
+tensors or change the declared chip mapping. Record prepared input identity with every run
+so timing differences cannot hide a change in the workload producer.
+
 TASK: parallelism INSIDE one simulation, built so that the exact mode is byte-identical to the
 single-threaded engine. Only then comes a lax mode, and it is labelled as approximate everywhere it
 appears.

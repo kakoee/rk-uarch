@@ -7,6 +7,13 @@ CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7, third_party/
 ADR U0005 (which fork sub-models are BookSim 2 or Ramulator 2). Documentation for BookSim 2 (BSD-2, Stanford), Ramulator 2 (MIT, CMU SAFARI), SCALE-Sim v3
 (MIT). Optionally Gemmini (BSD-3, UC Berkeley) and Verilator (LGPL-3.0/Artistic-2.0).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Pin the prepared workload/mapping identity and represented scope for each reference
+comparison. A difference caused by another mapping is not an engine discrepancy. References
+that cannot consume equivalent resolved inputs must be reported as unmatched rather than
+being compared solely by model name, tp or a policy label.
+
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
 implements the same abstraction as independent, published models. Both run through the
 engine protocol against every engine in the matrix.

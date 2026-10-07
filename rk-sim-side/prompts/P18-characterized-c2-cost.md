@@ -15,6 +15,14 @@ rk-uarch, READ-ONLY: docs/decisions/U0001 (the nine rules), contract/schema/*.js
 contract version the boundary ADR names, contract/fixtures/interpolation_vectors.json, and one
 committed table.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR (in rk-uarch, READ-ONLY): docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Read the accepted U0003 and later public contract revisions as well as U0001. Preserve
+and validate the table's declared preparation identity/scope through the adopted boundary.
+This prompt remains table consumption at runtime: no live rk-uarch, compiler or preparation
+invocation, and no new tensor sharding in the reader. A future rk-sim prepared-input exporter
+is a separately approved integration; it is not a prerequisite or an implicit part of P18.
+
 TASK: a component whose effective compute fidelity is C2 is priced, every iteration, from a
 uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
 

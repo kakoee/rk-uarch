@@ -13,3 +13,9 @@ prefill/decode iterations; they become table warnings. FLOP parity against rk-si
 runs on every change; every deviation above 0.5% has a name and a reason in deviations.py.
 `uarch characterize` reports FLOPs, bytes, operational intensity and shape regime per op
 across the grid; L3 suites and workload suites pick shapes from it.
+
+Preparation boundary (build-spec §2.5.1): this module is the standalone, versioned producer
+and loader of prepared OpSpec graphs. Engines receive its resolved output. A supplied
+rank-local graph bypasses model expansion and sharding; validate its identity, supported
+scope, precision, dependencies and omissions. Keep the high-level convenience path usable
+without rk-sim or a compiler. U-P3 adds export/import/replay; no second workload IR is added.

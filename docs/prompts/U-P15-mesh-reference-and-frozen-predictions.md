@@ -9,6 +9,14 @@ tt-isa-documentation/BlackholeA0/NoC/README.md (two opposite-direction 2-D torus
 64-byte flits, about 9 cycles router-to-router, about 5 cycles NIU↔router), the TT-Metalium
 device program profiler page, and tt-npe (Apache-2.0).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Freeze the exact prepared workload/mapping artifacts or a resolvable immutable manifest
+alongside predictions, including producer versions, content hashes, hardware binding and run
+conditions. Measurements use the declared mapping match; a compiler-chosen mapping is not
+assumed equal to the local policy. Replaying predictions must not silently re-prepare inputs
+with a newer producer.
+
 TASK: the same discipline as U-P9, for the class the native engine exists for: a mesh of many
 small cores. Predictions are committed before any measurement exists, and this prompt never
 sees one.

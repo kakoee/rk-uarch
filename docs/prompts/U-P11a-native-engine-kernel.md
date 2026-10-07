@@ -9,6 +9,13 @@ spec, not background), ADR U0005, U0007. Javid's ../rk-sim/docs/vision/elements_
 from rk-sim, READ-ONLY, for the parts §2.8 adopts, and build-spec §2.8's "departures" table
 for the parts it rejects and why.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Reuse the U2/U4 versioned prepared-job protocol and fixtures. Rust receives resolved
+shapes, resource assignments, dependencies and policies; no model builder or mapper runs
+inside the engine. Timing/events are outputs of executing those inputs. Extend the accepted
+protocol only through its versioned schema procedure, not a parallel Rust-only format.
+
 TASK: the kernel of native/, uarch's own event-driven engine, in Rust, built in the engine
 container, and the plumbing that puts it behind exactly the same engine protocol as the
 fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
@@ -63,9 +70,10 @@ fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
    parser, identical in shape to engines/fork/, so `uarch table ... --engine native` reaches
    the binary.
-10. The protocol as a schema: `make gen` also exports EngineJob and EngineResult's JSON Schema
-    from engines/protocol.py to src/rkuarch/engines/schema/, with fixture messages. The Rust
-    serde types are tested against those fixtures, so neither side can drift alone.
+10. The protocol as a schema: reuse U2/U4's EngineJob/EngineResult schemas and fixture
+    messages from engines/protocol.py in src/rkuarch/engines/schema/. `make gen` keeps exporting
+    them; the freshness check remains read-only. Test Rust serde types against those fixtures,
+    including prepared input versions/hashes and refusal cases, so neither side drifts alone.
 
 ACCEPTANCE TESTS (write first):
 1. cargo test: event ordering, wheel overflow into heap and back, arena reuse, next_edge at

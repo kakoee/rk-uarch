@@ -9,11 +9,19 @@ contract/uarch_contract/{request,table}.py. From rk-sim READ-ONLY: rk/engine/f0/
 comment block above IterationCounts, which says why (B, T, Q) is sufficient for a
 roofline and warns that it is exact only while cost is linear.
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Extend U2's saved-input path with the existing TaskGraph; policies are versioned
+preparation producers outside engines. Imported mapped inputs bypass policy execution and
+are validated unchanged. The fork's declared internal-mapping exception remains explicit;
+a supplied native mapping cannot silently turn into a fork default.
+
 TASK: turn a CharacterizationRequest into a complete, hashed, honestly-errored table, driven
 by the fork, at the composite build-spec §2.4's rule gives for the fork's levels as ADR U0005
 records them: C2 only if they qualify, and C1, said so, if they do not.
 
-1. mapping/ — named, versioned policies, each a pure function (op graph, HardwareSpec) ->
+1. mapping/ — standalone preparation: named, versioned policies, each a pure function
+   (validated prepared op graph, HardwareSpec) ->
    TaskGraph (build-spec §2.5): per-core compute jobs, DMA jobs, NoC transfers (unicast and
    multicast), barriers, dependencies.
    - ws-rowsplit@1 for the large-core class (weight-stationary, output rows split across
@@ -72,6 +80,14 @@ records them: C2 only if they qualify, and C1, said so, if they do not.
 9. initial_state travels in every EngineJob; steady primes one iteration at the same point
    and reports the second.
 
+10. Extend prepare/export and prepared-input loading with complete TaskGraph payloads and
+    their hashes: placements, tiles, DMA/NoC transfers, dependencies, barriers and policies.
+    Schema and producer versions are explicit. Validate hardware/resource references, SRAM
+    capacity, dimensions and dependency consistency before launching an engine. Reject a
+    hardware-incompatible imported mapping rather than re-running a local policy.
+    Materialize all requested grid and seeded error-experiment jobs during preparation;
+    imported bundles must declare sufficient query/state coverage or refuse the experiment.
+
 ACCEPTANCE TESTS (write first):
 1. Determinism: two builds byte-identical; --workers 1 vs --workers 8 byte-identical.
 2. An out-of-envelope query raises EnvelopeExceedsGrid at request time, naming the region.
@@ -92,6 +108,16 @@ ACCEPTANCE TESTS (write first):
 12. The table's composite equals what build-spec §2.4's rule gives for ADR U0005's levels.
 13. interpolate.py reproduces interpolation_vectors.json, and a query outside the grid in
     that file is refused.
+
+ADDITIONAL ACCEPTANCE — prepared inputs:
+- A locally prepared mapped bundle replays with mapping policies disabled and yields
+  identical EngineResults/tables for the same engine/version/run conditions.
+- A supported external TaskGraph fixture executes without the local mapper. Changing its
+  placement changes content/cache identity even if the model and policy label are unchanged.
+- Unsupported supplied mapping, stale hardware binding, bad dependencies, and missing error
+  sample coverage are refused; no implicit retiling or regeneration occurs.
+- Fork/native correspondence compares the resolved work supported by the fork; a shared
+  policy label alone cannot pass the mapping-match check.
 
 GUARDRAILS: No mapping search. Never silently clamp an out-of-grid query. Do not correct the
 composition or layer-reuse error, because disclosure is the deliverable. Do not let

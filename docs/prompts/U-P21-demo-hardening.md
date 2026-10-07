@@ -7,6 +7,13 @@ CONTEXT TO LOAD: CLAUDE.md, README.md, build-spec §1.2 (the acceptance demo: th
 done), docs/execution-plan.md U11, docs/how-it-works.md, every docs/reviews/*-closeout.md.
 From rk-sim READ-ONLY: docs/prompts/P13-demo-hardening.md (same discipline).
 
+PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
+ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
+Demonstrate both the standalone model-based path and replay of a saved prepared bundle
+on the cold setup. Neither path requires a live rk-sim clone or a compiler to produce uarch
+results. Verify replay with local producers disabled, including input-content/cache identity;
+keep the later rk-sim table-consumption demo independent of preparation services.
+
 TASK: a stranger can run it, and either founder can perform the build-spec §1.2 demo cold,
 including the other lane's parts.
 
