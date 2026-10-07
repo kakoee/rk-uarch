@@ -33,8 +33,8 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | Commit and push as separately authorized steps, then hosted CI and Linux-box cold-clone validation; G1/U1 closure remains pending |
-| **In progress** | U1: both lane reviews ACCEPTED; Javid accepted complete U0001/U0002 and authorized snapshot adoption/integration on 2026-10-06; integrated locally, uncommitted |
+| **Next** | Commit the accepted closeout, push and verify CI, then create/publish `u01-end` as separate steps; U2 kickoff follows |
+| **In progress** | U1 closeout: **G1 APPROVED and closeout ACCEPTED by Javid on 2026-10-07**, including U0020; implementation `44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e` is published and validated; closeout publication/tag pending |
 | **Not started** | U2–U11 |
 | **Paused** | The `nightly` workflow's schedule (2026-10-03): no self-hosted runner yet. Re-enable it when U3 starts (U3, "Before it starts") |
 
@@ -43,6 +43,13 @@ Update this block and `docs/how-it-works.md` at every sprint boundary.
 Current U1 acceptance and artifact identities are recorded in
 [U1 acceptance and adoption](reviews/U1-acceptance-and-adoption.md). Earlier proposal
 and partial-approval notes below remain historical; they do not override that acceptance.
+See the [U1 closeout](reviews/U1-closeout.md) for publication and durable validation evidence.
+[U0020](decisions/U0020-u1-cold-clone-validation-exception.md) records Javid's already-approved
+U1-only substitution of fresh ElfinKidsLaptop Ubuntu/WSL2 validation plus same-commit hosted
+Ubuntu CI for the separate Linux-box check. Later runner/hardware/performance-host requirements
+are unchanged. Javid approved G1 and accepted the complete closeout, including U0020, on
+2026-10-07. The approval is recorded in the closeout; commit, push and tagging remain
+separate pending steps.
 
 **U1 pin update, 2026-10-04:** Javid (@jjaffari) approved advancing from `11bb530` to
 `1e5706e` before implementation. The seven intervening commits leave `rk/schema/`,

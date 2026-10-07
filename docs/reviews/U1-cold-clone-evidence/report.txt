@@ -1,0 +1,303 @@
+U1 published-revision cold-clone validation evidence
+Report generated UTC: 2026-10-07T07:18:30.538132+00:00
+Repository: https://github.com/kakoee/rk-uarch.git
+Exact requested and observed commit: 44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e
+Clone: /tmp/u1-cold-clone-rwaqeoco/checkout
+Report/log directory: /tmp/u1-cold-clone-rwaqeoco (outside clone)
+
+RESULT
+All eight requested validation commands and the locked environment sync exited 0.
+Contract tests: 379 passed, 0 failed, 0 skipped.
+Full suite: 385 passed, 0 failed, 0 skipped.
+Prompt-sync tests: 4 passed, 0 failed, 0 skipped.
+Mypy: no issues in 47 source files. Ruff: all checks passed.
+Import contracts: 2 kept, 0 broken.
+Vendor snapshot and generated-schema freshness checks passed.
+Snapshot manifest SHA256 matched the requested value exactly.
+Initial and final git status --porcelain=v1 --untracked-files=all were empty.
+Final git diff --exit-code HEAD -- exited 0; HEAD remains the exact requested SHA.
+No G1 or U1 completion declaration is made by this report.
+
+EXPLICIT USER-APPROVED U1 VALIDATION-PLAN EXCEPTION
+For U1, I approve ElfinKidsLaptop’s Ubuntu/WSL2 environment for the manual
+cold-clone check, supplemented by hosted Ubuntu CI on the same commit.
+
+Record this as an explicit U1 validation-plan exception, not as validation
+on a separate Linux machine. Proceed with the fresh GitHub clone and checks
+already specified. Preserve the exact host/kernel details.
+
+This does not designate WSL2 as the later simulator-performance host or
+waive future runner/hardware requirements.
+
+This is a new manual cold-clone run on WSL2, not evidence from an earlier
+validation and not validation on a separate Linux machine. The original
+separate/designated Linux-box condition was not met; the user explicitly
+approved the exception above, with same-commit hosted Ubuntu CI supplementation.
+Future simulator-performance runner and hardware requirements remain unchanged.
+
+MANUAL HOST AND TOOLS
+Hostname: ElfinKidsLaptop
+OS: Ubuntu 24.04.4 LTS (Noble Numbat)
+Kernel/uname -a: Linux ElfinKidsLaptop 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 5 18:30:46 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+Architecture: x86_64
+System Python: 3.12.3 (python3; unqualified python was unavailable outside the venv)
+Validation Python: 3.12.14 (main, Sep 1 2026, 14:16:52) [Clang 22.1.3]
+uv: 0.12.9 (x86_64-unknown-linux-gnu)
+git: 2.43.0
+Fresh virtual environment: /tmp/u1-cold-clone-rwaqeoco/checkout/.venv
+Python executable: /tmp/u1-cold-clone-rwaqeoco/checkout/.venv/bin/python3
+Base interpreter: /home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu
+uv discovered the already installed Python 3.12.14 via /home/jjaff/.local/bin/python3.12;
+the interpreter was reused, but no existing virtual environment was reused.
+
+ISOLATION AND CONSTRAINTS
+Created a new directory with tempfile.mkdtemp under /tmp and cloned directly from GitHub.
+Checked out the exact commit detached; no local worktree or rk-sim checkout was used.
+No unpublished repository files were copied into the clone.
+UV_CACHE_DIR=/tmp/u1-cold-clone-rwaqeoco/uv-cache (new, empty before sync).
+UV_PYTHON_INSTALL_DIR=/tmp/u1-cold-clone-rwaqeoco/uv-python.
+UV_PROJECT_ENVIRONMENT=/tmp/u1-cold-clone-rwaqeoco/checkout/.venv (created by requested sync).
+The runner removes inherited VIRTUAL_ENV from child-process environments.
+UARCH_HUMAN was unset and was never set.
+No source edits, artifact regeneration commands, commits, pushes, or tags were performed.
+The environment and ordinary ignored tool caches remain inside the clone; Git is clean.
+The published clone contains no AGENTS.md files.
+
+MANIFEST
+Path: contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/MANIFEST.json
+Expected SHA256: b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d
+Observed SHA256: b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d
+Both sha256sum output and a separate Python assertion are logged.
+
+HOSTED UBUNTU CI SUPPLEMENT
+Existing run inspected read-only; no new run was triggered:
+https://github.com/kakoee/rk-uarch/actions/runs/37585143201
+Workflow: ci; status: completed; conclusion: success.
+Created: 2026-10-07T07:04:45Z; updated: 2026-10-07T07:05:16Z.
+Every job head_sha equals 44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e.
+All 8 jobs succeeded; no jobs or steps are marked failed or skipped.
+Job metadata: labels ubuntu-latest; runner group GitHub Actions.
+Job logs identify Hosted Compute Agent, Ubuntu 24.04.5, image ubuntu-24.04,
+and GitHub Actions runner version 2.337.0.
+CI uses Python 3.12.3 and uv sync --extra dev, so it supplements the exact
+manual Python 3.12.14 locked-sync run rather than reproducing that setup exactly.
+CI results: contract 379 passed; python suite 385 passed; licences 2 passed.
+CI lint, type checking, imports, vendor check, and schema freshness succeeded.
+Explicit CI no-op coverage (successful conditional jobs/steps, not executed tests):
+- golden: no expected files.
+- determinism: no golden scenarios.
+- native: no native sources.
+- perf: no perf baselines.
+- ordering: no predictions.
+- licences-and-patches / patches: no patches.
+CI logs also contain Node.js 20 action deprecation warnings; jobs succeeded.
+Full downloaded job metadata and logs are preserved in logs/ci-jobs.log and logs/ci-log.log.
+
+FAILURES AND SKIPS
+Requested manual validation checks: no failures, no skips.
+Manifest assertion: passed. Checkout cleanliness checks: passed.
+Hosted CI: no failed/skipped jobs or steps; conditional no-op coverage listed above.
+Execution infrastructure: the sandbox could not start because of the
+/mnt/wslg/distro mount; approved escalated commands were used thereafter.
+Initial unqualified system python probe failed; requested uv-managed validation
+used Python 3.12.14 successfully. See logs/preflight-sandbox-failure.log.
+
+COMMANDS AND RESULTS
+Each command log includes UTC start, working directory, combined stdout/stderr,
+exit code, and elapsed time. results.jsonl is the machine-readable command index.
+
+[hostname] 2026-10-07T07:12:19.159352+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco
+$ hostname
+Exit: 0; elapsed: 0.004s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/hostname.log
+
+[kernel] 2026-10-07T07:12:19.163379+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco
+$ uname -a
+Exit: 0; elapsed: 0.002s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/kernel.log
+
+[os] 2026-10-07T07:12:19.166100+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco
+$ cat /etc/os-release
+Exit: 0; elapsed: 0.003s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/os.log
+
+[architecture] 2026-10-07T07:12:19.169200+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco
+$ uname -m
+Exit: 0; elapsed: 0.002s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/architecture.log
+
+[system-python] 2026-10-07T07:12:19.171791+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco
+$ python3 --version
+Exit: 0; elapsed: 0.002s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/system-python.log
+
+[uv-version] 2026-10-07T07:12:19.174204+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco
+$ uv --version
+Exit: 0; elapsed: 0.053s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/uv-version.log
+
+[git-version] 2026-10-07T07:12:19.227778+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco
+$ git --version
+Exit: 0; elapsed: 0.002s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/git-version.log
+
+[clone] 2026-10-07T07:12:19.230391+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco
+$ git clone https://github.com/kakoee/rk-uarch.git /tmp/u1-cold-clone-rwaqeoco/checkout
+Exit: 0; elapsed: 0.847s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/clone.log
+
+[checkout] 2026-10-07T07:12:20.078245+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ git checkout --detach 44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e
+Exit: 0; elapsed: 0.011s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/checkout.log
+
+[commit] 2026-10-07T07:12:20.089852+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ git rev-parse HEAD
+Exit: 0; elapsed: 0.002s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/commit.log
+
+[initial-status] 2026-10-07T07:12:20.091600+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ git status --porcelain=v1 --untracked-files=all
+Exit: 0; elapsed: 0.013s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/initial-status.log
+
+[instructions] 2026-10-07T07:12:20.105131+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ find . -name AGENTS.md -print
+Exit: 0; elapsed: 0.004s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/instructions.log
+
+[workflow] 2026-10-07T07:14:15.253028+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ cat .github/workflows/ci.yml
+Exit: 0; elapsed: 0.002s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/workflow.log
+
+[sync] 2026-10-07T07:14:15.255235+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv sync --locked --extra dev --python 3.12.14
+Exit: 0; elapsed: 1.67s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/sync.log
+
+[environment-python] 2026-10-07T07:14:16.925843+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync python -B -c 'import sys, platform; print(sys.version); print(sys.executable); print(sys.prefix); print(sys.base_prefix); print(platform.platform())'
+Exit: 0; elapsed: 0.072s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/environment-python.log
+
+[vendor-check] 2026-10-07T07:14:16.998268+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync python -B scripts/vendor_rk.py --check
+Exit: 0; elapsed: 0.147s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/vendor-check.log
+
+[contract-tests] 2026-10-07T07:14:17.145535+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync pytest -q -rs contract/tests --require-vendor
+Exit: 0; elapsed: 3.178s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/contract-tests.log
+
+[full-tests] 2026-10-07T07:14:20.323564+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync pytest -q -rs
+Exit: 0; elapsed: 2.266s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/full-tests.log
+
+[mypy] 2026-10-07T07:14:22.589777+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync mypy src contract scripts
+Exit: 0; elapsed: 3.774s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/mypy.log
+
+[ruff] 2026-10-07T07:14:26.364164+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync ruff check .
+Exit: 0; elapsed: 0.026s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/ruff.log
+
+[lint-imports] 2026-10-07T07:14:26.390269+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync lint-imports
+Exit: 0; elapsed: 0.22s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/lint-imports.log
+
+[generated-check] 2026-10-07T07:14:26.610786+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync python -B -m uarch_contract.generate --check
+Exit: 0; elapsed: 0.183s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/generated-check.log
+
+[prompt-sync] 2026-10-07T07:14:26.794458+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ uv run --no-sync pytest -q tests/unit/test_prompt_sync.py
+Exit: 0; elapsed: 0.219s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/prompt-sync.log
+
+[manifest-sha256] 2026-10-07T07:14:27.014039+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ sha256sum contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/MANIFEST.json
+Exit: 0; elapsed: 0.006s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/manifest-sha256.log
+
+[manifest-assert] 2026-10-07T07:14:27.020156+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ python3 -c 'import hashlib,pathlib; paths=list(pathlib.Path('"'"'contract/vendor'"'"').glob('"'"'rk-sim@*/MANIFEST.json'"'"')); assert len(paths)==1,paths; value=hashlib.sha256(paths[0].read_bytes()).hexdigest(); print(value); assert value=='"'"'b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d'"'"''
+Exit: 0; elapsed: 0.028s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/manifest-assert.log
+
+[final-commit] 2026-10-07T07:14:27.048628+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ git rev-parse HEAD
+Exit: 0; elapsed: 0.001s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/final-commit.log
+
+[final-status] 2026-10-07T07:14:27.050353+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ git status --porcelain=v1 --untracked-files=all
+Exit: 0; elapsed: 0.015s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/final-status.log
+
+[final-diff] 2026-10-07T07:14:27.065536+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ git diff --exit-code HEAD --
+Exit: 0; elapsed: 0.002s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/final-diff.log
+
+[ci-runs] 2026-10-07T07:14:27.068086+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ gh run list --repo kakoee/rk-uarch --commit 44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e --limit 100 --json databaseId,workflowName,status,conclusion,headSha,url,createdAt,updatedAt
+Exit: 0; elapsed: 0.804s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/ci-runs.log
+
+[ci-jobs] 2026-10-07T07:16:24.045891+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ gh api 'repos/kakoee/rk-uarch/actions/runs/37585143201/jobs?per_page=100'
+Exit: 0; elapsed: 1.103s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/ci-jobs.log
+
+[ci-log] 2026-10-07T07:16:25.155481+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ gh run view 37585143201 --repo kakoee/rk-uarch --log
+Exit: 0; elapsed: 3.12s
+Log: /tmp/u1-cold-clone-rwaqeoco/logs/ci-log.log
+
+CI JOBS
+licences-and-patches: success; runner=GitHub Actions 1000000666; labels=['ubuntu-latest']; https://github.com/kakoee/rk-uarch/actions/runs/37585143201/job/112673448947
+contract: success; runner=GitHub Actions 1000000665; labels=['ubuntu-latest']; https://github.com/kakoee/rk-uarch/actions/runs/37585143201/job/112673449008
+python: success; runner=GitHub Actions 1000000667; labels=['ubuntu-latest']; https://github.com/kakoee/rk-uarch/actions/runs/37585143201/job/112673449014
+perf: success; runner=GitHub Actions 1000000664; labels=['ubuntu-latest']; https://github.com/kakoee/rk-uarch/actions/runs/37585143201/job/112673449040
+golden: success; runner=GitHub Actions 1000000668; labels=['ubuntu-latest']; https://github.com/kakoee/rk-uarch/actions/runs/37585143201/job/112673449050
+native: success; runner=GitHub Actions 1000000669; labels=['ubuntu-latest']; https://github.com/kakoee/rk-uarch/actions/runs/37585143201/job/112673449077
+ordering: success; runner=GitHub Actions 1000000671; labels=['ubuntu-latest']; https://github.com/kakoee/rk-uarch/actions/runs/37585143201/job/112673449082
+determinism: success; runner=GitHub Actions 1000000670; labels=['ubuntu-latest']; https://github.com/kakoee/rk-uarch/actions/runs/37585143201/job/112673449144

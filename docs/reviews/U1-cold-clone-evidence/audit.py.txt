@@ -1,0 +1,70 @@
+import datetime, json, os, pathlib, shlex, subprocess, sys, time
+ROOT = pathlib.Path(__file__).resolve().parent
+CLONE = ROOT / 'checkout'
+ENV = os.environ.copy()
+ENV.pop('VIRTUAL_ENV', None)
+ENV['UV_CACHE_DIR'] = str(ROOT / 'uv-cache')
+ENV['UV_PYTHON_INSTALL_DIR'] = str(ROOT / 'uv-python')
+ENV['UV_PROJECT_ENVIRONMENT'] = str(CLONE / '.venv')
+def run(label, argv, cwd=None):
+    started = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    path = ROOT / 'logs' / (label + '.log')
+    command = shlex.join(argv)
+    print('\n$ ' + command, flush=True)
+    with path.open('w') as log:
+        log.write('UTC start: ' + started + '\nCWD: ' + str(cwd or ROOT) + '\n$ ' + command + '\n')
+        log.flush()
+        t = time.monotonic()
+        try:
+            p = subprocess.Popen(argv, cwd=cwd or ROOT, env=ENV, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            for line in p.stdout:
+                log.write(line)
+                log.flush()
+                print(line, end='', flush=True)
+            code = p.wait()
+        except OSError as e:
+            log.write(str(e) + '\n')
+            print(str(e), flush=True)
+            code = 127
+        elapsed = time.monotonic() - t
+        log.write(f'\nExit code: {code}\nElapsed seconds: {elapsed:.3f}\n')
+    with (ROOT / 'results.jsonl').open('a') as out:
+        out.write(json.dumps(dict(label=label, command=command, cwd=str(cwd or ROOT), started=started, exit_code=code, elapsed_seconds=round(elapsed,3), log=str(path))) + '\n')
+    print(f'Exit code: {code}; elapsed: {elapsed:.3f}s', flush=True)
+    return code
+if __name__ == '__main__':
+    if sys.argv[1] == 'init':
+        (ROOT / 'environment.json').write_text(json.dumps({'UV_CACHE_DIR':ENV['UV_CACHE_DIR'], 'UV_PYTHON_INSTALL_DIR':ENV['UV_PYTHON_INSTALL_DIR'], 'UV_PROJECT_ENVIRONMENT':ENV['UV_PROJECT_ENVIRONMENT'], 'UARCH_HUMAN_present': 'UARCH_HUMAN' in ENV, 'inherited_virtual_environment_removed': 'VIRTUAL_ENV' in os.environ}, indent=2) + '\n')
+        for label, cmd in [('hostname',['hostname']),('kernel',['uname','-a']),('os',['cat','/etc/os-release']),('architecture',['uname','-m']),('system-python',['python3','--version']),('uv-version',['uv','--version']),('git-version',['git','--version'])]:
+            run(label,cmd)
+        if run('clone',['git','clone','https://github.com/kakoee/rk-uarch.git',str(CLONE)]): sys.exit(1)
+        if run('checkout',['git','checkout','--detach','44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e'],CLONE): sys.exit(1)
+        run('commit',['git','rev-parse','HEAD'],CLONE)
+        run('initial-status',['git','status','--porcelain=v1','--untracked-files=all'],CLONE)
+        run('instructions',['find','.','-name','AGENTS.md','-print'],CLONE)
+    elif sys.argv[1] == 'validate':
+        run('workflow',['cat','.github/workflows/ci.yml'],CLONE)
+        run('sync',['uv','sync','--locked','--extra','dev','--python','3.12.14'],CLONE)
+        run('environment-python',['uv','run','--no-sync','python','-B','-c','import sys, platform; print(sys.version); print(sys.executable); print(sys.prefix); print(sys.base_prefix); print(platform.platform())'],CLONE)
+        commands = [
+            ('vendor-check',['python','-B','scripts/vendor_rk.py','--check']),
+            ('contract-tests',['pytest','-q','-rs','contract/tests','--require-vendor']),
+            ('full-tests',['pytest','-q','-rs']),
+            ('mypy',['mypy','src','contract','scripts']),
+            ('ruff',['ruff','check','.']),
+            ('lint-imports',['lint-imports']),
+            ('generated-check',['python','-B','-m','uarch_contract.generate','--check']),
+            ('prompt-sync',['pytest','-q','tests/unit/test_prompt_sync.py']),
+        ]
+        for label, cmd in commands:
+            run(label,['uv','run','--no-sync']+cmd,CLONE)
+        manifests = list((CLONE/'contract'/'vendor').glob('rk-sim@*/MANIFEST.json'))
+        run('manifest-sha256',['sha256sum']+[str(p.relative_to(CLONE)) for p in manifests],CLONE)
+        run('manifest-assert',['python3','-c',"import hashlib,pathlib; paths=list(pathlib.Path('contract/vendor').glob('rk-sim@*/MANIFEST.json')); assert len(paths)==1,paths; value=hashlib.sha256(paths[0].read_bytes()).hexdigest(); print(value); assert value=='b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d'"],CLONE)
+        run('final-commit',['git','rev-parse','HEAD'],CLONE)
+        run('final-status',['git','status','--porcelain=v1','--untracked-files=all'],CLONE)
+        run('final-diff',['git','diff','--exit-code','HEAD','--'],CLONE)
+        run('ci-runs',['gh','run','list','--repo','kakoee/rk-uarch','--commit','44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e','--limit','100','--json','databaseId,workflowName,status,conclusion,headSha,url,createdAt,updatedAt'],CLONE)
+    elif sys.argv[1] == 'ci':
+        run('ci-jobs',['gh','api','repos/kakoee/rk-uarch/actions/runs/37585143201/jobs?per_page=100'],CLONE)
+        run('ci-log',['gh','run','view','37585143201','--repo','kakoee/rk-uarch','--log'],CLONE)

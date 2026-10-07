@@ -4,6 +4,17 @@
 **Approver:** Javid (@jjaffari), already-authorized acting owner of both U1 lanes.
 No Reza approval is claimed.
 
+**Current status, 2026-10-07:** implementation published at
+`44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e`; publication and validation are complete.
+Same-commit hosted Ubuntu CI succeeded, and the fresh ElfinKidsLaptop Ubuntu/WSL2
+cold-clone check passed under Javid's U1-only [U0020 exception](../decisions/U0020-u1-cold-clone-validation-exception.md).
+The [closeout](U1-closeout.md) and [durable evidence](U1-cold-clone-evidence/README.md)
+record the exact results and CI conditional no-ops. Javid approved G1 and accepted the
+complete U1 closeout, including U0020, on 2026-10-07; see the
+[final authorization](U1-closeout.md#final-human-approval). Closeout commit, push and
+`u01-end` tagging remain separate pending steps. The original acceptance, adoption and
+integrated-tree evidence below is preserved as history.
+
 ## Authorization
 
 Javid explicitly instructed the coordinator in this session:
@@ -92,14 +103,16 @@ edits. All commands below ran from the coordinator root; none generated vendor a
 
 These are local integrated checks, not hosted CI or Linux-box cold-clone evidence.
 
-## Remaining gates
+## Publication, validation and remaining gates
 
-- Local publication commit: pending separate instruction; comprehensive message prepared.
-- Push and hosted CI: pending separate instruction and actual results.
-- Linux-box cold-clone validation of the committed revision: pending.
-- Sprint-end how-it-works refresh and closeout record: pending.
-- Final human G1/U1 decision and u01-end tag: pending.
+- Implementation publication: complete at `44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e`.
+- Push and [same-commit hosted CI](https://github.com/kakoee/rk-uarch/actions/runs/37585143201): complete; eight successful jobs, with conditional no-op coverage detailed in the closeout.
+- Fresh published-revision cold clone: complete, 379 contract / 385 full-suite / four prompt-sync checks and static/schema/strict vendor checks passed. This was ElfinKidsLaptop Ubuntu/WSL2, not a separate Linux machine; Javid's approved U1-only substitution is recorded in U0020.
+- Sprint-end how-it-works refresh and closeout record: accepted by Javid on 2026-10-07; documentation staged for a separate commit, with publication pending.
+- Final human G1 decision: APPROVED on 2026-10-07, including the complete U1 closeout and U0020.
+- Closeout push/CI and `u01-end` tag: separate pending steps.
 
 Both independent lane review verdicts are ACCEPTED. B-F16, A-F9 and embedding-accounting
 obligations remain assigned to U2 in [the kickoff record](U2-kickoff-obligations.md).
-Acceptance and adoption do not establish U2 workload parity or close G1/U1.
+Acceptance and adoption do not establish U2 workload parity. The subsequent final G1
+approval is recorded above; closeout publication and tagging remain pending.

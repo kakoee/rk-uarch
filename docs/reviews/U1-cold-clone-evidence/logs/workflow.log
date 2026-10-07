@@ -1,0 +1,110 @@
+UTC start: 2026-10-07T07:14:15.253028+00:00
+CWD: /tmp/u1-cold-clone-rwaqeoco/checkout
+$ cat .github/workflows/ci.yml
+name: ci
+on:
+  push: {branches: [main]}
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - name: lint
+        run: uv run ruff check .
+      - name: typecheck
+        run: uv run mypy src contract scripts
+      - name: imports
+        run: uv run lint-imports
+      - name: tests (fails on an empty suite, by design)
+        run: uv run pytest -q -m "not nightly and not silicon and not native and not golden and not determinism"
+
+  golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - run: |
+          if [ -n "$(find tests/golden/expected -name '*.json' -print -quit)" ]; then
+            uv run pytest -q -m golden
+          else echo "nothing yet: no expected files"; fi
+
+  determinism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - run: |
+          if [ -n "$(find tests/golden/scenarios -name '*.yaml' -print -quit)" ]; then
+            uv run pytest -q -m determinism
+          else echo "nothing yet: no golden scenarios"; fi
+
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - name: verify committed rk-sim snapshot (no upstream checkout or credentials)
+        run: uv run python scripts/vendor_rk.py --check
+      - name: contract and parity harness self-tests (not workload parity)
+        run: uv run python -m pytest -q -rs contract/tests --require-vendor
+      # Same read-only check as Lane A's test_schema_freshness / make gen-check.
+      - name: schema freshness (Lane A generator)
+        run: uv run python -m uarch_contract.generate --check
+
+  licences-and-patches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - name: licences
+        run: uv run python -m pytest -q tests/unit/test_third_party.py
+      - name: patches
+        run: |
+          if [ -n "$(find third_party/patches -name '*.patch' -print -quit)" ]; then
+            echo "patches exist but no apply check is wired yet; U-P5 adds it"; exit 1
+          else echo "nothing yet: no patches"; fi
+
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if [ -n "$(find native/crates -name '*.rs' -print -quit 2>/dev/null)" ]; then
+            cd native
+            cargo fmt --check
+            cargo clippy --all-targets -- -D warnings
+            cargo test
+            cargo install --locked cargo-deny && cargo deny check licenses
+          else echo "nothing yet: no native sources"; fi
+
+  perf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync --extra dev
+      - run: |
+          if [ -n "$(find validation/perf -name '*.json' -print -quit 2>/dev/null)" ]; then
+            uv run pytest -q validation/perf
+          else echo "nothing yet: no perf baselines"; fi
+
+  ordering:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - run: |
+          if [ -n "$(find validation/L3_silicon -path '*/predictions/*' -type f -print -quit)" ]; then
+            python3 validation/L3_silicon/check_ordering.py
+          else echo "nothing yet: no predictions"; fi
+
+Exit code: 0
+Elapsed seconds: 0.002
