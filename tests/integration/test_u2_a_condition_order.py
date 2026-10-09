@@ -1,0 +1,135 @@
+"""RR-C1: actual H1 hardware, small workload, explicitly synthetic review scaffolding."""
+
+import importlib
+import json
+from pathlib import Path
+
+import pytest
+import yaml
+from uarch_contract.hardware import HardwareSpec
+from uarch_contract.hashing import canonical_json, content_hash, spec_hash
+
+from rkuarch.table.artifacts import load_verified_report_inputs
+from rkuarch.table.build import CapturedWork, build_table, capture, write_table
+from rkuarch.workload.prepared import load_prepared_input, physical_assumptions
+from tests.integration.test_u2_a_replay import companions
+from tests.unit.test_u2_a_loader import reviewed
+from tests.unit.test_u2_a_shapes import inputs, prepare
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def mapping_order(value, order):
+    """Reorder dictionaries only; array and scalar meanings stay unchanged."""
+    if isinstance(value, dict):
+        keys = list(value)
+        keys = list(reversed(keys)) if order == "reversed" else keys[1:] + keys[:1]
+        return {k: mapping_order(value[k], order) for k in keys}
+    if isinstance(value, list):
+        return [mapping_order(v, order) for v in value]
+    return value
+
+
+def expected_conditions(raw, path=""):
+    """Independent JSON walk, not the production sourced_leaves collector."""
+    if isinstance(raw, dict):
+        if raw.get("kind") in ("claim", "stipulation"):
+            return {path: raw} if raw["kind"] == "stipulation" else {}
+        result = {}
+        for key, value in raw.items():
+            result.update(expected_conditions(value, f"{path}.{key}" if path else key))
+        return result
+    if isinstance(raw, list):
+        result = {}
+        for index, value in enumerate(raw):
+            result.update(expected_conditions(value, f"{path}[{index}]"))
+        return result
+    return {}
+
+
+@pytest.fixture
+def h1_capture():
+    hw = HardwareSpec.model_validate(yaml.safe_load((ROOT / "hw/designs/npu-l4.yaml").read_text()))
+    intent, _ = inputs()
+    intent = intent.model_copy(update={"hardware_spec_hash": spec_hash(hw)})
+    c = capture(prepare(intent, hw), assumptions=physical_assumptions())
+    context, card, store = companions(c)
+    # Match the real H1 spec with explicit TEST-ONLY registry/review scaffolding.
+    registry = dict(store[context.family_registry_hash])
+    registry["entries"] = [
+        dict(entry, hardware_spec_hash=spec_hash(hw)) for entry in registry["entries"]
+    ]
+    reviewed(registry, "registry_hash", store)
+    context = context.model_copy(update={"family_registry_hash": registry["registry_hash"]})
+    context = context.model_copy(
+        update={"context_hash": content_hash(context, exclude=("context_hash",))}
+    )
+    return c, context, card, store
+
+
+def test_conditions_preserve_exact_h1_membership_and_sourced_values(h1_capture):
+    c, ctx, card, store = h1_capture
+    table = build_table(c, context=ctx, model_card=card, artifacts=store).table
+    expected = expected_conditions(c.bundle.hardware_spec.model_dump(mode="json"))
+    actual = {v.path: v.value.model_dump(mode="json") for v in table.provenance.conditional_on}
+    assert len(expected) == len(table.provenance.conditional_on) == 59
+    assert (
+        actual == expected
+    )  # Includes units, rationale, nulls and every value, without duplicates.
+
+
+@pytest.mark.parametrize("order", ["canonical", "reversed", "rotated"])
+def test_h1_mapping_order_preserves_complete_table_and_saved_replay(
+    h1_capture, order, tmp_path, monkeypatch
+):
+    c, ctx, card, store = h1_capture
+    original = build_table(c, context=ctx, model_card=card, artifacts=store)
+    raw = c.bundle.model_dump(mode="json")
+    raw = json.loads(canonical_json(raw)) if order == "canonical" else mapping_order(raw, order)
+    saved = tmp_path / "prepared.json"
+    # Preserve the deliberately selected dictionary order on disk.
+    saved.write_text(json.dumps(raw))
+
+    def disabled(*args, **kwargs):
+        pytest.fail("preparation/analytic producer called during captured-result replay")
+
+    monkeypatch.setattr(importlib.import_module("rkuarch.workload.prepare"), "prepare", disabled)
+    monkeypatch.setattr(
+        importlib.import_module("rkuarch.engines.analytic.core"), "run_analytic", disabled
+    )
+    monkeypatch.setattr(importlib.import_module("rkuarch.table.build"), "capture", disabled)
+    bundle = load_prepared_input(saved)
+    assert bundle == c.bundle and bundle.bundle_hash == c.bundle.bundle_hash
+    assert spec_hash(bundle.hardware_spec) == spec_hash(c.bundle.hardware_spec)
+    assert set(bundle.hardware_spec.memory) == set(c.bundle.hardware_spec.memory)
+    replay = CapturedWork(bundle, c.assumptions, c.request, c.derivation, c.jobs, c.results)
+    rebuilt = build_table(replay, context=ctx, model_card=card, artifacts=store)
+    expected = expected_conditions(c.bundle.hardware_spec.model_dump(mode="json"))
+    for package in (original, rebuilt):
+        conditions = package.table.provenance.conditional_on
+        assert len(conditions) == len(expected)
+        assert {v.path: v.value.model_dump(mode="json") for v in conditions} == expected
+        assert package.table.table_hash == content_hash(package.table, exclude=("table_hash",))
+    assert original.table.rows == rebuilt.table.rows
+    assert canonical_json(original.table) == canonical_json(rebuilt.table)
+    assert original.table.provenance == rebuilt.table.provenance
+    assert original.table.table_hash == rebuilt.table.table_hash
+    assert original == rebuilt
+    assert [v.path for v in rebuilt.table.provenance.conditional_on] == sorted(expected)
+    # Public serialized package and offline loader, with producers still trapped.
+    paths = [tmp_path / name / "table.json" for name in ("yaml", "saved")]
+    for package, path in zip((original, rebuilt), paths, strict=True):
+        write_table(package, path)
+        verified = load_verified_report_inputs(path)
+        assert verified.table == package.table
+        assert verified.results == c.results
+    assert paths[0].read_bytes() == paths[1].read_bytes()
+    for left in paths[0].parent.rglob("*"):
+        if left.is_file():
+            assert (
+                left.read_bytes()
+                == (paths[1].parent / left.relative_to(paths[0].parent)).read_bytes()
+            )
+    assert {p.name for p in (paths[0].parent / "artifacts").iterdir()} == {
+        p.name for p in (paths[1].parent / "artifacts").iterdir()
+    }

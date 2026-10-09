@@ -1,0 +1,37 @@
+.FFF                                                                     [100%]
+=================================== FAILURES ===================================
+__ test_h1_mapping_order_preserves_complete_table_and_saved_replay[canonical] __
+tests/integration/test_u2_a_condition_order.py:110: in test_h1_mapping_order_preserves_complete_table_and_saved_replay
+    assert canonical_json(original.table) == canonical_json(rebuilt.table)
+E   assert '{"artifacts"...put: tdp_w"]}' == '{"artifacts"...put: tdp_w"]}'
+E     
+E     Skipping 16092 identical leading characters in diff, use -v to show
+E     Skipping 1104 identical trailing characters in diff, use -v to show
+E     - _per_byte.dram","value":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":20.0}},{"path":"energy.pj_per_byte.noc_hop","value":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM ene...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show
+__ test_h1_mapping_order_preserves_complete_table_and_saved_replay[reversed] ___
+tests/integration/test_u2_a_condition_order.py:110: in test_h1_mapping_order_preserves_complete_table_and_saved_replay
+    assert canonical_json(original.table) == canonical_json(rebuilt.table)
+E   assert '{"artifacts"...put: tdp_w"]}' == '{"artifacts"...put: tdp_w"]}'
+E     
+E     Skipping 16092 identical leading characters in diff, use -v to show
+E     Skipping 1104 identical trailing characters in diff, use -v to show
+E     - _per_byte.dram","value":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":20.0}},{"path":"energy.pj_per_byte.noc_hop","value":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM ene...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show
+___ test_h1_mapping_order_preserves_complete_table_and_saved_replay[rotated] ___
+tests/integration/test_u2_a_condition_order.py:110: in test_h1_mapping_order_preserves_complete_table_and_saved_replay
+    assert canonical_json(original.table) == canonical_json(rebuilt.table)
+E   assert '{"artifacts"...put: tdp_w"]}' == '{"artifacts"...put: tdp_w"]}'
+E     
+E     Skipping 16092 identical leading characters in diff, use -v to show
+E     Skipping 1104 identical trailing characters in diff, use -v to show
+E     - _per_byte.noc_hop","value":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":2.0}},{"path":"energy.pj_per_byte.dram","value":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM ener...
+E     
+E     ...Full output truncated (4 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED tests/integration/test_u2_a_condition_order.py::test_h1_mapping_order_preserves_complete_table_and_saved_replay[canonical]
+FAILED tests/integration/test_u2_a_condition_order.py::test_h1_mapping_order_preserves_complete_table_and_saved_replay[reversed]
+FAILED tests/integration/test_u2_a_condition_order.py::test_h1_mapping_order_preserves_complete_table_and_saved_replay[rotated]
+3 failed, 1 passed in 5.50s

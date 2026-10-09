@@ -310,7 +310,7 @@ def build_table(
             ),
             conditional_on=[
                 dict(path=p, value=v)
-                for p, v in sourced_leaves(b.hardware_spec)
+                for p, v in sorted(sourced_leaves(b.hardware_spec), key=lambda item: item[0])
                 if v.kind == "stipulation"
             ],
         ),

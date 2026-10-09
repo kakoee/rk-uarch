@@ -1,0 +1,105 @@
+{
+  "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u2-a",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": ".:contract:src",
+    "MYPY_CACHE_DIR": "/tmp/u2-a-rr-c1-mypy",
+    "XDG_CACHE_HOME": "/tmp/u2-a-rr-c1-cache",
+    "HYPOTHESIS_STORAGE_DIRECTORY": "/tmp/u2-a-rr-c1-hypothesis"
+  },
+  "source_hashes": {
+    "src/rkuarch/table/build.py": "c91880cb7ca8977e6ecf491109a8459394af39c6efab82714d34c8cdd895f9e6",
+    "tests/integration/test_u2_a_condition_order.py": "4dbefc4178ced5e7acdfab34d3302cf28f929c8cc804daa4e8b6b50c43f670f6"
+  },
+  "runs": [
+    {
+      "name": "focused",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--tb=short",
+        "tests/integration/test_u2_a_condition_order.py"
+      ],
+      "returncode": 0,
+      "seconds": 13.642506500007585,
+      "log": "focused.log"
+    },
+    {
+      "name": "affected-regression",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "--tb=short",
+        "tests/integration/test_u2_a_replay.py",
+        "tests/unit/test_u2_a_prepared.py",
+        "tests/unit/test_u2_a_loader.py",
+        "tests/unit/test_u2_a_artifacts.py",
+        "tests/unit/test_u2_a_resolution_session.py"
+      ],
+      "returncode": 0,
+      "seconds": 21.811649336013943,
+      "log": "affected-regression.log"
+    },
+    {
+      "name": "lint",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "src/rkuarch/table/build.py",
+        "tests/integration/test_u2_a_condition_order.py"
+      ],
+      "returncode": 0,
+      "seconds": 0.02553800609894097,
+      "log": "lint.log"
+    },
+    {
+      "name": "types",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "mypy",
+        "--no-incremental"
+      ],
+      "returncode": 0,
+      "seconds": 3.044157915050164,
+      "log": "types.log"
+    },
+    {
+      "name": "strict-support-expected-refusal",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u2-a/docs/reviews/U2-A-RR-C1/support_lifecycle.py"
+      ],
+      "returncode": 0,
+      "seconds": 0.23463965393602848,
+      "log": "strict-support-expected-refusal.log"
+    },
+    {
+      "name": "diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "returncode": 0,
+      "seconds": 0.0033811889588832855,
+      "log": "diff-check.log"
+    }
+  ]
+}
