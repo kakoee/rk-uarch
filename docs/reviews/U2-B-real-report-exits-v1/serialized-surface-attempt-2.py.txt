@@ -1,0 +1,60 @@
+"""Check serialized full ratio text independently of ReportOutput metric objects."""
+
+import html
+import json
+import re
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+
+
+def check_text(text, row, mode):
+    assert "STUB" in text and "error unknown" in text
+    visible = mode == "opt-in" and row["execution"] == "executed" and row["value"] is not None
+    if visible:
+        number = repr(0.0 if row["value"] == 0 else float(row["value"]))
+        assert text.startswith(number + " relative · STUB")
+    else:
+        assert text.startswith("magnitude hidden · STUB")
+    return visible
+
+
+def main():
+    out = Path(json.loads((HERE / "output-location.json").read_text())["root"])
+    # Independent expansion was checked against all complete/nonempty real assessments.
+    rows = json.loads((out / "report-hidden-coverage.json").read_text())
+    expected = {r["path"]: r for r in rows}
+    assert len(expected) == len(rows) == 40320
+    result = {}
+    for mode in ("hidden", "opt-in"):
+        texts = {}
+        raw = (out / "report" / (mode + ".html")).read_text()
+        texts["html"] = {
+            p: html.unescape(t)
+            for p, t in re.findall(r"<dt>(/comparisons/[^<]+)</dt><dd>(.*?)</dd>", raw)
+            if p in expected and "STUB" in t
+        }
+        del raw
+        raw = (out / "report" / (mode + ".md")).read_text()
+        texts["markdown"] = {
+            p.replace("\\_", "_"): t.replace("\\_", "_")
+            for p, t in re.findall(r"^\*\*(/comparisons/[^\n]+?)\*\*: ([^\n]*)$", raw, re.M)
+            if p.replace("\\_", "_") in expected and "STUB" in t
+        }
+        del raw
+        # Labels recur in the separate contributor section; compare metric STUB entries.
+        assert texts["html"] == texts["markdown"]
+        result[mode] = {}
+        for format_name, values in texts.items():
+            assert values.keys() == expected.keys()
+            visible = sum(check_text(t, expected[p], mode) for p, t in values.items())
+            assert visible == (18768 if mode == "opt-in" else 0)
+            result[mode][format_name] = dict(checked=len(values), visible=visible)
+    (HERE / "serialized-surface-results.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n"
+    )
+    print(json.dumps(result, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
