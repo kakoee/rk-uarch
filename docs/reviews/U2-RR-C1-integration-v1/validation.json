@@ -1,0 +1,32 @@
+{
+  "source_tree": "36f24dc4b0a1a27775f6a566fb913ed3d8cd177e",
+  "cwd": "/tmp/u2-rr-c1-source-w9shelhl",
+  "baseline": "7aab97d35ca554b0477ac5719dfa4e5306f8bbab",
+  "command": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-q",
+    "--tb=short"
+  ],
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": ".:contract:src",
+    "XDG_CACHE_HOME": "/tmp/u2-rr-c1-integration-cache"
+  },
+  "passed": 1017,
+  "failed": 2,
+  "skipped": 0,
+  "elapsed_s": 161.53,
+  "expected_failures": [
+    "contract/tests/test_committed_snapshot.py::test_current_snapshot_generator_compatibility",
+    "contract/tests/test_u2_historical_snapshot.py::test_current_canonical_is_exact_adopted_1008_four_real_refusals"
+  ],
+  "same_reason": "input support changed: src/rkuarch/table/build.py",
+  "lint": "passed",
+  "types": "62 source files passed",
+  "scope": "Full suite on exact clean source/test Git tree; only expected strict old-artifact/current-support refusals. Not a green final U2 exit. No repeated actual-table rebuild needed: identical source hash independently verified on prior coordinator and A real-context builds."
+}

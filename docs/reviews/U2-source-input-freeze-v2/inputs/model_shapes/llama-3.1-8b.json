@@ -1,0 +1,45 @@
+{
+  "id": "llama-3.1-8b",
+  "model": {
+    "active_params": 8030000000,
+    "d_model": 4096,
+    "experts_per_token": 0,
+    "kv_heads": 8,
+    "n_experts": 0,
+    "n_heads": 32,
+    "n_layers": 32,
+    "name": "llama-3.1-8b",
+    "total_params": 8030000000
+  },
+  "parameter_count_note": "Nominal architecture counts: 8.03B/70.6B dense and 46.7B total/12.9B active Mixtral. These rounded ModelSpec inputs must pass Lane A check_parity within 1%; no FLOP formula is inferred here. Norm/router details are below that tolerance.",
+  "shape": {
+    "attention": "gqa",
+    "d_ff": 14336,
+    "expert_d_ff": null,
+    "gated_mlp": true,
+    "tie_embeddings": false,
+    "vocab_size": 128256
+  },
+  "sources": [
+    {
+      "fields": [
+        "n_layers",
+        "d_model",
+        "n_heads",
+        "kv_heads",
+        "n_experts",
+        "experts_per_token",
+        "d_ff",
+        "gated_mlp",
+        "vocab_size",
+        "attention",
+        "tie_embeddings",
+        "expert_d_ff"
+      ],
+      "note": "Architecture dimensions from publisher config. NVIDIA publishes Llama quantized weights; only architecture is used, not quantization or performance. The requested precision is an oracle input.",
+      "revision": "42d9515ebd69eea3a87351d079c671c3c5ff0a31",
+      "sha256": "60c4b66789dfbb8a44e5fc7664b572250337bc2d372defce618c990c5b261d78",
+      "url": "https://huggingface.co/nvidia/Llama-3.1-8B-Instruct-FP8/raw/42d9515ebd69eea3a87351d079c671c3c5ff0a31/config.json"
+    }
+  ]
+}

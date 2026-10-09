@@ -1,0 +1,18 @@
+{
+  "baseline_export": "/tmp/u2-rr-c1-git-hnxxfvjy",
+  "patched_export": "/tmp/u2-rr-c1-patched-kfyy0zp8",
+  "python": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": ".:contract:src"
+  },
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "commands": [
+    "python -B /tmp/u2-rr-c1-coordinator/production_probe.py baseline",
+    "python -B /tmp/u2-rr-c1-coordinator/production_probe.py patched",
+    "python -B -m pytest -p no:cacheprovider -q /tmp/u2-rr-c1-coordinator/test_condition_order.py (both exports; initial and corrected harness logs retained)",
+    "python -B -m pytest -p no:cacheprovider -q tests/integration/test_u2_a_replay.py (patched export)",
+    "ruff check --no-cache src/rkuarch/table/build.py (patched export)"
+  ],
+  "full_report_outputs": "inspected and stream-compared in place; not copied"
+}

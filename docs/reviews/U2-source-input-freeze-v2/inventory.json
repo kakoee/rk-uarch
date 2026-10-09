@@ -1,0 +1,58 @@
+{
+  "id": "U2-source-input-freeze-v2",
+  "status": "proposed; acceptance recorded separately only after explicit approval",
+  "base_commit": "7aab97d35ca554b0477ac5719dfa4e5306f8bbab",
+  "source_tree": "36f24dc4b0a1a27775f6a566fb913ed3d8cd177e",
+  "input_manifest_sha256": "9a30b29029a32339dfc6062e138cebc23f7f1474044b414068dd9c8113c1dca0",
+  "previous_input_manifest_sha256": "81df43c063396c89bd3333f43957c71efc7087cfa65b2a401177f2227fca8898",
+  "previous_adopted_manifest_sha256": "2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44",
+  "pin": "1e5706e0ebfcc67c1a7333079a35b75f693e9963",
+  "rk_clone": "/home/jjaff/AI-infra-simulation/rk-sim-u1-pin",
+  "oracle_environment": "/tmp/rk-sim-u1-jjaffari-1e5706e",
+  "candidate": "docs/reviews/U2-real-generation-v2/candidate",
+  "review_files_sha256": {
+    "preflight.py": "0c3f42bfbc362aa441c45a0f3c31b073b6eb5ec8624d04c21ab99bf495d72b8d",
+    "human-generate.sh": "027321d00ef909777fd98bc3594ee0582a5846cdda30c189e9811e3e01cd52ff",
+    "source-tree.json": "9ed0ed91132aa098e7ef126171ac927396f07b421fc92c6b27cba5e90b050ef3",
+    "source-delta.patch": "053c7d7bef52abb0cc15f09f2207295ca80b6405c5bd6eb24711848618faadb7",
+    "input-delta.json": "cfb9d659db2287b5ef855b2b07855909bcdc85d05dc248a441807ab1a01154b5",
+    "oracle-environment-preflight.json": "79b8960ed02455756a4a539646c217cdcaf3918a0666decdd250928f404107d7"
+  },
+  "matrix": {
+    "asic_placeholder.yaml": [
+      {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      {
+        "compute": "fp16",
+        "kv_cache": "fp8"
+      }
+    ],
+    "nvidia_h100_sxm.yaml": [
+      {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      {
+        "compute": "fp16",
+        "kv_cache": "fp8"
+      },
+      {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      },
+      {
+        "compute": "fp8",
+        "kv_cache": "fp8"
+      }
+    ],
+    "npu-l4.yaml": [
+      {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      }
+    ]
+  },
+  "scope": "RR-C1 source/input freeze only; requires new human created/verified-identical pair. No candidate adoption, push, main/tag or closure authority."
+}

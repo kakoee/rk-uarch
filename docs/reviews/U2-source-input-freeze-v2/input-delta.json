@@ -1,0 +1,54 @@
+{
+  "input_manifest_sha256": "9a30b29029a32339dfc6062e138cebc23f7f1474044b414068dd9c8113c1dca0",
+  "previous_input_manifest_sha256": "81df43c063396c89bd3333f43957c71efc7087cfa65b2a401177f2227fca8898",
+  "files": 24,
+  "changed_input_files": [
+    "SHA256SUMS",
+    "support-files.json"
+  ],
+  "unchanged_input_files": 22,
+  "support_delta": {
+    "src/rkuarch/table/build.py": {
+      "before": "ece53ed1bcb1ca02fdcc450ff4b1ee99da321f699fadcb5b446ea07f17fe4acc",
+      "after": "c91880cb7ca8977e6ecf491109a8459394af39c6efab82714d34c8cdd895f9e6"
+    }
+  },
+  "support_files": 84,
+  "matrix": {
+    "asic_placeholder.yaml": [
+      {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      {
+        "compute": "fp16",
+        "kv_cache": "fp8"
+      }
+    ],
+    "nvidia_h100_sxm.yaml": [
+      {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      {
+        "compute": "fp16",
+        "kv_cache": "fp8"
+      },
+      {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      },
+      {
+        "compute": "fp8",
+        "kv_cache": "fp8"
+      }
+    ],
+    "npu-l4.yaml": [
+      {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      }
+    ]
+  },
+  "status": "prepared and strictly verified; no oracle call/generation/adoption"
+}

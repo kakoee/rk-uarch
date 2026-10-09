@@ -1,0 +1,41 @@
+........................................................................ [  7%]
+........................................................................ [ 14%]
+........................................................................ [ 21%]
+........................................................................ [ 28%]
+........................................................................ [ 35%]
+........................................................................ [ 42%]
+.........F.............................................................. [ 49%]
+........................F............................................... [ 56%]
+........................................................................ [ 63%]
+........................................................................ [ 70%]
+........................................................................ [ 77%]
+........................................................................ [ 84%]
+........................................................................ [ 91%]
+........................................................................ [ 98%]
+...........                                                              [100%]
+=================================== FAILURES ===================================
+________________ test_current_snapshot_generator_compatibility _________________
+contract/tests/test_committed_snapshot.py:25: in test_current_snapshot_generator_compatibility
+    check_generator(snapshot)
+scripts/vendor_rk.py:479: in check_generator
+    check_snapshot_inputs(root, check_support=True)
+scripts/vendor_rk.py:499: in check_snapshot_inputs
+    checked = load_inputs(
+scripts/u2_inputs.py:173: in load_inputs
+    raise ValueError("input support changed: " + name)
+E   ValueError: input support changed: src/rkuarch/table/build.py
+_______ test_current_canonical_is_exact_adopted_1008_four_real_refusals ________
+contract/tests/test_u2_historical_snapshot.py:63: in test_current_canonical_is_exact_adopted_1008_four_real_refusals
+    audit = u2_refresh.audit_candidate(root)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/u2_refresh.py:49: in audit_candidate
+    vr.check_snapshot_inputs(root, check_support=True)
+scripts/vendor_rk.py:499: in check_snapshot_inputs
+    checked = load_inputs(
+scripts/u2_inputs.py:173: in load_inputs
+    raise ValueError("input support changed: " + name)
+E   ValueError: input support changed: src/rkuarch/table/build.py
+=========================== short test summary info ============================
+FAILED contract/tests/test_committed_snapshot.py::test_current_snapshot_generator_compatibility
+FAILED contract/tests/test_u2_historical_snapshot.py::test_current_canonical_is_exact_adopted_1008_four_real_refusals
+2 failed, 1017 passed in 161.53s (0:02:41)

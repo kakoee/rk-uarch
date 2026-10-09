@@ -1,0 +1,282 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_real_h1_condition_order_does_not_change_table[canonical] _________
+
+order = 'canonical'
+
+    @pytest.mark.parametrize('order', ['canonical', 'reversed'])
+    def test_real_h1_condition_order_does_not_change_table(order):
+        hardware = HardwareSpec.model_validate(yaml.safe_load(Path('hw/designs/npu-l4.yaml').read_text()))
+        raw = hardware.model_dump(mode='json')
+        if order == 'canonical':
+            raw = json.loads(canonical_json(raw))
+        else:
+            def reverse(v):
+                if isinstance(v, dict):
+                    return {k: reverse(v[k]) for k in reversed(v)}
+                if isinstance(v, list):
+                    return [reverse(x) for x in v]
+                return v
+            raw = reverse(raw)
+        reordered = HardwareSpec.model_validate(raw)
+        assert hardware == reordered and spec_hash(hardware) == spec_hash(reordered)
+        intent, _ = inputs()
+        intent = intent.model_copy(update={'hardware_spec_hash': spec_hash(hardware)})
+        tables = []
+        for hw in (hardware, reordered):
+            captured = capture(prepare(intent, hw), assumptions=physical_assumptions())
+>           tables.append(package(captured).table)
+                          ^^^^^^^^^^^^^^^^^
+
+../u2-rr-c1-coordinator/test_condition_order.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_u2_a_replay.py:72: in package
+    return build_module().build_table(c, context=context, model_card=card, artifacts=store)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/rkuarch/table/build.py:332: in build_table
+    verified = verify_report_inputs(table, store)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/rkuarch/table/artifacts.py:383: in verify_report_inputs
+    return _load_verified(table, files, memory=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+table = UarchCostTable(artifacts=ArtifactBindings(comparison_hashes=(), derivation_hash='sha256:429ea7ce186a5dee620f98ef4e5ce8...model input: static_power_w', 'Unrepresented hardware/model input: sync', 'Unrepresented hardware/model input: tdp_w'))
+files = <rkuarch.table.artifacts.verify_report_inputs.<locals>.MemoryFiles object at 0x77b470c738f0>
+memory = True
+
+    def _load_verified(
+        table: UarchCostTable, files: _Files, *, memory: bool = False
+    ) -> VerifiedReportInputs:
+        files.loaded[table.table_hash] = table.model_dump(mode="json")
+        bundle = validate_execution_bundle(files[table.artifacts.prepared_bundle_hash])
+        files.loaded[bundle.intent.hardware_spec_hash] = bundle.hardware_spec.model_dump(mode="json")
+        request = CharacterizationRequest(
+            **bundle.intent.model_dump(mode="json"), prepared_input_hash=bundle.bundle_hash
+        )
+        # Request is reconstructed per accepted packaging. An explicit companion, if supplied,
+        # must still verify; it cannot override captured intent.
+        if (table.request_hash in files.loaded) if memory else files.path(table.request_hash).exists():
+            if files[table.request_hash] != request.model_dump(mode="json"):
+                raise ValueError("TableBindingMismatch: request companion")
+        files.loaded[table.request_hash] = request.model_dump(mode="json")
+        _complete_closure(table.table_hash, files)
+        table = validate_table_bindings(table, files)
+        hardware = bundle.hardware_spec
+        derivation = Derivation.model_validate(files[table.artifacts.derivation_hash])
+        if derivation != derive_rk_params(hardware) or table.provenance.params != tuple(
+            Parameter(name=p.name, value=p.value) for p in derivation.parameters
+        ):
+            raise ValueError("ParamsMismatch: table/source derivation")
+        conditions = {p: v for p, v in sourced_leaves(hardware) if v.kind == "stipulation"}
+        actual_conditions = {c.path: c.value for c in table.provenance.conditional_on}
+        if (
+            len(actual_conditions) != len(table.provenance.conditional_on)
+            or actual_conditions != conditions
+        ):
+            raise ValueError("ConditionMismatch: exact all-spec stipulations")
+        card = ModelCard.model_validate(files[table.artifacts.model_card_hash])
+        summary = table.provenance.model_card.model_dump(mode="json")
+        expected_summary = card.model_dump(mode="json", exclude={"model_id", "verification"})
+        if summary != dict(expected_summary, hash=content_hash(card)):
+            raise ValueError("ModelCardMismatch: embedded summary")
+        assumptions = AssumptionSet.model_validate(files[request.assumptions_hash])
+        if assumptions.algorithms != ALGORITHMS:
+            raise ValueError("AssumptionMismatch: captured resolved-ops/1 algorithms")
+        jobs, results = [], []
+        for row in table.rows:
+            result = EngineResult.model_validate(files[row.result_hash])
+            job = validate_engine_job(files[result.job_hash], bundle, request)
+            validate_engine_result(result, job)
+            if job.hardware != resolve_hardware(
+                hardware, request.precision, frequency_ratio=job.point.frequency_ratio
+            ):
+                raise ValueError("EngineJobMismatch: sourced hardware projection")
+            if (
+                job.engine.model != assumptions.model
+                or card.model_id.engine != job.engine.name
+                or card.model_id.engine_version != job.engine.version
+                or card.model_id.fidelity_detail != job.fidelity_detail
+                or card.model_id.mapping_policy != request.mapping_policy
+            ):
+                raise ValueError("ModelCardMismatch: job/request/model identity")
+            if row.diagnostics != result.diagnostics or any(
+                v is not None for v in row.peak_resident_bytes.values()
+            ):
+                raise ValueError("TableBindingMismatch: diagnostics/partial peak residency")
+            jobs.append(job)
+            results.append(result)
+        if request.model.n_experts and MOE_OMISSION not in table.warnings:
+            raise ValueError("InvalidPreparedGraph: table MOE_OMISSION")
+        context = validate_report_context(files[table.artifacts.report_context_hash], files)
+        if (
+            context.request_hash != table.request_hash
+            or context.assumptions_hash != request.assumptions_hash
+            or context.model_identity != assumptions.model
+            or context.comparison_hashes != table.artifacts.comparison_hashes
+        ):
+            raise ValueError("ReportContextMismatch: request/assumptions/model/comparisons")
+        for identity in card.verification.model_dump().values():
+            if identity is not None:
+                verify_declared_artifact_closure(identity, files)
+                VerificationRecord.model_validate(files[identity])
+                if identity not in context.verification_hashes:
+                    raise ValueError("ModelCardMismatch: verification index")
+        if card.energy_verification is not None:
+            for family_records in card.energy_verification.model_dump().values():
+                for identity in family_records.values():
+                    if identity is not None:
+                        verify_declared_artifact_closure(identity, files)
+        if any(e not in context.evidence_index for e in card.evidence):
+            raise ValueError("ModelCardMismatch: evidence index")
+        for eid, identity in context.evidence_index.items():
+            if EvidenceRecord.model_validate(files[identity]).evidence_id != eid:
+                raise ValueError("ReportContextMismatch: evidence ID")
+        registry = FamilyRegistry.model_validate(files[context.family_registry_hash])
+        if sum(e.hardware_spec_hash == table.hardware_spec_hash for e in registry.entries) != 1:
+>           raise ValueError("AmbiguousFamily: current hardware")
+E           ValueError: AmbiguousFamily: current hardware
+
+src/rkuarch/table/artifacts.py:475: ValueError
+_________ test_real_h1_condition_order_does_not_change_table[reversed] _________
+
+order = 'reversed'
+
+    @pytest.mark.parametrize('order', ['canonical', 'reversed'])
+    def test_real_h1_condition_order_does_not_change_table(order):
+        hardware = HardwareSpec.model_validate(yaml.safe_load(Path('hw/designs/npu-l4.yaml').read_text()))
+        raw = hardware.model_dump(mode='json')
+        if order == 'canonical':
+            raw = json.loads(canonical_json(raw))
+        else:
+            def reverse(v):
+                if isinstance(v, dict):
+                    return {k: reverse(v[k]) for k in reversed(v)}
+                if isinstance(v, list):
+                    return [reverse(x) for x in v]
+                return v
+            raw = reverse(raw)
+        reordered = HardwareSpec.model_validate(raw)
+        assert hardware == reordered and spec_hash(hardware) == spec_hash(reordered)
+        intent, _ = inputs()
+        intent = intent.model_copy(update={'hardware_spec_hash': spec_hash(hardware)})
+        tables = []
+        for hw in (hardware, reordered):
+            captured = capture(prepare(intent, hw), assumptions=physical_assumptions())
+>           tables.append(package(captured).table)
+                          ^^^^^^^^^^^^^^^^^
+
+../u2-rr-c1-coordinator/test_condition_order.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_u2_a_replay.py:72: in package
+    return build_module().build_table(c, context=context, model_card=card, artifacts=store)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/rkuarch/table/build.py:332: in build_table
+    verified = verify_report_inputs(table, store)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/rkuarch/table/artifacts.py:383: in verify_report_inputs
+    return _load_verified(table, files, memory=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+table = UarchCostTable(artifacts=ArtifactBindings(comparison_hashes=(), derivation_hash='sha256:429ea7ce186a5dee620f98ef4e5ce8...model input: static_power_w', 'Unrepresented hardware/model input: sync', 'Unrepresented hardware/model input: tdp_w'))
+files = <rkuarch.table.artifacts.verify_report_inputs.<locals>.MemoryFiles object at 0x77b470cb6f30>
+memory = True
+
+    def _load_verified(
+        table: UarchCostTable, files: _Files, *, memory: bool = False
+    ) -> VerifiedReportInputs:
+        files.loaded[table.table_hash] = table.model_dump(mode="json")
+        bundle = validate_execution_bundle(files[table.artifacts.prepared_bundle_hash])
+        files.loaded[bundle.intent.hardware_spec_hash] = bundle.hardware_spec.model_dump(mode="json")
+        request = CharacterizationRequest(
+            **bundle.intent.model_dump(mode="json"), prepared_input_hash=bundle.bundle_hash
+        )
+        # Request is reconstructed per accepted packaging. An explicit companion, if supplied,
+        # must still verify; it cannot override captured intent.
+        if (table.request_hash in files.loaded) if memory else files.path(table.request_hash).exists():
+            if files[table.request_hash] != request.model_dump(mode="json"):
+                raise ValueError("TableBindingMismatch: request companion")
+        files.loaded[table.request_hash] = request.model_dump(mode="json")
+        _complete_closure(table.table_hash, files)
+        table = validate_table_bindings(table, files)
+        hardware = bundle.hardware_spec
+        derivation = Derivation.model_validate(files[table.artifacts.derivation_hash])
+        if derivation != derive_rk_params(hardware) or table.provenance.params != tuple(
+            Parameter(name=p.name, value=p.value) for p in derivation.parameters
+        ):
+            raise ValueError("ParamsMismatch: table/source derivation")
+        conditions = {p: v for p, v in sourced_leaves(hardware) if v.kind == "stipulation"}
+        actual_conditions = {c.path: c.value for c in table.provenance.conditional_on}
+        if (
+            len(actual_conditions) != len(table.provenance.conditional_on)
+            or actual_conditions != conditions
+        ):
+            raise ValueError("ConditionMismatch: exact all-spec stipulations")
+        card = ModelCard.model_validate(files[table.artifacts.model_card_hash])
+        summary = table.provenance.model_card.model_dump(mode="json")
+        expected_summary = card.model_dump(mode="json", exclude={"model_id", "verification"})
+        if summary != dict(expected_summary, hash=content_hash(card)):
+            raise ValueError("ModelCardMismatch: embedded summary")
+        assumptions = AssumptionSet.model_validate(files[request.assumptions_hash])
+        if assumptions.algorithms != ALGORITHMS:
+            raise ValueError("AssumptionMismatch: captured resolved-ops/1 algorithms")
+        jobs, results = [], []
+        for row in table.rows:
+            result = EngineResult.model_validate(files[row.result_hash])
+            job = validate_engine_job(files[result.job_hash], bundle, request)
+            validate_engine_result(result, job)
+            if job.hardware != resolve_hardware(
+                hardware, request.precision, frequency_ratio=job.point.frequency_ratio
+            ):
+                raise ValueError("EngineJobMismatch: sourced hardware projection")
+            if (
+                job.engine.model != assumptions.model
+                or card.model_id.engine != job.engine.name
+                or card.model_id.engine_version != job.engine.version
+                or card.model_id.fidelity_detail != job.fidelity_detail
+                or card.model_id.mapping_policy != request.mapping_policy
+            ):
+                raise ValueError("ModelCardMismatch: job/request/model identity")
+            if row.diagnostics != result.diagnostics or any(
+                v is not None for v in row.peak_resident_bytes.values()
+            ):
+                raise ValueError("TableBindingMismatch: diagnostics/partial peak residency")
+            jobs.append(job)
+            results.append(result)
+        if request.model.n_experts and MOE_OMISSION not in table.warnings:
+            raise ValueError("InvalidPreparedGraph: table MOE_OMISSION")
+        context = validate_report_context(files[table.artifacts.report_context_hash], files)
+        if (
+            context.request_hash != table.request_hash
+            or context.assumptions_hash != request.assumptions_hash
+            or context.model_identity != assumptions.model
+            or context.comparison_hashes != table.artifacts.comparison_hashes
+        ):
+            raise ValueError("ReportContextMismatch: request/assumptions/model/comparisons")
+        for identity in card.verification.model_dump().values():
+            if identity is not None:
+                verify_declared_artifact_closure(identity, files)
+                VerificationRecord.model_validate(files[identity])
+                if identity not in context.verification_hashes:
+                    raise ValueError("ModelCardMismatch: verification index")
+        if card.energy_verification is not None:
+            for family_records in card.energy_verification.model_dump().values():
+                for identity in family_records.values():
+                    if identity is not None:
+                        verify_declared_artifact_closure(identity, files)
+        if any(e not in context.evidence_index for e in card.evidence):
+            raise ValueError("ModelCardMismatch: evidence index")
+        for eid, identity in context.evidence_index.items():
+            if EvidenceRecord.model_validate(files[identity]).evidence_id != eid:
+                raise ValueError("ReportContextMismatch: evidence ID")
+        registry = FamilyRegistry.model_validate(files[context.family_registry_hash])
+        if sum(e.hardware_spec_hash == table.hardware_spec_hash for e in registry.entries) != 1:
+>           raise ValueError("AmbiguousFamily: current hardware")
+E           ValueError: AmbiguousFamily: current hardware
+
+src/rkuarch/table/artifacts.py:475: ValueError
+=========================== short test summary info ============================
+FAILED ../u2-rr-c1-coordinator/test_condition_order.py::test_real_h1_condition_order_does_not_change_table[canonical]
+FAILED ../u2-rr-c1-coordinator/test_condition_order.py::test_real_h1_condition_order_does_not_change_table[reversed]
+2 failed in 1.67s

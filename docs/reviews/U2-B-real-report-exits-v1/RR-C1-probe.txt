@@ -1,0 +1,32 @@
+{
+  "finding": "RR-C1",
+  "status": "reproduced; source proposal unapplied",
+  "cause": "build_table preserves sourced_leaves dictionary insertion order in conditional_on array; canonical saved JSON changes mapping order while preserving input identity",
+  "received_table_hash": "sha256:e42bd0dbe02b323f28384cf52a25fc96d5892ab9011ed705eb6c8210575668f4",
+  "replayed_table_hash": "sha256:6af7d7c3117d4c46c6718cf48d4362fd5e2043fb191742a6769fad7ae1fcb245",
+  "hardware_spec_hash": "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9",
+  "prepared_bundle_hash": "sha256:e5d723f88dc8b3883c24de611ea3043d3943c45d43cb3e11c2f7048424d20709",
+  "same_hardware_and_condition_mapping": true,
+  "condition_count": 59,
+  "order_changes": [
+    {
+      "index": 53,
+      "before": "energy.pj_per_byte.sram",
+      "after": "energy.pj_per_byte.dram"
+    },
+    {
+      "index": 55,
+      "before": "energy.pj_per_byte.dram",
+      "after": "energy.pj_per_byte.sram"
+    }
+  ],
+  "all_other_table_content_equal": true,
+  "proposed_sorted_table_hash": "sha256:200ca0f703feb341e3871ad3a1f897ac45cb1e42f270d10384ea31cdcafbd554",
+  "proposed_sort_two_representation_control": true,
+  "path": "src/rkuarch/table/build.py",
+  "old_sha256": "ece53ed1bcb1ca02fdcc450ff4b1ee99da321f699fadcb5b446ea07f17fe4acc",
+  "proposed_sha256": "c91880cb7ca8977e6ecf491109a8459394af39c6efab82714d34c8cdd895f9e6",
+  "generator_bound_support_member": true,
+  "lifecycle": "Changes support84: strict old-support input verification would reject. Requires A/coordinator-reviewed correction and explicit source/input/artifact lifecycle decision before applying; no source edit, generation or adoption performed.",
+  "required_regression": "Build complete tables from actual H1 YAML-order capture and canonical serialized/imported capture, require equal table, provenance, hashes and bytes; repeat report modes, RenderSpecs and producer-disabled replay on the selected reviewed inputs."
+}

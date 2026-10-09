@@ -1,0 +1,134 @@
+# NVIDIA H100 SXM. Every value below is ADR 0006 §1.1, transcribed — not re-derived, not
+# searched for. If a number here disagrees with the datasheet, the datasheet wins and the
+# ADR gets an addendum; do NOT adjust this file to match the ADR (ADR 0006 §6).
+#
+# Source document: NVIDIA H100 Tensor Core GPU Datasheet, H100 SXM column, Jan-2023
+# revision (document id 2287922). Canonical URL in every `source` below; ADR 0006 §1.1
+# records the mirror it was actually read from.
+id: compute.nvidia.h100_sxm
+kind: compute_resource
+role: accelerator
+params:
+  # DENSE fp16, and the derivation matters more than the number. The datasheet's
+  # "FP16 Tensor Core" row reads 1,979 TFLOPS* with the footnote "Shown with sparsity.
+  # Specifications one-half lower without sparsity" — so dense is 1,979 / 2 = 989.5.
+  #
+  # DO NOT copy the datasheet cell that literally reads 989: that one is TF32-with-
+  # sparsity, a different number that happens to collide, and anyone "checking the
+  # datasheet" lands on it. Sparsity is not modelled (build-spec §1.3), so feeding 1,979
+  # in would silently double the compute roof and halve every compute-bound answer.
+  # ADR 0006 §2.
+  fp16_tflops:
+    {value: 989.5, unit: TFLOPS, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # ------------------------------------------------------------------------------------
+  # THE OTHER PRECISIONS THE SAME PAGE PRINTS. ADR 0015 section 2 and its section 7
+  # addendum; P3b task 3. Transcribed from the SAME document and the SAME "H100 SXM"
+  # column as `fp16_tflops` above -- this is reading more of a page ADR 0006 section 1.1
+  # already opened, not new sourcing. The per-row record is ADR 0006 section 7.
+  #
+  # THE SPARSITY RULE IS PER ROW-CLASS ON THIS SHEET, AND THE BLANKET VERSION IS WRONG:
+  #
+  #   STARRED rows (TF32 / BFLOAT16 / FP16 / FP8 / INT8 Tensor Core) print ONLY the
+  #   with-sparsity figure, under the footnote "Shown with sparsity. Specifications 1/2
+  #   lower without sparsity." DENSE IS THE PRINTED FIGURE HALVED.
+  #
+  #   UNSTARRED rows (FP64, FP64 Tensor Core, FP32) are CUDA-core figures with no sparsity
+  #   variant. THEY ARE ALREADY DENSE -- DO NOT HALVE THEM. Halving FP32 would write 33.5
+  #   where the sheet says 67.
+  #
+  # Self-check, needing no external number: every starred value below is exactly half its
+  # printed cell, and the one unstarred value equals its printed cell. If one of yours
+  # does not, you read the wrong row.
+  #
+  # AND READ THE ROW LABEL, NEVER THE NUMBER. `989` printed on the TF32 row is
+  # TF32-WITH-SPARSITY; dense FP16 is 989.5 and dense TF32 is 494.5. The two collide within
+  # half a unit, so landing on the wrong row confirms the right number for the wrong reason
+  # (ADR 0006 section 2). ADR 0015 section 7.7 records an outside inference calculator that
+  # published all five of this sheet's Tensor-Core peaks at exactly 2x dense, each labelled
+  # "(dense)" in its own provenance table, while getting the A100 entirely right -- it got
+  # right the sheet that prints both cells and wrong by 2x the sheet that prints only one.
+  # ------------------------------------------------------------------------------------
+  # Datasheet row: "FP32" = `67 TFLOPS`. UNSTARRED, CUDA core, already dense, taken as
+  # printed -- `spec_derived` in the plain read-it-off-the-page sense.
+  fp32_tflops:
+    {value: 67, unit: TFLOPS, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # Datasheet row: "TF32 Tensor Core" = `989 TFLOPS*`. STARRED, so dense = 989 / 2 = 494.5.
+  # NOT 989 -- that cell is the with-sparsity figure and is the collision named above.
+  #
+  # TF32 IS 4 BYTES PER ELEMENT despite the name. It is a 19-bit format (1 sign + 8
+  # exponent + 10 mantissa) held in a 32-bit slot: the saving is in the multiplier array,
+  # not in memory. rk/engine/f0/compute.py's BYTES_PER_ELEMENT says the same.
+  tf32_tflops:
+    {value: 494.5, unit: TFLOPS, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # Datasheet row: "BFLOAT16 Tensor Core" = `1,979 TFLOPS*`. STARRED, dense = 989.5.
+  # Identical to FP16 on this part, which is a fact about Hopper and not a copy-paste.
+  bf16_tflops:
+    {value: 989.5, unit: TFLOPS, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # Datasheet row: "FP8 Tensor Core" = `3,958 TFLOPS*`. STARRED, dense = 1,979. Hopper
+  # introduced FP8; the A100 entry beside this one has no such row and refuses fp8 by name.
+  fp8_tflops:
+    {value: 1979, unit: TFLOPS, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # Datasheet row: "INT8 Tensor Core" = `3,958 TOPS*`. STARRED, dense = 1,979. TOPS, not
+  # TFLOPS, and the unit gate refuses the other (CLAUDE.md invariant 7).
+  int8_tops:
+    {value: 1979, unit: TOPS, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # NO fp4_tflops AND NO int4_tops, and their absence is a claim rather than a gap: this
+  # datasheet prints no FP4 or INT4 row at all. A plan asking for either is refused by name
+  # (ADR 0015 section 2), which is the honest answer and better than a stubbed 0.0 that
+  # would let the run produce a number. If a row is not on the page it is not searched for.
+  #
+  # FP64 (`34 TFLOPS`) and FP64 Tensor Core (`67 TFLOPS`) ARE printed here and are
+  # deliberately NOT carried: `PrecisionFormat` has no FP64 member, so the value would be
+  # loaded, unit-checked and then unreachable by any plan -- a dead number in a library
+  # whose whole point is that numbers are accountable. Decided 2026-09-13, ADR 0015
+  # section 7.6 item 2. Adding it is a schema PR, not an edit to this file.
+  # Datasheet row: "GPU memory bandwidth". Decimal TB/s, as the datasheet quotes it.
+  hbm_bw:
+    {value: 3.35, unit: TB/s, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # Datasheet row: "GPU memory". 8 x 80 GB = the 640 GB the DGX H100 page quotes, which is
+  # the consistency check ADR 0006 §1.3 ran and passed.
+  hbm_capacity:
+    {value: 80, unit: GB, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # Datasheet row: "Max thermal design power (TDP)", printed as "Up to 700W" — a CEILING,
+  # not an operating point. The trivial sum-of-TDP power model therefore computes an UPPER
+  # BOUND, and rk/engine/f0/power.py badges its output no better than ESTIMATED for
+  # exactly this reason. Same class of honesty as the tp>1 warning. ADR 0006 §1.1.
+  tdp:
+    {value: 700, unit: W, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # Datasheet row: "Interconnect". Declared only — nothing reads it until N0 links land in
+  # P3. It is here because the number was sourced when the rest were (ADR 0006 §1.1).
+  nvlink_bw:
+    {value: 900, unit: GB/s, provenance: spec_derived,
+     source: "https://resources.nvidia.com/en-us-gpu-resources/h100-datasheet-24306", date: "2023-01"}
+  # TODO(P3): STUB. Cloud on-demand pricing moves weekly and varies by provider, region
+  # and commitment, so any single number is stale on arrival (ADR 0006 §3). 0.0 is a
+  # placeholder, not a price — usd_per_mtok comes back 0.0 and STUB-badged because of it.
+  # Retired by a dated price quote, or by S6's TCO assumptions drawer.
+  usd_per_hr:
+    {value: 0.0, unit: USD/hr, provenance: stub, source: null, date: null}
+execution_model:
+  kind: scalar_efficiency
+  # TODO(P3): STUB, and this is the load-bearing one. Realized-vs-peak is a property of
+  # the software stack, not of silicon: no datasheet states it. build-spec §2.3.1's
+  # example uses 0.55 citing "InferenceMAX realized-vs-peak gap", and ADR 0006 §3 could
+  # not tie that to a specific published figure anyone had read — so 0.55 is carried here
+  # as a PLACEHOLDER, not a claim, and the badge says so.
+  #
+  # The consequence is visible and should not be softened: kernel_efficiency contributes
+  # to the roofline, badges propagate worst-of-contributors, and STUB is the worst badge,
+  # so the demo's throughput and everything derived from it come back STUB. Four grey
+  # chips is the correct rendering of what we currently know (ADR 0006 §3).
+  #
+  # Retired by P3's GenZ oracle cross-check, or by S7's own measurements.
+  value:
+    {value: 0.55, unit: ratio, provenance: stub, source: null, date: null}
+fidelity_available: [C0]

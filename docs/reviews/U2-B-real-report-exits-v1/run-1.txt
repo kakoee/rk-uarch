@@ -1,0 +1,29 @@
+public_adopted_consume_received_physical_replay started
+public_adopted_consume_received_physical_replay 9.264531605876982
+save_adopted_comparisons started
+save_adopted_comparisons 0.820562164997682
+received_comparison_bytes started
+received_comparison_bytes 0.7473221269901842
+package_saved_results_all_producers_trapped started
+package_saved_results_all_producers_trapped 91.2261684590485
+public_write_table started
+public_write_table 77.39750773715787
+received_full_package_bytes started
+Traceback (most recent call last):
+  File "/home/jjaff/AI-infra-simulation/rk-uarch-u2-b/docs/reviews/U2-B-real-report-exits-v1/real_report_driver.py", line 526, in <module>
+    main()
+  File "/home/jjaff/AI-infra-simulation/rk-uarch-u2-b/docs/reviews/U2-B-real-report-exits-v1/real_report_driver.py", line 384, in main
+    phase(
+  File "/home/jjaff/AI-infra-simulation/rk-uarch-u2-b/docs/reviews/U2-B-real-report-exits-v1/real_report_driver.py", line 292, in phase
+    result = fn()
+             ^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch-u2-b/docs/reviews/U2-B-real-report-exits-v1/real_report_driver.py", line 386, in <lambda>
+    lambda: compare_files(RECEIVED, out / "report", package_names),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch-u2-b/docs/reviews/U2-B-real-report-exits-v1/real_report_driver.py", line 67, in compare_files
+    n: {"bytes": equal(left / n, right / n), "sha256": sha(left / n)} for n in sorted(names)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch-u2-b/docs/reviews/U2-B-real-report-exits-v1/real_report_driver.py", line 59, in equal
+    assert x == y, (str(left), str(right), total)
+           ^^^^^^
+AssertionError: ('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/U2-adoption-v1-execution/runtime/table.json', '/tmp/u2-b-real-report-exits-v1-xn5pjr8z/outputs/report/table.json', 0)
