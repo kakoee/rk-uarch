@@ -1,0 +1,57 @@
+{
+  "$id": "urn:u2-proof-proposal:envelope:2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "classification": {
+      "enum": [
+        "synthetic_fixture",
+        "real"
+      ]
+    },
+    "format": {
+      "const": "u2-proof-bundle/2"
+    },
+    "kind": {
+      "enum": [
+        "measurement",
+        "verification",
+        "capture_support"
+      ]
+    },
+    "members": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "base64": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "pattern": "^[a-z0-9][a-z0-9./-]*$",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "sha256",
+          "base64"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "format",
+    "classification",
+    "kind",
+    "members"
+  ],
+  "type": "object"
+}

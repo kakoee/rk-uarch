@@ -1,0 +1,164 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "kv_read_bytes_per_layer": 8704,
+        "matrix_ops_per_layer": 17408,
+        "parity_candidate_calls": 0,
+        "parity_status": "unsupported_projection",
+        "runtime_supported": true,
+        "vector_ops_per_layer": 170
+      },
+      "id": "replicated-kv-valid-runtime",
+      "model_kv_heads": 8,
+      "model_n_heads": 32,
+      "op": {
+        "depends_on": [
+          "q",
+          "k",
+          "v",
+          "kv"
+        ],
+        "embedding_local_tokens": null,
+        "fusion": "qk_softmax_av",
+        "id": "attn",
+        "kv_access": {
+          "block_size_tokens": 16,
+          "context_tokens": 17,
+          "last_page_valid_tokens": 1,
+          "pages_per_sequence": 2,
+          "read_policy": "valid_tokens",
+          "write_policy": "append_valid_tokens"
+        },
+        "operand_access": {
+          "K": "read",
+          "O": "write",
+          "Q": "read",
+          "V": "read"
+        },
+        "padding": [],
+        "replication": [
+          {
+            "dimension": "Hkv",
+            "global_extent": 8,
+            "rank_extent": 1,
+            "replicas": 2
+          }
+        ],
+        "spec": {
+          "dimensions": {
+            "B": 1,
+            "D": 128,
+            "Hkv": 1,
+            "Hq": 2,
+            "S": 1,
+            "T": 17
+          },
+          "operands": {
+            "K": {
+              "block_size_tokens": 16,
+              "dimensions": [
+                "B",
+                "Hkv",
+                "T",
+                "D"
+              ],
+              "dtype": "bf16",
+              "layout": "paged"
+            },
+            "O": {
+              "block_size_tokens": null,
+              "dimensions": [
+                "B",
+                "Hq",
+                "S",
+                "D"
+              ],
+              "dtype": "bf16",
+              "layout": "contiguous"
+            },
+            "Q": {
+              "block_size_tokens": null,
+              "dimensions": [
+                "B",
+                "Hq",
+                "S",
+                "D"
+              ],
+              "dtype": "bf16",
+              "layout": "contiguous"
+            },
+            "V": {
+              "block_size_tokens": 16,
+              "dimensions": [
+                "B",
+                "Hkv",
+                "T",
+                "D"
+              ],
+              "dtype": "bf16",
+              "layout": "paged"
+            }
+          },
+          "operator": "attention_fused",
+          "reduction_axes": [
+            "T",
+            "D"
+          ]
+        },
+        "weight_copies": 1,
+        "work_repeat": 1
+      },
+      "tp": 16
+    },
+    {
+      "expected": {
+        "matrix_ops": 40,
+        "parity_candidate_calls": 0,
+        "parity_status": "unsupported_projection",
+        "runtime_supported": true
+      },
+      "id": "padded-vocabulary-valid-runtime",
+      "lm_head": {
+        "K": 4,
+        "M": 1,
+        "N": 5
+      },
+      "masked_global_slots": 1,
+      "model_vocab_size": 9,
+      "note": "Representative rank 0 has five valid/physical slots; global V9 is padded to ten slots over tp2. Final rank has one masked slot but performs the same physical GEMM. No hidden uniform-/tp parity projection.",
+      "padding": [
+        {
+          "dimension": "N",
+          "logical": 5,
+          "physical": 5
+        }
+      ],
+      "physical_vocab_per_rank": 5,
+      "tp": 2
+    },
+    {
+      "d_ff": 14336,
+      "d_model": 4096,
+      "expected": {
+        "active_ffn_matrix_ops_per_token": 22548578304,
+        "required_warning": "MoE routing, imbalance and all-to-all are unmodelled.",
+        "resident_expert_weight_elements": 45097156608
+      },
+      "expert_d_ff": 14336,
+      "experts_per_token": 2,
+      "id": "mixtral-once",
+      "n_experts": 8,
+      "n_layers": 32
+    },
+    {
+      "expected_decoder_template_invocations": 3,
+      "expected_head_invocations": 1,
+      "expected_lm_head_invocations": 1,
+      "id": "no-head-tail-layer-multiply",
+      "n_layers_after": 3,
+      "n_layers_before": 2
+    }
+  ],
+  "classification": "independent operator fragments with explicit surrounding rank/model constraints; not complete bundle imports"
+}

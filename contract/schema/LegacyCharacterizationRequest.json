@@ -1,0 +1,547 @@
+{
+  "$defs": {
+    "DecodeEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_max": {
+          "minimum": 1,
+          "title": "Batch Max",
+          "type": "integer"
+        },
+        "context_per_seq_max": {
+          "minimum": 1,
+          "title": "Context Per Seq Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "batch_max",
+        "context_per_seq_max"
+      ],
+      "title": "DecodeEnvelope",
+      "type": "object"
+    },
+    "DecodeGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Batch",
+          "type": "array"
+        },
+        "context_per_seq": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Context Per Seq",
+          "type": "array"
+        }
+      },
+      "required": [
+        "batch",
+        "context_per_seq"
+      ],
+      "title": "DecodeGrid",
+      "type": "object"
+    },
+    "DecodeVisitWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        },
+        "weight_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "batch",
+        "total_context_tokens",
+        "weight_ratio"
+      ],
+      "title": "DecodeVisitWeight",
+      "type": "object"
+    },
+    "Envelope": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/DecodeEnvelope"
+        },
+        "prefill": {
+          "$ref": "#/$defs/PrefillEnvelope"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill"
+      ],
+      "title": "Envelope",
+      "type": "object"
+    },
+    "FidelityDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "title": "Compute",
+          "type": "integer"
+        },
+        "dram": {
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            2
+          ],
+          "title": "Dram"
+        },
+        "layer_reuse": {
+          "title": "Layer Reuse",
+          "type": "boolean"
+        },
+        "noc": {
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            2
+          ],
+          "title": "Noc"
+        },
+        "shared_sram": {
+          "description": "Omit only when hardware has no shared SRAM; null is invalid.",
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            "unrepresented"
+          ],
+          "title": "Shared Sram"
+        },
+        "sync": {
+          "pattern": "^(exact|approx\\(Q=[1-9][0-9]*\\))$",
+          "title": "Sync",
+          "type": "string"
+        }
+      },
+      "required": [
+        "compute",
+        "noc",
+        "dram",
+        "sync",
+        "layer_reuse"
+      ],
+      "title": "FidelityDetail",
+      "type": "object"
+    },
+    "Grid": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/DecodeGrid"
+        },
+        "frequency_ratio": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "minItems": 1,
+          "title": "Frequency Ratio",
+          "type": "array"
+        },
+        "prefill": {
+          "$ref": "#/$defs/PrefillGrid"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill",
+        "frequency_ratio"
+      ],
+      "title": "Grid",
+      "type": "object"
+    },
+    "KvLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "minimum": 1,
+          "title": "Block Size Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "block_size_tokens"
+      ],
+      "title": "KvLayout",
+      "type": "object"
+    },
+    "ModelShape": {
+      "additionalProperties": false,
+      "properties": {
+        "attention": {
+          "enum": [
+            "mha",
+            "gqa"
+          ],
+          "title": "Attention",
+          "type": "string"
+        },
+        "d_ff": {
+          "minimum": 1,
+          "title": "D Ff",
+          "type": "integer"
+        },
+        "expert_d_ff": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expert D Ff"
+        },
+        "gated_mlp": {
+          "title": "Gated Mlp",
+          "type": "boolean"
+        },
+        "tie_embeddings": {
+          "title": "Tie Embeddings",
+          "type": "boolean"
+        },
+        "vocab_size": {
+          "minimum": 1,
+          "title": "Vocab Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "d_ff",
+        "gated_mlp",
+        "vocab_size",
+        "attention",
+        "tie_embeddings"
+      ],
+      "title": "ModelShape",
+      "type": "object"
+    },
+    "ModelSpec": {
+      "additionalProperties": false,
+      "description": "MoE is active-vs-total and nothing more (build-spec \u00a72.3.5).",
+      "properties": {
+        "active_params": {
+          "minimum": 1,
+          "title": "Active Params",
+          "type": "integer"
+        },
+        "d_model": {
+          "minimum": 1,
+          "title": "D Model",
+          "type": "integer"
+        },
+        "experts_per_token": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Experts Per Token",
+          "type": "integer"
+        },
+        "kv_heads": {
+          "minimum": 1,
+          "title": "Kv Heads",
+          "type": "integer"
+        },
+        "n_experts": {
+          "default": 0,
+          "minimum": 0,
+          "title": "N Experts",
+          "type": "integer"
+        },
+        "n_heads": {
+          "minimum": 1,
+          "title": "N Heads",
+          "type": "integer"
+        },
+        "n_layers": {
+          "minimum": 1,
+          "title": "N Layers",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "total_params": {
+          "minimum": 1,
+          "title": "Total Params",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "total_params",
+        "active_params",
+        "n_layers",
+        "d_model",
+        "n_heads",
+        "kv_heads"
+      ],
+      "title": "ModelSpec",
+      "type": "object"
+    },
+    "Precision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat",
+          "default": "fp16"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat",
+          "default": "fp16"
+        }
+      },
+      "title": "Precision",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "PrefillEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "prompt_tokens_max": {
+          "minimum": 1,
+          "title": "Prompt Tokens Max",
+          "type": "integer"
+        },
+        "prompts_per_iteration_max": {
+          "minimum": 1,
+          "title": "Prompts Per Iteration Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prompt_tokens_max",
+        "prompts_per_iteration_max"
+      ],
+      "title": "PrefillEnvelope",
+      "type": "object"
+    },
+    "PrefillGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "L": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "L",
+          "type": "array"
+        },
+        "n": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "N",
+          "type": "array"
+        }
+      },
+      "required": [
+        "n",
+        "L"
+      ],
+      "title": "PrefillGrid",
+      "type": "object"
+    },
+    "PrefillVisitWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "weight_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "n_prompts",
+        "prompt_tokens",
+        "weight_ratio"
+      ],
+      "title": "PrefillVisitWeight",
+      "type": "object"
+    },
+    "VisitWeights": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "items": {
+            "$ref": "#/$defs/DecodeVisitWeight"
+          },
+          "title": "Decode",
+          "type": "array"
+        },
+        "prefill": {
+          "items": {
+            "$ref": "#/$defs/PrefillVisitWeight"
+          },
+          "title": "Prefill",
+          "type": "array"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill"
+      ],
+      "title": "VisitWeights",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Explicit historical 0.1 inspection, never a production U2 request.",
+  "properties": {
+    "component_id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Component Id",
+      "type": "string"
+    },
+    "contract": {
+      "const": "uarch-contract/0.1",
+      "title": "Contract",
+      "type": "string"
+    },
+    "envelope": {
+      "$ref": "#/$defs/Envelope"
+    },
+    "grid": {
+      "$ref": "#/$defs/Grid"
+    },
+    "hardware_spec_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Hardware Spec Hash",
+      "type": "string"
+    },
+    "initial_state": {
+      "default": "steady",
+      "enum": [
+        "steady",
+        "cold"
+      ],
+      "title": "Initial State",
+      "type": "string"
+    },
+    "kv_layout": {
+      "$ref": "#/$defs/KvLayout"
+    },
+    "mapping_policy": {
+      "pattern": "^\\S+@\\S+$",
+      "title": "Mapping Policy",
+      "type": "string"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelSpec"
+    },
+    "model_shape": {
+      "$ref": "#/$defs/ModelShape"
+    },
+    "precision": {
+      "$ref": "#/$defs/Precision"
+    },
+    "rk_schema_snapshot": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Rk Schema Snapshot",
+      "type": "string"
+    },
+    "seed": {
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "tp": {
+      "minimum": 1,
+      "title": "Tp",
+      "type": "integer"
+    },
+    "uarch_fidelity": {
+      "$ref": "#/$defs/FidelityDetail"
+    },
+    "visit_weights": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/VisitWeights"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "rk_schema_snapshot",
+    "component_id",
+    "hardware_spec_hash",
+    "model",
+    "model_shape",
+    "precision",
+    "tp",
+    "envelope",
+    "grid",
+    "mapping_policy",
+    "uarch_fidelity",
+    "kv_layout",
+    "seed",
+    "contract"
+  ],
+  "title": "LegacyCharacterizationRequest",
+  "type": "object"
+}

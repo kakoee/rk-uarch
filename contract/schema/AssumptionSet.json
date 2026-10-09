@@ -1,0 +1,80 @@
+{
+  "$defs": {
+    "ModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "physical-resolved",
+            "nominal-rk-compatibility"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "implementation_hash",
+        "name",
+        "version"
+      ],
+      "title": "ModelIdentity",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "algorithms": {
+      "additionalProperties": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Algorithms",
+      "type": "object"
+    },
+    "assumptions_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Assumptions Hash",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-assumptions/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Limitations",
+      "type": "array"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelIdentity"
+    }
+  },
+  "required": [
+    "algorithms",
+    "assumptions_hash",
+    "format",
+    "limitations",
+    "model"
+  ],
+  "title": "AssumptionSet",
+  "type": "object"
+}

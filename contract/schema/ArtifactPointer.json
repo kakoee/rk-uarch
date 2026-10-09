@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Artifact Hash",
+      "type": "string"
+    },
+    "json_pointer": {
+      "pattern": "^(/.*)?$",
+      "title": "Json Pointer",
+      "type": "string"
+    }
+  },
+  "required": [
+    "artifact_hash",
+    "json_pointer"
+  ],
+  "title": "ArtifactPointer",
+  "type": "object"
+}

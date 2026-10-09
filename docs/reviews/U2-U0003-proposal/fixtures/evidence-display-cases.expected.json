@@ -1,0 +1,80 @@
+{
+  "cases": [
+    {
+      "error_band": null,
+      "id": "l3-no-band",
+      "real_eligible_review_and_ordering_required": true,
+      "scope_present": true,
+      "scope_without_band_required": true
+    },
+    {
+      "claim_badge": null,
+      "expected_badge": "estimated",
+      "id": "all-stipulated-L3",
+      "model_rung": "eligible L3",
+      "real_claim_contributors": 0
+    },
+    {
+      "claim_badge": "stub",
+      "expected_badge": "stub",
+      "id": "mixed-stub-L3",
+      "real_claim_contributors": 1
+    },
+    {
+      "expected_badge": "estimated",
+      "id": "proposed-L4",
+      "model_rung": "eligible L4",
+      "spec_status": "proposed"
+    },
+    {
+      "evidence_purpose": "counts",
+      "expected_badge": "stub",
+      "id": "wrong-purpose-count-L3",
+      "requested": "duration"
+    },
+    {
+      "evidence_cases": [
+        "bf16/low/full",
+        "fp8/high/underfilled"
+      ],
+      "expected": "uncovered; no Cartesian cross-product",
+      "id": "compound-scope",
+      "query": "bf16/high/underfilled"
+    },
+    {
+      "evidence_compute": "BLOCKFP8",
+      "expected": "MISMATCH; no alias",
+      "id": "BLOCKFP8",
+      "query_compute": "fp8"
+    },
+    {
+      "expected": "ArtifactMissing before rendering",
+      "id": "missing-registry-or-evidence"
+    },
+    {
+      "expected": "hidden/refused; no numeric text or SVG geometry",
+      "id": "unresolved-or-empty-contributors-opt-in"
+    },
+    {
+      "expected": "magnitudes hidden on every surface",
+      "id": "computed-stub-default"
+    },
+    {
+      "expected": "finite resolved prediction visible with STUB — unvalidated model prediction",
+      "id": "computed-stub-opt-in"
+    },
+    {
+      "expected": "synthetic presentation label; never executed prediction",
+      "id": "synthetic-fixture-opt-in"
+    },
+    {
+      "expected": "no point, no zero, not modelled",
+      "id": "null-plot"
+    },
+    {
+      "expected": "unverified; no energy model",
+      "id": "partial-energy-L2"
+    }
+  ],
+  "classification": "independent review specifications, semantic tests planned"
+}

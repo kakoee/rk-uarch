@@ -1,0 +1,56 @@
+{
+  "depends_on": [],
+  "embedding_local_tokens": null,
+  "fusion": "none",
+  "id": "q",
+  "kv_access": null,
+  "operand_access": {
+    "W": "read",
+    "X": "read",
+    "Y": "write"
+  },
+  "padding": [],
+  "replication": [],
+  "spec": {
+    "dimensions": {
+      "K": 4,
+      "M": 2,
+      "N": 3
+    },
+    "operands": {
+      "W": {
+        "block_size_tokens": null,
+        "dimensions": [
+          "K",
+          "N"
+        ],
+        "dtype": "bf16",
+        "layout": "contiguous"
+      },
+      "X": {
+        "block_size_tokens": null,
+        "dimensions": [
+          "M",
+          "K"
+        ],
+        "dtype": "bf16",
+        "layout": "contiguous"
+      },
+      "Y": {
+        "block_size_tokens": null,
+        "dimensions": [
+          "M",
+          "N"
+        ],
+        "dtype": "bf16",
+        "layout": "contiguous"
+      }
+    },
+    "operator": "q_projection",
+    "reduction_axes": [
+      "K"
+    ]
+  },
+  "weight_copies": 1,
+  "work_repeat": 1
+}

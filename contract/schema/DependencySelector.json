@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Artifact Hash",
+      "type": "string"
+    },
+    "json_pointer": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Json Pointer",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "hardware_leaf",
+        "prepared_content",
+        "model_assumption",
+        "model_evidence",
+        "result_field"
+      ],
+      "title": "Kind",
+      "type": "string"
+    }
+  },
+  "required": [
+    "artifact_hash",
+    "json_pointer",
+    "kind"
+  ],
+  "title": "DependencySelector",
+  "type": "object"
+}

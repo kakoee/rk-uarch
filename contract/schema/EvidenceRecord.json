@@ -1,0 +1,406 @@
+{
+  "$defs": {
+    "EvidencePrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Compute",
+          "type": "string"
+        },
+        "kv_cache": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Kv Cache"
+        },
+        "operands": {
+          "additionalProperties": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Operands",
+          "type": "object"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache",
+        "operands"
+      ],
+      "title": "EvidencePrecision",
+      "type": "object"
+    },
+    "EvidenceRecordErrorBand0": {
+      "additionalProperties": false,
+      "properties": {
+        "high_rel": {
+          "gt": 0,
+          "title": "High Rel",
+          "type": "number"
+        },
+        "low_rel": {
+          "ge": 0,
+          "title": "Low Rel",
+          "type": "number"
+        }
+      },
+      "required": [
+        "high_rel",
+        "low_rel"
+      ],
+      "title": "EvidenceRecordErrorBand0",
+      "type": "object"
+    },
+    "EvidenceScopeCase": {
+      "additionalProperties": false,
+      "properties": {
+        "array_fill": {
+          "anyOf": [
+            {
+              "enum": [
+                "underfilled",
+                "full"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Array Fill"
+        },
+        "dram_load_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dram Load Regime"
+        },
+        "family": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Family",
+          "type": "string"
+        },
+        "frequency_ratio": {
+          "ge": 0,
+          "title": "Frequency Ratio",
+          "type": "number"
+        },
+        "hardware_spec_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hardware Spec Hash"
+        },
+        "initial_state": {
+          "enum": [
+            "steady",
+            "cold"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "intensity_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Intensity Regime"
+        },
+        "kv_block_size_tokens": {
+          "minimum": 1,
+          "title": "Kv Block Size Tokens",
+          "type": "integer"
+        },
+        "mapping_correspondence_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mapping Correspondence Hash"
+        },
+        "mapping_match": {
+          "anyOf": [
+            {
+              "enum": [
+                "matched",
+                "compiler-chosen"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mapping Match"
+        },
+        "model_identity_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Model Identity Hash",
+          "type": "string"
+        },
+        "noc_load_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Noc Load Regime"
+        },
+        "op_class": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Op Class"
+        },
+        "precision": {
+          "$ref": "#/$defs/EvidencePrecision"
+        },
+        "prepared_bundle_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prepared Bundle Hash"
+        }
+      },
+      "required": [
+        "array_fill",
+        "dram_load_regime",
+        "family",
+        "frequency_ratio",
+        "hardware_spec_hash",
+        "initial_state",
+        "intensity_regime",
+        "kv_block_size_tokens",
+        "mapping_correspondence_hash",
+        "mapping_match",
+        "model_identity_hash",
+        "noc_load_regime",
+        "op_class",
+        "precision",
+        "prepared_bundle_hash"
+      ],
+      "title": "EvidenceScopeCase",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "channel": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Channel"
+    },
+    "classification": {
+      "enum": [
+        "real",
+        "synthetic_fixture"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "energy_family": {
+      "anyOf": [
+        {
+          "enum": [
+            "mac",
+            "sram",
+            "noc_hop",
+            "dram",
+            "static"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Energy Family"
+    },
+    "error_band": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvidenceRecordErrorBand0"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "evidence_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Evidence Hash",
+      "type": "string"
+    },
+    "evidence_id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Evidence Id",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-evidence/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "granularity": {
+      "enum": [
+        "operator",
+        "subsystem",
+        "whole_iteration"
+      ],
+      "title": "Granularity",
+      "type": "string"
+    },
+    "ordering_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Ordering Hash"
+    },
+    "purpose": {
+      "enum": [
+        "duration",
+        "counts",
+        "diagnostics",
+        "energy"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "review_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Review Hash",
+      "type": "string"
+    },
+    "rung": {
+      "enum": [
+        "L0",
+        "L0m",
+        "L1",
+        "L2",
+        "L3",
+        "L4"
+      ],
+      "title": "Rung",
+      "type": "string"
+    },
+    "scope": {
+      "items": {
+        "$ref": "#/$defs/EvidenceScopeCase"
+      },
+      "minItems": 1,
+      "title": "Scope",
+      "type": "array"
+    },
+    "source_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Source Hash",
+      "type": "string"
+    },
+    "verification_hashes": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "title": "Verification Hashes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "channel",
+    "classification",
+    "energy_family",
+    "error_band",
+    "evidence_hash",
+    "evidence_id",
+    "format",
+    "granularity",
+    "ordering_hash",
+    "purpose",
+    "review_hash",
+    "rung",
+    "scope",
+    "source_hash",
+    "verification_hashes"
+  ],
+  "title": "EvidenceRecord",
+  "type": "object"
+}

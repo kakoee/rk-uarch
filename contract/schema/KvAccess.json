@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "block_size_tokens": {
+      "minimum": 1,
+      "title": "Block Size Tokens",
+      "type": "integer"
+    },
+    "context_tokens": {
+      "minimum": 1,
+      "title": "Context Tokens",
+      "type": "integer"
+    },
+    "last_page_valid_tokens": {
+      "minimum": 1,
+      "title": "Last Page Valid Tokens",
+      "type": "integer"
+    },
+    "pages_per_sequence": {
+      "minimum": 1,
+      "title": "Pages Per Sequence",
+      "type": "integer"
+    },
+    "read_policy": {
+      "const": "valid_tokens",
+      "title": "Read Policy",
+      "type": "string"
+    },
+    "write_policy": {
+      "const": "append_valid_tokens",
+      "title": "Write Policy",
+      "type": "string"
+    }
+  },
+  "required": [
+    "block_size_tokens",
+    "context_tokens",
+    "last_page_valid_tokens",
+    "pages_per_sequence",
+    "read_policy",
+    "write_policy"
+  ],
+  "title": "KvAccess",
+  "type": "object"
+}

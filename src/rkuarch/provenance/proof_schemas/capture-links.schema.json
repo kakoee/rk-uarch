@@ -1,0 +1,155 @@
+{
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "u2-proof-capture-links/2"
+    },
+    "suite_plan": {
+      "type": "object",
+      "properties": {
+        "source_record_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "member_name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*\\.(json|csv|txt)$"
+        },
+        "member_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "source_record_hash",
+        "member_name",
+        "member_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "capture_inventory": {
+      "type": "object",
+      "properties": {
+        "source_record_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "member_name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*\\.(json|csv|txt)$"
+        },
+        "member_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "source_record_hash",
+        "member_name",
+        "member_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "enum": [
+              "prediction",
+              "verification_observed",
+              "fidelity_count"
+            ]
+          },
+          "case_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "benchmark_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proof_member": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proof_pointer": {
+            "type": "string",
+            "pattern": "^/.*$"
+          },
+          "independent_reference": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "source_record_hash": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^sha256:[0-9a-f]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "member_name": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]*\\.(json|csv|txt)$"
+                  },
+                  "member_sha256": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  }
+                },
+                "required": [
+                  "source_record_hash",
+                  "member_name",
+                  "member_sha256"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "role",
+          "case_id",
+          "benchmark_id",
+          "proof_member",
+          "proof_pointer",
+          "independent_reference"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "format",
+    "suite_plan",
+    "capture_inventory",
+    "entries"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:u2-proof-proposal:revision2:capture-links.schema.json"
+}

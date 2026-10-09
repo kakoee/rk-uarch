@@ -1,0 +1,1044 @@
+{
+  "attention_mask": "full_square",
+  "groups": [
+    {
+      "depends_on": [],
+      "id": "head",
+      "kind": "head",
+      "ops": [
+        {
+          "depends_on": [],
+          "embedding_local_tokens": 1,
+          "fusion": "none",
+          "id": "embed",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "D": 4,
+              "M": 1,
+              "V": 8
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "V",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "embedding",
+            "reduction_axes": []
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        }
+      ],
+      "repeat": 1
+    },
+    {
+      "depends_on": [
+        "head"
+      ],
+      "id": "layers",
+      "kind": "decoder",
+      "ops": [
+        {
+          "depends_on": [],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "norm1",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "D": 4,
+              "M": 1
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "normalization",
+            "reduction_axes": [
+              "D"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "norm1"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "q",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "K": 4,
+              "M": 1,
+              "N": 4
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "K",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "K"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "q_projection",
+            "reduction_axes": [
+              "K"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "norm1"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "k",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "K": 4,
+              "M": 1,
+              "N": 2
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "K",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "K"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "k_projection",
+            "reduction_axes": [
+              "K"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "norm1"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "v",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "K": 4,
+              "M": 1,
+              "N": 2
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "K",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "K"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "v_projection",
+            "reduction_axes": [
+              "K"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "k",
+            "v"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "kv",
+          "kv_access": null,
+          "operand_access": {
+            "K": "read",
+            "K_cache": "write",
+            "V": "read",
+            "V_cache": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "B": 1,
+              "D": 2,
+              "Hkv": 1,
+              "S": 1
+            },
+            "operands": {
+              "K": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "B",
+                  "Hkv",
+                  "S",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "K_cache": {
+                "block_size_tokens": 16,
+                "dimensions": [
+                  "B",
+                  "Hkv",
+                  "S",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "paged"
+              },
+              "V": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "B",
+                  "Hkv",
+                  "S",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "V_cache": {
+                "block_size_tokens": 16,
+                "dimensions": [
+                  "B",
+                  "Hkv",
+                  "S",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "paged"
+              }
+            },
+            "operator": "kv_write",
+            "reduction_axes": []
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "q",
+            "k",
+            "v",
+            "kv"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "qk_softmax_av",
+          "id": "attn",
+          "kv_access": {
+            "block_size_tokens": 16,
+            "context_tokens": 17,
+            "last_page_valid_tokens": 1,
+            "pages_per_sequence": 2,
+            "read_policy": "valid_tokens",
+            "write_policy": "append_valid_tokens"
+          },
+          "operand_access": {
+            "K": "read",
+            "O": "write",
+            "Q": "read",
+            "V": "read"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "B": 1,
+              "D": 2,
+              "Hkv": 1,
+              "Hq": 2,
+              "S": 1,
+              "T": 17
+            },
+            "operands": {
+              "K": {
+                "block_size_tokens": 16,
+                "dimensions": [
+                  "B",
+                  "Hkv",
+                  "T",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "paged"
+              },
+              "O": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "B",
+                  "Hq",
+                  "S",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Q": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "B",
+                  "Hq",
+                  "S",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "V": {
+                "block_size_tokens": 16,
+                "dimensions": [
+                  "B",
+                  "Hkv",
+                  "T",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "paged"
+              }
+            },
+            "operator": "attention_fused",
+            "reduction_axes": [
+              "T",
+              "D"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "attn"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "out",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "K": 4,
+              "M": 1,
+              "N": 4
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "K",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "K"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "output_projection",
+            "reduction_axes": [
+              "K"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "out"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "res1",
+          "kv_access": null,
+          "operand_access": {
+            "R": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "D": 4,
+              "M": 1
+            },
+            "operands": {
+              "R": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "residual_addition",
+            "reduction_axes": []
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "res1"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "norm2",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "D": 4,
+              "M": 1
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "normalization",
+            "reduction_axes": [
+              "D"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "norm2"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "up",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "K": 4,
+              "M": 1,
+              "N": 8
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "K",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "K"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "ffn_up",
+            "reduction_axes": [
+              "K"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "norm2"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "gate",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "K": 4,
+              "M": 1,
+              "N": 8
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "K",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "K"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "ffn_gate",
+            "reduction_axes": [
+              "K"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "up",
+            "gate"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "act",
+          "kv_access": null,
+          "operand_access": {
+            "G": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "D": 8,
+              "M": 1
+            },
+            "operands": {
+              "G": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "activation",
+            "reduction_axes": []
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "act"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "down",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "K": 8,
+              "M": 1,
+              "N": 4
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "K",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "K"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "ffn_down",
+            "reduction_axes": [
+              "K"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "down"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "res2",
+          "kv_access": null,
+          "operand_access": {
+            "R": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "D": 4,
+              "M": 1
+            },
+            "operands": {
+              "R": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "residual_addition",
+            "reduction_axes": []
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        }
+      ],
+      "repeat": 2
+    },
+    {
+      "depends_on": [
+        "layers"
+      ],
+      "id": "tail",
+      "kind": "tail",
+      "ops": [
+        {
+          "depends_on": [],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "final_norm",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "D": 4,
+              "M": 1
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "D"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "normalization",
+            "reduction_axes": [
+              "D"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        },
+        {
+          "depends_on": [
+            "final_norm"
+          ],
+          "embedding_local_tokens": null,
+          "fusion": "none",
+          "id": "lm",
+          "kv_access": null,
+          "operand_access": {
+            "W": "read",
+            "X": "read",
+            "Y": "write"
+          },
+          "padding": [],
+          "replication": [],
+          "spec": {
+            "dimensions": {
+              "K": 4,
+              "M": 1,
+              "N": 8
+            },
+            "operands": {
+              "W": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "K",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "X": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "K"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              },
+              "Y": {
+                "block_size_tokens": null,
+                "dimensions": [
+                  "M",
+                  "N"
+                ],
+                "dtype": "bf16",
+                "layout": "contiguous"
+              }
+            },
+            "operator": "lm_head",
+            "reduction_axes": [
+              "K"
+            ]
+          },
+          "weight_copies": 1,
+          "work_repeat": 1
+        }
+      ],
+      "repeat": 1
+    }
+  ],
+  "lm_head_tokens": 1,
+  "omissions": [
+    "Host and runtime time outside the device is unmodelled.",
+    "Address translation is unmodelled.",
+    "Cache coherence is unmodelled.",
+    "Mixed prefill/decode iterations are unmodelled."
+  ]
+}

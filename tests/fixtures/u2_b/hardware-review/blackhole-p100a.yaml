@@ -1,0 +1,151 @@
+# B1 INPUT PROPOSAL: actual bytes await Javid hardware approval.
+# Numeric stubs are explicit carrier stand-ins, NOT estimates or chip facts.
+# Do not execute/adopt as a calibrated reference. See hw/U2-sourcing-inventory.md.
+# Categorical/structural placeholders are also listed there; no preset fallback.
+# unknown for this chip: clock_domains.noc.freq_hz (stub carrier value 1.0; no evidence)
+# unknown for this chip: clock_domains.dram.freq_hz (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.grid.rows (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.grid.cols (stub carrier value 120.0; no evidence)
+# unknown for this chip: cores.core_type.matrix_engine.array.rows (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.matrix_engine.array.cols (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.matrix_engine.macs_per_cycle.bf16 (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.matrix_engine.accumulator_bytes (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.matrix_engine.operand_buffer_bytes (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.matrix_engine.operand_bytes_per_cycle (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.vector_engine.ops_per_cycle (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.sram.bytes (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.sram.banks (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.sram.bytes_per_cycle_per_bank (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.dma.engines (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.dma.bytes_per_cycle (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.dma.max_outstanding (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.dma.request_bytes (stub carrier value 1.0; no evidence)
+# unknown for this chip: cores.core_type.job_overhead_cycles (stub carrier value 1.0; no evidence)
+# unknown for this chip: sync.barrier_latency_cycles (stub carrier value 1.0; no evidence)
+# unknown for this chip: nocs[0].link_bytes_per_cycle (stub carrier value 1.0; no evidence)
+# unknown for this chip: nocs[0].router_latency_cycles (stub carrier value 1.0; no evidence)
+# unknown for this chip: nocs[0].virtual_channels (stub carrier value 1.0; no evidence)
+# unknown for this chip: nocs[0].buffer_flits (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.interleave.granularity_bytes (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.controllers[0].read_queue_depth (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.controllers[0].write_queue_depth (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.controllers[0].noc_credits (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.channels (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.organization.ranks (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.organization.bank_groups (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.organization.banks_per_group (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.organization.row_bytes (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.timing.t_rcd_cycles (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.timing.t_rp_cycles (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.timing.t_cl_cycles (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.timing.t_rfc_cycles (stub carrier value 1.0; no evidence)
+# unknown for this chip: memory.dram.timing.t_refi_cycles (stub carrier value 1.0; no evidence)
+# unknown for this chip: formats.bf16.accumulate_bytes (stub carrier value 1.0; no evidence)
+# unknown for this chip: formats.bf16.block_scale_bytes (stub carrier value 0.0; no evidence)
+# unknown for this chip: energy.pj_per_mac.bf16 (stub carrier value 1.0; no evidence)
+# unknown for this chip: energy.pj_per_byte.sram (stub carrier value 1.0; no evidence)
+# unknown for this chip: energy.pj_per_byte.noc_hop (stub carrier value 1.0; no evidence)
+# unknown for this chip: energy.pj_per_byte.dram (stub carrier value 1.0; no evidence)
+# unknown for this chip: energy.voltage_ratio.1.0 (stub carrier value 1.0; no evidence)
+# unknown for this chip: static_power_w (stub carrier value 1.0; no evidence)
+# unknown for this chip: tdp_w (stub carrier value 1.0; no evidence)
+id: blackhole-p100a
+design_status: reference
+clock_domains:
+  core:
+    freq_hz: {value: 1350000000.0, unit: Hz, kind: claim, provenance: spec_derived, source: 'https://docs.tenstorrent.com/aibs/blackhole/', date: '2026-10-07', rationale: null}
+    scales_with_core: true
+  noc:
+    freq_hz: {value: 1.0, unit: Hz, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    scales_with_core: false
+  dram:
+    freq_hz: {value: 1.0, unit: Hz, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    scales_with_core: false
+cores:
+  grid:
+    rows: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    cols: {value: 120.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+  core_type:
+    matrix_engine:
+      array:
+        rows: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+        cols: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      dataflows:
+      - weight_stationary
+      macs_per_cycle:
+        bf16: {value: 1.0, unit: MAC/cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      accumulator_bytes: {value: 1.0, unit: byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      operand_buffer_bytes: {value: 1.0, unit: byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      operand_bytes_per_cycle: {value: 1.0, unit: byte/cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    vector_engine:
+      ops_per_cycle: {value: 1.0, unit: op/cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    sram:
+      bytes: {value: 1.0, unit: byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      banks: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      bytes_per_cycle_per_bank: {value: 1.0, unit: byte/cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    dma:
+      engines: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      bytes_per_cycle: {value: 1.0, unit: byte/cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      max_outstanding: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      request_bytes: {value: 1.0, unit: byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    job_overhead_cycles: {value: 1.0, unit: cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+sync:
+  mechanism: noc_semaphore
+  barrier_latency_cycles: {value: 1.0, unit: cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+shared_sram: null
+nocs:
+- topology: mesh
+  direction: bidirectional
+  link_bytes_per_cycle: {value: 1.0, unit: byte/cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+  router_latency_cycles: {value: 1.0, unit: cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+  virtual_channels: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+  buffer_flits: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+memory:
+  interleave:
+    granularity_bytes: {value: 1.0, unit: byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    scheme: round_robin
+  controllers:
+  - attach:
+    - 0
+    - 0
+    scheduler: fr_fcfs
+    page_policy: open
+    read_queue_depth: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    write_queue_depth: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    noc_credits: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+  dram:
+    standard: gddr6
+    channels: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    bw_bytes_per_s: {value: 448000000000.0, unit: byte/s, kind: claim, provenance: spec_derived, source: 'https://docs.tenstorrent.com/aibs/blackhole/', date: '2026-10-07',
+      rationale: null}
+    capacity_bytes: {value: 28000000000.0, unit: byte, kind: claim, provenance: spec_derived, source: 'https://docs.tenstorrent.com/aibs/blackhole/', date: '2026-10-07',
+      rationale: null}
+    organization:
+      ranks: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      bank_groups: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      banks_per_group: {value: 1.0, unit: count, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      row_bytes: {value: 1.0, unit: byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    timing_source: direct
+    timing_preset: null
+    timing:
+      t_rcd_cycles: {value: 1.0, unit: cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      t_rp_cycles: {value: 1.0, unit: cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      t_cl_cycles: {value: 1.0, unit: cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      t_rfc_cycles: {value: 1.0, unit: cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+      t_refi_cycles: {value: 1.0, unit: cycle, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+formats:
+  bf16:
+    bytes: 2.0
+    accumulate_bytes: {value: 1.0, unit: byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    block_scale_bytes: {value: 0.0, unit: byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+energy:
+  pj_per_mac:
+    bf16: {value: 1.0, unit: pJ/MAC, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+  pj_per_byte:
+    sram: {value: 1.0, unit: pJ/byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    noc_hop: {value: 1.0, unit: pJ/byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+    dram: {value: 1.0, unit: pJ/byte, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+  voltage_ratio:
+    1.0: {value: 1.0, unit: ratio, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+static_power_w: {value: 1.0, unit: W, kind: claim, provenance: stub, source: null, date: null, rationale: null}
+tdp_w: {value: 1.0, unit: W, kind: claim, provenance: stub, source: null, date: null, rationale: null}

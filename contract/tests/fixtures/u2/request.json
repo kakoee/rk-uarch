@@ -1,0 +1,80 @@
+{
+  "accounting": "resolved-ops/1",
+  "analytic_mode": "per_op",
+  "assumptions_hash": "sha256:ede89012b8843ff1b35c1ffe55f815a21e464866c08d5c14e59a363661c06321",
+  "component_id": "compute.asic.synthetic-review-only",
+  "contract": "uarch-contract/0.2",
+  "envelope": {
+    "decode": {
+      "batch_max": 1,
+      "context_per_seq_max": 17
+    },
+    "prefill": {
+      "prompt_tokens_max": 1,
+      "prompts_per_iteration_max": 1
+    }
+  },
+  "grid": {
+    "decode": {
+      "batch": [
+        1
+      ],
+      "context_per_seq": [
+        17
+      ]
+    },
+    "frequency_ratio": [
+      1.0
+    ],
+    "prefill": {
+      "L": [
+        1
+      ],
+      "n": [
+        1
+      ]
+    }
+  },
+  "hardware_spec_hash": "sha256:cb268745ae183e43995c881ea75ac7a659849e890a234f7f89911dbb7514c180",
+  "initial_state": "steady",
+  "kv_layout": {
+    "block_size_tokens": 16
+  },
+  "mapping_policy": "analytic-ops@1",
+  "model": {
+    "active_params": 372,
+    "d_model": 4,
+    "experts_per_token": 0,
+    "kv_heads": 1,
+    "n_experts": 0,
+    "n_heads": 2,
+    "n_layers": 2,
+    "name": "synthetic-d4",
+    "total_params": 372
+  },
+  "model_shape": {
+    "attention": "gqa",
+    "d_ff": 8,
+    "expert_d_ff": null,
+    "gated_mlp": true,
+    "tie_embeddings": false,
+    "vocab_size": 8
+  },
+  "precision": {
+    "compute": "bf16",
+    "kv_cache": "bf16"
+  },
+  "preparation_policy": "balanced-tp/1",
+  "prepared_input_hash": "sha256:3ef891336af031f9da1d9789cccc9d827bfba3c9eca52ee3bb3061eb33b72977",
+  "rk_schema_snapshot": "1e5706e0ebfcc67c1a7333079a35b75f693e9963",
+  "seed": 7,
+  "tp": 1,
+  "uarch_fidelity": {
+    "compute": 0,
+    "dram": 0,
+    "layer_reuse": true,
+    "noc": 0,
+    "sync": "exact"
+  },
+  "visit_weights": null
+}

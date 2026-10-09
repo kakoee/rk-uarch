@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -11,6 +10,7 @@ import pytest
 from scripts.vendor_rk import ROOT
 
 from . import parity
+from .historical_snapshot import historical_snapshot
 from .test_flop_parity import sample
 
 
@@ -88,9 +88,9 @@ def test_f8_zero_reference_serializes_without_relative_max(lane_a: dict[str, Any
     assert payload["comparisons"][0]["reference_state"] == "zero"
 
 
-def test_f8_preserved_oracle_echo_stays_self_test(snapshot: Path, lane_a: dict[str, Any]) -> None:
+def test_f8_preserved_oracle_echo_stays_self_test(lane_a: dict[str, Any]) -> None:
     cls = carrier_api(lane_a)
-    rows = json.loads((snapshot / "parity/fixtures.json").read_text())
+    rows = json.loads((historical_snapshot() / "parity/fixtures.json").read_text())
     iterator = iter(rows)
     report = parity.run_parity(rows, lambda *a: parity.rank_counts(next(iterator)))
     payload = parity.contract_payload(

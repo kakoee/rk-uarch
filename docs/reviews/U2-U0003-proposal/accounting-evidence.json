@@ -1,0 +1,525 @@
+{
+  "baseline": "1e9e794a84c5173812c23a1cf2fc04b85e6f6831",
+  "classification": "independent arithmetic investigation, not runtime/workload parity",
+  "duration_diagnostic": {
+    "candidate_relative_difference": -0.4499999999999999,
+    "classification": "frozen-count-fed raw-peak algebra probe, NOT actual workload or expected oracle generation",
+    "declared_component_fp16_tflops": 100.0,
+    "declared_component_hbm_bw_TB_per_s": 1.0,
+    "declared_execution_model_scalar_efficiency": 0.55,
+    "fixture_id": "llama-3.1-8b/fp16/fp16/tp1/asic_placeholder.yaml/12",
+    "interpretation": "efficiency mapping requires decision even before workload-count differences; never tune peak",
+    "raw_peak_candidate_duration_s": 0.02059974967296,
+    "stored_upstream_duration_s": 0.03745409031447272
+  },
+  "examples": [
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 67108864,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0.01515012361238563,
+      "component_params_file": "components/asic_placeholder.yaml",
+      "component_params_sha256": "4686450b989d85b655649ee130ff4118e29a066b08b3e1347c34b453c4a030ed",
+      "count_budget_arithmetic_can_pass": false,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 525336576,
+      "fixture_id": "llama-3.1-8b/fp16/fp16/tp1/asic_placeholder.yaml/0",
+      "frozen_counts": {
+        "matrix_ops": 16127108864.0,
+        "memory_read_bytes": 16076777216.0,
+        "memory_write_bytes": null
+      },
+      "frozen_duration_method": "decode_s",
+      "frozen_duration_s": 0.016076777216,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "decode KV writes"
+      ],
+      "known_append_kv_write_bytes": 131072,
+      "linear_weight_elements": 7504658432,
+      "matrix_ops_full_square_all_token_head": 15076425728,
+      "matrix_raw_rel": -0.06515012361238563,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 15026102272
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 67108864,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0.01515012361238563,
+      "component_params_file": "components/nvidia_h100_sxm.yaml",
+      "component_params_sha256": "0eee9677ce86a0e9b879fc33f4d0214142b076495865408e872d6264824ee2e6",
+      "count_budget_arithmetic_can_pass": false,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 525336576,
+      "fixture_id": "llama-3.1-8b/fp16/fp16/tp1/nvidia_h100_sxm.yaml/0",
+      "frozen_counts": {
+        "matrix_ops": 16127108864.0,
+        "memory_read_bytes": 16076777216.0,
+        "memory_write_bytes": null
+      },
+      "frozen_duration_method": "decode_s",
+      "frozen_duration_s": 0.004799037974925373,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "decode KV writes"
+      ],
+      "known_append_kv_write_bytes": 131072,
+      "linear_weight_elements": 7504658432,
+      "matrix_ops_full_square_all_token_head": 15076425728,
+      "matrix_raw_rel": -0.06515012361238563,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 15026102272
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 8589934592,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0.01320099815722299,
+      "component_params_file": "components/asic_placeholder.yaml",
+      "component_params_sha256": "4686450b989d85b655649ee130ff4118e29a066b08b3e1347c34b453c4a030ed",
+      "count_budget_arithmetic_can_pass": false,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 525336576,
+      "fixture_id": "llama-3.1-8b/fp16/fp16/tp1/asic_placeholder.yaml/12",
+      "frozen_counts": {
+        "matrix_ops": 2059974967296.0,
+        "memory_read_bytes": 16060000000.0,
+        "memory_write_bytes": 16777216.0
+      },
+      "frozen_duration_method": "prefill_s",
+      "frozen_duration_s": 0.03745409031447272,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "non-KV writes"
+      ],
+      "known_append_kv_write_bytes": 16777216,
+      "linear_weight_elements": 7504658432,
+      "matrix_ops_full_square_all_token_head": 1929782493184,
+      "matrix_raw_rel": -0.06320099815722299,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "n_prompts": 1,
+        "phase": "prefill",
+        "prompt_tokens": 128,
+        "sum_of_squared_prompt_tokens": 16384,
+        "total_prompt_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 15010365440
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 8589934592,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0.01320099815722299,
+      "component_params_file": "components/nvidia_h100_sxm.yaml",
+      "component_params_sha256": "0eee9677ce86a0e9b879fc33f4d0214142b076495865408e872d6264824ee2e6",
+      "count_budget_arithmetic_can_pass": false,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 525336576,
+      "fixture_id": "llama-3.1-8b/fp16/fp16/tp1/nvidia_h100_sxm.yaml/12",
+      "frozen_counts": {
+        "matrix_ops": 2059974967296.0,
+        "memory_read_bytes": 16060000000.0,
+        "memory_write_bytes": 16777216.0
+      },
+      "frozen_duration_method": "prefill_s",
+      "frozen_duration_s": 0.004799037974925373,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "non-KV writes"
+      ],
+      "known_append_kv_write_bytes": 16777216,
+      "linear_weight_elements": 7504658432,
+      "matrix_ops_full_square_all_token_head": 1929782493184,
+      "matrix_raw_rel": -0.06320099815722299,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "n_prompts": 1,
+        "phase": "prefill",
+        "prompt_tokens": 128,
+        "sum_of_squared_prompt_tokens": 16384,
+        "total_prompt_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 15010365440
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 335544320,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0,
+      "component_params_file": "components/asic_placeholder.yaml",
+      "component_params_sha256": "4686450b989d85b655649ee130ff4118e29a066b08b3e1347c34b453c4a030ed",
+      "count_budget_arithmetic_can_pass": true,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 1050673152,
+      "fixture_id": "llama-3.1-70b/fp16/fp16/tp1/asic_placeholder.yaml/0",
+      "frozen_counts": {
+        "matrix_ops": 141535544320.0,
+        "memory_read_bytes": 141241943040.0,
+        "memory_write_bytes": null
+      },
+      "frozen_duration_method": "decode_s",
+      "frozen_duration_s": 0.14124194304,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "decode KV writes"
+      ],
+      "known_append_kv_write_bytes": 327680,
+      "linear_weight_elements": 69501714432,
+      "matrix_ops_full_square_all_token_head": 139338973184,
+      "matrix_raw_rel": -0.015519572461838538,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 139045388288
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 335544320,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0,
+      "component_params_file": "components/nvidia_h100_sxm.yaml",
+      "component_params_sha256": "0eee9677ce86a0e9b879fc33f4d0214142b076495865408e872d6264824ee2e6",
+      "count_budget_arithmetic_can_pass": true,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 1050673152,
+      "fixture_id": "llama-3.1-70b/fp16/fp16/tp1/nvidia_h100_sxm.yaml/0",
+      "frozen_counts": {
+        "matrix_ops": 141535544320.0,
+        "memory_read_bytes": 141241943040.0,
+        "memory_write_bytes": null
+      },
+      "frozen_duration_method": "decode_s",
+      "frozen_duration_s": 0.04216177404179104,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "decode KV writes"
+      ],
+      "known_append_kv_write_bytes": 327680,
+      "linear_weight_elements": 69501714432,
+      "matrix_ops_full_square_all_token_head": 139338973184,
+      "matrix_raw_rel": -0.015519572461838538,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 139045388288
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 42949672960,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0,
+      "component_params_file": "components/asic_placeholder.yaml",
+      "component_params_sha256": "4686450b989d85b655649ee130ff4118e29a066b08b3e1347c34b453c4a030ed",
+      "count_budget_arithmetic_can_pass": true,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 1050673152,
+      "fixture_id": "llama-3.1-70b/fp16/fp16/tp1/asic_placeholder.yaml/12",
+      "frozen_counts": {
+        "matrix_ops": 18095074836480.0,
+        "memory_read_bytes": 141200000000.0,
+        "memory_write_bytes": 41943040.0
+      },
+      "frozen_duration_method": "prefill_s",
+      "frozen_duration_s": 0.3290013606632727,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "non-KV writes"
+      ],
+      "known_append_kv_write_bytes": 41943040,
+      "linear_weight_elements": 69501714432,
+      "matrix_ops_full_square_all_token_head": 17835388567552,
+      "matrix_raw_rel": -0.014351212762296388,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "n_prompts": 1,
+        "phase": "prefill",
+        "prompt_tokens": 128,
+        "sum_of_squared_prompt_tokens": 16384,
+        "total_prompt_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 139005526016
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 42949672960,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0,
+      "component_params_file": "components/nvidia_h100_sxm.yaml",
+      "component_params_sha256": "0eee9677ce86a0e9b879fc33f4d0214142b076495865408e872d6264824ee2e6",
+      "count_budget_arithmetic_can_pass": true,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 1050673152,
+      "fixture_id": "llama-3.1-70b/fp16/fp16/tp1/nvidia_h100_sxm.yaml/12",
+      "frozen_counts": {
+        "matrix_ops": 18095074836480.0,
+        "memory_read_bytes": 141200000000.0,
+        "memory_write_bytes": 41943040.0
+      },
+      "frozen_duration_method": "prefill_s",
+      "frozen_duration_s": 0.04216177404179104,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "non-KV writes"
+      ],
+      "known_append_kv_write_bytes": 41943040,
+      "linear_weight_elements": 69501714432,
+      "matrix_ops_full_square_all_token_head": 17835388567552,
+      "matrix_raw_rel": -0.014351212762296388,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "n_prompts": 1,
+        "phase": "prefill",
+        "prompt_tokens": 128,
+        "sum_of_squared_prompt_tokens": 16384,
+        "total_prompt_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 139005526016
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 67108864,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0,
+      "component_params_file": "components/asic_placeholder.yaml",
+      "component_params_sha256": "4686450b989d85b655649ee130ff4118e29a066b08b3e1347c34b453c4a030ed",
+      "count_budget_arithmetic_can_pass": true,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 131072000,
+      "fixture_id": "mixtral-8x7b/fp16/fp16/tp1/asic_placeholder.yaml/0",
+      "frozen_counts": {
+        "matrix_ops": 25867108864.0,
+        "memory_read_bytes": 25816777216.0,
+        "memory_write_bytes": null
+      },
+      "frozen_duration_method": "decode_s",
+      "frozen_duration_s": 0.025816777216,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "decode KV writes"
+      ],
+      "known_append_kv_write_bytes": 131072,
+      "linear_weight_elements": 12747538432,
+      "matrix_ops_full_square_all_token_head": 25562185728,
+      "matrix_raw_rel": -0.011788064047017264,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 25511862272
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 67108864,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0,
+      "component_params_file": "components/nvidia_h100_sxm.yaml",
+      "component_params_sha256": "0eee9677ce86a0e9b879fc33f4d0214142b076495865408e872d6264824ee2e6",
+      "count_budget_arithmetic_can_pass": true,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 131072000,
+      "fixture_id": "mixtral-8x7b/fp16/fp16/tp1/nvidia_h100_sxm.yaml/0",
+      "frozen_counts": {
+        "matrix_ops": 25867108864.0,
+        "memory_read_bytes": 25816777216.0,
+        "memory_write_bytes": null
+      },
+      "frozen_duration_method": "decode_s",
+      "frozen_duration_s": 0.007706500661492538,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "decode KV writes"
+      ],
+      "known_append_kv_write_bytes": 131072,
+      "linear_weight_elements": 12747538432,
+      "matrix_ops_full_square_all_token_head": 25562185728,
+      "matrix_raw_rel": -0.011788064047017264,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 25511862272
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 8589934592,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0,
+      "component_params_file": "components/asic_placeholder.yaml",
+      "component_params_sha256": "4686450b989d85b655649ee130ff4118e29a066b08b3e1347c34b453c4a030ed",
+      "count_budget_arithmetic_can_pass": true,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 131072000,
+      "fixture_id": "mixtral-8x7b/fp16/fp16/tp1/asic_placeholder.yaml/12",
+      "frozen_counts": {
+        "matrix_ops": 3306694967296.0,
+        "memory_read_bytes": 25800000000.0,
+        "memory_write_bytes": 16777216.0
+      },
+      "frozen_duration_method": "prefill_s",
+      "frozen_duration_s": 0.06012172667810908,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "non-KV writes"
+      ],
+      "known_append_kv_write_bytes": 16777216,
+      "linear_weight_elements": 12747538432,
+      "matrix_ops_full_square_all_token_head": 3271959773184,
+      "matrix_raw_rel": -0.010504505089081193,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "n_prompts": 1,
+        "phase": "prefill",
+        "prompt_tokens": 128,
+        "sum_of_squared_prompt_tokens": 16384,
+        "total_prompt_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 25496125440
+    },
+    {
+      "actual_engine_duration_s": null,
+      "actual_producer_duration_s": null,
+      "attention_matrix_ops": 8589934592,
+      "best_possible_residual_magnitude_with_5_percent_spend": 0,
+      "component_params_file": "components/nvidia_h100_sxm.yaml",
+      "component_params_sha256": "0eee9677ce86a0e9b879fc33f4d0214142b076495865408e872d6264824ee2e6",
+      "count_budget_arithmetic_can_pass": true,
+      "duration_parity": "not run",
+      "embedding_gather_matrix_ops": 0,
+      "embedding_table_elements": 131072000,
+      "fixture_id": "mixtral-8x7b/fp16/fp16/tp1/nvidia_h100_sxm.yaml/12",
+      "frozen_counts": {
+        "matrix_ops": 3306694967296.0,
+        "memory_read_bytes": 25800000000.0,
+        "memory_write_bytes": 16777216.0
+      },
+      "frozen_duration_method": "prefill_s",
+      "frozen_duration_s": 0.007706500661492538,
+      "frozen_omissions": [
+        "inter-chip collectives",
+        "activation memory traffic",
+        "non-KV writes"
+      ],
+      "known_append_kv_write_bytes": 16777216,
+      "linear_weight_elements": 12747538432,
+      "matrix_ops_full_square_all_token_head": 3271959773184,
+      "matrix_raw_rel": -0.010504505089081193,
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "query": {
+        "n_prompts": 1,
+        "phase": "prefill",
+        "prompt_tokens": 128,
+        "sum_of_squared_prompt_tokens": 16384,
+        "total_prompt_tokens": 128
+      },
+      "tp": 1,
+      "weight_gather_kv_read_lower_bound_bytes": 25496125440
+    }
+  ],
+  "inventory": {
+    "components": [
+      "components/asic_placeholder.yaml",
+      "components/nvidia_h100_sxm.yaml"
+    ],
+    "decode_null_writes": 432,
+    "missing_vector_channel": 864,
+    "npu_l4_records": 0,
+    "records": 864
+  },
+  "source_hashes": {
+    "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/GENERATOR.json": "adbd70e4b478f53735107834ea718ef57c2c0c759db7a9463e60dcd2b67784d3",
+    "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/MANIFEST.json": "b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d",
+    "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/parity/fixtures.json": "357543468ef03222159f99f267dbcd4e78fdcc34e0b442cbd7cedfb476a74dbb",
+    "scripts/vendor_rk.py": "4d2304002b262f2ee03dfe4f8fb338b350aacd80ea2488952849c416ee135317"
+  }
+}

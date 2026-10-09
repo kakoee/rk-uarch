@@ -1,0 +1,147 @@
+{
+  "cases": [
+    {
+      "available_peaks": [
+        "bf16"
+      ],
+      "badge": "stub",
+      "boundary": "full loader -> Precision -> _Instance -> _accelerator",
+      "case": "bf16-only",
+      "compute_efficiency": 1.0,
+      "contributors": [
+        "compute.asic.synthetic-review-only.bf16_tflops",
+        "compute.asic.synthetic-review-only.hbm_bw",
+        "compute.asic.synthetic-review-only.execution_model"
+      ],
+      "memory_efficiency": 1.0,
+      "selected_peak_param": "bf16_tflops",
+      "status": "accepted"
+    },
+    {
+      "case": "direct-missing-fp16",
+      "error_class": "UnsupportedPrecision",
+      "message": "this accelerator declares no peak for 'fp16'. It declares: bf16. The compute roof has no value without a peak, so there is no number to report and nothing to warn about \u2014 and resolving to the nearest supported format would answer a different question than the one asked (build-spec \u00a72.4, ADR 0015 \u00a72). Ask for a precision this part declares, or run it on a part that has one.",
+      "status": "refused"
+    },
+    {
+      "case": "private-missing-fp16",
+      "error_class": "EngineError",
+      "message": "component 'compute.asic.synthetic-review-only': this accelerator declares no peak for 'fp16'. It declares: bf16. The compute roof has no value without a peak, so there is no number to report and nothing to warn about \u2014 and resolving to the nearest supported format would answer a different question than the one asked (build-spec \u00a72.4, ADR 0015 \u00a72). Ask for a precision this part declares, or run it on a part that has one.",
+      "status": "refused"
+    },
+    {
+      "case": "private-missing-fp8",
+      "error_class": "EngineError",
+      "message": "component 'compute.asic.synthetic-review-only': this accelerator declares no peak for 'fp8'. It declares: bf16. The compute roof has no value without a peak, so there is no number to report and nothing to warn about \u2014 and resolving to the nearest supported format would answer a different question than the one asked (build-spec \u00a72.4, ADR 0015 \u00a72). Ask for a precision this part declares, or run it on a part that has one.",
+      "status": "refused"
+    },
+    {
+      "case": "unknown-precision",
+      "error_class": "ValidationError",
+      "message": "1 validation error for Precision\ncompute\n  Input should be 'fp32', 'tf32', 'bf16', 'fp16', 'fp8', 'int8', 'fp4' or 'int4' [type=enum, input_value='BLOCKFP8', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/enum",
+      "status": "refused"
+    },
+    {
+      "case": "missing-model",
+      "error_class": "ComponentLoadError",
+      "message": "<scratch>/missing-model.yaml: component 'compute.asic.synthetic-review-only': is not a valid ComponentDescriptor: 1 validation error for ComponentDescriptor\n  Value error, component 'compute.asic.synthetic-review-only': kind=compute_resource requires an execution_model. Without it the roofline would run at peak FLOPs, which no real stack achieves \u2014 build-spec \u00a72.3.4. [type=value_error, input_value={'calibration': [], 'fide...ource=None, date=None)}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error",
+      "status": "refused"
+    },
+    {
+      "case": "extended-value",
+      "error_class": "ComponentLoadError",
+      "message": "<scratch>/extended-value.yaml: component 'compute.asic.synthetic-review-only': params.bf16_tflops carries unknown key(s) ['kind']. A SourcedValue has exactly five fields: ['date', 'provenance', 'source', 'unit', 'value']. There is no `note` \u2014 commentary goes in a YAML comment or in `source` (build-spec \u00a72.3.1).",
+      "status": "refused"
+    },
+    {
+      "case": "no-peaks",
+      "error_class": "EngineError",
+      "message": "component 'compute.asic.synthetic-review-only' declares no per-precision peak at all, which the C0 roofline needs. Add one of fp32_tflops, tf32_tflops, bf16_tflops, fp16_tflops, fp8_tflops, int8_tops, fp4_tflops, int4_tops to the library YAML as a SourcedValue \u2014 or as provenance: stub with source: null if it cannot be sourced.",
+      "status": "refused"
+    },
+    {
+      "case": "no-bandwidth",
+      "error_class": "EngineError",
+      "message": "component 'compute.asic.synthetic-review-only' declares no 'hbm_bw' parameter, which the C0 roofline needs. Add it to the library YAML as a SourcedValue \u2014 or as provenance: stub with source: null if it cannot be sourced.",
+      "status": "refused"
+    },
+    {
+      "case": "wrong-peak-unit",
+      "error_class": "EngineError",
+      "message": "component 'compute.asic.synthetic-review-only': bf16_tflops is in 'TOPS', expected 'TFLOPS'. Units live in names and converting is a named function (CLAUDE.md invariant 7) \u2014 this engine will not guess a conversion.",
+      "status": "refused"
+    },
+    {
+      "case": "wrong-bandwidth-unit",
+      "error_class": "EngineError",
+      "message": "component 'compute.asic.synthetic-review-only': hbm_bw is in 'GB/s', expected 'TB/s'. Units live in names and converting is a named function (CLAUDE.md invariant 7) \u2014 this engine will not guess a conversion.",
+      "status": "refused"
+    },
+    {
+      "case": "wrong-ratio-unit",
+      "error_class": "EngineError",
+      "message": "component 'compute.asic.synthetic-review-only': execution_model.value is in 'W', expected 'ratio'. Units live in names and converting is a named function (CLAUDE.md invariant 7) \u2014 this engine will not guess a conversion.",
+      "status": "refused"
+    },
+    {
+      "case": "unselected-int8-wrong-unit",
+      "error_class": "EngineError",
+      "message": "component 'compute.asic.synthetic-review-only': int8_tops is in 'TFLOPS', expected 'TOPS'. Units live in names and converting is a named function (CLAUDE.md invariant 7) \u2014 this engine will not guess a conversion.",
+      "status": "refused"
+    },
+    {
+      "case": "invalid-evidence-measured",
+      "error_class": "ComponentLoadError",
+      "message": "<scratch>/invalid-evidence-measured.yaml: component 'compute.asic.synthetic-review-only': bf16_tflops is badged 'measured' and this component carries no `calibration` anchor. `measured` is the strongest badge in the system and it means the value came out of measure/results/ with an anchor id (rk/components/library/README.md's provenance table). Promotion happens through `rk calibrate promote`, never by hand \u2014 a typed 'measured' with nothing recording the measurement is a badge no anchor can be checked against.",
+      "status": "refused"
+    },
+    {
+      "case": "invalid-evidence-spec_derived",
+      "error_class": "ComponentLoadError",
+      "message": "<scratch>/invalid-evidence-spec_derived.yaml: component 'compute.asic.synthetic-review-only': bf16_tflops is badged 'spec_derived' with source 'uarch-derive:sha256:synthetic:matrix-peak/1', which is not a URL. `spec_derived` means a vendor datasheet somebody can open and read the row from (rk/components/library/README.md's provenance table); a description of a datasheet is not one. Cite the document, or drop to 'estimated' with the derivation in docs/decisions/.",
+      "status": "refused"
+    },
+    {
+      "case": "invalid-evidence-estimated",
+      "error_class": "ComponentLoadError",
+      "message": "<scratch>/invalid-evidence-estimated.yaml: component 'compute.asic.synthetic-review-only': bf16_tflops is badged 'estimated' with source 'uarch-derive:sha256:synthetic:matrix-peak/1', which names no derivation. `estimated` means derived from indirect public evidence, and rk/components/library/README.md's provenance table requires the derivation to live in docs/decisions/ \u2014 so the source must point at it. Without that the badge is a claim that reasoning happened somewhere nobody can find. ADR 0006 \u00a74 is what this rule exists to keep repeatable.",
+      "status": "refused"
+    },
+    {
+      "available_peaks": [
+        "bf16"
+      ],
+      "badge": "stub",
+      "boundary": "full loader -> Precision -> _Instance -> _accelerator",
+      "case": "bf16-compute-fp8-kv-adapter-only",
+      "compute_efficiency": 1.0,
+      "contributors": [
+        "compute.asic.synthetic-review-only.bf16_tflops",
+        "compute.asic.synthetic-review-only.hbm_bw",
+        "compute.asic.synthetic-review-only.execution_model"
+      ],
+      "memory_efficiency": 1.0,
+      "selected_peak_param": "bf16_tflops",
+      "status": "accepted"
+    },
+    {
+      "case": "duplicate-component-id",
+      "error_class": "ComponentLoadError",
+      "status": "refused"
+    }
+  ],
+  "classification": "safe synthetic full-loader/adapter selection; not oracle generation, counts, durations or actual npu-l4 evidence",
+  "interpreter": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+  "limitations": [
+    "Hardware KV inventory and export/hash semantic bridge checks are planned, not upstream behavior.",
+    "No upstream tree edited; no new dependency; no frozen oracle values generated."
+  ],
+  "oracle_calls": 0,
+  "pin": "1e5706e0ebfcc67c1a7333079a35b75f693e9963",
+  "retained_scratch_directory": "/tmp/u0003-synthetic-loader-8dkh3_s3",
+  "source_sha256": {
+    "rk/components/loader.py": "57db13f8cf02b61683b81e8488155da2df9e97741a09a1edaec135722fe0c94e",
+    "rk/engine/orchestrator.py": "5cab0afb61f4fbf749e3d4144720022e72f2ff04cda48329cd83e85dabd2f988",
+    "rk/schema/components.py": "379fa21f930106e84fba1b212cdf71956720e56e69a6eb243d655429958ad174"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "$defs": {
+    "FamilyRegistryEntriesItem": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Family",
+          "type": "string"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "family",
+        "hardware_spec_hash"
+      ],
+      "title": "FamilyRegistryEntriesItem",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/FamilyRegistryEntriesItem"
+      },
+      "minItems": 1,
+      "title": "Entries",
+      "type": "array"
+    },
+    "format": {
+      "const": "uarch-family-registry/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "registry_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Registry Hash",
+      "type": "string"
+    },
+    "review_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Review Hash",
+      "type": "string"
+    },
+    "version": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "entries",
+    "format",
+    "registry_hash",
+    "review_hash",
+    "version"
+  ],
+  "title": "FamilyRegistry",
+  "type": "object"
+}

@@ -1,0 +1,172 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "Parameter": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "Parameter",
+      "type": "object"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "component_id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Component Id",
+      "type": "string"
+    },
+    "derivation_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Derivation Hash",
+      "type": "string"
+    },
+    "design_status": {
+      "enum": [
+        "proposed",
+        "reference"
+      ],
+      "title": "Design Status",
+      "type": "string"
+    },
+    "execution_model_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Execution Model Hash",
+      "type": "string"
+    },
+    "export_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Export Hash",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-component-truth/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "hardware_spec_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Hardware Spec Hash",
+      "type": "string"
+    },
+    "params": {
+      "items": {
+        "$ref": "#/$defs/Parameter"
+      },
+      "minItems": 1,
+      "title": "Params",
+      "type": "array"
+    }
+  },
+  "required": [
+    "component_id",
+    "derivation_hash",
+    "design_status",
+    "execution_model_hash",
+    "export_hash",
+    "format",
+    "hardware_spec_hash",
+    "params"
+  ],
+  "title": "ComponentExport",
+  "type": "object"
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "global_kv_heads": {
+      "minimum": 1,
+      "title": "Global Kv Heads",
+      "type": "integer"
+    },
+    "global_vocab": {
+      "minimum": 1,
+      "title": "Global Vocab",
+      "type": "integer"
+    },
+    "kv_replicated": {
+      "title": "Kv Replicated",
+      "type": "boolean"
+    },
+    "padded_vocab": {
+      "minimum": 1,
+      "title": "Padded Vocab",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "global_kv_heads",
+    "global_vocab",
+    "kv_replicated",
+    "padded_vocab"
+  ],
+  "title": "ProjectionScope",
+  "type": "object"
+}

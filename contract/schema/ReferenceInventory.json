@@ -1,0 +1,470 @@
+{
+  "$defs": {
+    "ArtifactPointer": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifact Hash",
+          "type": "string"
+        },
+        "json_pointer": {
+          "pattern": "^(/.*)?$",
+          "title": "Json Pointer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "json_pointer"
+      ],
+      "title": "ArtifactPointer",
+      "type": "object"
+    },
+    "DecodeQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "phase": {
+          "const": "decode",
+          "title": "Phase",
+          "type": "string"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "batch",
+        "phase",
+        "total_context_tokens"
+      ],
+      "title": "DecodeQuery",
+      "type": "object"
+    },
+    "ExpectedPrecisionRefusal": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary": {
+          "minLength": 1,
+          "title": "Boundary",
+          "type": "string"
+        },
+        "check_input_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Check Input Hash",
+          "type": "string"
+        },
+        "component_binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Component Binding Hash",
+          "type": "string"
+        },
+        "error_class": {
+          "minLength": 1,
+          "title": "Error Class",
+          "type": "string"
+        },
+        "precision": {
+          "$ref": "#/$defs/ExplicitPrecision"
+        },
+        "refusal_id": {
+          "minLength": 1,
+          "title": "Refusal Id",
+          "type": "string"
+        },
+        "source_entry_index": {
+          "minimum": 0,
+          "title": "Source Entry Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "boundary",
+        "check_input_hash",
+        "component_binding_hash",
+        "error_class",
+        "precision",
+        "refusal_id",
+        "source_entry_index"
+      ],
+      "title": "ExpectedPrecisionRefusal",
+      "type": "object"
+    },
+    "ExplicitPrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache"
+      ],
+      "title": "ExplicitPrecision",
+      "type": "object"
+    },
+    "ModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "physical-resolved",
+            "nominal-rk-compatibility"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "implementation_hash",
+        "name",
+        "version"
+      ],
+      "title": "ModelIdentity",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "PrefillQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "phase": {
+          "const": "prefill",
+          "title": "Phase",
+          "type": "string"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "n_prompts",
+        "phase",
+        "prompt_tokens"
+      ],
+      "title": "PrefillQuery",
+      "type": "object"
+    },
+    "ProjectionScope": {
+      "additionalProperties": false,
+      "properties": {
+        "global_kv_heads": {
+          "minimum": 1,
+          "title": "Global Kv Heads",
+          "type": "integer"
+        },
+        "global_vocab": {
+          "minimum": 1,
+          "title": "Global Vocab",
+          "type": "integer"
+        },
+        "kv_replicated": {
+          "title": "Kv Replicated",
+          "type": "boolean"
+        },
+        "padded_vocab": {
+          "minimum": 1,
+          "title": "Padded Vocab",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "global_kv_heads",
+        "global_vocab",
+        "kv_replicated",
+        "padded_vocab"
+      ],
+      "title": "ProjectionScope",
+      "type": "object"
+    },
+    "ReferenceInventoryFixturesItem": {
+      "additionalProperties": false,
+      "properties": {
+        "component_binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Component Binding Hash",
+          "type": "string"
+        },
+        "fixture_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Fixture Id",
+          "type": "string"
+        },
+        "precision": {
+          "$ref": "#/$defs/ExplicitPrecision"
+        },
+        "projection_scope": {
+          "$ref": "#/$defs/ProjectionScope"
+        },
+        "query": {
+          "discriminator": {
+            "mapping": {
+              "decode": "#/$defs/DecodeQuery",
+              "prefill": "#/$defs/PrefillQuery"
+            },
+            "propertyName": "phase"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DecodeQuery"
+            },
+            {
+              "$ref": "#/$defs/PrefillQuery"
+            }
+          ],
+          "title": "Query"
+        },
+        "tp": {
+          "minimum": 1,
+          "title": "Tp",
+          "type": "integer"
+        },
+        "values": {
+          "$ref": "#/$defs/ReferenceInventoryFixturesItemValues"
+        }
+      },
+      "required": [
+        "component_binding_hash",
+        "fixture_id",
+        "precision",
+        "projection_scope",
+        "query",
+        "tp",
+        "values"
+      ],
+      "title": "ReferenceInventoryFixturesItem",
+      "type": "object"
+    },
+    "ReferenceInventoryFixturesItemValues": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_s": {
+          "$ref": "#/$defs/ReferenceValue"
+        },
+        "matrix_ops": {
+          "$ref": "#/$defs/ReferenceValue"
+        },
+        "memory_read_bytes": {
+          "$ref": "#/$defs/ReferenceValue"
+        },
+        "memory_write_bytes": {
+          "$ref": "#/$defs/ReferenceValue"
+        },
+        "vector_ops": {
+          "$ref": "#/$defs/ReferenceValue"
+        }
+      },
+      "required": [
+        "duration_s",
+        "matrix_ops",
+        "memory_read_bytes",
+        "memory_write_bytes",
+        "vector_ops"
+      ],
+      "title": "ReferenceInventoryFixturesItemValues",
+      "type": "object"
+    },
+    "ReferenceValue": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "positive"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "zero"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "absent"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "positive",
+            "zero",
+            "null",
+            "absent"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "ge": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "title": "ReferenceValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "classification": {
+      "enum": [
+        "adopted_oracle",
+        "synthetic_reference"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "fixtures": {
+      "items": {
+        "$ref": "#/$defs/ReferenceInventoryFixturesItem"
+      },
+      "minItems": 1,
+      "title": "Fixtures",
+      "type": "array"
+    },
+    "format": {
+      "const": "uarch-reference-inventory/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "inventory_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Inventory Hash",
+      "type": "string"
+    },
+    "oracle_manifest_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracle Manifest Sha256",
+      "type": "string"
+    },
+    "reference_model": {
+      "$ref": "#/$defs/ModelIdentity"
+    },
+    "refusal_inventory_source": {
+      "$ref": "#/$defs/ArtifactPointer"
+    },
+    "refusals": {
+      "items": {
+        "$ref": "#/$defs/ExpectedPrecisionRefusal"
+      },
+      "title": "Refusals",
+      "type": "array"
+    }
+  },
+  "required": [
+    "classification",
+    "fixtures",
+    "format",
+    "inventory_hash",
+    "oracle_manifest_sha256",
+    "reference_model",
+    "refusal_inventory_source",
+    "refusals"
+  ],
+  "title": "ReferenceInventory",
+  "type": "object"
+}

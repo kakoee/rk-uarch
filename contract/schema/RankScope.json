@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "collectives": {
+      "const": "excluded",
+      "title": "Collectives",
+      "type": "string"
+    },
+    "equivalent_ranks": {
+      "items": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Equivalent Ranks",
+      "type": "array"
+    },
+    "kind": {
+      "enum": [
+        "balanced_tp_representative",
+        "balanced_tp_selected_rank"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "rank_index": {
+      "minimum": 0,
+      "title": "Rank Index",
+      "type": "integer"
+    },
+    "tp": {
+      "minimum": 1,
+      "title": "Tp",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "collectives",
+    "equivalent_ranks",
+    "kind",
+    "rank_index",
+    "tp"
+  ],
+  "title": "RankScope",
+  "type": "object"
+}

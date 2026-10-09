@@ -1,0 +1,66 @@
+{
+  "classification": "independent_B_test_specification",
+  "runtime_status": "pending A1 APIs and B implementation",
+  "cases": [
+    {
+      "id": "S01",
+      "setup": "Complete independently bound synthetic bundle, review/order/verification/registry; L3 count evidence with error_band=null.",
+      "expected": "eligible estimated counts; unknown band, not automatic rejection."
+    },
+    {
+      "id": "S02",
+      "setup": "Supplied evidence-no-band.json: null prepared bundle, no ordering/verification.",
+      "expected": "ineligible; supplied fixture is NOT positive L3 evidence."
+    },
+    {
+      "id": "S03",
+      "setup": "S01 count evidence requested for duration, including duration ratio 0.",
+      "expected": "stub duration; count evidence does not transfer."
+    },
+    {
+      "id": "S04",
+      "setup": "Only actual model covered; separately identified reference model uncovered.",
+      "expected": "ratio inherits reference model stub; no primary-model substitution."
+    },
+    {
+      "id": "S05",
+      "setup": "Evidence compute bf16/KV fp8 vs requested compute fp8/KV bf16.",
+      "expected": "scope mismatch; roles cannot be swapped."
+    },
+    {
+      "id": "S06",
+      "setup": "BLOCKFP8 vendor source offered for plain fp8.",
+      "expected": "not matching precision evidence."
+    },
+    {
+      "id": "S07",
+      "setup": "Required load/mapping dimension null; observed match or one family match.",
+      "expected": "no applicability; null is not wildcard."
+    },
+    {
+      "id": "S08",
+      "setup": "Two cases cover (bf16,low) and (fp8,high); ask (bf16,high).",
+      "expected": "no Cartesian-product coverage."
+    },
+    {
+      "id": "S09",
+      "setup": "One operator duration validated in multi-operator iteration.",
+      "expected": "no whole-iteration upgrade without required composition evidence."
+    },
+    {
+      "id": "S10",
+      "setup": "Energy mac/sram/noc_hop/dram covered; static missing.",
+      "expected": "aggregate energy unverified; all consumed families and scope required."
+    },
+    {
+      "id": "S11",
+      "setup": "same class evidence for a different hardware hash without reviewed family registry correspondence.",
+      "expected": "no family inference by filename; refuse missing registry or remain inapplicable."
+    },
+    {
+      "id": "S12",
+      "setup": "Matching measured duration evidence has supplied error band; deterministic output no separately supplied interval.",
+      "expected": "never manufacture ci95; compare purpose and granularity before using supplied band."
+    }
+  ]
+}

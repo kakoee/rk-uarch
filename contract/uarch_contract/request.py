@@ -95,8 +95,7 @@ class VisitWeights(FrozenModel):
     prefill: tuple[PrefillVisitWeight, ...]
 
 
-class CharacterizationRequest(FrozenModel):
-    contract: Literal["uarch-contract/0.1"]
+class _RequestFields(FrozenModel):
     rk_schema_snapshot: Sha
     component_id: NonEmpty
     hardware_spec_hash: Hash
@@ -114,7 +113,7 @@ class CharacterizationRequest(FrozenModel):
     seed: NonNegativeInt
 
     @model_validator(mode="after")
-    def shape_and_shard(self) -> CharacterizationRequest:
+    def shape_and_shard(self) -> _RequestFields:
         check_parity(self.model, self.model_shape)
         dimensions = {"n_heads": self.model.n_heads, "d_ff": self.model_shape.d_ff}
         if self.model_shape.expert_d_ff is not None:
@@ -144,3 +143,34 @@ class CharacterizationRequest(FrozenModel):
                     f"{name} envelope maximum {limit} exceeds grid {max(axis)}."
                 )
         return self
+
+
+class LegacyCharacterizationRequest(_RequestFields):
+    """Explicit historical 0.1 inspection, never a production U2 request."""
+
+    contract: Literal["uarch-contract/0.1"]
+
+
+class RequestIntent(_RequestFields):
+    accounting: Literal["resolved-ops/1"]
+    analytic_mode: Literal["aggregate", "per_op"]
+    assumptions_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    contract: Literal["uarch-contract/0.2"]
+    preparation_policy: Literal["balanced-tp/1"]
+
+
+class CharacterizationRequest(RequestIntent):
+    prepared_input_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+
+
+# Only accepted named roots are emitted; inline helper shapes are nested definitions.
+SCHEMA_ROOTS = (
+    RequestIntent,
+    CharacterizationRequest,
+)
+
+for _model in (
+    RequestIntent,
+    CharacterizationRequest,
+):
+    _model.model_rebuild()

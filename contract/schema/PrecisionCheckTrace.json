@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "ArtifactPointer": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifact Hash",
+          "type": "string"
+        },
+        "json_pointer": {
+          "pattern": "^(/.*)?$",
+          "title": "Json Pointer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "json_pointer"
+      ],
+      "title": "ArtifactPointer",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "capture_source": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ArtifactPointer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "check_input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Check Input Hash",
+      "type": "string"
+    },
+    "classification": {
+      "enum": [
+        "synthetic_observation",
+        "captured_probe"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "error_class": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Error Class"
+    },
+    "execution": {
+      "enum": [
+        "refused",
+        "succeeded",
+        "execution_failed"
+      ],
+      "title": "Execution",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-precision-check-trace/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "message": {
+      "minLength": 1,
+      "title": "Message",
+      "type": "string"
+    },
+    "observed_boundary": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Observed Boundary"
+    },
+    "trace_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Trace Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "capture_source",
+    "check_input_hash",
+    "classification",
+    "error_class",
+    "execution",
+    "format",
+    "message",
+    "observed_boundary",
+    "trace_hash"
+  ],
+  "title": "PrecisionCheckTrace",
+  "type": "object"
+}

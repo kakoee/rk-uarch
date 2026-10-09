@@ -1,0 +1,150 @@
+{
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "u2-proof-compiler-counts/2"
+    },
+    "compiler_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compiler_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "program_sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "original_output": {
+      "type": "object",
+      "properties": {
+        "source_record_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "member_name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*\\.(json|csv|txt)$"
+        },
+        "member_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "source_record_hash",
+        "member_name",
+        "member_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "model_input_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "bundle_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "point_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "rank": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "basis": {
+      "enum": [
+        "selected_rank_one_iteration_all_layers_no_collectives",
+        "selected_rank_captured_op_instances"
+      ]
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "benchmark_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "operator_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quantity": {
+            "enum": [
+              "matrix_ops",
+              "vector_ops",
+              "memory_read_bytes",
+              "memory_write_bytes"
+            ]
+          },
+          "unit": {
+            "enum": [
+              "count",
+              "byte"
+            ]
+          },
+          "value_decimal": {
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]*[1-9])?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "benchmark_id",
+          "group_id",
+          "operator_id",
+          "quantity",
+          "unit",
+          "value_decimal"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "format",
+    "compiler_identity",
+    "compiler_version",
+    "program_sha256",
+    "original_output",
+    "model_input_hash",
+    "bundle_hash",
+    "point_hash",
+    "rank",
+    "basis",
+    "rows"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:u2-proof-proposal:revision2:compiler-counts.schema.json"
+}

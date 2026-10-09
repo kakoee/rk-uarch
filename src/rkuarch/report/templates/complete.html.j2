@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Uarch evidence report</title>
+<style>body{font-family:system-ui,sans-serif;max-width:90em;margin:auto;padding:2em}dt{font-weight:bold}dd{overflow-wrap:anywhere;margin-bottom:1em}svg{max-width:100%;border:1px solid #ccc}section{border-top:1px solid #ccc}details{margin:1em 0}</style></head><body>
+<h1>Uarch evidence report</h1>
+{% for label, entries in sections %}<section><h2>{{ label }}</h2><details open><summary>Inputs, evidence and permissions</summary><dl>{% for label, metric in entries %}<dt>{{ label }}</dt><dd>{{ metric.text }}</dd>{% endfor %}</dl></details></section>
+{% endfor %}<section><h2>Captured per-op roofline</h2><p>Isolated per-op roofline estimates; durations do not add to aggregate latency.</p>
+{% for plot in plots %}{{ plot.svg | safe }}{% endfor %}</section>
+</body></html>

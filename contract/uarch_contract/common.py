@@ -4,7 +4,7 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
-CONTRACT_VERSION = "uarch-contract/0.1"
+CONTRACT_VERSION = "uarch-contract/0.2"
 RK_SCHEMA_SNAPSHOT = "1e5706e0ebfcc67c1a7333079a35b75f693e9963"
 PositiveInt = Annotated[int, Field(ge=1)]
 NonNegativeInt = Annotated[int, Field(ge=0)]

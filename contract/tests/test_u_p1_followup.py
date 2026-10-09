@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 from uarch_contract import table as models
-from uarch_contract.hashing import table_hash
+from uarch_contract.hashing import legacy_table_hash
 
 from .test_u_p1 import hardware, request_data, sv, toy
 
@@ -69,10 +69,10 @@ def test_cycle_hardware_conditions_round_trip(path: str, unit: str) -> None:
     data = toy()
     echo = sv(64, unit, kind="stipulation", provenance=None, rationale="synthetic design")
     data["provenance"]["conditional_on"] = [{"path": path, "value": echo}]
-    model = models.UarchCostTable.model_validate(data)
+    model = models.LegacyUarchCostTable.model_validate(data)
     assert model.provenance.conditional_on[0].value.unit == unit
     assert model.provenance.conditional_on[0].value.value == 64
-    assert models.UarchCostTable.model_validate_json(model.model_dump_json()) == model
+    assert models.LegacyUarchCostTable.model_validate_json(model.model_dump_json()) == model
 
 
 @pytest.mark.parametrize("location", ["params", "row", "diagnostics", "top", "condition_extra"])
@@ -84,7 +84,7 @@ def test_cycle_exception_cannot_escape_condition_value(location: str) -> None:
             "value": sv(1, "cycle", kind="stipulation", provenance=None, rationale="synthetic"),
         }
     ]
-    models.UarchCostTable.model_validate(data)  # valid echo must not mask the negative case
+    models.LegacyUarchCostTable.model_validate(data)  # valid echo must not mask the negative case
     if location == "params":
         data["provenance"]["params"] = [{"name": "computed", "value": sv(1, "cycle")}]
     elif location == "row":
@@ -96,7 +96,7 @@ def test_cycle_exception_cannot_escape_condition_value(location: str) -> None:
     else:
         data["provenance"]["conditional_on"][0]["computed_cycles"] = 1
     with pytest.raises(ValidationError):
-        models.UarchCostTable.model_validate(data)
+        models.LegacyUarchCostTable.model_validate(data)
 
 
 @pytest.mark.parametrize("change", ["claim", "wrong_unit"])
@@ -107,7 +107,7 @@ def test_condition_exception_preserves_stipulation_and_unit_rules(change: str) -
     value = sv(1, "cycle", kind="stipulation", provenance=None, rationale="synthetic")
     condition = {"path": "cores.core_type.job_overhead_cycles", "value": value}
     data["provenance"]["conditional_on"] = [condition]
-    models.UarchCostTable.model_validate(data)
+    models.LegacyUarchCostTable.model_validate(data)
     if change == "claim":
         condition["value"] = sv(1, "cycle")
     else:
@@ -118,29 +118,31 @@ def test_condition_exception_preserves_stipulation_and_unit_rules(change: str) -
         with pytest.raises(ValidationError, match="job_overhead_cycles.*unit"):
             HardwareSpec.model_validate(spec)
     with pytest.raises(ValidationError):
-        models.UarchCostTable.model_validate(data)
+        models.LegacyUarchCostTable.model_validate(data)
 
 
 def test_table_requires_hardware_identity() -> None:
     data = toy()
     data.pop("hardware_spec_hash", None)
     with pytest.raises(ValidationError, match="hardware_spec_hash"):
-        models.UarchCostTable.model_validate(data)
+        models.LegacyUarchCostTable.model_validate(data)
 
 
 @pytest.mark.parametrize("value", [None, "", "a" * 64, "sha256:" + "a" * 63, "sha256:" + "G" * 64])
 def test_table_refuses_malformed_hardware_identity(value: Any) -> None:
     with pytest.raises(ValidationError, match="hardware_spec_hash"):
-        models.UarchCostTable.model_validate(toy() | {"hardware_spec_hash": value})
+        models.LegacyUarchCostTable.model_validate(toy() | {"hardware_spec_hash": value})
 
 
 def test_hardware_identity_round_trip_schema_and_digest() -> None:
     data = toy() | {"hardware_spec_hash": request_data()["hardware_spec_hash"]}
-    model = models.UarchCostTable.model_validate(data)
-    assert models.UarchCostTable.model_validate_json(model.model_dump_json()) == model
+    model = models.LegacyUarchCostTable.model_validate(data)
+    assert models.LegacyUarchCostTable.model_validate_json(model.model_dump_json()) == model
     assert model.hardware_spec_hash == request_data()["hardware_spec_hash"]
-    assert "hardware_spec_hash" in models.UarchCostTable.model_json_schema()["required"]
-    assert table_hash(data) != table_hash(data | {"hardware_spec_hash": "sha256:" + "b" * 64})
+    assert "hardware_spec_hash" in models.LegacyUarchCostTable.model_json_schema()["required"]
+    assert legacy_table_hash(data) != legacy_table_hash(
+        data | {"hardware_spec_hash": "sha256:" + "b" * 64}
+    )
 
 
 @pytest.mark.parametrize("kind", ["not_run", "harness_self_test", "workload_parity"])
@@ -316,7 +318,7 @@ def test_per_fixture_channel_budget_cannot_pool() -> None:
 
 def test_table_preserves_comparison_classification_and_attribution() -> None:
     data = toy() | {"flop_parity": parity()}
-    model = models.UarchCostTable.model_validate(data)
+    model = models.LegacyUarchCostTable.model_validate(data)
     assert model.flop_parity.kind == "harness_self_test"
     assert model.flop_parity.comparisons[0].fixture_id == "synthetic/adjusted"
     assert model.flop_parity.comparisons[0].channel == "matrix_ops"
@@ -324,12 +326,12 @@ def test_table_preserves_comparison_classification_and_attribution() -> None:
 
 @pytest.mark.parametrize("tp,pad", [(16, False), (8, True)])
 def test_a_f12_oracle_scope_does_not_restrict_legitimate_shapes(tp: int, pad: bool) -> None:
-    from uarch_contract.request import CharacterizationRequest
+    from uarch_contract.request import LegacyCharacterizationRequest
 
     data = request_data() | {"tp": tp}
     if pad:
         data["model_shape"]["vocab_size"] += 1
-    model = CharacterizationRequest.model_validate(data)
+    model = LegacyCharacterizationRequest.model_validate(data)
     assert model.tp == tp
     if pad:
         assert model.model_shape.vocab_size % tp != 0
@@ -352,5 +354,5 @@ def test_condition_carrier_does_not_claim_to_verify_unavailable_hardware() -> No
             ),
         }
     ]
-    model = models.UarchCostTable.model_validate(data)
+    model = models.LegacyUarchCostTable.model_validate(data)
     assert model.provenance.conditional_on[0].path == "nocs[999].link_bytes_per_cycle"

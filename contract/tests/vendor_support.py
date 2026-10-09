@@ -65,10 +65,11 @@ def translate_count_names(counts: dict[str, Any]) -> dict[str, Any]:
 def check_production_isolation(root: Path) -> None:
     """Conservative source guard, not a proof against arbitrary obfuscated execution.
 
-    Only A's fixed local schema-discovery import is allowed. New dynamic loading needs review.
+    Only the fixed schema discovery and byte-pinned local JSON import are allowed.
     Import-linter separately checks the static import graph.
     """
     import ast
+    import hashlib
 
     for directory in (root / "src", root / "contract/uarch_contract"):
         for path in sorted(directory.rglob("*.py")):
@@ -83,7 +84,19 @@ def check_production_isolation(root: Path) -> None:
                         else [node.module or ""]
                     )
                     forbidden = {"rk", "scripts"} | (set() if schema_generator else {"importlib"})
-                    if any(name.split(".")[0] in forbidden for name in names):
+                    fixed_proof_resources = (
+                        path == root / "src/rkuarch/provenance/proof_raw.py"
+                        and hashlib.sha256(path.read_bytes()).hexdigest()
+                        == "9f47439f058417e24fcf2891f996d7b9428a69c4c8825c5e3188936c6d659c15"
+                        and isinstance(node, ast.ImportFrom)
+                        and node.level == 0
+                        and node.module == "importlib.resources"
+                        and [(alias.name, alias.asname) for alias in node.names] == [("files", None)]
+                    )
+                    if (
+                        any(name.split(".")[0] in forbidden for name in names)
+                        and not fixed_proof_resources
+                    ):
                         violations.append(node.lineno)
                 if isinstance(node, ast.Call):
                     name = (

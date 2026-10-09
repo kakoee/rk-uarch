@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allow_synthetic_presentation": {
+      "title": "Allow Synthetic Presentation",
+      "type": "boolean"
+    },
+    "format": {
+      "const": "uarch-render/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "locale": {
+      "const": "en",
+      "title": "Locale",
+      "type": "string"
+    },
+    "number_format": {
+      "const": "roundtrip-display/1",
+      "title": "Number Format",
+      "type": "string"
+    },
+    "render_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Render Hash",
+      "type": "string"
+    },
+    "renderer_version": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Renderer Version",
+      "type": "string"
+    },
+    "report_context_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Report Context Hash",
+      "type": "string"
+    },
+    "show_unvalidated_predictions": {
+      "title": "Show Unvalidated Predictions",
+      "type": "boolean"
+    },
+    "table_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Table Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "allow_synthetic_presentation",
+    "format",
+    "locale",
+    "number_format",
+    "render_hash",
+    "renderer_version",
+    "report_context_hash",
+    "show_unvalidated_predictions",
+    "table_hash"
+  ],
+  "title": "RenderSpec",
+  "type": "object"
+}

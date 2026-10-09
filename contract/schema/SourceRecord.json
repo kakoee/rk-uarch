@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "uarch-reference-source/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "independence_from_candidate": {
+      "title": "Independence From Candidate",
+      "type": "boolean"
+    },
+    "kind": {
+      "enum": [
+        "silicon_measurement",
+        "independent_simulator",
+        "hand_derived",
+        "contract_test",
+        "synthetic_fixture"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "limitation": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Limitation",
+      "type": "string"
+    },
+    "raw_blob_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Raw Blob Sha256",
+      "type": "string"
+    },
+    "reference_identity": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Reference Identity",
+      "type": "string"
+    },
+    "reference_version": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Reference Version",
+      "type": "string"
+    },
+    "source_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Source Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "independence_from_candidate",
+    "kind",
+    "limitation",
+    "raw_blob_sha256",
+    "reference_identity",
+    "reference_version",
+    "source_hash"
+  ],
+  "title": "SourceRecord",
+  "type": "object"
+}

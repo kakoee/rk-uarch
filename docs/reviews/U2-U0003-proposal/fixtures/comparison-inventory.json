@@ -1,0 +1,193 @@
+{
+  "classification": "synthetic_reference",
+  "fixtures": [
+    {
+      "component_binding_hash": "sha256:ae4cdf6592845c157a3ff0160d0a7a5d41a167ca914d0597cfae7a42f76436ba",
+      "fixture_id": "synthetic/mixed",
+      "precision": {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      },
+      "projection_scope": {
+        "global_kv_heads": 2,
+        "global_vocab": 8,
+        "kv_replicated": false,
+        "padded_vocab": 8
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 17
+      },
+      "tp": 1,
+      "values": {
+        "duration_s": {
+          "state": "positive",
+          "value": 1.892e-06
+        },
+        "matrix_ops": {
+          "state": "positive",
+          "value": 1000.0
+        },
+        "memory_read_bytes": {
+          "state": "positive",
+          "value": 1296.0
+        },
+        "memory_write_bytes": {
+          "state": "null",
+          "value": null
+        },
+        "vector_ops": {
+          "state": "absent",
+          "value": null
+        }
+      }
+    },
+    {
+      "component_binding_hash": "sha256:ae4cdf6592845c157a3ff0160d0a7a5d41a167ca914d0597cfae7a42f76436ba",
+      "fixture_id": "synthetic/known-zero",
+      "precision": {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      },
+      "projection_scope": {
+        "global_kv_heads": 2,
+        "global_vocab": 8,
+        "kv_replicated": false,
+        "padded_vocab": 8
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 17
+      },
+      "tp": 1,
+      "values": {
+        "duration_s": {
+          "state": "positive",
+          "value": 1.892e-06
+        },
+        "matrix_ops": {
+          "state": "zero",
+          "value": 0.0
+        },
+        "memory_read_bytes": {
+          "state": "positive",
+          "value": 1296.0
+        },
+        "memory_write_bytes": {
+          "state": "null",
+          "value": null
+        },
+        "vector_ops": {
+          "state": "absent",
+          "value": null
+        }
+      }
+    },
+    {
+      "component_binding_hash": "sha256:ae4cdf6592845c157a3ff0160d0a7a5d41a167ca914d0597cfae7a42f76436ba",
+      "fixture_id": "synthetic/precall-refusal",
+      "precision": {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      },
+      "projection_scope": {
+        "global_kv_heads": 8,
+        "global_vocab": 128,
+        "kv_replicated": true,
+        "padded_vocab": 128
+      },
+      "query": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 17
+      },
+      "tp": 16,
+      "values": {
+        "duration_s": {
+          "state": "positive",
+          "value": 1.892e-06
+        },
+        "matrix_ops": {
+          "state": "positive",
+          "value": 1000.0
+        },
+        "memory_read_bytes": {
+          "state": "positive",
+          "value": 1296.0
+        },
+        "memory_write_bytes": {
+          "state": "null",
+          "value": null
+        },
+        "vector_ops": {
+          "state": "absent",
+          "value": null
+        }
+      }
+    }
+  ],
+  "format": "uarch-reference-inventory/1",
+  "inventory_hash": "sha256:65287faa432cc74a89125adba8a92c67126207ad8e319d08d75ed77ed8da41d2",
+  "oracle_manifest_sha256": "sha256:09efec6f671d89865b4389b7c6feb2465ad21a1c3986e3802997a59ac4197d43",
+  "reference_model": {
+    "implementation_hash": "sha256:c88a7944fbdd203fbbd998f74997a0e27b859cb418ac8828e619e5082cd306a1",
+    "name": "nominal-rk-compatibility",
+    "version": "1-proposed"
+  },
+  "refusal_inventory_source": {
+    "artifact_hash": "sha256:42918f3460e0d54a8a910ac6ff5b414b4e0f40c1cd2824a0baafdfb01d7a7e6d",
+    "json_pointer": "/refusals"
+  },
+  "refusals": [
+    {
+      "boundary": "direct Accelerator.peak_op_per_s",
+      "check_input_hash": "sha256:1ee2bb831ffc07c48a869b50d4f366327fa9aac68e361ac15836cefda0880a36",
+      "component_binding_hash": "sha256:6c6a330768e324b50d955de086f5619dc58f41658a297cbc4223a8579b1ae03e",
+      "error_class": "UnsupportedPrecision",
+      "precision": {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      },
+      "refusal_id": "asic_placeholder.yaml/bf16/bf16/direct-peak",
+      "source_entry_index": 0
+    },
+    {
+      "boundary": "direct Accelerator.peak_op_per_s",
+      "check_input_hash": "sha256:2fb4e39bbf9e8a4f517c34a748973189502911fcd61695acd2f0527a22f500ae",
+      "component_binding_hash": "sha256:6c6a330768e324b50d955de086f5619dc58f41658a297cbc4223a8579b1ae03e",
+      "error_class": "UnsupportedPrecision",
+      "precision": {
+        "compute": "fp8",
+        "kv_cache": "fp8"
+      },
+      "refusal_id": "asic_placeholder.yaml/fp8/fp8/direct-peak",
+      "source_entry_index": 1
+    },
+    {
+      "boundary": "direct Accelerator.peak_op_per_s",
+      "check_input_hash": "sha256:82e36a0c15935c81d5a193a00904e2ff059020af3763674f6c3738a20544f56c",
+      "component_binding_hash": "sha256:ae4cdf6592845c157a3ff0160d0a7a5d41a167ca914d0597cfae7a42f76436ba",
+      "error_class": "UnsupportedPrecision",
+      "precision": {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      "refusal_id": "npu-l4.yaml/fp16/fp16/direct-peak",
+      "source_entry_index": 2
+    },
+    {
+      "boundary": "direct Accelerator.peak_op_per_s",
+      "check_input_hash": "sha256:0c23672a76290a73e2d3d5198e10e0a7e35a19187ef03c86e83c8bde5c950283",
+      "component_binding_hash": "sha256:ae4cdf6592845c157a3ff0160d0a7a5d41a167ca914d0597cfae7a42f76436ba",
+      "error_class": "UnsupportedPrecision",
+      "precision": {
+        "compute": "fp8",
+        "kv_cache": "fp8"
+      },
+      "refusal_id": "npu-l4.yaml/fp8/fp8/direct-peak",
+      "source_entry_index": 3
+    }
+  ]
+}

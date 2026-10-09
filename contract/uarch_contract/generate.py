@@ -24,7 +24,85 @@ MODULES = (
     "request",
     "model_card",
     "table",
+    "assumptions",
+    "exports",
+    "prepared",
+    "derivation",
+    "evidence",
+    "comparison",
+    "registry",
+    "report_context",
 )
+LEGACY_ROOTS = [
+    "ApplicabilityScope",
+    "Calibration",
+    "ClockDomain",
+    "ClockDomains",
+    "ColdVsSteadyError",
+    "CompositionError",
+    "Condition",
+    "Controller",
+    "CoreClockDomain",
+    "CoreType",
+    "Cores",
+    "Counts",
+    "DecodeEnvelope",
+    "DecodeGrid",
+    "DecodeVisitWeight",
+    "Diagnostics",
+    "Dma",
+    "Dram",
+    "DramOrganization",
+    "DramTiming",
+    "EmbeddedModelCard",
+    "Energy",
+    "EnergyVerification",
+    "Envelope",
+    "ErrorRecord",
+    "ExtCounts",
+    "FidelityDetail",
+    "FlopDeviation",
+    "FlopParity",
+    "Grid",
+    "HardwareGrid",
+    "HardwareSpec",
+    "Interleave",
+    "InterpolationError",
+    "KvLayout",
+    "MatrixEngine",
+    "MeasuredError",
+    "Memory",
+    "ModelCard",
+    "ModelId",
+    "ModelShape",
+    "ModelSpec",
+    "Noc",
+    "NominalCounts",
+    "NominalInput",
+    "NominalOutput",
+    "NumericFormat",
+    "OpSpec",
+    "Operand",
+    "Operator",
+    "Parameter",
+    "ParityChannelComparison",
+    "Precision",
+    "PrecisionFormat",
+    "PrefillEnvelope",
+    "PrefillGrid",
+    "PrefillVisitWeight",
+    "Provenance",
+    "SampledError",
+    "SharedSram",
+    "SourcedValue",
+    "Sram",
+    "Sync",
+    "TimingPreset",
+    "ValidatedErrorBand",
+    "VectorEngine",
+    "Verification",
+    "VisitWeights",
+]
 DEFAULT_OUTPUT = Path(__file__).resolve().parents[1] / "schema"
 
 
@@ -38,6 +116,14 @@ def exported_models() -> tuple[type[BaseModel], ...]:
             if isinstance(cls, type)
             and issubclass(cls, BaseModel)
             and cls.__module__ == module.__name__
+            and not cls.__name__.startswith("_")
+            and (
+                not hasattr(module, "SCHEMA_ROOTS")
+                or cls in module.SCHEMA_ROOTS
+                or cls.__name__.startswith("Legacy")
+                or name in ("request", "table")
+                and cls.__name__ in LEGACY_ROOTS
+            )
         )
     return tuple(sorted(models, key=lambda cls: cls.__name__))
 
@@ -55,6 +141,11 @@ def schemas() -> dict[str, str]:
     schema = TypeAdapter(PrecisionFormat).json_schema()
     schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
     result["PrecisionFormat.json"] = json.dumps(schema, indent=2, sort_keys=True) + "\n"
+    from .prepared import Query
+
+    query_schema = TypeAdapter(Query).json_schema()
+    query_schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+    result["Query.json"] = json.dumps(query_schema, indent=2, sort_keys=True) + "\n"
     return result
 
 

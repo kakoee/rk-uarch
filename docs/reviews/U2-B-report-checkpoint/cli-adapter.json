@@ -1,0 +1,16 @@
+{
+  "status": "UNAPPLIED proposed A-owned registration for coordinator reconciliation",
+  "before_sha256": "4d73b3b4091980f4c6787b1bb615b0ee62fdc062cdbb4e84c23cb9f96aebb8a9",
+  "proposed_after_sha256": "24cd82b8692bf35b17096c811f4f84b1d9ab4e1b7378a2803dfe626f03fe997e",
+  "edits": [
+    {
+      "needle": "from uarch_contract.request import RequestIntent\n",
+      "replacement": "from uarch_contract.request import RequestIntent\n\nfrom rkuarch.report.command import report_command\n"
+    },
+    {
+      "needle": "if __name__ == \"__main__\":\n    app()",
+      "replacement": "app.command(\"report\")(report_command)\n\n\nif __name__ == \"__main__\":\n    app()"
+    }
+  ],
+  "B_callable": "rkuarch.report.command.report_command"
+}

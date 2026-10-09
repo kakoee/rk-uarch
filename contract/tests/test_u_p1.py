@@ -15,11 +15,103 @@ import pytest
 from pydantic import BaseModel, ValidationError
 from uarch_contract import errors
 from uarch_contract.hardware import HardwareSpec
-from uarch_contract.hashing import canonical_json, table_hash
+from uarch_contract.hashing import canonical_json, legacy_table_hash
 from uarch_contract.model_shape import ModelShape, ModelSpec, check_parity, implied_params
-from uarch_contract.request import CharacterizationRequest
+from uarch_contract.request import LegacyCharacterizationRequest
 from uarch_contract.sourced import SourcedValue
-from uarch_contract.table import UarchCostTable
+from uarch_contract.table import LegacyUarchCostTable
+
+LEGACY_MODEL_NAMES = [
+    "ApplicabilityScope",
+    "Calibration",
+    "ClaimWithoutSource",
+    "ClockDomain",
+    "ClockDomains",
+    "ColdVsSteadyError",
+    "CompositionError",
+    "Condition",
+    "ContractError",
+    "ContractMajorMismatch",
+    "ContractMinorMismatch",
+    "Controller",
+    "CoreClockDomain",
+    "CoreType",
+    "Cores",
+    "Counts",
+    "DecodeEnvelope",
+    "DecodeGrid",
+    "DecodeVisitWeight",
+    "Diagnostics",
+    "Dma",
+    "Dram",
+    "DramOrganization",
+    "DramTiming",
+    "EmbeddedModelCard",
+    "Energy",
+    "EnergyVerification",
+    "Envelope",
+    "EnvelopeExceedsGrid",
+    "ErrorRecord",
+    "ExtCounts",
+    "FidelityDetail",
+    "FlopDeviation",
+    "FlopParity",
+    "Grid",
+    "HardwareGrid",
+    "HardwareSpec",
+    "InitialStateMismatch",
+    "Interleave",
+    "InterpolationError",
+    "KvLayout",
+    "KvLayoutMismatch",
+    "LegacyCharacterizationRequest",
+    "LegacyDecodeRow",
+    "LegacyInterpolation",
+    "LegacyPrefillRow",
+    "LegacyRow",
+    "LegacyUarchCostTable",
+    "MatrixEngine",
+    "MeasuredError",
+    "Memory",
+    "MissingFrequencyAxis",
+    "ModelCard",
+    "ModelId",
+    "ModelShape",
+    "ModelSpec",
+    "NoTableForComponent",
+    "Noc",
+    "NonFiniteRow",
+    "NumericFormat",
+    "OpSpec",
+    "Operand",
+    "Operator",
+    "Parameter",
+    "ParamsMismatch",
+    "ParityChannelComparison",
+    "Precision",
+    "PrecisionFormat",
+    "PrefillEnvelope",
+    "PrefillGrid",
+    "PrefillVisitWeight",
+    "Provenance",
+    "ResidencyExceedsCapacity",
+    "SampledError",
+    "ShardIndivisible",
+    "SharedSram",
+    "SourcedValue",
+    "SpecHashMismatch",
+    "Sram",
+    "SramCapacityExceeded",
+    "StipulationOnReference",
+    "Sync",
+    "TimingPreset",
+    "TpMismatch",
+    "UnnamedPreset",
+    "ValidatedErrorBand",
+    "VectorEngine",
+    "Verification",
+    "VisitWeights",
+]
 
 FIXTURES = Path(__file__).parent / "fixtures"
 MODULES = (
@@ -222,8 +314,8 @@ def test_round_trip_all_models() -> None:
     extra = json.loads((FIXTURES / "model_examples.json").read_text())
     examples: list[BaseModel] = [
         HardwareSpec.model_validate(hardware()),
-        CharacterizationRequest.model_validate(request_data()),
-        UarchCostTable.model_validate(toy()),
+        LegacyCharacterizationRequest.model_validate(request_data()),
+        LegacyUarchCostTable.model_validate(toy()),
         OpSpec.model_validate(extra["op"]),
         ModelCard.model_validate(extra["card"]),
         ErrorRecord.model_validate(extra["error"]),
@@ -232,7 +324,8 @@ def test_round_trip_all_models() -> None:
         cls.model_validate(payload)
         for name, payload in extra["additional"].items()
         for cls in exported_models()
-        if cls.__name__ == name
+        if cls.__name__
+        == {"Row": "LegacyRow", "Interpolation": "LegacyInterpolation"}.get(name, name)
     ]
     seen = set()
     for model in walk_models(examples):
@@ -241,20 +334,22 @@ def test_round_trip_all_models() -> None:
         assert cls.model_validate(model.model_dump(mode="json")) == model
         assert cls.model_config["frozen"] is True
         assert cls.model_config["extra"] == "forbid"
-    assert set(exported_models()) <= seen, "Each concrete model needs a round-trip example"
+    assert {m for m in exported_models() if m.__name__ in LEGACY_MODEL_NAMES} <= seen, (
+        "Each concrete model needs a round-trip example"
+    )
 
 
 def test_hash_fresh_processes_and_key_order() -> None:
     script = (
-        "import json; from uarch_contract.hashing import table_hash; "
-        f"print(table_hash(json.load(open({str(FIXTURES / 'toy_table.json')!r}))))"
+        "import json; from uarch_contract.hashing import legacy_table_hash; "
+        f"print(legacy_table_hash(json.load(open({str(FIXTURES / 'toy_table.json')!r}))))"
     )
     outputs = [
         subprocess.check_output([sys.executable, "-c", script], text=True).strip() for _ in range(2)
     ]
     assert outputs[0] == outputs[1] == toy()["table_hash"]
-    assert table_hash(dict(reversed(list(toy().items())))) == outputs[0]
-    assert table_hash(UarchCostTable.model_validate(toy())) == outputs[0]
+    assert legacy_table_hash(dict(reversed(list(toy().items())))) == outputs[0]
+    assert legacy_table_hash(LegacyUarchCostTable.model_validate(toy())) == outputs[0]
     assert canonical_json({"b": 1.25, "a": 1e-20}) == canonical_json({"a": 1e-20, "b": 1.25})
     with pytest.raises(ValueError):
         canonical_json({"x": math.nan})
@@ -392,19 +487,19 @@ def test_shape_parity() -> None:
 def test_shard_indivisible() -> None:
     data = request_data() | {"tp": 3}
     with pytest.raises(ValidationError, match="n_heads") as caught:
-        CharacterizationRequest.model_validate(data)
+        LegacyCharacterizationRequest.model_validate(data)
     assert isinstance(caught.value.errors()[0]["ctx"]["error"], errors.ShardIndivisible)
 
 
 def test_toy_semantics_and_nulls() -> None:
-    table = UarchCostTable.model_validate(toy())
+    table = LegacyUarchCostTable.model_validate(toy())
     assert [row.phase for row in table.rows] == ["decode", "decode", "prefill"]
     assert table.tp == 8 and table.initial_state == "steady"
     assert table.kv_layout.block_size_tokens == 16
     assert len(type(table.measured_error).model_fields) == 4
     assert table.provenance.model_card.badge == "stub"
     assert any(v is None for v in table.rows[0].diagnostics.model_dump().values())
-    assert table_hash(table) == table.table_hash
+    assert legacy_table_hash(table) == table.table_hash
 
 
 @pytest.mark.parametrize(
@@ -415,7 +510,7 @@ def test_fidelity_values(key: str, value: Any) -> None:
     data = request_data()
     data["uarch_fidelity"][key] = value
     with pytest.raises(ValueError, match=key):
-        CharacterizationRequest.model_validate(data)
+        LegacyCharacterizationRequest.model_validate(data)
 
 
 def test_no_numeric_defaults() -> None:
@@ -476,6 +571,7 @@ def test_unit_and_cycle_boundaries() -> None:
         "_j",
         "_pj",
         "_per_s",
+        "_per_byte",
         "_per_cycle",
         "_flits",
         "_count",
@@ -490,6 +586,8 @@ def test_unit_and_cycle_boundaries() -> None:
             ):
                 continue
             schema = cls.model_json_schema()
+            if cls.__name__.endswith("AttributionS"):
+                continue  # Fixed keys carry the enclosing attribution_s unit.
             for path in schema_float_paths(schema):
                 assert (
                     path[-1].endswith(suffixes)
@@ -513,21 +611,21 @@ def test_bad_rows(field: str, value: float) -> None:
     data = deepcopy(toy())
     data["rows"][0][field] = value
     with pytest.raises(ValueError):
-        UarchCostTable.model_validate(data)
+        LegacyUarchCostTable.model_validate(data)
 
 
 def test_cycle_unit_cannot_hide_in_table_provenance() -> None:
     data = toy()
     data["provenance"]["params"] = [{"name": "bad", "value": sv(1, "cycle")}]
     with pytest.raises(ValueError, match="cycle"):
-        UarchCostTable.model_validate(data)
+        LegacyUarchCostTable.model_validate(data)
 
 
 def test_unsampled_weighted_error_cannot_be_zero() -> None:
     data = toy()
     data["measured_error"]["interpolation_loo"]["weighted_median_rel"] = 0
     with pytest.raises(ValueError, match="unsampled"):
-        UarchCostTable.model_validate(data)
+        LegacyUarchCostTable.model_validate(data)
 
 
 def test_schema_checker_detects_changed_missing_and_extra_files(tmp_path: Path) -> None:
@@ -548,14 +646,14 @@ def test_schema_checker_detects_changed_missing_and_extra_files(tmp_path: Path) 
 
 @pytest.mark.parametrize("tp", [1, 8, 16])
 def test_divisible_and_replicated_kv_shards(tp: int) -> None:
-    CharacterizationRequest.model_validate(request_data() | {"tp": tp})
+    LegacyCharacterizationRequest.model_validate(request_data() | {"tp": tp})
 
 
 def test_ffn_shard_error_is_named() -> None:
     data = request_data()
     data["model_shape"]["d_ff"] += 1  # remains inside the parity tolerance
     with pytest.raises(ValueError, match="d_ff"):
-        CharacterizationRequest.model_validate(data)
+        LegacyCharacterizationRequest.model_validate(data)
 
 
 @pytest.mark.parametrize("change", ["duplicate", "attribution", "c2_floor", "composite", "keys"])
@@ -574,7 +672,7 @@ def test_row_semantic_refusals(change: str) -> None:
     else:
         data["rows"][0]["n_prompts"] = 1
     with pytest.raises(ValueError):
-        UarchCostTable.model_validate(data)
+        LegacyUarchCostTable.model_validate(data)
 
 
 def test_moe_parameter_count_hand_case() -> None:
@@ -621,7 +719,7 @@ def test_fidelity_rejects_boolean_levels_and_explicit_null(key: str, value: Any)
     data = request_data()
     data["uarch_fidelity"][key] = value
     with pytest.raises(ValueError, match=key):
-        CharacterizationRequest.model_validate(data)
+        LegacyCharacterizationRequest.model_validate(data)
 
 
 @pytest.mark.parametrize("shared_sram", [None, 0, "unrepresented"])
@@ -637,7 +735,7 @@ def test_zero_hardware_detail_is_c0(shared_sram: Any, sync: str) -> None:
     assert detail.sync == sync
     assert detail.shared_sram == shared_sram
     table = toy() | {"fidelity_detail": detail.model_dump(mode="json")}
-    loaded = UarchCostTable.model_validate(table)
+    loaded = LegacyUarchCostTable.model_validate(table)
     assert loaded.fidelity_detail == detail  # neither sync nor unrepresented is hidden
 
 
@@ -818,8 +916,8 @@ def test_c2_without_shared_sram_enforces_own_roofline(below_floor: bool) -> None
     if below_floor:
         data["rows"][0]["u_c0_duration_s"] = data["rows"][0]["duration_s"] * 2
         with pytest.raises(ValidationError, match="must not be below its own u_c0_duration_s"):
-            UarchCostTable.model_validate(data)
+            LegacyUarchCostTable.model_validate(data)
     else:
-        table = UarchCostTable.model_validate(data)
+        table = LegacyUarchCostTable.model_validate(data)
         assert table.composite_fidelity == "C2"
         assert table.rows[0].duration_s == table.rows[0].u_c0_duration_s

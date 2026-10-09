@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from scripts.vendor_rk import ROOT, SOURCES, digest, validate_matrix
+from scripts.vendor_rk import ROOT, SOURCES, digest
 
 from .parity import rank_counts, run_parity
 
@@ -29,9 +29,10 @@ def test_committed_manifest_matrix_and_component_provenance(snapshot: Path) -> N
     for name in (*SOURCES, "schema.json"):
         assert (snapshot / name).is_file(), name
     rows = json.loads((snapshot / "parity/fixtures.json").read_text())
-    validate_matrix(rows)
     from scripts.vendor_rk import check_snapshot_inputs
 
+    # Validates the exact retained matrix or authenticated explicit U2 declarations.
+    # Unknown components still refuse; never infer a new component's precision.
     check_snapshot_inputs(snapshot)
     for row in rows:
         assert (
@@ -79,4 +80,11 @@ def test_placeholder_refuses_unsupported_compute_precision(snapshot: Path) -> No
     """Human bridge asserted rk-sim's actual exception; CI checks its committed evidence."""
     from scripts.vendor_rk import validate_refusals
 
-    validate_refusals(json.loads((snapshot / "parity/refusals.json").read_text()))
+    expanded = (snapshot / "u2-inputs").is_dir()
+    validate_refusals(
+        json.loads((snapshot / "parity/refusals.json").read_text()),
+        expanded=expanded,
+        callable_source_sha256=digest((snapshot / "rk/engine/f0/compute.py").read_bytes())
+        if expanded
+        else None,
+    )

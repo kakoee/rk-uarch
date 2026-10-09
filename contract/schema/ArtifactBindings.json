@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "comparison_hashes": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "title": "Comparison Hashes",
+      "type": "array"
+    },
+    "derivation_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Derivation Hash",
+      "type": "string"
+    },
+    "hardware_spec_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Hardware Spec Hash",
+      "type": "string"
+    },
+    "model_card_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Model Card Hash",
+      "type": "string"
+    },
+    "prepared_bundle_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Prepared Bundle Hash",
+      "type": "string"
+    },
+    "report_context_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Report Context Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "comparison_hashes",
+    "derivation_hash",
+    "hardware_spec_hash",
+    "model_card_hash",
+    "prepared_bundle_hash",
+    "report_context_hash"
+  ],
+  "title": "ArtifactBindings",
+  "type": "object"
+}

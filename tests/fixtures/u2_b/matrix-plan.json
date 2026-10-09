@@ -1,0 +1,87 @@
+{
+  "classification": "B1 matrix test specification, not generated output or full ComponentPrecision inventory",
+  "rk_sha": "1e5706e0ebfcc67c1a7333079a35b75f693e9963",
+  "retained_manifest_sha256": "sha256:b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d",
+  "models": [
+    "llama-3.1-8b",
+    "llama-3.1-70b",
+    "mixtral-8x7b"
+  ],
+  "tp": [
+    1,
+    8
+  ],
+  "positive_pairs": [
+    {
+      "component": "asic_placeholder.yaml",
+      "compute": "fp16",
+      "kv_cache": "fp16"
+    },
+    {
+      "component": "asic_placeholder.yaml",
+      "compute": "fp16",
+      "kv_cache": "fp8"
+    },
+    {
+      "component": "nvidia_h100_sxm.yaml",
+      "compute": "fp16",
+      "kv_cache": "fp16"
+    },
+    {
+      "component": "nvidia_h100_sxm.yaml",
+      "compute": "fp16",
+      "kv_cache": "fp8"
+    },
+    {
+      "component": "nvidia_h100_sxm.yaml",
+      "compute": "bf16",
+      "kv_cache": "bf16"
+    },
+    {
+      "component": "nvidia_h100_sxm.yaml",
+      "compute": "fp8",
+      "kv_cache": "fp8"
+    },
+    {
+      "component": "npu-l4.yaml",
+      "compute": "bf16",
+      "kv_cache": "bf16"
+    }
+  ],
+  "direct_peak_refusals": [
+    {
+      "component": "asic_placeholder.yaml",
+      "compute": "bf16",
+      "kv_cache": "bf16",
+      "exception": "UnsupportedPrecision"
+    },
+    {
+      "component": "asic_placeholder.yaml",
+      "compute": "fp8",
+      "kv_cache": "fp8",
+      "exception": "UnsupportedPrecision"
+    },
+    {
+      "component": "npu-l4.yaml",
+      "compute": "fp16",
+      "kv_cache": "fp16",
+      "exception": "UnsupportedPrecision"
+    },
+    {
+      "component": "npu-l4.yaml",
+      "compute": "fp8",
+      "kv_cache": "fp8",
+      "exception": "UnsupportedPrecision"
+    }
+  ],
+  "new_execution_efficiency": {
+    "value": 1.0,
+    "status": "accepted labelled nominal assumption; not measured efficiency"
+  },
+  "excluded_optional_pair": {
+    "component": "npu-l4.yaml",
+    "compute": "bf16",
+    "kv_cache": "fp8"
+  },
+  "new_component_binding": "pending accepted hardware and actual A1 export; no synthetic export substituted"
+}

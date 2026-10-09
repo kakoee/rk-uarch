@@ -17,14 +17,21 @@ import subprocess
 import tempfile
 import tomllib
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from uarch_contract.exports import ComponentPrecision
 
 PIN = "1e5706e0ebfcc67c1a7333079a35b75f693e9963"
 # Independently read at the pinned revision; CI needs no upstream checkout.
 PINNED_UV_LOCK_SHA256 = "d984e55723326751ac3f888712f98462a525315ad4693691dbc3f2f5dc7f577c"
 ROOT = Path(__file__).resolve().parents[1]
+HISTORICAL_MANIFEST_SHA256 = "b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d"
 SOURCES = (
     "rk/provenance.py",
+    "rk/engine/f0/compute.py",
+    "rk/engine/orchestrator.py",
+    "rk/components/loader.py",
     *(
         f"rk/schema/{name}.py"
         for name in (
@@ -46,7 +53,12 @@ H100_PRECISIONS = ({"compute": "bf16", "kv_cache": "bf16"}, {"compute": "fp8", "
 
 
 def component_precisions(name: str) -> tuple[dict[str, str], ...]:
-    return PRECISIONS + (H100_PRECISIONS if name == "nvidia_h100_sxm.yaml" else ())
+    """Historical retained inventory only; never infer precision for a new component."""
+    if name == "asic_placeholder.yaml":
+        return PRECISIONS
+    if name == "nvidia_h100_sxm.yaml":
+        return PRECISIONS + H100_PRECISIONS
+    raise ValueError("Explicit ComponentPrecision required for new component: " + name)
 
 
 QUERIES = [
@@ -69,6 +81,8 @@ QUERIES = [
 ORACLE_PROGRAM = r"""
 import json
 import sys
+import hashlib
+import inspect
 from pathlib import Path
 from rk.components.loader import load_component_file
 from rk.engine.f0.compute import UnsupportedPrecision, iteration_cost
@@ -84,7 +98,33 @@ for component in request['components']:
     descriptor = load_component_file(Path(component['path']))
     instance = _Instance(descriptor.id, 1, descriptor,
         FidelityMap(compute='STUB', memory='STUB', network='STUB', runtime='STUB'), None)
-    if component['name'] == 'asic_placeholder.yaml':
+    if component.get('direct_refusals'):
+        baseline = Precision.model_validate(component['precisions'][0])
+        accelerator, _, _ = _accelerator(instance, baseline)
+        source_file = inspect.getsourcefile(type(accelerator).peak_op_per_s)
+        source_sha = hashlib.sha256(Path(source_file).read_bytes()).hexdigest()
+        if source_sha != request['direct_peak_source_sha256']:
+            raise AssertionError('direct peak callable source drift')
+        for precision_data in component['direct_refusals']:
+            unsupported = Precision.model_validate(precision_data)
+            event = {'component_params_file': 'components/' + component['name'],
+                'component_params_sha256': component['sha256'], 'rk_sha': request['sha'],
+                'compute': unsupported.compute.value, 'kv_cache': unsupported.kv_cache.value,
+                'boundary': 'Accelerator.peak_op_per_s', 'callable_source_sha256': source_sha}
+            try:
+                accelerator.peak_op_per_s(unsupported.compute)
+            except UnsupportedPrecision as exc:
+                event.update(execution='refused', exception=type(exc).__name__, message=str(exc))
+            except Exception as exc:
+                event.update(execution='execution_failed', exception=type(exc).__name__,
+                             message=str(exc) or type(exc).__name__)
+            else:
+                event.update(execution='succeeded', exception=None,
+                             message='Direct peak returned without refusing')
+            refusals.append(event)
+    elif component['name'] == 'asic_placeholder.yaml':
+        # Historical retained-only mode: these are iteration-level observations,
+        # never relabelled direct-peak evidence for the expanded U2 inventory.
         baseline = Precision(compute='fp16', kv_cache='fp16')
         accelerator, _, _ = _accelerator(instance, baseline)
         for compute in ('bf16', 'fp8'):
@@ -435,6 +475,8 @@ def check_generator(root: Path, *, current: bool = True) -> dict[str, Any]:
             raise ValueError("GENERATOR environment lock differs from pinned upstream lock")
         validate_environment_metadata(metadata["environment"], (root / "uv.lock").read_bytes())
     if current:
+        if (root / "u2-inputs").is_dir():
+            check_snapshot_inputs(root, check_support=True)
         problems = []
         if metadata["script_sha256"] != digest(Path(__file__).read_bytes()):
             problems.append("generator script fingerprint differs")
@@ -447,11 +489,54 @@ def check_generator(root: Path, *, current: bool = True) -> dict[str, Any]:
     return metadata
 
 
-def check_snapshot_inputs(root: Path) -> None:
+def check_snapshot_inputs(root: Path, *, check_support: bool = False) -> None:
     components = {p.name for p in (root / "components").iterdir() if p.is_file()}
     rows = json.loads((root / "parity/fixtures.json").read_text())
-    validate_matrix(rows, components)
-    validate_refusals(json.loads((root / "parity/refusals.json").read_text()))
+    checked = None
+    if (root / "u2-inputs").is_dir():
+        from scripts.u2_inputs import load_inputs
+
+        checked = load_inputs(
+            root / "u2-inputs",
+            digest((root / "u2-inputs/SHA256SUMS").read_bytes()),
+            check_support=check_support,
+        )
+        for directory, expected in (
+            (
+                "components",
+                {
+                    role: checked.descriptors[entry.component_id]
+                    for entry in checked.entries
+                    for role in [
+                        Path(entry.binding.component_file).name
+                        if entry.binding.kind == "upstream_only"
+                        else "npu-l4.yaml"
+                    ]
+                },
+            ),
+            (
+                "model_shapes",
+                {p.name: p.read_bytes() for p in (checked.root / "model_shapes").glob("*.json")},
+            ),
+        ):
+            outer = root / directory
+            if any(p.is_symlink() for p in (outer, *outer.rglob("*"))):
+                raise ValueError("frozen output copy contains symlink: " + directory)
+            actual = {
+                p.relative_to(outer).as_posix(): p.read_bytes()
+                for p in outer.rglob("*")
+                if p.is_file()
+            }
+            if actual != expected:
+                raise ValueError("frozen output copy inventory/bytes differ: " + directory)
+    validate_matrix(rows, components, precisions=checked.matrix if checked else None)
+    validate_refusals(
+        json.loads((root / "parity/refusals.json").read_text()),
+        expanded=checked is not None,
+        callable_source_sha256=digest((root / "rk/engine/f0/compute.py").read_bytes())
+        if checked
+        else None,
+    )
     sidecars = {p.stem: json.loads(p.read_text()) for p in (root / "model_shapes").glob("*.json")}
     if set(sidecars) != {r["model_id"] for r in rows}:
         raise ValueError("model sidecar inventory differs from matrix")
@@ -474,16 +559,41 @@ def check_snapshot_inputs(root: Path) -> None:
             raise ValueError("model sidecar content/attribution differs from matrix")
 
 
-def collect_snapshot(rk: Path, sha: str, params: list[Path], shapes: Path) -> dict[str, bytes]:
+def collect_snapshot(
+    rk: Path,
+    sha: str,
+    params: list[Path],
+    shapes: Path,
+    *,
+    input_root: Path | None = None,
+    input_manifest_sha256: str | None = None,
+) -> dict[str, bytes]:
+    checked = None
+    if input_root is not None:
+        from scripts.u2_inputs import load_inputs
+
+        if params or input_manifest_sha256 is None:
+            raise ValueError("explicit U2 input manifest required; --params cannot override it")
+        checked = load_inputs(input_root, input_manifest_sha256)
+    elif input_manifest_sha256 is not None:
+        raise ValueError("input manifest without input root")
     check_clone(rk, sha)
     files = {name: (rk / name).read_bytes() for name in SOURCES}
     files["schema.json"] = (rk / "web/src/schema.json").read_bytes()
     files["uv.lock"] = (rk / "uv.lock").read_bytes()
-    models = [json.loads(path.read_text()) for path in sorted(shapes.glob("*.json"))]
+    models = (
+        list(checked.models)
+        if checked
+        else [json.loads(path.read_text()) for path in sorted(shapes.glob("*.json"))]
+    )
     if len(models) < 3:
         raise ValueError("at least three sourced ModelShape sidecars required")
     components: list[dict[str, Any]] = []
-    paths = [rk / "rk/components/library/compute" / name for name in REQUIRED_COMPONENTS] + params
+    paths = (
+        [checked.root / "components" / name for name in checked.matrix]
+        if checked
+        else [rk / "rk/components/library/compute" / name for name in REQUIRED_COMPONENTS] + params
+    )
     for path in paths:
         data = path.read_bytes()
         name = path.name
@@ -498,10 +608,32 @@ def collect_snapshot(rk: Path, sha: str, params: list[Path], shapes: Path) -> di
                 "name": name,
                 "path": str(path.resolve()),
                 "sha256": digest(data),
-                "precisions": component_precisions(name),
+                "precisions": checked.matrix[name] if checked else component_precisions(name),
+                "direct_refusals": tuple(
+                    {"compute": fmt, "kv_cache": fmt}
+                    for fmt in (
+                        ()
+                        if checked is None
+                        else ("bf16", "fp8")
+                        if name == "asic_placeholder.yaml"
+                        else ("fp16", "fp8")
+                        if name == "npu-l4.yaml"
+                        else ()
+                    )
+                ),
             }
         )
-    request = {"sha": sha, "models": models, "queries": QUERIES, "components": components}
+    request: dict[str, Any] = {
+        "sha": sha,
+        "models": models,
+        "queries": QUERIES,
+        "components": components,
+        "direct_peak_source_sha256": digest(files["rk/engine/f0/compute.py"]),
+    }
+    if checked:
+        for path in checked.root.rglob("*"):
+            if path.is_file():
+                files["u2-inputs/" + path.relative_to(checked.root).as_posix()] = path.read_bytes()
     env = oracle_environment(rk)
     verify_oracle_environment(rk, env)
     environment = record_oracle_environment(rk, env)
@@ -518,9 +650,15 @@ def collect_snapshot(rk: Path, sha: str, params: list[Path], shapes: Path) -> di
     result = run_oracle(rk, env, ORACLE_PROGRAM, json.dumps(request))
     output = json.loads(result.stdout)
     rows = output["rows"]
-    validate_refusals(output["refusals"])
+    validate_refusals(
+        output["refusals"],
+        expanded=checked is not None,
+        callable_source_sha256=request["direct_peak_source_sha256"] if checked else None,
+    )
     files["parity/refusals.json"] = canonical(output["refusals"])
-    validate_matrix(rows, {item["name"] for item in components})
+    validate_matrix(
+        rows, {item["name"] for item in components}, precisions=checked.matrix if checked else None
+    )
     files["parity/fixtures.json"] = canonical(rows)
     for model in models:
         files[f"model_shapes/{model['id']}.json"] = canonical(model)
@@ -539,15 +677,25 @@ def collect_snapshot(rk: Path, sha: str, params: list[Path], shapes: Path) -> di
     for component in components:
         if digest(Path(component["path"]).read_bytes()) != component["sha256"]:
             raise ValueError(f"input changed during generation: {component['name']}")
+    if checked:
+        assert input_root is not None and input_manifest_sha256 is not None
+        load_inputs(input_root, input_manifest_sha256)
     return snapshot_bytes(files, sha)
 
 
-def validate_matrix(rows: list[dict[str, Any]], components: set[str] | None = None) -> None:
+def validate_matrix(
+    rows: list[dict[str, Any]],
+    components: set[str] | None = None,
+    *,
+    precisions: dict[str, tuple[dict[str, str], ...]] | None = None,
+) -> None:
     import math
 
     components = components or {Path(row["component_params_file"]).name for row in rows}
     if not set(REQUIRED_COMPONENTS) <= components:
         raise ValueError("missing required component params files")
+    if precisions is not None and set(precisions) != components:
+        raise ValueError("explicit precision/component inventory differs")
     models = {row["model_id"] for row in rows}
     if len(models) < 3:
         raise ValueError("missing models: require at least three")
@@ -561,7 +709,7 @@ def validate_matrix(rows: list[dict[str, Any]], components: set[str] | None = No
         )
         for model in models
         for component in components
-        for precision in component_precisions(component)
+        for precision in (precisions[component] if precisions else component_precisions(component))
         for tp in (1, 8)
         for query in QUERIES
     }
@@ -605,16 +753,235 @@ def validate_matrix(rows: list[dict[str, Any]], components: set[str] | None = No
         )
 
 
-def validate_refusals(refusals: list[dict[str, Any]]) -> None:
+def validate_refusals(
+    refusals: list[dict[str, Any]],
+    *,
+    expanded: bool = False,
+    callable_source_sha256: str | None = None,
+) -> None:
     expected = {
         ("components/asic_placeholder.yaml", fmt, fmt, "UnsupportedPrecision")
         for fmt in ("bf16", "fp8")
     }
+    if expanded:
+        expected |= {
+            ("components/npu-l4.yaml", fmt, fmt, "UnsupportedPrecision") for fmt in ("fp16", "fp8")
+        }
     actual = {
         (r["component_params_file"], r["compute"], r["kv_cache"], r["exception"]) for r in refusals
     }
-    if actual != expected or len(refusals) != 2 or any(not r["message"] for r in refusals):
-        raise ValueError("missing actual placeholder UnsupportedPrecision refusals")
+    if (
+        actual != expected
+        or len(refusals) != len(expected)
+        or any(not r["message"] for r in refusals)
+    ):
+        raise ValueError("missing actual UnsupportedPrecision refusals")
+    if callable_source_sha256 is not None or expanded:
+        if callable_source_sha256 is None or any(
+            r.get("boundary") != "Accelerator.peak_op_per_s"
+            or r.get("callable_source_sha256") != callable_source_sha256
+            for r in refusals
+        ):
+            raise ValueError("direct peak boundary/source mismatch")
+
+
+def retained_provenance_root() -> Path:
+    """Committed immutable U0002 source subset; independent of the adoption destination."""
+    return ROOT / "contract/provenance" / ("rk-sim@" + PIN) / HISTORICAL_MANIFEST_SHA256
+
+
+def retained_provenance(directory: Path | None = None) -> dict[str, bytes]:
+    """Authenticate original manifest bytes AND every retained descriptor/sidecar entry.
+
+    This is a source subset, not a replacement oracle snapshot. Unneeded oracle/source
+    members named by the original manifest are not claimed present or re-generated.
+    """
+    root = retained_provenance_root() if directory is None else directory
+    if any(p.is_symlink() for p in (root, *root.parents)):
+        raise ValueError("historical provenance symlink ancestor")
+    try:
+        raw = (root / "MANIFEST.json").read_bytes()
+    except OSError as exc:
+        raise ValueError("historical provenance manifest missing") from exc
+    if digest(raw) != HISTORICAL_MANIFEST_SHA256:
+        raise ValueError("historical provenance manifest identity differs")
+    manifest = json.loads(raw)
+    if manifest["rk_sha"] != PIN:
+        raise ValueError("historical provenance pin differs")
+    names = {
+        name for name in manifest["files"] if name.startswith(("components/", "model_shapes/"))
+    }
+    result = {"MANIFEST.json": raw}
+    actual = set()
+    for path in root.rglob("*"):
+        if path.is_symlink():
+            raise ValueError("historical provenance symlink member")
+        if path.is_file():
+            actual.add(path.relative_to(root).as_posix())
+    if actual != names | {"MANIFEST.json"}:
+        raise ValueError("historical provenance exact source subset differs")
+    for name in sorted(names):
+        data = (root / name).read_bytes()
+        if digest(data) != manifest["files"][name]:
+            raise ValueError("historical provenance entry differs: " + name)
+        result[name] = data
+    return result
+
+
+def validate_u2_component_inputs(
+    values: list[dict[str, Any]],
+    descriptors: dict[str, bytes],
+    artifacts: dict[str, Any],
+    *,
+    require_full: bool = True,
+    provenance_root: Path | None = None,
+) -> tuple[ComponentPrecision, ...]:
+    """Validate explicit shared bindings; this is not real pinned bridge verification.
+
+    Full mode requires the exact accepted seven-pair inventory. Partial mode serves
+    received/retained input checks only and cannot authorize generator execution.
+    """
+    import yaml
+    from uarch_contract.exports import ComponentExport, ComponentPrecision, ExecutionModelInput
+    from uarch_contract.hashing import (
+        content_hash,
+        resolve_artifact,
+        sha256,
+        spec_hash,
+        verify_identity,
+    )
+
+    entries = tuple(ComponentPrecision.model_validate(v) for v in values)
+    ids = [entry.component_id for entry in entries]
+    if len(set(ids)) != len(ids) or set(ids) != set(descriptors):
+        raise ValueError("ComponentBindingMismatch: unique exact descriptor inventory required")
+    roles: set[str] = set()
+    historical = (
+        retained_provenance(provenance_root)
+        if any(e.binding.kind == "upstream_only" for e in entries)
+        else {}
+    )
+    for entry in entries:
+        verify_identity(entry, "precision_hash")
+        binding = entry.binding
+        verify_identity(binding, "binding_hash")
+        if binding.upstream_sha != PIN:
+            raise ValueError("ComponentBindingMismatch: upstream pin")
+        raw = descriptors[entry.component_id]
+        descriptor = yaml.safe_load(raw)
+        if descriptor["id"] != entry.component_id:
+            raise ValueError("ComponentBindingMismatch: descriptor id")
+        execution = ExecutionModelInput.model_validate(
+            resolve_artifact(binding.execution_model_hash, artifacts)
+        )
+        if execution.kind != "scalar_efficiency" or execution.acceptance != "accepted_input":
+            raise ValueError("ExecutionModelMismatch: accepted scalar input required")
+        if descriptor["execution_model"]["kind"] != execution.kind:
+            raise ValueError("ExecutionModelMismatch: descriptor kind")
+        original_efficiency = descriptor["execution_model"]["value"]
+        if any(
+            original_efficiency[k] != getattr(execution.compute, k)
+            for k in ("value", "unit", "provenance", "source", "date")
+        ):
+            raise ValueError("ExecutionModelMismatch: descriptor efficiency")
+        pairs = {(p.compute.value, p.kv_cache.value) for p in entry.precisions}
+        if any(p.kv_cache not in binding.supported_kv_storage for p in entry.precisions):
+            raise ValueError("UnsupportedPrecision: undeclared KV storage")
+        if binding.kind == "upstream_only":
+            if sha256(raw) != binding.component_bytes_sha256:
+                raise ValueError("ComponentBindingMismatch: upstream descriptor bytes")
+            if not safe_path(binding.component_file) or binding.component_file not in (
+                "components/asic_placeholder.yaml",
+                "components/nvidia_h100_sxm.yaml",
+            ):
+                raise ValueError("ComponentBindingMismatch: unapproved upstream component")
+            if (
+                sha256(historical["MANIFEST.json"]) != binding.oracle_manifest_sha256
+                or raw != historical[binding.component_file]
+            ):
+                raise ValueError("ComponentBindingMismatch: retained bytes/manifest changed")
+            role = Path(binding.component_file).name
+            approved = {(p["compute"], p["kv_cache"]) for p in component_precisions(role)}
+            if execution.compute.value != 0.55 or execution.compute.provenance != "stub":
+                raise ValueError("ExecutionModelMismatch: retain .55 stub input")
+        else:
+            role = "npu-l4.yaml"
+            approved = {("bf16", "bf16")}
+            truth = ComponentExport.model_validate(
+                resolve_artifact(binding.primary_export_hash, artifacts)
+            )
+            if (
+                truth.hardware_spec_hash != binding.hardware_spec_hash
+                or truth.component_id != entry.component_id
+                or truth.derivation_hash != binding.derivation_hash
+                or truth.execution_model_hash != binding.execution_model_hash
+                or truth.design_status != binding.design_status
+            ):
+                raise ValueError("ComponentBindingMismatch: export truth")
+            from uarch_contract.derivation import Derivation
+            from uarch_contract.hardware import HardwareSpec
+
+            from rkuarch.hw.export import project_for_oracle
+
+            derivation = Derivation.model_validate(
+                resolve_artifact(binding.derivation_hash, artifacts)
+            )
+            spec = yaml.safe_load((ROOT / "hw/designs/npu-l4.yaml").read_text())
+            if binding.hardware_spec_hash != spec_hash(spec):
+                raise ValueError("ComponentBindingMismatch: accepted H1 required")
+            if binding.projected_descriptor_bytes_sha256 != sha256(
+                raw
+            ) or binding.projected_descriptor_content_hash != content_hash(descriptor):
+                raise ValueError("ComponentBindingMismatch: projection bytes/content")
+            compute = execution.compute
+            if (
+                compute.value != 1.0
+                or compute.kind != "claim"
+                or compute.provenance != "stub"
+                or any(v is not None for v in (compute.source, compute.date, compute.rationale))
+                or execution.evidence_hashes
+                or "unvalidated" not in execution.assumption_note.lower()
+            ):
+                raise ValueError("ExecutionModelMismatch: nominal1.0 claim/stub unvalidated input")
+            # Replay A's pure local source/projection checks; no pinned bridge or oracle call.
+            expected_bytes, expected_binding = project_for_oracle(
+                HardwareSpec.model_validate(spec), truth, derivation, execution, upstream_sha=PIN
+            )
+            if raw != expected_bytes or binding != expected_binding:
+                raise ValueError("ComponentBindingMismatch: source projection/losses")
+        if role in roles or pairs != approved:
+            raise ValueError("ComponentBindingMismatch: exact seven approved pairs required")
+        roles.add(role)
+    if require_full and roles != {"asic_placeholder.yaml", "nvidia_h100_sxm.yaml", "npu-l4.yaml"}:
+        raise ValueError("ComponentBindingMismatch: actual npu-l4 export still required")
+    return entries
+
+
+def staging_destination(output_root: Path, adopted_root: Path) -> Path:
+    """A distinct review-only output root, never the adopted vendor tree or its parent."""
+    for path in (output_root, *output_root.parents):
+        if path.is_symlink():
+            raise ValueError("staging output must not use symlink ancestors")
+    destination, adopted = output_root.resolve(), adopted_root.resolve()
+    if destination == adopted or destination in adopted.parents or adopted in destination.parents:
+        raise ValueError("staging output overlaps adopted vendor artifacts")
+    return destination
+
+
+def compare_staged_revisions(first: Path, second: Path) -> tuple[str, ...]:
+    """Compare complete relative file sets and bytes, including manifests and metadata."""
+    if first.resolve() == second.resolve():
+        raise ValueError("two distinct preserved generation roots are required")
+    check_manifest(first)
+    check_manifest(second)
+
+    def files(root: Path) -> dict[str, bytes]:
+        return {
+            p.relative_to(root).as_posix(): p.read_bytes() for p in root.rglob("*") if p.is_file()
+        }
+
+    left, right = files(first), files(second)
+    return tuple(sorted(p for p in left.keys() | right.keys() if left.get(p) != right.get(p)))
 
 
 def main() -> None:
@@ -623,6 +990,11 @@ def main() -> None:
     parser.add_argument("--rk", type=Path, default=os.environ.get("RK"))
     parser.add_argument("--params", action="append", type=Path, default=[])
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--inputs", type=Path, help="Reviewed explicit U2 input directory")
+    parser.add_argument("--input-manifest-sha256", help="Exact reviewed SHA256SUMS digest")
+    parser.add_argument(
+        "--output-root", type=Path, help="Separate review candidate root; never adopted tree"
+    )
     parser.add_argument(
         "--pre-contract",
         action="store_true",
@@ -634,8 +1006,15 @@ def main() -> None:
         help="With --check: integrity/recorded identity only, NOT current compatibility",
     )
     args = parser.parse_args()
-    destination = ROOT / "contract/vendor" / f"rk-sim@{args.sha}"
+    adopted = ROOT / "contract/vendor" / f"rk-sim@{args.sha}"
+    destination = adopted
     try:
+        if args.output_root is not None:
+            destination = staging_destination(args.output_root, adopted)
+        if args.inputs is not None and args.output_root is not None:
+            staging_destination(args.output_root, args.inputs)
+        if args.inputs is not None and args.output_root is None:
+            raise ValueError("expanded U2 generation requires a separate --output-root")
         if args.sha != PIN:
             raise ValueError(f"U1 requires {PIN}")
         if args.historical and not args.check:
@@ -659,7 +1038,12 @@ def main() -> None:
             raise ValueError("RK=<path-to-clean-pinned-rk-sim> is required")
         params = args.params + [Path(p) for p in shlex.split(os.environ.get("PARAMS", ""))]
         files = collect_snapshot(
-            args.rk.resolve(), args.sha, params, ROOT / "contract/fixtures/model_shapes"
+            args.rk.resolve(),
+            args.sha,
+            params,
+            ROOT / "contract/fixtures/model_shapes",
+            input_root=args.inputs,
+            input_manifest_sha256=args.input_manifest_sha256,
         )
         status = publish_snapshot(destination, files)
         print(f"{status}: {len(files)} files at {destination}")

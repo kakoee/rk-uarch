@@ -16,12 +16,12 @@ from pydantic import ValidationError
 from uarch_contract import errors
 from uarch_contract.fidelity import FidelityDetail
 from uarch_contract.hardware import HardwareSpec
-from uarch_contract.hashing import canonical_json, request_hash, table_hash
+from uarch_contract.hashing import canonical_json, legacy_request_hash, legacy_table_hash
 from uarch_contract.model_card import EmbeddedModelCard, ModelCard, ValidatedErrorBand
 from uarch_contract.model_shape import ModelShape, ModelSpec, check_parity, implied_params
 from uarch_contract.operators import OpSpec
-from uarch_contract.request import CharacterizationRequest
-from uarch_contract.table import Condition, DecodeRow, UarchCostTable
+from uarch_contract.request import LegacyCharacterizationRequest
+from uarch_contract.table import Condition, LegacyDecodeRow, LegacyUarchCostTable
 
 from .test_u_p1 import FIXTURES, hardware, request_data, sv, toy
 
@@ -59,7 +59,7 @@ def test_each_declared_omission_is_required(omission: int) -> None:
         )[omission]
     )
     with pytest.raises(ValidationError, match="every declared contract omission"):
-        UarchCostTable.model_validate(data)
+        LegacyUarchCostTable.model_validate(data)
 
 
 def test_conditions_are_stipulations_not_claims() -> None:
@@ -71,7 +71,7 @@ def test_envelope_exceeds_grid_reports_contract_error() -> None:
     data = request_data()
     data["envelope"]["decode"]["batch_max"] = 3
     with pytest.raises(ValidationError) as caught:
-        CharacterizationRequest.model_validate(data)
+        LegacyCharacterizationRequest.model_validate(data)
     assert_cause(caught, errors.EnvelopeExceedsGrid)
 
 
@@ -80,7 +80,7 @@ def test_invalid_row_reports_nonfinite_row(value: float) -> None:
     data = toy()["rows"][0]
     data["counts"]["memory_read_bytes"] = value
     with pytest.raises(ValidationError) as caught:
-        DecodeRow.model_validate(data)
+        LegacyDecodeRow.model_validate(data)
     assert_cause(caught, errors.NonFiniteRow)
 
 
@@ -94,21 +94,21 @@ def test_unbalanced_kv_replication_reports_shard_error() -> None:
     data["model"].update(total_params=total, active_params=active)
     data["tp"] = 12
     with pytest.raises(ValidationError, match="cannot replicate evenly") as caught:
-        CharacterizationRequest.model_validate(data)
+        LegacyCharacterizationRequest.model_validate(data)
     assert_cause(caught, errors.ShardIndivisible)
 
 
 def test_decode_context_is_divisible_by_batch() -> None:
     row = toy()["rows"][0] | {"batch": 3, "total_context_tokens": 128}
     with pytest.raises(ValidationError, match="divisible by batch"):
-        DecodeRow.model_validate(row)
+        LegacyDecodeRow.model_validate(row)
 
 
 def test_grid_points_cannot_repeat() -> None:
     data = request_data()
     data["grid"]["frequency_ratio"] = [1.0, 1.0]
     with pytest.raises(ValidationError, match="must not repeat"):
-        CharacterizationRequest.model_validate(data)
+        LegacyCharacterizationRequest.model_validate(data)
 
 
 def test_controller_attachment_must_exist() -> None:
@@ -141,14 +141,14 @@ def test_error_statistics_are_coherent(case: str) -> None:
         e["cold_vs_steady"].update(n_samples=1, median_rel=0.1, max_rel=0.1)
         message = "null exactly when unsampled"
     with pytest.raises(ValidationError, match=message):
-        UarchCostTable.model_validate(data)
+        LegacyUarchCostTable.model_validate(data)
 
 
 def test_parameter_names_are_unique() -> None:
     data = toy()
     data["provenance"]["params"] = [{"name": "tdp_w", "value": sv(100, "W")}] * 2
     with pytest.raises(ValidationError, match="must not repeat parameter names"):
-        UarchCostTable.model_validate(data)
+        LegacyUarchCostTable.model_validate(data)
 
 
 def test_paged_operand_needs_page_size() -> None:
@@ -179,10 +179,12 @@ def test_peak_residency_names_unknown_resources(key: str) -> None:
     data = toy()["rows"][0]
     del data["peak_resident_bytes"][key]
     with pytest.raises(ValidationError, match="requires hbm and sram"):
-        DecodeRow.model_validate(data)
+        LegacyDecodeRow.model_validate(data)
 
 
-@pytest.mark.parametrize("carrier", ["FidelityDetail", "UarchCostTable", "CharacterizationRequest"])
+@pytest.mark.parametrize(
+    "carrier", ["FidelityDetail", "LegacyUarchCostTable", "LegacyCharacterizationRequest"]
+)
 def test_shared_sram_schema_excludes_explicit_null(carrier: str) -> None:
     schema = json.loads((ROOT / "contract/schema" / f"{carrier}.json").read_text())
     detail = schema if carrier == "FidelityDetail" else schema["$defs"]["FidelityDetail"]
@@ -196,18 +198,20 @@ def test_shared_sram_schema_excludes_explicit_null(carrier: str) -> None:
 @pytest.mark.parametrize("field,value", [("tp", True), ("tp", "8"), ("seed", "7")])
 def test_request_wire_numbers_reject_boolean_and_string(field: str, value: Any) -> None:
     with pytest.raises(ValidationError):
-        CharacterizationRequest.model_validate(request_data() | {field: value})
+        LegacyCharacterizationRequest.model_validate(request_data() | {field: value})
 
 
 @pytest.mark.parametrize("field,value", [("batch", True), ("duration_s", "0.001")])
 def test_row_wire_numbers_reject_boolean_and_string(field: str, value: Any) -> None:
     with pytest.raises(ValidationError):
-        DecodeRow.model_validate(toy()["rows"][0] | {field: value})
+        LegacyDecodeRow.model_validate(toy()["rows"][0] | {field: value})
 
 
 def test_json_integral_number_remains_compatible() -> None:
-    assert CharacterizationRequest.model_validate(request_data() | {"tp": 8.0}).tp == 8
-    assert DecodeRow.model_validate(toy()["rows"][0] | {"duration_s": 0.001}).duration_s == 0.001
+    assert LegacyCharacterizationRequest.model_validate(request_data() | {"tp": 8.0}).tp == 8
+    assert (
+        LegacyDecodeRow.model_validate(toy()["rows"][0] | {"duration_s": 0.001}).duration_s == 0.001
+    )
 
 
 def test_core_domain_always_scales_and_omitted_flag_defaults_true() -> None:
@@ -252,7 +256,7 @@ def test_readme_cycle_rule_distinguishes_hardware_from_results() -> None:
         HardwareSpec.model_validate(hardware()).cores.core_type.job_overhead_cycles.unit == "cycle"
     )
     with pytest.raises(ValidationError):
-        DecodeRow.model_validate(toy()["rows"][0] | {"duration_cycles": 1})
+        LegacyDecodeRow.model_validate(toy()["rows"][0] | {"duration_cycles": 1})
     readme = (ROOT / "contract/README.md").read_text()
     assert "HardwareSpec" in readme and "execution results" in readme
     assert "no field carries cycles" not in readme
@@ -261,7 +265,7 @@ def test_readme_cycle_rule_distinguishes_hardware_from_results() -> None:
 def test_negative_zero_has_one_canonical_identity() -> None:
     a, b = toy(), toy()
     a["rows"][0]["attribution_s"]["noc"] = -0.0
-    assert table_hash(a) == table_hash(b)
+    assert legacy_table_hash(a) == legacy_table_hash(b)
     assert canonical_json({"nested": [-0.0, {"value": -0.0}]}) == '{"nested":[0.0,{"value":0.0}]}'
     assert a["rows"][0]["attribution_s"]["noc"].hex().startswith("-"), "do not mutate inputs"
 
@@ -269,8 +273,8 @@ def test_negative_zero_has_one_canonical_identity() -> None:
 def test_grid_order_is_preserved_in_request_identity() -> None:
     a, b = request_data(), request_data()
     b["grid"]["decode"]["batch"] = [2, 1]
-    assert CharacterizationRequest.model_validate(b).grid.decode.batch == (2, 1)
-    assert request_hash(a) != request_hash(b)
+    assert LegacyCharacterizationRequest.model_validate(b).grid.decode.batch == (2, 1)
+    assert legacy_request_hash(a) != legacy_request_hash(b)
 
 
 def test_voltage_keys_cannot_collapse_after_parsing() -> None:
@@ -443,7 +447,7 @@ def test_unit_walk_follows_foreign_schema_references() -> None:
 @pytest.mark.parametrize("key", ["duration_cycles", "unit"])
 def test_request_extra_keys_preserve_cycle_boundary(key: str) -> None:
     with pytest.raises(ValidationError, match="Extra inputs"):
-        CharacterizationRequest.model_validate(request_data() | {key: "cycle"})
+        LegacyCharacterizationRequest.model_validate(request_data() | {key: "cycle"})
 
 
 def test_verification_hashes_do_not_replace_model_evidence() -> None:
@@ -461,10 +465,10 @@ def test_pinned_numeric_carriers_remain_compatible_standalone_and_embedded() -> 
     raw, normalized = request_data(), request_data()
     raw["model"]["n_layers"] = "80"
     assert ModelSpec.model_validate(raw["model"]) == ModelSpec.model_validate(normalized["model"])
-    assert CharacterizationRequest.model_validate(raw) == CharacterizationRequest.model_validate(
-        normalized
-    )
-    assert request_hash(raw) == request_hash(normalized)
+    assert LegacyCharacterizationRequest.model_validate(
+        raw
+    ) == LegacyCharacterizationRequest.model_validate(normalized)
+    assert legacy_request_hash(raw) == legacy_request_hash(normalized)
     assert ModelSpec.model_json_schema()["properties"]["n_layers"]["type"] == "integer"
 
     claim = sv(1.25, "W")
@@ -474,8 +478,8 @@ def test_pinned_numeric_carriers_remain_compatible_standalone_and_embedded() -> 
     a, b = toy(), toy()
     a["provenance"]["params"] = [{"name": "tdp_w", "value": textual}]
     b["provenance"]["params"] = [{"name": "tdp_w", "value": claim}]
-    assert UarchCostTable.model_validate(a) == UarchCostTable.model_validate(b)
-    assert table_hash(a) == table_hash(b)
+    assert LegacyUarchCostTable.model_validate(a) == LegacyUarchCostTable.model_validate(b)
+    assert legacy_table_hash(a) == legacy_table_hash(b)
     hw = hardware()
     plain = hardware()
     hw["clock_domains"]["core"]["freq_hz"]["value"] = "1000000000"

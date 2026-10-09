@@ -1,0 +1,7213 @@
+{
+  "$defs": {
+    "ApplicabilityScope": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Family",
+          "type": "string"
+        },
+        "load_regimes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Load Regimes",
+          "type": "array"
+        },
+        "mapping_match": {
+          "enum": [
+            "matched",
+            "compiler-chosen"
+          ],
+          "title": "Mapping Match",
+          "type": "string"
+        },
+        "op_classes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Op Classes",
+          "type": "array"
+        },
+        "precisions": {
+          "items": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Precisions",
+          "type": "array"
+        },
+        "shape_regimes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Shape Regimes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "family",
+        "op_classes",
+        "precisions",
+        "shape_regimes",
+        "load_regimes",
+        "mapping_match"
+      ],
+      "title": "ApplicabilityScope",
+      "type": "object"
+    },
+    "ArtifactBindings": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison_hashes": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "derivation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "model_card_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "prepared_bundle_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "report_context_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "prepared_bundle_hash",
+        "hardware_spec_hash",
+        "model_card_hash",
+        "derivation_hash",
+        "report_context_hash",
+        "comparison_hashes"
+      ],
+      "type": "object"
+    },
+    "ArtifactPointer": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "json_pointer": {
+          "pattern": "^(/.*)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "json_pointer"
+      ],
+      "type": "object"
+    },
+    "AssumptionSet": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithms": {
+          "additionalProperties": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "assumptions_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-assumptions/1"
+        },
+        "limitations": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelIdentity"
+        }
+      },
+      "required": [
+        "format",
+        "assumptions_hash",
+        "model",
+        "algorithms",
+        "limitations"
+      ],
+      "type": "object"
+    },
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "CharacterizationRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "accounting": {
+          "const": "resolved-ops/1"
+        },
+        "analytic_mode": {
+          "enum": [
+            "aggregate",
+            "per_op"
+          ]
+        },
+        "assumptions_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Component Id",
+          "type": "string"
+        },
+        "contract": {
+          "const": "uarch-contract/0.2"
+        },
+        "envelope": {
+          "$ref": "#/$defs/Envelope"
+        },
+        "grid": {
+          "$ref": "#/$defs/Grid"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "initial_state": {
+          "default": "steady",
+          "enum": [
+            "steady",
+            "cold"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "kv_layout": {
+          "$ref": "#/$defs/KvLayout"
+        },
+        "mapping_policy": {
+          "pattern": "^\\S+@\\S+$",
+          "title": "Mapping Policy",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelSpec"
+        },
+        "model_shape": {
+          "$ref": "#/$defs/ModelShape"
+        },
+        "precision": {
+          "$ref": "#/$defs/Precision"
+        },
+        "preparation_policy": {
+          "const": "balanced-tp/1"
+        },
+        "prepared_input_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "rk_schema_snapshot": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Rk Schema Snapshot",
+          "type": "string"
+        },
+        "seed": {
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "tp": {
+          "minimum": 1,
+          "title": "Tp",
+          "type": "integer"
+        },
+        "uarch_fidelity": {
+          "$ref": "#/$defs/FidelityDetail"
+        },
+        "visit_weights": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VisitWeights"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "contract",
+        "rk_schema_snapshot",
+        "component_id",
+        "hardware_spec_hash",
+        "model",
+        "model_shape",
+        "precision",
+        "tp",
+        "envelope",
+        "grid",
+        "mapping_policy",
+        "uarch_fidelity",
+        "kv_layout",
+        "seed",
+        "analytic_mode",
+        "accounting",
+        "preparation_policy",
+        "prepared_input_hash",
+        "assumptions_hash"
+      ],
+      "title": "CharacterizationRequest",
+      "type": "object"
+    },
+    "ClockDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "freq_hz": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scales_with_core": {
+          "title": "Scales With Core",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "freq_hz",
+        "scales_with_core"
+      ],
+      "title": "ClockDomain",
+      "type": "object"
+    },
+    "ClockDomains": {
+      "additionalProperties": false,
+      "properties": {
+        "core": {
+          "$ref": "#/$defs/CoreClockDomain"
+        },
+        "dram": {
+          "$ref": "#/$defs/ClockDomain"
+        },
+        "noc": {
+          "$ref": "#/$defs/ClockDomain"
+        }
+      },
+      "required": [
+        "core",
+        "noc",
+        "dram"
+      ],
+      "title": "ClockDomains",
+      "type": "object"
+    },
+    "ColdVsSteadyError": {
+      "additionalProperties": false,
+      "properties": {
+        "max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Rel"
+        },
+        "median_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Median Rel"
+        },
+        "n_samples": {
+          "minimum": 0,
+          "title": "N Samples",
+          "type": "integer"
+        },
+        "priming_2_vs_1_max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Priming 2 Vs 1 Max Rel"
+        }
+      },
+      "required": [
+        "median_rel",
+        "max_rel",
+        "n_samples",
+        "priming_2_vs_1_max_rel"
+      ],
+      "title": "ColdVsSteadyError",
+      "type": "object"
+    },
+    "ComparisonArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate": {
+          "$ref": "#/$defs/ModelIdentity"
+        },
+        "classification": {
+          "enum": [
+            "executed_comparison",
+            "synthetic_presentation"
+          ]
+        },
+        "comparison_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_outcome": {
+          "enum": [
+            "complete_pass",
+            "failed",
+            "unassessed",
+            "refused",
+            "execution_failed"
+          ]
+        },
+        "fixtures": {
+          "items": {
+            "$ref": "#/$defs/ComparisonFixture"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "format": {
+          "const": "uarch-comparison/1"
+        },
+        "gate_outcome": {
+          "enum": [
+            "not_assessed",
+            "compatibility_pass",
+            "compatibility_fail",
+            "discrepancy_record_complete"
+          ]
+        },
+        "limitations": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "precision_refusal_observations": {
+          "items": {
+            "$ref": "#/$defs/PrecisionRefusalObservation"
+          },
+          "type": "array"
+        },
+        "reference_basis": {
+          "enum": [
+            "physical_vs_nominal_rank_projection",
+            "nominal_aggregate_divided_by_tp"
+          ]
+        },
+        "reference_inventory_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "reference_model": {
+          "$ref": "#/$defs/ModelIdentity"
+        },
+        "track": {
+          "enum": [
+            "physical_discrepancy",
+            "nominal_compatibility"
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "comparison_hash",
+        "classification",
+        "track",
+        "reference_inventory_hash",
+        "reference_model",
+        "reference_basis",
+        "candidate",
+        "fixtures",
+        "evidence_outcome",
+        "gate_outcome",
+        "limitations",
+        "precision_refusal_observations"
+      ],
+      "type": "object"
+    },
+    "ComparisonChannel": {
+      "additionalProperties": false,
+      "properties": {
+        "absolute_adjustment_rel": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "actual": {
+          "$ref": "#/$defs/ProducedValue"
+        },
+        "channel": {
+          "enum": [
+            "matrix_ops",
+            "vector_ops",
+            "memory_read_bytes",
+            "memory_write_bytes",
+            "duration_s"
+          ]
+        },
+        "declared_deviations": {
+          "items": {
+            "$ref": "#/$defs/ComparisonDeviation"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "outcome": {
+          "enum": [
+            "passed",
+            "failed",
+            "unassessed",
+            "refused",
+            "execution_failed",
+            "modelled_absence"
+          ]
+        },
+        "raw_rel": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/ReferenceValue"
+        },
+        "residual_rel": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "signed_adjustment_rel": {
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "op",
+            "byte",
+            "s"
+          ]
+        }
+      },
+      "required": [
+        "channel",
+        "unit",
+        "actual",
+        "reference",
+        "outcome",
+        "reason",
+        "raw_rel",
+        "signed_adjustment_rel",
+        "absolute_adjustment_rel",
+        "residual_rel",
+        "declared_deviations"
+      ],
+      "type": "object"
+    },
+    "ComparisonDeviation": {
+      "additionalProperties": false,
+      "properties": {
+        "deviation_rel": {
+          "maximum": 0.05,
+          "minimum": -0.05,
+          "type": "number"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "deviation_rel",
+        "reason"
+      ],
+      "title": "FlopDeviation",
+      "type": "object"
+    },
+    "ComparisonFixture": {
+      "additionalProperties": false,
+      "properties": {
+        "bundle_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate_input_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate_output_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "channels": {
+          "items": {
+            "$ref": "#/$defs/ComparisonChannel"
+          },
+          "minItems": 5,
+          "type": "array"
+        },
+        "component_binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "execution": {
+          "enum": [
+            "executed",
+            "pre_call_refusal",
+            "execution_failed",
+            "not_run"
+          ]
+        },
+        "fixture_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "job_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "passed",
+            "failed",
+            "unassessed",
+            "refused",
+            "execution_failed"
+          ]
+        },
+        "precision": {
+          "$ref": "#/$defs/ExplicitPrecision"
+        },
+        "projection_scope": {
+          "$ref": "#/$defs/ProjectionScope"
+        },
+        "query": {
+          "$ref": "#/$defs/Query"
+        },
+        "result_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tp": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fixture_id",
+        "component_binding_hash",
+        "precision",
+        "query",
+        "tp",
+        "bundle_hash",
+        "job_hash",
+        "result_hash",
+        "candidate_input_hash",
+        "candidate_output_hash",
+        "execution",
+        "channels",
+        "outcome",
+        "projection_scope"
+      ],
+      "type": "object"
+    },
+    "ComponentExport": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "derivation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "design_status": {
+          "enum": [
+            "proposed",
+            "reference"
+          ]
+        },
+        "execution_model_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "export_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-component-truth/1"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "params": {
+          "items": {
+            "$ref": "#/$defs/Parameter"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "export_hash",
+        "component_id",
+        "hardware_spec_hash",
+        "design_status",
+        "derivation_hash",
+        "params",
+        "execution_model_hash"
+      ],
+      "type": "object"
+    },
+    "ComponentPrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "binding": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ExportBinding"
+            },
+            {
+              "$ref": "#/$defs/UpstreamComponentBinding"
+            }
+          ]
+        },
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-component-precision/1"
+        },
+        "precision_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "precisions": {
+          "items": {
+            "$ref": "#/$defs/ExplicitPrecision"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "format",
+        "component_id",
+        "binding",
+        "precisions",
+        "precision_hash"
+      ],
+      "type": "object"
+    },
+    "CompositionError": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/SampledError"
+        },
+        "n_samples": {
+          "minimum": 0,
+          "title": "N Samples",
+          "type": "integer"
+        },
+        "prefill": {
+          "$ref": "#/$defs/SampledError"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill",
+        "n_samples"
+      ],
+      "title": "CompositionError",
+      "type": "object"
+    },
+    "Condition": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "path",
+        "value"
+      ],
+      "title": "Condition",
+      "type": "object"
+    },
+    "Controller": {
+      "additionalProperties": false,
+      "properties": {
+        "attach": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "minimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "Attach",
+          "type": "array"
+        },
+        "noc_credits": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "page_policy": {
+          "enum": [
+            "open",
+            "closed"
+          ],
+          "title": "Page Policy",
+          "type": "string"
+        },
+        "read_queue_depth": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scheduler": {
+          "enum": [
+            "fr_fcfs",
+            "fcfs"
+          ],
+          "title": "Scheduler",
+          "type": "string"
+        },
+        "write_queue_depth": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "attach",
+        "scheduler",
+        "page_policy",
+        "read_queue_depth",
+        "write_queue_depth",
+        "noc_credits"
+      ],
+      "title": "Controller",
+      "type": "object"
+    },
+    "CoreClockDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "freq_hz": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scales_with_core": {
+          "const": true,
+          "default": true,
+          "title": "Scales With Core",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "freq_hz"
+      ],
+      "title": "CoreClockDomain",
+      "type": "object"
+    },
+    "CoreType": {
+      "additionalProperties": false,
+      "properties": {
+        "dma": {
+          "$ref": "#/$defs/Dma"
+        },
+        "job_overhead_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "matrix_engine": {
+          "$ref": "#/$defs/MatrixEngine"
+        },
+        "sram": {
+          "$ref": "#/$defs/Sram"
+        },
+        "vector_engine": {
+          "$ref": "#/$defs/VectorEngine"
+        }
+      },
+      "required": [
+        "matrix_engine",
+        "vector_engine",
+        "sram",
+        "dma",
+        "job_overhead_cycles"
+      ],
+      "title": "CoreType",
+      "type": "object"
+    },
+    "Cores": {
+      "additionalProperties": false,
+      "properties": {
+        "core_type": {
+          "$ref": "#/$defs/CoreType"
+        },
+        "grid": {
+          "$ref": "#/$defs/HardwareGrid"
+        }
+      },
+      "required": [
+        "grid",
+        "core_type"
+      ],
+      "title": "Cores",
+      "type": "object"
+    },
+    "Counts": {
+      "additionalProperties": false,
+      "properties": {
+        "matrix_ops": {
+          "minimum": 0,
+          "title": "Matrix Ops",
+          "type": "number"
+        },
+        "memory_read_bytes": {
+          "minimum": 0,
+          "title": "Memory Read Bytes",
+          "type": "number"
+        },
+        "memory_write_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Memory Write Bytes"
+        },
+        "vector_ops": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vector Ops"
+        }
+      },
+      "required": [
+        "matrix_ops",
+        "vector_ops",
+        "memory_read_bytes",
+        "memory_write_bytes"
+      ],
+      "title": "Counts",
+      "type": "object"
+    },
+    "DecodeEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_max": {
+          "minimum": 1,
+          "title": "Batch Max",
+          "type": "integer"
+        },
+        "context_per_seq_max": {
+          "minimum": 1,
+          "title": "Context Per Seq Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "batch_max",
+        "context_per_seq_max"
+      ],
+      "title": "DecodeEnvelope",
+      "type": "object"
+    },
+    "DecodeGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Batch",
+          "type": "array"
+        },
+        "context_per_seq": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Context Per Seq",
+          "type": "array"
+        }
+      },
+      "required": [
+        "batch",
+        "context_per_seq"
+      ],
+      "title": "DecodeGrid",
+      "type": "object"
+    },
+    "DecodeRow": {
+      "additionalProperties": false,
+      "properties": {
+        "analytic_mode": {
+          "enum": [
+            "aggregate",
+            "per_op"
+          ]
+        },
+        "attribution_s": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "enum": [
+              "compute",
+              "memory",
+              "noc",
+              "sync",
+              "overhead"
+            ]
+          },
+          "title": "Attribution S",
+          "type": "object"
+        },
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "counts": {
+          "$ref": "#/$defs/Counts"
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/Diagnostics"
+        },
+        "duration_s": {
+          "minimum": 0,
+          "title": "Duration S",
+          "type": "number"
+        },
+        "ext_counts": {
+          "$ref": "#/$defs/ExtCounts"
+        },
+        "frequency_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Frequency Ratio",
+          "type": "number"
+        },
+        "op_results": {
+          "items": {
+            "$ref": "#/$defs/OpResult"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "peak_resident_bytes": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "propertyNames": {
+            "enum": [
+              "hbm",
+              "sram"
+            ]
+          },
+          "title": "Peak Resident Bytes",
+          "type": "object"
+        },
+        "phase": {
+          "const": "decode",
+          "title": "Phase",
+          "type": "string"
+        },
+        "point_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "result_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "state_model": {
+          "const": "stateless_roofline"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        },
+        "u_c0_duration_s": {
+          "minimum": 0,
+          "title": "U C0 Duration S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "frequency_ratio",
+        "duration_s",
+        "u_c0_duration_s",
+        "attribution_s",
+        "counts",
+        "ext_counts",
+        "peak_resident_bytes",
+        "diagnostics",
+        "phase",
+        "batch",
+        "total_context_tokens",
+        "point_hash",
+        "result_hash",
+        "op_results",
+        "analytic_mode",
+        "state_model"
+      ],
+      "title": "DecodeRow",
+      "type": "object"
+    },
+    "DecodeVisitWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        },
+        "weight_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "batch",
+        "total_context_tokens",
+        "weight_ratio"
+      ],
+      "title": "DecodeVisitWeight",
+      "type": "object"
+    },
+    "DependencySelector": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "json_pointer": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "hardware_leaf",
+            "prepared_content",
+            "model_assumption",
+            "model_evidence",
+            "result_field"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "artifact_hash",
+        "json_pointer"
+      ],
+      "type": "object"
+    },
+    "Derivation": {
+      "additionalProperties": false,
+      "properties": {
+        "derivation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-derivation/1"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/DerivedParameter"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "hardware_spec_hash",
+        "parameters",
+        "derivation_hash"
+      ],
+      "type": "object"
+    },
+    "DerivedParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_badge": {
+          "anyOf": [
+            {
+              "enum": [
+                "measured",
+                "spec_derived",
+                "estimated",
+                "stub"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conditional_paths": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "contributor_paths": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "formula_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "formula_id",
+        "contributor_paths",
+        "claim_badge",
+        "conditional_paths"
+      ],
+      "type": "object"
+    },
+    "Diagnostics": {
+      "additionalProperties": false,
+      "properties": {
+        "dma_compute_overlap_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dma Compute Overlap Ratio"
+        },
+        "dram_bw_util_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dram Bw Util Ratio"
+        },
+        "dram_row_hit_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dram Row Hit Ratio"
+        },
+        "matrix_util_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matrix Util Ratio"
+        },
+        "noc_latency_p50_s": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Noc Latency P50 S"
+        },
+        "noc_latency_p99_s": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Noc Latency P99 S"
+        },
+        "noc_max_link_util_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Noc Max Link Util Ratio"
+        },
+        "sram_bank_conflict_stall_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sram Bank Conflict Stall Ratio"
+        },
+        "vector_util_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vector Util Ratio"
+        }
+      },
+      "title": "Diagnostics",
+      "type": "object"
+    },
+    "Dma": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes_per_cycle": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "engines": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "max_outstanding": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "request_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "engines",
+        "bytes_per_cycle",
+        "max_outstanding",
+        "request_bytes"
+      ],
+      "title": "Dma",
+      "type": "object"
+    },
+    "Dram": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "timing_source": {
+                "const": "direct"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "timing_preset": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "timing_source": {
+                "const": "preset"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "timing_preset": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "timing_preset"
+            ]
+          }
+        }
+      ],
+      "description": "Explicit timing origin; source strings are citations, never mode selectors.",
+      "properties": {
+        "bw_bytes_per_s": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "capacity_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "channels": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "organization": {
+          "$ref": "#/$defs/DramOrganization"
+        },
+        "standard": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Standard",
+          "type": "string"
+        },
+        "timing": {
+          "$ref": "#/$defs/DramTiming"
+        },
+        "timing_preset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimingPreset"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "timing_source": {
+          "enum": [
+            "direct",
+            "preset"
+          ],
+          "title": "Timing Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "standard",
+        "channels",
+        "bw_bytes_per_s",
+        "capacity_bytes",
+        "organization",
+        "timing_source",
+        "timing"
+      ],
+      "title": "Dram",
+      "type": "object"
+    },
+    "DramOrganization": {
+      "additionalProperties": false,
+      "properties": {
+        "bank_groups": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "banks_per_group": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "ranks": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "row_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "ranks",
+        "bank_groups",
+        "banks_per_group",
+        "row_bytes"
+      ],
+      "title": "DramOrganization",
+      "type": "object"
+    },
+    "DramTiming": {
+      "additionalProperties": false,
+      "properties": {
+        "t_cl_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rcd_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_refi_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rfc_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rp_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "t_rcd_cycles",
+        "t_rp_cycles",
+        "t_cl_cycles",
+        "t_rfc_cycles",
+        "t_refi_cycles"
+      ],
+      "title": "DramTiming",
+      "type": "object"
+    },
+    "EmbeddedModelCard": {
+      "additionalProperties": false,
+      "properties": {
+        "badge": {
+          "enum": [
+            "stub",
+            "estimated",
+            "measured"
+          ],
+          "title": "Badge",
+          "type": "string"
+        },
+        "energy_verification": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnergyVerification"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hash",
+          "type": "string"
+        },
+        "validated_error_band": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ValidatedErrorBand"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "hash",
+        "badge",
+        "evidence"
+      ],
+      "title": "EmbeddedModelCard",
+      "type": "object"
+    },
+    "Energy": {
+      "additionalProperties": false,
+      "properties": {
+        "pj_per_byte": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "propertyNames": {
+            "enum": [
+              "sram",
+              "noc_hop",
+              "dram"
+            ]
+          },
+          "title": "Pj Per Byte",
+          "type": "object"
+        },
+        "pj_per_mac": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Pj Per Mac",
+          "type": "object"
+        },
+        "voltage_ratio": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "title": "Voltage Ratio",
+          "type": "object"
+        }
+      },
+      "required": [
+        "pj_per_mac",
+        "pj_per_byte",
+        "voltage_ratio"
+      ],
+      "title": "Energy",
+      "type": "object"
+    },
+    "EnergyVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "L0": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minProperties": 1,
+          "propertyNames": {
+            "enum": [
+              "mac",
+              "sram",
+              "noc_hop",
+              "dram",
+              "static"
+            ]
+          },
+          "title": "L0",
+          "type": "object"
+        },
+        "L2": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minProperties": 1,
+          "propertyNames": {
+            "enum": [
+              "mac",
+              "sram",
+              "noc_hop",
+              "dram",
+              "static"
+            ]
+          },
+          "title": "L2",
+          "type": "object"
+        }
+      },
+      "required": [
+        "L0",
+        "L2"
+      ],
+      "title": "EnergyVerification",
+      "type": "object"
+    },
+    "EngineIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelIdentity"
+        },
+        "name": {
+          "const": "analytic"
+        },
+        "version": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash",
+        "model"
+      ],
+      "type": "object"
+    },
+    "EngineJob": {
+      "additionalProperties": false,
+      "properties": {
+        "accounting": {
+          "const": "resolved-ops/1"
+        },
+        "assumptions_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "bundle_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "engine": {
+          "$ref": "#/$defs/EngineIdentity"
+        },
+        "fidelity_detail": {
+          "$ref": "#/$defs/FidelityDetail"
+        },
+        "hardware": {
+          "$ref": "#/$defs/ResolvedHardware"
+        },
+        "initial_state": {
+          "enum": [
+            "steady",
+            "cold"
+          ]
+        },
+        "job_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "aggregate",
+            "per_op"
+          ]
+        },
+        "point": {
+          "$ref": "#/$defs/PreparedPoint"
+        },
+        "point_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "precision": {
+          "$ref": "#/$defs/Precision"
+        },
+        "producer": {
+          "$ref": "#/$defs/Producer"
+        },
+        "protocol": {
+          "const": "uarch-engine/1"
+        },
+        "rank": {
+          "$ref": "#/$defs/RankScope"
+        },
+        "request_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "seed": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "state_model": {
+          "const": "stateless_roofline"
+        }
+      },
+      "required": [
+        "protocol",
+        "job_hash",
+        "request_hash",
+        "bundle_hash",
+        "point_hash",
+        "producer",
+        "engine",
+        "hardware",
+        "point",
+        "rank",
+        "precision",
+        "fidelity_detail",
+        "mode",
+        "accounting",
+        "initial_state",
+        "state_model",
+        "seed",
+        "assumptions_hash"
+      ],
+      "type": "object"
+    },
+    "EngineResult": {
+      "additionalProperties": false,
+      "properties": {
+        "attribution_ps": {
+          "additionalProperties": false,
+          "properties": {
+            "compute": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "memory": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "noc": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "overhead": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "sync": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "compute",
+            "memory",
+            "noc",
+            "sync",
+            "overhead"
+          ],
+          "type": "object"
+        },
+        "busy_time_ps": {
+          "additionalProperties": false,
+          "properties": {
+            "compute": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "memory": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "noc": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "compute",
+            "memory",
+            "noc"
+          ],
+          "type": "object"
+        },
+        "counts": {
+          "$ref": "#/$defs/Counts"
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/Diagnostics"
+        },
+        "duration_ps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "engine": {
+          "$ref": "#/$defs/EngineIdentity"
+        },
+        "fidelity_detail": {
+          "$ref": "#/$defs/FidelityDetail"
+        },
+        "job_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "per_op": {
+          "items": {
+            "$ref": "#/$defs/OpResult"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "protocol": {
+          "const": "uarch-engine/1"
+        },
+        "result_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "simulator_metrics": {
+          "type": "null"
+        },
+        "trace": {
+          "type": "null"
+        },
+        "u_c0_duration_ps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "unrepresented": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        }
+      },
+      "required": [
+        "protocol",
+        "result_hash",
+        "job_hash",
+        "engine",
+        "duration_ps",
+        "u_c0_duration_ps",
+        "attribution_ps",
+        "counts",
+        "per_op",
+        "busy_time_ps",
+        "diagnostics",
+        "fidelity_detail",
+        "unrepresented",
+        "simulator_metrics",
+        "trace"
+      ],
+      "type": "object"
+    },
+    "Envelope": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/DecodeEnvelope"
+        },
+        "prefill": {
+          "$ref": "#/$defs/PrefillEnvelope"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill"
+      ],
+      "title": "Envelope",
+      "type": "object"
+    },
+    "ErrorRecord": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "NoTableForComponent",
+            "EnvelopeExceedsGrid",
+            "SpecHashMismatch",
+            "ParamsMismatch",
+            "TpMismatch",
+            "ContractMajorMismatch",
+            "ContractMinorMismatch",
+            "ResidencyExceedsCapacity",
+            "NonFiniteRow",
+            "MissingFrequencyAxis",
+            "InitialStateMismatch",
+            "KvLayoutMismatch",
+            "StipulationOnReference",
+            "ClaimWithoutSource",
+            "SramCapacityExceeded",
+            "UnnamedPreset",
+            "ShardIndivisible"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorRecord",
+      "type": "object"
+    },
+    "EvidencePrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "kv_cache": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operands": {
+          "additionalProperties": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache",
+        "operands"
+      ],
+      "type": "object"
+    },
+    "EvidenceRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "channel": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "classification": {
+          "enum": [
+            "real",
+            "synthetic_fixture"
+          ]
+        },
+        "energy_family": {
+          "anyOf": [
+            {
+              "enum": [
+                "mac",
+                "sram",
+                "noc_hop",
+                "dram",
+                "static"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error_band": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "high_rel": {
+                  "exclusiveMinimum": 0,
+                  "type": "number"
+                },
+                "low_rel": {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "low_rel",
+                "high_rel"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-evidence/1"
+        },
+        "granularity": {
+          "enum": [
+            "operator",
+            "subsystem",
+            "whole_iteration"
+          ]
+        },
+        "ordering_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "purpose": {
+          "enum": [
+            "duration",
+            "counts",
+            "diagnostics",
+            "energy"
+          ]
+        },
+        "review_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "rung": {
+          "enum": [
+            "L0",
+            "L0m",
+            "L1",
+            "L2",
+            "L3",
+            "L4"
+          ]
+        },
+        "scope": {
+          "items": {
+            "$ref": "#/$defs/EvidenceScopeCase"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "source_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "verification_hashes": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "evidence_hash",
+        "evidence_id",
+        "classification",
+        "rung",
+        "purpose",
+        "channel",
+        "energy_family",
+        "granularity",
+        "scope",
+        "source_hash",
+        "review_hash",
+        "ordering_hash",
+        "verification_hashes",
+        "error_band"
+      ],
+      "type": "object"
+    },
+    "EvidenceScopeCase": {
+      "additionalProperties": false,
+      "properties": {
+        "array_fill": {
+          "anyOf": [
+            {
+              "enum": [
+                "underfilled",
+                "full"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dram_load_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "family": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "frequency_ratio": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "hardware_spec_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "initial_state": {
+          "enum": [
+            "steady",
+            "cold"
+          ]
+        },
+        "intensity_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kv_block_size_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "mapping_correspondence_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mapping_match": {
+          "anyOf": [
+            {
+              "enum": [
+                "matched",
+                "compiler-chosen"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_identity_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "noc_load_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "op_class": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "precision": {
+          "$ref": "#/$defs/EvidencePrecision"
+        },
+        "prepared_bundle_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "family",
+        "op_class",
+        "precision",
+        "intensity_regime",
+        "array_fill",
+        "noc_load_regime",
+        "dram_load_regime",
+        "mapping_match",
+        "initial_state",
+        "kv_block_size_tokens",
+        "model_identity_hash",
+        "hardware_spec_hash",
+        "prepared_bundle_hash",
+        "mapping_correspondence_hash",
+        "frequency_ratio"
+      ],
+      "type": "object"
+    },
+    "ExecutionModelInput": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance": {
+          "enum": [
+            "proposed",
+            "accepted_input"
+          ]
+        },
+        "assumption_note": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "compute": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "evidence_hashes": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "execution_model_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-execution-model/1"
+        },
+        "kind": {
+          "enum": [
+            "scalar_efficiency",
+            "split_efficiency"
+          ]
+        },
+        "memory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcedValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "execution_model_hash",
+        "kind",
+        "compute",
+        "memory",
+        "assumption_note",
+        "acceptance",
+        "evidence_hashes"
+      ],
+      "type": "object"
+    },
+    "ExpectedPrecisionRefusal": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "check_input_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "component_binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "error_class": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "precision": {
+          "$ref": "#/$defs/ExplicitPrecision"
+        },
+        "refusal_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_entry_index": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "refusal_id",
+        "component_binding_hash",
+        "precision",
+        "boundary",
+        "error_class",
+        "check_input_hash",
+        "source_entry_index"
+      ],
+      "type": "object"
+    },
+    "ExplicitPrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache"
+      ],
+      "type": "object"
+    },
+    "ExportBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "derivation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "design_status": {
+          "enum": [
+            "proposed",
+            "reference"
+          ]
+        },
+        "execution_model_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-export-binding/1"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "kind": {
+          "const": "uarch_projection"
+        },
+        "losses": {
+          "items": {
+            "$ref": "#/$defs/ProjectionLoss"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "primary_export_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "projected_descriptor_bytes_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "projected_descriptor_content_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "projection_recipe": {
+          "const": "pinned-five-field-test-projection/1"
+        },
+        "supported_kv_storage": {
+          "items": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "upstream_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "binding_hash",
+        "kind",
+        "component_id",
+        "upstream_sha",
+        "hardware_spec_hash",
+        "design_status",
+        "derivation_hash",
+        "primary_export_hash",
+        "projected_descriptor_content_hash",
+        "projected_descriptor_bytes_sha256",
+        "execution_model_hash",
+        "projection_recipe",
+        "losses",
+        "supported_kv_storage"
+      ],
+      "type": "object"
+    },
+    "ExtCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "noc_flit_hop_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Noc Flit Hop Count"
+        },
+        "sram_read_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sram Read Bytes"
+        },
+        "sram_write_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sram Write Bytes"
+        }
+      },
+      "required": [
+        "sram_read_bytes",
+        "sram_write_bytes",
+        "noc_flit_hop_count"
+      ],
+      "title": "ExtCounts",
+      "type": "object"
+    },
+    "FamilyRegistry": {
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "family": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "hardware_spec_hash": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "hardware_spec_hash",
+              "family"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "format": {
+          "const": "uarch-family-registry/1"
+        },
+        "registry_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "review_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "registry_hash",
+        "version",
+        "entries",
+        "review_hash"
+      ],
+      "type": "object"
+    },
+    "FidelityDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "title": "Compute",
+          "type": "integer"
+        },
+        "dram": {
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            2
+          ],
+          "title": "Dram"
+        },
+        "layer_reuse": {
+          "title": "Layer Reuse",
+          "type": "boolean"
+        },
+        "noc": {
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            2
+          ],
+          "title": "Noc"
+        },
+        "shared_sram": {
+          "description": "Omit only when hardware has no shared SRAM; null is invalid.",
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            "unrepresented"
+          ],
+          "title": "Shared Sram"
+        },
+        "sync": {
+          "pattern": "^(exact|approx\\(Q=[1-9][0-9]*\\))$",
+          "title": "Sync",
+          "type": "string"
+        }
+      },
+      "required": [
+        "compute",
+        "noc",
+        "dram",
+        "sync",
+        "layer_reuse"
+      ],
+      "title": "FidelityDetail",
+      "type": "object"
+    },
+    "FiveFieldValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "enum": [
+            "stub",
+            "estimated",
+            "spec_derived",
+            "measured"
+          ]
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unit": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "provenance",
+        "source",
+        "date"
+      ],
+      "type": "object"
+    },
+    "FlopDeviation": {
+      "additionalProperties": false,
+      "properties": {
+        "deviation_rel": {
+          "ge": -0.05,
+          "le": 0.05,
+          "title": "Deviation Rel",
+          "type": "number"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "deviation_rel",
+        "reason"
+      ],
+      "title": "FlopDeviation",
+      "type": "object"
+    },
+    "FlopParity": {
+      "additionalProperties": false,
+      "description": "Explicit classification; self-tests never establish actual workload parity.\n\nAll fields are required, including nullable identities. Manifest digests use B's\nraw 64-hex spelling, unlike hardware_spec_hash's sha256: prefix. External oracle,\nfixture completeness, projection eligibility and callable identity need B/U-P3 checks.",
+      "properties": {
+        "candidate_identity": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Candidate Identity"
+        },
+        "comparisons": {
+          "items": {
+            "$ref": "#/$defs/ParityChannelComparison"
+          },
+          "title": "Comparisons",
+          "type": "array"
+        },
+        "fixture_set_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fixture Set Id"
+        },
+        "kind": {
+          "enum": [
+            "not_run",
+            "harness_self_test",
+            "workload_parity"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Rel"
+        },
+        "n_fixtures": {
+          "minimum": 0,
+          "title": "N Fixtures",
+          "type": "integer"
+        },
+        "oracle_manifest_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Oracle Manifest Sha256"
+        },
+        "reference_basis": {
+          "const": "rk_sim_aggregate_divided_by_tp",
+          "title": "Reference Basis",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "reference_basis",
+        "fixture_set_id",
+        "oracle_manifest_sha256",
+        "candidate_identity",
+        "n_fixtures",
+        "max_rel",
+        "comparisons"
+      ],
+      "title": "FlopParity",
+      "type": "object"
+    },
+    "Grid": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/DecodeGrid"
+        },
+        "frequency_ratio": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "minItems": 1,
+          "title": "Frequency Ratio",
+          "type": "array"
+        },
+        "prefill": {
+          "$ref": "#/$defs/PrefillGrid"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill",
+        "frequency_ratio"
+      ],
+      "title": "Grid",
+      "type": "object"
+    },
+    "HardwareGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "cols": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "rows": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "rows",
+        "cols"
+      ],
+      "title": "HardwareGrid",
+      "type": "object"
+    },
+    "HardwareSpec": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "Hardware inputs. Unit/path consistency is semantic validation; x-hardware-unit-rules lists exact allowed labels, without conversion. Coordinates are count indices; formats.*.bytes is an implicit byte width; energy.voltage_ratio keys are dimensionless frequency ratios. byte and B are equivalent labels preserved verbatim.",
+      "properties": {
+        "clock_domains": {
+          "$ref": "#/$defs/ClockDomains"
+        },
+        "cores": {
+          "$ref": "#/$defs/Cores"
+        },
+        "design_status": {
+          "enum": [
+            "proposed",
+            "reference"
+          ],
+          "title": "Design Status",
+          "type": "string"
+        },
+        "energy": {
+          "$ref": "#/$defs/Energy"
+        },
+        "formats": {
+          "additionalProperties": {
+            "$ref": "#/$defs/NumericFormat"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Formats",
+          "type": "object"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "memory": {
+          "$ref": "#/$defs/Memory"
+        },
+        "nocs": {
+          "items": {
+            "$ref": "#/$defs/Noc"
+          },
+          "minItems": 1,
+          "title": "Nocs",
+          "type": "array"
+        },
+        "shared_sram": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SharedSram"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "static_power_w": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "sync": {
+          "$ref": "#/$defs/Sync"
+        },
+        "tdp_w": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "id",
+        "design_status",
+        "clock_domains",
+        "cores",
+        "sync",
+        "nocs",
+        "memory",
+        "formats",
+        "energy",
+        "static_power_w",
+        "tdp_w"
+      ],
+      "title": "HardwareSpec",
+      "type": "object",
+      "x-hardware-unit-rules": {
+        "clock_domains.core.freq_hz": [
+          "Hz"
+        ],
+        "clock_domains.dram.freq_hz": [
+          "Hz"
+        ],
+        "clock_domains.noc.freq_hz": [
+          "Hz"
+        ],
+        "cores.core_type.dma.bytes_per_cycle": [
+          "byte/cycle"
+        ],
+        "cores.core_type.dma.engines": [
+          "count"
+        ],
+        "cores.core_type.dma.max_outstanding": [
+          "count"
+        ],
+        "cores.core_type.dma.request_bytes": [
+          "byte",
+          "B"
+        ],
+        "cores.core_type.job_overhead_cycles": [
+          "cycle"
+        ],
+        "cores.core_type.matrix_engine.accumulator_bytes": [
+          "byte",
+          "B"
+        ],
+        "cores.core_type.matrix_engine.array.cols": [
+          "count"
+        ],
+        "cores.core_type.matrix_engine.array.rows": [
+          "count"
+        ],
+        "cores.core_type.matrix_engine.macs_per_cycle.*": [
+          "MAC/cycle"
+        ],
+        "cores.core_type.matrix_engine.operand_buffer_bytes": [
+          "byte",
+          "B"
+        ],
+        "cores.core_type.matrix_engine.operand_bytes_per_cycle": [
+          "byte/cycle"
+        ],
+        "cores.core_type.sram.banks": [
+          "count"
+        ],
+        "cores.core_type.sram.bytes": [
+          "byte",
+          "B"
+        ],
+        "cores.core_type.sram.bytes_per_cycle_per_bank": [
+          "byte/cycle"
+        ],
+        "cores.core_type.vector_engine.ops_per_cycle": [
+          "op/cycle"
+        ],
+        "cores.grid.cols": [
+          "count"
+        ],
+        "cores.grid.rows": [
+          "count"
+        ],
+        "energy.pj_per_byte.dram": [
+          "pJ/byte"
+        ],
+        "energy.pj_per_byte.noc_hop": [
+          "pJ/byte"
+        ],
+        "energy.pj_per_byte.sram": [
+          "pJ/byte"
+        ],
+        "energy.pj_per_mac.*": [
+          "pJ/MAC"
+        ],
+        "energy.voltage_ratio.*": [
+          "ratio"
+        ],
+        "formats.*.accumulate_bytes": [
+          "byte",
+          "B"
+        ],
+        "formats.*.block_scale_bytes": [
+          "byte",
+          "B"
+        ],
+        "memory.controllers[].noc_credits": [
+          "count"
+        ],
+        "memory.controllers[].read_queue_depth": [
+          "count"
+        ],
+        "memory.controllers[].write_queue_depth": [
+          "count"
+        ],
+        "memory.dram.bw_bytes_per_s": [
+          "byte/s"
+        ],
+        "memory.dram.capacity_bytes": [
+          "byte",
+          "B"
+        ],
+        "memory.dram.channels": [
+          "count"
+        ],
+        "memory.dram.organization.bank_groups": [
+          "count"
+        ],
+        "memory.dram.organization.banks_per_group": [
+          "count"
+        ],
+        "memory.dram.organization.ranks": [
+          "count"
+        ],
+        "memory.dram.organization.row_bytes": [
+          "byte",
+          "B"
+        ],
+        "memory.dram.timing.t_cl_cycles": [
+          "cycle"
+        ],
+        "memory.dram.timing.t_rcd_cycles": [
+          "cycle"
+        ],
+        "memory.dram.timing.t_refi_cycles": [
+          "cycle"
+        ],
+        "memory.dram.timing.t_rfc_cycles": [
+          "cycle"
+        ],
+        "memory.dram.timing.t_rp_cycles": [
+          "cycle"
+        ],
+        "memory.interleave.granularity_bytes": [
+          "byte",
+          "B"
+        ],
+        "nocs[].buffer_flits": [
+          "count"
+        ],
+        "nocs[].link_bytes_per_cycle": [
+          "byte/cycle"
+        ],
+        "nocs[].router_latency_cycles": [
+          "cycle"
+        ],
+        "nocs[].virtual_channels": [
+          "count"
+        ],
+        "shared_sram.banks": [
+          "count"
+        ],
+        "shared_sram.bytes": [
+          "byte",
+          "B"
+        ],
+        "shared_sram.bytes_per_cycle_per_bank": [
+          "byte/cycle"
+        ],
+        "shared_sram.latency_cycles": [
+          "cycle"
+        ],
+        "static_power_w": [
+          "W"
+        ],
+        "sync.barrier_latency_cycles": [
+          "cycle"
+        ],
+        "tdp_w": [
+          "W"
+        ]
+      }
+    },
+    "Interleave": {
+      "additionalProperties": false,
+      "properties": {
+        "granularity_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scheme": {
+          "enum": [
+            "channel_hash",
+            "round_robin"
+          ],
+          "title": "Scheme",
+          "type": "string"
+        }
+      },
+      "required": [
+        "granularity_bytes",
+        "scheme"
+      ],
+      "title": "Interleave",
+      "type": "object"
+    },
+    "Interpolation": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "const": "none"
+        },
+        "outside_grid": {
+          "const": "refuse"
+        },
+        "prefill": {
+          "const": "none"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill",
+        "outside_grid"
+      ],
+      "type": "object"
+    },
+    "InterpolationError": {
+      "additionalProperties": false,
+      "properties": {
+        "max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Rel"
+        },
+        "median_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Median Rel"
+        },
+        "n_samples": {
+          "minimum": 0,
+          "title": "N Samples",
+          "type": "integer"
+        },
+        "weighted_median_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Weighted Median Rel"
+        }
+      },
+      "required": [
+        "median_rel",
+        "max_rel",
+        "n_samples",
+        "weighted_median_rel"
+      ],
+      "title": "InterpolationError",
+      "type": "object"
+    },
+    "KvAccess": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "context_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "last_page_valid_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "pages_per_sequence": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "read_policy": {
+          "const": "valid_tokens"
+        },
+        "write_policy": {
+          "const": "append_valid_tokens"
+        }
+      },
+      "required": [
+        "context_tokens",
+        "block_size_tokens",
+        "pages_per_sequence",
+        "last_page_valid_tokens",
+        "read_policy",
+        "write_policy"
+      ],
+      "type": "object"
+    },
+    "KvLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "minimum": 1,
+          "title": "Block Size Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "block_size_tokens"
+      ],
+      "title": "KvLayout",
+      "type": "object"
+    },
+    "MatrixEngine": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "accumulator_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "array": {
+          "$ref": "#/$defs/HardwareGrid"
+        },
+        "dataflows": {
+          "items": {
+            "enum": [
+              "weight_stationary",
+              "output_stationary"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Dataflows",
+          "type": "array"
+        },
+        "macs_per_cycle": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Macs Per Cycle",
+          "type": "object"
+        },
+        "operand_buffer_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "operand_bytes_per_cycle": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "array",
+        "dataflows",
+        "macs_per_cycle",
+        "accumulator_bytes",
+        "operand_buffer_bytes",
+        "operand_bytes_per_cycle"
+      ],
+      "title": "MatrixEngine",
+      "type": "object"
+    },
+    "MeasuredError": {
+      "additionalProperties": false,
+      "properties": {
+        "cold_vs_steady": {
+          "$ref": "#/$defs/ColdVsSteadyError"
+        },
+        "composition_reduction": {
+          "$ref": "#/$defs/CompositionError"
+        },
+        "interpolation_loo": {
+          "$ref": "#/$defs/InterpolationError"
+        },
+        "layer_reuse": {
+          "$ref": "#/$defs/SampledError"
+        }
+      },
+      "required": [
+        "interpolation_loo",
+        "composition_reduction",
+        "layer_reuse",
+        "cold_vs_steady"
+      ],
+      "title": "MeasuredError",
+      "type": "object"
+    },
+    "Memory": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "controllers": {
+          "items": {
+            "$ref": "#/$defs/Controller"
+          },
+          "minItems": 1,
+          "title": "Controllers",
+          "type": "array"
+        },
+        "dram": {
+          "$ref": "#/$defs/Dram"
+        },
+        "interleave": {
+          "$ref": "#/$defs/Interleave"
+        }
+      },
+      "required": [
+        "interleave",
+        "controllers",
+        "dram"
+      ],
+      "title": "Memory",
+      "type": "object"
+    },
+    "MetricDependencies": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencies_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-metric-dependencies/1"
+        },
+        "model_identity_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "recipes": {
+          "items": {
+            "$ref": "#/$defs/MetricRecipe"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "review_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_recipes": {
+          "items": {
+            "$ref": "#/$defs/SourceMetricRecipe"
+          },
+          "type": "array"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "dependencies_hash",
+        "version",
+        "model_identity_hash",
+        "recipes",
+        "review_hash",
+        "source_recipes"
+      ],
+      "type": "object"
+    },
+    "MetricRecipe": {
+      "additionalProperties": false,
+      "properties": {
+        "applicable_dimensions": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "granularity": {
+          "enum": [
+            "operator",
+            "whole_iteration",
+            "input"
+          ]
+        },
+        "metric_path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "duration",
+            "counts",
+            "diagnostics",
+            "energy",
+            "input"
+          ]
+        },
+        "selectors": {
+          "items": {
+            "$ref": "#/$defs/DependencySelector"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "metric_path",
+        "purpose",
+        "selectors",
+        "applicable_dimensions",
+        "granularity"
+      ],
+      "type": "object"
+    },
+    "ModelCard": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "badge": {
+          "enum": [
+            "stub",
+            "estimated",
+            "measured"
+          ],
+          "title": "Badge",
+          "type": "string"
+        },
+        "energy_verification": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnergyVerification"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "model_id": {
+          "$ref": "#/$defs/ModelId"
+        },
+        "validated_error_band": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ValidatedErrorBand"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "verification": {
+          "$ref": "#/$defs/Verification"
+        }
+      },
+      "required": [
+        "model_id",
+        "badge",
+        "evidence",
+        "verification"
+      ],
+      "title": "ModelCard",
+      "type": "object"
+    },
+    "ModelId": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Engine",
+          "type": "string"
+        },
+        "engine_version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Engine Version",
+          "type": "string"
+        },
+        "fidelity_detail": {
+          "$ref": "#/$defs/FidelityDetail"
+        },
+        "mapping_policy": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Mapping Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "engine",
+        "engine_version",
+        "fidelity_detail",
+        "mapping_policy"
+      ],
+      "title": "ModelId",
+      "type": "object"
+    },
+    "ModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "physical-resolved",
+            "nominal-rk-compatibility"
+          ]
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash"
+      ],
+      "type": "object"
+    },
+    "ModelShape": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "attention": {
+          "enum": [
+            "mha",
+            "gqa"
+          ],
+          "title": "Attention",
+          "type": "string"
+        },
+        "d_ff": {
+          "minimum": 1,
+          "title": "D Ff",
+          "type": "integer"
+        },
+        "expert_d_ff": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expert D Ff"
+        },
+        "gated_mlp": {
+          "title": "Gated Mlp",
+          "type": "boolean"
+        },
+        "tie_embeddings": {
+          "title": "Tie Embeddings",
+          "type": "boolean"
+        },
+        "vocab_size": {
+          "minimum": 1,
+          "title": "Vocab Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "d_ff",
+        "gated_mlp",
+        "vocab_size",
+        "attention",
+        "tie_embeddings"
+      ],
+      "title": "ModelShape",
+      "type": "object"
+    },
+    "ModelSpec": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "MoE is active-vs-total and nothing more (build-spec \u00a72.3.5).",
+      "properties": {
+        "active_params": {
+          "minimum": 1,
+          "title": "Active Params",
+          "type": "integer"
+        },
+        "d_model": {
+          "minimum": 1,
+          "title": "D Model",
+          "type": "integer"
+        },
+        "experts_per_token": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Experts Per Token",
+          "type": "integer"
+        },
+        "kv_heads": {
+          "minimum": 1,
+          "title": "Kv Heads",
+          "type": "integer"
+        },
+        "n_experts": {
+          "default": 0,
+          "minimum": 0,
+          "title": "N Experts",
+          "type": "integer"
+        },
+        "n_heads": {
+          "minimum": 1,
+          "title": "N Heads",
+          "type": "integer"
+        },
+        "n_layers": {
+          "minimum": 1,
+          "title": "N Layers",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "total_params": {
+          "minimum": 1,
+          "title": "Total Params",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "total_params",
+        "active_params",
+        "n_layers",
+        "d_model",
+        "n_heads",
+        "kv_heads"
+      ],
+      "title": "ModelSpec",
+      "type": "object"
+    },
+    "Noc": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "buffer_flits": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "direction": {
+          "enum": [
+            "positive",
+            "negative",
+            "bidirectional"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "link_bytes_per_cycle": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "router_latency_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "topology": {
+          "enum": [
+            "mesh",
+            "torus"
+          ],
+          "title": "Topology",
+          "type": "string"
+        },
+        "virtual_channels": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "topology",
+        "direction",
+        "link_bytes_per_cycle",
+        "router_latency_cycles",
+        "virtual_channels",
+        "buffer_flits"
+      ],
+      "title": "Noc",
+      "type": "object"
+    },
+    "NominalCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "matrix_ops": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "memory_read_bytes": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "memory_write_bytes": {
+          "minimum": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "vector_ops": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "matrix_ops",
+        "vector_ops",
+        "memory_read_bytes",
+        "memory_write_bytes"
+      ],
+      "type": "object"
+    },
+    "NominalInput": {
+      "additionalProperties": false,
+      "properties": {
+        "bandwidth": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "component_binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "execution_model": {
+          "$ref": "#/$defs/ExecutionModelInput"
+        },
+        "format": {
+          "const": "uarch-nominal-input/1"
+        },
+        "input_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelSpec"
+        },
+        "model_identity": {
+          "$ref": "#/$defs/ModelIdentity"
+        },
+        "precision": {
+          "$ref": "#/$defs/ExplicitPrecision"
+        },
+        "query": {
+          "$ref": "#/$defs/Query"
+        },
+        "selected_peak": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "tp": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "input_hash",
+        "model",
+        "precision",
+        "query",
+        "tp",
+        "component_binding_hash",
+        "selected_peak",
+        "bandwidth",
+        "execution_model",
+        "model_identity"
+      ],
+      "type": "object"
+    },
+    "NominalOutput": {
+      "additionalProperties": false,
+      "properties": {
+        "counts": {
+          "$ref": "#/$defs/NominalCounts"
+        },
+        "duration_s": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "format": {
+          "const": "uarch-nominal-output/1"
+        },
+        "input_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "model_identity": {
+          "$ref": "#/$defs/ModelIdentity"
+        },
+        "omissions": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "output_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "output_hash",
+        "input_hash",
+        "model_identity",
+        "counts",
+        "duration_s",
+        "omissions"
+      ],
+      "type": "object"
+    },
+    "NumericFormat": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "accumulate_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "block_scale_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Bytes",
+          "type": "number"
+        }
+      },
+      "required": [
+        "bytes",
+        "accumulate_bytes",
+        "block_scale_bytes"
+      ],
+      "title": "NumericFormat",
+      "type": "object"
+    },
+    "OpGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "head",
+            "decoder",
+            "tail"
+          ]
+        },
+        "ops": {
+          "items": {
+            "$ref": "#/$defs/PreparedOp"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "repeat": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "repeat",
+        "depends_on",
+        "ops"
+      ],
+      "type": "object"
+    },
+    "OpResult": {
+      "additionalProperties": false,
+      "properties": {
+        "achieved_ops_per_s": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bound": {
+          "enum": [
+            "compute",
+            "memory"
+          ]
+        },
+        "compute_time_ps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "counts": {
+          "$ref": "#/$defs/Counts"
+        },
+        "dram_bw_bytes_per_s": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "duration_ps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "group_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "instances": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "matrix_peak_ops_per_s": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "memory_time_ps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "operational_intensity_ops_per_byte": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ridge_ops_per_byte": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "scope": {
+          "$ref": "#/$defs/ReportScope"
+        },
+        "vector_peak_ops_per_s": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "group_id",
+        "instances",
+        "counts",
+        "compute_time_ps",
+        "memory_time_ps",
+        "duration_ps",
+        "bound",
+        "operational_intensity_ops_per_byte",
+        "achieved_ops_per_s",
+        "ridge_ops_per_byte",
+        "matrix_peak_ops_per_s",
+        "vector_peak_ops_per_s",
+        "dram_bw_bytes_per_s",
+        "scope"
+      ],
+      "type": "object"
+    },
+    "OpSpec": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "dimensions": {
+          "patternProperties": {
+            "\\S": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Dimensions",
+          "type": "object"
+        },
+        "operands": {
+          "patternProperties": {
+            "\\S": {
+              "$ref": "#/$defs/Operand"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operands",
+          "type": "object"
+        },
+        "operator": {
+          "$ref": "#/$defs/Operator"
+        },
+        "reduction_axes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Reduction Axes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operator",
+        "dimensions",
+        "operands",
+        "reduction_axes"
+      ],
+      "title": "OpSpec",
+      "type": "object"
+    },
+    "Operand": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Size Tokens"
+        },
+        "dimensions": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "dtype": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "layout": {
+          "enum": [
+            "contiguous",
+            "paged"
+          ],
+          "title": "Layout",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dtype",
+        "dimensions",
+        "layout"
+      ],
+      "title": "Operand",
+      "type": "object"
+    },
+    "Operator": {
+      "enum": [
+        "q_projection",
+        "k_projection",
+        "v_projection",
+        "qk_score",
+        "softmax",
+        "av_application",
+        "output_projection",
+        "normalization",
+        "residual_addition",
+        "ffn_up",
+        "ffn_gate",
+        "ffn_down",
+        "activation",
+        "kv_write",
+        "embedding",
+        "lm_head",
+        "attention_fused"
+      ],
+      "title": "Operator",
+      "type": "string"
+    },
+    "OrderingRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "uarch-ordering/1"
+        },
+        "ordering_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "prediction_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "prediction_is_ancestor": {
+          "type": "boolean"
+        },
+        "prediction_tree_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "result_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "verification_source_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "ordering_hash",
+        "prediction_commit",
+        "prediction_tree_hash",
+        "result_commit",
+        "prediction_is_ancestor",
+        "verification_source_hash"
+      ],
+      "type": "object"
+    },
+    "Padding": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "logical": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "physical": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dimension",
+        "logical",
+        "physical"
+      ],
+      "type": "object"
+    },
+    "Parameter": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "Parameter",
+      "type": "object"
+    },
+    "ParityChannelComparison": {
+      "additionalProperties": false,
+      "description": "One successful fixture/channel comparison against a projected oracle count.\n\nRatios use reference as denominator; positive adjustment means extra actual work.\nArithmetic follows B's binary64 division and math.fsum, without widening its limits.\nThe carrier verifies supplied arithmetic, not oracle/candidate authenticity.",
+      "properties": {
+        "absolute_adjustment_rel": {
+          "le": 0.05,
+          "minimum": 0,
+          "title": "Absolute Adjustment Rel",
+          "type": "number"
+        },
+        "actual": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual"
+        },
+        "channel": {
+          "enum": [
+            "matrix_ops",
+            "vector_ops",
+            "memory_read_bytes",
+            "memory_write_bytes"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "declared_deviations": {
+          "items": {
+            "$ref": "#/$defs/FlopDeviation"
+          },
+          "title": "Declared Deviations",
+          "type": "array"
+        },
+        "fixture_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Fixture Id",
+          "type": "string"
+        },
+        "raw_rel": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Raw Rel"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference"
+        },
+        "reference_state": {
+          "enum": [
+            "positive",
+            "zero",
+            "unmodelled"
+          ],
+          "title": "Reference State",
+          "type": "string"
+        },
+        "residual_rel": {
+          "anyOf": [
+            {
+              "ge": -0.005,
+              "le": 0.005,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Residual Rel"
+        },
+        "signed_adjustment_rel": {
+          "title": "Signed Adjustment Rel",
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "op",
+            "byte"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fixture_id",
+        "channel",
+        "unit",
+        "actual",
+        "reference",
+        "reference_state",
+        "raw_rel",
+        "signed_adjustment_rel",
+        "absolute_adjustment_rel",
+        "residual_rel",
+        "declared_deviations"
+      ],
+      "title": "ParityChannelComparison",
+      "type": "object"
+    },
+    "Precision": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat",
+          "default": "fp16"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat",
+          "default": "fp16"
+        }
+      },
+      "title": "Precision",
+      "type": "object"
+    },
+    "PrecisionCheckInput": {
+      "additionalProperties": false,
+      "properties": {
+        "callable_source_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "classification": {
+          "enum": [
+            "synthetic_input",
+            "captured_input",
+            "reconstructed_input"
+          ]
+        },
+        "component_binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "component_role": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-precision-check-input/1"
+        },
+        "input_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "limitation": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "precision": {
+          "$ref": "#/$defs/ExplicitPrecision"
+        },
+        "requested_boundary": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "upstream_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "input_hash",
+        "classification",
+        "component_role",
+        "component_binding_hash",
+        "precision",
+        "requested_boundary",
+        "callable_source_sha256",
+        "upstream_sha",
+        "limitation"
+      ],
+      "type": "object"
+    },
+    "PrecisionCheckTrace": {
+      "additionalProperties": false,
+      "properties": {
+        "capture_source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactPointer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "check_input_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "classification": {
+          "enum": [
+            "synthetic_observation",
+            "captured_probe"
+          ]
+        },
+        "error_class": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution": {
+          "enum": [
+            "refused",
+            "succeeded",
+            "execution_failed"
+          ]
+        },
+        "format": {
+          "const": "uarch-precision-check-trace/1"
+        },
+        "message": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "observed_boundary": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trace_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "trace_hash",
+        "classification",
+        "check_input_hash",
+        "execution",
+        "observed_boundary",
+        "error_class",
+        "message",
+        "capture_source"
+      ],
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "PrecisionRefusalObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "check_input_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error_class": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_outcome": {
+          "enum": [
+            "passed",
+            "refused",
+            "execution_failed",
+            "unassessed"
+          ]
+        },
+        "execution": {
+          "enum": [
+            "refused",
+            "succeeded",
+            "execution_failed",
+            "not_run"
+          ]
+        },
+        "format": {
+          "const": "uarch-precision-refusal-observation/1"
+        },
+        "match_result": {
+          "enum": [
+            "matched",
+            "wrong_boundary",
+            "wrong_error_class",
+            "unexpected_success",
+            "unexpected_refusal",
+            "execution_failed",
+            "not_run"
+          ]
+        },
+        "observation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "observed_boundary": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "refusal_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trace_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "observation_hash",
+        "refusal_id",
+        "check_input_hash",
+        "execution",
+        "observed_boundary",
+        "error_class",
+        "trace_hash",
+        "match_result",
+        "evidence_outcome",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "PrefillEnvelope": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "prompt_tokens_max": {
+          "minimum": 1,
+          "title": "Prompt Tokens Max",
+          "type": "integer"
+        },
+        "prompts_per_iteration_max": {
+          "minimum": 1,
+          "title": "Prompts Per Iteration Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prompt_tokens_max",
+        "prompts_per_iteration_max"
+      ],
+      "title": "PrefillEnvelope",
+      "type": "object"
+    },
+    "PrefillGrid": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "L": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "L",
+          "type": "array"
+        },
+        "n": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "N",
+          "type": "array"
+        }
+      },
+      "required": [
+        "n",
+        "L"
+      ],
+      "title": "PrefillGrid",
+      "type": "object"
+    },
+    "PrefillRow": {
+      "additionalProperties": false,
+      "properties": {
+        "analytic_mode": {
+          "enum": [
+            "aggregate",
+            "per_op"
+          ]
+        },
+        "attribution_s": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "enum": [
+              "compute",
+              "memory",
+              "noc",
+              "sync",
+              "overhead"
+            ]
+          },
+          "title": "Attribution S",
+          "type": "object"
+        },
+        "counts": {
+          "$ref": "#/$defs/Counts"
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/Diagnostics"
+        },
+        "duration_s": {
+          "minimum": 0,
+          "title": "Duration S",
+          "type": "number"
+        },
+        "ext_counts": {
+          "$ref": "#/$defs/ExtCounts"
+        },
+        "frequency_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Frequency Ratio",
+          "type": "number"
+        },
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "op_results": {
+          "items": {
+            "$ref": "#/$defs/OpResult"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "peak_resident_bytes": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "propertyNames": {
+            "enum": [
+              "hbm",
+              "sram"
+            ]
+          },
+          "title": "Peak Resident Bytes",
+          "type": "object"
+        },
+        "phase": {
+          "const": "prefill",
+          "title": "Phase",
+          "type": "string"
+        },
+        "point_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "result_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "state_model": {
+          "const": "stateless_roofline"
+        },
+        "u_c0_duration_s": {
+          "minimum": 0,
+          "title": "U C0 Duration S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "frequency_ratio",
+        "duration_s",
+        "u_c0_duration_s",
+        "attribution_s",
+        "counts",
+        "ext_counts",
+        "peak_resident_bytes",
+        "diagnostics",
+        "phase",
+        "n_prompts",
+        "prompt_tokens",
+        "point_hash",
+        "result_hash",
+        "op_results",
+        "analytic_mode",
+        "state_model"
+      ],
+      "title": "PrefillRow",
+      "type": "object"
+    },
+    "PrefillVisitWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "weight_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "n_prompts",
+        "prompt_tokens",
+        "weight_ratio"
+      ],
+      "title": "PrefillVisitWeight",
+      "type": "object"
+    },
+    "PreparedBundle": {
+      "additionalProperties": false,
+      "properties": {
+        "bundle_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-prepared/1"
+        },
+        "hardware_spec": {
+          "$ref": "#/$defs/HardwareSpec"
+        },
+        "intent": {
+          "$ref": "#/$defs/RequestIntent"
+        },
+        "intent_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "mapping_scope": {
+          "const": "analytic_ops"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/PreparedPoint"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "producer": {
+          "$ref": "#/$defs/Producer"
+        },
+        "rank": {
+          "$ref": "#/$defs/RankScope"
+        }
+      },
+      "required": [
+        "format",
+        "bundle_hash",
+        "intent_hash",
+        "intent",
+        "hardware_spec",
+        "producer",
+        "rank",
+        "mapping_scope",
+        "points"
+      ],
+      "type": "object"
+    },
+    "PreparedGraph": {
+      "additionalProperties": false,
+      "properties": {
+        "attention_mask": {
+          "enum": [
+            "full_square",
+            "causal"
+          ]
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/OpGroup"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "lm_head_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "omissions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 4,
+          "type": "array"
+        }
+      },
+      "required": [
+        "groups",
+        "omissions",
+        "attention_mask",
+        "lm_head_tokens"
+      ],
+      "type": "object"
+    },
+    "PreparedOp": {
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "embedding_local_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fusion": {
+          "enum": [
+            "none",
+            "qk_softmax_av"
+          ]
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "kv_access": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KvAccess"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operand_access": {
+          "additionalProperties": {
+            "enum": [
+              "read",
+              "write",
+              "read_write"
+            ]
+          },
+          "type": "object"
+        },
+        "padding": {
+          "items": {
+            "$ref": "#/$defs/Padding"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "replication": {
+          "items": {
+            "$ref": "#/$defs/Replication"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "spec": {
+          "$ref": "#/$defs/OpSpec"
+        },
+        "weight_copies": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "work_repeat": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "depends_on",
+        "spec",
+        "fusion",
+        "padding",
+        "replication",
+        "kv_access",
+        "work_repeat",
+        "weight_copies",
+        "operand_access",
+        "embedding_local_tokens"
+      ],
+      "type": "object"
+    },
+    "PreparedPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "embedding_hits": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "frequency_ratio": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "graph": {
+          "$ref": "#/$defs/PreparedGraph"
+        },
+        "hit_source": {
+          "enum": [
+            "provided_counts",
+            "synthetic_balanced_assignment",
+            "tp1_trivial"
+          ]
+        },
+        "initial_state": {
+          "enum": [
+            "steady",
+            "cold"
+          ]
+        },
+        "payload_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "query": {
+          "$ref": "#/$defs/Query"
+        }
+      },
+      "required": [
+        "query",
+        "initial_state",
+        "frequency_ratio",
+        "graph",
+        "payload_hash",
+        "embedding_hits",
+        "hit_source"
+      ],
+      "type": "object"
+    },
+    "ProducedValue": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_hash": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "source_pointer": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "value": {
+                "minimum": 0,
+                "type": "number"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "conversion": {
+          "enum": [
+            "identity",
+            "ps_to_seconds"
+          ]
+        },
+        "source_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_pointer": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "enum": [
+            "known",
+            "unmodelled",
+            "not_produced"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "value",
+        "source_hash",
+        "source_pointer",
+        "conversion"
+      ],
+      "type": "object"
+    },
+    "Producer": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash"
+      ],
+      "type": "object"
+    },
+    "ProjectionLoss": {
+      "additionalProperties": false,
+      "properties": {
+        "original": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "projected": {
+          "$ref": "#/$defs/FiveFieldValue"
+        },
+        "reason": {
+          "enum": [
+            "stipulation_not_in_upstream",
+            "citation_not_loader_eligible",
+            "measured_anchor_unavailable",
+            "strip_extensions_only"
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "original",
+        "projected",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "ProjectionScope": {
+      "additionalProperties": false,
+      "properties": {
+        "global_kv_heads": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "global_vocab": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "kv_replicated": {
+          "type": "boolean"
+        },
+        "padded_vocab": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "global_kv_heads",
+        "kv_replicated",
+        "global_vocab",
+        "padded_vocab"
+      ],
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "conditional_on": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "Conditional On",
+          "type": "array"
+        },
+        "model_card": {
+          "$ref": "#/$defs/EmbeddedModelCard"
+        },
+        "params": {
+          "items": {
+            "$ref": "#/$defs/Parameter"
+          },
+          "title": "Params",
+          "type": "array"
+        }
+      },
+      "required": [
+        "params",
+        "model_card",
+        "conditional_on"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Query": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "batch": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "phase": {
+              "const": "decode"
+            },
+            "total_context_tokens": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "phase",
+            "batch",
+            "total_context_tokens"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "n_prompts": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "phase": {
+              "const": "prefill"
+            },
+            "prompt_tokens": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "phase",
+            "n_prompts",
+            "prompt_tokens"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "RankScope": {
+      "additionalProperties": false,
+      "properties": {
+        "collectives": {
+          "const": "excluded"
+        },
+        "equivalent_ranks": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "balanced_tp_representative",
+            "balanced_tp_selected_rank"
+          ]
+        },
+        "rank_index": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tp": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "tp",
+        "rank_index",
+        "equivalent_ranks",
+        "collectives"
+      ],
+      "type": "object"
+    },
+    "ReferenceInventory": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "enum": [
+            "adopted_oracle",
+            "synthetic_reference"
+          ]
+        },
+        "fixtures": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "component_binding_hash": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "fixture_id": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "precision": {
+                "$ref": "#/$defs/ExplicitPrecision"
+              },
+              "projection_scope": {
+                "$ref": "#/$defs/ProjectionScope"
+              },
+              "query": {
+                "$ref": "#/$defs/Query"
+              },
+              "tp": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "values": {
+                "additionalProperties": false,
+                "properties": {
+                  "duration_s": {
+                    "$ref": "#/$defs/ReferenceValue"
+                  },
+                  "matrix_ops": {
+                    "$ref": "#/$defs/ReferenceValue"
+                  },
+                  "memory_read_bytes": {
+                    "$ref": "#/$defs/ReferenceValue"
+                  },
+                  "memory_write_bytes": {
+                    "$ref": "#/$defs/ReferenceValue"
+                  },
+                  "vector_ops": {
+                    "$ref": "#/$defs/ReferenceValue"
+                  }
+                },
+                "required": [
+                  "matrix_ops",
+                  "vector_ops",
+                  "memory_read_bytes",
+                  "memory_write_bytes",
+                  "duration_s"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "fixture_id",
+              "component_binding_hash",
+              "precision",
+              "query",
+              "tp",
+              "values",
+              "projection_scope"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "format": {
+          "const": "uarch-reference-inventory/1"
+        },
+        "inventory_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "oracle_manifest_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "reference_model": {
+          "$ref": "#/$defs/ModelIdentity"
+        },
+        "refusal_inventory_source": {
+          "$ref": "#/$defs/ArtifactPointer"
+        },
+        "refusals": {
+          "items": {
+            "$ref": "#/$defs/ExpectedPrecisionRefusal"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "inventory_hash",
+        "classification",
+        "oracle_manifest_sha256",
+        "reference_model",
+        "fixtures",
+        "refusals",
+        "refusal_inventory_source"
+      ],
+      "type": "object"
+    },
+    "ReferenceValue": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "positive"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "zero"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "absent"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "positive",
+            "zero",
+            "null",
+            "absent"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "type": "object"
+    },
+    "RenderSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_synthetic_presentation": {
+          "type": "boolean"
+        },
+        "format": {
+          "const": "uarch-render/1"
+        },
+        "locale": {
+          "const": "en"
+        },
+        "number_format": {
+          "const": "roundtrip-display/1"
+        },
+        "render_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "renderer_version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "report_context_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "show_unvalidated_predictions": {
+          "type": "boolean"
+        },
+        "table_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "render_hash",
+        "renderer_version",
+        "table_hash",
+        "report_context_hash",
+        "show_unvalidated_predictions",
+        "allow_synthetic_presentation",
+        "locale",
+        "number_format"
+      ],
+      "type": "object"
+    },
+    "Replication": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "global_extent": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "rank_extent": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "replicas": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dimension",
+        "global_extent",
+        "rank_extent",
+        "replicas"
+      ],
+      "type": "object"
+    },
+    "ReportContext": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "comparison_hashes": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        },
+        "context_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_index": {
+          "additionalProperties": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "family_registry_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-report-context/2"
+        },
+        "limitations": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "metric_dependencies_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "model_identity": {
+          "$ref": "#/$defs/ModelIdentity"
+        },
+        "request_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "used_energy_families": {
+          "items": {
+            "enum": [
+              "mac",
+              "sram",
+              "noc_hop",
+              "dram",
+              "static"
+            ]
+          },
+          "minItems": 0,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "verification_hashes": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 0,
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "context_hash",
+        "request_hash",
+        "model_identity",
+        "assumptions_hash",
+        "family_registry_hash",
+        "metric_dependencies_hash",
+        "evidence_index",
+        "verification_hashes",
+        "comparison_hashes",
+        "used_energy_families",
+        "limitations"
+      ],
+      "type": "object"
+    },
+    "ReportScope": {
+      "additionalProperties": false,
+      "properties": {
+        "array_fill": {
+          "anyOf": [
+            {
+              "enum": [
+                "underfilled",
+                "full"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dram_load_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "intensity_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mapping_match": {
+          "anyOf": [
+            {
+              "enum": [
+                "matched",
+                "compiler-chosen"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "noc_load_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "op_class": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "precision_roles": {
+          "additionalProperties": false,
+          "properties": {
+            "compute": {
+              "$ref": "#/$defs/PrecisionFormat"
+            },
+            "kv_cache": {
+              "$ref": "#/$defs/PrecisionFormat"
+            },
+            "operands": {
+              "additionalProperties": {
+                "$ref": "#/$defs/PrecisionFormat"
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "compute",
+            "kv_cache",
+            "operands"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "op_class",
+        "intensity_regime",
+        "array_fill",
+        "noc_load_regime",
+        "dram_load_regime",
+        "mapping_match",
+        "precision_roles"
+      ],
+      "type": "object"
+    },
+    "RequestIntent": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "accounting": {
+          "const": "resolved-ops/1"
+        },
+        "analytic_mode": {
+          "enum": [
+            "aggregate",
+            "per_op"
+          ]
+        },
+        "assumptions_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Component Id",
+          "type": "string"
+        },
+        "contract": {
+          "const": "uarch-contract/0.2"
+        },
+        "envelope": {
+          "$ref": "#/$defs/Envelope"
+        },
+        "grid": {
+          "$ref": "#/$defs/Grid"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "initial_state": {
+          "default": "steady",
+          "enum": [
+            "steady",
+            "cold"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "kv_layout": {
+          "$ref": "#/$defs/KvLayout"
+        },
+        "mapping_policy": {
+          "pattern": "^\\S+@\\S+$",
+          "title": "Mapping Policy",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelSpec"
+        },
+        "model_shape": {
+          "$ref": "#/$defs/ModelShape"
+        },
+        "precision": {
+          "$ref": "#/$defs/Precision"
+        },
+        "preparation_policy": {
+          "const": "balanced-tp/1"
+        },
+        "rk_schema_snapshot": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Rk Schema Snapshot",
+          "type": "string"
+        },
+        "seed": {
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "tp": {
+          "minimum": 1,
+          "title": "Tp",
+          "type": "integer"
+        },
+        "uarch_fidelity": {
+          "$ref": "#/$defs/FidelityDetail"
+        },
+        "visit_weights": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VisitWeights"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "contract",
+        "rk_schema_snapshot",
+        "component_id",
+        "hardware_spec_hash",
+        "model",
+        "model_shape",
+        "precision",
+        "tp",
+        "envelope",
+        "grid",
+        "mapping_policy",
+        "uarch_fidelity",
+        "kv_layout",
+        "seed",
+        "analytic_mode",
+        "accounting",
+        "preparation_policy",
+        "assumptions_hash"
+      ],
+      "title": "CharacterizationRequest",
+      "type": "object"
+    },
+    "ResolvedHardware": {
+      "additionalProperties": false,
+      "properties": {
+        "array_cols": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "array_rows": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "core_freq_hz": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "dram_bw_bytes_per_s": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "dram_capacity_bytes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "dram_freq_hz": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "matrix_peak_ops_per_s": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "noc_freq_hz": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "vector_peak_ops_per_s": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "hardware_spec_hash",
+        "core_freq_hz",
+        "noc_freq_hz",
+        "dram_freq_hz",
+        "matrix_peak_ops_per_s",
+        "vector_peak_ops_per_s",
+        "dram_bw_bytes_per_s",
+        "dram_capacity_bytes",
+        "array_rows",
+        "array_cols"
+      ],
+      "type": "object"
+    },
+    "ReviewRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "pending"
+          ]
+        },
+        "format": {
+          "const": "uarch-evidence-review/1"
+        },
+        "independent": {
+          "type": "boolean"
+        },
+        "rationale": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "review_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "reviewed_subject_hashes": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "reviewer": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "review_hash",
+        "reviewer",
+        "independent",
+        "decision",
+        "reviewed_subject_hashes",
+        "rationale"
+      ],
+      "type": "object"
+    },
+    "Row": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "A row is one chip's shard, one iteration, all layers, without inter-chip collectives.",
+      "properties": {
+        "analytic_mode": {
+          "enum": [
+            "aggregate",
+            "per_op"
+          ]
+        },
+        "attribution_s": {
+          "additionalProperties": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "enum": [
+              "compute",
+              "memory",
+              "noc",
+              "sync",
+              "overhead"
+            ]
+          },
+          "title": "Attribution S",
+          "type": "object"
+        },
+        "counts": {
+          "$ref": "#/$defs/Counts"
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/Diagnostics"
+        },
+        "duration_s": {
+          "minimum": 0,
+          "title": "Duration S",
+          "type": "number"
+        },
+        "ext_counts": {
+          "$ref": "#/$defs/ExtCounts"
+        },
+        "frequency_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Frequency Ratio",
+          "type": "number"
+        },
+        "op_results": {
+          "items": {
+            "$ref": "#/$defs/OpResult"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "peak_resident_bytes": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "propertyNames": {
+            "enum": [
+              "hbm",
+              "sram"
+            ]
+          },
+          "title": "Peak Resident Bytes",
+          "type": "object"
+        },
+        "point_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "result_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "state_model": {
+          "const": "stateless_roofline"
+        },
+        "u_c0_duration_s": {
+          "minimum": 0,
+          "title": "U C0 Duration S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "frequency_ratio",
+        "duration_s",
+        "u_c0_duration_s",
+        "attribution_s",
+        "counts",
+        "ext_counts",
+        "peak_resident_bytes",
+        "diagnostics",
+        "point_hash",
+        "result_hash",
+        "op_results",
+        "analytic_mode",
+        "state_model"
+      ],
+      "title": "Row",
+      "type": "object"
+    },
+    "SampledError": {
+      "additionalProperties": false,
+      "properties": {
+        "max_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Rel"
+        },
+        "median_rel": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Median Rel"
+        },
+        "n_samples": {
+          "minimum": 0,
+          "title": "N Samples",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "median_rel",
+        "max_rel",
+        "n_samples"
+      ],
+      "title": "SampledError",
+      "type": "object"
+    },
+    "SharedSram": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "attach": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Attach",
+          "type": "array"
+        },
+        "banks": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes_per_cycle_per_bank": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "latency_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "bytes",
+        "banks",
+        "bytes_per_cycle_per_bank",
+        "latency_cycles",
+        "attach"
+      ],
+      "title": "SharedSram",
+      "type": "object"
+    },
+    "SourceMetricRecipe": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "model_identity_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "recipe": {
+          "$ref": "#/$defs/MetricRecipe"
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "model_identity_hash",
+        "recipe"
+      ],
+      "type": "object"
+    },
+    "SourceRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "uarch-reference-source/1"
+        },
+        "independence_from_candidate": {
+          "type": "boolean"
+        },
+        "kind": {
+          "enum": [
+            "silicon_measurement",
+            "independent_simulator",
+            "hand_derived",
+            "contract_test",
+            "synthetic_fixture"
+          ]
+        },
+        "limitation": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "raw_blob_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "reference_identity": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "reference_version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "source_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "source_hash",
+        "kind",
+        "reference_identity",
+        "reference_version",
+        "raw_blob_sha256",
+        "independence_from_candidate",
+        "limitation"
+      ],
+      "type": "object"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    },
+    "Sram": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "banks": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes_per_cycle_per_bank": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "bytes",
+        "banks",
+        "bytes_per_cycle_per_bank"
+      ],
+      "title": "Sram",
+      "type": "object"
+    },
+    "Sync": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "barrier_latency_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "mechanism": {
+          "enum": [
+            "noc_semaphore",
+            "hardware_barrier"
+          ],
+          "title": "Mechanism",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mechanism",
+        "barrier_latency_cycles"
+      ],
+      "title": "Sync",
+      "type": "object"
+    },
+    "TimingPreset": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "File",
+          "type": "string"
+        },
+        "sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Sha",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "sha"
+      ],
+      "title": "TimingPreset",
+      "type": "object"
+    },
+    "UarchCostTable": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "artifacts": {
+          "$ref": "#/$defs/ArtifactBindings"
+        },
+        "comparison_state": {
+          "enum": [
+            "not_attempted",
+            "attempted"
+          ]
+        },
+        "composite_fidelity": {
+          "enum": [
+            "C0",
+            "C1",
+            "C2"
+          ],
+          "title": "Composite Fidelity",
+          "type": "string"
+        },
+        "contract": {
+          "const": "uarch-contract/0.2"
+        },
+        "execution_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "fidelity_detail": {
+          "$ref": "#/$defs/FidelityDetail"
+        },
+        "hardware_spec_hash": {
+          "description": "Canonical HardwareSpec identity; contents verified by U-P3/U-P19.",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "initial_state": {
+          "enum": [
+            "steady",
+            "cold"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "intent_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "interpolation": {
+          "$ref": "#/$defs/Interpolation"
+        },
+        "kv_layout": {
+          "$ref": "#/$defs/KvLayout"
+        },
+        "measured_error": {
+          "$ref": "#/$defs/MeasuredError"
+        },
+        "preparation": {
+          "$ref": "#/$defs/Producer"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "report_context_version": {
+          "const": "uarch-report-context/2"
+        },
+        "request_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Request Hash",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "decode": "#/$defs/DecodeRow",
+                "prefill": "#/$defs/PrefillRow"
+              },
+              "propertyName": "phase"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/DecodeRow"
+              },
+              {
+                "$ref": "#/$defs/PrefillRow"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        },
+        "table_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Table Hash",
+          "type": "string"
+        },
+        "tp": {
+          "minimum": 1,
+          "title": "Tp",
+          "type": "integer"
+        },
+        "uarch_version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Uarch Version",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contract",
+        "uarch_version",
+        "hardware_spec_hash",
+        "request_hash",
+        "table_hash",
+        "tp",
+        "initial_state",
+        "kv_layout",
+        "rows",
+        "interpolation",
+        "measured_error",
+        "composite_fidelity",
+        "fidelity_detail",
+        "provenance",
+        "warnings",
+        "intent_hash",
+        "execution_hash",
+        "preparation",
+        "artifacts",
+        "report_context_version",
+        "comparison_state"
+      ],
+      "title": "UarchCostTable",
+      "type": "object"
+    },
+    "UpstreamComponentBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "component_bytes_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "component_file": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "execution_model_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-upstream-component/1"
+        },
+        "kind": {
+          "const": "upstream_only"
+        },
+        "oracle_manifest_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "supported_kv_storage": {
+          "items": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "upstream_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "binding_hash",
+        "kind",
+        "component_id",
+        "upstream_sha",
+        "oracle_manifest_sha256",
+        "component_file",
+        "component_bytes_sha256",
+        "execution_model_hash",
+        "supported_kv_storage"
+      ],
+      "type": "object"
+    },
+    "ValidatedErrorBand": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "high_rel": {
+          "exclusiveMinimum": 0,
+          "title": "High Rel",
+          "type": "number"
+        },
+        "low_rel": {
+          "minimum": 0,
+          "title": "Low Rel",
+          "type": "number"
+        },
+        "scope": {
+          "$ref": "#/$defs/ApplicabilityScope"
+        }
+      },
+      "required": [
+        "low_rel",
+        "high_rel",
+        "scope"
+      ],
+      "title": "ValidatedErrorBand",
+      "type": "object"
+    },
+    "VectorEngine": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "ops_per_cycle": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "ops_per_cycle"
+      ],
+      "title": "VectorEngine",
+      "type": "object"
+    },
+    "Verification": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "L0": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "L0"
+        },
+        "L0m": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "L0M"
+        },
+        "L1": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "L1"
+        },
+        "L2": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "L2"
+        }
+      },
+      "title": "Verification",
+      "type": "object"
+    },
+    "VerificationRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "uarch-verification/1"
+        },
+        "model_identity_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "passed",
+            "failed",
+            "not_run"
+          ]
+        },
+        "purpose": {
+          "enum": [
+            "duration",
+            "counts",
+            "diagnostics",
+            "energy"
+          ]
+        },
+        "review_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "rung": {
+          "enum": [
+            "L0",
+            "L0m",
+            "L1",
+            "L2"
+          ]
+        },
+        "scope": {
+          "items": {
+            "$ref": "#/$defs/EvidenceScopeCase"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "source_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "verification_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "verification_hash",
+        "rung",
+        "model_identity_hash",
+        "purpose",
+        "source_hash",
+        "review_hash",
+        "outcome",
+        "scope"
+      ],
+      "type": "object"
+    },
+    "VisitWeights": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "items": {
+            "$ref": "#/$defs/DecodeVisitWeight"
+          },
+          "title": "Decode",
+          "type": "array"
+        },
+        "prefill": {
+          "items": {
+            "$ref": "#/$defs/PrefillVisitWeight"
+          },
+          "title": "Prefill",
+          "type": "array"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill"
+      ],
+      "title": "VisitWeights",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/PreparedBundle"
+    },
+    {
+      "$ref": "#/$defs/CharacterizationRequest"
+    },
+    {
+      "$ref": "#/$defs/EngineJob"
+    },
+    {
+      "$ref": "#/$defs/EngineResult"
+    },
+    {
+      "$ref": "#/$defs/UarchCostTable"
+    },
+    {
+      "$ref": "#/$defs/Derivation"
+    },
+    {
+      "$ref": "#/$defs/ComponentPrecision"
+    },
+    {
+      "$ref": "#/$defs/ExecutionModelInput"
+    },
+    {
+      "$ref": "#/$defs/ComponentExport"
+    },
+    {
+      "$ref": "#/$defs/ExportBinding"
+    },
+    {
+      "$ref": "#/$defs/UpstreamComponentBinding"
+    },
+    {
+      "$ref": "#/$defs/ReferenceInventory"
+    },
+    {
+      "$ref": "#/$defs/ComparisonArtifact"
+    },
+    {
+      "$ref": "#/$defs/EvidenceRecord"
+    },
+    {
+      "$ref": "#/$defs/ReviewRecord"
+    },
+    {
+      "$ref": "#/$defs/SourceRecord"
+    },
+    {
+      "$ref": "#/$defs/OrderingRecord"
+    },
+    {
+      "$ref": "#/$defs/VerificationRecord"
+    },
+    {
+      "$ref": "#/$defs/FamilyRegistry"
+    },
+    {
+      "$ref": "#/$defs/MetricDependencies"
+    },
+    {
+      "$ref": "#/$defs/ReportContext"
+    },
+    {
+      "$ref": "#/$defs/RenderSpec"
+    },
+    {
+      "$ref": "#/$defs/AssumptionSet"
+    },
+    {
+      "$ref": "#/$defs/NominalInput"
+    },
+    {
+      "$ref": "#/$defs/NominalOutput"
+    },
+    {
+      "$ref": "#/$defs/PrecisionCheckInput"
+    },
+    {
+      "$ref": "#/$defs/PrecisionCheckTrace"
+    },
+    {
+      "$ref": "#/$defs/PrecisionRefusalObservation"
+    }
+  ],
+  "title": "U0003 PROPOSED review schema; not a production contract"
+}

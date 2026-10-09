@@ -1,0 +1,49 @@
+# Accepted AD-C2 option A implementation checkpoint
+
+**Exact accepted option A implemented; return for coordinator reconciliation.** The guard hash is the required `4892004b408f904ba3e9b1945dac8cd610c4523c458e47edb25f2d9022d31d60`. Its one Ruff E501 finding remains active because changing even formatting would depart from the explicitly accepted bytes. A separate AST-identical formatting patch is proposed, not applied. Wheel validation is blocked by unavailable offline build tooling. No production support, artifact or policy change was needed.
+
+## Authority, receipt and exact implementation
+
+Verified acceptance receipt SHA256 `226960b9df2e5d67c10635a5e54b36d5fd8bfaf15b701bcd8281eb4fb93653a9` and every member of decision manifest `6acccdf9e4f83ae87cbba7994a169b6aaf8ce8733d3e692e212b696f86a77296`. The separate Javid acceptance supersedes the sealed proposal's historical pending wording. The received decision and AD-C1 reconciliation files are preserved under `received/`, with exact receipt hashes in `receipt.json`. Javid explicitly authorized this contract-test change; no repeated permission request was needed under CLAUDE.md.
+
+Entry verified every member of B's submitted 20,656-entry manifest `9a1e9ce797f0ac8b935827787dc8fc639fe5688f95e5a1f34b1509dcde183370`. All those manifest members remain unchanged. Of 20,955 pre-existing B paths, 20,954 remain unchanged; only the explicitly authorized `contract/tests/vendor_support.py` changed, from `d5a59904099a3a9729def3cb2e1bb752a2546d006027a366e6d7e512ebf00dfc` to the exact accepted hash above. That tracked guard was outside the prior changed-path manifest. Its exact original is preserved as `vendor_support.before.py.txt`. No deletion or old report/log/manifest edit occurred.
+
+`implementation.patch` contains the exact accepted guard patch and one new durable test module, `contract/tests/test_u2_resource_isolation.py`; `implementation-delta.json` identifies exact old/new hashes. The exception is limited to the reviewed path, whole-file SHA256 and unaliased import. No digest calculation is mocked. The loader is not newly restricted to a filename allow-list; the guard authenticates the reviewed source bytes with their existing supported calls. Existing limitations of the conservative source guard remain: it is not a hostile-environment security boundary.
+
+Thirty-five durable cases use actual reviewed proof source bytes. Every negative case first establishes that the unchanged reviewed source passes. They cover the exact-source positive, comment/hash drift, foreign/rk/dynamic package, schema directory/path, alias/additional import/extra resource call, unchanged bytes at three wrong paths, unrelated resource imports, direct/dynamic rk and scripts/vendor access, exec/eval/import_module/VendorLoader and vendor strings. Actual schema-generator bytes retain their fixed local discovery behavior; changed dynamic calls and moved generator source refuse. The existing complete-production-tree isolation test now passes. No mutation is blessed by replacing a digest function.
+
+## Combined-tree validation and static findings
+
+Validation uses a fresh isolated combined tree (`stage-path.txt`) with 606 exact current-integration files before overlay, including reconciled AD-C1 tests/helpers/received data and all previously omitted staging inputs. The only overlays are the accepted guard and new tests, yielding 607 files. Integration-specific proof/report-adapter/A2 fixture-path adaptations are preserved. `stage-entry.json` and `stage-final-inventory.json` distinguish inherited A/B lineage and new B work.
+
+The staged canonical snapshot is the exact adopted 48-file candidate, raw manifest `2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44`. B's canonical vendor remains the unchanged historical 20-file snapshot, `b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d`; no B old-snapshot pass is claimed as current-artifact evidence.
+
+Tests first: the new module produced 35 expected setup refusals because its common exact-source positive control was blocked by the original guard. After applying the selected bytes, **225 focused guard/schema/proof/strict checks pass**, including the new 35 cases, existing isolation controls and six strict snapshot gates. The complete combined suite ran once: **1,015 passed in 153.53s, zero failures/setup errors/skips/xfails**. Exact output and command are in `full-suite.txt` and `full-commands.json`; `validation-summary.json` records the final totals. Test counts overlap and are not additive.
+
+Configured mypy passes all 62 source files; import-linter analyzes 87 files/447 dependencies with both contracts kept; shared and engine schema freshness checks pass; the new test module passes Ruff. Ruff over the actual accepted guard and new test returns **one E501 at vendor_support.py:94 (101 characters, limit 100)**. The implementation deliberately retains the exact accepted hash. `proposed-lint-only.patch` wraps only that condition; `proposed-lint-only.json` proves AST equality and a temporary-prototype Ruff pass, with proposed guard hash `f56e666ed92faec53fc3de496ff2e5bdc39c4f7d024dc44f4188454e061588da`. It affects one supplemental member and zero support members; coordinator reconciliation of those alternate bytes is still required. No ignore, noqa, skip or weakened lint policy was added.
+
+Initial validation-driver mistakes remain documented: an incorrect schema-test filename caused a no-tests-run exit, corrected before the successful focused run; a broad explicit-path mypy invocation hit duplicate `tests.u2_comparison` / `contract.tests.u2_comparison` module naming, while the repository-configured source invocation passes; `python -m importlinter.cli` produced no validation output, so it is not credited as evidence and was replaced by the real `lint-imports --no-cache` entry point. Original logs are preserved. No source changes addressed these command issues.
+
+## Wheel boundary
+
+An actual offline backend invocation in the combined tree was attempted:
+
+```text
+/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python -B -m hatchling build -t wheel -d <recorded temporary output>/dist
+```
+
+It exits 1: `No module named hatchling`. Both the existing main Python 3.12 venv and `/usr/bin/python3` lack hatchling, build and pip. `wheel-check.json` records exact argv, environment, interpreter probes and output path; `wheel-build.txt` preserves stderr. No wheel exists and no wheel import, extraction or installation validation was executed. The already passed directory/ZIP checks remain historical complementary evidence, not wheel evidence. No dependencies were installed and no network was used.
+
+The proposed completion environment is an independently provisioned offline Python 3.12 environment with project runtime dependencies and hatchling; `build` is additionally needed only if choosing `python -m build --wheel --no-isolation`. Run the backend command above in a copied source tree, verify all six packaged JSON member raw hashes against the unchanged source manifest, extract the normally built wheel to a fresh temporary target, then launch the actual `rkuarch.provenance.proof_raw` loader outside the checkout with that target on PYTHONPATH. Assert each of the six `schema(name)` results equals the original JSON and verify ORIGINAL/SCHEMAS bindings. Provisioning dependencies or claiming this check completed is outside this checkpoint.
+
+## Inventory, remaining gates and handoff
+
+All **84 generator-bound support paths and every approved input member** remain unchanged in B, integration and staged validation. Approved input digest remains `81df43c063396c89bd3333f43957c71efc7087cfa65b2a401177f2227fca8898`; original 299-path generation freeze remains `8457d0607baf0af08c0b6d1c6eead00e141e778f6fd501d8869d9ae5eaadf443`. The original human pair and artifact-adoption identities are immutable historical evidence.
+
+`post-AD-C2-source-SHA256SUMS` is a separate **323-path current submitted inventory** based on coordinator's 322-path post-AD-C1 inventory: one existing supplemental member changed (the guard, also a member of original299), and one new test member added. AD-C1's seven modifications/23 additions remain. Relative to original299, there are eight changed existing members and 24 additions; support84 is unchanged. `supplemental-inventory.json` identifies membership and hashes. The unapplied formatting proposal is not included as applied source. This inventory is pending coordinator integration, not a relabelled freeze or new generation authorization.
+
+AD-C1 remains coordinator-reconciled. AD-C2's exact selected source correction and durable tests are submitted here; the lint-byte reconciliation and wheel tooling/validation remain explicit. Prior B64, proof and BP1 ledgers stay separate and unchanged. Full real-report opt-in/STUB behavior, repeat/output equality, producer-disabled replayed report-package equality, full-size capability refusals, B-F16, retained physical inputs/full matrix, real measurement/history/compiler/energy evidence, final review, publication/CI/cold clone and closure remain separate. Received nominal/physical/default-report evidence is not new B execution or model-accuracy acceptance. Estimates remain 256–400 engineering hours.
+
+`authorship.json`, `checkpoint-files.txt` and the complete current changed-path `SHA256SUMS` provide the exact review delta; the complete manifest excludes itself. Proposed checkpoint message: **Apply accepted U2 resource-import guard and add durable isolation regressions**.
+
+Everything remains uncommitted. No stage/commit/push/tag, oracle generation, human flag, new adoption, dependency installation, cleanup, agents/messages, or A/integration/main edits occurred. Stop for coordinator reconciliation. Hashes identify current bytes; this uncommitted work is not protected by branch history.

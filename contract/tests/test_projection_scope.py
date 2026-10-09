@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
-from pathlib import Path
 from typing import Any
 
 import pytest
 
 from . import parity
+from .historical_snapshot import historical_snapshot
 from .test_flop_parity import sample
 
 
@@ -48,11 +48,11 @@ def test_replicated_kv_refused_before_even_an_exact_echo(self_test: bool) -> Non
 
 
 def test_reproduced_a_f12_read_difference_is_an_unsupported_projection(lane_a: Any) -> None:
-    from uarch_contract.request import CharacterizationRequest
+    from uarch_contract.request import LegacyCharacterizationRequest
 
     from .test_u_p1 import request_data
 
-    request = CharacterizationRequest.model_validate(request_data() | {"tp": 16})
+    request = LegacyCharacterizationRequest.model_validate(request_data() | {"tp": 16})
     model = request.model
     weights = model.active_params * 2
     kv = 2 * model.n_layers * model.kv_heads * model.head_dim * 2 * 32768
@@ -132,8 +132,8 @@ def test_complete_coverage_keeps_unsupported_and_numerical_failure(lane_a: Any) 
         )
 
 
-def test_all_864_preserved_fixtures_retain_supported_coverage(snapshot: Path) -> None:
-    rows = json.loads((snapshot / "parity/fixtures.json").read_text())
+def test_all_864_preserved_fixtures_retain_supported_coverage() -> None:
+    rows = json.loads((historical_snapshot() / "parity/fixtures.json").read_text())
     iterator = iter(rows)
     report = parity.run_parity(rows, lambda *a: parity.rank_counts(next(iterator)))
     assert len(rows) == report["n_fixtures"] == len(report["coverage"]) == 864
@@ -162,13 +162,13 @@ def test_duplicate_fixture_ids_are_refused_before_coverage_can_collapse() -> Non
 
 
 def test_valid_a_padded_vocabulary_is_unsupported_not_invalid_contract(lane_a: Any) -> None:
-    from uarch_contract.request import CharacterizationRequest
+    from uarch_contract.request import LegacyCharacterizationRequest
 
     from .test_u_p1 import request_data
 
     data = request_data()
     data["model_shape"]["vocab_size"] += 1
-    request = CharacterizationRequest.model_validate(data)
+    request = LegacyCharacterizationRequest.model_validate(data)
     row = supported(request.tp) | {
         "model": request.model.model_dump(mode="json"),
         "model_shape": request.model_shape.model_dump(mode="json"),

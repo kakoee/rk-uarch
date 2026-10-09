@@ -1,0 +1,713 @@
+{
+  "attribution_ps": {
+    "compute": 216000.0,
+    "memory": 1112000.0,
+    "noc": 0.0,
+    "overhead": 0.0,
+    "sync": 0.0
+  },
+  "busy_time_ps": {
+    "compute": null,
+    "memory": null,
+    "noc": null
+  },
+  "counts": {
+    "matrix_ops": 672.0,
+    "memory_read_bytes": 1040.0,
+    "memory_write_bytes": 288.0,
+    "vector_ops": 252.0
+  },
+  "diagnostics": {
+    "dma_compute_overlap_ratio": null,
+    "dram_bw_util_ratio": null,
+    "dram_row_hit_ratio": null,
+    "matrix_util_ratio": null,
+    "noc_latency_p50_s": null,
+    "noc_latency_p99_s": null,
+    "noc_max_link_util_ratio": null,
+    "sram_bank_conflict_stall_ratio": null,
+    "vector_util_ratio": null
+  },
+  "duration_ps": 1328000.0,
+  "engine": {
+    "implementation_hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "model": {
+      "implementation_hash": "sha256:7bd2ba3b8801dc3007e46b049fdc0ab84148e85e0b292cfc288ba3b756f3e411",
+      "name": "physical-resolved",
+      "version": "1-proposed"
+    },
+    "name": "analytic",
+    "version": "1-proposed-fixture"
+  },
+  "fidelity_detail": {
+    "compute": 0,
+    "dram": 0,
+    "layer_reuse": true,
+    "noc": 0,
+    "sync": "exact"
+  },
+  "job_hash": "sha256:0b41b9a11592f3780797af8502b8879ccedbef8e7d9d6b023eda568be331740b",
+  "per_op": [
+    {
+      "achieved_ops_per_s": 0.0,
+      "bound": "memory",
+      "compute_time_ps": 0.0,
+      "counts": {
+        "matrix_ops": 0.0,
+        "memory_read_bytes": 8.0,
+        "memory_write_bytes": 8.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 16000.000000000002,
+      "group_id": "head",
+      "id": "head/embed",
+      "instances": 1,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 16000.000000000002,
+      "operational_intensity_ops_per_byte": 0.0,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "embedding",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 0.0,
+      "bound": "compute",
+      "compute_time_ps": 48000.0,
+      "counts": {
+        "matrix_ops": 0.0,
+        "memory_read_bytes": 32.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 48.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 48000.0,
+      "group_id": "layers",
+      "id": "layers/norm1",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 48000.0,
+      "operational_intensity_ops_per_byte": 0.0,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "normalization",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 666666666.6666666,
+      "bound": "memory",
+      "compute_time_ps": 32000.000000000004,
+      "counts": {
+        "matrix_ops": 64.0,
+        "memory_read_bytes": 80.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 96000.0,
+      "group_id": "layers",
+      "id": "layers/q",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 96000.0,
+      "operational_intensity_ops_per_byte": 0.6666666666666666,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": "full",
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "q_projection",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 571428571.4285715,
+      "bound": "memory",
+      "compute_time_ps": 16000.000000000002,
+      "counts": {
+        "matrix_ops": 32.0,
+        "memory_read_bytes": 48.0,
+        "memory_write_bytes": 8.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 56000.0,
+      "group_id": "layers",
+      "id": "layers/k",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 56000.0,
+      "operational_intensity_ops_per_byte": 0.5714285714285714,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": "full",
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "k_projection",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 571428571.4285715,
+      "bound": "memory",
+      "compute_time_ps": 16000.000000000002,
+      "counts": {
+        "matrix_ops": 32.0,
+        "memory_read_bytes": 48.0,
+        "memory_write_bytes": 8.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 56000.0,
+      "group_id": "layers",
+      "id": "layers/v",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 56000.0,
+      "operational_intensity_ops_per_byte": 0.5714285714285714,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": "full",
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "v_projection",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 0.0,
+      "bound": "memory",
+      "compute_time_ps": 0.0,
+      "counts": {
+        "matrix_ops": 0.0,
+        "memory_read_bytes": 16.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 32000.000000000004,
+      "group_id": "layers",
+      "id": "layers/kv",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 32000.000000000004,
+      "operational_intensity_ops_per_byte": 0.0,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "kv_write",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "K": "bf16",
+            "K_cache": "bf16",
+            "V": "bf16",
+            "V_cache": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 666666666.6666666,
+      "bound": "memory",
+      "compute_time_ps": 36000.00000000001,
+      "counts": {
+        "matrix_ops": 32.0,
+        "memory_read_bytes": 32.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 20.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 48000.0,
+      "group_id": "layers",
+      "id": "layers/attn",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 48000.0,
+      "operational_intensity_ops_per_byte": 0.6666666666666666,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "attention_fused",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "K": "bf16",
+            "O": "bf16",
+            "Q": "bf16",
+            "V": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 666666666.6666666,
+      "bound": "memory",
+      "compute_time_ps": 32000.000000000004,
+      "counts": {
+        "matrix_ops": 64.0,
+        "memory_read_bytes": 80.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 96000.0,
+      "group_id": "layers",
+      "id": "layers/out",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 96000.0,
+      "operational_intensity_ops_per_byte": 0.6666666666666666,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": "full",
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "output_projection",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 0.0,
+      "bound": "memory",
+      "compute_time_ps": 8000.000000000001,
+      "counts": {
+        "matrix_ops": 0.0,
+        "memory_read_bytes": 32.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 8.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 48000.0,
+      "group_id": "layers",
+      "id": "layers/res1",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 48000.0,
+      "operational_intensity_ops_per_byte": 0.0,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "residual_addition",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "R": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 0.0,
+      "bound": "compute",
+      "compute_time_ps": 48000.0,
+      "counts": {
+        "matrix_ops": 0.0,
+        "memory_read_bytes": 32.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 48.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 48000.0,
+      "group_id": "layers",
+      "id": "layers/norm2",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 48000.0,
+      "operational_intensity_ops_per_byte": 0.0,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "normalization",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 727272727.2727274,
+      "bound": "memory",
+      "compute_time_ps": 64000.00000000001,
+      "counts": {
+        "matrix_ops": 128.0,
+        "memory_read_bytes": 144.0,
+        "memory_write_bytes": 32.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 176000.0,
+      "group_id": "layers",
+      "id": "layers/up",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 176000.0,
+      "operational_intensity_ops_per_byte": 0.7272727272727273,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": "full",
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "ffn_up",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 727272727.2727274,
+      "bound": "memory",
+      "compute_time_ps": 64000.00000000001,
+      "counts": {
+        "matrix_ops": 128.0,
+        "memory_read_bytes": 144.0,
+        "memory_write_bytes": 32.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 176000.0,
+      "group_id": "layers",
+      "id": "layers/gate",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 176000.0,
+      "operational_intensity_ops_per_byte": 0.7272727272727273,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": "full",
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "ffn_gate",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 0.0,
+      "bound": "compute",
+      "compute_time_ps": 96000.0,
+      "counts": {
+        "matrix_ops": 0.0,
+        "memory_read_bytes": 64.0,
+        "memory_write_bytes": 32.0,
+        "vector_ops": 96.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 96000.0,
+      "group_id": "layers",
+      "id": "layers/act",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 96000.0,
+      "operational_intensity_ops_per_byte": 0.0,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "activation",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "G": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 727272727.2727274,
+      "bound": "memory",
+      "compute_time_ps": 64000.00000000001,
+      "counts": {
+        "matrix_ops": 128.0,
+        "memory_read_bytes": 160.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 176000.0,
+      "group_id": "layers",
+      "id": "layers/down",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 176000.0,
+      "operational_intensity_ops_per_byte": 0.7272727272727273,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": "full",
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "ffn_down",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 0.0,
+      "bound": "memory",
+      "compute_time_ps": 8000.000000000001,
+      "counts": {
+        "matrix_ops": 0.0,
+        "memory_read_bytes": 32.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 8.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 48000.0,
+      "group_id": "layers",
+      "id": "layers/res2",
+      "instances": 2,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 48000.0,
+      "operational_intensity_ops_per_byte": 0.0,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "residual_addition",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "R": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 0.0,
+      "bound": "compute",
+      "compute_time_ps": 24000.0,
+      "counts": {
+        "matrix_ops": 0.0,
+        "memory_read_bytes": 16.0,
+        "memory_write_bytes": 8.0,
+        "vector_ops": 24.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 24000.0,
+      "group_id": "tail",
+      "id": "tail/final_norm",
+      "instances": 1,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 24000.0,
+      "operational_intensity_ops_per_byte": 0.0,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "normalization",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    },
+    {
+      "achieved_ops_per_s": 727272727.2727274,
+      "bound": "memory",
+      "compute_time_ps": 32000.000000000004,
+      "counts": {
+        "matrix_ops": 64.0,
+        "memory_read_bytes": 72.0,
+        "memory_write_bytes": 16.0,
+        "vector_ops": 0.0
+      },
+      "dram_bw_bytes_per_s": 1000000000.0,
+      "duration_ps": 88000.0,
+      "group_id": "tail",
+      "id": "tail/lm",
+      "instances": 1,
+      "matrix_peak_ops_per_s": 2000000000.0,
+      "memory_time_ps": 88000.0,
+      "operational_intensity_ops_per_byte": 0.7272727272727273,
+      "ridge_ops_per_byte": 2.0,
+      "scope": {
+        "array_fill": "full",
+        "dram_load_regime": null,
+        "intensity_regime": "low",
+        "mapping_match": null,
+        "noc_load_regime": null,
+        "op_class": "lm_head",
+        "precision_roles": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {
+            "W": "bf16",
+            "X": "bf16",
+            "Y": "bf16"
+          }
+        }
+      },
+      "vector_peak_ops_per_s": 1000000000.0
+    }
+  ],
+  "protocol": "uarch-engine/1",
+  "result_hash": "sha256:f4b2af68b748f007491ac4432a1012afa8dae2d96e145e02fa6c0f878688bb68",
+  "simulator_metrics": null,
+  "trace": null,
+  "u_c0_duration_ps": 1328000.0,
+  "unrepresented": [
+    "cores.core_type.dma",
+    "cores.core_type.job_overhead_cycles",
+    "cores.core_type.sram",
+    "energy",
+    "memory.dram.timing",
+    "nocs",
+    "sync"
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "cases": [
+    {
+      "absolute_adjustment_rel": 0.05,
+      "actual": 1060,
+      "deviations": [
+        0.05
+      ],
+      "outcome": "failed",
+      "raw_rel": 0.06,
+      "reference": 1000,
+      "residual_rel": 0.01,
+      "signed_adjustment_rel": 0.05
+    },
+    {
+      "absolute_adjustment_rel": 0.035,
+      "actual": 1040,
+      "deviations": [
+        0.035
+      ],
+      "outcome": "passed at exact decimal boundary; binary64 comparison policy no widened threshold",
+      "raw_rel": 0.04,
+      "reference": 1000,
+      "residual_rel": 0.005,
+      "signed_adjustment_rel": 0.035
+    },
+    {
+      "actual": 1001,
+      "deviations": [
+        0.001
+      ],
+      "outcome": "refuse unnecessary adjustment",
+      "reference": 1000
+    },
+    {
+      "absolute_adjustment_rel": 0.08,
+      "actual": 1040,
+      "deviations": [
+        0.04,
+        -0.02,
+        0.02
+      ],
+      "outcome": "refuse over-budget cancellation",
+      "reference": 1000,
+      "signed_adjustment_rel": 0.04
+    },
+    {
+      "actual": 0,
+      "outcome": "passed; no adjustments",
+      "raw_rel": null,
+      "reference": 0,
+      "reference_state": "zero",
+      "residual_rel": null
+    },
+    {
+      "actual": 288,
+      "outcome": "unassessed; no adjustments",
+      "reference_state": "null"
+    },
+    {
+      "actual": 572,
+      "outcome": "unassessed; no adjustments",
+      "reference_state": "absent"
+    },
+    {
+      "actual": null,
+      "outcome": "modelled_absence only for declared nominal omission; not numeric validation",
+      "reference_state": "null"
+    },
+    {
+      "execution": "execution_failed",
+      "outcome": "retain error; gate fails; never not_run"
+    },
+    {
+      "candidate_calls": 0,
+      "execution": "pre_call_refusal",
+      "outcome": "retained expected A-F12 refusal",
+      "scope": {
+        "kv_heads": 8,
+        "tp": 16
+      }
+    },
+    {
+      "mutation": "remove fixture or duplicate channel",
+      "outcome": "IncompleteComparisonInventory"
+    }
+  ],
+  "classification": "independent semantic specifications, not executed comparator tests"
+}

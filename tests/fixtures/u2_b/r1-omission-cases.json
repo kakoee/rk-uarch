@@ -1,0 +1,81 @@
+{
+  "classification": "independent_B_test_specification",
+  "runtime_status": "pending A1 APIs and B implementation",
+  "cases": [
+    {
+      "id": "R101",
+      "setup": "Pinned vector_ops absent; nominal output unavailable with actual declared omission.",
+      "expected": "channel modelled_absence; aggregate unassessed; allowed nominal obligation only."
+    },
+    {
+      "id": "R102",
+      "setup": "Pinned decode memory_write_bytes=null with declared decode KV writes omission; nominal unavailable.",
+      "expected": "modelled_absence; no numeric pass."
+    },
+    {
+      "id": "R103",
+      "setup": "Invent matrix omission although model requires matrix; actual unavailable, reference positive.",
+      "expected": "unassessed; nominal fail; claimed modelled_absence => ComparisonOutcomeMismatch."
+    },
+    {
+      "id": "R104",
+      "setup": "Artificial matrix reference null AND actual unavailable, falsely claimed declared omission.",
+      "expected": "unassessed and nominal fail; not modelled_absence merely because both absent."
+    },
+    {
+      "id": "R105",
+      "setup": "Prefill write actual unavailable against known reference.",
+      "expected": "unassessed nominal fail; decode omission does not cover prefill."
+    },
+    {
+      "id": "R106",
+      "setup": "Physical required vector output unavailable against absent reference.",
+      "expected": "unassessed; missing physical output remains failure obligation."
+    },
+    {
+      "id": "R107",
+      "setup": "Required physical query/check explicitly not_run.",
+      "expected": "not_assessed, never discrepancy_record_complete."
+    },
+    {
+      "id": "R108",
+      "setup": "All required attempts validly recorded including executed failure/refusal/unexpected success.",
+      "expected": "physical discrepancy_record_complete; neither accuracy nor execution success certified."
+    },
+    {
+      "id": "R109",
+      "setup": "Four valid matched direct precision refusals plus passing numeric obligations.",
+      "expected": "nominal compatibility_pass, aggregate evidence refused (unless higher severity)."
+    },
+    {
+      "id": "R110",
+      "setup": "Wrong boundary and class vs expected precision refusal.",
+      "expected": "wrong_boundary wins; observed evidence refused; nominal compatibility_fail."
+    },
+    {
+      "id": "R111",
+      "setup": "Missing/duplicate observation, unknown nonnull ID or source-list nonbijection.",
+      "expected": "named verification refusal; gate not_assessed before reduction."
+    },
+    {
+      "id": "R112",
+      "setup": "Null-ID extra genuine refusal with valid trace/input.",
+      "expected": "unexpected_refusal retained; nominal fail; duplicate same trace refused."
+    },
+    {
+      "id": "R113",
+      "setup": "Actual positive against known zero; or exact zero/zero.",
+      "expected": "first fails, second exact pass; raw/residual null, no adjustments."
+    },
+    {
+      "id": "R114",
+      "setup": "Counts adjust +.03 and -.03 despite signed net0; duration adjustment or null-reference adjustment.",
+      "expected": "absolute .06 exceeds .05 => policy refusal; forbidden adjustments refuse, never numerical pass."
+    },
+    {
+      "id": "R115",
+      "setup": "Count residual .005 boundary and duration abs(raw) .001 boundary.",
+      "expected": "inclusive unchanged bounds; just above fails, no rounding before comparison."
+    }
+  ]
+}
