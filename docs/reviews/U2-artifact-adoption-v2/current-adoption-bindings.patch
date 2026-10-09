@@ -1,0 +1,29 @@
+--- a/contract/tests/test_u2_historical_snapshot.py
++++ b/contract/tests/test_u2_historical_snapshot.py
+@@ -18,8 +18,8 @@
+ from tests import u2_comparison, u2_refresh
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+-CURRENT_MANIFEST = "2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44"
+-REVIEW_SHA256 = "4aad401c01a828a1463853796c38c19c20359f4649e2c706880c6e8a1cdcdbcf"
++CURRENT_MANIFEST = "f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
++REVIEW_SHA256 = "5ab5192e35d395b93d7da1ee5bac0b33e2a9f0961c5b03fb60a7368981866fbb"
+ 
+ 
+ def test_historical_fixture_is_complete_and_relocatable(tmp_path):
+--- a/tests/fixtures/u2_b/received-adoption-review.json
++++ b/tests/fixtures/u2_b/received-adoption-review.json
+@@ -2,10 +2,10 @@
+   "decision": "accepted",
+   "format": "uarch-evidence-review/1",
+   "independent": true,
+-  "rationale": "Javid explicitly approved U2-artifact-adoption-v1 after the human created/verified-identical pair and complete coordinator audit:864 retained rows unchanged,144 accepted H1 BF16 rows added,and four actual source-bound refusals. Administrative exact-artifact adoption only; no model-accuracy or final independent review verdict.",
+-  "review_hash": "sha256:92280b195d1118b35fefb05046ad36eb34695747cca72d5d20e8e538b0cc1c30",
++  "rationale": "Javid explicitly approved U2-artifact-adoption-v2 after the human created/verified-identical pair and complete coordinator audit: all 1008 workload rows and four actual source-bound refusals unchanged; only manifest and input support binding advance for the RR-C1 provenance-order correction. Administrative exact-artifact adoption only; no model-accuracy or final independent review verdict.",
++  "review_hash": "sha256:ea86715ad681b9dfcbf29dc326a0f9f87245dc3ca9959595de0d1ced29ff8354",
+   "reviewed_subject_hashes": [
+-    "sha256:2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44"
++    "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
+   ],
+   "reviewer": "Javid (@jjaffari)"
+ }

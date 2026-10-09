@@ -18,8 +18,8 @@ from scripts import vendor_rk as vr
 from tests import u2_comparison, u2_refresh
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT_MANIFEST = "2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44"
-REVIEW_SHA256 = "4aad401c01a828a1463853796c38c19c20359f4649e2c706880c6e8a1cdcdbcf"
+CURRENT_MANIFEST = "f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
+REVIEW_SHA256 = "5ab5192e35d395b93d7da1ee5bac0b33e2a9f0961c5b03fb60a7368981866fbb"
 
 
 def test_historical_fixture_is_complete_and_relocatable(tmp_path):
