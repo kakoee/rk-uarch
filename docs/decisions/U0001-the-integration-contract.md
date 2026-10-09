@@ -707,3 +707,17 @@ This proposal adds no engine, workload graph, mapper, clock executor, DRAM adapt
 model-shape catalogue, vendor snapshot, parity fixtures, evidence promotion, interpolation
 implementation, CI wiring or rk-sim integration. It does not implement U-P3 or U-P2.
 See ../reviews/U1-U-P1-handoff.md for tests, exact commands and remaining blockers.
+
+## U0003 accepted companion/display addendum
+
+Accepted by Javid under U2-U0003-acceptance-v1; see
+[the exact acceptance record](../reviews/U2-U0003-acceptance-record.md).
+
+Keep existing bins, format vocabulary and generic Precision defaults. Version0.2 introduces
+ReportScope precision roles and nullable analytic dimensions, plus complete hash-bound
+comparison/evidence/registry/recipe/report context. Evidence applicability is independent of
+error-band availability; purpose and granularity are explicit. A missing required dimension
+is UNKNOWN and independent scope cases are never combined into a Cartesian product. Family
+is supplied by exact-spec reviewed report registry, not engine inference. Empty claim summary
+is null, while total-empty contributors remains stub. STUB computed predictions require
+explicit display opt-in and complete contributors; hidden values cannot leak via SVG/text.

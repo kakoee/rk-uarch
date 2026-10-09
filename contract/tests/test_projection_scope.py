@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
-from pathlib import Path
 from typing import Any
 
 import pytest
 
 from . import parity
+from .historical_snapshot import historical_snapshot
 from .test_flop_parity import sample
 
 
@@ -132,8 +132,8 @@ def test_complete_coverage_keeps_unsupported_and_numerical_failure(lane_a: Any) 
         )
 
 
-def test_all_864_preserved_fixtures_retain_supported_coverage(snapshot: Path) -> None:
-    rows = json.loads((snapshot / "parity/fixtures.json").read_text())
+def test_all_864_preserved_fixtures_retain_supported_coverage() -> None:
+    rows = json.loads((historical_snapshot() / "parity/fixtures.json").read_text())
     iterator = iter(rows)
     report = parity.run_parity(rows, lambda *a: parity.rank_counts(next(iterator)))
     assert len(rows) == report["n_fixtures"] == len(report["coverage"]) == 864

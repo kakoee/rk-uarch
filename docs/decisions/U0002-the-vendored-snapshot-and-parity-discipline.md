@@ -271,3 +271,16 @@ exception**, not exact validator parity. Javid explicitly accepted it with this 
 
 The two earlier human snapshots remain preserved and unadopted. The reviewed replacement
 is adopted locally as recorded above; first publication and G1/U1 closure remain pending.
+
+## U0003 accepted validation-scope addendum
+
+Accepted by Javid under U2-U0003-acceptance-v1; see
+[the exact acceptance record](../reviews/U2-U0003-acceptance-record.md).
+
+Historical acceptance above is preserved; this prospective amendment now governs the new
+0.2 comparison artifacts, retain zero equality and positive count ratios/budgets. Null/absent
+reference is unassessed, with actual retained and no adjustment; matching omission is not
+numerical validation. The nominal test-only candidate is the compatibility subject. Physical
+work instead has independent correctness tests and complete discrepancies; an aggregate
+compatibility pass is not physical parity. Preserve all fixtures/refusals and A-F12 before
+calls. Actual npu-l4 refresh follows the existing human generation/adoption lifecycle.

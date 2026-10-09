@@ -1,0 +1,190 @@
+{
+  "format": "uarch-metric-dependencies/1",
+  "version": "b1-synthetic-1",
+  "model_identity_hash": "sha256:1dac6872298671f67e45a9d1f1793aa0f7309092982f4e3e548bfdfeff2c1a2c",
+  "recipes": [
+    {
+      "metric_path": "/comparisons/0/fixtures/0/channels/0/raw_rel",
+      "purpose": "counts",
+      "granularity": "whole_iteration",
+      "applicable_dimensions": [
+        "model_identity_hash",
+        "precision",
+        "hardware_spec_hash",
+        "prepared_bundle_hash"
+      ],
+      "selectors": [
+        {
+          "kind": "result_field",
+          "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+          "json_pointer": "/actual_matrix_ops"
+        },
+        {
+          "kind": "result_field",
+          "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+          "json_pointer": "/reference_matrix_ops"
+        }
+      ]
+    },
+    {
+      "metric_path": "/comparisons/0/fixtures/0/channels/4/raw_rel",
+      "purpose": "duration",
+      "granularity": "whole_iteration",
+      "applicable_dimensions": [
+        "model_identity_hash",
+        "precision",
+        "hardware_spec_hash",
+        "prepared_bundle_hash"
+      ],
+      "selectors": [
+        {
+          "kind": "result_field",
+          "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+          "json_pointer": "/actual_duration_ps"
+        },
+        {
+          "kind": "result_field",
+          "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+          "json_pointer": "/reference_duration_s"
+        }
+      ]
+    }
+  ],
+  "source_recipes": [
+    {
+      "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+      "model_identity_hash": "sha256:1dac6872298671f67e45a9d1f1793aa0f7309092982f4e3e548bfdfeff2c1a2c",
+      "recipe": {
+        "metric_path": "/actual_matrix_ops",
+        "purpose": "counts",
+        "granularity": "whole_iteration",
+        "applicable_dimensions": [
+          "model_identity_hash",
+          "precision",
+          "hardware_spec_hash",
+          "prepared_bundle_hash"
+        ],
+        "selectors": [
+          {
+            "kind": "prepared_content",
+            "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+            "json_pointer": "/actual_matrix_ops"
+          },
+          {
+            "kind": "model_assumption",
+            "artifact_hash": "sha256:8649840d63f66cf1687a76bd4e71cd7ba5106bef112406fea932ffa9ab89bfd4",
+            "json_pointer": "/algorithms/literal_case"
+          },
+          {
+            "kind": "model_evidence",
+            "artifact_hash": "sha256:8649840d63f66cf1687a76bd4e71cd7ba5106bef112406fea932ffa9ab89bfd4",
+            "json_pointer": "/model"
+          }
+        ]
+      }
+    },
+    {
+      "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+      "model_identity_hash": "sha256:1dac6872298671f67e45a9d1f1793aa0f7309092982f4e3e548bfdfeff2c1a2c",
+      "recipe": {
+        "metric_path": "/actual_duration_ps",
+        "purpose": "duration",
+        "granularity": "whole_iteration",
+        "applicable_dimensions": [
+          "model_identity_hash",
+          "precision",
+          "hardware_spec_hash",
+          "prepared_bundle_hash"
+        ],
+        "selectors": [
+          {
+            "kind": "prepared_content",
+            "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+            "json_pointer": "/actual_duration_ps"
+          },
+          {
+            "kind": "model_assumption",
+            "artifact_hash": "sha256:8649840d63f66cf1687a76bd4e71cd7ba5106bef112406fea932ffa9ab89bfd4",
+            "json_pointer": "/algorithms/literal_case"
+          },
+          {
+            "kind": "model_evidence",
+            "artifact_hash": "sha256:8649840d63f66cf1687a76bd4e71cd7ba5106bef112406fea932ffa9ab89bfd4",
+            "json_pointer": "/model"
+          },
+          {
+            "kind": "hardware_leaf",
+            "artifact_hash": "sha256:549fa8f4a95ac3ef86fec52d75fff1db43cf46b5eab911e30c2156a37d1543dc",
+            "json_pointer": "/memory/dram/bw_bytes_per_s"
+          }
+        ]
+      }
+    },
+    {
+      "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+      "model_identity_hash": "sha256:1314c0047102ea4f94f910ac2be57136d4e4aa60e5d5b6649aef07eabb69f613",
+      "recipe": {
+        "metric_path": "/reference_matrix_ops",
+        "purpose": "counts",
+        "granularity": "whole_iteration",
+        "applicable_dimensions": [
+          "model_identity_hash",
+          "precision",
+          "hardware_spec_hash",
+          "prepared_bundle_hash"
+        ],
+        "selectors": [
+          {
+            "kind": "prepared_content",
+            "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+            "json_pointer": "/reference_matrix_ops"
+          },
+          {
+            "kind": "model_assumption",
+            "artifact_hash": "sha256:ea68820369c9b9851c8a3d2788fb3304c80fa186a46766a5a2c41bba6f399cba",
+            "json_pointer": "/algorithms/literal_case"
+          },
+          {
+            "kind": "model_evidence",
+            "artifact_hash": "sha256:ea68820369c9b9851c8a3d2788fb3304c80fa186a46766a5a2c41bba6f399cba",
+            "json_pointer": "/model"
+          }
+        ]
+      }
+    },
+    {
+      "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+      "model_identity_hash": "sha256:1314c0047102ea4f94f910ac2be57136d4e4aa60e5d5b6649aef07eabb69f613",
+      "recipe": {
+        "metric_path": "/reference_duration_s",
+        "purpose": "duration",
+        "granularity": "whole_iteration",
+        "applicable_dimensions": [
+          "model_identity_hash",
+          "precision",
+          "hardware_spec_hash",
+          "prepared_bundle_hash"
+        ],
+        "selectors": [
+          {
+            "kind": "prepared_content",
+            "artifact_hash": "sha256:bdf069022f239df283fc300e66d9d62e941df70b61f8fd8e5fbcc3f947727a7d",
+            "json_pointer": "/reference_duration_s"
+          },
+          {
+            "kind": "model_assumption",
+            "artifact_hash": "sha256:ea68820369c9b9851c8a3d2788fb3304c80fa186a46766a5a2c41bba6f399cba",
+            "json_pointer": "/algorithms/literal_case"
+          },
+          {
+            "kind": "model_evidence",
+            "artifact_hash": "sha256:ea68820369c9b9851c8a3d2788fb3304c80fa186a46766a5a2c41bba6f399cba",
+            "json_pointer": "/model"
+          }
+        ]
+      }
+    }
+  ],
+  "review_hash": "sha256:1140529d6a560ee71aefdd833e4a85bb43aec8d07f902b7895e0110b9e00471d",
+  "dependencies_hash": "sha256:ef9340429484b9771906d4f12dc82f420249a74e66e9a2a4c4efccb86ce08910"
+}

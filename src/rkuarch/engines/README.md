@@ -2,7 +2,7 @@
 
 Every engine: EngineJob JSON in, EngineResult JSON out, as a subprocess or in-process pure
 function. No foreign-function interface.
-- analytic/  U-C0: our roofline of the spec. aggregate mode reproduces rk-sim C0 to ±0.1%;
+- analytic/  U-C0: our roofline of the spec. aggregate mode prices resolved physical work; nominal compatibility is test-only;
              per_op mode is always ≥ aggregate. Anchors every L1 test.
 - fork/      the pinned published simulator in the engine container. Its mapping is its own,
              recorded as fork:<name>-default@<sha>. Fields it cannot represent are listed.
@@ -17,3 +17,12 @@ and an explicit analytic scope; U4 detailed jobs carry mapped TaskGraphs. U2 est
 versioned protocol fixtures for later fork/Rust consumers. Replay requires neither local
 producer execution nor a compiler. Fork-delegated mapping is explicit and supplied mappings
 that it cannot honor are refused. Resource timing and contention remain simulation outputs.
+
+U0003 S boundary: physical-resolved runs authoritative prepared work and has independent
+correctness/replay tests plus complete physical-versus-nominal discrepancy reports. The
+separately identified nominal-rk-compatibility candidate is test-only; its unchanged count
+and stored-duration thresholds replace the former physical nominal-parity gate explicitly.
+Report inputs include complete comparison/evidence/registry/recipe closure. Default STUB
+magnitudes are hidden; explicit finite-prediction opt-in requires complete contributors and
+visible unvalidated labels on every surface. No live timestamps, null-as-zero or ambient
+artifact lookup. Exported extended hardware truth and five-field test projections are distinct.

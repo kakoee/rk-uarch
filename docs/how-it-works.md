@@ -5,8 +5,14 @@ This describes the validated U1 implementation published at
 schemas, a human-generated rk-sim evidence snapshot and a test-only parity harness.
 There is no simulation engine, workload producer, working table/report CLI or engine
 result yet. The [U1 closeout](reviews/U1-closeout.md) records validation and Javid's
-2026-10-07 G1 approval and closeout acceptance. Closeout publication and `u01-end` tagging
-remain separate pending steps.
+2026-10-07 G1 approval and closeout acceptance. The published annotated `u01-end` now
+resolves to `1e9e794a84c5173812c23a1cf2fc04b85e6f6831`;
+[closeout CI](https://github.com/kakoee/rk-uarch/actions/runs/37588171798) passed on that
+revision. The [U2 kickoff record](reviews/U2-orchestration-kickoff.md) records independent
+verification. U2 shared design is accepted under [U0003](decisions/U0003-one-chip-one-set-of-facts.md);
+implementation handoffs are prepared. No U2 producer or engine is implemented yet.
+Its approved validation-host arrangement is recorded separately in
+[U0021](decisions/U0021-u2-cold-clone-validation-exception.md), without extending U0020.
 
 ## Contracts and their limits
 
@@ -124,3 +130,16 @@ checks and replay acceptance. Read the [U2 kickoff obligations](reviews/U2-kicko
 and [closeout carry-forward](reviews/U1-closeout.md#u2-obligations-and-later-boundaries),
 including B-F16, A-F9 and unresolved embedding accounting. No U2 implementation is included
 in this refresh.
+
+U0003 S boundary: physical-resolved runs authoritative prepared work and has independent
+correctness/replay tests plus complete physical-versus-nominal discrepancy reports. The
+separately identified nominal-rk-compatibility candidate is test-only; its unchanged count
+and stored-duration thresholds replace the former physical nominal-parity gate explicitly.
+Report inputs include complete comparison/evidence/registry/recipe closure. Default STUB
+magnitudes are hidden; explicit finite-prediction opt-in requires complete contributors and
+visible unvalidated labels on every surface. No live timestamps, null-as-zero or ambient
+artifact lookup. Exported extended hardware truth and five-field test projections are distinct.
+
+The exact U2 baseline is now accepted by Javid: see [acceptance record](reviews/U2-U0003-acceptance-record.md)
+and [common baseline](reviews/U2-common-baseline-v1.md). Earlier kickoff descriptions above
+are historical; runtime correctness, full exits and publication remain outstanding.

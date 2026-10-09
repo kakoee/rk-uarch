@@ -1,0 +1,46 @@
+{
+  "classification": "independent_B_test_specification",
+  "runtime_status": "pending A1 APIs and B implementation",
+  "cases": [
+    {
+      "id": "D01",
+      "setup": "Finite executed stub canary 137.0625; complete contributors; default RenderSpec flags false.",
+      "expected": "hide every numeric surface, retain visible STUB/unknown reason."
+    },
+    {
+      "id": "D02",
+      "setup": "D01 with show_unvalidated_predictions=true.",
+      "expected": "show only eligible listed metrics, labelled STUB/unvalidated and conditional_on."
+    },
+    {
+      "id": "D03",
+      "setup": "D02 with empty contributors, missing dependency, not-run, NaN or infinity.",
+      "expected": "no numeric opt-in; invalid closure/nonfinite rejected."
+    },
+    {
+      "id": "D04",
+      "setup": "Source raw actual/reference magnitudes have source recipes but no display recipe.",
+      "expected": "hidden even opt-in; direct request MissingMetricRecipe."
+    },
+    {
+      "id": "D05",
+      "setup": "Stored null reference, raw_rel=null, residual_rel=null.",
+      "expected": "unknown/absent display, never zero or fabricated axis position."
+    },
+    {
+      "id": "D06",
+      "setup": "Synthetic evidence and ordinary opt-in only.",
+      "expected": "synthetic results require separate allow_synthetic_presentation plus explicit label."
+    },
+    {
+      "id": "D07",
+      "setup": "Count-only evidence, timing raw_rel=0, signed/absolute adjustment=0.",
+      "expected": "all timing numeric surfaces remain stub, band unknown."
+    },
+    {
+      "id": "D08",
+      "setup": "Same verified inputs at moved path, changed wall clock, different map insertion order.",
+      "expected": "identical UTF-8 HTML/Markdown; no timestamps/path comments or unstable ordering."
+    }
+  ]
+}

@@ -301,22 +301,24 @@ def test_oracle_bridge_synthetic_dispatch_self_test(
     interpreter.touch()
     monkeypatch.setenv("UV_PROJECT_ENVIRONMENT", str(interpreter.parent.parent))
     shapes = vendor.ROOT / "contract/fixtures/model_shapes"
-    first = vendor.collect_snapshot(tmp_path, vendor.PIN, [extra], shapes)
-    second = vendor.collect_snapshot(tmp_path, vendor.PIN, [extra], shapes)
+    first = vendor.collect_snapshot(tmp_path, vendor.PIN, [], shapes)
+    second = vendor.collect_snapshot(tmp_path, vendor.PIN, [], shapes)
     assert first == second
     assert environment_checks == ["verified"] * 4  # before and after both collections
     assert json.loads(first["GENERATOR.json"])["environment"] == environment
     assert first["uv.lock"] == b"{}"
     rows = json.loads(first["parity/fixtures.json"])
-    assert len(rows) == 1152  # 864 baseline + 288 additional component
+    assert len(rows) == 864  # retained explicit pairs only; unknown inputs must refuse
     assert {r["duration_s"] for r in rows} == {0.123, 0.456}
     assert {r["counts"]["matrix_ops"] for r in rows} == {1234.0}
-    assert len([call for call in calls if call[0] == "counts"]) == 2304
+    assert len([call for call in calls if call[0] == "counts"]) == 1728
     vendor.validate_refusals(json.loads(first["parity/refusals.json"]))
     with pytest.raises(ValueError, match="incomplete matrix"):
         vendor.validate_matrix(rows[:-1])
     publish_snapshot(tmp_path / "synthetic-output", first)
     check_manifest(tmp_path / "synthetic-output")
+    with pytest.raises(ValueError, match="Explicit ComponentPrecision"):
+        vendor.collect_snapshot(tmp_path, vendor.PIN, [extra], shapes)
 
 
 def test_vendor_cli_refuses_without_human_authorization(monkeypatch: pytest.MonkeyPatch) -> None:

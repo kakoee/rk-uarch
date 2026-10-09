@@ -1,0 +1,16 @@
+[
+  {
+    "component_params_file": "components/asic_placeholder.yaml",
+    "compute": "bf16",
+    "exception": "UnsupportedPrecision",
+    "kv_cache": "bf16",
+    "message": "this accelerator declares no peak for 'bf16'. It declares: fp16. The compute roof has no value without a peak, so there is no number to report and nothing to warn about \u2014 and resolving to the nearest supported format would answer a different question than the one asked (build-spec \u00a72.4, ADR 0015 \u00a72). Ask for a precision this part declares, or run it on a part that has one."
+  },
+  {
+    "component_params_file": "components/asic_placeholder.yaml",
+    "compute": "fp8",
+    "exception": "UnsupportedPrecision",
+    "kv_cache": "fp8",
+    "message": "this accelerator declares no peak for 'fp8'. It declares: fp16. The compute roof has no value without a peak, so there is no number to report and nothing to warn about \u2014 and resolving to the nearest supported format would answer a different question than the one asked (build-spec \u00a72.4, ADR 0015 \u00a72). Ask for a precision this part declares, or run it on a part that has one."
+  }
+]

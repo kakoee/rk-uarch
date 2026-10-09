@@ -18,6 +18,8 @@ from uarch_contract.prepared import PreparedBundle
 from uarch_contract.report_context import ReportContext
 from uarch_contract.request import RequestIntent
 
+from rkuarch.report.command import report_command
+
 
 def _json(path: Path) -> Any:
     return strict_json_loads(path.read_bytes())
@@ -341,6 +343,9 @@ def validate_command(
     for label, entries in groups.items():
         lines.extend(["", f"{label} ({len(entries)})", *("- " + entry for entry in entries)])
     typer.echo("\n".join(lines))
+
+
+app.command("report")(report_command)
 
 
 if __name__ == "__main__":

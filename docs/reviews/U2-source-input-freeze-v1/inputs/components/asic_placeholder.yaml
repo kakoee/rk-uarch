@@ -1,0 +1,43 @@
+# A custom ASIC, entirely unspecified. build-spec §1.3: "Custom ASIC placeholder — STUB,
+# user-editable — proves extensibility."
+#
+# THIS ENTRY EXISTS TO PROVE A CLAIM ABOUT THE SCHEMA, NOT TO MODEL A PART. The claim is
+# rk/components/README.md's: "Adding a component = drop one YAML file in the right
+# library/ subdirectory. Nothing else. No engine change, no registration — dispatch is by
+# kind." A vendor with silicon nobody outside has numbers for should be expressible today,
+# as an honest hole rather than as an absence, and every number below is that hole.
+#
+# EVERY PARAMETER IS `provenance: stub, source: null`, and the values are placeholders in
+# the sense docs/decisions/kernel-efficiency.md §2 uses the word: a number carried so the
+# arithmetic has an operand, with a badge that says it is not a claim. Nothing derived
+# from this entry can come back better than STUB, which is the whole point — it is what
+# makes the Assumptions page (P9b) list this part as work to be done rather than as fact.
+#
+# role: asic, not accelerator. The C0 roofline runs on role=accelerator only, so this part
+# contributes its (stubbed) power draw and nothing else, and the run's fidelity map says
+# compute: STUB for it. Giving it role=accelerator would make the roofline run on invented
+# silicon — a confident number with no right to confidence.
+id: compute.asic.placeholder
+kind: compute_resource
+role: asic
+params:
+  fp16_tflops:
+    {value: 100.0, unit: TFLOPS, provenance: stub, source: null, date: null}
+  hbm_bw:
+    {value: 1.0, unit: TB/s, provenance: stub, source: null, date: null}
+  hbm_capacity:
+    {value: 32.0, unit: GB, provenance: stub, source: null, date: null}
+  tdp:
+    {value: 300.0, unit: W, provenance: stub, source: null, date: null}
+  usd_per_hr:
+    {value: 0.0, unit: USD/hr, provenance: stub, source: null, date: null}
+  capex_usd:
+    {value: 0.0, unit: USD, provenance: stub, source: null, date: null}
+execution_model:
+  kind: scalar_efficiency
+  # STUB for the reason every kernel_efficiency in this repo is STUB
+  # (docs/decisions/kernel-efficiency.md §4 and §6), and additionally because there is no
+  # silicon here to be efficient about.
+  value:
+    {value: 0.55, unit: ratio, provenance: stub, source: null, date: null}
+fidelity_available: [STUB]

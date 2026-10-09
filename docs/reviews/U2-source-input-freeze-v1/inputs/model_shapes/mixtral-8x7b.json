@@ -1,0 +1,45 @@
+{
+  "id": "mixtral-8x7b",
+  "model": {
+    "active_params": 12900000000,
+    "d_model": 4096,
+    "experts_per_token": 2,
+    "kv_heads": 8,
+    "n_experts": 8,
+    "n_heads": 32,
+    "n_layers": 32,
+    "name": "mixtral-8x7b",
+    "total_params": 46700000000
+  },
+  "parameter_count_note": "Nominal architecture counts: 8.03B/70.6B dense and 46.7B total/12.9B active Mixtral. These rounded ModelSpec inputs must pass Lane A check_parity within 1%; no FLOP formula is inferred here. Norm/router details are below that tolerance.",
+  "shape": {
+    "attention": "gqa",
+    "d_ff": 14336,
+    "expert_d_ff": 14336,
+    "gated_mlp": true,
+    "tie_embeddings": false,
+    "vocab_size": 32000
+  },
+  "sources": [
+    {
+      "fields": [
+        "n_layers",
+        "d_model",
+        "n_heads",
+        "kv_heads",
+        "n_experts",
+        "experts_per_token",
+        "d_ff",
+        "gated_mlp",
+        "vocab_size",
+        "attention",
+        "tie_embeddings",
+        "expert_d_ff"
+      ],
+      "note": "Architecture dimensions from Mistral's published Mixtral config. The requested precision is an oracle input, not inferred from weights.",
+      "revision": "fc7ac94680e38d7348cfa806e51218e6273104b0",
+      "sha256": "9d56d04b36d0fd12ff54ae4c5bac769cc176e254e64ff71144614b6318b40793",
+      "url": "https://huggingface.co/mistralai/Mixtral-8x7B-v0.1/raw/fc7ac94680e38d7348cfa806e51218e6273104b0/config.json"
+    }
+  ]
+}

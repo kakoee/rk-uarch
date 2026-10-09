@@ -359,9 +359,8 @@ measured_error: {interpolation_loo: {median_rel: …, max_rel: …, weighted_med
                  layer_reuse: {median_rel: …, max_rel: …, n_samples: …},            # F3
                  cold_vs_steady: {median_rel: …, max_rel: …, n_samples: …,
                                   priming_2_vs_1_max_rel: …}}                         # F2; warm-up length
-flop_parity: {kind: not_run, reference_basis: rk_sim_aggregate_divided_by_tp,
-              fixture_set_id: null, oracle_manifest_sha256: null, candidate_identity: null,
-              n_fixtures: 0, max_rel: null, comparisons: []}  # no workload parity claimed
+comparison_state: not_attempted | attempted
+artifacts: {report_context_hash: ..., comparison_hashes: [...]} # retains failures/unknowns
 provenance: {params: [...], model_card: {hash, badge, evidence, validated_error_band,
                                          energy_verification},
              conditional_on: [...]}
@@ -553,9 +552,9 @@ frontend is a bootstrap producer implementing the explicitly selected supported 
 no external producer exists. Supplied rank-local operators must already identify their split,
 rank/equivalence scope, shapes, dtypes, layouts, dependency edges, fusion, padding/replication,
 KV layout and omissions. Imported inputs are never silently re-sharded, divided by tp again,
-or given an inferred fusion policy. Initially accept only the declared balanced TP and
-representative-rank cases; unsupported heterogeneous/unequal-rank or other parallelism must
-fail explicitly. This does not introduce PP/EP/CP support or a second operator language.
+or given an inferred fusion policy. Accept declared balanced TP representative cases only with conserved equal work; the
+U0003 selected-rank extension permits explicitly conserved unequal embedding hits only.
+Other heterogeneous splits or parallelism fail explicitly; imported work is never re-sharded. This does not introduce PP/EP/CP support or a second operator language.
 
 Within a chip, the selected mapping producer resolves tile shapes, cores/resources, dataflow,
 buffer placement, transfers, barriers and scheduling policies. At the mapped execution
@@ -1073,8 +1072,9 @@ are redundant compatibility fields for one expert's width. Total expert paramete
 n_experts, active expert parameters/work use experts_per_token, each exactly once;
 shared/non-expert terms remain separate. Dense d_ff semantics are unchanged. `omissions` lists routing,
 imbalance, all-to-all, host/runtime time, address translation, coherence and mixed
-prefill/decode iterations; they become table warnings. FLOP parity against rk-sim's own counts
-runs on every change; every deviation above 0.5% has a name and a reason in deviations.py.
+prefill/decode iterations; they become table warnings. Independent physical correctness and complete physical-versus-nominal discrepancy reporting
+run on every change. A separate test-only nominal candidate retains the adopted compatibility
+thresholds; a nominal pass never establishes physical workload parity.
 `uarch characterize` reports FLOPs, bytes, operational intensity and shape regime per op
 across the grid; L3 suites and workload suites pick shapes from it.
 
@@ -1111,7 +1111,7 @@ changing placements under the same policy label is. Keep local preparation as th
 
 Every engine: EngineJob JSON in, EngineResult JSON out, as a subprocess or in-process pure
 function. No foreign-function interface.
-- analytic/  U-C0: our roofline of the spec. aggregate mode reproduces rk-sim C0 to ±0.1%;
+- analytic/  U-C0: our roofline of the spec. aggregate mode prices actual resolved work; test-only nominal compatibility has the ±0.1% gate;
              per_op mode is always ≥ aggregate. Anchors every L1 test.
 - fork/      the pinned published simulator in the engine container. Its mapping is its own,
              recorded as fork:<name>-default@<sha>. Fields it cannot represent are listed.
@@ -1934,8 +1934,9 @@ rk-sim or a compiler. First propose and obtain acceptance of U0003's prepared-in
 hashing/provenance and any public request/table schema revision; coordinate it with U-P4.
 At U0003 kickoff carry forward B-F16's component-precision and prepared-bundle parity
 requirements, and the separately unresolved embedding-accounting obligation, from the
-kickoff record and U0002. Preserve the approved parity budget, nominal inputs and explicit
-unsupported-projection policy; U1 harness self-tests do not discharge actual U2 parity.
+kickoff record and U0002. Preserve the approved numerical budgets, nominal inputs and A-F12 pre-call refusal.
+The accepted U0003 amendment separates physical correctness/discrepancy reporting from
+test-only nominal compatibility; compatibility does not prove physical full-workload timing.
 Use the existing OpSpec vocabulary and engine protocol. Workload construction belongs to
 preparation; analytic engines consume resolved operators. No detailed mapper lands in U2.
 
@@ -1963,10 +1964,16 @@ later.
    (fp16_tflops and the other per-format peaks that apply, hbm_bw, hbm_capacity, tdp) as
    SourcedValues whose provenance is the WORST of the spec leaves each was computed from.
    STIPULATIONS STAY STIPULATIONS. A peak computed from stipulated MACs/cycle and a
-   stipulated clock is a stipulation, never a claim. Plus `uarch rk-component <spec>`, which
-   emits the rk-sim library YAML for the chip (kind: compute_resource, role: asic,
-   design_status carried in a comment until rk-sim's schema has the field; uarch's proposed
-   maps to rk-sim's proposed and reference to shipping).
+   stipulated clock is a stipulation, never a claim. `uarch rk-component <spec>
+   --execution-model <file>` emits authoritative extended ComponentExport plus derivation.
+   `--oracle-compat` separately emits pinned-loader-compatible test YAML and ExportBinding;
+   it does not replace primary truth. Include id/kind/role, supported peaks with exact units,
+   bandwidth/capacity/TDP, fidelity_available/calibration and explicit execution_model.
+   Bind original spec/status/derivation, all original/projected values, descriptor bytes,
+   model input, precision pairs and loss reasons. Strip extensions even for claims; preserve
+   grades only with eligible real citations/anchors. Never invent a URL or calibration.
+   Retained .55 stays unchanged. New synthetic npu-l41.0 is a declared unvalidated assumption
+   only if separately accepted; no hardware efficiency default or fit.
 3. src/rkuarch/workload/ — the standalone, separately versioned preparation producer:
    (ModelSpec, ModelShape, precision, tp, query) -> the operator
    graph of ONE RANK of a tp-way tensor-parallel split, for one iteration, at decoder-layer
@@ -1986,25 +1993,31 @@ later.
    host/runtime time, address translation, coherence and mixed prefill/decode iterations
    (build-spec §2.3.4). KV operands are paged: the graph carries page-granular KV reads for
    the request's kv_layout.block_size_tokens.
-4. Plug the graph into the parity harness (contract/tests/test_flop_parity.py) as its first
-   real callable. Every difference from rk-sim's closed form above 0.5% gets a named
-   declared deviation in src/rkuarch/workload/deviations.py with a one-line reason: embedding
-   or lm_head accounting, norm parameters, and whatever else you actually find. Report them;
-   do not tune the graph to hide them. B's adapter emits the revised typed FlopParity:
-   kind, identities, fixture/channel/unit attribution and all four ratios must survive.
-   Total absolute adjustments <=5% per fixture/channel, residual <=0.5%; refuse adjustments
-   for raw-inside-tolerance or zero/null references. Self-tests are never workload parity.
+4. Implement two validation tracks with separate identities. Physical-resolved executes
+   authoritative resolved work, passes independently specified shape/count/timing/replay
+   tests, and records every physical-versus-nominal discrepancy, including failures and
+   unassessed/null/absent/refused channels. Never tune physical work to nominal counts.
+   A owns test-only contract/tests/nominal_candidate.py: recompute from declared nominal
+   ModelSpec/query/tp/precision/component/model inputs, without expected counts, oracle
+   imports or manufactured OpSpecs. B owns complete comparison inventory and tooling.
+   Nominal compatibility positive count channels retain total absolute adjustments <=5%
+   per fixture/channel and residual <=0.5%, with all four ratios/declarations retained.
+   Reject adjustments inside raw tolerance or on zero/null/absent references. Known zero
+   must match zero; null/absent remain unassessed, matching omission never numeric validation.
+   A-F12 refuses replication/padding before either comparison callable and keeps coverage.
+   Nominal gate success cannot be labelled physical parity. Bind all attempted comparisons
+   to table/report context, including failure; no failed attempt rewritten as not_run.
 5. src/rkuarch/engines/analytic/ — U-C0, consuming a validated prepared operator graph and
    resolved HardwareSpec without importing/calling the workload builder or mapping policies.
    Record the explicit analytic mapping scope and preparation identity. Two modes:
    - aggregate: max(compute_time, memory_time) over the whole iteration, the same shape as
-     rk-sim's IterationCost._time_s. This is the parity anchor.
+     a roofline over actual resolved counts. It is not the nominal compatibility model.
    - per_op: the sum over ops of each op's own roofline. Always >= aggregate. It is the first
      place the chip's structure shows up.
    Both return a Row (the contract's row, via table/) with attribution_s split by which roof
    bound, its parts summing to duration_s. Units in names. Seconds at the boundary. U-C0
-   uses peak DRAM bandwidth with no refresh derating, because it is the parity anchor for
-   rk-sim C0; derating starts at native level 0. U-C0 leaves every diagnostic null.
+   uses declared peak DRAM bandwidth with no refresh derating; derating starts at native
+   level 0. U-C0 leaves every diagnostic null. Bind all vector/traffic/time assumptions.
 6. src/rkuarch/table/ — the minimal path: high-level request -> grid-point preparation
    OR validated prepared bundle -> engine -> rows -> UarchCostTable. Both paths share engine
    execution and hashing; imported payloads bypass local preparation. Single process, no
@@ -2042,14 +2055,18 @@ later.
     Reuse these fixtures in the fork adapter and Rust protocol work; do not create another IR.
 
 ACCEPTANCE TESTS (write first):
-1. U-C0 AGGREGATE REPRODUCES rk-sim C0: fed each fixture's own component params (U-P2
-   records the file and rk-sim's duration for it), aggregate-mode duration equals that rk-sim
-   duration within ±0.1% on every fixture (decode and prefill, both precisions, tp 1 and 8).
-   A test, not a claim. Then a human runs `make vendor-rk ... PARAMS=<uarch rk-component
-   output for npu-l4>` and the same test covers derive_rk_params(npu-l4). Never compute an
-   expected duration yourself.
+1. NOMINAL COMPATIBILITY: the separately named test-only nominal candidate matches each
+   adopted fixture's own upstream-generated duration within +/-0.1%, using original component
+   execution-model inputs and explicit precision/tp. Preserve every adopted fixture/refusal.
+   Physical U-C0 is validated separately by hand-derived timing, conserved attribution,
+   shape/count tests and disabled-producer replay; no full-workload duration accuracy claim.
+   Actual npu-l4 BF16 expectations require human generation/adoption of a fully bound test
+   projection. Never compute expected oracle durations. This replaces the former physical
+   aggregate +/-0.1% exit; passing nominal compatibility does not satisfy that former exit.
 2. per_op >= aggregate on every fixture query (a property test over random queries too).
-3. FLOP parity: the workload graph passes the harness with every deviation named.
+3. Physical counts pass independent operator/shard/traffic expectations and complete
+   discrepancy coverage. Nominal candidate passes unchanged comparable-channel count
+   budgets. Null/absent channels and every physical failure remain explicit report inputs.
 4. derive_rk_params: a stipulated-clock design yields stipulation-kind peaks. A reference
    yields claims whose provenance is the worst of their inputs. Test both.
 5. `uarch table hw/designs/npu-l4.yaml --model llama-3.1-8b --precision bf16 --engine
@@ -2062,13 +2079,22 @@ ACCEPTANCE TESTS (write first):
    hash-stable report in which every op has a shape regime.
 9. KV reads are page-granular: the number of KV page reads per sequence per layer equals
    ceil(context / block_size_tokens).
-10. The shard: at tp = 8 the graph's matrix_ops equals the tp = 1 graph's divided by 8, except
-    for named deviations (replicated KV heads, vocabulary padding), and a model whose heads do
-    not divide by tp raises ShardIndivisible.
+10. The shard: check independently specified physical extents and integer counts at tp1/8,
+    including KV replication/vocabulary padding. Supply conserved embedding hit counts;
+    tp2/M1 [1,0] is valid and [1,1] is not. Representative ranks require equal actual work.
+    The narrowly accepted selected-rank extension allows unequal embedding hits only, with
+    explicit supplied counts or synthetic balanced high-level assignment; imports never
+    re-shard. Nondivisible unsupported dimensions raise ShardIndivisible.
 11. Attention: a prefill at L = 32768 yields an attention_fused operator whose DRAM bytes are
     Q, K, V and O only, and the graph contains no L × L tensor.
 
-ADDITIONAL ACCEPTANCE — prepared inputs:
+ADDITIONAL ACCEPTANCE — physical conventions and prepared inputs:
+- Pin n2/L3 causal/full-square attention and all-token/last-token head separately; T1/T17
+  valid-token reads vs allocated pages; once-per-operand traffic; explicit vector algorithm
+  rate dependencies and serial matrix/vector time; partial residency with total peak null.
+- Scalable DRAM at nonbase ratio, zero-rounded Hz and unsupported block-scale geometry
+  refuse as engine capabilities; generic contract shapes remain legal.
+- Aggregate-row plots label isolated per-op estimates; their durations are not latency parts.
 - Export locally prepared inputs and replay them with the local builder unavailable:
   engine results and table bytes match under identical engine/version/run conditions.
 - A hand-authored supported prepared fixture executes with no rk-sim clone or compiler.
@@ -2121,8 +2147,9 @@ U-P3 to have landed.
       spec_derived never applies to a model.
    c. THE CEILING: anything computed for a design_status: proposed spec is capped at
       estimated, whatever its evidence. Enforced in code, with a test.
-   d. combine([]) is stub, as in rk-sim: a number that cannot name what fed it has no
-      evidence behind it.
+   d. Empty total contributors is stub. Empty hardware claim summary is null, not an
+      invented stub claim: stipulated inputs still need the independently eligible model
+      contributor. A genuine stub claim lowers the result. Resolve every used contributor.
    e. NOTHING HERE MAY RAISE A BADGE. Write a test that fuzzes inputs and asserts the output
       badge is never better than the worst claim contributor and never better than the model
       card's rung.
@@ -2139,15 +2166,22 @@ U-P3 to have landed.
    Precision matches by format name: BLOCKFP8 evidence does not cover fp8 unless U0001 says
    why it should. A model card whose evidence does not apply to this
    request contributes stub for this request, whatever its best rung elsewhere.
+   Shared ReportContext/2 binds evidence IDs to exact EvidenceRecord hashes, plus source,
+   independent review, prediction ordering, verification, metric recipes, family registry
+   and comparison inventories. Applicability exists without error bands. Match purpose,
+   granularity, role-specific precision, state and required dimensions using unchanged U1
+   bins and independent scope cases, never their Cartesian product. Family is report-only.
+   Missing/tampered/ambiguous closure refuses before rendering, with no ambient lookup.
 4. report/ — `uarch report <table>` writes a self-contained static HTML file (plus a
    Markdown twin for agents), with no JavaScript framework and no network fetches:
    - every number renders through report/badged.py::badged(value, unit, badge,
-     conditional_on, error_band). A raw float in a template is a build failure: add a
+     conditional_on, error_band, contributors, render_permissions). A raw float in a template is a build failure: add a
      template lint that fails on any {{ x }} whose x is not a Badged object;
    - "conditional: if built as specified (N stipulations)" with the list expandable;
    - error band shown as the band, or "unknown", NEVER "±0";
    - the fidelity chip (composite plus the per-subsystem detail), the model card, the
-     measured interpolation and composition errors, and the flop-parity deviations;
+     measured interpolation/composition errors, separately named nominal compatibility and
+     complete physical comparison failures/unassessed/refusals;
    - a diagnostics section: a null diagnostic renders "not modelled", never 0 and never a
      blank that reads as zero;
    - a per-op roofline as static inline SVG (operational intensity against achieved
@@ -2166,8 +2200,8 @@ ACCEPTANCE TESTS (write first):
 4. Error unknown: a card with validated_error_band=None renders "unknown", and the rendered
    HTML contains no "±0" anywhere (grep test).
 5. Template lint catches an injected raw {{ row.duration_s }}.
-6. The report for the toy table is byte-identical across two runs (no timestamps in the
-   body; the generation time goes in a comment block excluded from the hash).
+6. Canonical HTML and Markdown are byte-identical across two runs, including comments.
+   No live timestamp anywhere. RenderSpec hashes version, table/context, options and format.
 7. A null diagnostic renders "not modelled": no diagnostic that is null in the toy table
    appears as 0 in the rendered report.
 8. Precision scope: an fp8 request against BLOCKFP8-only evidence gets stub, naming precision.
@@ -2175,6 +2209,17 @@ ACCEPTANCE TESTS (write first):
    only one coefficient family has a reference.
 10. Applicability per row: a row with one operator whose shape regime the evidence does not
     cover gets stub, naming that operator.
+
+11. STUB magnitudes are hidden by default. Explicit --show-unvalidated-predictions may
+    show finite executed predictions with complete resolved contributors and visible
+    "STUB — unvalidated model prediction" labels, never empty/unresolved contributors.
+    Apply permissions to HTML/Markdown text, SVG geometry/axes/domains/tooltips/attributes,
+    accessibility and numeric warnings. Hidden values cannot affect axes. Null has no point.
+12. Default table->report demo shows conditional inputs, unknown error, C0, not-modelled
+    diagnostics and hidden STUB magnitudes with reasons. Explicit prediction demo adds
+    complete contributors and STUB labels; both preserve all physical discrepancy statuses.
+    Aggregate-row roofline says "isolated per-op roofline estimates; durations do not add
+    to aggregate latency". Synthetic display fixtures never claim executed predictions.
 
 GUARDRAILS: Do not read from an engine or compute a physical number here. Do not compute
 error bars from a deterministic run; a deterministic simulator has no replication variance,
@@ -2261,8 +2306,11 @@ choose between the two candidates on pre-registered numbers.
 ACCEPTANCE TESTS (write first where they can be written first):
 1. G2(a): `make image` from a clean clone builds the engine image unattended.
 2. G2(b): three consecutive runs of the same query produce byte-identical stats files.
-3. G2(c): decode matrix-op counts at B ∈ {1,8,32}, context/seq ∈ {512,4096} match rk-sim's
-   parity fixtures within 0.5% after named deviations, no single deviation above 5%.
+3. G2(c): decode matrix-op counts at B ∈ {1,8,32}, context/seq ∈ {512,4096}, tp ∈ {1,8}
+   and declared supported precisions exactly match independent integer resolved-operator
+   expectations for the same captured bundle and preserve physical rank shapes. Missing or
+   unrepresented matrix work fails; no adjustment budget. Preserve physical-versus-nominal
+   discrepancies and separate nominal compatibility; a nominal pass cannot discharge G2(c).
 4. G2(d): wall-clock per one-layer decode query at or under the pre-registered budget.
 5. G2(e): licence scan of the image green against the allow-list.
 6. The adapter's `unrepresented` list is non-empty for npu-l4 if anything is unrepresented,
@@ -3888,3 +3936,15 @@ quoted number is reproduced by the command next to it.
 
 GUARDRAILS: Documentation only. Change no code, fixture or ADR.
 ```
+
+## U0003 validation and display amendment
+
+U2 has two separately identified validation tracks: physical-resolved correctness/replay and
+complete nominal discrepancies, and test-only nominal-rk-compatibility with unchanged numerical
+budgets. This replaces the original physical nominal-parity exit explicitly. Nominal comparisons
+cannot promote physical duration evidence. Default STUB magnitudes are hidden; explicit
+--show-unvalidated-predictions requires complete contributors, finite executed results and
+STUB labels across text/SVG/accessibility. Null is never plotted as zero. Full report inputs
+include reviewed evidence, ordering, source, verification, family registry and metric recipes,
+all transitively hashed; empty claim summaries are not fabricated stub claims. The complete
+U0003 schemas and normative interfaces are frozen before implementation.

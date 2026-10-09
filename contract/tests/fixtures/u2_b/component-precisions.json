@@ -1,0 +1,71 @@
+[
+  {
+    "format": "uarch-component-precision/1",
+    "component_id": "compute.asic.placeholder",
+    "binding": {
+      "format": "uarch-upstream-component/1",
+      "kind": "upstream_only",
+      "component_id": "compute.asic.placeholder",
+      "upstream_sha": "1e5706e0ebfcc67c1a7333079a35b75f693e9963",
+      "oracle_manifest_sha256": "sha256:b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d",
+      "component_file": "components/asic_placeholder.yaml",
+      "component_bytes_sha256": "sha256:4686450b989d85b655649ee130ff4118e29a066b08b3e1347c34b453c4a030ed",
+      "execution_model_hash": "sha256:bd096f8c2b3dfb42be1dd33d876b4ea3ff773e86a902f948d8127458c9371699",
+      "supported_kv_storage": [
+        "fp16",
+        "fp8"
+      ],
+      "binding_hash": "sha256:5ea5435437df7c896b5cd424e3f6227ec49433ad37f65dbf2381965d342b6bbe"
+    },
+    "precisions": [
+      {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      {
+        "compute": "fp16",
+        "kv_cache": "fp8"
+      }
+    ],
+    "precision_hash": "sha256:b43029433fdc339b9ab3b7f18fab1d8a849bd5631e309c045f6e4f348f9369f3"
+  },
+  {
+    "format": "uarch-component-precision/1",
+    "component_id": "compute.nvidia.h100_sxm",
+    "binding": {
+      "format": "uarch-upstream-component/1",
+      "kind": "upstream_only",
+      "component_id": "compute.nvidia.h100_sxm",
+      "upstream_sha": "1e5706e0ebfcc67c1a7333079a35b75f693e9963",
+      "oracle_manifest_sha256": "sha256:b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d",
+      "component_file": "components/nvidia_h100_sxm.yaml",
+      "component_bytes_sha256": "sha256:0eee9677ce86a0e9b879fc33f4d0214142b076495865408e872d6264824ee2e6",
+      "execution_model_hash": "sha256:bd096f8c2b3dfb42be1dd33d876b4ea3ff773e86a902f948d8127458c9371699",
+      "supported_kv_storage": [
+        "bf16",
+        "fp16",
+        "fp8"
+      ],
+      "binding_hash": "sha256:33ba3f04456759288fab1b5dac9c211f368058f4d1c1cbeec4c8709e2e9fdb8b"
+    },
+    "precisions": [
+      {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      {
+        "compute": "fp16",
+        "kv_cache": "fp8"
+      },
+      {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      },
+      {
+        "compute": "fp8",
+        "kv_cache": "fp8"
+      }
+    ],
+    "precision_hash": "sha256:e564d339fa9265265f9540ee3e0137aca1fa397b0a05aa5414beb50ee0141859"
+  }
+]

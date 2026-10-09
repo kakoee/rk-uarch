@@ -1,0 +1,11 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________________ test_production_isolation ___________________________
+contract/tests/test_u_p2_review.py:438: in test_production_isolation
+    vendor_support.check_production_isolation(v.ROOT)
+contract/tests/vendor_support.py:113: in check_production_isolation
+    raise ValueError(f"production vendor isolation: {path}:{sorted(set(violations))}")
+E   ValueError: production vendor isolation: /home/jjaff/AI-infra-simulation/rk-uarch-u2-b/src/rkuarch/provenance/proof_raw.py:[13]
+=========================== short test summary info ============================
+FAILED contract/tests/test_u_p2_review.py::test_production_isolation - ValueE...
+1 failed in 0.20s

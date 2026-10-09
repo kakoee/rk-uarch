@@ -137,3 +137,15 @@ exporter, or simulator code. It does not require live rk-sim or a compiler. It d
 change the one-chip result scope, channel mapping, numerical parity criteria, fidelity
 rules or evidence thresholds. It does not accept concrete schema fields in advance or
 supersede U0001/U0002 as a whole. Replacing this direction requires a subsequent ADR.
+
+## U0003 accepted rank-scope addendum
+
+Accepted by Javid under U2-U0003-acceptance-v1; see
+[the exact acceptance record](../reviews/U2-U0003-acceptance-record.md).
+
+Extend balanced TP imports only to selected ranks with unequal embedding hits explicitly
+supplied as a conserved integer vector: length tp, sum M. All other shard extents remain
+balanced. Representative ranks require equal physical work. tp2/M1 [1,0] is valid selected
+work; [1,1] cannot establish rank equivalence. High-level no-token inputs require explicit
+synthetic balanced assignment (floor(M/tp), remainder in rank order). Imports remain
+immutable, never re-sharded; heterogeneous non-embedding splits/PP/EP/CP remain unsupported.

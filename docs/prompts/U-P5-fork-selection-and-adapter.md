@@ -74,8 +74,11 @@ choose between the two candidates on pre-registered numbers.
 ACCEPTANCE TESTS (write first where they can be written first):
 1. G2(a): `make image` from a clean clone builds the engine image unattended.
 2. G2(b): three consecutive runs of the same query produce byte-identical stats files.
-3. G2(c): decode matrix-op counts at B ∈ {1,8,32}, context/seq ∈ {512,4096} match rk-sim's
-   parity fixtures within 0.5% after named deviations, no single deviation above 5%.
+3. G2(c): decode matrix-op counts at B ∈ {1,8,32}, context/seq ∈ {512,4096}, tp ∈ {1,8}
+   and declared supported precisions exactly match independent integer resolved-operator
+   expectations for the same captured bundle and preserve physical rank shapes. Missing or
+   unrepresented matrix work fails; no adjustment budget. Preserve physical-versus-nominal
+   discrepancies and separate nominal compatibility; a nominal pass cannot discharge G2(c).
 4. G2(d): wall-clock per one-layer decode query at or under the pre-registered budget.
 5. G2(e): licence scan of the image green against the allow-list.
 6. The adapter's `unrepresented` list is non-empty for npu-l4 if anything is unrepresented,

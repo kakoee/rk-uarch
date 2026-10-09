@@ -67,14 +67,14 @@ def test_actual_h1_export_preserves_accepted_bytes(tmp_path):
         "--component-id",
         "compute.asic.npu-l4",
         "--execution-model",
-        ROOT / "docs/reviews/U2-A-checkpoint-2/export/npu-l4.execution-model.json",
+        ROOT / "contract/tests/fixtures/u2_b/a2-export/npu-l4.execution-model.json",
         "--oracle-compat",
         "--output",
         tmp_path,
     )
     assert p.returncode == 0, p.stderr.decode()
     assert (tmp_path / "oracle-compat.yaml").read_bytes() == (
-        ROOT / "docs/reviews/U2-A-checkpoint-2/export/npu-l4.oracle-compat.yaml"
+        ROOT / "contract/tests/fixtures/u2_b/a2-export/npu-l4.oracle-compat.yaml"
     ).read_bytes()
     assert (
         json.loads((tmp_path / "truth.json").read_bytes())["component_id"] == "compute.asic.npu-l4"

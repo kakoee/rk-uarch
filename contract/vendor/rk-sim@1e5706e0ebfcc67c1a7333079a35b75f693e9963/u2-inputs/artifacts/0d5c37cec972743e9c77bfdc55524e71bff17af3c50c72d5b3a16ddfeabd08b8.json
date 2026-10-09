@@ -1,0 +1,120 @@
+{
+  "binding_hash": "sha256:0d5c37cec972743e9c77bfdc55524e71bff17af3c50c72d5b3a16ddfeabd08b8",
+  "component_id": "compute.asic.npu-l4",
+  "derivation_hash": "sha256:429ea7ce186a5dee620f98ef4e5ce8172cce841511b46f0315f3b65525b9caa9",
+  "design_status": "proposed",
+  "execution_model_hash": "sha256:6121a0636cb009c9cddf0fbd9fe945745ea50c666b57e072abc7e5ab71c6c2c6",
+  "format": "uarch-export-binding/1",
+  "hardware_spec_hash": "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9",
+  "kind": "uarch_projection",
+  "losses": [
+    {
+      "original": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "matrix-peak/1: clock_domains.core.freq_hz, cores.core_type.matrix_engine.macs_per_cycle.bf16, cores.grid.cols, cores.grid.rows",
+        "source": null,
+        "unit": "TFLOPS",
+        "value": 524.288
+      },
+      "path": "params.bf16_tflops",
+      "projected": {
+        "date": null,
+        "provenance": "stub",
+        "source": null,
+        "unit": "TFLOPS",
+        "value": 524.288
+      },
+      "reason": "stipulation_not_in_upstream"
+    },
+    {
+      "original": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "decimal-bandwidth/1: memory.dram.bw_bytes_per_s",
+        "source": null,
+        "unit": "TB/s",
+        "value": 1.0
+      },
+      "path": "params.hbm_bw",
+      "projected": {
+        "date": null,
+        "provenance": "stub",
+        "source": null,
+        "unit": "TB/s",
+        "value": 1.0
+      },
+      "reason": "stipulation_not_in_upstream"
+    },
+    {
+      "original": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "decimal-capacity/1: memory.dram.capacity_bytes",
+        "source": null,
+        "unit": "GB",
+        "value": 32.0
+      },
+      "path": "params.hbm_capacity",
+      "projected": {
+        "date": null,
+        "provenance": "stub",
+        "source": null,
+        "unit": "GB",
+        "value": 32.0
+      },
+      "reason": "stipulation_not_in_upstream"
+    },
+    {
+      "original": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "identity/1: tdp_w",
+        "source": null,
+        "unit": "W",
+        "value": 300.0
+      },
+      "path": "params.tdp",
+      "projected": {
+        "date": null,
+        "provenance": "stub",
+        "source": null,
+        "unit": "W",
+        "value": 300.0
+      },
+      "reason": "stipulation_not_in_upstream"
+    },
+    {
+      "original": {
+        "date": null,
+        "kind": "claim",
+        "provenance": "stub",
+        "rationale": null,
+        "source": null,
+        "unit": "ratio",
+        "value": 1.0
+      },
+      "path": "execution_model.value",
+      "projected": {
+        "date": null,
+        "provenance": "stub",
+        "source": null,
+        "unit": "ratio",
+        "value": 1.0
+      },
+      "reason": "strip_extensions_only"
+    }
+  ],
+  "primary_export_hash": "sha256:9fdbe8d7f9d1b05cd8f44ef5d893da73742ae3b5b2acc9bde4584f14a2771d23",
+  "projected_descriptor_bytes_sha256": "sha256:2ea53cfd0b039908f35e67cc21d658f634e714605cdbc8446e9708736bf738ea",
+  "projected_descriptor_content_hash": "sha256:72d507def6f3939cf3073aacf004258bdf63258af60a2fde48977e7f3a60468e",
+  "projection_recipe": "pinned-five-field-test-projection/1",
+  "supported_kv_storage": [
+    "bf16"
+  ],
+  "upstream_sha": "1e5706e0ebfcc67c1a7333079a35b75f693e9963"
+}

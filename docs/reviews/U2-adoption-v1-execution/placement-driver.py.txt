@@ -1,0 +1,33 @@
+from pathlib import Path
+import hashlib,json,shutil,datetime
+from scripts import vendor_rk as vr
+from tests.u2_refresh import audit_candidate,adoption_authority
+from uarch_contract.hashing import content_hash,verify_identity
+from uarch_contract.evidence import ReviewRecord
+root=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration');r=root/'docs/reviews';proposal=r/'U2-artifact-adoption-v1';candidate=r/'U2-real-generation-v1/candidate';target=root/f'contract/vendor/rk-sim@{vr.PIN}';stage=target.parent/'.u2-adoption-v1-stage';displaced=r/'U2-artifact-adoption-v1-displaced';receipt=r/'U2-adoption-v1-execution'
+def h(p):
+ with p.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
+assert h(proposal/'SHA256SUMS')=='e496a80ba057f34b65903a1f434010e34475ce2a490bbe3a619f1180ed2d7015'
+for line in (proposal/'SHA256SUMS').read_text().splitlines():
+ sha,path=line.split('  ',1);assert h(proposal/path)==sha,path
+plan=json.loads((proposal/'placement-plan.json').read_text());oldsha=plan['old_manifest_sha256'];newsha=plan['candidate_manifest_sha256']
+assert h(target/'MANIFEST.json')==oldsha and h(candidate/'MANIFEST.json')==newsha
+audit_candidate(candidate)
+for p in [stage,displaced,receipt]:assert not p.exists() and not p.is_symlink(),p
+receipt.mkdir();record={'decision_id':'U2-artifact-adoption-v1','decision':'accepted','decision_maker':'Javid (@jjaffari)','user_reply':'yes','reply_context':'Approve U2-artifact-adoption-v1 for candidate2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44; authorizes integration adoption and subsequent runtime checks; commit/push/closure separate.','recorded_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'old_manifest_sha256':oldsha,'new_manifest_sha256':newsha,'status':'approved; placement pending','publication_commit':None}
+(receipt/'acceptance-and-placement.json').write_text(json.dumps(record,indent=2)+'\n')
+review={'format':'uarch-evidence-review/1','reviewer':'Javid (@jjaffari)','independent':True,'decision':'accepted','rationale':'Javid explicitly approved U2-artifact-adoption-v1 after the human created/verified-identical pair and complete coordinator audit:864 retained rows unchanged,144 accepted H1 BF16 rows added,and four actual source-bound refusals. Administrative exact-artifact adoption only; no model-accuracy or final independent review verdict.','reviewed_subject_hashes':['sha256:'+newsha]}
+review['review_hash']=content_hash(review,exclude=('review_hash',));typed=ReviewRecord.model_validate(review);verify_identity(typed,'review_hash');reviewpath=receipt/'adoption-review.json';reviewpath.write_text(json.dumps(review,indent=2,sort_keys=True)+'\n');reviewsha=h(reviewpath)
+shutil.copytree(candidate,stage)
+def inventory(p):return {str(f.relative_to(p)):h(f) for f in p.rglob('*') if f.is_file()}
+newfiles=inventory(candidate);oldfiles=inventory(target);assert inventory(stage)==newfiles;assert inventory(proposal/'previous-adopted')==oldfiles
+# Preserve exact old canonical tree; no deletion or in-place artifact edits.
+target.rename(displaced)
+try:stage.rename(target)
+except BaseException:
+ displaced.rename(target)
+ raise
+assert inventory(target)==newfiles and inventory(displaced)==oldfiles
+checked=audit_candidate(target);adoption_authority(target,reviewpath,reviewsha)
+record.update(status='accepted and placed; exact bytes/strict audit/authority verified; real runtime checks pending',candidate_path=str(candidate),canonical_destination=str(target),displaced_old_snapshot=str(displaced),preserved_old_snapshot=plan['preserved_old_snapshot'],file_count=len(newfiles),old_file_count=len(oldfiles),adoption_review_path=str(reviewpath),adoption_review_sha256=reviewsha,raw_inspection=checked,commit_push_tag_closure_authorized=False)
+(receipt/'acceptance-and-placement.json').write_text(json.dumps(record,indent=2)+'\n');print(json.dumps(record,indent=2))

@@ -1,0 +1,54 @@
+from pathlib import Path
+import hashlib,json,shutil,subprocess,os,datetime
+from collections import Counter
+from scripts import vendor_rk as vr,u2_inputs as ui
+from tests.u2_refresh import audit_candidate
+base=Path('/home/jjaff/AI-infra-simulation');root=base/'rk-uarch-u2-integration';r=root/'docs/reviews';run=r/'U2-real-generation-v1';candidate=run/'candidate';old=ui.ADOPTED;f=r/'U2-source-input-freeze-v1';d=r/'U2-artifact-adoption-v1'
+def h(p):
+ with p.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
+assert not d.exists()
+expected_new='2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44';expected_old='b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d'
+assert h(candidate/'MANIFEST.json')==expected_new and h(old/'MANIFEST.json')==expected_old
+assert not (candidate/'SYNTHETIC-REFERENCE').exists()
+assert (run/'created.log').read_text().strip()==f'created: 48 files at {candidate}'
+assert (run/'verified-identical.log').read_text().strip()==f'verified-identical: 48 files at {candidate}'
+preflights=[json.loads((run/n).read_text()) for n in ['preflight.json','preflight-between.json','preflight-after.json']];assert preflights[0]==preflights[1]==preflights[2]
+assert preflights[0]['input_manifest_sha256']==h(f/'inputs/SHA256SUMS')=='81df43c063396c89bd3333f43957c71efc7087cfa65b2a401177f2227fca8898'
+assert h(f/'SHA256SUMS')=='38a57dc314aed099eae53a20362932354ba911ae3d400bfe152503017f8d22e6'
+for line in (f/'source-SHA256SUMS').read_text().splitlines():
+ digest,path=line.split('  ',1);assert h(root/path)==digest,path
+for line in (f/'SHA256SUMS').read_text().splitlines():
+ digest,path=line.split('  ',1);assert h(f/path)==digest,path
+strict=audit_candidate(candidate);assert strict==json.loads((run/'raw-inspection.json').read_text())
+diff=ui.compare_snapshots(old,candidate);assert diff==json.loads((run/'semantic-diff.json').read_text())
+rows=diff['rows'];assert rows['unchanged']==864 and len(rows['added'])==144 and rows['removed']==[] and rows['changed']==[]
+added=rows['added'];assert all(x['component_params_file']=='components/npu-l4.yaml' and x['precision']=={'compute':'bf16','kv_cache':'bf16'} for x in added)
+coverage=Counter((x['model_id'],x['tp'],x['query']['phase']) for x in added);assert len(coverage)==12 and set(coverage.values())=={12}
+oldref,newref=diff['refusals']['before'],diff['refusals']['after'];assert len(oldref)==2 and len(newref)==4
+for before in oldref:
+ after=next(x for x in newref if all(x[k]==before[k] for k in ['component_params_file','compute','kv_cache']));assert all(after[k]==v for k,v in before.items())
+assert {(x['component_params_file'],x['compute'],x['kv_cache']) for x in newref}=={('components/asic_placeholder.yaml','bf16','bf16'),('components/asic_placeholder.yaml','fp8','fp8'),('components/npu-l4.yaml','fp16','fp16'),('components/npu-l4.yaml','fp8','fp8')}
+for event in newref:
+ assert event['execution']=='refused' and event['exception']=='UnsupportedPrecision' and event['boundary']=='Accelerator.peak_op_per_s'
+ assert event['rk_sha']==vr.PIN and event['callable_source_sha256']==h(candidate/'rk/engine/f0/compute.py') and event['component_params_sha256']==h(candidate/event['component_params_file'])
+oldgen=json.loads((old/'GENERATOR.json').read_text());newgen=json.loads((candidate/'GENERATOR.json').read_text());assert oldgen['environment']==newgen['environment']==preflights[0]['environment_metadata']
+assert newgen['script_sha256']==h(root/'scripts/vendor_rk.py') and newgen['oracle_program_sha256']==hashlib.sha256(vr.ORACLE_PROGRAM.encode()).hexdigest()
+assert {k for k in newgen if newgen[k]!=oldgen[k]}=={'script_sha256','oracle_program_sha256'}
+assert all((f/'inputs'/p.relative_to(candidate/'u2-inputs')).read_bytes()==p.read_bytes() for p in (candidate/'u2-inputs').rglob('*') if p.is_file())
+pinned=[]
+for path in vr.SOURCES:
+ raw=subprocess.check_output(['git','-C',str(base/'rk-sim-u1-pin'),'show',f'{vr.PIN}:{path}']);assert raw==(candidate/path).read_bytes(),path;pinned.append(path)
+oldfiles={str(p.relative_to(old)):h(p) for p in old.rglob('*') if p.is_file()};newfiles={str(p.relative_to(candidate)):h(p) for p in candidate.rglob('*') if p.is_file()}
+assert not set(oldfiles)-set(newfiles)
+changed={p for p in oldfiles if oldfiles[p]!=newfiles[p]};assert changed=={'GENERATOR.json','MANIFEST.json','parity/fixtures.json','parity/refusals.json'}
+addedfiles=set(newfiles)-set(oldfiles);expectedadded={'components/npu-l4.yaml','rk/engine/f0/compute.py','rk/engine/orchestrator.py','rk/components/loader.py'}|{'u2-inputs/'+str(p.relative_to(f/'inputs')) for p in (f/'inputs').rglob('*') if p.is_file()};assert addedfiles==expectedadded
+# Reversible preservation only: canonical adopted path is not modified.
+d.mkdir();shutil.copytree(old,d/'previous-adopted')
+for p,sha in oldfiles.items():assert h(d/'previous-adopted'/p)==sha and h(old/p)==sha
+record={'status':'complete raw/semantic candidate audit passed; adoption pending explicit human approval','audited_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'old_manifest_sha256':expected_old,'candidate_manifest_sha256':expected_new,'source_manifest_sha256':h(f/'source-SHA256SUMS'),'input_manifest_sha256':h(f/'inputs/SHA256SUMS'),'human_generation_pair':{'created':h(run/'created.log'),'verified_identical':h(run/'verified-identical.log'),'all_three_preflights_identical':True,'wrapper_only_recovery_preserved':True},'raw_inspection':strict,'file_counts':{'old':len(oldfiles),'new':len(newfiles),'unchanged':len(oldfiles)-len(changed),'changed':len(changed),'added':len(addedfiles),'removed':0},'changed_files':sorted(changed),'added_files':sorted(addedfiles),'row_counts':{'retained_unchanged':864,'added_H1_BF16':144,'changed':0,'removed':0},'added_coverage':[{'model_id':model,'tp':tp,'phase':phase,'queries':count} for (model,tp,phase),count in sorted(coverage.items())],'refusals':{'old_outcomes_and_messages_unchanged':True,'all_four_actual_refusals_source_bound':True,'new_pairs':['npu-l4 FP16/FP16','npu-l4 FP8/FP8'],'new_metadata':['boundary','callable_source_sha256','component_params_sha256','execution','rk_sha']},'all_12_upstream_sources_match_git_objects':pinned,'environment_and_scopes_unchanged':True,'generator_metadata_only_changed_fields':sorted(k for k in newgen if newgen[k]!=oldgen[k]),'old_snapshot_preservation':str((d/'previous-adopted').relative_to(root)),'canonical_adopted_snapshot_unchanged':True,'actual_workload_against_real_candidate_executed':False,'adoption_executed':False,'publication_commit':None}
+(d/'audit.json').write_text(json.dumps(record,indent=2)+'\n')
+(d/'candidate-files-SHA256SUMS').write_text(''.join(f'{sha}  {p}\n' for p,sha in sorted(newfiles.items())))
+(d/'generation-evidence-SHA256SUMS').write_text(''.join(f'{h(p)}  {p.relative_to(root)}\n' for p in sorted(run.iterdir()) if p.is_file()))
+plan={'decision_id':'U2-artifact-adoption-v1','status':'PROPOSED, human acceptance pending','old_manifest_sha256':expected_old,'candidate_manifest_sha256':expected_new,'candidate_path':str(candidate),'canonical_destination':str(old),'preserved_old_snapshot':str(d/'previous-adopted'),'reason':'Complete U2 artifact refresh for accepted H1 BF16/precision matrix and source-bound direct refusal capture; no changes to864 retained oracle rows.','after_explicit_acceptance':['Record Javid acceptance of this exact candidate and placement.','Create the existing separate ReviewRecord with Javid as reviewer, accepted decision and this exact raw manifest as sole subject; calculate and record review-file digest.','Reverify old/new/full freeze identities; stage an exact complete copy adjacent to destination; preserve displaced old tree and replace canonical snapshot without editing generated files.','Verify canonical raw manifest/all bytes and strict checks; run committed-snapshot gates and real adopted consumer checks as a separate explicitly reported step.'],'runtime_review_record_created':False,'commit_push_tag_closure_authorized':False,'frozen_sources_changed':False}
+(d/'placement-plan.json').write_text(json.dumps(plan,indent=2)+'\n')
+print(json.dumps({k:record[k] for k in ['status','file_counts','row_counts','refusals','environment_and_scopes_unchanged','candidate_manifest_sha256','adoption_executed']},indent=2))

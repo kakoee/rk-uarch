@@ -1,0 +1,46 @@
+{
+  "classification": "independent_B_test_specification",
+  "runtime_status": "pending A1 APIs and B implementation",
+  "cases": [
+    {
+      "id": "B01",
+      "setup": "All hardware contributors stipulated; model only L2.",
+      "expected": "claim summary null; model stub; final stub; conditions retained."
+    },
+    {
+      "id": "B02",
+      "setup": "All stipulated; synthetic matching complete L3 count evidence, no band.",
+      "expected": "model estimated; claim summary null; final estimated; band unknown."
+    },
+    {
+      "id": "B03",
+      "setup": "B02 plus real stub bandwidth actually used by requested metric.",
+      "expected": "final stub; stipulations cannot cancel a real claim."
+    },
+    {
+      "id": "B04",
+      "setup": "Proposed design and otherwise matching target L4.",
+      "expected": "final capped estimated."
+    },
+    {
+      "id": "B05",
+      "setup": "Reference design, measured claims and matching target L4.",
+      "expected": "measured only within full covered scope."
+    },
+    {
+      "id": "B06",
+      "setup": "No model or hardware contributors.",
+      "expected": "total-empty stub, default hidden and opt-in ineligible."
+    },
+    {
+      "id": "B07",
+      "setup": "L3 exists for another model/purpose/scope.",
+      "expected": "stub; no spec_derived model rung."
+    },
+    {
+      "id": "B08",
+      "setup": "Generate finite claim sets and eligible model rungs over the badge lattice, with arbitrary stipulated leaves and proposed/reference status.",
+      "expected": "badge never exceeds worst actual claim or model, never exceeds estimated for proposed; adding/removing a stipulation changes conditions only."
+    }
+  ]
+}

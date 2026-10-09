@@ -1,0 +1,22 @@
+{
+  "status": "accepted by Javid",
+  "recorded_at_utc": "2026-10-09T05:26:44.473797+00:00",
+  "applies": "U2 from this instruction onward; transition after current B AD-C2 correction returns",
+  "steps": [
+    "Reconcile the current B correction without copying its entire checkpoint tree.",
+    "Prepare exact local commit contents for human review on existing A, B and integration branches.",
+    "Commit only the checkpoints whose exact contents Javid approves; pushing remains separate.",
+    "Use Git diffs and commit IDs for subsequent reviews.",
+    "Keep manifests only where needed for generated-artifact provenance and reproducibility; stop whole checkpoint-tree copies."
+  ],
+  "preserve": [
+    "existing A, B and integration worktrees through verified publication",
+    "existing snapshots and historical evidence; cleanup is a separate decision",
+    "main as publication branch; tested approved result and final tag at closure",
+    "separate commit, push, artifact adoption and closure decisions"
+  ],
+  "current_B_task": "U2-AD-C2-decision-v1 option A remains accepted; no need to restart B. A full changed-path manifest already prepared by B may be received and verified, but must not trigger another complete snapshot copy.",
+  "commit_preparation": "Review actual diff, inherited A/B bytes, deletions and untracked outputs; do not blindly commit the accumulated archive or treat old blanket path lists as approval. Explicitly identify included and deferred paths, dependencies and validation.",
+  "authorization_boundary": "This approves the workflow, not any as-yet-unreviewed commit contents, push, PR, cleanup or source change.",
+  "bookkeeping_transition": "Maintain the existing coordinator index only to keep current records consistent until reviewed Git checkpoints exist; do not create another version-tracking system or full-tree inventory."
+}

@@ -33,9 +33,10 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | Commit the accepted closeout, push and verify CI, then create/publish `u01-end` as separate steps; U2 kickoff follows |
-| **In progress** | U1 closeout: **G1 APPROVED and closeout ACCEPTED by Javid on 2026-10-07**, including U0020; implementation `44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e` is published and validated; closeout publication/tag pending |
-| **Not started** | U2–U11 |
+| **Next** | AD-C2 reconciled; integration1015pass with lint and offline wheel resource/loader validation passed; exact local A/B/integration Git checkpoint proposals under review; real report/final exits pending |
+| **U1 done** | G1 and closeout accepted by Javid, including U0020; published annotated `u01-end` resolves to `1e9e794a84c5173812c23a1cf2fc04b85e6f6831`; same-commit closeout CI passed |
+| **In progress** | U2 shared baseline accepted by Javid for both lanes; implementation handoffs prepared. U0021 host approval retained; no U2 runtime exit or publication claimed |
+| **Not started** | U3–U11 |
 | **Paused** | The `nightly` workflow's schedule (2026-10-03): no self-hosted runner yet. Re-enable it when U3 starts (U3, "Before it starts") |
 
 Update this block and `docs/how-it-works.md` at every sprint boundary.
@@ -48,8 +49,24 @@ See the [U1 closeout](reviews/U1-closeout.md) for publication and durable valida
 U1-only substitution of fresh ElfinKidsLaptop Ubuntu/WSL2 validation plus same-commit hosted
 Ubuntu CI for the separate Linux-box check. Later runner/hardware/performance-host requirements
 are unchanged. Javid approved G1 and accepted the complete closeout, including U0020, on
-2026-10-07. The approval is recorded in the closeout; commit, push and tagging remain
-separate pending steps.
+2026-10-07. The approval is recorded in the closeout. Read-only remote verification on 2026-10-07
+confirmed the published closeout and annotated tag, plus successful
+[closeout CI](https://github.com/kakoee/rk-uarch/actions/runs/37588171798) on the exact tagged
+commit. Historical pending wording in U1 evidence is retained as history. See the
+[U2 kickoff record](reviews/U2-orchestration-kickoff.md) for verified identities, isolated
+worktrees, ownership, carry-forward obligations and bounded worker prompts.
+[U0021](decisions/U0021-u2-cold-clone-validation-exception.md) records Javid's newly approved
+U2-only WSL2 fresh GitHub clone plus same-published-commit hosted Ubuntu CI exception.
+U0020 is unchanged; later Linux-host, runner and hardware requirements are not waived.
+
+**U2 publication workflow:** keep the A, B and integration worktrees isolated and their
+development branches local. Main remains the publication branch; no development-branch
+push or mandatory PR workflow without discussion with Javid. Prepare reviewed local
+checkpoints, keeping commit and push separate; uncommitted files are not protected by branch
+history. Integrate the tested, approved result onto main and tag the approved main revision
+at closure. Preserve worker worktrees until publication is verified. The
+[kickoff sequence](reviews/U2-orchestration-kickoff.md#local-checkpoints-integration-and-publication)
+explains each transfer and validation step.
 
 **U1 pin update, 2026-10-04:** Javid (@jjaffari) approved advancing from `11bb530` to
 `1e5706e` before implementation. The seven intervening commits leave `rk/schema/`,
@@ -158,11 +175,11 @@ existing interfaces.
 | | |
 |---|---|
 | **Goal** | A hashed table end to end, whose every number says what it may claim |
-| **Lane A** | U0003 schema/identity prerequisite; four hardware specs, `derive_rk_params`, standalone versioned workload preparation with FLOP parity/paged KV, prepared bundle export/import, U-C0 over resolved operators, minimal table path and existing CLI → **U-P3** |
-| **Lane B** | Badges (claims, stipulations, the model as contributor, the ceiling), model cards, applicability over the full scope vector, `uarch report` through `badged()` with diagnostics and a per-op roofline → **U-P4** |
-| **Joint exit criterion** | `uarch table hw/designs/npu-l4.yaml … --engine analytic` → `uarch report` shows "conditional · N stipulations", "error: unknown", "not modelled" for null diagnostics, composite C0 · U-C0 aggregate = rk-sim C0 within ±0.1% on every parity fixture, each fed that fixture's own component params · the graph is one rank of a tp-way split, with attention fused · `uarch characterize` runs on the demo request · local preparation exports a bundle whose analytic replay is byte-identical with the producer disabled; imported supported fixtures run without rk-sim/compiler; input mismatches and stale hashes fail |
-| **Effort** | Original baseline A 41 · B 35; re-estimate prepare/replay work at U0003 before scheduling (§7 has the unamended baseline) |
-| **Depends on** | G1; settle U0003's concrete prepared-input and any public contract revision before the two lane implementations diverge |
+| **Lane A** | Accepted U0003 schema/identity; consume B-owned hardware specs, `derive_rk_params`, standalone versioned physical preparation with independent correctness/paged KV and test-only nominal compatibility, prepared bundle export/import, U-C0 over resolved operators, minimal table path and existing CLI → **U-P3** |
+| **Lane B** | Four hardware specs and sourcing; badges (claims, stipulations, the model as contributor, the ceiling), model cards, applicability over the full scope vector, `uarch report` through `badged()` with diagnostics and a per-op roofline → **U-P4** |
+| **Joint exit criterion** | `uarch table hw/designs/npu-l4.yaml … --engine analytic` → `uarch report` defaults to hidden STUB magnitudes (explicit labelled prediction opt-in), shows "conditional · N stipulations", "error: unknown", "not modelled" for null diagnostics, composite C0 · test-only nominal candidate = stored rk-sim duration within ±0.1% for every adopted fixture using its own params/model; unchanged nominal count budgets; independent physical shape/count/timing correctness and complete bound physical discrepancies; no physical full-workload duration validation claim · the graph is one rank of a tp-way split, with attention fused · `uarch characterize` runs on the demo request · local preparation exports a bundle whose analytic replay is byte-identical with the producer disabled; imported supported fixtures run without rk-sim/compiler; input mismatches and stale hashes fail |
+| **Effort** | Accepted conditional range A 140–222 · B 100–154 · independent review 16–24 = 256–400 engineering hours; human waits separate (§7 remains historical) |
+| **Depends on** | G1 and U0003 acceptance-v1 complete as prerequisites; implement the exact common baseline, with A2 runtime interfaces, reference readiness and artifact decisions still outstanding |
 | **Not in this sprint** | Fork; native; interpolation; detailed tiling/mapping policies; compiler or rk-sim exporter |
 
 ### U3 · The fork
@@ -303,7 +320,9 @@ This is part of U2's exit, not a new claim of accuracy or a dependency on rk-sim
 before measuring:
 - (a) the fork builds unattended in the container;
 - (b) three runs are byte-identical;
-- (c) decode matrix-op parity is within 0.5% after named deviations, with no deviation above 5%;
+- (c) decode matrix counts exactly match independent integer expectations for the same prepared
+  physical work at B={1,8,32}, context/seq={512,4096}, tp={1,8}, declared precisions; missing
+  work fails, no adjustment. Separate nominal compatibility cannot discharge this gate;
 - (d) per-point wall-clock is within the budget;
 - (e) every linked licence is permissive.
 
@@ -586,3 +605,32 @@ These costs are listed as facts, not as constraints. Prices were checked on 2026
 
 *Companion documents: `docs/build-spec.md` (architecture, contract, layout, conventions, prompt
 texts) · `rk-uarch-track-verdict-and-plan.md` in the Project (research and reasoning).*
+
+U0003 S replaces the physical nominal-parity subject, not its evidence by implication. The
+accepted U0021 host arrangement remains; its check-scope addendum names both tracks,
+complete discrepancy inventory, null policy and contributor-safe display tests. Historic
+nominal inputs, A-F12, oracle lifecycle, U3 runners and later silicon work remain required.
+
+Current U2 authority: [accepted decision](reviews/U2-U0003-acceptance-record.md) and
+[common baseline](reviews/U2-common-baseline-v1.md). Accepted S replaces the old physical
+nominal-parity gates; it does not claim they passed. All runtime exits remain outstanding.
+
+B1 input decision accepted: [U0004/H1/H2 and draft-only references](reviews/U2-B1-acceptance-record.md).
+The [frozen B1 addition](reviews/U2-common-baseline-b1-addendum.md) supplements unchanged
+baseline v1. Input acceptance is not physical validation or a completed B-F16 exit.
+
+Corrected A1 checkpoint: [coordinator recheck](reviews/U2-A1-coordinator-recheck.md).
+Shared interfaces are reconciled; A2/B2 handoffs are prepared. Remaining runtime,
+artifact, independent-review and publication checks are not completed by this checkpoint.
+
+B2 intermediate intake: [coordinator review](reviews/U2-B2-coordinator-review.md).
+One source-scope correction precedes active B2 integration. Declared A2/report/tooling
+dependencies remain open; the generator fingerprint gate has not been waived.
+
+Corrected B2: [recheck and partial integration](reviews/U2-B2-coordinator-recheck.md).
+B2-C1 is resolved; the integrated generator fingerprint gate still fails. Exact
+proof/energy protocol, A2-dependent runtime/report checks and tooling freeze remain pending.
+
+A2 interfaces: [coordinator reconciliation](reviews/U2-A2-coordinator-reconciliation.md).
+Delivered to B; standalone production and full runtime exits remain pending. B
+consumer input-kind mismatch and the generator fingerprint gate remain explicit.

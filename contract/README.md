@@ -17,3 +17,12 @@ CharacterizationRequest, the UarchCostTable, the ModelCard, hashing and the erro
 ## After integration
 rk-sim adopts this contract into rk/schema/characterization.py (rk-sim P18's boundary ADR).
 From then on rk-sim is the source of truth and this directory vendors it back.
+
+U0003 S boundary: physical-resolved runs authoritative prepared work and has independent
+correctness/replay tests plus complete physical-versus-nominal discrepancy reports. The
+separately identified nominal-rk-compatibility candidate is test-only; its unchanged count
+and stored-duration thresholds replace the former physical nominal-parity gate explicitly.
+Report inputs include complete comparison/evidence/registry/recipe closure. Default STUB
+magnitudes are hidden; explicit finite-prediction opt-in requires complete contributors and
+visible unvalidated labels on every surface. No live timestamps, null-as-zero or ambient
+artifact lookup. Exported extended hardware truth and five-field test projections are distinct.

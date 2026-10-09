@@ -1,0 +1,13 @@
+# Uarch evidence report
+{% for label, entries in sections %}
+## {{ label }}
+
+{% for label, metric in entries %}**{{ label }}**: {{ metric.text }}
+
+{% endfor %}{% endfor %}
+## Captured per-op roofline
+
+Isolated per-op roofline estimates; durations do not add to aggregate latency.
+
+{% for plot in plots %}{{ plot.markdown }}
+{% endfor %}

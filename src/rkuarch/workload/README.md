@@ -9,8 +9,8 @@ operations. Layer reuse must be declared in
 the graph, and its error is measured by table/. KV is read in pages of the request's
 block_size_tokens. MoE is active-parameter dense-equivalent only. `omissions` lists routing,
 imbalance, all-to-all, host/runtime time, address translation, coherence and mixed
-prefill/decode iterations; they become table warnings. FLOP parity against rk-sim's own counts
-runs on every change; every deviation above 0.5% has a name and a reason in deviations.py.
+prefill/decode iterations; they become table warnings. Independent physical correctness/discrepancy tests and separate nominal compatibility run
+on every change; no nominal pass is claimed as physical parity.
 `uarch characterize` reports FLOPs, bytes, operational intensity and shape regime per op
 across the grid; L3 suites and workload suites pick shapes from it.
 
@@ -19,3 +19,12 @@ and loader of prepared OpSpec graphs. Engines receive its resolved output. A sup
 rank-local graph bypasses model expansion and sharding; validate its identity, supported
 scope, precision, dependencies and omissions. Keep the high-level convenience path usable
 without rk-sim or a compiler. U-P3 adds export/import/replay; no second workload IR is added.
+
+U0003 S boundary: physical-resolved runs authoritative prepared work and has independent
+correctness/replay tests plus complete physical-versus-nominal discrepancy reports. The
+separately identified nominal-rk-compatibility candidate is test-only; its unchanged count
+and stored-duration thresholds replace the former physical nominal-parity gate explicitly.
+Report inputs include complete comparison/evidence/registry/recipe closure. Default STUB
+magnitudes are hidden; explicit finite-prediction opt-in requires complete contributors and
+visible unvalidated labels on every surface. No live timestamps, null-as-zero or ambient
+artifact lookup. Exported extended hardware truth and five-field test projections are distinct.

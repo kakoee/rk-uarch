@@ -1,0 +1,183 @@
+{
+  "status": "complete raw/semantic candidate audit passed; adoption pending explicit human approval",
+  "audited_at_utc": "2026-10-09T04:26:06.188055+00:00",
+  "old_manifest_sha256": "b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d",
+  "candidate_manifest_sha256": "2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44",
+  "source_manifest_sha256": "8457d0607baf0af08c0b6d1c6eead00e141e778f6fd501d8869d9ae5eaadf443",
+  "input_manifest_sha256": "81df43c063396c89bd3333f43957c71efc7087cfa65b2a401177f2227fca8898",
+  "human_generation_pair": {
+    "created": "4600af4f6276705ef1f199d4324bcae10064a8a75e71b6eaccace770e062220b",
+    "verified_identical": "86690075d70e54ca5d8361d3b2c9c78d94bb535cc03ab195648d4f4e6c172691",
+    "all_three_preflights_identical": true,
+    "wrapper_only_recovery_preserved": true
+  },
+  "raw_inspection": {
+    "adopted": false,
+    "rows": 1008,
+    "manifest_sha256": "sha256:2d15afd7dd80124f70d387bc7cde4addda29162cd49370d40da7b99830709b44",
+    "input_manifest_sha256": "81df43c063396c89bd3333f43957c71efc7087cfa65b2a401177f2227fca8898"
+  },
+  "file_counts": {
+    "old": 20,
+    "new": 48,
+    "unchanged": 16,
+    "changed": 4,
+    "added": 28,
+    "removed": 0
+  },
+  "changed_files": [
+    "GENERATOR.json",
+    "MANIFEST.json",
+    "parity/fixtures.json",
+    "parity/refusals.json"
+  ],
+  "added_files": [
+    "components/npu-l4.yaml",
+    "rk/components/loader.py",
+    "rk/engine/f0/compute.py",
+    "rk/engine/orchestrator.py",
+    "u2-inputs/ADOPTED-MANIFEST-SHA256",
+    "u2-inputs/PIN",
+    "u2-inputs/SHA256SUMS",
+    "u2-inputs/artifacts/0d5c37cec972743e9c77bfdc55524e71bff17af3c50c72d5b3a16ddfeabd08b8.json",
+    "u2-inputs/artifacts/33ba3f04456759288fab1b5dac9c211f368058f4d1c1cbeec4c8709e2e9fdb8b.json",
+    "u2-inputs/artifacts/429ea7ce186a5dee620f98ef4e5ce8172cce841511b46f0315f3b65525b9caa9.json",
+    "u2-inputs/artifacts/5ea5435437df7c896b5cd424e3f6227ec49433ad37f65dbf2381965d342b6bbe.json",
+    "u2-inputs/artifacts/6121a0636cb009c9cddf0fbd9fe945745ea50c666b57e072abc7e5ab71c6c2c6.json",
+    "u2-inputs/artifacts/9fdbe8d7f9d1b05cd8f44ef5d893da73742ae3b5b2acc9bde4584f14a2771d23.json",
+    "u2-inputs/artifacts/bd096f8c2b3dfb42be1dd33d876b4ea3ff773e86a902f948d8127458c9371699.json",
+    "u2-inputs/component-precisions.json",
+    "u2-inputs/components/asic_placeholder.yaml",
+    "u2-inputs/components/npu-l4.yaml",
+    "u2-inputs/components/nvidia_h100_sxm.yaml",
+    "u2-inputs/historical-source/MANIFEST.json",
+    "u2-inputs/historical-source/components/asic_placeholder.yaml",
+    "u2-inputs/historical-source/components/nvidia_h100_sxm.yaml",
+    "u2-inputs/historical-source/model_shapes/llama-3.1-70b.json",
+    "u2-inputs/historical-source/model_shapes/llama-3.1-8b.json",
+    "u2-inputs/historical-source/model_shapes/mixtral-8x7b.json",
+    "u2-inputs/model_shapes/llama-3.1-70b.json",
+    "u2-inputs/model_shapes/llama-3.1-8b.json",
+    "u2-inputs/model_shapes/mixtral-8x7b.json",
+    "u2-inputs/support-files.json"
+  ],
+  "row_counts": {
+    "retained_unchanged": 864,
+    "added_H1_BF16": 144,
+    "changed": 0,
+    "removed": 0
+  },
+  "added_coverage": [
+    {
+      "model_id": "llama-3.1-70b",
+      "tp": 1,
+      "phase": "decode",
+      "queries": 12
+    },
+    {
+      "model_id": "llama-3.1-70b",
+      "tp": 1,
+      "phase": "prefill",
+      "queries": 12
+    },
+    {
+      "model_id": "llama-3.1-70b",
+      "tp": 8,
+      "phase": "decode",
+      "queries": 12
+    },
+    {
+      "model_id": "llama-3.1-70b",
+      "tp": 8,
+      "phase": "prefill",
+      "queries": 12
+    },
+    {
+      "model_id": "llama-3.1-8b",
+      "tp": 1,
+      "phase": "decode",
+      "queries": 12
+    },
+    {
+      "model_id": "llama-3.1-8b",
+      "tp": 1,
+      "phase": "prefill",
+      "queries": 12
+    },
+    {
+      "model_id": "llama-3.1-8b",
+      "tp": 8,
+      "phase": "decode",
+      "queries": 12
+    },
+    {
+      "model_id": "llama-3.1-8b",
+      "tp": 8,
+      "phase": "prefill",
+      "queries": 12
+    },
+    {
+      "model_id": "mixtral-8x7b",
+      "tp": 1,
+      "phase": "decode",
+      "queries": 12
+    },
+    {
+      "model_id": "mixtral-8x7b",
+      "tp": 1,
+      "phase": "prefill",
+      "queries": 12
+    },
+    {
+      "model_id": "mixtral-8x7b",
+      "tp": 8,
+      "phase": "decode",
+      "queries": 12
+    },
+    {
+      "model_id": "mixtral-8x7b",
+      "tp": 8,
+      "phase": "prefill",
+      "queries": 12
+    }
+  ],
+  "refusals": {
+    "old_outcomes_and_messages_unchanged": true,
+    "all_four_actual_refusals_source_bound": true,
+    "new_pairs": [
+      "npu-l4 FP16/FP16",
+      "npu-l4 FP8/FP8"
+    ],
+    "new_metadata": [
+      "boundary",
+      "callable_source_sha256",
+      "component_params_sha256",
+      "execution",
+      "rk_sha"
+    ]
+  },
+  "all_12_upstream_sources_match_git_objects": [
+    "rk/provenance.py",
+    "rk/engine/f0/compute.py",
+    "rk/engine/orchestrator.py",
+    "rk/components/loader.py",
+    "rk/schema/fidelity.py",
+    "rk/schema/channels.py",
+    "rk/schema/execution.py",
+    "rk/schema/workloads.py",
+    "rk/schema/agentic.py",
+    "rk/schema/hashing.py",
+    "rk/schema/traces.py",
+    "rk/schema/versions.py"
+  ],
+  "environment_and_scopes_unchanged": true,
+  "generator_metadata_only_changed_fields": [
+    "oracle_program_sha256",
+    "script_sha256"
+  ],
+  "old_snapshot_preservation": "docs/reviews/U2-artifact-adoption-v1/previous-adopted",
+  "canonical_adopted_snapshot_unchanged": true,
+  "actual_workload_against_real_candidate_executed": false,
+  "adoption_executed": false,
+  "publication_commit": null
+}
