@@ -1,0 +1,338 @@
+{
+  "$defs": {
+    "ComparisonDeviation": {
+      "additionalProperties": false,
+      "properties": {
+        "deviation_rel": {
+          "ge": -0.05,
+          "le": 0.05,
+          "title": "Deviation Rel",
+          "type": "number"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "deviation_rel",
+        "id",
+        "reason"
+      ],
+      "title": "ComparisonDeviation",
+      "type": "object"
+    },
+    "ProducedValue": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_hash": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "source_pointer": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "value": {
+                "minimum": 0,
+                "type": "number"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "conversion": {
+          "enum": [
+            "identity",
+            "ps_to_seconds"
+          ],
+          "title": "Conversion",
+          "type": "string"
+        },
+        "source_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Hash"
+        },
+        "source_pointer": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Pointer"
+        },
+        "state": {
+          "enum": [
+            "known",
+            "unmodelled",
+            "not_produced"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "ge": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "conversion",
+        "source_hash",
+        "source_pointer",
+        "state",
+        "value"
+      ],
+      "title": "ProducedValue",
+      "type": "object"
+    },
+    "ReferenceValue": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "positive"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "zero"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "absent"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "positive",
+            "zero",
+            "null",
+            "absent"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "ge": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "title": "ReferenceValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "absolute_adjustment_rel": {
+      "ge": 0,
+      "title": "Absolute Adjustment Rel",
+      "type": "number"
+    },
+    "actual": {
+      "$ref": "#/$defs/ProducedValue"
+    },
+    "channel": {
+      "enum": [
+        "matrix_ops",
+        "vector_ops",
+        "memory_read_bytes",
+        "memory_write_bytes",
+        "duration_s"
+      ],
+      "title": "Channel",
+      "type": "string"
+    },
+    "declared_deviations": {
+      "items": {
+        "$ref": "#/$defs/ComparisonDeviation"
+      },
+      "minItems": 0,
+      "title": "Declared Deviations",
+      "type": "array"
+    },
+    "outcome": {
+      "enum": [
+        "passed",
+        "failed",
+        "unassessed",
+        "refused",
+        "execution_failed",
+        "modelled_absence"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "raw_rel": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Raw Rel"
+    },
+    "reason": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Reason",
+      "type": "string"
+    },
+    "reference": {
+      "$ref": "#/$defs/ReferenceValue"
+    },
+    "residual_rel": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Residual Rel"
+    },
+    "signed_adjustment_rel": {
+      "title": "Signed Adjustment Rel",
+      "type": "number"
+    },
+    "unit": {
+      "enum": [
+        "op",
+        "byte",
+        "s"
+      ],
+      "title": "Unit",
+      "type": "string"
+    }
+  },
+  "required": [
+    "absolute_adjustment_rel",
+    "actual",
+    "channel",
+    "declared_deviations",
+    "outcome",
+    "raw_rel",
+    "reason",
+    "reference",
+    "residual_rel",
+    "signed_adjustment_rel",
+    "unit"
+  ],
+  "title": "ComparisonChannel",
+  "type": "object"
+}

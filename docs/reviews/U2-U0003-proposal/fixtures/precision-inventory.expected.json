@@ -1,0 +1,41 @@
+{
+  "classification": "proposed future matrix; synthetic npu-l4 fixture is not generated evidence",
+  "duplicate_pairs": "schema refusal",
+  "new_npu_l4_bf16_bf16_records": 144,
+  "no_fake_upstream_spec_hashes": true,
+  "optional_bf16_fp8_records": 144,
+  "pairs_require_explicit_fields": true,
+  "refusals": [
+    {
+      "boundary": "direct Accelerator.peak_op_per_s",
+      "component": "asic_placeholder.yaml",
+      "compute": "bf16",
+      "error": "UnsupportedPrecision",
+      "kv_cache": "bf16"
+    },
+    {
+      "boundary": "direct Accelerator.peak_op_per_s",
+      "component": "asic_placeholder.yaml",
+      "compute": "fp8",
+      "error": "UnsupportedPrecision",
+      "kv_cache": "fp8"
+    },
+    {
+      "boundary": "direct Accelerator.peak_op_per_s",
+      "component": "npu-l4.yaml",
+      "compute": "fp16",
+      "error": "UnsupportedPrecision",
+      "kv_cache": "fp16"
+    },
+    {
+      "boundary": "direct Accelerator.peak_op_per_s",
+      "component": "npu-l4.yaml",
+      "compute": "fp8",
+      "error": "UnsupportedPrecision",
+      "kv_cache": "fp8"
+    }
+  ],
+  "retained_records": 864,
+  "total_refusals": 4,
+  "total_success_records": 1008
+}

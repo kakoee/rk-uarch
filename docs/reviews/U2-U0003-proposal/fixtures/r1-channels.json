@@ -1,0 +1,206 @@
+{
+  "cases": [
+    {
+      "case_id": "zero-zero",
+      "channel": {
+        "absolute_adjustment_rel": 0.0,
+        "actual": {
+          "conversion": "identity",
+          "source_hash": "sha256:9e68b113e7e379c9e08dfa260280fb03ca0dee151e8d0c7c3acedae99d213cf2",
+          "source_pointer": "/zero",
+          "state": "known",
+          "value": 0
+        },
+        "channel": "matrix_ops",
+        "declared_deviations": [],
+        "outcome": "passed",
+        "raw_rel": null,
+        "reason": "Synthetic isolated channel case: zero-zero",
+        "reference": {
+          "state": "zero",
+          "value": 0
+        },
+        "residual_rel": null,
+        "signed_adjustment_rel": 0.0,
+        "unit": "op"
+      },
+      "expected": {
+        "actual": {
+          "state": "known",
+          "value": 0
+        },
+        "execution": "executed",
+        "fixture_outcome": "passed",
+        "gate_obligation": "satisfied",
+        "id": "zero-zero",
+        "outcome": "passed",
+        "reference": {
+          "state": "zero",
+          "value": 0
+        }
+      }
+    },
+    {
+      "case_id": "known-reference-unavailable",
+      "channel": {
+        "absolute_adjustment_rel": 0.0,
+        "actual": {
+          "conversion": "identity",
+          "source_hash": null,
+          "source_pointer": null,
+          "state": "not_produced",
+          "value": null
+        },
+        "channel": "matrix_ops",
+        "declared_deviations": [],
+        "outcome": "unassessed",
+        "raw_rel": null,
+        "reason": "Synthetic isolated channel case: known-reference-unavailable",
+        "reference": {
+          "state": "positive",
+          "value": 1000
+        },
+        "residual_rel": null,
+        "signed_adjustment_rel": 0.0,
+        "unit": "op"
+      },
+      "expected": {
+        "actual": {
+          "state": "not_produced",
+          "value": null
+        },
+        "execution": "executed",
+        "fixture_outcome": "unassessed",
+        "gate_obligation": "failed",
+        "id": "known-reference-unavailable",
+        "outcome": "unassessed",
+        "physical_record": "complete with attempted execution and reason",
+        "reference": {
+          "state": "positive",
+          "value": 1000
+        }
+      }
+    },
+    {
+      "case_id": "null-known",
+      "channel": {
+        "absolute_adjustment_rel": 0.0,
+        "actual": {
+          "conversion": "identity",
+          "source_hash": "sha256:9e68b113e7e379c9e08dfa260280fb03ca0dee151e8d0c7c3acedae99d213cf2",
+          "source_pointer": "/null-known",
+          "state": "known",
+          "value": 288
+        },
+        "channel": "matrix_ops",
+        "declared_deviations": [],
+        "outcome": "unassessed",
+        "raw_rel": null,
+        "reason": "Synthetic isolated channel case: null-known",
+        "reference": {
+          "state": "null",
+          "value": null
+        },
+        "residual_rel": null,
+        "signed_adjustment_rel": 0.0,
+        "unit": "op"
+      },
+      "expected": {
+        "actual": {
+          "state": "known",
+          "value": 288
+        },
+        "execution": "executed",
+        "fixture_outcome": "unassessed",
+        "gate_obligation": "excluded-reference only; actual retained",
+        "id": "null-known",
+        "outcome": "unassessed",
+        "reference": {
+          "state": "null",
+          "value": null
+        }
+      }
+    },
+    {
+      "case_id": "absent-known",
+      "channel": {
+        "absolute_adjustment_rel": 0.0,
+        "actual": {
+          "conversion": "identity",
+          "source_hash": "sha256:9e68b113e7e379c9e08dfa260280fb03ca0dee151e8d0c7c3acedae99d213cf2",
+          "source_pointer": "/absent-known",
+          "state": "known",
+          "value": 572
+        },
+        "channel": "matrix_ops",
+        "declared_deviations": [],
+        "outcome": "unassessed",
+        "raw_rel": null,
+        "reason": "Synthetic isolated channel case: absent-known",
+        "reference": {
+          "state": "absent",
+          "value": null
+        },
+        "residual_rel": null,
+        "signed_adjustment_rel": 0.0,
+        "unit": "op"
+      },
+      "expected": {
+        "actual": {
+          "state": "known",
+          "value": 572
+        },
+        "execution": "executed",
+        "fixture_outcome": "unassessed",
+        "gate_obligation": "excluded-reference only; actual retained",
+        "id": "absent-known",
+        "outcome": "unassessed",
+        "reference": {
+          "state": "absent",
+          "value": null
+        }
+      }
+    },
+    {
+      "case_id": "nominal-omission",
+      "channel": {
+        "absolute_adjustment_rel": 0.0,
+        "actual": {
+          "conversion": "identity",
+          "source_hash": null,
+          "source_pointer": null,
+          "state": "unmodelled",
+          "value": null
+        },
+        "channel": "matrix_ops",
+        "declared_deviations": [],
+        "outcome": "modelled_absence",
+        "raw_rel": null,
+        "reason": "Synthetic isolated channel case: nominal-omission",
+        "reference": {
+          "state": "null",
+          "value": null
+        },
+        "residual_rel": null,
+        "signed_adjustment_rel": 0.0,
+        "unit": "op"
+      },
+      "expected": {
+        "actual": {
+          "state": "unmodelled",
+          "value": null
+        },
+        "execution": "executed",
+        "fixture_outcome": "unassessed",
+        "gate_obligation": "satisfied only for declared nominal omission",
+        "id": "nominal-omission",
+        "outcome": "modelled_absence",
+        "reference": {
+          "state": "null",
+          "value": null
+        }
+      }
+    }
+  ],
+  "classification": "schema-valid isolated ComparisonChannel cases; independent inputs, no engine executed"
+}

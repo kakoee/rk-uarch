@@ -1,0 +1,241 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "bf16_tflops": 1.024,
+        "claim_badge": "stub",
+        "conditional_paths": [
+          "clock_domains.core.freq_hz",
+          "cores.grid.cols"
+        ],
+        "kind": "stipulation",
+        "model_L0_L2_badge": "stub"
+      },
+      "id": "mixed-claim-stipulation",
+      "inputs": {
+        "clock_domains.core.freq_hz": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic target frequency",
+          "source": null,
+          "unit": "Hz",
+          "value": 1000000000.0
+        },
+        "cores.core_type.matrix_engine.macs_per_cycle.bf16": {
+          "date": null,
+          "kind": "claim",
+          "provenance": "stub",
+          "rationale": null,
+          "source": null,
+          "unit": "MAC/cycle",
+          "value": 128
+        },
+        "cores.grid.cols": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic grid",
+          "source": null,
+          "unit": "count",
+          "value": 2
+        },
+        "cores.grid.rows": {
+          "date": null,
+          "kind": "claim",
+          "provenance": "stub",
+          "rationale": null,
+          "source": null,
+          "unit": "count",
+          "value": 2
+        }
+      }
+    },
+    {
+      "expected_error": "StipulationOnReference",
+      "hardware_design_status": "reference",
+      "id": "reference-with-stipulation",
+      "injected_leaf": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "Synthetic target frequency",
+        "source": null,
+        "unit": "Hz",
+        "value": 1000000000.0
+      }
+    },
+    {
+      "condition": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "Different rationale",
+        "source": null,
+        "unit": "Hz",
+        "value": 1000000000.0
+      },
+      "expected_engine_calls": 0,
+      "expected_error": "ConditionMismatch",
+      "id": "condition-rationale-mismatch",
+      "original": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "Synthetic target frequency",
+        "source": null,
+        "unit": "Hz",
+        "value": 1000000000.0
+      }
+    },
+    {
+      "condition_path": "nocs[99].router_latency_cycles",
+      "expected_engine_calls": 0,
+      "expected_error": "ConditionPathMissing",
+      "id": "missing-condition-path"
+    },
+    {
+      "detail_has_shared_sram": false,
+      "expected_engine_calls": 0,
+      "expected_error": "HardwareDetailMismatch",
+      "hardware_shared_sram_present": true,
+      "id": "missing-shared-sram-detail"
+    },
+    {
+      "changed_field": "model_id.engine_version",
+      "expected_error": "ModelCardHashMismatch",
+      "expected_render_calls": 0,
+      "id": "forged-model-card",
+      "unchanged_declared_hash": true
+    },
+    {
+      "evidence_op_classes": [
+        "q_projection"
+      ],
+      "expected_badge": "stub",
+      "expected_uncovered": [
+        "attention_fused"
+      ],
+      "id": "uncovered-one-op",
+      "row_ops": [
+        "q_projection",
+        "attention_fused"
+      ]
+    },
+    {
+      "expected_error": "HardwareUnitMismatch",
+      "id": "wrong-hardware-units",
+      "mutations": {
+        "clock_domains.core.freq_hz.unit": "MHz",
+        "memory.dram.capacity_bytes.unit": "GB",
+        "memory.dram.timing.t_cl_cycles.unit": "ns"
+      }
+    },
+    {
+      "expected_error": "UnnamedPreset",
+      "id": "unbound-dram-preset",
+      "timing_preset": null,
+      "timing_source": "preset"
+    },
+    {
+      "expected": {
+        "bf16_tflops": 1.024,
+        "claim_badge": null,
+        "eligible_L3_model_badge": "estimated",
+        "kind": "stipulation",
+        "proposed_ceiling": "estimated"
+      },
+      "id": "all-stipulated-no-claim",
+      "inputs": {
+        "clock_domains.core.freq_hz": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic independent design assumption: clock_domains.core.freq_hz",
+          "source": null,
+          "unit": "Hz",
+          "value": 1000000000.0
+        },
+        "cores.core_type.matrix_engine.macs_per_cycle.bf16": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic independent design assumption: cores.core_type.matrix_engine.macs_per_cycle.bf16",
+          "source": null,
+          "unit": "MAC/cycle",
+          "value": 128
+        },
+        "cores.grid.cols": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic independent design assumption: cores.grid.cols",
+          "source": null,
+          "unit": "count",
+          "value": 2
+        },
+        "cores.grid.rows": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic independent design assumption: cores.grid.rows",
+          "source": null,
+          "unit": "count",
+          "value": 2
+        }
+      },
+      "model_evidence_fixture": "evidence-no-band.json",
+      "test_mode": "synthetic-only"
+    },
+    {
+      "evidence_mutations": {
+        "rung": "L4",
+        "source.kind": "silicon_measurement",
+        "source.reference_identity": "synthetic target silicon for evaluator test only"
+      },
+      "expected_badge": "estimated",
+      "id": "proposed-L4-cap",
+      "inputs": {
+        "clock_domains.core.freq_hz": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic independent design assumption: clock_domains.core.freq_hz",
+          "source": null,
+          "unit": "Hz",
+          "value": 1000000000.0
+        },
+        "cores.core_type.matrix_engine.macs_per_cycle.bf16": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic independent design assumption: cores.core_type.matrix_engine.macs_per_cycle.bf16",
+          "source": null,
+          "unit": "MAC/cycle",
+          "value": 128
+        },
+        "cores.grid.cols": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic independent design assumption: cores.grid.cols",
+          "source": null,
+          "unit": "count",
+          "value": 2
+        },
+        "cores.grid.rows": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "Synthetic independent design assumption: cores.grid.rows",
+          "source": null,
+          "unit": "count",
+          "value": 2
+        }
+      },
+      "model_evidence_base": "evidence-no-band.json",
+      "rehash_and_review": "required for every changed body; no real promotion"
+    }
+  ],
+  "classification": "independent synthetic fragments; not real chip claims"
+}

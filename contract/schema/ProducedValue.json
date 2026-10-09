@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "else": {
+        "properties": {
+          "value": {
+            "type": "null"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "state": {
+            "const": "known"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "source_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "source_pointer": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "value": {
+            "minimum": 0,
+            "type": "number"
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "conversion": {
+      "enum": [
+        "identity",
+        "ps_to_seconds"
+      ],
+      "title": "Conversion",
+      "type": "string"
+    },
+    "source_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Source Hash"
+    },
+    "source_pointer": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Source Pointer"
+    },
+    "state": {
+      "enum": [
+        "known",
+        "unmodelled",
+        "not_produced"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "ge": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Value"
+    }
+  },
+  "required": [
+    "conversion",
+    "source_hash",
+    "source_pointer",
+    "state",
+    "value"
+  ],
+  "title": "ProducedValue",
+  "type": "object"
+}

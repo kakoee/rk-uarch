@@ -33,6 +33,8 @@ from .errors import NonFiniteRow
 from .fidelity import FidelityDetail
 from .hardware import hardware_unit_rule
 from .model_card import EmbeddedModelCard
+from .precision import PrecisionFormat
+from .prepared import Producer
 from .request import KvLayout
 from .sourced import SourcedValue
 
@@ -70,7 +72,7 @@ class ExtCounts(FrozenModel):
     noc_flit_hop_count: NonNegativeFloat | None
 
 
-class Row(FrozenModel):
+class LegacyRow(FrozenModel):
     """A row is one chip's shard, one iteration, all layers, without inter-chip collectives."""
 
     frequency_ratio: PositiveFloat
@@ -100,7 +102,7 @@ class Row(FrozenModel):
         return data
 
     @model_validator(mode="after")
-    def attribution(self) -> Row:
+    def attribution(self) -> LegacyRow:
         if set(self.attribution_s) != {"compute", "memory", "noc", "sync", "overhead"}:
             raise ValueError("attribution_s requires compute, memory, noc, sync and overhead.")
         if not math.isclose(
@@ -112,25 +114,25 @@ class Row(FrozenModel):
         return self
 
 
-class DecodeRow(Row):
+class LegacyDecodeRow(LegacyRow):
     phase: Literal["decode"]
     batch: PositiveInt
     total_context_tokens: PositiveInt
 
     @model_validator(mode="after")
-    def canonical_batch(self) -> DecodeRow:
+    def canonical_batch(self) -> LegacyDecodeRow:
         if self.total_context_tokens % self.batch:
             raise ValueError("Canonical decode total_context_tokens must be divisible by batch.")
         return self
 
 
-class PrefillRow(Row):
+class LegacyPrefillRow(LegacyRow):
     phase: Literal["prefill"]
     n_prompts: PositiveInt
     prompt_tokens: PositiveInt
 
 
-class Interpolation(FrozenModel):
+class LegacyInterpolation(FrozenModel):
     decode: Literal["bilinear in (log B, log T); linear in 1/f"]
     prefill: Literal["bilinear in (log n, log L); linear in 1/f"]
     outside_grid: Literal["refuse"]
@@ -349,7 +351,7 @@ class Provenance(FrozenModel):
         return self
 
 
-class UarchCostTable(FrozenModel):
+class LegacyUarchCostTable(FrozenModel):
     contract: Literal["uarch-contract/0.1"]
     uarch_version: NonEmpty
     hardware_spec_hash: Annotated[
@@ -361,16 +363,197 @@ class UarchCostTable(FrozenModel):
     initial_state: Literal["steady", "cold"]
     kv_layout: KvLayout
     rows: Annotated[
-        tuple[Annotated[DecodeRow | PrefillRow, Field(discriminator="phase")], ...],
+        tuple[Annotated[LegacyDecodeRow | LegacyPrefillRow, Field(discriminator="phase")], ...],
         Field(min_length=1),
     ]
-    interpolation: Interpolation
+    interpolation: LegacyInterpolation
     measured_error: MeasuredError
     flop_parity: FlopParity
     composite_fidelity: Literal["C0", "C1", "C2"]
     fidelity_detail: FidelityDetail
     provenance: Provenance
     warnings: tuple[NonEmpty, ...]
+
+    @model_validator(mode="after")
+    def row_contract(self) -> LegacyUarchCostTable:
+        # Only stipulated hardware input values are exempt; Condition checks kind/unit.
+        # U-P3 must resolve the path/value against the actual referenced HardwareSpec.
+        boundary = self.model_dump(
+            mode="json", exclude={"provenance": {"conditional_on": {"__all__": {"value"}}}}
+        )
+        reject_cycles(boundary)
+        if self.composite_fidelity != self.fidelity_detail.conservative_composite():
+            raise ValueError("composite_fidelity disagrees with fidelity_detail.")
+        keys: set[tuple[Any, ...]] = set()
+        for row in self.rows:
+            key = (
+                (row.phase, row.batch, row.total_context_tokens, row.frequency_ratio)
+                if isinstance(row, LegacyDecodeRow)
+                else (row.phase, row.n_prompts, row.prompt_tokens, row.frequency_ratio)
+            )
+            if key in keys:
+                raise ValueError(f"Duplicate row key {key}.")
+            keys.add(key)
+            if self.composite_fidelity == "C2" and row.duration_s < row.u_c0_duration_s:
+                raise ValueError("A C2 duration_s must not be below its own u_c0_duration_s.")
+        if not set(DECLARED_OMISSIONS).issubset(self.warnings):
+            raise ValueError("warnings must include every declared contract omission.")
+        return self
+
+
+class ReportScopePrecisionRoles(FrozenModel):
+    compute: PrecisionFormat
+    kv_cache: PrecisionFormat
+    operands: dict[str, PrecisionFormat]
+
+
+class ReportScope(FrozenModel):
+    array_fill: Literal["underfilled", "full"] | None
+    dram_load_regime: Literal["low", "middle", "high"] | None
+    intensity_regime: Literal["low", "middle", "high"] | None
+    mapping_match: Literal["matched", "compiler-chosen"] | None
+    noc_load_regime: Literal["low", "middle", "high"] | None
+    op_class: Annotated[str, Field(min_length=1)]
+    precision_roles: ReportScopePrecisionRoles
+
+
+class OpResult(FrozenModel):
+    achieved_ops_per_s: Annotated[JsonFloat, Field(ge=0)] | None
+    bound: Literal["compute", "memory"]
+    compute_time_ps: Annotated[JsonFloat, Field(ge=0)]
+    counts: Counts
+    dram_bw_bytes_per_s: Annotated[JsonFloat, Field(gt=0)]
+    duration_ps: Annotated[JsonFloat, Field(ge=0)]
+    group_id: Annotated[str, Field(min_length=1)]
+    id: Annotated[str, Field(min_length=1)]
+    instances: Annotated[int, Field(strict=True, ge=1)]
+    matrix_peak_ops_per_s: Annotated[JsonFloat, Field(gt=0)]
+    memory_time_ps: Annotated[JsonFloat, Field(ge=0)]
+    operational_intensity_ops_per_byte: Annotated[JsonFloat, Field(ge=0)] | None
+    ridge_ops_per_byte: Annotated[JsonFloat, Field(gt=0)]
+    scope: ReportScope
+    vector_peak_ops_per_s: Annotated[JsonFloat, Field(gt=0)]
+
+
+class ArtifactBindings(FrozenModel):
+    comparison_hashes: Annotated[
+        tuple[Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")], ...], Field(min_length=0)
+    ]
+    derivation_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    hardware_spec_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    model_card_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    prepared_bundle_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    report_context_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+
+
+class Row(FrozenModel):
+    analytic_mode: Literal["aggregate", "per_op"]
+    attribution_s: dict[
+        Literal["compute", "memory", "noc", "sync", "overhead"], Annotated[JsonFloat, Field(ge=0)]
+    ]
+    counts: Counts
+    diagnostics: Diagnostics
+    duration_s: Annotated[JsonFloat, Field(ge=0)]
+    ext_counts: ExtCounts
+    frequency_ratio: Annotated[JsonFloat, Field(gt=0)]
+    op_results: Annotated[tuple[OpResult, ...], Field(min_length=1)]
+    peak_resident_bytes: dict[Literal["hbm", "sram"], Annotated[JsonFloat, Field(ge=0)] | None]
+    point_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    result_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    state_model: Literal["stateless_roofline"]
+    u_c0_duration_s: Annotated[JsonFloat, Field(ge=0)]
+
+    @model_validator(mode="after")
+    def accepted_semantics(self) -> Row:
+        LegacyRow.model_validate(self.model_dump(mode="json", include=set(LegacyRow.model_fields)))
+        return self
+
+
+class DecodeRow(FrozenModel):
+    analytic_mode: Literal["aggregate", "per_op"]
+    attribution_s: dict[
+        Literal["compute", "memory", "noc", "sync", "overhead"], Annotated[JsonFloat, Field(ge=0)]
+    ]
+    batch: Annotated[int, Field(strict=True, ge=1)]
+    counts: Counts
+    diagnostics: Diagnostics
+    duration_s: Annotated[JsonFloat, Field(ge=0)]
+    ext_counts: ExtCounts
+    frequency_ratio: Annotated[JsonFloat, Field(gt=0)]
+    op_results: Annotated[tuple[OpResult, ...], Field(min_length=1)]
+    peak_resident_bytes: dict[Literal["hbm", "sram"], Annotated[JsonFloat, Field(ge=0)] | None]
+    phase: Literal["decode"]
+    point_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    result_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    state_model: Literal["stateless_roofline"]
+    total_context_tokens: Annotated[int, Field(strict=True, ge=1)]
+    u_c0_duration_s: Annotated[JsonFloat, Field(ge=0)]
+
+    @model_validator(mode="after")
+    def accepted_semantics(self) -> DecodeRow:
+        LegacyRow.model_validate(self.model_dump(mode="json", include=set(LegacyRow.model_fields)))
+        if self.total_context_tokens % self.batch:
+            raise ValueError("Canonical decode total_context_tokens must be divisible by batch.")
+        return self
+
+
+class PrefillRow(FrozenModel):
+    analytic_mode: Literal["aggregate", "per_op"]
+    attribution_s: dict[
+        Literal["compute", "memory", "noc", "sync", "overhead"], Annotated[JsonFloat, Field(ge=0)]
+    ]
+    counts: Counts
+    diagnostics: Diagnostics
+    duration_s: Annotated[JsonFloat, Field(ge=0)]
+    ext_counts: ExtCounts
+    frequency_ratio: Annotated[JsonFloat, Field(gt=0)]
+    n_prompts: Annotated[int, Field(strict=True, ge=1)]
+    op_results: Annotated[tuple[OpResult, ...], Field(min_length=1)]
+    peak_resident_bytes: dict[Literal["hbm", "sram"], Annotated[JsonFloat, Field(ge=0)] | None]
+    phase: Literal["prefill"]
+    point_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    prompt_tokens: Annotated[int, Field(strict=True, ge=1)]
+    result_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    state_model: Literal["stateless_roofline"]
+    u_c0_duration_s: Annotated[JsonFloat, Field(ge=0)]
+
+    @model_validator(mode="after")
+    def accepted_semantics(self) -> PrefillRow:
+        LegacyRow.model_validate(self.model_dump(mode="json", include=set(LegacyRow.model_fields)))
+        return self
+
+
+class Interpolation(FrozenModel):
+    decode: Literal["none"]
+    outside_grid: Literal["refuse"]
+    prefill: Literal["none"]
+
+
+class UarchCostTable(FrozenModel):
+    artifacts: ArtifactBindings
+    comparison_state: Literal["not_attempted", "attempted"]
+    composite_fidelity: Literal["C0", "C1", "C2"]
+    contract: Literal["uarch-contract/0.2"]
+    execution_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    fidelity_detail: FidelityDetail
+    hardware_spec_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    initial_state: Literal["steady", "cold"]
+    intent_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    interpolation: Interpolation
+    kv_layout: KvLayout
+    measured_error: MeasuredError
+    preparation: Producer
+    provenance: Provenance
+    report_context_version: Literal["uarch-report-context/2"]
+    request_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    rows: Annotated[
+        tuple[Annotated[DecodeRow | PrefillRow, Field(discriminator="phase")], ...],
+        Field(min_length=1),
+    ]
+    table_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    tp: Annotated[int, Field(strict=True, ge=1)]
+    uarch_version: Annotated[str, Field(min_length=1, pattern="\\S")]
+    warnings: tuple[Annotated[str, Field(min_length=1, pattern="\\S")], ...]
 
     @model_validator(mode="after")
     def row_contract(self) -> UarchCostTable:
@@ -397,3 +580,105 @@ class UarchCostTable(FrozenModel):
         if not set(DECLARED_OMISSIONS).issubset(self.warnings):
             raise ValueError("warnings must include every declared contract omission.")
         return self
+
+
+# Only accepted named roots are emitted; inline helper shapes are nested definitions.
+SCHEMA_ROOTS = (
+    ReportScope,
+    OpResult,
+    ArtifactBindings,
+    Row,
+    DecodeRow,
+    PrefillRow,
+    Interpolation,
+    UarchCostTable,
+)
+
+for _model in (
+    ReportScopePrecisionRoles,
+    ReportScope,
+    OpResult,
+    ArtifactBindings,
+    Row,
+    DecodeRow,
+    PrefillRow,
+    Interpolation,
+    UarchCostTable,
+):
+    _model.model_rebuild()
+
+
+def validate_table_bindings(value: object, artifacts: object) -> UarchCostTable:
+    """Verify captured table/request/bundle/row companions without executing a model.
+
+    This is an A1 shared-carrier check. A2's read-only report loader additionally owns
+    physical derivation, model-card/condition agreement and the complete evidence closure.
+    B still evaluates eligibility, applicability and display permission.
+    """
+    from .hashing import content_hash, execution_hash, resolve_artifact, verify_identity
+    from .prepared import validate_prepared_bundle
+    from .request import CharacterizationRequest
+
+    table = UarchCostTable.model_validate(value)
+    verify_identity(table, "table_hash")
+    b = validate_prepared_bundle(resolve_artifact(table.artifacts.prepared_bundle_hash, artifacts))
+    request = CharacterizationRequest.model_validate(
+        {
+            **b.intent.model_dump(mode="json"),
+            "prepared_input_hash": b.bundle_hash,
+        }
+    )
+    if (
+        table.intent_hash != b.intent_hash
+        or table.request_hash != content_hash(request)
+        or table.hardware_spec_hash != request.hardware_spec_hash
+        or table.artifacts.hardware_spec_hash != request.hardware_spec_hash
+        or table.preparation != b.producer
+        or table.tp != request.tp
+        or table.initial_state != request.initial_state
+        or table.kv_layout != request.kv_layout
+        or table.fidelity_detail != request.uarch_fidelity
+    ):
+        raise ValueError("TableBindingMismatch: request/bundle/hardware/preparation")
+    points = {point.payload_hash: point for point in b.points}
+    if {row.point_hash for row in table.rows} != points.keys() or len(table.rows) != len(points):
+        raise ValueError("TableBindingMismatch: exact point coverage")
+    jobs = []
+    for row in table.rows:
+        point = points[row.point_hash]
+        result = resolve_artifact(row.result_hash, artifacts)
+        job = resolve_artifact(result["job_hash"], artifacts)
+        jobs.append(job)
+        if (
+            job["point_hash"] != row.point_hash
+            or job["bundle_hash"] != b.bundle_hash
+            or job["request_hash"] != table.request_hash
+            or job["point"] != point.model_dump(mode="json")
+        ):
+            raise ValueError("TableBindingMismatch: row/point/result/job")
+        if (
+            row.duration_s != result["duration_ps"] / 1e12
+            or row.u_c0_duration_s != result["u_c0_duration_ps"] / 1e12
+            or row.counts.model_dump(mode="json") != result["counts"]
+            or [op.model_dump(mode="json") for op in row.op_results] != result["per_op"]
+            or row.attribution_s != {k: v / 1e12 for k, v in result["attribution_ps"].items()}
+            or row.frequency_ratio != point.frequency_ratio
+            or row.analytic_mode != job["mode"]
+            or row.state_model != job["state_model"]
+        ):
+            raise ValueError("TableBindingMismatch: captured result/conversion")
+        if row.phase != point.query.phase:
+            raise ValueError("TableBindingMismatch: phase")
+        for key, item in point.query.model_dump(mode="json").items():
+            if getattr(row, key) != item:
+                raise ValueError("TableBindingMismatch: query/" + key)
+    if jobs and table.execution_hash != execution_hash(
+        table.request_hash,
+        tuple(job["job_hash"] for job in jobs),
+        jobs[0]["engine"],
+        table.uarch_version,
+    ):
+        raise ValueError("TableBindingMismatch: execution_hash")
+    if (table.comparison_state == "attempted") != bool(table.artifacts.comparison_hashes):
+        raise ValueError("TableBindingMismatch: comparison_state")
+    return table

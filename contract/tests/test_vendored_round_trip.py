@@ -71,7 +71,7 @@ def test_row_count_keys_map_exactly_to_rk_channel_literals(
     toy_path = ROOT / "contract/tests/fixtures/toy_table.json"
     assert toy_path.exists(), "Lane A toy table is required"
     toy = json.loads(toy_path.read_text())
-    table = lane_a["table"].UarchCostTable.model_validate(toy)
+    table = lane_a["table"].LegacyUarchCostTable.model_validate(toy)
     assert set(lane_a["table"].Counts.model_fields) == set(COUNT_CHANNELS)
     for row in table.rows:
         keys = set(row.model_dump(mode="json")["counts"])

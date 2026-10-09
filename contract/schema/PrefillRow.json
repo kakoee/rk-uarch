@@ -225,14 +225,275 @@
       ],
       "title": "ExtCounts",
       "type": "object"
+    },
+    "OpResult": {
+      "additionalProperties": false,
+      "properties": {
+        "achieved_ops_per_s": {
+          "anyOf": [
+            {
+              "ge": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Achieved Ops Per S"
+        },
+        "bound": {
+          "enum": [
+            "compute",
+            "memory"
+          ],
+          "title": "Bound",
+          "type": "string"
+        },
+        "compute_time_ps": {
+          "ge": 0,
+          "title": "Compute Time Ps",
+          "type": "number"
+        },
+        "counts": {
+          "$ref": "#/$defs/Counts"
+        },
+        "dram_bw_bytes_per_s": {
+          "gt": 0,
+          "title": "Dram Bw Bytes Per S",
+          "type": "number"
+        },
+        "duration_ps": {
+          "ge": 0,
+          "title": "Duration Ps",
+          "type": "number"
+        },
+        "group_id": {
+          "minLength": 1,
+          "title": "Group Id",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "instances": {
+          "minimum": 1,
+          "title": "Instances",
+          "type": "integer"
+        },
+        "matrix_peak_ops_per_s": {
+          "gt": 0,
+          "title": "Matrix Peak Ops Per S",
+          "type": "number"
+        },
+        "memory_time_ps": {
+          "ge": 0,
+          "title": "Memory Time Ps",
+          "type": "number"
+        },
+        "operational_intensity_ops_per_byte": {
+          "anyOf": [
+            {
+              "ge": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Operational Intensity Ops Per Byte"
+        },
+        "ridge_ops_per_byte": {
+          "gt": 0,
+          "title": "Ridge Ops Per Byte",
+          "type": "number"
+        },
+        "scope": {
+          "$ref": "#/$defs/ReportScope"
+        },
+        "vector_peak_ops_per_s": {
+          "gt": 0,
+          "title": "Vector Peak Ops Per S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "achieved_ops_per_s",
+        "bound",
+        "compute_time_ps",
+        "counts",
+        "dram_bw_bytes_per_s",
+        "duration_ps",
+        "group_id",
+        "id",
+        "instances",
+        "matrix_peak_ops_per_s",
+        "memory_time_ps",
+        "operational_intensity_ops_per_byte",
+        "ridge_ops_per_byte",
+        "scope",
+        "vector_peak_ops_per_s"
+      ],
+      "title": "OpResult",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "ReportScope": {
+      "additionalProperties": false,
+      "properties": {
+        "array_fill": {
+          "anyOf": [
+            {
+              "enum": [
+                "underfilled",
+                "full"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Array Fill"
+        },
+        "dram_load_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dram Load Regime"
+        },
+        "intensity_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Intensity Regime"
+        },
+        "mapping_match": {
+          "anyOf": [
+            {
+              "enum": [
+                "matched",
+                "compiler-chosen"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mapping Match"
+        },
+        "noc_load_regime": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "middle",
+                "high"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Noc Load Regime"
+        },
+        "op_class": {
+          "minLength": 1,
+          "title": "Op Class",
+          "type": "string"
+        },
+        "precision_roles": {
+          "$ref": "#/$defs/ReportScopePrecisionRoles"
+        }
+      },
+      "required": [
+        "array_fill",
+        "dram_load_regime",
+        "intensity_regime",
+        "mapping_match",
+        "noc_load_regime",
+        "op_class",
+        "precision_roles"
+      ],
+      "title": "ReportScope",
+      "type": "object"
+    },
+    "ReportScopePrecisionRoles": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "operands": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Operands",
+          "type": "object"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache",
+        "operands"
+      ],
+      "title": "ReportScopePrecisionRoles",
+      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "analytic_mode": {
+      "enum": [
+        "aggregate",
+        "per_op"
+      ],
+      "title": "Analytic Mode",
+      "type": "string"
+    },
     "attribution_s": {
       "additionalProperties": {
-        "minimum": 0,
+        "ge": 0,
         "type": "number"
       },
       "propertyNames": {
@@ -254,7 +515,7 @@
       "$ref": "#/$defs/Diagnostics"
     },
     "duration_s": {
-      "minimum": 0,
+      "ge": 0,
       "title": "Duration S",
       "type": "number"
     },
@@ -262,7 +523,7 @@
       "$ref": "#/$defs/ExtCounts"
     },
     "frequency_ratio": {
-      "exclusiveMinimum": 0,
+      "gt": 0,
       "title": "Frequency Ratio",
       "type": "number"
     },
@@ -271,11 +532,19 @@
       "title": "N Prompts",
       "type": "integer"
     },
+    "op_results": {
+      "items": {
+        "$ref": "#/$defs/OpResult"
+      },
+      "minItems": 1,
+      "title": "Op Results",
+      "type": "array"
+    },
     "peak_resident_bytes": {
       "additionalProperties": {
         "anyOf": [
           {
-            "minimum": 0,
+            "ge": 0,
             "type": "number"
           },
           {
@@ -297,29 +566,49 @@
       "title": "Phase",
       "type": "string"
     },
+    "point_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Point Hash",
+      "type": "string"
+    },
     "prompt_tokens": {
       "minimum": 1,
       "title": "Prompt Tokens",
       "type": "integer"
     },
+    "result_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Result Hash",
+      "type": "string"
+    },
+    "state_model": {
+      "const": "stateless_roofline",
+      "title": "State Model",
+      "type": "string"
+    },
     "u_c0_duration_s": {
-      "minimum": 0,
+      "ge": 0,
       "title": "U C0 Duration S",
       "type": "number"
     }
   },
   "required": [
-    "frequency_ratio",
-    "duration_s",
-    "u_c0_duration_s",
+    "analytic_mode",
     "attribution_s",
     "counts",
-    "ext_counts",
-    "peak_resident_bytes",
     "diagnostics",
-    "phase",
+    "duration_s",
+    "ext_counts",
+    "frequency_ratio",
     "n_prompts",
-    "prompt_tokens"
+    "op_results",
+    "peak_resident_bytes",
+    "phase",
+    "point_hash",
+    "prompt_tokens",
+    "result_hash",
+    "state_model",
+    "u_c0_duration_s"
   ],
   "title": "PrefillRow",
   "type": "object"

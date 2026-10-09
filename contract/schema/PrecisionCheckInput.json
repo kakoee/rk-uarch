@@ -1,0 +1,105 @@
+{
+  "$defs": {
+    "ExplicitPrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache"
+      ],
+      "title": "ExplicitPrecision",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "callable_source_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Callable Source Sha256",
+      "type": "string"
+    },
+    "classification": {
+      "enum": [
+        "synthetic_input",
+        "captured_input",
+        "reconstructed_input"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "component_binding_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Component Binding Hash",
+      "type": "string"
+    },
+    "component_role": {
+      "minLength": 1,
+      "title": "Component Role",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-precision-check-input/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Input Hash",
+      "type": "string"
+    },
+    "limitation": {
+      "minLength": 1,
+      "title": "Limitation",
+      "type": "string"
+    },
+    "precision": {
+      "$ref": "#/$defs/ExplicitPrecision"
+    },
+    "requested_boundary": {
+      "minLength": 1,
+      "title": "Requested Boundary",
+      "type": "string"
+    },
+    "upstream_sha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Upstream Sha",
+      "type": "string"
+    }
+  },
+  "required": [
+    "callable_source_sha256",
+    "classification",
+    "component_binding_hash",
+    "component_role",
+    "format",
+    "input_hash",
+    "limitation",
+    "precision",
+    "requested_boundary",
+    "upstream_sha"
+  ],
+  "title": "PrecisionCheckInput",
+  "type": "object"
+}

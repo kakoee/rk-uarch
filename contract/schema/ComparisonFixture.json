@@ -1,0 +1,607 @@
+{
+  "$defs": {
+    "ComparisonChannel": {
+      "additionalProperties": false,
+      "properties": {
+        "absolute_adjustment_rel": {
+          "ge": 0,
+          "title": "Absolute Adjustment Rel",
+          "type": "number"
+        },
+        "actual": {
+          "$ref": "#/$defs/ProducedValue"
+        },
+        "channel": {
+          "enum": [
+            "matrix_ops",
+            "vector_ops",
+            "memory_read_bytes",
+            "memory_write_bytes",
+            "duration_s"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "declared_deviations": {
+          "items": {
+            "$ref": "#/$defs/ComparisonDeviation"
+          },
+          "minItems": 0,
+          "title": "Declared Deviations",
+          "type": "array"
+        },
+        "outcome": {
+          "enum": [
+            "passed",
+            "failed",
+            "unassessed",
+            "refused",
+            "execution_failed",
+            "modelled_absence"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "raw_rel": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Raw Rel"
+        },
+        "reason": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Reason",
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/ReferenceValue"
+        },
+        "residual_rel": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Residual Rel"
+        },
+        "signed_adjustment_rel": {
+          "title": "Signed Adjustment Rel",
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "op",
+            "byte",
+            "s"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "absolute_adjustment_rel",
+        "actual",
+        "channel",
+        "declared_deviations",
+        "outcome",
+        "raw_rel",
+        "reason",
+        "reference",
+        "residual_rel",
+        "signed_adjustment_rel",
+        "unit"
+      ],
+      "title": "ComparisonChannel",
+      "type": "object"
+    },
+    "ComparisonDeviation": {
+      "additionalProperties": false,
+      "properties": {
+        "deviation_rel": {
+          "ge": -0.05,
+          "le": 0.05,
+          "title": "Deviation Rel",
+          "type": "number"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "deviation_rel",
+        "id",
+        "reason"
+      ],
+      "title": "ComparisonDeviation",
+      "type": "object"
+    },
+    "DecodeQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "phase": {
+          "const": "decode",
+          "title": "Phase",
+          "type": "string"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "batch",
+        "phase",
+        "total_context_tokens"
+      ],
+      "title": "DecodeQuery",
+      "type": "object"
+    },
+    "ExplicitPrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache"
+      ],
+      "title": "ExplicitPrecision",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "PrefillQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "phase": {
+          "const": "prefill",
+          "title": "Phase",
+          "type": "string"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "n_prompts",
+        "phase",
+        "prompt_tokens"
+      ],
+      "title": "PrefillQuery",
+      "type": "object"
+    },
+    "ProducedValue": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_hash": {
+                "pattern": "^sha256:[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "source_pointer": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "value": {
+                "minimum": 0,
+                "type": "number"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "conversion": {
+          "enum": [
+            "identity",
+            "ps_to_seconds"
+          ],
+          "title": "Conversion",
+          "type": "string"
+        },
+        "source_hash": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Hash"
+        },
+        "source_pointer": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Pointer"
+        },
+        "state": {
+          "enum": [
+            "known",
+            "unmodelled",
+            "not_produced"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "ge": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "conversion",
+        "source_hash",
+        "source_pointer",
+        "state",
+        "value"
+      ],
+      "title": "ProducedValue",
+      "type": "object"
+    },
+    "ProjectionScope": {
+      "additionalProperties": false,
+      "properties": {
+        "global_kv_heads": {
+          "minimum": 1,
+          "title": "Global Kv Heads",
+          "type": "integer"
+        },
+        "global_vocab": {
+          "minimum": 1,
+          "title": "Global Vocab",
+          "type": "integer"
+        },
+        "kv_replicated": {
+          "title": "Kv Replicated",
+          "type": "boolean"
+        },
+        "padded_vocab": {
+          "minimum": 1,
+          "title": "Padded Vocab",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "global_kv_heads",
+        "global_vocab",
+        "kv_replicated",
+        "padded_vocab"
+      ],
+      "title": "ProjectionScope",
+      "type": "object"
+    },
+    "ReferenceValue": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "positive"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "zero"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "absent"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "positive",
+            "zero",
+            "null",
+            "absent"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "ge": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "title": "ReferenceValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bundle_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Bundle Hash"
+    },
+    "candidate_input_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Candidate Input Hash"
+    },
+    "candidate_output_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Candidate Output Hash"
+    },
+    "channels": {
+      "items": {
+        "$ref": "#/$defs/ComparisonChannel"
+      },
+      "minItems": 5,
+      "title": "Channels",
+      "type": "array"
+    },
+    "component_binding_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Component Binding Hash",
+      "type": "string"
+    },
+    "execution": {
+      "enum": [
+        "executed",
+        "pre_call_refusal",
+        "execution_failed",
+        "not_run"
+      ],
+      "title": "Execution",
+      "type": "string"
+    },
+    "fixture_id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Fixture Id",
+      "type": "string"
+    },
+    "job_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Job Hash"
+    },
+    "outcome": {
+      "enum": [
+        "passed",
+        "failed",
+        "unassessed",
+        "refused",
+        "execution_failed"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "precision": {
+      "$ref": "#/$defs/ExplicitPrecision"
+    },
+    "projection_scope": {
+      "$ref": "#/$defs/ProjectionScope"
+    },
+    "query": {
+      "discriminator": {
+        "mapping": {
+          "decode": "#/$defs/DecodeQuery",
+          "prefill": "#/$defs/PrefillQuery"
+        },
+        "propertyName": "phase"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DecodeQuery"
+        },
+        {
+          "$ref": "#/$defs/PrefillQuery"
+        }
+      ],
+      "title": "Query"
+    },
+    "result_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Result Hash"
+    },
+    "tp": {
+      "minimum": 1,
+      "title": "Tp",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "bundle_hash",
+    "candidate_input_hash",
+    "candidate_output_hash",
+    "channels",
+    "component_binding_hash",
+    "execution",
+    "fixture_id",
+    "job_hash",
+    "outcome",
+    "precision",
+    "projection_scope",
+    "query",
+    "result_hash",
+    "tp"
+  ],
+  "title": "ComparisonFixture",
+  "type": "object"
+}

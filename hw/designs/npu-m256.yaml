@@ -1,0 +1,203 @@
+# B1 INPUT PROPOSAL: actual bytes await Javid hardware approval.
+# All numeric choices are stipulations with rationale; no empirical badge claimed.
+id: npu-m256
+design_status: proposed
+clock_domains:
+  core:
+    freq_hz: {value: 1200000000.0, unit: Hz, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: core
+        target clock; no fitted efficiency; a design input, not a measured claim.'}
+    scales_with_core: true
+  noc:
+    freq_hz: {value: 1000000000.0, unit: Hz, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: noc target
+        clock; no fitted efficiency; a design input, not a measured claim.'}
+    scales_with_core: false
+  dram:
+    freq_hz: {value: 1000000000.0, unit: Hz, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: dram
+        target clock; no fitted efficiency; a design input, not a measured claim.'}
+    scales_with_core: false
+cores:
+  grid:
+    rows: {value: 16.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: core/array row
+        count; a design input, not a measured claim.'}
+    cols: {value: 16.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: core/array column
+        count; a design input, not a measured claim.'}
+  core_type:
+    matrix_engine:
+      array:
+        rows: {value: 16.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: core/array
+            row count; a design input, not a measured claim.'}
+        cols: {value: 16.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: core/array
+            column count; a design input, not a measured claim.'}
+      dataflows:
+      - weight_stationary
+      macs_per_cycle:
+        bf16: {value: 256.0, unit: MAC/cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: dense
+            throughput per core; no sparsity multiplier; a design input, not a measured claim.'}
+        fp8: {value: 512.0, unit: MAC/cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: dense
+            throughput per core; no sparsity multiplier; a design input, not a measured claim.'}
+      accumulator_bytes: {value: 16384.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+          FP32 partial-sum storage; a design input, not a measured claim.'}
+      operand_buffer_bytes: {value: 65536.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending
+          Javid: array operand staging budget; a design input, not a measured claim.'}
+      operand_bytes_per_cycle: {value: 64.0, unit: byte/cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending
+          Javid: core-domain operand delivery; a design input, not a measured claim.'}
+    vector_engine:
+      ops_per_cycle: {value: 32.0, unit: op/cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+          abstract scalar vector rate, not transcendental validation; a design input, not a measured claim.'}
+    sram:
+      bytes: {value: 1048576.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: paired
+          SRAM choice with 0.5 pJ/byte; a design input, not a measured claim.'}
+      banks: {value: 16.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: local SRAM
+          banking; a design input, not a measured claim.'}
+      bytes_per_cycle_per_bank: {value: 16.0, unit: byte/cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending
+          Javid: local SRAM bank bandwidth; a design input, not a measured claim.'}
+    dma:
+      engines: {value: 2.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: DMA issue
+          engines; a design input, not a measured claim.'}
+      bytes_per_cycle: {value: 32.0, unit: byte/cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+          aggregate per-core DMA delivery; a design input, not a measured claim.'}
+      max_outstanding: {value: 16.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+          DMA outstanding limit; a design input, not a measured claim.'}
+      request_bytes: {value: 128.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: DMA
+          request granularity; a design input, not a measured claim.'}
+    job_overhead_cycles: {value: 48.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+        core-domain job issue overhead; U-C0 unrepresented; a design input, not a measured claim.'}
+sync:
+  mechanism: noc_semaphore
+  barrier_latency_cycles: {value: 64.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+      NoC-domain barrier latency; U-C0 unrepresented; a design input, not a measured claim.'}
+shared_sram: null
+nocs:
+- topology: torus
+  direction: positive
+  link_bytes_per_cycle: {value: 32.0, unit: byte/cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+      NoC link width; a design input, not a measured claim.'}
+  router_latency_cycles: {value: 3.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+      NoC router pipeline; a design input, not a measured claim.'}
+  virtual_channels: {value: 4.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: NoC
+      virtual channels; a design input, not a measured claim.'}
+  buffer_flits: {value: 8.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: NoC input
+      buffering; a design input, not a measured claim.'}
+- topology: torus
+  direction: negative
+  link_bytes_per_cycle: {value: 32.0, unit: byte/cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+      NoC link width; a design input, not a measured claim.'}
+  router_latency_cycles: {value: 3.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+      NoC router pipeline; a design input, not a measured claim.'}
+  virtual_channels: {value: 4.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: NoC
+      virtual channels; a design input, not a measured claim.'}
+  buffer_flits: {value: 8.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: NoC input
+      buffering; a design input, not a measured claim.'}
+memory:
+  interleave:
+    granularity_bytes: {value: 256.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+        address interleave granularity; a design input, not a measured claim.'}
+    scheme: round_robin
+  controllers:
+  - attach:
+    - 0
+    - 0
+    scheduler: fr_fcfs
+    page_policy: open
+    read_queue_depth: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: read
+        queue budget; a design input, not a measured claim.'}
+    write_queue_depth: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+        write queue budget; a design input, not a measured claim.'}
+    noc_credits: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: controller
+        credits; a design input, not a measured claim.'}
+  - attach:
+    - 0
+    - 15
+    scheduler: fr_fcfs
+    page_policy: open
+    read_queue_depth: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: read
+        queue budget; a design input, not a measured claim.'}
+    write_queue_depth: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+        write queue budget; a design input, not a measured claim.'}
+    noc_credits: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: controller
+        credits; a design input, not a measured claim.'}
+  - attach:
+    - 15
+    - 0
+    scheduler: fr_fcfs
+    page_policy: open
+    read_queue_depth: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: read
+        queue budget; a design input, not a measured claim.'}
+    write_queue_depth: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+        write queue budget; a design input, not a measured claim.'}
+    noc_credits: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: controller
+        credits; a design input, not a measured claim.'}
+  - attach:
+    - 15
+    - 15
+    scheduler: fr_fcfs
+    page_policy: open
+    read_queue_depth: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: read
+        queue budget; a design input, not a measured claim.'}
+    write_queue_depth: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+        write queue budget; a design input, not a measured claim.'}
+    noc_credits: {value: 32.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: controller
+        credits; a design input, not a measured claim.'}
+  dram:
+    standard: gddr6
+    channels: {value: 8.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: logical DRAM
+        channels; two per listed controller; a design input, not a measured claim.'}
+    bw_bytes_per_s: {value: 512000000000.0, unit: byte/s, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending
+        Javid: total chip bandwidth; never multiply again by channels; a design input, not a measured claim.'}
+    capacity_bytes: {value: 32000000000.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+        decimal 32 GB capacity; a design input, not a measured claim.'}
+    organization:
+      ranks: {value: 1.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: ranks per logical
+          channel; a design input, not a measured claim.'}
+      bank_groups: {value: 4.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: bank
+          groups per rank; a design input, not a measured claim.'}
+      banks_per_group: {value: 4.0, unit: count, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: banks
+          per bank group; a design input, not a measured claim.'}
+      row_bytes: {value: 2048.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: row payload
+          bytes; a design input, not a measured claim.'}
+    timing_source: direct
+    timing_preset: null
+    timing:
+      t_rcd_cycles: {value: 16.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: explicit
+          illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.'}
+      t_rp_cycles: {value: 16.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: explicit
+          illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.'}
+      t_cl_cycles: {value: 16.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: explicit
+          illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.'}
+      t_rfc_cycles: {value: 350.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: explicit
+          illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.'}
+      t_refi_cycles: {value: 3900.0, unit: cycle, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid:
+          explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.'}
+formats:
+  bf16:
+    bytes: 2.0
+    accumulate_bytes: {value: 4.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: FP32
+        accumulation; a design input, not a measured claim.'}
+    block_scale_bytes: {value: 0.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: plain
+        format with no block-scale payload; a design input, not a measured claim.'}
+  fp8:
+    bytes: 1.0
+    accumulate_bytes: {value: 4.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: FP32
+        accumulation; a design input, not a measured claim.'}
+    block_scale_bytes: {value: 0.0, unit: byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: plain
+        format with no block-scale payload; a design input, not a measured claim.'}
+energy:
+  pj_per_mac:
+    bf16: {value: 0.4, unit: pJ/MAC, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: co-design energy
+        assumption, no validation; a design input, not a measured claim.'}
+    fp8: {value: 0.2, unit: pJ/MAC, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: co-design energy
+        assumption, no validation; a design input, not a measured claim.'}
+  pj_per_byte:
+    sram: {value: 0.5, unit: pJ/byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: SRAM pair 1048576
+        bytes/0.5 pJ per byte; a design input, not a measured claim.'}
+    noc_hop: {value: 2.0, unit: pJ/byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: unvalidated
+        interconnect/DRAM energy assumption; a design input, not a measured claim.'}
+    dram: {value: 20.0, unit: pJ/byte, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: unvalidated
+        interconnect/DRAM energy assumption; a design input, not a measured claim.'}
+  voltage_ratio:
+    1.0: {value: 1.0, unit: ratio, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: base voltage normalization
+        only; nonbase energy unknown; a design input, not a measured claim.'}
+static_power_w: {value: 60.0, unit: W, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: chip static
+    power budget; no energy model in U2; a design input, not a measured claim.'}
+tdp_w: {value: 300.0, unit: W, kind: stipulation, provenance: null, source: null, date: null, rationale: 'B1 hardware proposal, pending Javid: chip design power budget,
+    not board power measurement; a design input, not a measured claim.'}

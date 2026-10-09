@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "check_input_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Check Input Hash"
+    },
+    "error_class": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Error Class"
+    },
+    "evidence_outcome": {
+      "enum": [
+        "passed",
+        "refused",
+        "execution_failed",
+        "unassessed"
+      ],
+      "title": "Evidence Outcome",
+      "type": "string"
+    },
+    "execution": {
+      "enum": [
+        "refused",
+        "succeeded",
+        "execution_failed",
+        "not_run"
+      ],
+      "title": "Execution",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-precision-refusal-observation/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "match_result": {
+      "enum": [
+        "matched",
+        "wrong_boundary",
+        "wrong_error_class",
+        "unexpected_success",
+        "unexpected_refusal",
+        "execution_failed",
+        "not_run"
+      ],
+      "title": "Match Result",
+      "type": "string"
+    },
+    "observation_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Observation Hash",
+      "type": "string"
+    },
+    "observed_boundary": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Observed Boundary"
+    },
+    "reason": {
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "refusal_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Refusal Id"
+    },
+    "trace_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Trace Hash"
+    }
+  },
+  "required": [
+    "check_input_hash",
+    "error_class",
+    "evidence_outcome",
+    "execution",
+    "format",
+    "match_result",
+    "observation_hash",
+    "observed_boundary",
+    "reason",
+    "refusal_id",
+    "trace_hash"
+  ],
+  "title": "PrecisionRefusalObservation",
+  "type": "object"
+}

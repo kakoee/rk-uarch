@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "dimension": {
+      "minLength": 1,
+      "title": "Dimension",
+      "type": "string"
+    },
+    "global_extent": {
+      "minimum": 1,
+      "title": "Global Extent",
+      "type": "integer"
+    },
+    "rank_extent": {
+      "minimum": 1,
+      "title": "Rank Extent",
+      "type": "integer"
+    },
+    "replicas": {
+      "minimum": 1,
+      "title": "Replicas",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "dimension",
+    "global_extent",
+    "rank_extent",
+    "replicas"
+  ],
+  "title": "Replication",
+  "type": "object"
+}

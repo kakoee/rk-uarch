@@ -1,0 +1,162 @@
+{
+  "applicability_test_inputs": [
+    {
+      "channel": "matrix_ops",
+      "evidence_hash": "sha256:53c86b54b34c26587632763b3084a34ce82c67dba1b0e50f37ed7208f37fe237",
+      "model_identity_hash": "sha256:a36f6170875a30ab43e775421b1e44e798de6a52c04a7d5794e67e0989ee1535",
+      "purpose": "counts",
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "family": "synthetic-large-core",
+        "frequency_ratio": 1.0,
+        "hardware_spec_hash": "sha256:cb268745ae183e43995c881ea75ac7a659849e890a234f7f89911dbb7514c180",
+        "initial_state": "steady",
+        "intensity_regime": null,
+        "kv_block_size_tokens": 16,
+        "mapping_correspondence_hash": null,
+        "mapping_match": "compiler-chosen",
+        "model_identity_hash": "sha256:a36f6170875a30ab43e775421b1e44e798de6a52c04a7d5794e67e0989ee1535",
+        "noc_load_regime": null,
+        "op_class": null,
+        "precision": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {}
+        },
+        "prepared_bundle_hash": "sha256:3ef891336af031f9da1d9789cccc9d827bfba3c9eca52ee3bb3061eb33b72977"
+      },
+      "verdict": "MATCH"
+    },
+    {
+      "channel": "matrix_ops",
+      "evidence_hash": "sha256:77c3b6a8388536240c2afa6e86dac534ad9cad7ba778e4785cda8da1db8dabeb",
+      "model_identity_hash": "sha256:dd5d8397f981c2ea5193a6d5329992494347345617202ea76c15cb33e2bbec76",
+      "purpose": "counts",
+      "scope": {
+        "array_fill": null,
+        "dram_load_regime": null,
+        "family": "synthetic-large-core",
+        "frequency_ratio": 1.0,
+        "hardware_spec_hash": "sha256:cb268745ae183e43995c881ea75ac7a659849e890a234f7f89911dbb7514c180",
+        "initial_state": "steady",
+        "intensity_regime": null,
+        "kv_block_size_tokens": 16,
+        "mapping_correspondence_hash": null,
+        "mapping_match": "compiler-chosen",
+        "model_identity_hash": "sha256:dd5d8397f981c2ea5193a6d5329992494347345617202ea76c15cb33e2bbec76",
+        "noc_load_regime": null,
+        "op_class": null,
+        "precision": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {}
+        },
+        "prepared_bundle_hash": "sha256:3ef891336af031f9da1d9789cccc9d827bfba3c9eca52ee3bb3061eb33b72977"
+      },
+      "verdict": "MATCH"
+    }
+  ],
+  "cases": [
+    {
+      "actual_model": "L3 counts eligible in synthetic mode",
+      "deviations": [],
+      "expected_badge": "estimated",
+      "expected_band": null,
+      "expected_value": 0.184,
+      "hardware_claims_used": [],
+      "id": "count-only-eligible",
+      "purpose": "counts",
+      "reference_model": "L3 counts eligible in synthetic mode",
+      "why": "Only counts/workload/model assumptions used; timing-only stub rate is not a count contributor."
+    },
+    {
+      "actual_model": "no eligible duration evidence",
+      "default_display": "hidden",
+      "expected_badge": "stub",
+      "expected_band": null,
+      "expected_value": 0.0,
+      "hardware_leaf": {
+        "artifact_hash": "sha256:cb268745ae183e43995c881ea75ac7a659849e890a234f7f89911dbb7514c180",
+        "json_pointer": "/memory/dram/bw_bytes_per_s"
+      },
+      "id": "uncovered-timing-and-true-stub",
+      "leaf_kind": "claim",
+      "leaf_provenance": "stub",
+      "opt_in": "allowed only with complete closure and synthetic-fixture label in this fixture; never an executed prediction",
+      "purpose": "duration",
+      "reference_model": "no eligible duration evidence",
+      "why": "Zero error does not erase stub timing hardware or allow count-only evidence to validate timing."
+    },
+    {
+      "expected_badge": "stub",
+      "id": "eligible-timing-still-real-stub",
+      "mutation": "supply eligible synthetic duration model evidence on both sides, retain true stub bandwidth claim"
+    },
+    {
+      "expected_refusal": "ReviewSubjectMismatch",
+      "id": "drop-timing-hardware-selector",
+      "mutation": "delete bandwidth selector but retain reviewed body hash"
+    },
+    {
+      "expected_refusal": "MissingSourceMetricRecipe",
+      "id": "missing-source-recipe",
+      "mutation": "remove engine /duration_ps source recipe and rehash review/dependencies as synthetic fixture"
+    },
+    {
+      "expected_refusal": "IncompleteMetricContributors",
+      "id": "incomplete-reviewed-timing-recipe",
+      "mutation": "new synthetic reviewed recipe removes a required bandwidth input despite source computation contract"
+    },
+    {
+      "expected_refusal": "CyclicMetricRecipe",
+      "id": "recursive-source-recipe",
+      "mutation": "engine /duration_ps result_field selects itself"
+    },
+    {
+      "expected_refusal": "AmbiguousSourceMetricRecipe",
+      "id": "ambiguous-source-recipe",
+      "mutation": "duplicate source recipe target with another selector list"
+    },
+    {
+      "expected_refusal": "MetricPurposeMismatch",
+      "id": "purpose-mismatch",
+      "mutation": "engine /duration_ps source recipe purpose=counts"
+    },
+    {
+      "expected_refusal": "IncompleteMetricContributors",
+      "id": "drop-reference-model",
+      "mutation": "reference source recipe lacks its model identity/evidence selector"
+    },
+    {
+      "expected_badge": "stub; declared adjustment remains model assumption; cannot promote",
+      "id": "unvalidated-adjustment",
+      "mutation": "nonempty named count deviation with no independent validation"
+    },
+    {
+      "expected": "stored and verified-loader accessible; no display recipe, so hidden on every surface even opt-in; direct numeric render raises MissingMetricRecipe",
+      "id": "raw-magnitudes",
+      "paths": [
+        "/comparisons/0/fixtures/0/channels/0/actual/value",
+        "/comparisons/0/fixtures/0/channels/0/reference/value"
+      ]
+    },
+    {
+      "applicability_test_input": "UNKNOWN mapping for both source models; no synthetic MATCH injected",
+      "expected_count_badge": "stub",
+      "expected_duration_badge": "stub",
+      "id": "base-analytic-scope-without-test-MATCH",
+      "why": "The isolated eligible-count test is not permission to treat the original null mapping as covered."
+    }
+  ],
+  "classification": "independent synthetic semantic evaluator expectations, no renderer or eligibility validator executed",
+  "context_hash": "sha256:f499a509aec7930c58cdba5c21d793e945bc317bcebc3d0bb202328c9f9ddb07",
+  "count_evidence": [
+    "r2-actual-count-evidence.json",
+    "r2-reference-count-evidence.json"
+  ],
+  "count_path": "/comparisons/0/fixtures/0/channels/0/raw_rel",
+  "dependencies": "metric-dependencies.json",
+  "duration_path": "/comparisons/0/fixtures/0/channels/4/raw_rel",
+  "scope_override": "Explicit synthetic test context with compiler-chosen mapping, exact model/spec/bundle/precision/state; never infer it from analytic null mapping. All source/review/ordering/verification prerequisites simulated in fixture mode. No actual silicon claim."
+}

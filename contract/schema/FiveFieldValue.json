@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "date": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Date"
+    },
+    "provenance": {
+      "enum": [
+        "stub",
+        "estimated",
+        "spec_derived",
+        "measured"
+      ],
+      "title": "Provenance",
+      "type": "string"
+    },
+    "source": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Source"
+    },
+    "unit": {
+      "minLength": 1,
+      "title": "Unit",
+      "type": "string"
+    },
+    "value": {
+      "title": "Value",
+      "type": "number"
+    }
+  },
+  "required": [
+    "date",
+    "provenance",
+    "source",
+    "unit",
+    "value"
+  ],
+  "title": "FiveFieldValue",
+  "type": "object"
+}

@@ -1,0 +1,83 @@
+{
+  "$defs": {
+    "ExplicitPrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache"
+      ],
+      "title": "ExplicitPrecision",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "boundary": {
+      "minLength": 1,
+      "title": "Boundary",
+      "type": "string"
+    },
+    "check_input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Check Input Hash",
+      "type": "string"
+    },
+    "component_binding_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Component Binding Hash",
+      "type": "string"
+    },
+    "error_class": {
+      "minLength": 1,
+      "title": "Error Class",
+      "type": "string"
+    },
+    "precision": {
+      "$ref": "#/$defs/ExplicitPrecision"
+    },
+    "refusal_id": {
+      "minLength": 1,
+      "title": "Refusal Id",
+      "type": "string"
+    },
+    "source_entry_index": {
+      "minimum": 0,
+      "title": "Source Entry Index",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "boundary",
+    "check_input_hash",
+    "component_binding_hash",
+    "error_class",
+    "precision",
+    "refusal_id",
+    "source_entry_index"
+  ],
+  "title": "ExpectedPrecisionRefusal",
+  "type": "object"
+}

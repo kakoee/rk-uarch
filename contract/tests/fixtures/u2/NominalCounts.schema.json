@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "matrix_ops": {
+      "minimum": 0,
+      "title": "Matrix Ops",
+      "type": "number"
+    },
+    "memory_read_bytes": {
+      "minimum": 0,
+      "title": "Memory Read Bytes",
+      "type": "number"
+    },
+    "memory_write_bytes": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Memory Write Bytes"
+    },
+    "vector_ops": {
+      "title": "Vector Ops",
+      "type": "null"
+    }
+  },
+  "required": [
+    "matrix_ops",
+    "memory_read_bytes",
+    "memory_write_bytes",
+    "vector_ops"
+  ],
+  "title": "NominalCounts",
+  "type": "object"
+}

@@ -1,0 +1,185 @@
+{
+  "base_evidence": "evidence-no-band.json",
+  "base_request_scope": {
+    "array_fill": null,
+    "dram_load_regime": null,
+    "family": "synthetic-large-core",
+    "frequency_ratio": 1.0,
+    "hardware_spec_hash": "sha256:cb268745ae183e43995c881ea75ac7a659849e890a234f7f89911dbb7514c180",
+    "initial_state": "steady",
+    "intensity_regime": null,
+    "kv_block_size_tokens": 16,
+    "mapping_correspondence_hash": null,
+    "mapping_match": "compiler-chosen",
+    "model_identity_hash": "sha256:a36f6170875a30ab43e775421b1e44e798de6a52c04a7d5794e67e0989ee1535",
+    "noc_load_regime": null,
+    "op_class": null,
+    "precision": {
+      "compute": "bf16",
+      "kv_cache": "bf16",
+      "operands": {}
+    },
+    "prepared_bundle_hash": "sha256:3ef891336af031f9da1d9789cccc9d827bfba3c9eca52ee3bb3061eb33b72977"
+  },
+  "cases": [
+    {
+      "expected": "MATCH/estimated in synthetic evaluator mode with explicit compiler-chosen scope; error unknown; not operator duration or actual analytic evidence",
+      "id": "eligible-whole-iteration-no-band",
+      "mutations": []
+    },
+    {
+      "expected": "EvidenceIneligible: L3 requires ordering",
+      "id": "no-ordering",
+      "mutations": [
+        {
+          "path": "/ordering_hash",
+          "value": null
+        }
+      ]
+    },
+    {
+      "expected": "EvidenceIneligible",
+      "id": "review-not-independent",
+      "mutations": [
+        {
+          "artifact": "evidence-review.json",
+          "path": "/independent",
+          "value": false
+        }
+      ]
+    },
+    {
+      "expected": "MISMATCH for duration",
+      "id": "wrong-purpose",
+      "mutations": [
+        {
+          "path": "/purpose",
+          "value": "counts"
+        }
+      ]
+    },
+    {
+      "expected": "UNKNOWN even when evidence also null",
+      "id": "unknown-required-load",
+      "recipe_required_add": [
+        "dram_load_regime"
+      ],
+      "request_changes": {
+        "dram_load_regime": null
+      }
+    },
+    {
+      "expected": "MISMATCH",
+      "id": "precision-role-swap",
+      "request_changes": {
+        "precision": {
+          "compute": "fp8",
+          "kv_cache": "bf16",
+          "operands": {}
+        }
+      }
+    },
+    {
+      "evidence_scopes": [
+        {
+          "array_fill": null,
+          "dram_load_regime": null,
+          "family": "synthetic-large-core",
+          "frequency_ratio": 1.0,
+          "hardware_spec_hash": "sha256:cb268745ae183e43995c881ea75ac7a659849e890a234f7f89911dbb7514c180",
+          "initial_state": "steady",
+          "intensity_regime": "low",
+          "kv_block_size_tokens": 16,
+          "mapping_correspondence_hash": null,
+          "mapping_match": null,
+          "model_identity_hash": "sha256:a36f6170875a30ab43e775421b1e44e798de6a52c04a7d5794e67e0989ee1535",
+          "noc_load_regime": null,
+          "op_class": null,
+          "precision": {
+            "compute": "bf16",
+            "kv_cache": "bf16",
+            "operands": {}
+          },
+          "prepared_bundle_hash": "sha256:3ef891336af031f9da1d9789cccc9d827bfba3c9eca52ee3bb3061eb33b72977"
+        },
+        {
+          "array_fill": null,
+          "dram_load_regime": null,
+          "family": "synthetic-large-core",
+          "frequency_ratio": 1.0,
+          "hardware_spec_hash": "sha256:cb268745ae183e43995c881ea75ac7a659849e890a234f7f89911dbb7514c180",
+          "initial_state": "steady",
+          "intensity_regime": "high",
+          "kv_block_size_tokens": 16,
+          "mapping_correspondence_hash": null,
+          "mapping_match": null,
+          "model_identity_hash": "sha256:a36f6170875a30ab43e775421b1e44e798de6a52c04a7d5794e67e0989ee1535",
+          "noc_load_regime": null,
+          "op_class": null,
+          "precision": {
+            "compute": "fp8",
+            "kv_cache": "fp8",
+            "operands": {}
+          },
+          "prepared_bundle_hash": "sha256:3ef891336af031f9da1d9789cccc9d827bfba3c9eca52ee3bb3061eb33b72977"
+        }
+      ],
+      "expected": "MISMATCH; no cross-product",
+      "id": "independent-compound-cases",
+      "recipe_required_add": [
+        "intensity_regime"
+      ],
+      "request_changes": {
+        "intensity_regime": "high",
+        "precision": {
+          "compute": "bf16",
+          "kv_cache": "bf16",
+          "operands": {}
+        }
+      }
+    },
+    {
+      "claim_contributors": [],
+      "eligible_model": "L3",
+      "expected": "estimated; claim summary null",
+      "id": "no-claim-contributors"
+    },
+    {
+      "claim_contributors": [
+        "stub"
+      ],
+      "eligible_model": "L3",
+      "expected": "stub",
+      "id": "one-stub-claim"
+    },
+    {
+      "claim_contributors": [],
+      "eligible_model": null,
+      "expected": "stub and hidden even with opt-in",
+      "id": "empty-all-contributors"
+    },
+    {
+      "expected": "UNKNOWN; no ambient family inference",
+      "id": "unavailable-family",
+      "registry_lookup": "missing exact spec hash"
+    },
+    {
+      "expected": "ArtifactHashMismatch",
+      "id": "tamper-source",
+      "preserve_declared_hash": true
+    },
+    {
+      "duplicate_spec_with_other_family": true,
+      "expected": "AmbiguousArtifact",
+      "id": "ambiguous-registry"
+    },
+    {
+      "expected": "UNKNOWN; analytic policy name does not prove correspondence",
+      "id": "unknown-required-mapping",
+      "request_changes": {
+        "mapping_match": null
+      }
+    }
+  ],
+  "classification": "synthetic applicability fixtures; no real validation claim"
+}

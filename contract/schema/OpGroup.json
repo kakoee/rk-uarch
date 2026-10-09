@@ -1,0 +1,395 @@
+{
+  "$defs": {
+    "KvAccess": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "minimum": 1,
+          "title": "Block Size Tokens",
+          "type": "integer"
+        },
+        "context_tokens": {
+          "minimum": 1,
+          "title": "Context Tokens",
+          "type": "integer"
+        },
+        "last_page_valid_tokens": {
+          "minimum": 1,
+          "title": "Last Page Valid Tokens",
+          "type": "integer"
+        },
+        "pages_per_sequence": {
+          "minimum": 1,
+          "title": "Pages Per Sequence",
+          "type": "integer"
+        },
+        "read_policy": {
+          "const": "valid_tokens",
+          "title": "Read Policy",
+          "type": "string"
+        },
+        "write_policy": {
+          "const": "append_valid_tokens",
+          "title": "Write Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "block_size_tokens",
+        "context_tokens",
+        "last_page_valid_tokens",
+        "pages_per_sequence",
+        "read_policy",
+        "write_policy"
+      ],
+      "title": "KvAccess",
+      "type": "object"
+    },
+    "OpSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "dimensions": {
+          "patternProperties": {
+            "\\S": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Dimensions",
+          "type": "object"
+        },
+        "operands": {
+          "patternProperties": {
+            "\\S": {
+              "$ref": "#/$defs/Operand"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operands",
+          "type": "object"
+        },
+        "operator": {
+          "$ref": "#/$defs/Operator"
+        },
+        "reduction_axes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Reduction Axes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operator",
+        "dimensions",
+        "operands",
+        "reduction_axes"
+      ],
+      "title": "OpSpec",
+      "type": "object"
+    },
+    "Operand": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Size Tokens"
+        },
+        "dimensions": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "dtype": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "layout": {
+          "enum": [
+            "contiguous",
+            "paged"
+          ],
+          "title": "Layout",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dtype",
+        "dimensions",
+        "layout"
+      ],
+      "title": "Operand",
+      "type": "object"
+    },
+    "Operator": {
+      "enum": [
+        "q_projection",
+        "k_projection",
+        "v_projection",
+        "qk_score",
+        "softmax",
+        "av_application",
+        "output_projection",
+        "normalization",
+        "residual_addition",
+        "ffn_up",
+        "ffn_gate",
+        "ffn_down",
+        "activation",
+        "kv_write",
+        "embedding",
+        "lm_head",
+        "attention_fused"
+      ],
+      "title": "Operator",
+      "type": "string"
+    },
+    "Padding": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "minLength": 1,
+          "title": "Dimension",
+          "type": "string"
+        },
+        "logical": {
+          "minimum": 1,
+          "title": "Logical",
+          "type": "integer"
+        },
+        "physical": {
+          "minimum": 1,
+          "title": "Physical",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dimension",
+        "logical",
+        "physical"
+      ],
+      "title": "Padding",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "PreparedOp": {
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 0,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "embedding_local_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Embedding Local Tokens"
+        },
+        "fusion": {
+          "enum": [
+            "none",
+            "qk_softmax_av"
+          ],
+          "title": "Fusion",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kv_access": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KvAccess"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operand_access": {
+          "additionalProperties": {
+            "enum": [
+              "read",
+              "write",
+              "read_write"
+            ],
+            "type": "string"
+          },
+          "title": "Operand Access",
+          "type": "object"
+        },
+        "padding": {
+          "items": {
+            "$ref": "#/$defs/Padding"
+          },
+          "minItems": 0,
+          "title": "Padding",
+          "type": "array"
+        },
+        "replication": {
+          "items": {
+            "$ref": "#/$defs/Replication"
+          },
+          "minItems": 0,
+          "title": "Replication",
+          "type": "array"
+        },
+        "spec": {
+          "$ref": "#/$defs/OpSpec"
+        },
+        "weight_copies": {
+          "minimum": 1,
+          "title": "Weight Copies",
+          "type": "integer"
+        },
+        "work_repeat": {
+          "minimum": 1,
+          "title": "Work Repeat",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "depends_on",
+        "embedding_local_tokens",
+        "fusion",
+        "id",
+        "kv_access",
+        "operand_access",
+        "padding",
+        "replication",
+        "spec",
+        "weight_copies",
+        "work_repeat"
+      ],
+      "title": "PreparedOp",
+      "type": "object"
+    },
+    "Replication": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "minLength": 1,
+          "title": "Dimension",
+          "type": "string"
+        },
+        "global_extent": {
+          "minimum": 1,
+          "title": "Global Extent",
+          "type": "integer"
+        },
+        "rank_extent": {
+          "minimum": 1,
+          "title": "Rank Extent",
+          "type": "integer"
+        },
+        "replicas": {
+          "minimum": 1,
+          "title": "Replicas",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dimension",
+        "global_extent",
+        "rank_extent",
+        "replicas"
+      ],
+      "title": "Replication",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "depends_on": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 0,
+      "title": "Depends On",
+      "type": "array"
+    },
+    "id": {
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "head",
+        "decoder",
+        "tail"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "ops": {
+      "items": {
+        "$ref": "#/$defs/PreparedOp"
+      },
+      "minItems": 1,
+      "title": "Ops",
+      "type": "array"
+    },
+    "repeat": {
+      "minimum": 1,
+      "title": "Repeat",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "depends_on",
+    "id",
+    "kind",
+    "ops",
+    "repeat"
+  ],
+  "title": "OpGroup",
+  "type": "object"
+}

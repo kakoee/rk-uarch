@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "array_cols": {
+      "minimum": 1,
+      "title": "Array Cols",
+      "type": "integer"
+    },
+    "array_rows": {
+      "minimum": 1,
+      "title": "Array Rows",
+      "type": "integer"
+    },
+    "core_freq_hz": {
+      "minimum": 1,
+      "title": "Core Freq Hz",
+      "type": "integer"
+    },
+    "dram_bw_bytes_per_s": {
+      "gt": 0,
+      "title": "Dram Bw Bytes Per S",
+      "type": "number"
+    },
+    "dram_capacity_bytes": {
+      "minimum": 1,
+      "title": "Dram Capacity Bytes",
+      "type": "integer"
+    },
+    "dram_freq_hz": {
+      "minimum": 1,
+      "title": "Dram Freq Hz",
+      "type": "integer"
+    },
+    "hardware_spec_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Hardware Spec Hash",
+      "type": "string"
+    },
+    "matrix_peak_ops_per_s": {
+      "gt": 0,
+      "title": "Matrix Peak Ops Per S",
+      "type": "number"
+    },
+    "noc_freq_hz": {
+      "minimum": 1,
+      "title": "Noc Freq Hz",
+      "type": "integer"
+    },
+    "vector_peak_ops_per_s": {
+      "gt": 0,
+      "title": "Vector Peak Ops Per S",
+      "type": "number"
+    }
+  },
+  "required": [
+    "array_cols",
+    "array_rows",
+    "core_freq_hz",
+    "dram_bw_bytes_per_s",
+    "dram_capacity_bytes",
+    "dram_freq_hz",
+    "hardware_spec_hash",
+    "matrix_peak_ops_per_s",
+    "noc_freq_hz",
+    "vector_peak_ops_per_s"
+  ],
+  "title": "ResolvedHardware",
+  "type": "object"
+}

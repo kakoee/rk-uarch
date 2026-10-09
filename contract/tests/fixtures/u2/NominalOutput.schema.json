@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "ModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "physical-resolved",
+            "nominal-rk-compatibility"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "implementation_hash",
+        "name",
+        "version"
+      ],
+      "title": "ModelIdentity",
+      "type": "object"
+    },
+    "NominalCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "matrix_ops": {
+          "minimum": 0,
+          "title": "Matrix Ops",
+          "type": "number"
+        },
+        "memory_read_bytes": {
+          "minimum": 0,
+          "title": "Memory Read Bytes",
+          "type": "number"
+        },
+        "memory_write_bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Memory Write Bytes"
+        },
+        "vector_ops": {
+          "title": "Vector Ops",
+          "type": "null"
+        }
+      },
+      "required": [
+        "matrix_ops",
+        "memory_read_bytes",
+        "memory_write_bytes",
+        "vector_ops"
+      ],
+      "title": "NominalCounts",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "counts": {
+      "$ref": "#/$defs/NominalCounts"
+    },
+    "duration_s": {
+      "minimum": 0,
+      "title": "Duration S",
+      "type": "number"
+    },
+    "format": {
+      "const": "uarch-nominal-output/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Input Hash",
+      "type": "string"
+    },
+    "model_identity": {
+      "$ref": "#/$defs/ModelIdentity"
+    },
+    "omissions": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Omissions",
+      "type": "array"
+    },
+    "output_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Output Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "counts",
+    "duration_s",
+    "format",
+    "input_hash",
+    "model_identity",
+    "omissions",
+    "output_hash"
+  ],
+  "title": "NominalOutput",
+  "type": "object"
+}

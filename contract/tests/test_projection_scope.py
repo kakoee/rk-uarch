@@ -48,11 +48,11 @@ def test_replicated_kv_refused_before_even_an_exact_echo(self_test: bool) -> Non
 
 
 def test_reproduced_a_f12_read_difference_is_an_unsupported_projection(lane_a: Any) -> None:
-    from uarch_contract.request import CharacterizationRequest
+    from uarch_contract.request import LegacyCharacterizationRequest
 
     from .test_u_p1 import request_data
 
-    request = CharacterizationRequest.model_validate(request_data() | {"tp": 16})
+    request = LegacyCharacterizationRequest.model_validate(request_data() | {"tp": 16})
     model = request.model
     weights = model.active_params * 2
     kv = 2 * model.n_layers * model.kv_heads * model.head_dim * 2 * 32768
@@ -162,13 +162,13 @@ def test_duplicate_fixture_ids_are_refused_before_coverage_can_collapse() -> Non
 
 
 def test_valid_a_padded_vocabulary_is_unsupported_not_invalid_contract(lane_a: Any) -> None:
-    from uarch_contract.request import CharacterizationRequest
+    from uarch_contract.request import LegacyCharacterizationRequest
 
     from .test_u_p1 import request_data
 
     data = request_data()
     data["model_shape"]["vocab_size"] += 1
-    request = CharacterizationRequest.model_validate(data)
+    request = LegacyCharacterizationRequest.model_validate(data)
     row = supported(request.tp) | {
         "model": request.model.model_dump(mode="json"),
         "model_shape": request.model_shape.model_dump(mode="json"),

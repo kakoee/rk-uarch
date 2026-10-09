@@ -1,0 +1,296 @@
+{
+  "base_actual_gate": "physical discrepancy complete; evidence failed due to matrix discrepancies",
+  "cases": [
+    {
+      "artifact_evidence": "failed",
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "four-correct-refusals",
+      "mutation": [],
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "compatibility_pass",
+      "observation_evidence": "refused",
+      "physical_gate": "discrepancy_record_complete",
+      "validation_refusal": null
+    },
+    {
+      "artifact_evidence": "failed",
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "wrong-boundary",
+      "mutation": {
+        "observation_index": 0,
+        "rebind_synthetic_trace_and_hashes": true,
+        "set": {
+          "match_result": "wrong_boundary",
+          "observed_boundary": "rk.engine.orchestrator._accelerator"
+        }
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "compatibility_fail",
+      "observation_evidence": "refused",
+      "physical_gate": "discrepancy_record_complete",
+      "validation_refusal": null
+    },
+    {
+      "artifact_evidence": "failed",
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "wrong-class",
+      "mutation": {
+        "observation_index": 0,
+        "rebind_synthetic_trace_and_hashes": true,
+        "set": {
+          "error_class": "EngineError",
+          "match_result": "wrong_error_class"
+        }
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "compatibility_fail",
+      "observation_evidence": "refused",
+      "physical_gate": "discrepancy_record_complete",
+      "validation_refusal": null
+    },
+    {
+      "artifact_evidence": "failed",
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "unexpected-success",
+      "mutation": {
+        "observation_index": 0,
+        "rebind_synthetic_trace_and_hashes": true,
+        "set": {
+          "error_class": null,
+          "evidence_outcome": "passed",
+          "execution": "succeeded",
+          "match_result": "unexpected_success"
+        }
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "compatibility_fail",
+      "observation_evidence": "passed",
+      "physical_gate": "discrepancy_record_complete",
+      "validation_refusal": null
+    },
+    {
+      "artifact_evidence": "execution_failed",
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "execution-failure",
+      "mutation": {
+        "observation_index": 0,
+        "rebind_synthetic_trace_and_hashes": true,
+        "set": {
+          "error_class": "OSError",
+          "evidence_outcome": "execution_failed",
+          "execution": "execution_failed",
+          "match_result": "execution_failed"
+        }
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "compatibility_fail",
+      "observation_evidence": "execution_failed",
+      "physical_gate": "discrepancy_record_complete",
+      "validation_refusal": null
+    },
+    {
+      "artifact_evidence": "failed",
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "required-not-run",
+      "mutation": {
+        "observation_index": 0,
+        "rebind_synthetic_trace_and_hashes": true,
+        "set": {
+          "error_class": null,
+          "evidence_outcome": "unassessed",
+          "execution": "not_run",
+          "match_result": "not_run",
+          "observed_boundary": null,
+          "trace_hash": null
+        }
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "compatibility_fail",
+      "observation_evidence": "unassessed",
+      "physical_gate": "not_assessed",
+      "validation_refusal": null
+    },
+    {
+      "artifact_evidence": "failed",
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "unexpected-refusal",
+      "mutation": {
+        "append": "r1-recorded-probe-observation.json"
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "compatibility_fail",
+      "observation_evidence": "refused",
+      "physical_gate": "discrepancy_record_complete",
+      "validation_refusal": null
+    },
+    {
+      "artifact_evidence": null,
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "missing-observation",
+      "mutation": {
+        "remove_observation": 0
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "not_assessed",
+      "observation_evidence": null,
+      "physical_gate": "not_assessed",
+      "validation_refusal": "RefusalObservationMissing"
+    },
+    {
+      "artifact_evidence": null,
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "duplicate-observation",
+      "mutation": {
+        "duplicate_observation": 0
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "not_assessed",
+      "observation_evidence": null,
+      "physical_gate": "not_assessed",
+      "validation_refusal": "DuplicateRefusalObservation"
+    },
+    {
+      "artifact_evidence": null,
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "unknown-observation-id",
+      "mutation": {
+        "observation_id": "not-in-inventory"
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "not_assessed",
+      "observation_evidence": null,
+      "physical_gate": "not_assessed",
+      "validation_refusal": "UnknownExpectedRefusal"
+    },
+    {
+      "artifact_evidence": null,
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "unknown-extra-expected-entry",
+      "mutation": {
+        "append_expected_source_index": 4
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "not_assessed",
+      "observation_evidence": null,
+      "physical_gate": "not_assessed",
+      "validation_refusal": "RefusalInventoryMismatch"
+    },
+    {
+      "artifact_evidence": null,
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "duplicate-expected-id",
+      "mutation": {
+        "duplicate_expected": 0
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "not_assessed",
+      "observation_evidence": null,
+      "physical_gate": "not_assessed",
+      "validation_refusal": "DuplicateExpectedRefusal"
+    },
+    {
+      "artifact_evidence": null,
+      "base": "comparison-physical.json + comparison-inventory.json",
+      "id": "source-mismatch",
+      "mutation": {
+        "observation_input_hash": "retained different input, valid self hashes"
+      },
+      "nominal_gate_on_isolated_otherwise_passing_inventory": "not_assessed",
+      "observation_evidence": null,
+      "physical_gate": "not_assessed",
+      "validation_refusal": "RefusalSourceMismatch"
+    }
+  ],
+  "channels": [
+    {
+      "actual": {
+        "state": "known",
+        "value": 0
+      },
+      "execution": "executed",
+      "fixture_outcome": "passed",
+      "gate_obligation": "satisfied",
+      "id": "zero-zero",
+      "outcome": "passed",
+      "reference": {
+        "state": "zero",
+        "value": 0
+      }
+    },
+    {
+      "actual": {
+        "state": "not_produced",
+        "value": null
+      },
+      "execution": "executed",
+      "fixture_outcome": "unassessed",
+      "gate_obligation": "failed",
+      "id": "known-reference-unavailable",
+      "outcome": "unassessed",
+      "physical_record": "complete with attempted execution and reason",
+      "reference": {
+        "state": "positive",
+        "value": 1000
+      }
+    },
+    {
+      "actual": {
+        "state": "known",
+        "value": 288
+      },
+      "execution": "executed",
+      "fixture_outcome": "unassessed",
+      "gate_obligation": "excluded-reference only; actual retained",
+      "id": "null-known",
+      "outcome": "unassessed",
+      "reference": {
+        "state": "null",
+        "value": null
+      }
+    },
+    {
+      "actual": {
+        "state": "known",
+        "value": 572
+      },
+      "execution": "executed",
+      "fixture_outcome": "unassessed",
+      "gate_obligation": "excluded-reference only; actual retained",
+      "id": "absent-known",
+      "outcome": "unassessed",
+      "reference": {
+        "state": "absent",
+        "value": null
+      }
+    },
+    {
+      "actual": {
+        "state": "unmodelled",
+        "value": null
+      },
+      "execution": "executed",
+      "fixture_outcome": "unassessed",
+      "gate_obligation": "satisfied only for declared nominal omission",
+      "id": "nominal-omission",
+      "outcome": "modelled_absence",
+      "reference": {
+        "state": "null",
+        "value": null
+      }
+    },
+    {
+      "execution": "not_run",
+      "fixture_outcome": "unassessed",
+      "id": "query-not-run",
+      "nominal_gate": "compatibility_fail",
+      "outcome": "unassessed",
+      "physical_gate": "not_assessed"
+    },
+    {
+      "execution": "execution_failed",
+      "fixture_outcome": "execution_failed",
+      "id": "query-execution-failure",
+      "nominal_gate": "compatibility_fail",
+      "outcome": "execution_failed",
+      "physical_gate": "discrepancy_record_complete if complete attempted trace"
+    },
+    {
+      "execution": "pre_call_refusal",
+      "fixture_outcome": "refused",
+      "gate_obligation": "satisfied only when projection guard actually requires refusal",
+      "id": "A-F12",
+      "outcome": "refused"
+    }
+  ],
+  "classification": "independent semantic expected outcomes; future comparator not executed",
+  "isolated_rule": "Nominal column isolates the mutated obligation with every other required check satisfying its gate; base sample remains compatibility_fail due to existing numeric discrepancies.",
+  "rehash_rule": "Apply mutations to the typed base; for claimed observed changes update synthetic trace first, its hash, observation hash and comparison hash. Source-mismatch deliberately remains inconsistent. Invalid expected/observation cases remain structurally valid but semantically refused."
+}

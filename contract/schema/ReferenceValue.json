@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "positive"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "zero"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "absent"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "state": {
+      "enum": [
+        "positive",
+        "zero",
+        "null",
+        "absent"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "ge": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Value"
+    }
+  },
+  "required": [
+    "state",
+    "value"
+  ],
+  "title": "ReferenceValue",
+  "type": "object"
+}

@@ -1,0 +1,140 @@
+{
+  "$defs": {
+    "ModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "physical-resolved",
+            "nominal-rk-compatibility"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "implementation_hash",
+        "name",
+        "version"
+      ],
+      "title": "ModelIdentity",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assumptions_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Assumptions Hash",
+      "type": "string"
+    },
+    "comparison_hashes": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "title": "Comparison Hashes",
+      "type": "array"
+    },
+    "context_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Context Hash",
+      "type": "string"
+    },
+    "evidence_index": {
+      "additionalProperties": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Evidence Index",
+      "type": "object"
+    },
+    "family_registry_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Family Registry Hash",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-report-context/2",
+      "title": "Format",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Limitations",
+      "type": "array"
+    },
+    "metric_dependencies_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Metric Dependencies Hash",
+      "type": "string"
+    },
+    "model_identity": {
+      "$ref": "#/$defs/ModelIdentity"
+    },
+    "request_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Request Hash",
+      "type": "string"
+    },
+    "used_energy_families": {
+      "items": {
+        "enum": [
+          "mac",
+          "sram",
+          "noc_hop",
+          "dram",
+          "static"
+        ],
+        "type": "string"
+      },
+      "minItems": 0,
+      "title": "Used Energy Families",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "verification_hashes": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "title": "Verification Hashes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "assumptions_hash",
+    "comparison_hashes",
+    "context_hash",
+    "evidence_index",
+    "family_registry_hash",
+    "format",
+    "limitations",
+    "metric_dependencies_hash",
+    "model_identity",
+    "request_hash",
+    "used_energy_families",
+    "verification_hashes"
+  ],
+  "title": "ReportContext",
+  "type": "object"
+}

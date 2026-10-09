@@ -3,7 +3,7 @@
   "additionalProperties": false,
   "properties": {
     "decode": {
-      "const": "bilinear in (log B, log T); linear in 1/f",
+      "const": "none",
       "title": "Decode",
       "type": "string"
     },
@@ -13,15 +13,15 @@
       "type": "string"
     },
     "prefill": {
-      "const": "bilinear in (log n, log L); linear in 1/f",
+      "const": "none",
       "title": "Prefill",
       "type": "string"
     }
   },
   "required": [
     "decode",
-    "prefill",
-    "outside_grid"
+    "outside_grid",
+    "prefill"
   ],
   "title": "Interpolation",
   "type": "object"

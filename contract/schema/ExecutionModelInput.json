@@ -1,0 +1,159 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "acceptance": {
+      "enum": [
+        "proposed",
+        "accepted_input"
+      ],
+      "title": "Acceptance",
+      "type": "string"
+    },
+    "assumption_note": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Assumption Note",
+      "type": "string"
+    },
+    "compute": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "evidence_hashes": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 0,
+      "title": "Evidence Hashes",
+      "type": "array"
+    },
+    "execution_model_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Execution Model Hash",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-execution-model/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "scalar_efficiency",
+        "split_efficiency"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "memory": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "acceptance",
+    "assumption_note",
+    "compute",
+    "evidence_hashes",
+    "execution_model_hash",
+    "format",
+    "kind",
+    "memory"
+  ],
+  "title": "ExecutionModelInput",
+  "type": "object"
+}

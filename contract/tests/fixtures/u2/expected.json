@@ -1,0 +1,49 @@
+{
+  "activation_vector_ops_all_layers": 96,
+  "attention_per_layer": {
+    "kv_read_bytes": 136,
+    "last_page_valid_tokens": 1,
+    "matrix_ops": 272,
+    "pages_per_sequence": 2,
+    "vector_ops": 170
+  },
+  "classification": "hand-authored two-layer tiny decoder; independent of future producer",
+  "decoder_template_ops": 14,
+  "embedding_instances": 1,
+  "expanded_op_count": 31,
+  "expected_scope": "one rank tp1, one iteration, two layers; context 17 includes appended token",
+  "kv_write_all_layers_bytes": 16,
+  "lm_head_instances": 1,
+  "matrix_ops": 1184,
+  "memory_read_bytes": 1296,
+  "memory_write_bytes": 288,
+  "model": {
+    "active_params": 372,
+    "d_model": 4,
+    "experts_per_token": 0,
+    "kv_heads": 1,
+    "n_experts": 0,
+    "n_heads": 2,
+    "n_layers": 2,
+    "name": "synthetic-d4",
+    "total_params": 372
+  },
+  "norm_vector_ops_all_layers_and_tail": 120,
+  "not_measured": true,
+  "prefill_L1": {
+    "matrix_ops": 672,
+    "memory_read_bytes": 1040,
+    "memory_write_bytes": 288,
+    "vector_ops": 252
+  },
+  "residual_vector_ops_all_layers": 16,
+  "shape": {
+    "attention": "gqa",
+    "d_ff": 8,
+    "expert_d_ff": null,
+    "gated_mlp": true,
+    "tie_embeddings": false,
+    "vocab_size": 8
+  },
+  "vector_ops": 572
+}

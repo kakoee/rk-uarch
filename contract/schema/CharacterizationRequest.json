@@ -447,6 +447,24 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "accounting": {
+      "const": "resolved-ops/1",
+      "title": "Accounting",
+      "type": "string"
+    },
+    "analytic_mode": {
+      "enum": [
+        "aggregate",
+        "per_op"
+      ],
+      "title": "Analytic Mode",
+      "type": "string"
+    },
+    "assumptions_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Assumptions Hash",
+      "type": "string"
+    },
     "component_id": {
       "minLength": 1,
       "pattern": "\\S",
@@ -454,7 +472,7 @@
       "type": "string"
     },
     "contract": {
-      "const": "uarch-contract/0.1",
+      "const": "uarch-contract/0.2",
       "title": "Contract",
       "type": "string"
     },
@@ -495,6 +513,16 @@
     "precision": {
       "$ref": "#/$defs/Precision"
     },
+    "preparation_policy": {
+      "const": "balanced-tp/1",
+      "title": "Preparation Policy",
+      "type": "string"
+    },
+    "prepared_input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Prepared Input Hash",
+      "type": "string"
+    },
     "rk_schema_snapshot": {
       "pattern": "^[0-9a-f]{40}$",
       "title": "Rk Schema Snapshot",
@@ -526,7 +554,6 @@
     }
   },
   "required": [
-    "contract",
     "rk_schema_snapshot",
     "component_id",
     "hardware_spec_hash",
@@ -539,7 +566,13 @@
     "mapping_policy",
     "uarch_fidelity",
     "kv_layout",
-    "seed"
+    "seed",
+    "accounting",
+    "analytic_mode",
+    "assumptions_hash",
+    "contract",
+    "preparation_policy",
+    "prepared_input_hash"
   ],
   "title": "CharacterizationRequest",
   "type": "object"

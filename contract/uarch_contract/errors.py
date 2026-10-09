@@ -91,7 +91,142 @@ class ShardIndivisible(ContractError):
     sentence = "The model dimension cannot be divided into the requested tp shards."
 
 
+class ArtifactHashMismatch(ContractError):
+    sentence = "ArtifactHashMismatch: accepted artifact validation refused."
+
+
+class ArtifactMissing(ContractError):
+    sentence = "ArtifactMissing: accepted artifact validation refused."
+
+
+class ReviewSubjectMismatch(ContractError):
+    sentence = "ReviewSubjectMismatch: accepted artifact validation refused."
+
+
+class RefusalObservationMissing(ContractError):
+    sentence = "RefusalObservationMissing: accepted artifact validation refused."
+
+
+class DuplicateRefusalObservation(ContractError):
+    sentence = "DuplicateRefusalObservation: accepted artifact validation refused."
+
+
+class UnknownExpectedRefusal(ContractError):
+    sentence = "UnknownExpectedRefusal: accepted artifact validation refused."
+
+
+class RefusalInventoryMismatch(ContractError):
+    sentence = "RefusalInventoryMismatch: accepted artifact validation refused."
+
+
+class DuplicateExpectedRefusal(ContractError):
+    sentence = "DuplicateExpectedRefusal: accepted artifact validation refused."
+
+
+class RefusalSourceMismatch(ContractError):
+    sentence = "RefusalSourceMismatch: accepted artifact validation refused."
+
+
+class IncompleteComparisonInventory(ContractError):
+    sentence = "IncompleteComparisonInventory: accepted artifact validation refused."
+
+
+class ComparisonOutcomeMismatch(ContractError):
+    sentence = "ComparisonOutcomeMismatch: accepted artifact validation refused."
+
+
+class ComparisonPolicyViolation(ContractError):
+    sentence = "ComparisonPolicyViolation: accepted artifact validation refused."
+
+
+class MissingSourceMetricRecipe(ContractError):
+    sentence = "MissingSourceMetricRecipe: accepted artifact validation refused."
+
+
+class AmbiguousSourceMetricRecipe(ContractError):
+    sentence = "AmbiguousSourceMetricRecipe: accepted artifact validation refused."
+
+
+class CyclicMetricRecipe(ContractError):
+    sentence = "CyclicMetricRecipe: accepted artifact validation refused."
+
+
+class MetricPurposeMismatch(ContractError):
+    sentence = "MetricPurposeMismatch: accepted artifact validation refused."
+
+
+class IncompleteMetricContributors(ContractError):
+    sentence = "IncompleteMetricContributors: accepted artifact validation refused."
+
+
+class MissingMetricRecipe(ContractError):
+    sentence = "MissingMetricRecipe: accepted artifact validation refused."
+
+
+class ContentHashMismatch(ContractError):
+    sentence = "ContentHashMismatch: accepted artifact validation refused."
+
+
+class UnsupportedPreparedVersion(ContractError):
+    sentence = "UnsupportedPreparedVersion: accepted artifact validation refused."
+
+
+class UnsupportedRankScope(ContractError):
+    sentence = "UnsupportedRankScope: accepted artifact validation refused."
+
+
+class UnsupportedPrecision(ContractError):
+    sentence = "UnsupportedPrecision: accepted artifact validation refused."
+
+
+class MissingCoverage(ContractError):
+    sentence = "MissingCoverage: accepted artifact validation refused."
+
+
+class InvalidPreparedGraph(ContractError):
+    sentence = "InvalidPreparedGraph: accepted artifact validation refused."
+
+
+class InvalidDependency(ContractError):
+    sentence = "InvalidDependency: accepted artifact validation refused."
+
+
+class UnsupportedMappingScope(ContractError):
+    sentence = "UnsupportedMappingScope: accepted artifact validation refused."
+
+
+class FusionMismatch(ContractError):
+    sentence = "FusionMismatch: accepted artifact validation refused."
+
+
 ErrorCode = Literal[
+    "InvalidDependency",
+    "UnsupportedMappingScope",
+    "FusionMismatch",
+    "ArtifactHashMismatch",
+    "ArtifactMissing",
+    "ReviewSubjectMismatch",
+    "RefusalObservationMissing",
+    "DuplicateRefusalObservation",
+    "UnknownExpectedRefusal",
+    "RefusalInventoryMismatch",
+    "DuplicateExpectedRefusal",
+    "RefusalSourceMismatch",
+    "IncompleteComparisonInventory",
+    "ComparisonOutcomeMismatch",
+    "ComparisonPolicyViolation",
+    "MissingSourceMetricRecipe",
+    "AmbiguousSourceMetricRecipe",
+    "CyclicMetricRecipe",
+    "MetricPurposeMismatch",
+    "IncompleteMetricContributors",
+    "MissingMetricRecipe",
+    "ContentHashMismatch",
+    "UnsupportedPreparedVersion",
+    "UnsupportedRankScope",
+    "UnsupportedPrecision",
+    "MissingCoverage",
+    "InvalidPreparedGraph",
     "NoTableForComponent",
     "EnvelopeExceedsGrid",
     "SpecHashMismatch",
@@ -113,6 +248,33 @@ ErrorCode = Literal[
 ERROR_TYPES: dict[str, type[ContractError] | type[ContractMinorMismatch]] = {
     cls.__name__: cls
     for cls in (
+        InvalidDependency,
+        UnsupportedMappingScope,
+        FusionMismatch,
+        ArtifactHashMismatch,
+        ArtifactMissing,
+        ReviewSubjectMismatch,
+        RefusalObservationMissing,
+        DuplicateRefusalObservation,
+        UnknownExpectedRefusal,
+        RefusalInventoryMismatch,
+        DuplicateExpectedRefusal,
+        RefusalSourceMismatch,
+        IncompleteComparisonInventory,
+        ComparisonOutcomeMismatch,
+        ComparisonPolicyViolation,
+        MissingSourceMetricRecipe,
+        AmbiguousSourceMetricRecipe,
+        CyclicMetricRecipe,
+        MetricPurposeMismatch,
+        IncompleteMetricContributors,
+        MissingMetricRecipe,
+        ContentHashMismatch,
+        UnsupportedPreparedVersion,
+        UnsupportedRankScope,
+        UnsupportedPrecision,
+        MissingCoverage,
+        InvalidPreparedGraph,
         NoTableForComponent,
         EnvelopeExceedsGrid,
         SpecHashMismatch,

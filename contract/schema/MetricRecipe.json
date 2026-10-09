@@ -1,0 +1,96 @@
+{
+  "$defs": {
+    "DependencySelector": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifact Hash",
+          "type": "string"
+        },
+        "json_pointer": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Json Pointer",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "hardware_leaf",
+            "prepared_content",
+            "model_assumption",
+            "model_evidence",
+            "result_field"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "json_pointer",
+        "kind"
+      ],
+      "title": "DependencySelector",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "applicable_dimensions": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Applicable Dimensions",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "granularity": {
+      "enum": [
+        "operator",
+        "whole_iteration",
+        "input"
+      ],
+      "title": "Granularity",
+      "type": "string"
+    },
+    "metric_path": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Metric Path",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "duration",
+        "counts",
+        "diagnostics",
+        "energy",
+        "input"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "selectors": {
+      "items": {
+        "$ref": "#/$defs/DependencySelector"
+      },
+      "minItems": 1,
+      "title": "Selectors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "applicable_dimensions",
+    "granularity",
+    "metric_path",
+    "purpose",
+    "selectors"
+  ],
+  "title": "MetricRecipe",
+  "type": "object"
+}

@@ -1,0 +1,74 @@
+{
+  "$defs": {
+    "DecodeQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "phase": {
+          "const": "decode",
+          "title": "Phase",
+          "type": "string"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "batch",
+        "phase",
+        "total_context_tokens"
+      ],
+      "title": "DecodeQuery",
+      "type": "object"
+    },
+    "PrefillQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "phase": {
+          "const": "prefill",
+          "title": "Phase",
+          "type": "string"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "n_prompts",
+        "phase",
+        "prompt_tokens"
+      ],
+      "title": "PrefillQuery",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "discriminator": {
+    "mapping": {
+      "decode": "#/$defs/DecodeQuery",
+      "prefill": "#/$defs/PrefillQuery"
+    },
+    "propertyName": "phase"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/DecodeQuery"
+    },
+    {
+      "$ref": "#/$defs/PrefillQuery"
+    }
+  ]
+}

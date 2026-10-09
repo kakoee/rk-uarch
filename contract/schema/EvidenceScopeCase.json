@@ -1,0 +1,226 @@
+{
+  "$defs": {
+    "EvidencePrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Compute",
+          "type": "string"
+        },
+        "kv_cache": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Kv Cache"
+        },
+        "operands": {
+          "additionalProperties": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Operands",
+          "type": "object"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache",
+        "operands"
+      ],
+      "title": "EvidencePrecision",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "array_fill": {
+      "anyOf": [
+        {
+          "enum": [
+            "underfilled",
+            "full"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Array Fill"
+    },
+    "dram_load_regime": {
+      "anyOf": [
+        {
+          "enum": [
+            "low",
+            "middle",
+            "high"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dram Load Regime"
+    },
+    "family": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Family",
+      "type": "string"
+    },
+    "frequency_ratio": {
+      "ge": 0,
+      "title": "Frequency Ratio",
+      "type": "number"
+    },
+    "hardware_spec_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Hardware Spec Hash"
+    },
+    "initial_state": {
+      "enum": [
+        "steady",
+        "cold"
+      ],
+      "title": "Initial State",
+      "type": "string"
+    },
+    "intensity_regime": {
+      "anyOf": [
+        {
+          "enum": [
+            "low",
+            "middle",
+            "high"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Intensity Regime"
+    },
+    "kv_block_size_tokens": {
+      "minimum": 1,
+      "title": "Kv Block Size Tokens",
+      "type": "integer"
+    },
+    "mapping_correspondence_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Mapping Correspondence Hash"
+    },
+    "mapping_match": {
+      "anyOf": [
+        {
+          "enum": [
+            "matched",
+            "compiler-chosen"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Mapping Match"
+    },
+    "model_identity_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Model Identity Hash",
+      "type": "string"
+    },
+    "noc_load_regime": {
+      "anyOf": [
+        {
+          "enum": [
+            "low",
+            "middle",
+            "high"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Noc Load Regime"
+    },
+    "op_class": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Op Class"
+    },
+    "precision": {
+      "$ref": "#/$defs/EvidencePrecision"
+    },
+    "prepared_bundle_hash": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Prepared Bundle Hash"
+    }
+  },
+  "required": [
+    "array_fill",
+    "dram_load_regime",
+    "family",
+    "frequency_ratio",
+    "hardware_spec_hash",
+    "initial_state",
+    "intensity_regime",
+    "kv_block_size_tokens",
+    "mapping_correspondence_hash",
+    "mapping_match",
+    "model_identity_hash",
+    "noc_load_regime",
+    "op_class",
+    "precision",
+    "prepared_bundle_hash"
+  ],
+  "title": "EvidenceScopeCase",
+  "type": "object"
+}

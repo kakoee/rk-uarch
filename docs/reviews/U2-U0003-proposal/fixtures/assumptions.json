@@ -1,0 +1,24 @@
+{
+  "algorithms": {
+    "activation": "silu-5md-plus-gate/1",
+    "compute_overlap": "serialize-matrix-vector/1",
+    "embedding": "supplied-conserved-hit-vector/1",
+    "kv": "valid-tokens-context-includes-append/1",
+    "normalization": "rms-6md/1",
+    "residency": "partial-weight-kv-checks-total-peak-unknown/1",
+    "softmax": "scalar-5pairs/1",
+    "traffic": "once-per-operand-no-retention/1",
+    "vector_rate": "cores-times-ops-per-cycle-times-resolved-core-hz/1"
+  },
+  "assumptions_hash": "sha256:ede89012b8843ff1b35c1ffe55f815a21e464866c08d5c14e59a363661c06321",
+  "format": "uarch-assumptions/1",
+  "limitations": [
+    "Abstract vector operation rate is unvalidated for transcendental algorithms.",
+    "No independent full-workload physical timing validation."
+  ],
+  "model": {
+    "implementation_hash": "sha256:7bd2ba3b8801dc3007e46b049fdc0ab84148e85e0b292cfc288ba3b756f3e411",
+    "name": "physical-resolved",
+    "version": "1-proposed"
+  }
+}

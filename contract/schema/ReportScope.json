@@ -1,0 +1,144 @@
+{
+  "$defs": {
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "ReportScopePrecisionRoles": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "operands": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Operands",
+          "type": "object"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache",
+        "operands"
+      ],
+      "title": "ReportScopePrecisionRoles",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "array_fill": {
+      "anyOf": [
+        {
+          "enum": [
+            "underfilled",
+            "full"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Array Fill"
+    },
+    "dram_load_regime": {
+      "anyOf": [
+        {
+          "enum": [
+            "low",
+            "middle",
+            "high"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dram Load Regime"
+    },
+    "intensity_regime": {
+      "anyOf": [
+        {
+          "enum": [
+            "low",
+            "middle",
+            "high"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Intensity Regime"
+    },
+    "mapping_match": {
+      "anyOf": [
+        {
+          "enum": [
+            "matched",
+            "compiler-chosen"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Mapping Match"
+    },
+    "noc_load_regime": {
+      "anyOf": [
+        {
+          "enum": [
+            "low",
+            "middle",
+            "high"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Noc Load Regime"
+    },
+    "op_class": {
+      "minLength": 1,
+      "title": "Op Class",
+      "type": "string"
+    },
+    "precision_roles": {
+      "$ref": "#/$defs/ReportScopePrecisionRoles"
+    }
+  },
+  "required": [
+    "array_fill",
+    "dram_load_regime",
+    "intensity_regime",
+    "mapping_match",
+    "noc_load_regime",
+    "op_class",
+    "precision_roles"
+  ],
+  "title": "ReportScope",
+  "type": "object"
+}

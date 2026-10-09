@@ -1,0 +1,125 @@
+"""Read-only proposal checks; does not implement/run a comparator or renderer.
+Independent semantic expected verdicts remain test specifications, not runtime results.
+"""
+from pathlib import Path
+import copy,hashlib,json,math,sys
+import jsonschema
+R=Path.cwd();P=R/'docs/reviews/U2-U0003-proposal';F=P/'fixtures'
+def load(n):return json.loads((F/n).read_text())
+def H(x):return 'sha256:'+hashlib.sha256(json.dumps(x,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()).hexdigest()
+def pointer(x,path):
+ for k in path.split('/')[1:]:
+  k=k.replace('~1','/').replace('~0','~');x=x[int(k)] if isinstance(x,list) else x[k]
+ return x
+schema=json.loads((P/'proposed.schema.json').read_text());jsonschema.Draft202012Validator.check_schema(schema)
+def validate(typ,x):jsonschema.Draft202012Validator({'$defs':schema['$defs'],'$ref':'#/$defs/'+typ}).validate(x)
+catalog=load('amendment-fixture-catalog.json');objects={};payloads=[];hashes=0;reviews=0
+keys={'AssumptionSet':'assumptions_hash','PreparedBundle':'bundle_hash','EngineJob':'job_hash','EngineResult':'result_hash','Derivation':'derivation_hash','ComponentPrecision':'precision_hash','ComponentExport':'export_hash','ExportBinding':'binding_hash','UpstreamComponentBinding':'binding_hash','ExecutionModelInput':'execution_model_hash','ReferenceInventory':'inventory_hash','ComparisonArtifact':'comparison_hash','EvidenceRecord':'evidence_hash','SourceRecord':'source_hash','ReviewRecord':'review_hash','OrderingRecord':'ordering_hash','VerificationRecord':'verification_hash','FamilyRegistry':'registry_hash','MetricDependencies':'dependencies_hash','ReportContext':'context_hash','UarchCostTable':'table_hash','RenderSpec':'render_hash','NominalInput':'input_hash','NominalOutput':'output_hash','PrecisionCheckInput':'input_hash','PrecisionCheckTrace':'trace_hash','PrecisionRefusalObservation':'observation_hash'}
+for item in catalog:
+ x=json.loads((P/item['path']).read_text());validate(item['type'],x);payloads.append((item,x));key=keys.get(item['type'])
+ if key:
+  assert H({k:v for k,v in x.items() if k!=key})==x[key],item['path'];objects[x[key]]=x;hashes+=1
+for item,x in payloads:
+ if 'review_hash' in x and item['type']!='ReviewRecord':
+  body=H({k:v for k,v in x.items() if k not in [keys[item['type']],'review_hash']});assert body in objects[x['review_hash']]['reviewed_subject_hashes'];reviews+=1
+for path in F.glob('*.json'):
+ x=json.loads(path.read_text());objects[H(x)]=x
+probe=json.loads((P/'loader-probe-results.json').read_text());objects[H(probe)]=probe
+b=load('independent-bundle.json');objects[H(b['hardware_spec'])]=b['hardware_spec']
+inv=load('comparison-inventory.json');comp=load('comparison-physical.json');assert len(inv['refusals'])==len(comp['precision_refusal_observations'])==4
+assert comp['reference_inventory_hash']==inv['inventory_hash'];source=inv['refusal_inventory_source'];expected_source=pointer(objects[source['artifact_hash']],source['json_pointer']);assert len(expected_source)==4
+assert len({x['refusal_id'] for x in inv['refusals']})==4
+assert {x['source_entry_index'] for x in inv['refusals']}==set(range(4))
+for e,o in zip(inv['refusals'],comp['precision_refusal_observations']):
+ ci=objects[e['check_input_hash']];t=objects[o['trace_hash']];source_entry=expected_source[e['source_entry_index']]
+ assert o['refusal_id']==e['refusal_id'] and o['check_input_hash']==e['check_input_hash']
+ assert ci['component_binding_hash']==e['component_binding_hash'] and ci['precision']==e['precision']
+ assert ci['component_role']==source_entry['component'] and ci['precision']=={'compute':source_entry['compute'],'kv_cache':source_entry['kv_cache']}
+ assert ci['requested_boundary']==e['boundary']==source_entry['boundary']==o['observed_boundary']
+ assert e['error_class']==source_entry['error']==o['error_class']=='UnsupportedPrecision'
+ for k in ['execution','observed_boundary','error_class','check_input_hash']:assert o[k]==t[k]
+ assert o['evidence_outcome']=='refused' and o['match_result']=='matched' and t['classification']=='synthetic_observation'
+captured=load('r1-recorded-probe-trace.json');raw=pointer(objects[captured['capture_source']['artifact_hash']],captured['capture_source']['json_pointer']);assert raw['error_class']==captured['error_class'] and raw['message']==captured['message'];assert captured['classification']=='captured_probe'
+# Shape/hash-check each materialized semantic case. No comparator computes the expected enums.
+semantic=load('r1-semantic-cases.json')['cases']
+for case in semantic:
+ validate('ReferenceInventory',case['inventory']);validate('ComparisonArtifact',case['comparison'])
+ for typ,key in [('inventory','inventory_hash'),('comparison','comparison_hash')]:assert H({k:v for k,v in case[typ].items() if k!=key})==case[typ][key]
+ assert case['comparison']['reference_inventory_hash']==case['inventory']['inventory_hash']
+ for tr in case['additional_synthetic_traces']:validate('PrecisionCheckTrace',tr);assert H({k:v for k,v in tr.items() if k!='trace_hash'})==tr['trace_hash']
+byid={x['case_id']:x for x in semantic}
+assert byid['wrong-boundary']['expected']['observation_evidence']=='refused'
+assert byid['unexpected-success']['expected']['observation_evidence']=='passed' and byid['unexpected-success']['expected']['nominal_gate_on_isolated_otherwise_passing_inventory']=='compatibility_fail'
+assert byid['execution-failure']['comparison']['evidence_outcome']=='execution_failed'
+assert byid['required-not-run']['comparison']['gate_outcome']=='not_assessed'
+assert byid['four-correct-refusals']['comparison']['evidence_outcome']=='failed' and byid['four-correct-refusals']['comparison']['gate_outcome']=='discrepancy_record_complete'
+for name in ['missing-observation','duplicate-observation','unknown-observation-id','unknown-extra-expected-entry','duplicate-expected-id','source-mismatch']:
+ assert byid[name]['expected']['validation_refusal'] and byid[name]['expected']['artifact_evidence'] is None and byid[name]['comparison']['gate_outcome']=='not_assessed'
+channels=load('r1-channels.json')['cases']
+for case in channels:
+ validate('ComparisonChannel',case['channel']);a=case['channel']['actual']
+ if a['state']=='known':assert pointer(objects[a['source_hash']],a['source_pointer'])==a['value']
+assert next(x for x in channels if x['case_id']=='known-reference-unavailable')['channel']['outcome']=='unassessed'
+assert next(x for x in channels if x['case_id']=='nominal-omission')['channel']['outcome']=='modelled_absence'
+# Check finite-sample purpose coverage and complete dependency topology, not badge evaluation.
+deps=load('metric-dependencies.json');source_recipes={(x['artifact_hash'],x['recipe']['metric_path']):x for x in deps['source_recipes']};assert len(source_recipes)==len(deps['source_recipes'])
+source_edges=[];selectors=0
+for rec in deps['recipes']+[x['recipe'] for x in deps['source_recipes']]:
+ for sel in rec['selectors']:
+  pointer(objects[sel['artifact_hash']],sel['json_pointer']);selectors+=1
+  if sel['kind']=='result_field':
+   sr=source_recipes[(sel['artifact_hash'],sel['json_pointer'])];assert sr['recipe']['purpose']==rec['purpose'];source_edges.append((sel['artifact_hash'],sel['json_pointer']))
+comparison_recipes={x['metric_path']:x for x in deps['recipes'] if x['metric_path'].startswith('/comparisons/')}
+expected_paths=set()
+for fi,fixture in enumerate(comp['fixtures']):
+ if fixture['execution']!='executed':continue
+ for ci,ch in enumerate(fixture['channels']):
+  for field in ['raw_rel','signed_adjustment_rel','absolute_adjustment_rel','residual_rel']:
+   if ch[field] is None:continue
+   path=f'/comparisons/0/fixtures/{fi}/channels/{ci}/{field}';expected_paths.add(path);r=comparison_recipes[path];assert '*' not in path
+   assert r['purpose']==('duration' if ch['channel']=='duration_s' else 'counts')
+   assert any(x['kind']=='model_assumption' and x['artifact_hash']==comp['comparison_hash'] and x['json_pointer'].endswith('/declared_deviations') for x in r['selectors'])
+assert set(comparison_recipes)==expected_paths
+assert not any(x.endswith('/actual/value') or x.endswith('/reference/value') for x in comparison_recipes)
+actual=load('engine-result-0.json');time_recipe=source_recipes[(actual['result_hash'],'/duration_ps')];count_recipe=source_recipes[(actual['result_hash'],'/counts/matrix_ops')]
+assert time_recipe['recipe']['purpose']=='duration' and count_recipe['recipe']['purpose']=='counts'
+assert not any(s['kind']=='hardware_leaf' for s in count_recipe['recipe']['selectors'])
+required=['/cores/grid/rows','/cores/grid/cols','/clock_domains/core/freq_hz','/cores/core_type/matrix_engine/macs_per_cycle/bf16','/cores/core_type/vector_engine/ops_per_cycle','/memory/dram/bw_bytes_per_s']
+assert set(required)<={x['json_pointer'] for x in time_recipe['recipe']['selectors'] if x['kind']=='hardware_leaf'}
+stub=pointer(b['hardware_spec'],'/memory/dram/bw_bytes_per_s');assert stub['kind']=='claim' and stub['provenance']=='stub'
+for role in ['actual','reference']:
+ e=load('r2-'+role+'-count-evidence.json');v=load('r2-'+role+'-count-verification.json');assert e['purpose']==v['purpose']=='counts' and e['channel']=='matrix_ops';assert e['verification_hashes']==[v['verification_hash']];assert e['scope']==v['scope'];assert v['model_identity_hash']==e['scope'][0]['model_identity_hash']
+r2=load('r2-contributors.expected.json');assert math.isclose(1184/1000-1,.184);assert r2['cases'][0]['expected_badge']=='estimated' and r2['cases'][1]['expected_badge']=='stub'
+assert r2['cases'][1]['expected_value']==0.0
+# Materialize exact R2 negative payloads without implementing their semantic evaluator.
+r2_cases=load('r2-semantic-cases.json')['cases']
+for case in r2_cases:
+ x=copy.deepcopy(deps)
+ for edit in case['edits']:
+  path,last=edit['path'].rsplit('/',1);parent=pointer(x,path)
+  if edit['op']=='remove':
+   if isinstance(parent,list):parent.pop(int(last))
+   else:del parent[last]
+  elif edit['op']=='add' and last=='-':parent.append(edit['value'])
+  elif isinstance(parent,list):parent[int(last)]=edit['value']
+  else:parent[last]=edit['value']
+
+ review=copy.deepcopy(objects[deps['review_hash']])
+ body=H({k:v for k,v in x.items() if k not in ['dependencies_hash','review_hash']})
+ if case['review_action']=='rebind_synthetic':
+  review['reviewed_subject_hashes']=[body];review['review_hash']=H({k:v for k,v in review.items() if k!='review_hash'});x['review_hash']=review['review_hash']
+ else:assert body not in review['reviewed_subject_hashes']
+ x['dependencies_hash']=H({k:v for k,v in x.items() if k!='dependencies_hash'})
+ validate('MetricDependencies',x);validate('ReviewRecord',review)
+ assert case['expected_render_calls']==0 and case['expected_refusal']
+# Every directly affected outer binding is fresh.
+ctx=load('report-context.json');table=load('table.json');assert ctx['metric_dependencies_hash']==deps['dependencies_hash'] and ctx['comparison_hashes']==[comp['comparison_hash']]
+assert table['artifacts']['report_context_hash']==ctx['context_hash'] and table['artifacts']['comparison_hashes']==ctx['comparison_hashes']
+for n in ['render-default.json','render-opt-in.json']:
+ x=load(n);assert x['table_hash']==table['table_hash'] and x['report_context_hash']==ctx['context_hash']
+# Preserve policy inputs and previous executed evidence byte for byte.
+snapshot=R.parent/'rk-uarch-u2-integration/docs/reviews/U2-inputs/A-S-proposal-59d9d3889e86';preserved=['accounting-evidence.json','accounting-probe.py.txt','loader-selection-probe.py.txt','loader-probe-results.json','prompt-sync-results.txt','public-amendments.patch','public-amendments-index.json','changes-from-initial.json','fixtures/precision-inventory.expected.json','fixtures/independent-bundle.json','fixtures/conventions.expected.json','fixtures/export-binding.json','fixtures/nominal-decode-input.json','fixtures/nominal-decode-output.expected.json','fixtures/nominal-prefill-input.json','fixtures/nominal-prefill-output.expected.json']
+for n in preserved:assert (P/n).read_bytes()==(snapshot/'docs/reviews/U2-U0003-proposal'/n).read_bytes(),n
+for path in [P/'R1-R2-corrections.md',*P.glob('r1-r2-*')]:
+ for line in path.read_text().splitlines():assert line.rstrip()==line,str(path)
+print(json.dumps({'classification':'read-only proposal structure/bindings and independent expected-case assertions; no semantic comparator/renderer implementation or execution','schema_definitions':len(schema['$defs']),'catalog_payloads_valid':len(catalog),'self_hashes_checked':hashes,'review_bodies_checked':reviews,'precision_expected_observed_pairs':4,'historical_probe_events_referenced_not_rerun':1,'materialized_semantic_inventory_comparison_pairs_valid':len(semantic),'isolated_channel_payloads_valid':len(channels),'source_recipe_count':len(source_recipes),'R2_materialized_schema_valid_semantic_mutations':len(r2_cases),'result_field_edges_resolve_with_equal_purpose':len(source_edges),'selectors_resolved':selectors,'exact_comparison_ratio_recipes':len(comparison_recipes),'preserved_policy_evidence_paths_checked':len(preserved),'R1_expected_reductions':'independent literals checked for specified discriminators; future semantic comparator tests planned','R2_badge_outcomes':'independent expected literals; actual evidence eligibility and rendering not run','full_suite':'not run','loader_probe':'not rerun','prompt_sync':'not rerun; public hunks unchanged','oracle_generation':'not run'},indent=2,sort_keys=True))

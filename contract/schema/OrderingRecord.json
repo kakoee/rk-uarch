@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "uarch-ordering/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "ordering_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Ordering Hash",
+      "type": "string"
+    },
+    "prediction_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Prediction Commit",
+      "type": "string"
+    },
+    "prediction_is_ancestor": {
+      "title": "Prediction Is Ancestor",
+      "type": "boolean"
+    },
+    "prediction_tree_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Prediction Tree Hash",
+      "type": "string"
+    },
+    "result_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Result Commit",
+      "type": "string"
+    },
+    "verification_source_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Verification Source Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "ordering_hash",
+    "prediction_commit",
+    "prediction_is_ancestor",
+    "prediction_tree_hash",
+    "result_commit",
+    "verification_source_hash"
+  ],
+  "title": "OrderingRecord",
+  "type": "object"
+}

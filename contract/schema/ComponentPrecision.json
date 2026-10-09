@@ -1,0 +1,444 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "ExplicitPrecision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat"
+        }
+      },
+      "required": [
+        "compute",
+        "kv_cache"
+      ],
+      "title": "ExplicitPrecision",
+      "type": "object"
+    },
+    "ExportBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Binding Hash",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Component Id",
+          "type": "string"
+        },
+        "derivation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Derivation Hash",
+          "type": "string"
+        },
+        "design_status": {
+          "enum": [
+            "proposed",
+            "reference"
+          ],
+          "title": "Design Status",
+          "type": "string"
+        },
+        "execution_model_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Execution Model Hash",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-export-binding/1",
+          "title": "Format",
+          "type": "string"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "kind": {
+          "const": "uarch_projection",
+          "title": "Kind",
+          "type": "string"
+        },
+        "losses": {
+          "items": {
+            "$ref": "#/$defs/ProjectionLoss"
+          },
+          "minItems": 0,
+          "title": "Losses",
+          "type": "array"
+        },
+        "primary_export_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Primary Export Hash",
+          "type": "string"
+        },
+        "projected_descriptor_bytes_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Projected Descriptor Bytes Sha256",
+          "type": "string"
+        },
+        "projected_descriptor_content_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Projected Descriptor Content Hash",
+          "type": "string"
+        },
+        "projection_recipe": {
+          "const": "pinned-five-field-test-projection/1",
+          "title": "Projection Recipe",
+          "type": "string"
+        },
+        "supported_kv_storage": {
+          "items": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "minItems": 1,
+          "title": "Supported Kv Storage",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "upstream_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Upstream Sha",
+          "type": "string"
+        }
+      },
+      "required": [
+        "binding_hash",
+        "component_id",
+        "derivation_hash",
+        "design_status",
+        "execution_model_hash",
+        "format",
+        "hardware_spec_hash",
+        "kind",
+        "losses",
+        "primary_export_hash",
+        "projected_descriptor_bytes_sha256",
+        "projected_descriptor_content_hash",
+        "projection_recipe",
+        "supported_kv_storage",
+        "upstream_sha"
+      ],
+      "title": "ExportBinding",
+      "type": "object"
+    },
+    "FiveFieldValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date"
+        },
+        "provenance": {
+          "enum": [
+            "stub",
+            "estimated",
+            "spec_derived",
+            "measured"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "date",
+        "provenance",
+        "source",
+        "unit",
+        "value"
+      ],
+      "title": "FiveFieldValue",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "ProjectionLoss": {
+      "additionalProperties": false,
+      "properties": {
+        "original": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        },
+        "projected": {
+          "$ref": "#/$defs/FiveFieldValue"
+        },
+        "reason": {
+          "enum": [
+            "stipulation_not_in_upstream",
+            "citation_not_loader_eligible",
+            "measured_anchor_unavailable",
+            "strip_extensions_only"
+          ],
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "original",
+        "path",
+        "projected",
+        "reason"
+      ],
+      "title": "ProjectionLoss",
+      "type": "object"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    },
+    "UpstreamComponentBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Binding Hash",
+          "type": "string"
+        },
+        "component_bytes_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Component Bytes Sha256",
+          "type": "string"
+        },
+        "component_file": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Component File",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Component Id",
+          "type": "string"
+        },
+        "execution_model_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Execution Model Hash",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-upstream-component/1",
+          "title": "Format",
+          "type": "string"
+        },
+        "kind": {
+          "const": "upstream_only",
+          "title": "Kind",
+          "type": "string"
+        },
+        "oracle_manifest_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Oracle Manifest Sha256",
+          "type": "string"
+        },
+        "supported_kv_storage": {
+          "items": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "minItems": 1,
+          "title": "Supported Kv Storage",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "upstream_sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Upstream Sha",
+          "type": "string"
+        }
+      },
+      "required": [
+        "binding_hash",
+        "component_bytes_sha256",
+        "component_file",
+        "component_id",
+        "execution_model_hash",
+        "format",
+        "kind",
+        "oracle_manifest_sha256",
+        "supported_kv_storage",
+        "upstream_sha"
+      ],
+      "title": "UpstreamComponentBinding",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "binding": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExportBinding"
+        },
+        {
+          "$ref": "#/$defs/UpstreamComponentBinding"
+        }
+      ],
+      "title": "Binding"
+    },
+    "component_id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Component Id",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-component-precision/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "precision_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Precision Hash",
+      "type": "string"
+    },
+    "precisions": {
+      "items": {
+        "$ref": "#/$defs/ExplicitPrecision"
+      },
+      "minItems": 1,
+      "title": "Precisions",
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "binding",
+    "component_id",
+    "format",
+    "precision_hash",
+    "precisions"
+  ],
+  "title": "ComponentPrecision",
+  "type": "object"
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "compute": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Compute",
+      "type": "string"
+    },
+    "kv_cache": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Kv Cache"
+    },
+    "operands": {
+      "additionalProperties": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Operands",
+      "type": "object"
+    }
+  },
+  "required": [
+    "compute",
+    "kv_cache",
+    "operands"
+  ],
+  "title": "EvidencePrecision",
+  "type": "object"
+}

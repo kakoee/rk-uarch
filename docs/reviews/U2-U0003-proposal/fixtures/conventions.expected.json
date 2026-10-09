@@ -1,0 +1,126 @@
+{
+  "aggregate_plot": {
+    "aggregate_duration_ps": 10.0,
+    "caption": "isolated per-op roofline estimate; durations do not add to aggregate latency",
+    "isolated_per_op_ps": [
+      9.0,
+      9.0
+    ],
+    "sum_ps": 18.0
+  },
+  "attention_n2_L3_Hq2_Hkv1_D2": [
+    {
+      "mask": "full_square",
+      "matrix_ops": 288,
+      "pairs": 36,
+      "vector_ops": 180
+    },
+    {
+      "mask": "causal",
+      "matrix_ops": 192,
+      "pairs": 24,
+      "vector_ops": 120
+    }
+  ],
+  "capabilities": [
+    {
+      "accepted": true,
+      "id": "fixed-dram-ratio0.6"
+    },
+    {
+      "accepted": true,
+      "id": "scalable-dram-ratio1"
+    },
+    {
+      "error": "UnsupportedDramFrequencyModel",
+      "id": "scalable-dram-ratio0.6"
+    },
+    {
+      "error": "ZeroResolvedFrequency",
+      "id": "core0.4Hz-rounds0"
+    },
+    {
+      "error": "UnsupportedBlockScaleGeometry",
+      "id": "nonzero-block-scale-bytes"
+    }
+  ],
+  "classification": "hand-derived physical model expectations, not executed results",
+  "embedding_tp2_M1": {
+    "equivalent_ranks_valid_selected": [
+      0
+    ],
+    "invalid_hits": [
+      1,
+      1
+    ],
+    "invalid_total": 2,
+    "representative_all_ranks": "refuse unequal hit counts",
+    "valid_hits": [
+      1,
+      0
+    ],
+    "valid_total": 1
+  },
+  "embedding_tp2_M2": {
+    "equivalent_ranks": [
+      0,
+      1
+    ],
+    "hits": [
+      1,
+      1
+    ]
+  },
+  "head_n2_L3_K4_N8": [
+    {
+      "M": 6,
+      "head": "all_token",
+      "matrix_ops": 384
+    },
+    {
+      "M": 2,
+      "head": "last_token",
+      "matrix_ops": 128
+    }
+  ],
+  "kv_B1_Hkv1_D2_bf16_block16": [
+    {
+      "T": 1,
+      "allocated_bytes": 128,
+      "append_write_bytes": 8,
+      "pages": 1,
+      "valid_read_bytes": 8
+    },
+    {
+      "T": 17,
+      "allocated_bytes": 256,
+      "append_write_bytes": 8,
+      "pages": 2,
+      "valid_read_bytes": 136
+    }
+  ],
+  "operand_traffic": {
+    "K": 4,
+    "M": 2,
+    "N": 3,
+    "element_bytes": 2,
+    "read_W": 24,
+    "read_X": 16,
+    "total_bytes": 52,
+    "write_Y": 12
+  },
+  "partial_residency": {
+    "known_subtotal_bytes": 356,
+    "kv_allocated_bytes": 256,
+    "total_peak_bytes": null,
+    "weights_bytes": 100
+  },
+  "vector": {
+    "matrix_ops": 48,
+    "matrix_rate": 48000000000000.0,
+    "overlap_alternative_ps": 1.0,
+    "serialized_compute_ps": 2.0,
+    "vector_ops": 24,
+    "vector_rate": 24000000000000.0
+  }
+}

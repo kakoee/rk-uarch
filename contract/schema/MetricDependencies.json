@@ -1,0 +1,178 @@
+{
+  "$defs": {
+    "DependencySelector": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifact Hash",
+          "type": "string"
+        },
+        "json_pointer": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Json Pointer",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "hardware_leaf",
+            "prepared_content",
+            "model_assumption",
+            "model_evidence",
+            "result_field"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "json_pointer",
+        "kind"
+      ],
+      "title": "DependencySelector",
+      "type": "object"
+    },
+    "MetricRecipe": {
+      "additionalProperties": false,
+      "properties": {
+        "applicable_dimensions": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Applicable Dimensions",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "granularity": {
+          "enum": [
+            "operator",
+            "whole_iteration",
+            "input"
+          ],
+          "title": "Granularity",
+          "type": "string"
+        },
+        "metric_path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Metric Path",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "duration",
+            "counts",
+            "diagnostics",
+            "energy",
+            "input"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
+        "selectors": {
+          "items": {
+            "$ref": "#/$defs/DependencySelector"
+          },
+          "minItems": 1,
+          "title": "Selectors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "applicable_dimensions",
+        "granularity",
+        "metric_path",
+        "purpose",
+        "selectors"
+      ],
+      "title": "MetricRecipe",
+      "type": "object"
+    },
+    "SourceMetricRecipe": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifact Hash",
+          "type": "string"
+        },
+        "model_identity_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Model Identity Hash",
+          "type": "string"
+        },
+        "recipe": {
+          "$ref": "#/$defs/MetricRecipe"
+        }
+      },
+      "required": [
+        "artifact_hash",
+        "model_identity_hash",
+        "recipe"
+      ],
+      "title": "SourceMetricRecipe",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "dependencies_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Dependencies Hash",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-metric-dependencies/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "model_identity_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Model Identity Hash",
+      "type": "string"
+    },
+    "recipes": {
+      "items": {
+        "$ref": "#/$defs/MetricRecipe"
+      },
+      "minItems": 1,
+      "title": "Recipes",
+      "type": "array"
+    },
+    "review_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Review Hash",
+      "type": "string"
+    },
+    "source_recipes": {
+      "items": {
+        "$ref": "#/$defs/SourceMetricRecipe"
+      },
+      "title": "Source Recipes",
+      "type": "array"
+    },
+    "version": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dependencies_hash",
+    "format",
+    "model_identity_hash",
+    "recipes",
+    "review_hash",
+    "source_recipes",
+    "version"
+  ],
+  "title": "MetricDependencies",
+  "type": "object"
+}

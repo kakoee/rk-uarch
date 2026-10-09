@@ -1,0 +1,2277 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "ClockDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "freq_hz": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scales_with_core": {
+          "title": "Scales With Core",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "freq_hz",
+        "scales_with_core"
+      ],
+      "title": "ClockDomain",
+      "type": "object"
+    },
+    "ClockDomains": {
+      "additionalProperties": false,
+      "properties": {
+        "core": {
+          "$ref": "#/$defs/CoreClockDomain"
+        },
+        "dram": {
+          "$ref": "#/$defs/ClockDomain"
+        },
+        "noc": {
+          "$ref": "#/$defs/ClockDomain"
+        }
+      },
+      "required": [
+        "core",
+        "noc",
+        "dram"
+      ],
+      "title": "ClockDomains",
+      "type": "object"
+    },
+    "Controller": {
+      "additionalProperties": false,
+      "properties": {
+        "attach": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "minimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "Attach",
+          "type": "array"
+        },
+        "noc_credits": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "page_policy": {
+          "enum": [
+            "open",
+            "closed"
+          ],
+          "title": "Page Policy",
+          "type": "string"
+        },
+        "read_queue_depth": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scheduler": {
+          "enum": [
+            "fr_fcfs",
+            "fcfs"
+          ],
+          "title": "Scheduler",
+          "type": "string"
+        },
+        "write_queue_depth": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "attach",
+        "scheduler",
+        "page_policy",
+        "read_queue_depth",
+        "write_queue_depth",
+        "noc_credits"
+      ],
+      "title": "Controller",
+      "type": "object"
+    },
+    "CoreClockDomain": {
+      "additionalProperties": false,
+      "properties": {
+        "freq_hz": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scales_with_core": {
+          "const": true,
+          "default": true,
+          "title": "Scales With Core",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "freq_hz"
+      ],
+      "title": "CoreClockDomain",
+      "type": "object"
+    },
+    "CoreType": {
+      "additionalProperties": false,
+      "properties": {
+        "dma": {
+          "$ref": "#/$defs/Dma"
+        },
+        "job_overhead_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "matrix_engine": {
+          "$ref": "#/$defs/MatrixEngine"
+        },
+        "sram": {
+          "$ref": "#/$defs/Sram"
+        },
+        "vector_engine": {
+          "$ref": "#/$defs/VectorEngine"
+        }
+      },
+      "required": [
+        "matrix_engine",
+        "vector_engine",
+        "sram",
+        "dma",
+        "job_overhead_cycles"
+      ],
+      "title": "CoreType",
+      "type": "object"
+    },
+    "Cores": {
+      "additionalProperties": false,
+      "properties": {
+        "core_type": {
+          "$ref": "#/$defs/CoreType"
+        },
+        "grid": {
+          "$ref": "#/$defs/HardwareGrid"
+        }
+      },
+      "required": [
+        "grid",
+        "core_type"
+      ],
+      "title": "Cores",
+      "type": "object"
+    },
+    "DecodeEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "batch_max": {
+          "minimum": 1,
+          "title": "Batch Max",
+          "type": "integer"
+        },
+        "context_per_seq_max": {
+          "minimum": 1,
+          "title": "Context Per Seq Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "batch_max",
+        "context_per_seq_max"
+      ],
+      "title": "DecodeEnvelope",
+      "type": "object"
+    },
+    "DecodeGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Batch",
+          "type": "array"
+        },
+        "context_per_seq": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Context Per Seq",
+          "type": "array"
+        }
+      },
+      "required": [
+        "batch",
+        "context_per_seq"
+      ],
+      "title": "DecodeGrid",
+      "type": "object"
+    },
+    "DecodeQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "phase": {
+          "const": "decode",
+          "title": "Phase",
+          "type": "string"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "batch",
+        "phase",
+        "total_context_tokens"
+      ],
+      "title": "DecodeQuery",
+      "type": "object"
+    },
+    "DecodeVisitWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "batch": {
+          "minimum": 1,
+          "title": "Batch",
+          "type": "integer"
+        },
+        "total_context_tokens": {
+          "minimum": 1,
+          "title": "Total Context Tokens",
+          "type": "integer"
+        },
+        "weight_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "batch",
+        "total_context_tokens",
+        "weight_ratio"
+      ],
+      "title": "DecodeVisitWeight",
+      "type": "object"
+    },
+    "Dma": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes_per_cycle": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "engines": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "max_outstanding": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "request_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "engines",
+        "bytes_per_cycle",
+        "max_outstanding",
+        "request_bytes"
+      ],
+      "title": "Dma",
+      "type": "object"
+    },
+    "Dram": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "timing_source": {
+                "const": "direct"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "timing_preset": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "timing_source": {
+                "const": "preset"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "timing_preset": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "timing_preset"
+            ]
+          }
+        }
+      ],
+      "description": "Explicit timing origin; source strings are citations, never mode selectors.",
+      "properties": {
+        "bw_bytes_per_s": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "capacity_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "channels": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "organization": {
+          "$ref": "#/$defs/DramOrganization"
+        },
+        "standard": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Standard",
+          "type": "string"
+        },
+        "timing": {
+          "$ref": "#/$defs/DramTiming"
+        },
+        "timing_preset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimingPreset"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "timing_source": {
+          "enum": [
+            "direct",
+            "preset"
+          ],
+          "title": "Timing Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "standard",
+        "channels",
+        "bw_bytes_per_s",
+        "capacity_bytes",
+        "organization",
+        "timing_source",
+        "timing"
+      ],
+      "title": "Dram",
+      "type": "object"
+    },
+    "DramOrganization": {
+      "additionalProperties": false,
+      "properties": {
+        "bank_groups": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "banks_per_group": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "ranks": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "row_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "ranks",
+        "bank_groups",
+        "banks_per_group",
+        "row_bytes"
+      ],
+      "title": "DramOrganization",
+      "type": "object"
+    },
+    "DramTiming": {
+      "additionalProperties": false,
+      "properties": {
+        "t_cl_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rcd_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_refi_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rfc_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "t_rp_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "t_rcd_cycles",
+        "t_rp_cycles",
+        "t_cl_cycles",
+        "t_rfc_cycles",
+        "t_refi_cycles"
+      ],
+      "title": "DramTiming",
+      "type": "object"
+    },
+    "Energy": {
+      "additionalProperties": false,
+      "properties": {
+        "pj_per_byte": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "propertyNames": {
+            "enum": [
+              "sram",
+              "noc_hop",
+              "dram"
+            ]
+          },
+          "title": "Pj Per Byte",
+          "type": "object"
+        },
+        "pj_per_mac": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Pj Per Mac",
+          "type": "object"
+        },
+        "voltage_ratio": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "title": "Voltage Ratio",
+          "type": "object"
+        }
+      },
+      "required": [
+        "pj_per_mac",
+        "pj_per_byte",
+        "voltage_ratio"
+      ],
+      "title": "Energy",
+      "type": "object"
+    },
+    "Envelope": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/DecodeEnvelope"
+        },
+        "prefill": {
+          "$ref": "#/$defs/PrefillEnvelope"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill"
+      ],
+      "title": "Envelope",
+      "type": "object"
+    },
+    "FidelityDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "title": "Compute",
+          "type": "integer"
+        },
+        "dram": {
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            2
+          ],
+          "title": "Dram"
+        },
+        "layer_reuse": {
+          "title": "Layer Reuse",
+          "type": "boolean"
+        },
+        "noc": {
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            2
+          ],
+          "title": "Noc"
+        },
+        "shared_sram": {
+          "description": "Omit only when hardware has no shared SRAM; null is invalid.",
+          "enum": [
+            0,
+            1,
+            "1+ts",
+            "unrepresented"
+          ],
+          "title": "Shared Sram"
+        },
+        "sync": {
+          "pattern": "^(exact|approx\\(Q=[1-9][0-9]*\\))$",
+          "title": "Sync",
+          "type": "string"
+        }
+      },
+      "required": [
+        "compute",
+        "noc",
+        "dram",
+        "sync",
+        "layer_reuse"
+      ],
+      "title": "FidelityDetail",
+      "type": "object"
+    },
+    "Grid": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/DecodeGrid"
+        },
+        "frequency_ratio": {
+          "items": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "minItems": 1,
+          "title": "Frequency Ratio",
+          "type": "array"
+        },
+        "prefill": {
+          "$ref": "#/$defs/PrefillGrid"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill",
+        "frequency_ratio"
+      ],
+      "title": "Grid",
+      "type": "object"
+    },
+    "HardwareGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "cols": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "rows": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "rows",
+        "cols"
+      ],
+      "title": "HardwareGrid",
+      "type": "object"
+    },
+    "HardwareSpec": {
+      "additionalProperties": false,
+      "description": "Hardware inputs. Unit/path consistency is semantic validation; x-hardware-unit-rules lists exact allowed labels, without conversion. Coordinates are count indices; formats.*.bytes is an implicit byte width; energy.voltage_ratio keys are dimensionless frequency ratios. byte and B are equivalent labels preserved verbatim.",
+      "properties": {
+        "clock_domains": {
+          "$ref": "#/$defs/ClockDomains"
+        },
+        "cores": {
+          "$ref": "#/$defs/Cores"
+        },
+        "design_status": {
+          "enum": [
+            "proposed",
+            "reference"
+          ],
+          "title": "Design Status",
+          "type": "string"
+        },
+        "energy": {
+          "$ref": "#/$defs/Energy"
+        },
+        "formats": {
+          "additionalProperties": {
+            "$ref": "#/$defs/NumericFormat"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Formats",
+          "type": "object"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "memory": {
+          "$ref": "#/$defs/Memory"
+        },
+        "nocs": {
+          "items": {
+            "$ref": "#/$defs/Noc"
+          },
+          "minItems": 1,
+          "title": "Nocs",
+          "type": "array"
+        },
+        "shared_sram": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SharedSram"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "static_power_w": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "sync": {
+          "$ref": "#/$defs/Sync"
+        },
+        "tdp_w": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "id",
+        "design_status",
+        "clock_domains",
+        "cores",
+        "sync",
+        "nocs",
+        "memory",
+        "formats",
+        "energy",
+        "static_power_w",
+        "tdp_w"
+      ],
+      "title": "HardwareSpec",
+      "type": "object",
+      "x-hardware-unit-rules": {
+        "clock_domains.core.freq_hz": [
+          "Hz"
+        ],
+        "clock_domains.dram.freq_hz": [
+          "Hz"
+        ],
+        "clock_domains.noc.freq_hz": [
+          "Hz"
+        ],
+        "cores.core_type.dma.bytes_per_cycle": [
+          "byte/cycle"
+        ],
+        "cores.core_type.dma.engines": [
+          "count"
+        ],
+        "cores.core_type.dma.max_outstanding": [
+          "count"
+        ],
+        "cores.core_type.dma.request_bytes": [
+          "byte",
+          "B"
+        ],
+        "cores.core_type.job_overhead_cycles": [
+          "cycle"
+        ],
+        "cores.core_type.matrix_engine.accumulator_bytes": [
+          "byte",
+          "B"
+        ],
+        "cores.core_type.matrix_engine.array.cols": [
+          "count"
+        ],
+        "cores.core_type.matrix_engine.array.rows": [
+          "count"
+        ],
+        "cores.core_type.matrix_engine.macs_per_cycle.*": [
+          "MAC/cycle"
+        ],
+        "cores.core_type.matrix_engine.operand_buffer_bytes": [
+          "byte",
+          "B"
+        ],
+        "cores.core_type.matrix_engine.operand_bytes_per_cycle": [
+          "byte/cycle"
+        ],
+        "cores.core_type.sram.banks": [
+          "count"
+        ],
+        "cores.core_type.sram.bytes": [
+          "byte",
+          "B"
+        ],
+        "cores.core_type.sram.bytes_per_cycle_per_bank": [
+          "byte/cycle"
+        ],
+        "cores.core_type.vector_engine.ops_per_cycle": [
+          "op/cycle"
+        ],
+        "cores.grid.cols": [
+          "count"
+        ],
+        "cores.grid.rows": [
+          "count"
+        ],
+        "energy.pj_per_byte.dram": [
+          "pJ/byte"
+        ],
+        "energy.pj_per_byte.noc_hop": [
+          "pJ/byte"
+        ],
+        "energy.pj_per_byte.sram": [
+          "pJ/byte"
+        ],
+        "energy.pj_per_mac.*": [
+          "pJ/MAC"
+        ],
+        "energy.voltage_ratio.*": [
+          "ratio"
+        ],
+        "formats.*.accumulate_bytes": [
+          "byte",
+          "B"
+        ],
+        "formats.*.block_scale_bytes": [
+          "byte",
+          "B"
+        ],
+        "memory.controllers[].noc_credits": [
+          "count"
+        ],
+        "memory.controllers[].read_queue_depth": [
+          "count"
+        ],
+        "memory.controllers[].write_queue_depth": [
+          "count"
+        ],
+        "memory.dram.bw_bytes_per_s": [
+          "byte/s"
+        ],
+        "memory.dram.capacity_bytes": [
+          "byte",
+          "B"
+        ],
+        "memory.dram.channels": [
+          "count"
+        ],
+        "memory.dram.organization.bank_groups": [
+          "count"
+        ],
+        "memory.dram.organization.banks_per_group": [
+          "count"
+        ],
+        "memory.dram.organization.ranks": [
+          "count"
+        ],
+        "memory.dram.organization.row_bytes": [
+          "byte",
+          "B"
+        ],
+        "memory.dram.timing.t_cl_cycles": [
+          "cycle"
+        ],
+        "memory.dram.timing.t_rcd_cycles": [
+          "cycle"
+        ],
+        "memory.dram.timing.t_refi_cycles": [
+          "cycle"
+        ],
+        "memory.dram.timing.t_rfc_cycles": [
+          "cycle"
+        ],
+        "memory.dram.timing.t_rp_cycles": [
+          "cycle"
+        ],
+        "memory.interleave.granularity_bytes": [
+          "byte",
+          "B"
+        ],
+        "nocs[].buffer_flits": [
+          "count"
+        ],
+        "nocs[].link_bytes_per_cycle": [
+          "byte/cycle"
+        ],
+        "nocs[].router_latency_cycles": [
+          "cycle"
+        ],
+        "nocs[].virtual_channels": [
+          "count"
+        ],
+        "shared_sram.banks": [
+          "count"
+        ],
+        "shared_sram.bytes": [
+          "byte",
+          "B"
+        ],
+        "shared_sram.bytes_per_cycle_per_bank": [
+          "byte/cycle"
+        ],
+        "shared_sram.latency_cycles": [
+          "cycle"
+        ],
+        "static_power_w": [
+          "W"
+        ],
+        "sync.barrier_latency_cycles": [
+          "cycle"
+        ],
+        "tdp_w": [
+          "W"
+        ]
+      }
+    },
+    "Interleave": {
+      "additionalProperties": false,
+      "properties": {
+        "granularity_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scheme": {
+          "enum": [
+            "channel_hash",
+            "round_robin"
+          ],
+          "title": "Scheme",
+          "type": "string"
+        }
+      },
+      "required": [
+        "granularity_bytes",
+        "scheme"
+      ],
+      "title": "Interleave",
+      "type": "object"
+    },
+    "KvAccess": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "minimum": 1,
+          "title": "Block Size Tokens",
+          "type": "integer"
+        },
+        "context_tokens": {
+          "minimum": 1,
+          "title": "Context Tokens",
+          "type": "integer"
+        },
+        "last_page_valid_tokens": {
+          "minimum": 1,
+          "title": "Last Page Valid Tokens",
+          "type": "integer"
+        },
+        "pages_per_sequence": {
+          "minimum": 1,
+          "title": "Pages Per Sequence",
+          "type": "integer"
+        },
+        "read_policy": {
+          "const": "valid_tokens",
+          "title": "Read Policy",
+          "type": "string"
+        },
+        "write_policy": {
+          "const": "append_valid_tokens",
+          "title": "Write Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "block_size_tokens",
+        "context_tokens",
+        "last_page_valid_tokens",
+        "pages_per_sequence",
+        "read_policy",
+        "write_policy"
+      ],
+      "title": "KvAccess",
+      "type": "object"
+    },
+    "KvLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "minimum": 1,
+          "title": "Block Size Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "block_size_tokens"
+      ],
+      "title": "KvLayout",
+      "type": "object"
+    },
+    "MatrixEngine": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulator_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "array": {
+          "$ref": "#/$defs/HardwareGrid"
+        },
+        "dataflows": {
+          "items": {
+            "enum": [
+              "weight_stationary",
+              "output_stationary"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Dataflows",
+          "type": "array"
+        },
+        "macs_per_cycle": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SourcedValue"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/PrecisionFormat"
+          },
+          "title": "Macs Per Cycle",
+          "type": "object"
+        },
+        "operand_buffer_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "operand_bytes_per_cycle": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "array",
+        "dataflows",
+        "macs_per_cycle",
+        "accumulator_bytes",
+        "operand_buffer_bytes",
+        "operand_bytes_per_cycle"
+      ],
+      "title": "MatrixEngine",
+      "type": "object"
+    },
+    "Memory": {
+      "additionalProperties": false,
+      "properties": {
+        "controllers": {
+          "items": {
+            "$ref": "#/$defs/Controller"
+          },
+          "minItems": 1,
+          "title": "Controllers",
+          "type": "array"
+        },
+        "dram": {
+          "$ref": "#/$defs/Dram"
+        },
+        "interleave": {
+          "$ref": "#/$defs/Interleave"
+        }
+      },
+      "required": [
+        "interleave",
+        "controllers",
+        "dram"
+      ],
+      "title": "Memory",
+      "type": "object"
+    },
+    "ModelShape": {
+      "additionalProperties": false,
+      "properties": {
+        "attention": {
+          "enum": [
+            "mha",
+            "gqa"
+          ],
+          "title": "Attention",
+          "type": "string"
+        },
+        "d_ff": {
+          "minimum": 1,
+          "title": "D Ff",
+          "type": "integer"
+        },
+        "expert_d_ff": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expert D Ff"
+        },
+        "gated_mlp": {
+          "title": "Gated Mlp",
+          "type": "boolean"
+        },
+        "tie_embeddings": {
+          "title": "Tie Embeddings",
+          "type": "boolean"
+        },
+        "vocab_size": {
+          "minimum": 1,
+          "title": "Vocab Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "d_ff",
+        "gated_mlp",
+        "vocab_size",
+        "attention",
+        "tie_embeddings"
+      ],
+      "title": "ModelShape",
+      "type": "object"
+    },
+    "ModelSpec": {
+      "additionalProperties": false,
+      "description": "MoE is active-vs-total and nothing more (build-spec \u00a72.3.5).",
+      "properties": {
+        "active_params": {
+          "minimum": 1,
+          "title": "Active Params",
+          "type": "integer"
+        },
+        "d_model": {
+          "minimum": 1,
+          "title": "D Model",
+          "type": "integer"
+        },
+        "experts_per_token": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Experts Per Token",
+          "type": "integer"
+        },
+        "kv_heads": {
+          "minimum": 1,
+          "title": "Kv Heads",
+          "type": "integer"
+        },
+        "n_experts": {
+          "default": 0,
+          "minimum": 0,
+          "title": "N Experts",
+          "type": "integer"
+        },
+        "n_heads": {
+          "minimum": 1,
+          "title": "N Heads",
+          "type": "integer"
+        },
+        "n_layers": {
+          "minimum": 1,
+          "title": "N Layers",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "total_params": {
+          "minimum": 1,
+          "title": "Total Params",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "total_params",
+        "active_params",
+        "n_layers",
+        "d_model",
+        "n_heads",
+        "kv_heads"
+      ],
+      "title": "ModelSpec",
+      "type": "object"
+    },
+    "Noc": {
+      "additionalProperties": false,
+      "properties": {
+        "buffer_flits": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "direction": {
+          "enum": [
+            "positive",
+            "negative",
+            "bidirectional"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "link_bytes_per_cycle": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "router_latency_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "topology": {
+          "enum": [
+            "mesh",
+            "torus"
+          ],
+          "title": "Topology",
+          "type": "string"
+        },
+        "virtual_channels": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "topology",
+        "direction",
+        "link_bytes_per_cycle",
+        "router_latency_cycles",
+        "virtual_channels",
+        "buffer_flits"
+      ],
+      "title": "Noc",
+      "type": "object"
+    },
+    "NumericFormat": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulate_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "block_scale_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Bytes",
+          "type": "number"
+        }
+      },
+      "required": [
+        "bytes",
+        "accumulate_bytes",
+        "block_scale_bytes"
+      ],
+      "title": "NumericFormat",
+      "type": "object"
+    },
+    "OpGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 0,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "head",
+            "decoder",
+            "tail"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "ops": {
+          "items": {
+            "$ref": "#/$defs/PreparedOp"
+          },
+          "minItems": 1,
+          "title": "Ops",
+          "type": "array"
+        },
+        "repeat": {
+          "minimum": 1,
+          "title": "Repeat",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "depends_on",
+        "id",
+        "kind",
+        "ops",
+        "repeat"
+      ],
+      "title": "OpGroup",
+      "type": "object"
+    },
+    "OpSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "dimensions": {
+          "patternProperties": {
+            "\\S": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Dimensions",
+          "type": "object"
+        },
+        "operands": {
+          "patternProperties": {
+            "\\S": {
+              "$ref": "#/$defs/Operand"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operands",
+          "type": "object"
+        },
+        "operator": {
+          "$ref": "#/$defs/Operator"
+        },
+        "reduction_axes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Reduction Axes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operator",
+        "dimensions",
+        "operands",
+        "reduction_axes"
+      ],
+      "title": "OpSpec",
+      "type": "object"
+    },
+    "Operand": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Size Tokens"
+        },
+        "dimensions": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "dtype": {
+          "$ref": "#/$defs/PrecisionFormat"
+        },
+        "layout": {
+          "enum": [
+            "contiguous",
+            "paged"
+          ],
+          "title": "Layout",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dtype",
+        "dimensions",
+        "layout"
+      ],
+      "title": "Operand",
+      "type": "object"
+    },
+    "Operator": {
+      "enum": [
+        "q_projection",
+        "k_projection",
+        "v_projection",
+        "qk_score",
+        "softmax",
+        "av_application",
+        "output_projection",
+        "normalization",
+        "residual_addition",
+        "ffn_up",
+        "ffn_gate",
+        "ffn_down",
+        "activation",
+        "kv_write",
+        "embedding",
+        "lm_head",
+        "attention_fused"
+      ],
+      "title": "Operator",
+      "type": "string"
+    },
+    "Padding": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "minLength": 1,
+          "title": "Dimension",
+          "type": "string"
+        },
+        "logical": {
+          "minimum": 1,
+          "title": "Logical",
+          "type": "integer"
+        },
+        "physical": {
+          "minimum": 1,
+          "title": "Physical",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dimension",
+        "logical",
+        "physical"
+      ],
+      "title": "Padding",
+      "type": "object"
+    },
+    "Precision": {
+      "additionalProperties": false,
+      "properties": {
+        "compute": {
+          "$ref": "#/$defs/PrecisionFormat",
+          "default": "fp16"
+        },
+        "kv_cache": {
+          "$ref": "#/$defs/PrecisionFormat",
+          "default": "fp16"
+        }
+      },
+      "title": "Precision",
+      "type": "object"
+    },
+    "PrecisionFormat": {
+      "enum": [
+        "fp32",
+        "tf32",
+        "bf16",
+        "fp16",
+        "fp8",
+        "int8",
+        "fp4",
+        "int4"
+      ],
+      "title": "PrecisionFormat",
+      "type": "string"
+    },
+    "PrefillEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "prompt_tokens_max": {
+          "minimum": 1,
+          "title": "Prompt Tokens Max",
+          "type": "integer"
+        },
+        "prompts_per_iteration_max": {
+          "minimum": 1,
+          "title": "Prompts Per Iteration Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prompt_tokens_max",
+        "prompts_per_iteration_max"
+      ],
+      "title": "PrefillEnvelope",
+      "type": "object"
+    },
+    "PrefillGrid": {
+      "additionalProperties": false,
+      "properties": {
+        "L": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "L",
+          "type": "array"
+        },
+        "n": {
+          "items": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "N",
+          "type": "array"
+        }
+      },
+      "required": [
+        "n",
+        "L"
+      ],
+      "title": "PrefillGrid",
+      "type": "object"
+    },
+    "PrefillQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "phase": {
+          "const": "prefill",
+          "title": "Phase",
+          "type": "string"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "n_prompts",
+        "phase",
+        "prompt_tokens"
+      ],
+      "title": "PrefillQuery",
+      "type": "object"
+    },
+    "PrefillVisitWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "n_prompts": {
+          "minimum": 1,
+          "title": "N Prompts",
+          "type": "integer"
+        },
+        "prompt_tokens": {
+          "minimum": 1,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "weight_ratio": {
+          "exclusiveMinimum": 0,
+          "title": "Weight Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "n_prompts",
+        "prompt_tokens",
+        "weight_ratio"
+      ],
+      "title": "PrefillVisitWeight",
+      "type": "object"
+    },
+    "PreparedGraph": {
+      "additionalProperties": false,
+      "properties": {
+        "attention_mask": {
+          "enum": [
+            "full_square",
+            "causal"
+          ],
+          "title": "Attention Mask",
+          "type": "string"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/OpGroup"
+          },
+          "minItems": 1,
+          "title": "Groups",
+          "type": "array"
+        },
+        "lm_head_tokens": {
+          "minimum": 1,
+          "title": "Lm Head Tokens",
+          "type": "integer"
+        },
+        "omissions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 4,
+          "title": "Omissions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "attention_mask",
+        "groups",
+        "lm_head_tokens",
+        "omissions"
+      ],
+      "title": "PreparedGraph",
+      "type": "object"
+    },
+    "PreparedOp": {
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 0,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "embedding_local_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Embedding Local Tokens"
+        },
+        "fusion": {
+          "enum": [
+            "none",
+            "qk_softmax_av"
+          ],
+          "title": "Fusion",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kv_access": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KvAccess"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operand_access": {
+          "additionalProperties": {
+            "enum": [
+              "read",
+              "write",
+              "read_write"
+            ],
+            "type": "string"
+          },
+          "title": "Operand Access",
+          "type": "object"
+        },
+        "padding": {
+          "items": {
+            "$ref": "#/$defs/Padding"
+          },
+          "minItems": 0,
+          "title": "Padding",
+          "type": "array"
+        },
+        "replication": {
+          "items": {
+            "$ref": "#/$defs/Replication"
+          },
+          "minItems": 0,
+          "title": "Replication",
+          "type": "array"
+        },
+        "spec": {
+          "$ref": "#/$defs/OpSpec"
+        },
+        "weight_copies": {
+          "minimum": 1,
+          "title": "Weight Copies",
+          "type": "integer"
+        },
+        "work_repeat": {
+          "minimum": 1,
+          "title": "Work Repeat",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "depends_on",
+        "embedding_local_tokens",
+        "fusion",
+        "id",
+        "kv_access",
+        "operand_access",
+        "padding",
+        "replication",
+        "spec",
+        "weight_copies",
+        "work_repeat"
+      ],
+      "title": "PreparedOp",
+      "type": "object"
+    },
+    "PreparedPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "embedding_hits": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Embedding Hits",
+          "type": "array"
+        },
+        "frequency_ratio": {
+          "gt": 0,
+          "title": "Frequency Ratio",
+          "type": "number"
+        },
+        "graph": {
+          "$ref": "#/$defs/PreparedGraph"
+        },
+        "hit_source": {
+          "enum": [
+            "provided_counts",
+            "synthetic_balanced_assignment",
+            "tp1_trivial"
+          ],
+          "title": "Hit Source",
+          "type": "string"
+        },
+        "initial_state": {
+          "enum": [
+            "steady",
+            "cold"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "payload_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "query": {
+          "discriminator": {
+            "mapping": {
+              "decode": "#/$defs/DecodeQuery",
+              "prefill": "#/$defs/PrefillQuery"
+            },
+            "propertyName": "phase"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DecodeQuery"
+            },
+            {
+              "$ref": "#/$defs/PrefillQuery"
+            }
+          ],
+          "title": "Query"
+        }
+      },
+      "required": [
+        "embedding_hits",
+        "frequency_ratio",
+        "graph",
+        "hit_source",
+        "initial_state",
+        "payload_hash",
+        "query"
+      ],
+      "title": "PreparedPoint",
+      "type": "object"
+    },
+    "Producer": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "implementation_hash",
+        "name",
+        "version"
+      ],
+      "title": "Producer",
+      "type": "object"
+    },
+    "RankScope": {
+      "additionalProperties": false,
+      "properties": {
+        "collectives": {
+          "const": "excluded",
+          "title": "Collectives",
+          "type": "string"
+        },
+        "equivalent_ranks": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Equivalent Ranks",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "balanced_tp_representative",
+            "balanced_tp_selected_rank"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "rank_index": {
+          "minimum": 0,
+          "title": "Rank Index",
+          "type": "integer"
+        },
+        "tp": {
+          "minimum": 1,
+          "title": "Tp",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "collectives",
+        "equivalent_ranks",
+        "kind",
+        "rank_index",
+        "tp"
+      ],
+      "title": "RankScope",
+      "type": "object"
+    },
+    "Replication": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "minLength": 1,
+          "title": "Dimension",
+          "type": "string"
+        },
+        "global_extent": {
+          "minimum": 1,
+          "title": "Global Extent",
+          "type": "integer"
+        },
+        "rank_extent": {
+          "minimum": 1,
+          "title": "Rank Extent",
+          "type": "integer"
+        },
+        "replicas": {
+          "minimum": 1,
+          "title": "Replicas",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dimension",
+        "global_extent",
+        "rank_extent",
+        "replicas"
+      ],
+      "title": "Replication",
+      "type": "object"
+    },
+    "RequestIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "accounting": {
+          "const": "resolved-ops/1",
+          "title": "Accounting",
+          "type": "string"
+        },
+        "analytic_mode": {
+          "enum": [
+            "aggregate",
+            "per_op"
+          ],
+          "title": "Analytic Mode",
+          "type": "string"
+        },
+        "assumptions_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Assumptions Hash",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Component Id",
+          "type": "string"
+        },
+        "contract": {
+          "const": "uarch-contract/0.2",
+          "title": "Contract",
+          "type": "string"
+        },
+        "envelope": {
+          "$ref": "#/$defs/Envelope"
+        },
+        "grid": {
+          "$ref": "#/$defs/Grid"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "initial_state": {
+          "default": "steady",
+          "enum": [
+            "steady",
+            "cold"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "kv_layout": {
+          "$ref": "#/$defs/KvLayout"
+        },
+        "mapping_policy": {
+          "pattern": "^\\S+@\\S+$",
+          "title": "Mapping Policy",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelSpec"
+        },
+        "model_shape": {
+          "$ref": "#/$defs/ModelShape"
+        },
+        "precision": {
+          "$ref": "#/$defs/Precision"
+        },
+        "preparation_policy": {
+          "const": "balanced-tp/1",
+          "title": "Preparation Policy",
+          "type": "string"
+        },
+        "rk_schema_snapshot": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Rk Schema Snapshot",
+          "type": "string"
+        },
+        "seed": {
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "tp": {
+          "minimum": 1,
+          "title": "Tp",
+          "type": "integer"
+        },
+        "uarch_fidelity": {
+          "$ref": "#/$defs/FidelityDetail"
+        },
+        "visit_weights": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VisitWeights"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "rk_schema_snapshot",
+        "component_id",
+        "hardware_spec_hash",
+        "model",
+        "model_shape",
+        "precision",
+        "tp",
+        "envelope",
+        "grid",
+        "mapping_policy",
+        "uarch_fidelity",
+        "kv_layout",
+        "seed",
+        "accounting",
+        "analytic_mode",
+        "assumptions_hash",
+        "contract",
+        "preparation_policy"
+      ],
+      "title": "RequestIntent",
+      "type": "object"
+    },
+    "SharedSram": {
+      "additionalProperties": false,
+      "properties": {
+        "attach": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Attach",
+          "type": "array"
+        },
+        "banks": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes_per_cycle_per_bank": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "latency_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "bytes",
+        "banks",
+        "bytes_per_cycle_per_bank",
+        "latency_cycles",
+        "attach"
+      ],
+      "title": "SharedSram",
+      "type": "object"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    },
+    "Sram": {
+      "additionalProperties": false,
+      "properties": {
+        "banks": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bytes_per_cycle_per_bank": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "bytes",
+        "banks",
+        "bytes_per_cycle_per_bank"
+      ],
+      "title": "Sram",
+      "type": "object"
+    },
+    "Sync": {
+      "additionalProperties": false,
+      "properties": {
+        "barrier_latency_cycles": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "mechanism": {
+          "enum": [
+            "noc_semaphore",
+            "hardware_barrier"
+          ],
+          "title": "Mechanism",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mechanism",
+        "barrier_latency_cycles"
+      ],
+      "title": "Sync",
+      "type": "object"
+    },
+    "TimingPreset": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "File",
+          "type": "string"
+        },
+        "sha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Sha",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "sha"
+      ],
+      "title": "TimingPreset",
+      "type": "object"
+    },
+    "VectorEngine": {
+      "additionalProperties": false,
+      "properties": {
+        "ops_per_cycle": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "ops_per_cycle"
+      ],
+      "title": "VectorEngine",
+      "type": "object"
+    },
+    "VisitWeights": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "items": {
+            "$ref": "#/$defs/DecodeVisitWeight"
+          },
+          "title": "Decode",
+          "type": "array"
+        },
+        "prefill": {
+          "items": {
+            "$ref": "#/$defs/PrefillVisitWeight"
+          },
+          "title": "Prefill",
+          "type": "array"
+        }
+      },
+      "required": [
+        "decode",
+        "prefill"
+      ],
+      "title": "VisitWeights",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bundle_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Bundle Hash",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-prepared/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "hardware_spec": {
+      "$ref": "#/$defs/HardwareSpec"
+    },
+    "intent": {
+      "$ref": "#/$defs/RequestIntent"
+    },
+    "intent_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Intent Hash",
+      "type": "string"
+    },
+    "mapping_scope": {
+      "const": "analytic_ops",
+      "title": "Mapping Scope",
+      "type": "string"
+    },
+    "points": {
+      "items": {
+        "$ref": "#/$defs/PreparedPoint"
+      },
+      "minItems": 1,
+      "title": "Points",
+      "type": "array"
+    },
+    "producer": {
+      "$ref": "#/$defs/Producer"
+    },
+    "rank": {
+      "$ref": "#/$defs/RankScope"
+    }
+  },
+  "required": [
+    "bundle_hash",
+    "format",
+    "hardware_spec",
+    "intent",
+    "intent_hash",
+    "mapping_scope",
+    "points",
+    "producer",
+    "rank"
+  ],
+  "title": "PreparedBundle",
+  "type": "object"
+}
