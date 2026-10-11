@@ -22,7 +22,6 @@ no Reza approval is claimed.
 | `24c03f42083d9beaccb1a1a8ef6e62069b73cd96` | Static relative-import resolution complies with the unchanged protected production-isolation guard |
 | `279134164ee526e10cc5d2a8ee36f22828c8a9ed` | Changed-byte refusal across direct/transitive engine, hardware, capacity and protected carrier dependencies |
 | `7f735526a0563049ec726884be4aa6bf377359b9` | Complete independent duplicated-job, reconstructed-request and fully rebound active-assumption controls; runtime bytes unchanged |
-| `7f735526a0563049ec726884be4aa6bf377359b9` | Complete independent duplicated-job, reconstructed-request and fully rebound active-assumption controls; runtime bytes unchanged |
 
 Use Git diffs across these commits, not copied checkpoint trees. Existing source paths under
 `src/` are unchanged: all runtime changes are additive. In particular core.py, old entry point,
@@ -113,10 +112,12 @@ reference tests**, not a numerical RoPE kernel or physical instruction evidence.
 remove the 28 skips, update their pending docstring and rename the test function. Keep the
 historical filename and all positive/counterexample fixtures unchanged. No further carrier
 schema/test changes are required by this implementation; broader job/result regressions live
-in A-owned tests. The human must review/install/commit this patch separately. Applicability:
+in A-owned tests. The human must review/install/commit this patch separately. Zero-context hunks avoid
+whitespace-only patch context; their applied bytes were checked identical to the exercised
+three-context representation. Applicability:
 
 ```sh
-git apply --check docs/reviews/U3-RoPE-runtime-v1/protected-tests.patch
+git apply --check --unidiff-zero docs/reviews/U3-RoPE-runtime-v1/protected-tests.patch
 uv run --no-sync python docs/reviews/U3-RoPE-runtime-v1/exercise.py --revision 7f735526a0563049ec726884be4aa6bf377359b9
 ```
 

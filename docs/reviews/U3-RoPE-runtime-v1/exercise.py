@@ -53,8 +53,8 @@ def main() -> None:
         )
         env.pop("MYPYPATH", None)
         patch = Path(__file__).with_name("protected-tests.patch")
-        run(["git", "apply", "--check", str(patch)], scratch, env)
-        run(["git", "apply", str(patch)], scratch, env)
+        run(["git", "apply", "--check", "--unidiff-zero", str(patch)], scratch, env)
+        run(["git", "apply", "--unidiff-zero", str(patch)], scratch, env)
         python = sys.executable
         tests = [python, "-m", "pytest", "-q", "--tb=short", "-p", "no:cacheprovider"]
         carrier = run(
