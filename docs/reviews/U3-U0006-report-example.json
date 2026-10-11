@@ -1,0 +1,343 @@
+{
+  "format": "uarch-analytic-verification-source/1",
+  "execution_kind": "illustration",
+  "input_kind": "synthetic_fixture",
+  "engine": {
+    "implementation_hash": "sha256:fa3938f8c009c7b80700d35feba7504e4b4da06e628d2e387480c358963974ea",
+    "model": {
+      "implementation_hash": "sha256:fa3938f8c009c7b80700d35feba7504e4b4da06e628d2e387480c358963974ea",
+      "name": "physical-resolved",
+      "version": "1"
+    },
+    "name": "analytic",
+    "version": "resolved-ops/1"
+  },
+  "model": {
+    "implementation_hash": "sha256:fa3938f8c009c7b80700d35feba7504e4b4da06e628d2e387480c358963974ea",
+    "name": "physical-resolved",
+    "version": "1"
+  },
+  "implementation_git_commit": "ad23500bc5f360727c660acd71781b4dc530115c",
+  "assumptions": {
+    "algorithms": {
+      "activation": "silu-5md-plus-gate/1",
+      "compute_overlap": "serialize-matrix-vector/1",
+      "embedding": "supplied-conserved-hit-vector/1",
+      "kv": "valid-tokens-context-includes-append/1",
+      "normalization": "rms-6md/1",
+      "residency": "partial-weight-kv-checks-total-peak-unknown/1",
+      "softmax": "scalar-5pairs/1",
+      "traffic": "once-per-operand-no-retention/1",
+      "vector_rate": "cores-times-ops-per-cycle-times-resolved-core-hz/1"
+    },
+    "assumptions_hash": "sha256:255afd1ceb9c02a4909464c41e98e16085485a8e500090a8e2d98dc2ee56a896",
+    "format": "uarch-assumptions/1",
+    "limitations": [
+      "Abstract vector operation rate is unvalidated for transcendental algorithms.",
+      "No independent full-workload physical timing validation."
+    ],
+    "model": {
+      "implementation_hash": "sha256:fa3938f8c009c7b80700d35feba7504e4b4da06e628d2e387480c358963974ea",
+      "name": "physical-resolved",
+      "version": "1"
+    }
+  },
+  "suite": {
+    "id": "illustration-skipped-queue",
+    "version": "proposal-1",
+    "git_commit": "ad23500bc5f360727c660acd71781b4dc530115c",
+    "entrypoint": "validation.reporting.analytic_report",
+    "plan_hash": "sha256:708be01ed7620f6bc19f1a3d623f65cede0f398fab548fcdaa334a7a88d802be"
+  },
+  "toolchain": {
+    "python_version": "3.12.14",
+    "hypothesis_version": "6.168.3",
+    "pytest_version": "9.1.1",
+    "uv_lock_sha256": "sha256:b6152bd0a0f81e910a69fd5d9d2c1523a0698fe53d57aa06e5a545f0ba30cbab"
+  },
+  "discovery_plan": {
+    "profile_id": "illustration-skipped-queue",
+    "profile_version": "1",
+    "rung": "L0",
+    "purposes": [
+      "diagnostics"
+    ],
+    "modes": [
+      "aggregate",
+      "per_op"
+    ],
+    "cells": [
+      {
+        "cell_id": "L0.little_law/1:aggregate:u-c0-capability",
+        "relation_id": "L0.little_law/1",
+        "purpose": "diagnostics",
+        "modes": [
+          "aggregate"
+        ],
+        "path": "fixed_prepared",
+        "domain": {
+          "id": "u-c0-capability",
+          "definition": {
+            "fixed": {
+              "/engine/name": "analytic"
+            },
+            "ranges": [],
+            "transformation": {
+              "id": "identity/1",
+              "arguments": {}
+            },
+            "tolerance": null
+          },
+          "input_fixture_hashes": [],
+          "scope_dimensions": {}
+        },
+        "premises": [
+          {
+            "id": "queue_observation",
+            "predicate": "queue-observation-required/1",
+            "observation_selectors": []
+          }
+        ],
+        "budget": {
+          "max_examples": 1,
+          "required_valid_examples": 1,
+          "max_engine_invocations": 1
+        },
+        "required_mutants": []
+      },
+      {
+        "cell_id": "L0.little_law/1:per_op:u-c0-capability",
+        "relation_id": "L0.little_law/1",
+        "purpose": "diagnostics",
+        "modes": [
+          "per_op"
+        ],
+        "path": "fixed_prepared",
+        "domain": {
+          "id": "u-c0-capability",
+          "definition": {
+            "fixed": {
+              "/engine/name": "analytic"
+            },
+            "ranges": [],
+            "transformation": {
+              "id": "identity/1",
+              "arguments": {}
+            },
+            "tolerance": null
+          },
+          "input_fixture_hashes": [],
+          "scope_dimensions": {}
+        },
+        "premises": [
+          {
+            "id": "queue_observation",
+            "predicate": "queue-observation-required/1",
+            "observation_selectors": []
+          }
+        ],
+        "budget": {
+          "max_examples": 1,
+          "required_valid_examples": 1,
+          "max_engine_invocations": 1
+        },
+        "required_mutants": []
+      }
+    ],
+    "selection": {
+      "policy": "hypothesis-freeze-replay/1",
+      "database": null,
+      "derandomize": true,
+      "seed": null,
+      "phases": [
+        "generate",
+        "shrink"
+      ],
+      "deadline_ms": null,
+      "retain": "all_engine_calls_and_counterexamples",
+      "corpus_hash": null
+    }
+  },
+  "plan": {
+    "profile_id": "illustration-skipped-queue",
+    "profile_version": "1",
+    "rung": "L0",
+    "purposes": [
+      "diagnostics"
+    ],
+    "modes": [
+      "aggregate",
+      "per_op"
+    ],
+    "cells": [
+      {
+        "cell_id": "L0.little_law/1:aggregate:u-c0-capability",
+        "relation_id": "L0.little_law/1",
+        "purpose": "diagnostics",
+        "modes": [
+          "aggregate"
+        ],
+        "path": "fixed_prepared",
+        "domain": {
+          "id": "u-c0-capability",
+          "definition": {
+            "fixed": {
+              "/engine/name": "analytic"
+            },
+            "ranges": [],
+            "transformation": {
+              "id": "identity/1",
+              "arguments": {}
+            },
+            "tolerance": null
+          },
+          "input_fixture_hashes": [],
+          "scope_dimensions": {}
+        },
+        "premises": [
+          {
+            "id": "queue_observation",
+            "predicate": "queue-observation-required/1",
+            "observation_selectors": []
+          }
+        ],
+        "budget": {
+          "max_examples": 1,
+          "required_valid_examples": 1,
+          "max_engine_invocations": 1
+        },
+        "required_mutants": []
+      },
+      {
+        "cell_id": "L0.little_law/1:per_op:u-c0-capability",
+        "relation_id": "L0.little_law/1",
+        "purpose": "diagnostics",
+        "modes": [
+          "per_op"
+        ],
+        "path": "fixed_prepared",
+        "domain": {
+          "id": "u-c0-capability",
+          "definition": {
+            "fixed": {
+              "/engine/name": "analytic"
+            },
+            "ranges": [],
+            "transformation": {
+              "id": "identity/1",
+              "arguments": {}
+            },
+            "tolerance": null
+          },
+          "input_fixture_hashes": [],
+          "scope_dimensions": {}
+        },
+        "premises": [
+          {
+            "id": "queue_observation",
+            "predicate": "queue-observation-required/1",
+            "observation_selectors": []
+          }
+        ],
+        "budget": {
+          "max_examples": 1,
+          "required_valid_examples": 1,
+          "max_engine_invocations": 1
+        },
+        "required_mutants": []
+      }
+    ],
+    "selection": {
+      "policy": "hypothesis-freeze-replay/1",
+      "database": null,
+      "derandomize": true,
+      "seed": null,
+      "phases": [
+        "generate",
+        "shrink"
+      ],
+      "deadline_ms": null,
+      "retain": "all_engine_calls_and_counterexamples",
+      "corpus_hash": "sha256:460913d2569dd02427b6c76803338095ddc7e699d4fd9163c2a9fd5c14006af7"
+    }
+  },
+  "execution": {
+    "state": "complete",
+    "stop_reason": null,
+    "ledger_count": 0
+  },
+  "corpus": {
+    "entries": [],
+    "discovery_case_ids": []
+  },
+  "cases": {
+    "discovery": [],
+    "candidate": [],
+    "mutant": []
+  },
+  "relations": [
+    {
+      "cell_id": "L0.little_law/1:aggregate:u-c0-capability",
+      "applicability": "unobservable",
+      "reason": "UNOBSERVABLE_QUEUE",
+      "status": "skip",
+      "premise_results": [
+        {
+          "id": "queue_observation",
+          "state": "unobservable",
+          "reason": "UNOBSERVABLE_QUEUE",
+          "observation_pointers": []
+        }
+      ],
+      "actual": {
+        "observed_body_entries": 0,
+        "internal_draws": null,
+        "internal_rejections": null,
+        "executed_shrink_calls": null,
+        "valid_examples": 0,
+        "engine_evaluations": {
+          "discovery": 0,
+          "candidate": 0,
+          "mutant": 0
+        }
+      },
+      "case_ids": []
+    },
+    {
+      "cell_id": "L0.little_law/1:per_op:u-c0-capability",
+      "applicability": "unobservable",
+      "reason": "UNOBSERVABLE_QUEUE",
+      "status": "skip",
+      "premise_results": [
+        {
+          "id": "queue_observation",
+          "state": "unobservable",
+          "reason": "UNOBSERVABLE_QUEUE",
+          "observation_pointers": []
+        }
+      ],
+      "actual": {
+        "observed_body_entries": 0,
+        "internal_draws": null,
+        "internal_rejections": null,
+        "executed_shrink_calls": null,
+        "valid_examples": 0,
+        "engine_evaluations": {
+          "discovery": 0,
+          "candidate": 0,
+          "mutant": 0
+        }
+      },
+      "case_ids": []
+    }
+  ],
+  "mutants": [],
+  "objects": [],
+  "reduction": {
+    "coverage": "none",
+    "outcome": "not_run",
+    "purpose_outcomes": {
+      "diagnostics": "not_run"
+    }
+  }
+}
