@@ -1,0 +1,7383 @@
+--- /dev/null
++++ b/contract/uarch_contract/rotary_v2.py
+@@ -0,0 +1,180 @@
++"""Additive U0022 carriers, NOT execution admission or automatic v1 migration.
++
++Coefficient shape/finite bits/content identity and inherited request/operand checks
++execute here. Graph semantics, closure joins, hardware/rank support, job/result admission
++and analytic replay require the separately reviewed v2 validators. Do not dispatch an
++engine merely because model_validate succeeds. V1 roots/generators remain untouched.
++"""
++
++from __future__ import annotations
++
++from typing import Annotated, Literal
++
++from pydantic import Field, model_validator
++
++from .common import FrozenModel, Hash, JsonFloat, JsonNonNegativeInt, JsonPositiveInt, NonEmpty
++from .hardware import HardwareSpec
++from .hashing import verify_identity
++from .operators import Operand, OpSpec
++from .prepared import KvAccess, Padding, Producer, Query, RankScope, Replication
++from .request import _RequestFields
++
++Bits32 = Annotated[str, Field(pattern=r"^[0-9a-f]{8}$")]
++BitRow = Annotated[tuple[Bits32, ...], Field(min_length=1)]
++BitTable = Annotated[tuple[BitRow, ...], Field(min_length=1)]
++Pairing = Literal["adjacent", "split_halves"]
++NumericPolicy = Literal["fp32-separate-round-rne/1"]
++_Id = Annotated[str, Field(min_length=1)]
++_Positive = Annotated[int, Field(strict=True, ge=1)]
++_Nonnegative = Annotated[int, Field(strict=True, ge=0)]
++
++
++class RotaryCoefficients(FrozenModel):
++    format: Literal["uarch-rotary-coefficients/1"]
++    coefficients_hash: Hash
++    position_count: JsonPositiveInt
++    rotary_dim: JsonPositiveInt
++    dtype: Literal["fp32"]
++    cos_bits: BitTable
++    sin_bits: BitTable
++    producer: Producer
++
++    @model_validator(mode="after")
++    def table_shape_bits_and_identity(self) -> RotaryCoefficients:
++        if self.rotary_dim < 2 or self.rotary_dim % 2:
++            raise ValueError("rotary_dim must be positive even and >=2")
++        for table in (self.cos_bits, self.sin_bits):
++            if len(table) != self.position_count:
++                raise ValueError("position_count mismatch")
++            for row in table:
++                if len(row) != self.rotary_dim // 2:
++                    raise ValueError("coefficient row width mismatch")
++                if any(int(bits, 16) & 0x7F800000 == 0x7F800000 for bits in row):
++                    raise ValueError("nonfinite binary32 coefficient")
++        verify_identity(self, "coefficients_hash")
++        return self
++
++
++class RotaryEncoding(FrozenModel):
++    kind: Literal["rope-precomputed/1"]
++    rotary_dim: JsonPositiveInt
++    pairing: Pairing
++    coefficients_hash: Hash
++    position_policy: Literal["zero-origin-contiguous/1"]
++    cache_key_state: Literal["rotated-before-store"]
++    numeric_policy: NumericPolicy
++
++
++class RotaryBinding(FrozenModel):
++    target: Literal["q", "k"]
++    coefficients_hash: Hash
++    pairing: Pairing
++    numeric_policy: NumericPolicy
++    position_ids: Annotated[
++        tuple[Annotated[tuple[JsonNonNegativeInt, ...], Field(min_length=1)], ...],
++        Field(min_length=1),
++    ]
++    input_op_id: NonEmpty
++
++
++class RotaryOpSpec(FrozenModel):
++    operator: Literal["rotary_embedding"]
++    dimensions: dict[NonEmpty, JsonPositiveInt]
++    operands: dict[NonEmpty, Operand]
++    reduction_axes: tuple[NonEmpty, ...]
++
++    @model_validator(mode="after")
++    def named_dimensions(self) -> RotaryOpSpec:
++        # Same structural guard as OpSpec; exact rotary axes are an admission obligation.
++        if not self.dimensions or not self.operands:
++            raise ValueError("An operator requires named dimensions and operands.")
++        used = set(self.reduction_axes)
++        for operand in self.operands.values():
++            used.update(operand.dimensions)
++        if used - self.dimensions.keys():
++            raise ValueError(f"Undefined dimensions: {sorted(used - self.dimensions.keys())}.")
++        return self
++
++
++class PreparedOpV2(FrozenModel):
++    depends_on: Annotated[tuple[_Id, ...], Field(min_length=0)]
++    embedding_local_tokens: _Nonnegative | None
++    fusion: Literal["none", "qk_softmax_av"]
++    id: _Id
++    kv_access: KvAccess | None
++    operand_access: dict[str, Literal["read", "write", "read_write"]]
++    padding: Annotated[tuple[Padding, ...], Field(min_length=0)]
++    replication: Annotated[tuple[Replication, ...], Field(min_length=0)]
++    spec: OpSpec | RotaryOpSpec
++    weight_copies: _Positive
++    work_repeat: _Positive
++    rotary: RotaryBinding | None
++
++
++class OpGroupV2(FrozenModel):
++    depends_on: Annotated[tuple[_Id, ...], Field(min_length=0)]
++    id: _Id
++    kind: Literal["head", "decoder", "tail"]
++    ops: Annotated[tuple[PreparedOpV2, ...], Field(min_length=1)]
++    repeat: _Positive
++
++
++class PreparedGraphV2(FrozenModel):
++    attention_mask: Literal["full_square", "causal"]
++    groups: Annotated[tuple[OpGroupV2, ...], Field(min_length=1)]
++    lm_head_tokens: _Positive
++    omissions: Annotated[tuple[_Id, ...], Field(min_length=4)]
++    kv_key_encoding: RotaryEncoding
++
++
++class PreparedPointV2(FrozenModel):
++    embedding_hits: Annotated[tuple[_Nonnegative, ...], Field(min_length=1)]
++    frequency_ratio: Annotated[JsonFloat, Field(gt=0)]
++    graph: PreparedGraphV2
++    hit_source: Literal["provided_counts", "synthetic_balanced_assignment", "tp1_trivial"]
++    initial_state: Literal["steady", "cold"]
++    payload_hash: Hash
++    query: Query
++
++
++class RequestIntentV3(_RequestFields):
++    accounting: Literal["resolved-ops/2"]
++    analytic_mode: Literal["aggregate", "per_op"]
++    assumptions_hash: Hash
++    contract: Literal["uarch-contract/0.3"]
++    preparation_policy: Literal["balanced-tp/1"]
++    mapping_policy: Literal["analytic-ops@2"]
++    position_encoding: RotaryEncoding
++
++
++class CharacterizationRequestV3(RequestIntentV3):
++    prepared_input_hash: Hash
++
++
++class PreparedBundleV2(FrozenModel):
++    bundle_hash: Hash
++    format: Literal["uarch-prepared/2"]
++    hardware_spec: HardwareSpec
++    intent: RequestIntentV3
++    intent_hash: Hash
++    mapping_scope: Literal["analytic_ops"]
++    points: Annotated[tuple[PreparedPointV2, ...], Field(min_length=1)]
++    producer: Producer
++    rank: RankScope
++    coefficients: RotaryCoefficients
++
++
++# Dedicated generator only: never add this module to the v1 generate.MODULES inventory.
++SCHEMA_ROOTS = (
++    RotaryCoefficients,
++    RotaryEncoding,
++    RotaryBinding,
++    RotaryOpSpec,
++    PreparedOpV2,
++    OpGroupV2,
++    PreparedGraphV2,
++    PreparedPointV2,
++    RequestIntentV3,
++    CharacterizationRequestV3,
++    PreparedBundleV2,
++)
+--- /dev/null
++++ b/contract/uarch_contract/generate_rotary_v2.py
+@@ -0,0 +1,52 @@
++"""Generate/check only U0022's additive contract/schema/rotary-v2 mirrors.
++
++Uses current dependencies, never vendors artifacts or writes v1 mirrors. Check is read-only.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++from pathlib import Path
++
++from .rotary_v2 import SCHEMA_ROOTS
++
++DEFAULT_OUTPUT = Path(__file__).resolve().parents[1] / "schema/rotary-v2"
++
++
++def schemas() -> dict[str, str]:
++    result = {}
++    for model in SCHEMA_ROOTS:
++        schema = model.model_json_schema()
++        schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
++        result[model.__name__ + ".json"] = json.dumps(schema, indent=2, sort_keys=True) + "\n"
++    return result
++
++
++def generate(output: Path = DEFAULT_OUTPUT, *, check: bool = False) -> list[str]:
++    expected = schemas()
++    actual = {p.name: p.read_text() for p in output.glob("*.json")}
++    stale = sorted(k for k in actual.keys() | expected.keys() if actual.get(k) != expected.get(k))
++    if not check:
++        unexpected = sorted(actual.keys() - expected.keys())
++        if unexpected:
++            raise ValueError("Refusing unexpected schema files: " + ", ".join(unexpected))
++        output.mkdir(parents=True, exist_ok=True)
++        for name, text in expected.items():
++            (output / name).write_text(text)
++    return stale
++
++
++def main() -> None:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--check", action="store_true")
++    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
++    args = parser.parse_args()
++    stale = generate(args.output, check=args.check)
++    if args.check and stale:
++        parser.exit(1, "Stale rotary-v2 schemas: " + ", ".join(stale) + "\n")
++    print("Rotary-v2 schemas are fresh." if args.check else "Generated rotary-v2 schemas.")
++
++
++if __name__ == "__main__":
++    main()
+--- /dev/null
++++ b/contract/tests/rotary_v2_cases.py
+@@ -0,0 +1,291 @@
++"""Complete synthetic carrier examples, not a producer, oracle, or executable job.
++
++Reuse the accepted U2 literal by reference; author explicit new profile/nodes/edges.
++No production preparation, counting, engine, or transcendental functions are imported.
++"""
++
++from __future__ import annotations
++
++import json
++from copy import deepcopy
++from pathlib import Path
++from typing import Any, cast
++
++from uarch_contract.hashing import content_hash, sha256
++
++FIXTURES = Path(__file__).parent / "fixtures/u2"
++
++
++def literal(name: str) -> dict[str, Any]:
++    return cast(dict[str, Any], json.loads((FIXTURES / name).read_text()))
++
++
++def seal(value: dict[str, Any], key: str) -> None:
++    value[key] = content_hash(value, exclude=(key,))
++
++
++def examples(mode: str = "per_op", pairing: str = "adjacent") -> dict[str, Any]:
++    """Author full two-point, tp1, BF16, synthetic-d4 contract closure for tests."""
++    producer = dict(
++        name="synthetic-contract-example",
++        version="1",
++        implementation_hash=sha256(Path(__file__).read_bytes()),
++    )
++    # Synthetic supplied bits, no named model equivalence and no sin/cos generation.
++    coefficients = dict(
++        format="uarch-rotary-coefficients/1",
++        position_count=17,
++        rotary_dim=2,
++        dtype="fp32",
++        cos_bits=[["3f800000"] for _ in range(17)],
++        sin_bits=[["00000000"] for _ in range(17)],
++        producer=producer,
++    )
++    seal(coefficients, "coefficients_hash")
++    encoding = dict(
++        kind="rope-precomputed/1",
++        rotary_dim=2,
++        pairing=pairing,
++        coefficients_hash=coefficients["coefficients_hash"],
++        position_policy="zero-origin-contiguous/1",
++        cache_key_state="rotated-before-store",
++        numeric_policy="fp32-separate-round-rne/1",
++    )
++    # This identity labels a test-only stand-in, never an installed v2 implementation.
++    assumptions = dict(
++        format="uarch-assumptions/1",
++        model=dict(
++            name="physical-resolved",
++            version="2",
++            implementation_hash=sha256(b"test-only-v2-engine-not-implemented"),
++        ),
++        algorithms={
++            "activation": "silu-5md-plus-gate/1",
++            "compute_overlap": "serialize-matrix-vector/1",
++            "embedding": "supplied-conserved-hit-vector/1",
++            "kv": "valid-tokens-context-includes-append/1",
++            "normalization": "rms-6md/1",
++            "residency": "partial-weight-kv-checks-total-peak-unknown/1",
++            "softmax": "scalar-5pairs/1",
++            "traffic": "once-per-operand-no-retention/1",
++            "vector_rate": "cores-times-ops-per-cycle-times-resolved-core-hz/1",
++            "rotary": "rope-3e-plus-explicit-casts/1",
++        },
++        limitations=[
++            "Test-only identity, no v2 engine exists for this example.",
++            "Abstract vector operation rate is unvalidated for transcendental algorithms.",
++            "No independent full-workload physical timing validation.",
++            "RoPE scalar casts are abstract vector ops, not measured instructions.",
++            "Supplied FP32 coefficient reads are charged per node/token/layer, without retention.",
++            "Precomputed coefficients have no named-model equivalence claim.",
++            "RoPE supports same-format FP32/BF16/FP16 activations and KV only.",
++            "Coefficient allocation is known; total peak residency remains unknown.",
++        ],
++    )
++    seal(assumptions, "assumptions_hash")
++    bundle = literal("independent-bundle.json")
++    bundle.update(format="uarch-prepared/2", coefficients=coefficients, producer=producer)
++    bundle["intent"].update(
++        contract="uarch-contract/0.3",
++        accounting="resolved-ops/2",
++        mapping_policy="analytic-ops@2",
++        analytic_mode=mode,
++        position_encoding=encoding,
++        assumptions_hash=assumptions["assumptions_hash"],
++    )
++    for point in bundle["points"]:
++        position = 16 if point["query"]["phase"] == "decode" else 0
++        point["graph"]["kv_key_encoding"] = deepcopy(encoding)
++        for group in point["graph"]["groups"]:
++            ops = []
++            for op in group["ops"]:
++                op["rotary"] = None
++                if op["id"] == "kv":
++                    op["depends_on"] = ["rope_k", "v"]
++                if op["id"] == "attn":
++                    op["depends_on"] = ["rope_q", "rope_k", "v", "kv"]
++                ops.append(op)
++                if group["kind"] == "decoder" and op["id"] in ("q", "k"):
++                    target = op["id"]
++                    operands = {
++                        name: dict(
++                            dtype="bf16" if name in ("X", "Y") else "fp32",
++                            dimensions=["B", "H", "S", "D"]
++                            if name in ("X", "Y")
++                            else ["B", "S", "P"],
++                            layout="contiguous",
++                            block_size_tokens=None,
++                        )
++                        for name in ("X", "Cos", "Sin", "Y")
++                    }
++                    ops.append(
++                        dict(
++                            depends_on=[target],
++                            embedding_local_tokens=None,
++                            fusion="none",
++                            id="rope_" + target,
++                            kv_access=None,
++                            operand_access=dict(X="read", Cos="read", Sin="read", Y="write"),
++                            padding=[],
++                            replication=[],
++                            weight_copies=1,
++                            work_repeat=1,
++                            spec=dict(
++                                operator="rotary_embedding",
++                                dimensions=dict(
++                                    B=1,
++                                    H=2 if target == "q" else 1,
++                                    S=1,
++                                    D=2,
++                                    R=2,
++                                    P=1,
++                                ),
++                                operands=operands,
++                                reduction_axes=[],
++                            ),
++                            rotary=dict(
++                                target=target,
++                                coefficients_hash=coefficients["coefficients_hash"],
++                                pairing=pairing,
++                                numeric_policy=encoding["numeric_policy"],
++                                position_ids=[[position]],
++                                input_op_id=target,
++                            ),
++                        )
++                    )
++            group["ops"] = ops
++        seal(point, "payload_hash")
++    bundle["intent_hash"] = content_hash(bundle["intent"])
++    seal(bundle, "bundle_hash")
++    request = dict(bundle["intent"], prepared_input_hash=bundle["bundle_hash"])
++    return dict(bundle=bundle, request=request, assumptions=assumptions)
++
++
++def rehash(bundle: dict[str, Any]) -> None:
++    """Refresh only enclosing identities, never repair deliberately broken joins."""
++    for point in bundle["points"]:
++        seal(point, "payload_hash")
++    bundle["intent_hash"] = content_hash(bundle["intent"])
++    seal(bundle, "bundle_hash")
++
++
++RUNTIME_REFUSALS = (
++    "missing-q",
++    "doubled-k",
++    "rope-in-tail",
++    "rotate-v",
++    "q-bypass",
++    "k-bypass",
++    "wrong-projection",
++    "cached-token-rotation",
++    "odd-R",
++    "Hkv-as-Hq",
++    "extra-repeat",
++    "rotary-padding",
++    "different-cache-profile",
++    "wrong-position",
++    "different-binding-hash",
++    "different-pairing",
++    "intent-coefficient-mismatch",
++    "missing-grid-point",
++    "wrong-rank",
++    "mixed-kv",
++    "fp8",
++    "wrong-hardware-hash",
++    "wrong-intent-hash",
++    "wrong-point-hash",
++    "missing-nonrotary-op",
++    "layer-repeat",
++    "wrong-omissions",
++    "short-context-table",
++)
++
++
++def runtime_counterexample(case: str) -> dict[str, Any]:
++    """Schema-valid counterexamples for the future full graph/closure validator."""
++    b: dict[str, Any] = deepcopy(examples()["bundle"])
++    p = b["points"][0]
++    groups = p["graph"]["groups"]
++    decoder = groups[1]
++    ops = decoder["ops"]
++    q = next(o for o in ops if o["id"] == "rope_q")
++    k = next(o for o in ops if o["id"] == "rope_k")
++    by_id = {o["id"]: o for o in ops}
++    if case == "missing-q":
++        ops.remove(q)
++    elif case == "doubled-k":
++        ops.append(deepcopy(k))
++    elif case == "rope-in-tail":
++        ops.remove(q)
++        groups[2]["ops"].append(q)
++    elif case == "rotate-v":
++        k["depends_on"] = ["v"]
++        k["rotary"]["input_op_id"] = "v"
++    elif case == "q-bypass":
++        by_id["attn"]["depends_on"] = ["q", "rope_k", "v", "kv"]
++    elif case == "k-bypass":
++        by_id["kv"]["depends_on"] = ["k", "v"]
++    elif case == "wrong-projection":
++        q["depends_on"] = ["k"]
++        q["rotary"]["input_op_id"] = "k"
++    elif case == "cached-token-rotation":
++        k["spec"]["dimensions"]["S"] = 17
++        k["rotary"]["position_ids"] = [list(range(17))]
++    elif case == "odd-R":
++        q["spec"]["dimensions"]["R"] = 3
++    elif case == "Hkv-as-Hq":
++        k["spec"]["dimensions"]["H"] = 2
++    elif case == "extra-repeat":
++        k["work_repeat"] = 2
++    elif case == "rotary-padding":
++        q["padding"] = [dict(dimension="H", logical=1, physical=2)]
++    elif case == "different-cache-profile":
++        p["graph"]["kv_key_encoding"]["pairing"] = "split_halves"
++    elif case == "wrong-position":
++        q["rotary"]["position_ids"] = [[15]]
++    elif case == "different-binding-hash":
++        q["rotary"]["coefficients_hash"] = sha256(b"different supplied table")
++    elif case == "different-pairing":
++        q["rotary"]["pairing"] = "split_halves"
++    elif case == "intent-coefficient-mismatch":
++        b["intent"]["position_encoding"]["rotary_dim"] = 4
++    elif case == "missing-grid-point":
++        b["points"].pop()
++    elif case == "wrong-rank":
++        b["rank"]["rank_index"] = 1
++    elif case == "mixed-kv":
++        b["intent"]["precision"]["kv_cache"] = "fp16"
++    elif case == "fp8":
++        b["intent"]["precision"] = dict(compute="fp8", kv_cache="fp8")
++    elif case == "wrong-hardware-hash":
++        b["intent"]["hardware_spec_hash"] = sha256(b"wrong hardware")
++    elif case == "missing-nonrotary-op":
++        ops.remove(by_id["norm1"])
++    elif case == "layer-repeat":
++        decoder["repeat"] = 3
++    elif case == "wrong-omissions":
++        p["graph"]["omissions"] = ["a", "b", "c", "d"]
++    elif case == "short-context-table":
++        c = b["coefficients"]
++        c["position_count"] = 16
++        c["cos_bits"].pop()
++        c["sin_bits"].pop()
++        seal(c, "coefficients_hash")
++        h = c["coefficients_hash"]
++        b["intent"]["position_encoding"]["coefficients_hash"] = h
++        for point in b["points"]:
++            point["graph"]["kv_key_encoding"]["coefficients_hash"] = h
++            for group in point["graph"]["groups"]:
++                for op in group["ops"]:
++                    if op["rotary"] is not None:
++                        op["rotary"]["coefficients_hash"] = h
++    elif case not in ("wrong-intent-hash", "wrong-point-hash"):
++        raise ValueError(case)
++    rehash(b)
++    if case == "wrong-intent-hash":
++        b["intent_hash"] = sha256(b"wrong intent")
++        seal(b, "bundle_hash")
++    if case == "wrong-point-hash":
++        p["payload_hash"] = sha256(b"wrong point")
++        seal(b, "bundle_hash")
++    return b
+--- /dev/null
++++ b/contract/tests/test_rotary_v2.py
+@@ -0,0 +1,229 @@
++"""Protected proposal tests: carrier semantics only; runtime admission remains pending."""
++
++from __future__ import annotations
++
++from copy import deepcopy
++from pathlib import Path
++from typing import Any
++
++import pytest
++from pydantic import ValidationError
++from uarch_contract.assumptions import AssumptionSet
++from uarch_contract.generate import generate as generate_v1
++from uarch_contract.generate_rotary_v2 import generate, schemas
++from uarch_contract.hashing import content_hash, strict_json_loads, verify_identity
++from uarch_contract.operators import OpSpec
++from uarch_contract.prepared import PreparedBundle, PreparedOp
++from uarch_contract.request import CharacterizationRequest
++from uarch_contract.rotary_v2 import (
++    SCHEMA_ROOTS,
++    CharacterizationRequestV3,
++    PreparedBundleV2,
++    PreparedOpV2,
++    RotaryCoefficients,
++)
++
++from contract.tests.rotary_v2_cases import examples, literal, rehash, seal
++
++
++@pytest.mark.parametrize("mode", ["aggregate", "per_op"])
++@pytest.mark.parametrize("pairing", ["adjacent", "split_halves"])
++def test_complete_positive_contract_closure(mode: str, pairing: str) -> None:
++    data = examples(mode, pairing)
++    b = PreparedBundleV2.model_validate(data["bundle"])
++    r = CharacterizationRequestV3.model_validate(data["request"])
++    a = AssumptionSet.model_validate(data["assumptions"])
++    assert b.model_dump(mode="json") == data["bundle"]
++    assert r.model_dump(mode="json") == data["request"]
++    assert r.prepared_input_hash == verify_identity(b, "bundle_hash")
++    assert (
++        b.intent_hash == content_hash(b.intent) == content_hash(r, exclude=("prepared_input_hash",))
++    )
++    assert r.assumptions_hash == verify_identity(a, "assumptions_hash")
++    assert a.model.version == "2"
++    assert len(b.points) == 2 and b.rank.tp == 1
++    assert b.intent.model.total_params == 372  # Existing independent synthetic model, unchanged.
++    assert b.coefficients.position_count == 17
++    for point in b.points:
++        verify_identity(point, "payload_hash")
++        assert point.graph.kv_key_encoding == b.intent.position_encoding
++        decoder = point.graph.groups[1]
++        assert decoder.repeat == 2
++        ops = {op.id: op for op in decoder.ops}
++        for target, heads in (("q", 2), ("k", 1)):
++            op = ops["rope_" + target]
++            binding = op.rotary
++            assert binding is not None
++            assert binding.coefficients_hash == b.coefficients.coefficients_hash
++            assert binding.pairing == pairing and binding.input_op_id == target
++            assert binding.position_ids == (((16,),) if point.query.phase == "decode" else ((0,),))
++            assert op.depends_on == (target,)
++            assert op.spec.dimensions == dict(B=1, H=heads, S=1, D=2, R=2, P=1)
++        assert ops["kv"].depends_on == ("rope_k", "v")
++        assert ops["attn"].depends_on == ("rope_q", "rope_k", "v", "kv")
++
++
++@pytest.mark.parametrize(
++    "bits",
++    [
++        "00000000",
++        "80000000",
++        "00000001",
++        "007fffff",
++        "00800000",
++        "7f7fffff",
++        "ff7fffff",
++        "3f800000",
++    ],
++)
++def test_finite_bits_with_independent_rehash(bits: str) -> None:
++    c = examples()["bundle"]["coefficients"]
++    c["cos_bits"][0][0] = bits
++    seal(c, "coefficients_hash")
++    parsed = RotaryCoefficients.model_validate(c)
++    assert parsed.cos_bits[0][0] == bits
++
++
++@pytest.mark.parametrize("bits", ["7f800000", "ff800000", "7fc00000", "7f800001", "ffc00000"])
++def test_nonfinite_bits_refuse_after_rehash(bits: str) -> None:
++    c = examples()["bundle"]["coefficients"]
++    c["sin_bits"][0][0] = bits
++    seal(c, "coefficients_hash")
++    with pytest.raises(ValidationError, match="nonfinite binary32"):
++        RotaryCoefficients.model_validate(c)
++
++
++@pytest.mark.parametrize("bits", ["3F800000", "0x00000000", "0000000", "000000000", "gggggggg"])
++def test_bad_bit_syntax_refuses(bits: str) -> None:
++    c = examples()["bundle"]["coefficients"]
++    c["cos_bits"][0][0] = bits
++    seal(c, "coefficients_hash")
++    with pytest.raises(ValidationError, match="pattern"):
++        RotaryCoefficients.model_validate(c)
++
++
++@pytest.mark.parametrize(
++    ("key", "value", "message"),
++    [
++        ("rotary_dim", 3, "even"),
++        ("rotary_dim", 1, "even"),
++        ("position_count", 18, "position_count mismatch"),
++        ("cos_bits", [["00000000", "3f800000"]] * 17, "row width"),
++        ("sin_bits", [["00000000"]] * 16, "position_count mismatch"),
++        ("position_count", True, "JSON number"),
++        ("dtype", "bf16", "fp32"),
++    ],
++)
++def test_coefficient_shape_refuses_after_rehash(key: str, value: Any, message: str) -> None:
++    c = examples()["bundle"]["coefficients"]
++    c[key] = value
++    seal(c, "coefficients_hash")
++    with pytest.raises(ValidationError, match=message):
++        RotaryCoefficients.model_validate(c)
++
++
++def test_finite_tamper_requires_new_identity_and_signed_zero_is_preserved() -> None:
++    c = examples()["bundle"]["coefficients"]
++    old = c["coefficients_hash"]
++    c["sin_bits"][0][0] = "80000000"
++    with pytest.raises(ValueError, match="ArtifactHashMismatch"):
++        RotaryCoefficients.model_validate(c)
++    seal(c, "coefficients_hash")
++    assert RotaryCoefficients.model_validate(c).coefficients_hash != old
++
++
++@pytest.mark.parametrize("field", ["coefficients", "intent", "rank", "points"])
++def test_bundle_fields_are_required(field: str) -> None:
++    b = examples()["bundle"]
++    del b[field]
++    with pytest.raises(ValidationError, match="Field required"):
++        PreparedBundleV2.model_validate(b)
++
++
++def test_explicit_null_binding_required_on_nonrotary_nodes() -> None:
++    old = literal("independent-bundle.json")["points"][0]["graph"]["groups"][1]["ops"][1]
++    PreparedOp.model_validate(old)
++    with pytest.raises(ValidationError, match="rotary"):
++        PreparedOpV2.model_validate(old)
++    old["rotary"] = None
++    PreparedOpV2.model_validate(old)
++    with pytest.raises(ValidationError, match="extra_forbidden"):
++        PreparedOp.model_validate(old)
++
++
++@pytest.mark.parametrize(
++    "version", ["uarch-contract/0.1", "uarch-contract/0.2", "uarch-contract/1"]
++)
++def test_v3_request_refuses_other_contract_tags(version: str) -> None:
++    r = examples()["request"]
++    r["contract"] = version
++    with pytest.raises(ValidationError, match="uarch-contract/0.3"):
++        CharacterizationRequestV3.model_validate(r)
++
++
++@pytest.mark.parametrize("key", ["position_encoding", "mapping_policy", "accounting"])
++def test_no_implicit_request_upgrade(key: str) -> None:
++    r = examples()["request"]
++    del r[key]
++    with pytest.raises(ValidationError, match="Field required"):
++        CharacterizationRequestV3.model_validate(r)
++
++
++def test_old_and_new_roots_refuse_cross_version_inputs() -> None:
++    new = examples()
++    old_bundle, old_request = literal("independent-bundle.json"), literal("request.json")
++    PreparedBundle.model_validate(old_bundle)
++    CharacterizationRequest.model_validate(old_request)
++    for model, value in (
++        (PreparedBundle, new["bundle"]),
++        (CharacterizationRequest, new["request"]),
++        (PreparedBundleV2, old_bundle),
++        (CharacterizationRequestV3, old_request),
++    ):
++        with pytest.raises(ValidationError):
++            model.model_validate(value)
++    rope = new["bundle"]["points"][0]["graph"]["groups"][1]["ops"][2]
++    assert rope["id"] == "rope_q"
++    with pytest.raises(ValidationError, match="operator"):
++        OpSpec.model_validate(rope["spec"])
++
++
++def test_legacy_schema_bytes_and_roots_unchanged() -> None:
++    assert generate_v1(check=True) == []
++    assert len(SCHEMA_ROOTS) == 11
++    assert set(schemas()) == {m.__name__ + ".json" for m in SCHEMA_ROOTS}
++    assert all(m.model_json_schema()["additionalProperties"] is False for m in SCHEMA_ROOTS)
++    assert generate(check=True) == []
++
++
++def test_generator_read_only_check_and_unexpected_file(tmp_path: Path) -> None:
++    absent = tmp_path / "absent"
++    assert len(generate(absent, check=True)) == 11
++    assert not absent.exists()
++    generate(absent)
++    assert generate(absent, check=True) == []
++    first = {p.name: p.read_bytes() for p in absent.iterdir()}
++    generate(absent)
++    assert {p.name: p.read_bytes() for p in absent.iterdir()} == first
++    unexpected = absent / "unknown.json"
++    unexpected.write_text("{}\n")
++    assert generate(absent, check=True) == ["unknown.json"]
++    assert unexpected.read_text() == "{}\n"
++    with pytest.raises(ValueError, match="unexpected schema"):
++        generate(absent)
++
++
++def test_strict_json_not_silently_replaced_by_pydantic_parser() -> None:
++    for text in ('{"position_count":1,"position_count":2}', '{"x":NaN}'):
++        with pytest.raises(ValueError):
++            strict_json_loads(text)
++
++
++def test_carriers_do_not_claim_runtime_graph_admission() -> None:
++    # Demonstrate the exact gap; this is NOT a positive execution-admission test.
++    b = deepcopy(examples()["bundle"])
++    ops = b["points"][0]["graph"]["groups"][1]["ops"]
++    ops[:] = [op for op in ops if op["id"] != "rope_q"]
++    rehash(b)
++    parsed = PreparedBundleV2.model_validate(b)
++    assert all(op.id != "rope_q" for op in parsed.points[0].graph.groups[1].ops)
+--- /dev/null
++++ b/contract/tests/test_rotary_v2_runtime_pending.py
+@@ -0,0 +1,28 @@
++"""Discriminating future admission tests; none is runtime evidence yet.
++
++Remove this explicit skip only under later runtime authorization when the new A validator
++exists. The unmodified positive control must pass before each counterexample is refused.
++"""
++
++import importlib
++
++import pytest
++from uarch_contract.rotary_v2 import PreparedBundleV2
++
++from contract.tests.rotary_v2_cases import RUNTIME_REFUSALS, examples, runtime_counterexample
++
++
++@pytest.mark.parametrize("case", RUNTIME_REFUSALS)
++def test_counterexample_is_carrier_valid_not_runtime_admitted(case: str) -> None:
++    # This demonstrates why parsing is insufficient. It certifies no execution admission.
++    PreparedBundleV2.model_validate(runtime_counterexample(case))
++
++
++@pytest.mark.skip(reason="PENDING: authorized v2 runtime admission validator is not implemented")
++@pytest.mark.parametrize("case", RUNTIME_REFUSALS)
++def test_future_full_admission_refuses_counterexample(case: str) -> None:
++    boundary = importlib.import_module("rkuarch.workload.prepared_v2")
++    admitted = boundary.validate_execution_bundle(examples()["bundle"])
++    assert admitted.format == "uarch-prepared/2"
++    with pytest.raises(ValueError):
++        boundary.validate_execution_bundle(runtime_counterexample(case))
+--- /dev/null
++++ b/contract/schema/rotary-v2/CharacterizationRequestV3.json
+@@ -0,0 +1,637 @@
++{
++  "$defs": {
++    "DecodeEnvelope": {
++      "additionalProperties": false,
++      "properties": {
++        "batch_max": {
++          "minimum": 1,
++          "title": "Batch Max",
++          "type": "integer"
++        },
++        "context_per_seq_max": {
++          "minimum": 1,
++          "title": "Context Per Seq Max",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "batch_max",
++        "context_per_seq_max"
++      ],
++      "title": "DecodeEnvelope",
++      "type": "object"
++    },
++    "DecodeGrid": {
++      "additionalProperties": false,
++      "properties": {
++        "batch": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Batch",
++          "type": "array"
++        },
++        "context_per_seq": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Context Per Seq",
++          "type": "array"
++        }
++      },
++      "required": [
++        "batch",
++        "context_per_seq"
++      ],
++      "title": "DecodeGrid",
++      "type": "object"
++    },
++    "DecodeVisitWeight": {
++      "additionalProperties": false,
++      "properties": {
++        "batch": {
++          "minimum": 1,
++          "title": "Batch",
++          "type": "integer"
++        },
++        "total_context_tokens": {
++          "minimum": 1,
++          "title": "Total Context Tokens",
++          "type": "integer"
++        },
++        "weight_ratio": {
++          "exclusiveMinimum": 0,
++          "title": "Weight Ratio",
++          "type": "number"
++        }
++      },
++      "required": [
++        "batch",
++        "total_context_tokens",
++        "weight_ratio"
++      ],
++      "title": "DecodeVisitWeight",
++      "type": "object"
++    },
++    "Envelope": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "$ref": "#/$defs/DecodeEnvelope"
++        },
++        "prefill": {
++          "$ref": "#/$defs/PrefillEnvelope"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill"
++      ],
++      "title": "Envelope",
++      "type": "object"
++    },
++    "FidelityDetail": {
++      "additionalProperties": false,
++      "properties": {
++        "compute": {
++          "enum": [
++            0,
++            1,
++            2
++          ],
++          "title": "Compute",
++          "type": "integer"
++        },
++        "dram": {
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            2
++          ],
++          "title": "Dram"
++        },
++        "layer_reuse": {
++          "title": "Layer Reuse",
++          "type": "boolean"
++        },
++        "noc": {
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            2
++          ],
++          "title": "Noc"
++        },
++        "shared_sram": {
++          "description": "Omit only when hardware has no shared SRAM; null is invalid.",
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            "unrepresented"
++          ],
++          "title": "Shared Sram"
++        },
++        "sync": {
++          "pattern": "^(exact|approx\\(Q=[1-9][0-9]*\\))$",
++          "title": "Sync",
++          "type": "string"
++        }
++      },
++      "required": [
++        "compute",
++        "noc",
++        "dram",
++        "sync",
++        "layer_reuse"
++      ],
++      "title": "FidelityDetail",
++      "type": "object"
++    },
++    "Grid": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "$ref": "#/$defs/DecodeGrid"
++        },
++        "frequency_ratio": {
++          "items": {
++            "exclusiveMinimum": 0,
++            "type": "number"
++          },
++          "minItems": 1,
++          "title": "Frequency Ratio",
++          "type": "array"
++        },
++        "prefill": {
++          "$ref": "#/$defs/PrefillGrid"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill",
++        "frequency_ratio"
++      ],
++      "title": "Grid",
++      "type": "object"
++    },
++    "KvLayout": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "minimum": 1,
++          "title": "Block Size Tokens",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "block_size_tokens"
++      ],
++      "title": "KvLayout",
++      "type": "object"
++    },
++    "ModelShape": {
++      "additionalProperties": false,
++      "properties": {
++        "attention": {
++          "enum": [
++            "mha",
++            "gqa"
++          ],
++          "title": "Attention",
++          "type": "string"
++        },
++        "d_ff": {
++          "minimum": 1,
++          "title": "D Ff",
++          "type": "integer"
++        },
++        "expert_d_ff": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Expert D Ff"
++        },
++        "gated_mlp": {
++          "title": "Gated Mlp",
++          "type": "boolean"
++        },
++        "tie_embeddings": {
++          "title": "Tie Embeddings",
++          "type": "boolean"
++        },
++        "vocab_size": {
++          "minimum": 1,
++          "title": "Vocab Size",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "d_ff",
++        "gated_mlp",
++        "vocab_size",
++        "attention",
++        "tie_embeddings"
++      ],
++      "title": "ModelShape",
++      "type": "object"
++    },
++    "ModelSpec": {
++      "additionalProperties": false,
++      "description": "MoE is active-vs-total and nothing more (build-spec \u00a72.3.5).",
++      "properties": {
++        "active_params": {
++          "minimum": 1,
++          "title": "Active Params",
++          "type": "integer"
++        },
++        "d_model": {
++          "minimum": 1,
++          "title": "D Model",
++          "type": "integer"
++        },
++        "experts_per_token": {
++          "default": 0,
++          "minimum": 0,
++          "title": "Experts Per Token",
++          "type": "integer"
++        },
++        "kv_heads": {
++          "minimum": 1,
++          "title": "Kv Heads",
++          "type": "integer"
++        },
++        "n_experts": {
++          "default": 0,
++          "minimum": 0,
++          "title": "N Experts",
++          "type": "integer"
++        },
++        "n_heads": {
++          "minimum": 1,
++          "title": "N Heads",
++          "type": "integer"
++        },
++        "n_layers": {
++          "minimum": 1,
++          "title": "N Layers",
++          "type": "integer"
++        },
++        "name": {
++          "title": "Name",
++          "type": "string"
++        },
++        "total_params": {
++          "minimum": 1,
++          "title": "Total Params",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "name",
++        "total_params",
++        "active_params",
++        "n_layers",
++        "d_model",
++        "n_heads",
++        "kv_heads"
++      ],
++      "title": "ModelSpec",
++      "type": "object"
++    },
++    "Precision": {
++      "additionalProperties": false,
++      "properties": {
++        "compute": {
++          "$ref": "#/$defs/PrecisionFormat",
++          "default": "fp16"
++        },
++        "kv_cache": {
++          "$ref": "#/$defs/PrecisionFormat",
++          "default": "fp16"
++        }
++      },
++      "title": "Precision",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "PrefillEnvelope": {
++      "additionalProperties": false,
++      "properties": {
++        "prompt_tokens_max": {
++          "minimum": 1,
++          "title": "Prompt Tokens Max",
++          "type": "integer"
++        },
++        "prompts_per_iteration_max": {
++          "minimum": 1,
++          "title": "Prompts Per Iteration Max",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "prompt_tokens_max",
++        "prompts_per_iteration_max"
++      ],
++      "title": "PrefillEnvelope",
++      "type": "object"
++    },
++    "PrefillGrid": {
++      "additionalProperties": false,
++      "properties": {
++        "L": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "L",
++          "type": "array"
++        },
++        "n": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "N",
++          "type": "array"
++        }
++      },
++      "required": [
++        "n",
++        "L"
++      ],
++      "title": "PrefillGrid",
++      "type": "object"
++    },
++    "PrefillVisitWeight": {
++      "additionalProperties": false,
++      "properties": {
++        "n_prompts": {
++          "minimum": 1,
++          "title": "N Prompts",
++          "type": "integer"
++        },
++        "prompt_tokens": {
++          "minimum": 1,
++          "title": "Prompt Tokens",
++          "type": "integer"
++        },
++        "weight_ratio": {
++          "exclusiveMinimum": 0,
++          "title": "Weight Ratio",
++          "type": "number"
++        }
++      },
++      "required": [
++        "n_prompts",
++        "prompt_tokens",
++        "weight_ratio"
++      ],
++      "title": "PrefillVisitWeight",
++      "type": "object"
++    },
++    "RotaryEncoding": {
++      "additionalProperties": false,
++      "properties": {
++        "cache_key_state": {
++          "const": "rotated-before-store",
++          "title": "Cache Key State",
++          "type": "string"
++        },
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "kind": {
++          "const": "rope-precomputed/1",
++          "title": "Kind",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_policy": {
++          "const": "zero-origin-contiguous/1",
++          "title": "Position Policy",
++          "type": "string"
++        },
++        "rotary_dim": {
++          "minimum": 1,
++          "title": "Rotary Dim",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "kind",
++        "rotary_dim",
++        "pairing",
++        "coefficients_hash",
++        "position_policy",
++        "cache_key_state",
++        "numeric_policy"
++      ],
++      "title": "RotaryEncoding",
++      "type": "object"
++    },
++    "VisitWeights": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "items": {
++            "$ref": "#/$defs/DecodeVisitWeight"
++          },
++          "title": "Decode",
++          "type": "array"
++        },
++        "prefill": {
++          "items": {
++            "$ref": "#/$defs/PrefillVisitWeight"
++          },
++          "title": "Prefill",
++          "type": "array"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill"
++      ],
++      "title": "VisitWeights",
++      "type": "object"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "accounting": {
++      "const": "resolved-ops/2",
++      "title": "Accounting",
++      "type": "string"
++    },
++    "analytic_mode": {
++      "enum": [
++        "aggregate",
++        "per_op"
++      ],
++      "title": "Analytic Mode",
++      "type": "string"
++    },
++    "assumptions_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Assumptions Hash",
++      "type": "string"
++    },
++    "component_id": {
++      "minLength": 1,
++      "pattern": "\\S",
++      "title": "Component Id",
++      "type": "string"
++    },
++    "contract": {
++      "const": "uarch-contract/0.3",
++      "title": "Contract",
++      "type": "string"
++    },
++    "envelope": {
++      "$ref": "#/$defs/Envelope"
++    },
++    "grid": {
++      "$ref": "#/$defs/Grid"
++    },
++    "hardware_spec_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Hardware Spec Hash",
++      "type": "string"
++    },
++    "initial_state": {
++      "default": "steady",
++      "enum": [
++        "steady",
++        "cold"
++      ],
++      "title": "Initial State",
++      "type": "string"
++    },
++    "kv_layout": {
++      "$ref": "#/$defs/KvLayout"
++    },
++    "mapping_policy": {
++      "const": "analytic-ops@2",
++      "title": "Mapping Policy",
++      "type": "string"
++    },
++    "model": {
++      "$ref": "#/$defs/ModelSpec"
++    },
++    "model_shape": {
++      "$ref": "#/$defs/ModelShape"
++    },
++    "position_encoding": {
++      "$ref": "#/$defs/RotaryEncoding"
++    },
++    "precision": {
++      "$ref": "#/$defs/Precision"
++    },
++    "preparation_policy": {
++      "const": "balanced-tp/1",
++      "title": "Preparation Policy",
++      "type": "string"
++    },
++    "prepared_input_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Prepared Input Hash",
++      "type": "string"
++    },
++    "rk_schema_snapshot": {
++      "pattern": "^[0-9a-f]{40}$",
++      "title": "Rk Schema Snapshot",
++      "type": "string"
++    },
++    "seed": {
++      "minimum": 0,
++      "title": "Seed",
++      "type": "integer"
++    },
++    "tp": {
++      "minimum": 1,
++      "title": "Tp",
++      "type": "integer"
++    },
++    "uarch_fidelity": {
++      "$ref": "#/$defs/FidelityDetail"
++    },
++    "visit_weights": {
++      "anyOf": [
++        {
++          "$ref": "#/$defs/VisitWeights"
++        },
++        {
++          "type": "null"
++        }
++      ],
++      "default": null
++    }
++  },
++  "required": [
++    "rk_schema_snapshot",
++    "component_id",
++    "hardware_spec_hash",
++    "model",
++    "model_shape",
++    "precision",
++    "tp",
++    "envelope",
++    "grid",
++    "mapping_policy",
++    "uarch_fidelity",
++    "kv_layout",
++    "seed",
++    "accounting",
++    "analytic_mode",
++    "assumptions_hash",
++    "contract",
++    "preparation_policy",
++    "position_encoding",
++    "prepared_input_hash"
++  ],
++  "title": "CharacterizationRequestV3",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/OpGroupV2.json
+@@ -0,0 +1,526 @@
++{
++  "$defs": {
++    "KvAccess": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "minimum": 1,
++          "title": "Block Size Tokens",
++          "type": "integer"
++        },
++        "context_tokens": {
++          "minimum": 1,
++          "title": "Context Tokens",
++          "type": "integer"
++        },
++        "last_page_valid_tokens": {
++          "minimum": 1,
++          "title": "Last Page Valid Tokens",
++          "type": "integer"
++        },
++        "pages_per_sequence": {
++          "minimum": 1,
++          "title": "Pages Per Sequence",
++          "type": "integer"
++        },
++        "read_policy": {
++          "const": "valid_tokens",
++          "title": "Read Policy",
++          "type": "string"
++        },
++        "write_policy": {
++          "const": "append_valid_tokens",
++          "title": "Write Policy",
++          "type": "string"
++        }
++      },
++      "required": [
++        "block_size_tokens",
++        "context_tokens",
++        "last_page_valid_tokens",
++        "pages_per_sequence",
++        "read_policy",
++        "write_policy"
++      ],
++      "title": "KvAccess",
++      "type": "object"
++    },
++    "OpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "$ref": "#/$defs/Operator"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "OpSpec",
++      "type": "object"
++    },
++    "Operand": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Block Size Tokens"
++        },
++        "dimensions": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Dimensions",
++          "type": "array"
++        },
++        "dtype": {
++          "$ref": "#/$defs/PrecisionFormat"
++        },
++        "layout": {
++          "enum": [
++            "contiguous",
++            "paged"
++          ],
++          "title": "Layout",
++          "type": "string"
++        }
++      },
++      "required": [
++        "dtype",
++        "dimensions",
++        "layout"
++      ],
++      "title": "Operand",
++      "type": "object"
++    },
++    "Operator": {
++      "enum": [
++        "q_projection",
++        "k_projection",
++        "v_projection",
++        "qk_score",
++        "softmax",
++        "av_application",
++        "output_projection",
++        "normalization",
++        "residual_addition",
++        "ffn_up",
++        "ffn_gate",
++        "ffn_down",
++        "activation",
++        "kv_write",
++        "embedding",
++        "lm_head",
++        "attention_fused"
++      ],
++      "title": "Operator",
++      "type": "string"
++    },
++    "Padding": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "logical": {
++          "minimum": 1,
++          "title": "Logical",
++          "type": "integer"
++        },
++        "physical": {
++          "minimum": 1,
++          "title": "Physical",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "logical",
++        "physical"
++      ],
++      "title": "Padding",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "PreparedOpV2": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "embedding_local_tokens": {
++          "anyOf": [
++            {
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Embedding Local Tokens"
++        },
++        "fusion": {
++          "enum": [
++            "none",
++            "qk_softmax_av"
++          ],
++          "title": "Fusion",
++          "type": "string"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kv_access": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/KvAccess"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "operand_access": {
++          "additionalProperties": {
++            "enum": [
++              "read",
++              "write",
++              "read_write"
++            ],
++            "type": "string"
++          },
++          "title": "Operand Access",
++          "type": "object"
++        },
++        "padding": {
++          "items": {
++            "$ref": "#/$defs/Padding"
++          },
++          "minItems": 0,
++          "title": "Padding",
++          "type": "array"
++        },
++        "replication": {
++          "items": {
++            "$ref": "#/$defs/Replication"
++          },
++          "minItems": 0,
++          "title": "Replication",
++          "type": "array"
++        },
++        "rotary": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/RotaryBinding"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "spec": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/OpSpec"
++            },
++            {
++              "$ref": "#/$defs/RotaryOpSpec"
++            }
++          ],
++          "title": "Spec"
++        },
++        "weight_copies": {
++          "minimum": 1,
++          "title": "Weight Copies",
++          "type": "integer"
++        },
++        "work_repeat": {
++          "minimum": 1,
++          "title": "Work Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "embedding_local_tokens",
++        "fusion",
++        "id",
++        "kv_access",
++        "operand_access",
++        "padding",
++        "replication",
++        "spec",
++        "weight_copies",
++        "work_repeat",
++        "rotary"
++      ],
++      "title": "PreparedOpV2",
++      "type": "object"
++    },
++    "Replication": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "global_extent": {
++          "minimum": 1,
++          "title": "Global Extent",
++          "type": "integer"
++        },
++        "rank_extent": {
++          "minimum": 1,
++          "title": "Rank Extent",
++          "type": "integer"
++        },
++        "replicas": {
++          "minimum": 1,
++          "title": "Replicas",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "global_extent",
++        "rank_extent",
++        "replicas"
++      ],
++      "title": "Replication",
++      "type": "object"
++    },
++    "RotaryBinding": {
++      "additionalProperties": false,
++      "properties": {
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "input_op_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Input Op Id",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_ids": {
++          "items": {
++            "items": {
++              "minimum": 0,
++              "type": "integer"
++            },
++            "minItems": 1,
++            "type": "array"
++          },
++          "minItems": 1,
++          "title": "Position Ids",
++          "type": "array"
++        },
++        "target": {
++          "enum": [
++            "q",
++            "k"
++          ],
++          "title": "Target",
++          "type": "string"
++        }
++      },
++      "required": [
++        "target",
++        "coefficients_hash",
++        "pairing",
++        "numeric_policy",
++        "position_ids",
++        "input_op_id"
++      ],
++      "title": "RotaryBinding",
++      "type": "object"
++    },
++    "RotaryOpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "const": "rotary_embedding",
++          "title": "Operator",
++          "type": "string"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "RotaryOpSpec",
++      "type": "object"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "depends_on": {
++      "items": {
++        "minLength": 1,
++        "type": "string"
++      },
++      "minItems": 0,
++      "title": "Depends On",
++      "type": "array"
++    },
++    "id": {
++      "minLength": 1,
++      "title": "Id",
++      "type": "string"
++    },
++    "kind": {
++      "enum": [
++        "head",
++        "decoder",
++        "tail"
++      ],
++      "title": "Kind",
++      "type": "string"
++    },
++    "ops": {
++      "items": {
++        "$ref": "#/$defs/PreparedOpV2"
++      },
++      "minItems": 1,
++      "title": "Ops",
++      "type": "array"
++    },
++    "repeat": {
++      "minimum": 1,
++      "title": "Repeat",
++      "type": "integer"
++    }
++  },
++  "required": [
++    "depends_on",
++    "id",
++    "kind",
++    "ops",
++    "repeat"
++  ],
++  "title": "OpGroupV2",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/PreparedBundleV2.json
+@@ -0,0 +1,2545 @@
++{
++  "$defs": {
++    "Calibration": {
++      "enum": [
++        "measured",
++        "spec_derived",
++        "estimated",
++        "stub"
++      ],
++      "title": "Calibration",
++      "type": "string"
++    },
++    "ClockDomain": {
++      "additionalProperties": false,
++      "properties": {
++        "freq_hz": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "scales_with_core": {
++          "title": "Scales With Core",
++          "type": "boolean"
++        }
++      },
++      "required": [
++        "freq_hz",
++        "scales_with_core"
++      ],
++      "title": "ClockDomain",
++      "type": "object"
++    },
++    "ClockDomains": {
++      "additionalProperties": false,
++      "properties": {
++        "core": {
++          "$ref": "#/$defs/CoreClockDomain"
++        },
++        "dram": {
++          "$ref": "#/$defs/ClockDomain"
++        },
++        "noc": {
++          "$ref": "#/$defs/ClockDomain"
++        }
++      },
++      "required": [
++        "core",
++        "noc",
++        "dram"
++      ],
++      "title": "ClockDomains",
++      "type": "object"
++    },
++    "Controller": {
++      "additionalProperties": false,
++      "properties": {
++        "attach": {
++          "maxItems": 2,
++          "minItems": 2,
++          "prefixItems": [
++            {
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "minimum": 0,
++              "type": "integer"
++            }
++          ],
++          "title": "Attach",
++          "type": "array"
++        },
++        "noc_credits": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "page_policy": {
++          "enum": [
++            "open",
++            "closed"
++          ],
++          "title": "Page Policy",
++          "type": "string"
++        },
++        "read_queue_depth": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "scheduler": {
++          "enum": [
++            "fr_fcfs",
++            "fcfs"
++          ],
++          "title": "Scheduler",
++          "type": "string"
++        },
++        "write_queue_depth": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "attach",
++        "scheduler",
++        "page_policy",
++        "read_queue_depth",
++        "write_queue_depth",
++        "noc_credits"
++      ],
++      "title": "Controller",
++      "type": "object"
++    },
++    "CoreClockDomain": {
++      "additionalProperties": false,
++      "properties": {
++        "freq_hz": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "scales_with_core": {
++          "const": true,
++          "default": true,
++          "title": "Scales With Core",
++          "type": "boolean"
++        }
++      },
++      "required": [
++        "freq_hz"
++      ],
++      "title": "CoreClockDomain",
++      "type": "object"
++    },
++    "CoreType": {
++      "additionalProperties": false,
++      "properties": {
++        "dma": {
++          "$ref": "#/$defs/Dma"
++        },
++        "job_overhead_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "matrix_engine": {
++          "$ref": "#/$defs/MatrixEngine"
++        },
++        "sram": {
++          "$ref": "#/$defs/Sram"
++        },
++        "vector_engine": {
++          "$ref": "#/$defs/VectorEngine"
++        }
++      },
++      "required": [
++        "matrix_engine",
++        "vector_engine",
++        "sram",
++        "dma",
++        "job_overhead_cycles"
++      ],
++      "title": "CoreType",
++      "type": "object"
++    },
++    "Cores": {
++      "additionalProperties": false,
++      "properties": {
++        "core_type": {
++          "$ref": "#/$defs/CoreType"
++        },
++        "grid": {
++          "$ref": "#/$defs/HardwareGrid"
++        }
++      },
++      "required": [
++        "grid",
++        "core_type"
++      ],
++      "title": "Cores",
++      "type": "object"
++    },
++    "DecodeEnvelope": {
++      "additionalProperties": false,
++      "properties": {
++        "batch_max": {
++          "minimum": 1,
++          "title": "Batch Max",
++          "type": "integer"
++        },
++        "context_per_seq_max": {
++          "minimum": 1,
++          "title": "Context Per Seq Max",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "batch_max",
++        "context_per_seq_max"
++      ],
++      "title": "DecodeEnvelope",
++      "type": "object"
++    },
++    "DecodeGrid": {
++      "additionalProperties": false,
++      "properties": {
++        "batch": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Batch",
++          "type": "array"
++        },
++        "context_per_seq": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Context Per Seq",
++          "type": "array"
++        }
++      },
++      "required": [
++        "batch",
++        "context_per_seq"
++      ],
++      "title": "DecodeGrid",
++      "type": "object"
++    },
++    "DecodeQuery": {
++      "additionalProperties": false,
++      "properties": {
++        "batch": {
++          "minimum": 1,
++          "title": "Batch",
++          "type": "integer"
++        },
++        "phase": {
++          "const": "decode",
++          "title": "Phase",
++          "type": "string"
++        },
++        "total_context_tokens": {
++          "minimum": 1,
++          "title": "Total Context Tokens",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "batch",
++        "phase",
++        "total_context_tokens"
++      ],
++      "title": "DecodeQuery",
++      "type": "object"
++    },
++    "DecodeVisitWeight": {
++      "additionalProperties": false,
++      "properties": {
++        "batch": {
++          "minimum": 1,
++          "title": "Batch",
++          "type": "integer"
++        },
++        "total_context_tokens": {
++          "minimum": 1,
++          "title": "Total Context Tokens",
++          "type": "integer"
++        },
++        "weight_ratio": {
++          "exclusiveMinimum": 0,
++          "title": "Weight Ratio",
++          "type": "number"
++        }
++      },
++      "required": [
++        "batch",
++        "total_context_tokens",
++        "weight_ratio"
++      ],
++      "title": "DecodeVisitWeight",
++      "type": "object"
++    },
++    "Dma": {
++      "additionalProperties": false,
++      "properties": {
++        "bytes_per_cycle": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "engines": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "max_outstanding": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "request_bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "engines",
++        "bytes_per_cycle",
++        "max_outstanding",
++        "request_bytes"
++      ],
++      "title": "Dma",
++      "type": "object"
++    },
++    "Dram": {
++      "additionalProperties": false,
++      "allOf": [
++        {
++          "if": {
++            "properties": {
++              "timing_source": {
++                "const": "direct"
++              }
++            }
++          },
++          "then": {
++            "properties": {
++              "timing_preset": {
++                "type": "null"
++              }
++            }
++          }
++        },
++        {
++          "if": {
++            "properties": {
++              "timing_source": {
++                "const": "preset"
++              }
++            }
++          },
++          "then": {
++            "properties": {
++              "timing_preset": {
++                "type": "object"
++              }
++            },
++            "required": [
++              "timing_preset"
++            ]
++          }
++        }
++      ],
++      "description": "Explicit timing origin; source strings are citations, never mode selectors.",
++      "properties": {
++        "bw_bytes_per_s": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "capacity_bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "channels": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "organization": {
++          "$ref": "#/$defs/DramOrganization"
++        },
++        "standard": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Standard",
++          "type": "string"
++        },
++        "timing": {
++          "$ref": "#/$defs/DramTiming"
++        },
++        "timing_preset": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/TimingPreset"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null
++        },
++        "timing_source": {
++          "enum": [
++            "direct",
++            "preset"
++          ],
++          "title": "Timing Source",
++          "type": "string"
++        }
++      },
++      "required": [
++        "standard",
++        "channels",
++        "bw_bytes_per_s",
++        "capacity_bytes",
++        "organization",
++        "timing_source",
++        "timing"
++      ],
++      "title": "Dram",
++      "type": "object"
++    },
++    "DramOrganization": {
++      "additionalProperties": false,
++      "properties": {
++        "bank_groups": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "banks_per_group": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "ranks": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "row_bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "ranks",
++        "bank_groups",
++        "banks_per_group",
++        "row_bytes"
++      ],
++      "title": "DramOrganization",
++      "type": "object"
++    },
++    "DramTiming": {
++      "additionalProperties": false,
++      "properties": {
++        "t_cl_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "t_rcd_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "t_refi_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "t_rfc_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "t_rp_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "t_rcd_cycles",
++        "t_rp_cycles",
++        "t_cl_cycles",
++        "t_rfc_cycles",
++        "t_refi_cycles"
++      ],
++      "title": "DramTiming",
++      "type": "object"
++    },
++    "Energy": {
++      "additionalProperties": false,
++      "properties": {
++        "pj_per_byte": {
++          "additionalProperties": {
++            "$ref": "#/$defs/SourcedValue"
++          },
++          "propertyNames": {
++            "enum": [
++              "sram",
++              "noc_hop",
++              "dram"
++            ]
++          },
++          "title": "Pj Per Byte",
++          "type": "object"
++        },
++        "pj_per_mac": {
++          "additionalProperties": {
++            "$ref": "#/$defs/SourcedValue"
++          },
++          "propertyNames": {
++            "$ref": "#/$defs/PrecisionFormat"
++          },
++          "title": "Pj Per Mac",
++          "type": "object"
++        },
++        "voltage_ratio": {
++          "additionalProperties": {
++            "$ref": "#/$defs/SourcedValue"
++          },
++          "title": "Voltage Ratio",
++          "type": "object"
++        }
++      },
++      "required": [
++        "pj_per_mac",
++        "pj_per_byte",
++        "voltage_ratio"
++      ],
++      "title": "Energy",
++      "type": "object"
++    },
++    "Envelope": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "$ref": "#/$defs/DecodeEnvelope"
++        },
++        "prefill": {
++          "$ref": "#/$defs/PrefillEnvelope"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill"
++      ],
++      "title": "Envelope",
++      "type": "object"
++    },
++    "FidelityDetail": {
++      "additionalProperties": false,
++      "properties": {
++        "compute": {
++          "enum": [
++            0,
++            1,
++            2
++          ],
++          "title": "Compute",
++          "type": "integer"
++        },
++        "dram": {
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            2
++          ],
++          "title": "Dram"
++        },
++        "layer_reuse": {
++          "title": "Layer Reuse",
++          "type": "boolean"
++        },
++        "noc": {
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            2
++          ],
++          "title": "Noc"
++        },
++        "shared_sram": {
++          "description": "Omit only when hardware has no shared SRAM; null is invalid.",
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            "unrepresented"
++          ],
++          "title": "Shared Sram"
++        },
++        "sync": {
++          "pattern": "^(exact|approx\\(Q=[1-9][0-9]*\\))$",
++          "title": "Sync",
++          "type": "string"
++        }
++      },
++      "required": [
++        "compute",
++        "noc",
++        "dram",
++        "sync",
++        "layer_reuse"
++      ],
++      "title": "FidelityDetail",
++      "type": "object"
++    },
++    "Grid": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "$ref": "#/$defs/DecodeGrid"
++        },
++        "frequency_ratio": {
++          "items": {
++            "exclusiveMinimum": 0,
++            "type": "number"
++          },
++          "minItems": 1,
++          "title": "Frequency Ratio",
++          "type": "array"
++        },
++        "prefill": {
++          "$ref": "#/$defs/PrefillGrid"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill",
++        "frequency_ratio"
++      ],
++      "title": "Grid",
++      "type": "object"
++    },
++    "HardwareGrid": {
++      "additionalProperties": false,
++      "properties": {
++        "cols": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "rows": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "rows",
++        "cols"
++      ],
++      "title": "HardwareGrid",
++      "type": "object"
++    },
++    "HardwareSpec": {
++      "additionalProperties": false,
++      "description": "Hardware inputs. Unit/path consistency is semantic validation; x-hardware-unit-rules lists exact allowed labels, without conversion. Coordinates are count indices; formats.*.bytes is an implicit byte width; energy.voltage_ratio keys are dimensionless frequency ratios. byte and B are equivalent labels preserved verbatim.",
++      "properties": {
++        "clock_domains": {
++          "$ref": "#/$defs/ClockDomains"
++        },
++        "cores": {
++          "$ref": "#/$defs/Cores"
++        },
++        "design_status": {
++          "enum": [
++            "proposed",
++            "reference"
++          ],
++          "title": "Design Status",
++          "type": "string"
++        },
++        "energy": {
++          "$ref": "#/$defs/Energy"
++        },
++        "formats": {
++          "additionalProperties": {
++            "$ref": "#/$defs/NumericFormat"
++          },
++          "propertyNames": {
++            "$ref": "#/$defs/PrecisionFormat"
++          },
++          "title": "Formats",
++          "type": "object"
++        },
++        "id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Id",
++          "type": "string"
++        },
++        "memory": {
++          "$ref": "#/$defs/Memory"
++        },
++        "nocs": {
++          "items": {
++            "$ref": "#/$defs/Noc"
++          },
++          "minItems": 1,
++          "title": "Nocs",
++          "type": "array"
++        },
++        "shared_sram": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/SharedSram"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null
++        },
++        "static_power_w": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "sync": {
++          "$ref": "#/$defs/Sync"
++        },
++        "tdp_w": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "id",
++        "design_status",
++        "clock_domains",
++        "cores",
++        "sync",
++        "nocs",
++        "memory",
++        "formats",
++        "energy",
++        "static_power_w",
++        "tdp_w"
++      ],
++      "title": "HardwareSpec",
++      "type": "object",
++      "x-hardware-unit-rules": {
++        "clock_domains.core.freq_hz": [
++          "Hz"
++        ],
++        "clock_domains.dram.freq_hz": [
++          "Hz"
++        ],
++        "clock_domains.noc.freq_hz": [
++          "Hz"
++        ],
++        "cores.core_type.dma.bytes_per_cycle": [
++          "byte/cycle"
++        ],
++        "cores.core_type.dma.engines": [
++          "count"
++        ],
++        "cores.core_type.dma.max_outstanding": [
++          "count"
++        ],
++        "cores.core_type.dma.request_bytes": [
++          "byte",
++          "B"
++        ],
++        "cores.core_type.job_overhead_cycles": [
++          "cycle"
++        ],
++        "cores.core_type.matrix_engine.accumulator_bytes": [
++          "byte",
++          "B"
++        ],
++        "cores.core_type.matrix_engine.array.cols": [
++          "count"
++        ],
++        "cores.core_type.matrix_engine.array.rows": [
++          "count"
++        ],
++        "cores.core_type.matrix_engine.macs_per_cycle.*": [
++          "MAC/cycle"
++        ],
++        "cores.core_type.matrix_engine.operand_buffer_bytes": [
++          "byte",
++          "B"
++        ],
++        "cores.core_type.matrix_engine.operand_bytes_per_cycle": [
++          "byte/cycle"
++        ],
++        "cores.core_type.sram.banks": [
++          "count"
++        ],
++        "cores.core_type.sram.bytes": [
++          "byte",
++          "B"
++        ],
++        "cores.core_type.sram.bytes_per_cycle_per_bank": [
++          "byte/cycle"
++        ],
++        "cores.core_type.vector_engine.ops_per_cycle": [
++          "op/cycle"
++        ],
++        "cores.grid.cols": [
++          "count"
++        ],
++        "cores.grid.rows": [
++          "count"
++        ],
++        "energy.pj_per_byte.dram": [
++          "pJ/byte"
++        ],
++        "energy.pj_per_byte.noc_hop": [
++          "pJ/byte"
++        ],
++        "energy.pj_per_byte.sram": [
++          "pJ/byte"
++        ],
++        "energy.pj_per_mac.*": [
++          "pJ/MAC"
++        ],
++        "energy.voltage_ratio.*": [
++          "ratio"
++        ],
++        "formats.*.accumulate_bytes": [
++          "byte",
++          "B"
++        ],
++        "formats.*.block_scale_bytes": [
++          "byte",
++          "B"
++        ],
++        "memory.controllers[].noc_credits": [
++          "count"
++        ],
++        "memory.controllers[].read_queue_depth": [
++          "count"
++        ],
++        "memory.controllers[].write_queue_depth": [
++          "count"
++        ],
++        "memory.dram.bw_bytes_per_s": [
++          "byte/s"
++        ],
++        "memory.dram.capacity_bytes": [
++          "byte",
++          "B"
++        ],
++        "memory.dram.channels": [
++          "count"
++        ],
++        "memory.dram.organization.bank_groups": [
++          "count"
++        ],
++        "memory.dram.organization.banks_per_group": [
++          "count"
++        ],
++        "memory.dram.organization.ranks": [
++          "count"
++        ],
++        "memory.dram.organization.row_bytes": [
++          "byte",
++          "B"
++        ],
++        "memory.dram.timing.t_cl_cycles": [
++          "cycle"
++        ],
++        "memory.dram.timing.t_rcd_cycles": [
++          "cycle"
++        ],
++        "memory.dram.timing.t_refi_cycles": [
++          "cycle"
++        ],
++        "memory.dram.timing.t_rfc_cycles": [
++          "cycle"
++        ],
++        "memory.dram.timing.t_rp_cycles": [
++          "cycle"
++        ],
++        "memory.interleave.granularity_bytes": [
++          "byte",
++          "B"
++        ],
++        "nocs[].buffer_flits": [
++          "count"
++        ],
++        "nocs[].link_bytes_per_cycle": [
++          "byte/cycle"
++        ],
++        "nocs[].router_latency_cycles": [
++          "cycle"
++        ],
++        "nocs[].virtual_channels": [
++          "count"
++        ],
++        "shared_sram.banks": [
++          "count"
++        ],
++        "shared_sram.bytes": [
++          "byte",
++          "B"
++        ],
++        "shared_sram.bytes_per_cycle_per_bank": [
++          "byte/cycle"
++        ],
++        "shared_sram.latency_cycles": [
++          "cycle"
++        ],
++        "static_power_w": [
++          "W"
++        ],
++        "sync.barrier_latency_cycles": [
++          "cycle"
++        ],
++        "tdp_w": [
++          "W"
++        ]
++      }
++    },
++    "Interleave": {
++      "additionalProperties": false,
++      "properties": {
++        "granularity_bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "scheme": {
++          "enum": [
++            "channel_hash",
++            "round_robin"
++          ],
++          "title": "Scheme",
++          "type": "string"
++        }
++      },
++      "required": [
++        "granularity_bytes",
++        "scheme"
++      ],
++      "title": "Interleave",
++      "type": "object"
++    },
++    "KvAccess": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "minimum": 1,
++          "title": "Block Size Tokens",
++          "type": "integer"
++        },
++        "context_tokens": {
++          "minimum": 1,
++          "title": "Context Tokens",
++          "type": "integer"
++        },
++        "last_page_valid_tokens": {
++          "minimum": 1,
++          "title": "Last Page Valid Tokens",
++          "type": "integer"
++        },
++        "pages_per_sequence": {
++          "minimum": 1,
++          "title": "Pages Per Sequence",
++          "type": "integer"
++        },
++        "read_policy": {
++          "const": "valid_tokens",
++          "title": "Read Policy",
++          "type": "string"
++        },
++        "write_policy": {
++          "const": "append_valid_tokens",
++          "title": "Write Policy",
++          "type": "string"
++        }
++      },
++      "required": [
++        "block_size_tokens",
++        "context_tokens",
++        "last_page_valid_tokens",
++        "pages_per_sequence",
++        "read_policy",
++        "write_policy"
++      ],
++      "title": "KvAccess",
++      "type": "object"
++    },
++    "KvLayout": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "minimum": 1,
++          "title": "Block Size Tokens",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "block_size_tokens"
++      ],
++      "title": "KvLayout",
++      "type": "object"
++    },
++    "MatrixEngine": {
++      "additionalProperties": false,
++      "properties": {
++        "accumulator_bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "array": {
++          "$ref": "#/$defs/HardwareGrid"
++        },
++        "dataflows": {
++          "items": {
++            "enum": [
++              "weight_stationary",
++              "output_stationary"
++            ],
++            "type": "string"
++          },
++          "minItems": 1,
++          "title": "Dataflows",
++          "type": "array"
++        },
++        "macs_per_cycle": {
++          "additionalProperties": {
++            "$ref": "#/$defs/SourcedValue"
++          },
++          "propertyNames": {
++            "$ref": "#/$defs/PrecisionFormat"
++          },
++          "title": "Macs Per Cycle",
++          "type": "object"
++        },
++        "operand_buffer_bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "operand_bytes_per_cycle": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "array",
++        "dataflows",
++        "macs_per_cycle",
++        "accumulator_bytes",
++        "operand_buffer_bytes",
++        "operand_bytes_per_cycle"
++      ],
++      "title": "MatrixEngine",
++      "type": "object"
++    },
++    "Memory": {
++      "additionalProperties": false,
++      "properties": {
++        "controllers": {
++          "items": {
++            "$ref": "#/$defs/Controller"
++          },
++          "minItems": 1,
++          "title": "Controllers",
++          "type": "array"
++        },
++        "dram": {
++          "$ref": "#/$defs/Dram"
++        },
++        "interleave": {
++          "$ref": "#/$defs/Interleave"
++        }
++      },
++      "required": [
++        "interleave",
++        "controllers",
++        "dram"
++      ],
++      "title": "Memory",
++      "type": "object"
++    },
++    "ModelShape": {
++      "additionalProperties": false,
++      "properties": {
++        "attention": {
++          "enum": [
++            "mha",
++            "gqa"
++          ],
++          "title": "Attention",
++          "type": "string"
++        },
++        "d_ff": {
++          "minimum": 1,
++          "title": "D Ff",
++          "type": "integer"
++        },
++        "expert_d_ff": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Expert D Ff"
++        },
++        "gated_mlp": {
++          "title": "Gated Mlp",
++          "type": "boolean"
++        },
++        "tie_embeddings": {
++          "title": "Tie Embeddings",
++          "type": "boolean"
++        },
++        "vocab_size": {
++          "minimum": 1,
++          "title": "Vocab Size",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "d_ff",
++        "gated_mlp",
++        "vocab_size",
++        "attention",
++        "tie_embeddings"
++      ],
++      "title": "ModelShape",
++      "type": "object"
++    },
++    "ModelSpec": {
++      "additionalProperties": false,
++      "description": "MoE is active-vs-total and nothing more (build-spec \u00a72.3.5).",
++      "properties": {
++        "active_params": {
++          "minimum": 1,
++          "title": "Active Params",
++          "type": "integer"
++        },
++        "d_model": {
++          "minimum": 1,
++          "title": "D Model",
++          "type": "integer"
++        },
++        "experts_per_token": {
++          "default": 0,
++          "minimum": 0,
++          "title": "Experts Per Token",
++          "type": "integer"
++        },
++        "kv_heads": {
++          "minimum": 1,
++          "title": "Kv Heads",
++          "type": "integer"
++        },
++        "n_experts": {
++          "default": 0,
++          "minimum": 0,
++          "title": "N Experts",
++          "type": "integer"
++        },
++        "n_heads": {
++          "minimum": 1,
++          "title": "N Heads",
++          "type": "integer"
++        },
++        "n_layers": {
++          "minimum": 1,
++          "title": "N Layers",
++          "type": "integer"
++        },
++        "name": {
++          "title": "Name",
++          "type": "string"
++        },
++        "total_params": {
++          "minimum": 1,
++          "title": "Total Params",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "name",
++        "total_params",
++        "active_params",
++        "n_layers",
++        "d_model",
++        "n_heads",
++        "kv_heads"
++      ],
++      "title": "ModelSpec",
++      "type": "object"
++    },
++    "Noc": {
++      "additionalProperties": false,
++      "properties": {
++        "buffer_flits": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "direction": {
++          "enum": [
++            "positive",
++            "negative",
++            "bidirectional"
++          ],
++          "title": "Direction",
++          "type": "string"
++        },
++        "link_bytes_per_cycle": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "router_latency_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "topology": {
++          "enum": [
++            "mesh",
++            "torus"
++          ],
++          "title": "Topology",
++          "type": "string"
++        },
++        "virtual_channels": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "topology",
++        "direction",
++        "link_bytes_per_cycle",
++        "router_latency_cycles",
++        "virtual_channels",
++        "buffer_flits"
++      ],
++      "title": "Noc",
++      "type": "object"
++    },
++    "NumericFormat": {
++      "additionalProperties": false,
++      "properties": {
++        "accumulate_bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "block_scale_bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "bytes": {
++          "exclusiveMinimum": 0,
++          "title": "Bytes",
++          "type": "number"
++        }
++      },
++      "required": [
++        "bytes",
++        "accumulate_bytes",
++        "block_scale_bytes"
++      ],
++      "title": "NumericFormat",
++      "type": "object"
++    },
++    "OpGroupV2": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kind": {
++          "enum": [
++            "head",
++            "decoder",
++            "tail"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "ops": {
++          "items": {
++            "$ref": "#/$defs/PreparedOpV2"
++          },
++          "minItems": 1,
++          "title": "Ops",
++          "type": "array"
++        },
++        "repeat": {
++          "minimum": 1,
++          "title": "Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "id",
++        "kind",
++        "ops",
++        "repeat"
++      ],
++      "title": "OpGroupV2",
++      "type": "object"
++    },
++    "OpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "$ref": "#/$defs/Operator"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "OpSpec",
++      "type": "object"
++    },
++    "Operand": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Block Size Tokens"
++        },
++        "dimensions": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Dimensions",
++          "type": "array"
++        },
++        "dtype": {
++          "$ref": "#/$defs/PrecisionFormat"
++        },
++        "layout": {
++          "enum": [
++            "contiguous",
++            "paged"
++          ],
++          "title": "Layout",
++          "type": "string"
++        }
++      },
++      "required": [
++        "dtype",
++        "dimensions",
++        "layout"
++      ],
++      "title": "Operand",
++      "type": "object"
++    },
++    "Operator": {
++      "enum": [
++        "q_projection",
++        "k_projection",
++        "v_projection",
++        "qk_score",
++        "softmax",
++        "av_application",
++        "output_projection",
++        "normalization",
++        "residual_addition",
++        "ffn_up",
++        "ffn_gate",
++        "ffn_down",
++        "activation",
++        "kv_write",
++        "embedding",
++        "lm_head",
++        "attention_fused"
++      ],
++      "title": "Operator",
++      "type": "string"
++    },
++    "Padding": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "logical": {
++          "minimum": 1,
++          "title": "Logical",
++          "type": "integer"
++        },
++        "physical": {
++          "minimum": 1,
++          "title": "Physical",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "logical",
++        "physical"
++      ],
++      "title": "Padding",
++      "type": "object"
++    },
++    "Precision": {
++      "additionalProperties": false,
++      "properties": {
++        "compute": {
++          "$ref": "#/$defs/PrecisionFormat",
++          "default": "fp16"
++        },
++        "kv_cache": {
++          "$ref": "#/$defs/PrecisionFormat",
++          "default": "fp16"
++        }
++      },
++      "title": "Precision",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "PrefillEnvelope": {
++      "additionalProperties": false,
++      "properties": {
++        "prompt_tokens_max": {
++          "minimum": 1,
++          "title": "Prompt Tokens Max",
++          "type": "integer"
++        },
++        "prompts_per_iteration_max": {
++          "minimum": 1,
++          "title": "Prompts Per Iteration Max",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "prompt_tokens_max",
++        "prompts_per_iteration_max"
++      ],
++      "title": "PrefillEnvelope",
++      "type": "object"
++    },
++    "PrefillGrid": {
++      "additionalProperties": false,
++      "properties": {
++        "L": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "L",
++          "type": "array"
++        },
++        "n": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "N",
++          "type": "array"
++        }
++      },
++      "required": [
++        "n",
++        "L"
++      ],
++      "title": "PrefillGrid",
++      "type": "object"
++    },
++    "PrefillQuery": {
++      "additionalProperties": false,
++      "properties": {
++        "n_prompts": {
++          "minimum": 1,
++          "title": "N Prompts",
++          "type": "integer"
++        },
++        "phase": {
++          "const": "prefill",
++          "title": "Phase",
++          "type": "string"
++        },
++        "prompt_tokens": {
++          "minimum": 1,
++          "title": "Prompt Tokens",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "n_prompts",
++        "phase",
++        "prompt_tokens"
++      ],
++      "title": "PrefillQuery",
++      "type": "object"
++    },
++    "PrefillVisitWeight": {
++      "additionalProperties": false,
++      "properties": {
++        "n_prompts": {
++          "minimum": 1,
++          "title": "N Prompts",
++          "type": "integer"
++        },
++        "prompt_tokens": {
++          "minimum": 1,
++          "title": "Prompt Tokens",
++          "type": "integer"
++        },
++        "weight_ratio": {
++          "exclusiveMinimum": 0,
++          "title": "Weight Ratio",
++          "type": "number"
++        }
++      },
++      "required": [
++        "n_prompts",
++        "prompt_tokens",
++        "weight_ratio"
++      ],
++      "title": "PrefillVisitWeight",
++      "type": "object"
++    },
++    "PreparedGraphV2": {
++      "additionalProperties": false,
++      "properties": {
++        "attention_mask": {
++          "enum": [
++            "full_square",
++            "causal"
++          ],
++          "title": "Attention Mask",
++          "type": "string"
++        },
++        "groups": {
++          "items": {
++            "$ref": "#/$defs/OpGroupV2"
++          },
++          "minItems": 1,
++          "title": "Groups",
++          "type": "array"
++        },
++        "kv_key_encoding": {
++          "$ref": "#/$defs/RotaryEncoding"
++        },
++        "lm_head_tokens": {
++          "minimum": 1,
++          "title": "Lm Head Tokens",
++          "type": "integer"
++        },
++        "omissions": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 4,
++          "title": "Omissions",
++          "type": "array"
++        }
++      },
++      "required": [
++        "attention_mask",
++        "groups",
++        "lm_head_tokens",
++        "omissions",
++        "kv_key_encoding"
++      ],
++      "title": "PreparedGraphV2",
++      "type": "object"
++    },
++    "PreparedOpV2": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "embedding_local_tokens": {
++          "anyOf": [
++            {
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Embedding Local Tokens"
++        },
++        "fusion": {
++          "enum": [
++            "none",
++            "qk_softmax_av"
++          ],
++          "title": "Fusion",
++          "type": "string"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kv_access": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/KvAccess"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "operand_access": {
++          "additionalProperties": {
++            "enum": [
++              "read",
++              "write",
++              "read_write"
++            ],
++            "type": "string"
++          },
++          "title": "Operand Access",
++          "type": "object"
++        },
++        "padding": {
++          "items": {
++            "$ref": "#/$defs/Padding"
++          },
++          "minItems": 0,
++          "title": "Padding",
++          "type": "array"
++        },
++        "replication": {
++          "items": {
++            "$ref": "#/$defs/Replication"
++          },
++          "minItems": 0,
++          "title": "Replication",
++          "type": "array"
++        },
++        "rotary": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/RotaryBinding"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "spec": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/OpSpec"
++            },
++            {
++              "$ref": "#/$defs/RotaryOpSpec"
++            }
++          ],
++          "title": "Spec"
++        },
++        "weight_copies": {
++          "minimum": 1,
++          "title": "Weight Copies",
++          "type": "integer"
++        },
++        "work_repeat": {
++          "minimum": 1,
++          "title": "Work Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "embedding_local_tokens",
++        "fusion",
++        "id",
++        "kv_access",
++        "operand_access",
++        "padding",
++        "replication",
++        "spec",
++        "weight_copies",
++        "work_repeat",
++        "rotary"
++      ],
++      "title": "PreparedOpV2",
++      "type": "object"
++    },
++    "PreparedPointV2": {
++      "additionalProperties": false,
++      "properties": {
++        "embedding_hits": {
++          "items": {
++            "minimum": 0,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Embedding Hits",
++          "type": "array"
++        },
++        "frequency_ratio": {
++          "gt": 0,
++          "title": "Frequency Ratio",
++          "type": "number"
++        },
++        "graph": {
++          "$ref": "#/$defs/PreparedGraphV2"
++        },
++        "hit_source": {
++          "enum": [
++            "provided_counts",
++            "synthetic_balanced_assignment",
++            "tp1_trivial"
++          ],
++          "title": "Hit Source",
++          "type": "string"
++        },
++        "initial_state": {
++          "enum": [
++            "steady",
++            "cold"
++          ],
++          "title": "Initial State",
++          "type": "string"
++        },
++        "payload_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Payload Hash",
++          "type": "string"
++        },
++        "query": {
++          "discriminator": {
++            "mapping": {
++              "decode": "#/$defs/DecodeQuery",
++              "prefill": "#/$defs/PrefillQuery"
++            },
++            "propertyName": "phase"
++          },
++          "oneOf": [
++            {
++              "$ref": "#/$defs/DecodeQuery"
++            },
++            {
++              "$ref": "#/$defs/PrefillQuery"
++            }
++          ],
++          "title": "Query"
++        }
++      },
++      "required": [
++        "embedding_hits",
++        "frequency_ratio",
++        "graph",
++        "hit_source",
++        "initial_state",
++        "payload_hash",
++        "query"
++      ],
++      "title": "PreparedPointV2",
++      "type": "object"
++    },
++    "Producer": {
++      "additionalProperties": false,
++      "properties": {
++        "implementation_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Implementation Hash",
++          "type": "string"
++        },
++        "name": {
++          "minLength": 1,
++          "title": "Name",
++          "type": "string"
++        },
++        "version": {
++          "minLength": 1,
++          "title": "Version",
++          "type": "string"
++        }
++      },
++      "required": [
++        "implementation_hash",
++        "name",
++        "version"
++      ],
++      "title": "Producer",
++      "type": "object"
++    },
++    "RankScope": {
++      "additionalProperties": false,
++      "properties": {
++        "collectives": {
++          "const": "excluded",
++          "title": "Collectives",
++          "type": "string"
++        },
++        "equivalent_ranks": {
++          "items": {
++            "minimum": 0,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Equivalent Ranks",
++          "type": "array"
++        },
++        "kind": {
++          "enum": [
++            "balanced_tp_representative",
++            "balanced_tp_selected_rank"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "rank_index": {
++          "minimum": 0,
++          "title": "Rank Index",
++          "type": "integer"
++        },
++        "tp": {
++          "minimum": 1,
++          "title": "Tp",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "collectives",
++        "equivalent_ranks",
++        "kind",
++        "rank_index",
++        "tp"
++      ],
++      "title": "RankScope",
++      "type": "object"
++    },
++    "Replication": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "global_extent": {
++          "minimum": 1,
++          "title": "Global Extent",
++          "type": "integer"
++        },
++        "rank_extent": {
++          "minimum": 1,
++          "title": "Rank Extent",
++          "type": "integer"
++        },
++        "replicas": {
++          "minimum": 1,
++          "title": "Replicas",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "global_extent",
++        "rank_extent",
++        "replicas"
++      ],
++      "title": "Replication",
++      "type": "object"
++    },
++    "RequestIntentV3": {
++      "additionalProperties": false,
++      "properties": {
++        "accounting": {
++          "const": "resolved-ops/2",
++          "title": "Accounting",
++          "type": "string"
++        },
++        "analytic_mode": {
++          "enum": [
++            "aggregate",
++            "per_op"
++          ],
++          "title": "Analytic Mode",
++          "type": "string"
++        },
++        "assumptions_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Assumptions Hash",
++          "type": "string"
++        },
++        "component_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Component Id",
++          "type": "string"
++        },
++        "contract": {
++          "const": "uarch-contract/0.3",
++          "title": "Contract",
++          "type": "string"
++        },
++        "envelope": {
++          "$ref": "#/$defs/Envelope"
++        },
++        "grid": {
++          "$ref": "#/$defs/Grid"
++        },
++        "hardware_spec_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Hardware Spec Hash",
++          "type": "string"
++        },
++        "initial_state": {
++          "default": "steady",
++          "enum": [
++            "steady",
++            "cold"
++          ],
++          "title": "Initial State",
++          "type": "string"
++        },
++        "kv_layout": {
++          "$ref": "#/$defs/KvLayout"
++        },
++        "mapping_policy": {
++          "const": "analytic-ops@2",
++          "title": "Mapping Policy",
++          "type": "string"
++        },
++        "model": {
++          "$ref": "#/$defs/ModelSpec"
++        },
++        "model_shape": {
++          "$ref": "#/$defs/ModelShape"
++        },
++        "position_encoding": {
++          "$ref": "#/$defs/RotaryEncoding"
++        },
++        "precision": {
++          "$ref": "#/$defs/Precision"
++        },
++        "preparation_policy": {
++          "const": "balanced-tp/1",
++          "title": "Preparation Policy",
++          "type": "string"
++        },
++        "rk_schema_snapshot": {
++          "pattern": "^[0-9a-f]{40}$",
++          "title": "Rk Schema Snapshot",
++          "type": "string"
++        },
++        "seed": {
++          "minimum": 0,
++          "title": "Seed",
++          "type": "integer"
++        },
++        "tp": {
++          "minimum": 1,
++          "title": "Tp",
++          "type": "integer"
++        },
++        "uarch_fidelity": {
++          "$ref": "#/$defs/FidelityDetail"
++        },
++        "visit_weights": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/VisitWeights"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null
++        }
++      },
++      "required": [
++        "rk_schema_snapshot",
++        "component_id",
++        "hardware_spec_hash",
++        "model",
++        "model_shape",
++        "precision",
++        "tp",
++        "envelope",
++        "grid",
++        "mapping_policy",
++        "uarch_fidelity",
++        "kv_layout",
++        "seed",
++        "accounting",
++        "analytic_mode",
++        "assumptions_hash",
++        "contract",
++        "preparation_policy",
++        "position_encoding"
++      ],
++      "title": "RequestIntentV3",
++      "type": "object"
++    },
++    "RotaryBinding": {
++      "additionalProperties": false,
++      "properties": {
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "input_op_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Input Op Id",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_ids": {
++          "items": {
++            "items": {
++              "minimum": 0,
++              "type": "integer"
++            },
++            "minItems": 1,
++            "type": "array"
++          },
++          "minItems": 1,
++          "title": "Position Ids",
++          "type": "array"
++        },
++        "target": {
++          "enum": [
++            "q",
++            "k"
++          ],
++          "title": "Target",
++          "type": "string"
++        }
++      },
++      "required": [
++        "target",
++        "coefficients_hash",
++        "pairing",
++        "numeric_policy",
++        "position_ids",
++        "input_op_id"
++      ],
++      "title": "RotaryBinding",
++      "type": "object"
++    },
++    "RotaryCoefficients": {
++      "additionalProperties": false,
++      "properties": {
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "cos_bits": {
++          "items": {
++            "items": {
++              "pattern": "^[0-9a-f]{8}$",
++              "type": "string"
++            },
++            "minItems": 1,
++            "type": "array"
++          },
++          "minItems": 1,
++          "title": "Cos Bits",
++          "type": "array"
++        },
++        "dtype": {
++          "const": "fp32",
++          "title": "Dtype",
++          "type": "string"
++        },
++        "format": {
++          "const": "uarch-rotary-coefficients/1",
++          "title": "Format",
++          "type": "string"
++        },
++        "position_count": {
++          "minimum": 1,
++          "title": "Position Count",
++          "type": "integer"
++        },
++        "producer": {
++          "$ref": "#/$defs/Producer"
++        },
++        "rotary_dim": {
++          "minimum": 1,
++          "title": "Rotary Dim",
++          "type": "integer"
++        },
++        "sin_bits": {
++          "items": {
++            "items": {
++              "pattern": "^[0-9a-f]{8}$",
++              "type": "string"
++            },
++            "minItems": 1,
++            "type": "array"
++          },
++          "minItems": 1,
++          "title": "Sin Bits",
++          "type": "array"
++        }
++      },
++      "required": [
++        "format",
++        "coefficients_hash",
++        "position_count",
++        "rotary_dim",
++        "dtype",
++        "cos_bits",
++        "sin_bits",
++        "producer"
++      ],
++      "title": "RotaryCoefficients",
++      "type": "object"
++    },
++    "RotaryEncoding": {
++      "additionalProperties": false,
++      "properties": {
++        "cache_key_state": {
++          "const": "rotated-before-store",
++          "title": "Cache Key State",
++          "type": "string"
++        },
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "kind": {
++          "const": "rope-precomputed/1",
++          "title": "Kind",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_policy": {
++          "const": "zero-origin-contiguous/1",
++          "title": "Position Policy",
++          "type": "string"
++        },
++        "rotary_dim": {
++          "minimum": 1,
++          "title": "Rotary Dim",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "kind",
++        "rotary_dim",
++        "pairing",
++        "coefficients_hash",
++        "position_policy",
++        "cache_key_state",
++        "numeric_policy"
++      ],
++      "title": "RotaryEncoding",
++      "type": "object"
++    },
++    "RotaryOpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "const": "rotary_embedding",
++          "title": "Operator",
++          "type": "string"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "RotaryOpSpec",
++      "type": "object"
++    },
++    "SharedSram": {
++      "additionalProperties": false,
++      "properties": {
++        "attach": {
++          "items": {
++            "maxItems": 2,
++            "minItems": 2,
++            "prefixItems": [
++              {
++                "minimum": 0,
++                "type": "integer"
++              },
++              {
++                "minimum": 0,
++                "type": "integer"
++              }
++            ],
++            "type": "array"
++          },
++          "minItems": 1,
++          "title": "Attach",
++          "type": "array"
++        },
++        "banks": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "bytes_per_cycle_per_bank": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "latency_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "bytes",
++        "banks",
++        "bytes_per_cycle_per_bank",
++        "latency_cycles",
++        "attach"
++      ],
++      "title": "SharedSram",
++      "type": "object"
++    },
++    "SourcedValue": {
++      "additionalProperties": false,
++      "properties": {
++        "date": {
++          "anyOf": [
++            {
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Date"
++        },
++        "kind": {
++          "default": "claim",
++          "enum": [
++            "claim",
++            "stipulation"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "provenance": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/Calibration"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null
++        },
++        "rationale": {
++          "anyOf": [
++            {
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Rationale"
++        },
++        "source": {
++          "anyOf": [
++            {
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Source"
++        },
++        "unit": {
++          "title": "Unit",
++          "type": "string"
++        },
++        "value": {
++          "title": "Value",
++          "type": "number"
++        }
++      },
++      "required": [
++        "value",
++        "unit"
++      ],
++      "title": "SourcedValue",
++      "type": "object"
++    },
++    "Sram": {
++      "additionalProperties": false,
++      "properties": {
++        "banks": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "bytes": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "bytes_per_cycle_per_bank": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "bytes",
++        "banks",
++        "bytes_per_cycle_per_bank"
++      ],
++      "title": "Sram",
++      "type": "object"
++    },
++    "Sync": {
++      "additionalProperties": false,
++      "properties": {
++        "barrier_latency_cycles": {
++          "$ref": "#/$defs/SourcedValue"
++        },
++        "mechanism": {
++          "enum": [
++            "noc_semaphore",
++            "hardware_barrier"
++          ],
++          "title": "Mechanism",
++          "type": "string"
++        }
++      },
++      "required": [
++        "mechanism",
++        "barrier_latency_cycles"
++      ],
++      "title": "Sync",
++      "type": "object"
++    },
++    "TimingPreset": {
++      "additionalProperties": false,
++      "properties": {
++        "file": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "File",
++          "type": "string"
++        },
++        "sha": {
++          "pattern": "^[0-9a-f]{40}$",
++          "title": "Sha",
++          "type": "string"
++        }
++      },
++      "required": [
++        "file",
++        "sha"
++      ],
++      "title": "TimingPreset",
++      "type": "object"
++    },
++    "VectorEngine": {
++      "additionalProperties": false,
++      "properties": {
++        "ops_per_cycle": {
++          "$ref": "#/$defs/SourcedValue"
++        }
++      },
++      "required": [
++        "ops_per_cycle"
++      ],
++      "title": "VectorEngine",
++      "type": "object"
++    },
++    "VisitWeights": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "items": {
++            "$ref": "#/$defs/DecodeVisitWeight"
++          },
++          "title": "Decode",
++          "type": "array"
++        },
++        "prefill": {
++          "items": {
++            "$ref": "#/$defs/PrefillVisitWeight"
++          },
++          "title": "Prefill",
++          "type": "array"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill"
++      ],
++      "title": "VisitWeights",
++      "type": "object"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "bundle_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Bundle Hash",
++      "type": "string"
++    },
++    "coefficients": {
++      "$ref": "#/$defs/RotaryCoefficients"
++    },
++    "format": {
++      "const": "uarch-prepared/2",
++      "title": "Format",
++      "type": "string"
++    },
++    "hardware_spec": {
++      "$ref": "#/$defs/HardwareSpec"
++    },
++    "intent": {
++      "$ref": "#/$defs/RequestIntentV3"
++    },
++    "intent_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Intent Hash",
++      "type": "string"
++    },
++    "mapping_scope": {
++      "const": "analytic_ops",
++      "title": "Mapping Scope",
++      "type": "string"
++    },
++    "points": {
++      "items": {
++        "$ref": "#/$defs/PreparedPointV2"
++      },
++      "minItems": 1,
++      "title": "Points",
++      "type": "array"
++    },
++    "producer": {
++      "$ref": "#/$defs/Producer"
++    },
++    "rank": {
++      "$ref": "#/$defs/RankScope"
++    }
++  },
++  "required": [
++    "bundle_hash",
++    "format",
++    "hardware_spec",
++    "intent",
++    "intent_hash",
++    "mapping_scope",
++    "points",
++    "producer",
++    "rank",
++    "coefficients"
++  ],
++  "title": "PreparedBundleV2",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/PreparedGraphV2.json
+@@ -0,0 +1,627 @@
++{
++  "$defs": {
++    "KvAccess": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "minimum": 1,
++          "title": "Block Size Tokens",
++          "type": "integer"
++        },
++        "context_tokens": {
++          "minimum": 1,
++          "title": "Context Tokens",
++          "type": "integer"
++        },
++        "last_page_valid_tokens": {
++          "minimum": 1,
++          "title": "Last Page Valid Tokens",
++          "type": "integer"
++        },
++        "pages_per_sequence": {
++          "minimum": 1,
++          "title": "Pages Per Sequence",
++          "type": "integer"
++        },
++        "read_policy": {
++          "const": "valid_tokens",
++          "title": "Read Policy",
++          "type": "string"
++        },
++        "write_policy": {
++          "const": "append_valid_tokens",
++          "title": "Write Policy",
++          "type": "string"
++        }
++      },
++      "required": [
++        "block_size_tokens",
++        "context_tokens",
++        "last_page_valid_tokens",
++        "pages_per_sequence",
++        "read_policy",
++        "write_policy"
++      ],
++      "title": "KvAccess",
++      "type": "object"
++    },
++    "OpGroupV2": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kind": {
++          "enum": [
++            "head",
++            "decoder",
++            "tail"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "ops": {
++          "items": {
++            "$ref": "#/$defs/PreparedOpV2"
++          },
++          "minItems": 1,
++          "title": "Ops",
++          "type": "array"
++        },
++        "repeat": {
++          "minimum": 1,
++          "title": "Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "id",
++        "kind",
++        "ops",
++        "repeat"
++      ],
++      "title": "OpGroupV2",
++      "type": "object"
++    },
++    "OpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "$ref": "#/$defs/Operator"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "OpSpec",
++      "type": "object"
++    },
++    "Operand": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Block Size Tokens"
++        },
++        "dimensions": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Dimensions",
++          "type": "array"
++        },
++        "dtype": {
++          "$ref": "#/$defs/PrecisionFormat"
++        },
++        "layout": {
++          "enum": [
++            "contiguous",
++            "paged"
++          ],
++          "title": "Layout",
++          "type": "string"
++        }
++      },
++      "required": [
++        "dtype",
++        "dimensions",
++        "layout"
++      ],
++      "title": "Operand",
++      "type": "object"
++    },
++    "Operator": {
++      "enum": [
++        "q_projection",
++        "k_projection",
++        "v_projection",
++        "qk_score",
++        "softmax",
++        "av_application",
++        "output_projection",
++        "normalization",
++        "residual_addition",
++        "ffn_up",
++        "ffn_gate",
++        "ffn_down",
++        "activation",
++        "kv_write",
++        "embedding",
++        "lm_head",
++        "attention_fused"
++      ],
++      "title": "Operator",
++      "type": "string"
++    },
++    "Padding": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "logical": {
++          "minimum": 1,
++          "title": "Logical",
++          "type": "integer"
++        },
++        "physical": {
++          "minimum": 1,
++          "title": "Physical",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "logical",
++        "physical"
++      ],
++      "title": "Padding",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "PreparedOpV2": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "embedding_local_tokens": {
++          "anyOf": [
++            {
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Embedding Local Tokens"
++        },
++        "fusion": {
++          "enum": [
++            "none",
++            "qk_softmax_av"
++          ],
++          "title": "Fusion",
++          "type": "string"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kv_access": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/KvAccess"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "operand_access": {
++          "additionalProperties": {
++            "enum": [
++              "read",
++              "write",
++              "read_write"
++            ],
++            "type": "string"
++          },
++          "title": "Operand Access",
++          "type": "object"
++        },
++        "padding": {
++          "items": {
++            "$ref": "#/$defs/Padding"
++          },
++          "minItems": 0,
++          "title": "Padding",
++          "type": "array"
++        },
++        "replication": {
++          "items": {
++            "$ref": "#/$defs/Replication"
++          },
++          "minItems": 0,
++          "title": "Replication",
++          "type": "array"
++        },
++        "rotary": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/RotaryBinding"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "spec": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/OpSpec"
++            },
++            {
++              "$ref": "#/$defs/RotaryOpSpec"
++            }
++          ],
++          "title": "Spec"
++        },
++        "weight_copies": {
++          "minimum": 1,
++          "title": "Weight Copies",
++          "type": "integer"
++        },
++        "work_repeat": {
++          "minimum": 1,
++          "title": "Work Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "embedding_local_tokens",
++        "fusion",
++        "id",
++        "kv_access",
++        "operand_access",
++        "padding",
++        "replication",
++        "spec",
++        "weight_copies",
++        "work_repeat",
++        "rotary"
++      ],
++      "title": "PreparedOpV2",
++      "type": "object"
++    },
++    "Replication": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "global_extent": {
++          "minimum": 1,
++          "title": "Global Extent",
++          "type": "integer"
++        },
++        "rank_extent": {
++          "minimum": 1,
++          "title": "Rank Extent",
++          "type": "integer"
++        },
++        "replicas": {
++          "minimum": 1,
++          "title": "Replicas",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "global_extent",
++        "rank_extent",
++        "replicas"
++      ],
++      "title": "Replication",
++      "type": "object"
++    },
++    "RotaryBinding": {
++      "additionalProperties": false,
++      "properties": {
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "input_op_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Input Op Id",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_ids": {
++          "items": {
++            "items": {
++              "minimum": 0,
++              "type": "integer"
++            },
++            "minItems": 1,
++            "type": "array"
++          },
++          "minItems": 1,
++          "title": "Position Ids",
++          "type": "array"
++        },
++        "target": {
++          "enum": [
++            "q",
++            "k"
++          ],
++          "title": "Target",
++          "type": "string"
++        }
++      },
++      "required": [
++        "target",
++        "coefficients_hash",
++        "pairing",
++        "numeric_policy",
++        "position_ids",
++        "input_op_id"
++      ],
++      "title": "RotaryBinding",
++      "type": "object"
++    },
++    "RotaryEncoding": {
++      "additionalProperties": false,
++      "properties": {
++        "cache_key_state": {
++          "const": "rotated-before-store",
++          "title": "Cache Key State",
++          "type": "string"
++        },
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "kind": {
++          "const": "rope-precomputed/1",
++          "title": "Kind",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_policy": {
++          "const": "zero-origin-contiguous/1",
++          "title": "Position Policy",
++          "type": "string"
++        },
++        "rotary_dim": {
++          "minimum": 1,
++          "title": "Rotary Dim",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "kind",
++        "rotary_dim",
++        "pairing",
++        "coefficients_hash",
++        "position_policy",
++        "cache_key_state",
++        "numeric_policy"
++      ],
++      "title": "RotaryEncoding",
++      "type": "object"
++    },
++    "RotaryOpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "const": "rotary_embedding",
++          "title": "Operator",
++          "type": "string"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "RotaryOpSpec",
++      "type": "object"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "attention_mask": {
++      "enum": [
++        "full_square",
++        "causal"
++      ],
++      "title": "Attention Mask",
++      "type": "string"
++    },
++    "groups": {
++      "items": {
++        "$ref": "#/$defs/OpGroupV2"
++      },
++      "minItems": 1,
++      "title": "Groups",
++      "type": "array"
++    },
++    "kv_key_encoding": {
++      "$ref": "#/$defs/RotaryEncoding"
++    },
++    "lm_head_tokens": {
++      "minimum": 1,
++      "title": "Lm Head Tokens",
++      "type": "integer"
++    },
++    "omissions": {
++      "items": {
++        "minLength": 1,
++        "type": "string"
++      },
++      "minItems": 4,
++      "title": "Omissions",
++      "type": "array"
++    }
++  },
++  "required": [
++    "attention_mask",
++    "groups",
++    "lm_head_tokens",
++    "omissions",
++    "kv_key_encoding"
++  ],
++  "title": "PreparedGraphV2",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/PreparedOpV2.json
+@@ -0,0 +1,476 @@
++{
++  "$defs": {
++    "KvAccess": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "minimum": 1,
++          "title": "Block Size Tokens",
++          "type": "integer"
++        },
++        "context_tokens": {
++          "minimum": 1,
++          "title": "Context Tokens",
++          "type": "integer"
++        },
++        "last_page_valid_tokens": {
++          "minimum": 1,
++          "title": "Last Page Valid Tokens",
++          "type": "integer"
++        },
++        "pages_per_sequence": {
++          "minimum": 1,
++          "title": "Pages Per Sequence",
++          "type": "integer"
++        },
++        "read_policy": {
++          "const": "valid_tokens",
++          "title": "Read Policy",
++          "type": "string"
++        },
++        "write_policy": {
++          "const": "append_valid_tokens",
++          "title": "Write Policy",
++          "type": "string"
++        }
++      },
++      "required": [
++        "block_size_tokens",
++        "context_tokens",
++        "last_page_valid_tokens",
++        "pages_per_sequence",
++        "read_policy",
++        "write_policy"
++      ],
++      "title": "KvAccess",
++      "type": "object"
++    },
++    "OpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "$ref": "#/$defs/Operator"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "OpSpec",
++      "type": "object"
++    },
++    "Operand": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Block Size Tokens"
++        },
++        "dimensions": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Dimensions",
++          "type": "array"
++        },
++        "dtype": {
++          "$ref": "#/$defs/PrecisionFormat"
++        },
++        "layout": {
++          "enum": [
++            "contiguous",
++            "paged"
++          ],
++          "title": "Layout",
++          "type": "string"
++        }
++      },
++      "required": [
++        "dtype",
++        "dimensions",
++        "layout"
++      ],
++      "title": "Operand",
++      "type": "object"
++    },
++    "Operator": {
++      "enum": [
++        "q_projection",
++        "k_projection",
++        "v_projection",
++        "qk_score",
++        "softmax",
++        "av_application",
++        "output_projection",
++        "normalization",
++        "residual_addition",
++        "ffn_up",
++        "ffn_gate",
++        "ffn_down",
++        "activation",
++        "kv_write",
++        "embedding",
++        "lm_head",
++        "attention_fused"
++      ],
++      "title": "Operator",
++      "type": "string"
++    },
++    "Padding": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "logical": {
++          "minimum": 1,
++          "title": "Logical",
++          "type": "integer"
++        },
++        "physical": {
++          "minimum": 1,
++          "title": "Physical",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "logical",
++        "physical"
++      ],
++      "title": "Padding",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "Replication": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "global_extent": {
++          "minimum": 1,
++          "title": "Global Extent",
++          "type": "integer"
++        },
++        "rank_extent": {
++          "minimum": 1,
++          "title": "Rank Extent",
++          "type": "integer"
++        },
++        "replicas": {
++          "minimum": 1,
++          "title": "Replicas",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "global_extent",
++        "rank_extent",
++        "replicas"
++      ],
++      "title": "Replication",
++      "type": "object"
++    },
++    "RotaryBinding": {
++      "additionalProperties": false,
++      "properties": {
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "input_op_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Input Op Id",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_ids": {
++          "items": {
++            "items": {
++              "minimum": 0,
++              "type": "integer"
++            },
++            "minItems": 1,
++            "type": "array"
++          },
++          "minItems": 1,
++          "title": "Position Ids",
++          "type": "array"
++        },
++        "target": {
++          "enum": [
++            "q",
++            "k"
++          ],
++          "title": "Target",
++          "type": "string"
++        }
++      },
++      "required": [
++        "target",
++        "coefficients_hash",
++        "pairing",
++        "numeric_policy",
++        "position_ids",
++        "input_op_id"
++      ],
++      "title": "RotaryBinding",
++      "type": "object"
++    },
++    "RotaryOpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "const": "rotary_embedding",
++          "title": "Operator",
++          "type": "string"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "RotaryOpSpec",
++      "type": "object"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "depends_on": {
++      "items": {
++        "minLength": 1,
++        "type": "string"
++      },
++      "minItems": 0,
++      "title": "Depends On",
++      "type": "array"
++    },
++    "embedding_local_tokens": {
++      "anyOf": [
++        {
++          "minimum": 0,
++          "type": "integer"
++        },
++        {
++          "type": "null"
++        }
++      ],
++      "title": "Embedding Local Tokens"
++    },
++    "fusion": {
++      "enum": [
++        "none",
++        "qk_softmax_av"
++      ],
++      "title": "Fusion",
++      "type": "string"
++    },
++    "id": {
++      "minLength": 1,
++      "title": "Id",
++      "type": "string"
++    },
++    "kv_access": {
++      "anyOf": [
++        {
++          "$ref": "#/$defs/KvAccess"
++        },
++        {
++          "type": "null"
++        }
++      ]
++    },
++    "operand_access": {
++      "additionalProperties": {
++        "enum": [
++          "read",
++          "write",
++          "read_write"
++        ],
++        "type": "string"
++      },
++      "title": "Operand Access",
++      "type": "object"
++    },
++    "padding": {
++      "items": {
++        "$ref": "#/$defs/Padding"
++      },
++      "minItems": 0,
++      "title": "Padding",
++      "type": "array"
++    },
++    "replication": {
++      "items": {
++        "$ref": "#/$defs/Replication"
++      },
++      "minItems": 0,
++      "title": "Replication",
++      "type": "array"
++    },
++    "rotary": {
++      "anyOf": [
++        {
++          "$ref": "#/$defs/RotaryBinding"
++        },
++        {
++          "type": "null"
++        }
++      ]
++    },
++    "spec": {
++      "anyOf": [
++        {
++          "$ref": "#/$defs/OpSpec"
++        },
++        {
++          "$ref": "#/$defs/RotaryOpSpec"
++        }
++      ],
++      "title": "Spec"
++    },
++    "weight_copies": {
++      "minimum": 1,
++      "title": "Weight Copies",
++      "type": "integer"
++    },
++    "work_repeat": {
++      "minimum": 1,
++      "title": "Work Repeat",
++      "type": "integer"
++    }
++  },
++  "required": [
++    "depends_on",
++    "embedding_local_tokens",
++    "fusion",
++    "id",
++    "kv_access",
++    "operand_access",
++    "padding",
++    "replication",
++    "spec",
++    "weight_copies",
++    "work_repeat",
++    "rotary"
++  ],
++  "title": "PreparedOpV2",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/PreparedPointV2.json
+@@ -0,0 +1,754 @@
++{
++  "$defs": {
++    "DecodeQuery": {
++      "additionalProperties": false,
++      "properties": {
++        "batch": {
++          "minimum": 1,
++          "title": "Batch",
++          "type": "integer"
++        },
++        "phase": {
++          "const": "decode",
++          "title": "Phase",
++          "type": "string"
++        },
++        "total_context_tokens": {
++          "minimum": 1,
++          "title": "Total Context Tokens",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "batch",
++        "phase",
++        "total_context_tokens"
++      ],
++      "title": "DecodeQuery",
++      "type": "object"
++    },
++    "KvAccess": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "minimum": 1,
++          "title": "Block Size Tokens",
++          "type": "integer"
++        },
++        "context_tokens": {
++          "minimum": 1,
++          "title": "Context Tokens",
++          "type": "integer"
++        },
++        "last_page_valid_tokens": {
++          "minimum": 1,
++          "title": "Last Page Valid Tokens",
++          "type": "integer"
++        },
++        "pages_per_sequence": {
++          "minimum": 1,
++          "title": "Pages Per Sequence",
++          "type": "integer"
++        },
++        "read_policy": {
++          "const": "valid_tokens",
++          "title": "Read Policy",
++          "type": "string"
++        },
++        "write_policy": {
++          "const": "append_valid_tokens",
++          "title": "Write Policy",
++          "type": "string"
++        }
++      },
++      "required": [
++        "block_size_tokens",
++        "context_tokens",
++        "last_page_valid_tokens",
++        "pages_per_sequence",
++        "read_policy",
++        "write_policy"
++      ],
++      "title": "KvAccess",
++      "type": "object"
++    },
++    "OpGroupV2": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kind": {
++          "enum": [
++            "head",
++            "decoder",
++            "tail"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "ops": {
++          "items": {
++            "$ref": "#/$defs/PreparedOpV2"
++          },
++          "minItems": 1,
++          "title": "Ops",
++          "type": "array"
++        },
++        "repeat": {
++          "minimum": 1,
++          "title": "Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "id",
++        "kind",
++        "ops",
++        "repeat"
++      ],
++      "title": "OpGroupV2",
++      "type": "object"
++    },
++    "OpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "$ref": "#/$defs/Operator"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "OpSpec",
++      "type": "object"
++    },
++    "Operand": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Block Size Tokens"
++        },
++        "dimensions": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Dimensions",
++          "type": "array"
++        },
++        "dtype": {
++          "$ref": "#/$defs/PrecisionFormat"
++        },
++        "layout": {
++          "enum": [
++            "contiguous",
++            "paged"
++          ],
++          "title": "Layout",
++          "type": "string"
++        }
++      },
++      "required": [
++        "dtype",
++        "dimensions",
++        "layout"
++      ],
++      "title": "Operand",
++      "type": "object"
++    },
++    "Operator": {
++      "enum": [
++        "q_projection",
++        "k_projection",
++        "v_projection",
++        "qk_score",
++        "softmax",
++        "av_application",
++        "output_projection",
++        "normalization",
++        "residual_addition",
++        "ffn_up",
++        "ffn_gate",
++        "ffn_down",
++        "activation",
++        "kv_write",
++        "embedding",
++        "lm_head",
++        "attention_fused"
++      ],
++      "title": "Operator",
++      "type": "string"
++    },
++    "Padding": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "logical": {
++          "minimum": 1,
++          "title": "Logical",
++          "type": "integer"
++        },
++        "physical": {
++          "minimum": 1,
++          "title": "Physical",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "logical",
++        "physical"
++      ],
++      "title": "Padding",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "PrefillQuery": {
++      "additionalProperties": false,
++      "properties": {
++        "n_prompts": {
++          "minimum": 1,
++          "title": "N Prompts",
++          "type": "integer"
++        },
++        "phase": {
++          "const": "prefill",
++          "title": "Phase",
++          "type": "string"
++        },
++        "prompt_tokens": {
++          "minimum": 1,
++          "title": "Prompt Tokens",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "n_prompts",
++        "phase",
++        "prompt_tokens"
++      ],
++      "title": "PrefillQuery",
++      "type": "object"
++    },
++    "PreparedGraphV2": {
++      "additionalProperties": false,
++      "properties": {
++        "attention_mask": {
++          "enum": [
++            "full_square",
++            "causal"
++          ],
++          "title": "Attention Mask",
++          "type": "string"
++        },
++        "groups": {
++          "items": {
++            "$ref": "#/$defs/OpGroupV2"
++          },
++          "minItems": 1,
++          "title": "Groups",
++          "type": "array"
++        },
++        "kv_key_encoding": {
++          "$ref": "#/$defs/RotaryEncoding"
++        },
++        "lm_head_tokens": {
++          "minimum": 1,
++          "title": "Lm Head Tokens",
++          "type": "integer"
++        },
++        "omissions": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 4,
++          "title": "Omissions",
++          "type": "array"
++        }
++      },
++      "required": [
++        "attention_mask",
++        "groups",
++        "lm_head_tokens",
++        "omissions",
++        "kv_key_encoding"
++      ],
++      "title": "PreparedGraphV2",
++      "type": "object"
++    },
++    "PreparedOpV2": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "embedding_local_tokens": {
++          "anyOf": [
++            {
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Embedding Local Tokens"
++        },
++        "fusion": {
++          "enum": [
++            "none",
++            "qk_softmax_av"
++          ],
++          "title": "Fusion",
++          "type": "string"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kv_access": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/KvAccess"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "operand_access": {
++          "additionalProperties": {
++            "enum": [
++              "read",
++              "write",
++              "read_write"
++            ],
++            "type": "string"
++          },
++          "title": "Operand Access",
++          "type": "object"
++        },
++        "padding": {
++          "items": {
++            "$ref": "#/$defs/Padding"
++          },
++          "minItems": 0,
++          "title": "Padding",
++          "type": "array"
++        },
++        "replication": {
++          "items": {
++            "$ref": "#/$defs/Replication"
++          },
++          "minItems": 0,
++          "title": "Replication",
++          "type": "array"
++        },
++        "rotary": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/RotaryBinding"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "spec": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/OpSpec"
++            },
++            {
++              "$ref": "#/$defs/RotaryOpSpec"
++            }
++          ],
++          "title": "Spec"
++        },
++        "weight_copies": {
++          "minimum": 1,
++          "title": "Weight Copies",
++          "type": "integer"
++        },
++        "work_repeat": {
++          "minimum": 1,
++          "title": "Work Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "embedding_local_tokens",
++        "fusion",
++        "id",
++        "kv_access",
++        "operand_access",
++        "padding",
++        "replication",
++        "spec",
++        "weight_copies",
++        "work_repeat",
++        "rotary"
++      ],
++      "title": "PreparedOpV2",
++      "type": "object"
++    },
++    "Replication": {
++      "additionalProperties": false,
++      "properties": {
++        "dimension": {
++          "minLength": 1,
++          "title": "Dimension",
++          "type": "string"
++        },
++        "global_extent": {
++          "minimum": 1,
++          "title": "Global Extent",
++          "type": "integer"
++        },
++        "rank_extent": {
++          "minimum": 1,
++          "title": "Rank Extent",
++          "type": "integer"
++        },
++        "replicas": {
++          "minimum": 1,
++          "title": "Replicas",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "dimension",
++        "global_extent",
++        "rank_extent",
++        "replicas"
++      ],
++      "title": "Replication",
++      "type": "object"
++    },
++    "RotaryBinding": {
++      "additionalProperties": false,
++      "properties": {
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "input_op_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Input Op Id",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_ids": {
++          "items": {
++            "items": {
++              "minimum": 0,
++              "type": "integer"
++            },
++            "minItems": 1,
++            "type": "array"
++          },
++          "minItems": 1,
++          "title": "Position Ids",
++          "type": "array"
++        },
++        "target": {
++          "enum": [
++            "q",
++            "k"
++          ],
++          "title": "Target",
++          "type": "string"
++        }
++      },
++      "required": [
++        "target",
++        "coefficients_hash",
++        "pairing",
++        "numeric_policy",
++        "position_ids",
++        "input_op_id"
++      ],
++      "title": "RotaryBinding",
++      "type": "object"
++    },
++    "RotaryEncoding": {
++      "additionalProperties": false,
++      "properties": {
++        "cache_key_state": {
++          "const": "rotated-before-store",
++          "title": "Cache Key State",
++          "type": "string"
++        },
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "kind": {
++          "const": "rope-precomputed/1",
++          "title": "Kind",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_policy": {
++          "const": "zero-origin-contiguous/1",
++          "title": "Position Policy",
++          "type": "string"
++        },
++        "rotary_dim": {
++          "minimum": 1,
++          "title": "Rotary Dim",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "kind",
++        "rotary_dim",
++        "pairing",
++        "coefficients_hash",
++        "position_policy",
++        "cache_key_state",
++        "numeric_policy"
++      ],
++      "title": "RotaryEncoding",
++      "type": "object"
++    },
++    "RotaryOpSpec": {
++      "additionalProperties": false,
++      "properties": {
++        "dimensions": {
++          "patternProperties": {
++            "\\S": {
++              "minimum": 1,
++              "type": "integer"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Dimensions",
++          "type": "object"
++        },
++        "operands": {
++          "patternProperties": {
++            "\\S": {
++              "$ref": "#/$defs/Operand"
++            }
++          },
++          "propertyNames": {
++            "minLength": 1
++          },
++          "title": "Operands",
++          "type": "object"
++        },
++        "operator": {
++          "const": "rotary_embedding",
++          "title": "Operator",
++          "type": "string"
++        },
++        "reduction_axes": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Reduction Axes",
++          "type": "array"
++        }
++      },
++      "required": [
++        "operator",
++        "dimensions",
++        "operands",
++        "reduction_axes"
++      ],
++      "title": "RotaryOpSpec",
++      "type": "object"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "embedding_hits": {
++      "items": {
++        "minimum": 0,
++        "type": "integer"
++      },
++      "minItems": 1,
++      "title": "Embedding Hits",
++      "type": "array"
++    },
++    "frequency_ratio": {
++      "gt": 0,
++      "title": "Frequency Ratio",
++      "type": "number"
++    },
++    "graph": {
++      "$ref": "#/$defs/PreparedGraphV2"
++    },
++    "hit_source": {
++      "enum": [
++        "provided_counts",
++        "synthetic_balanced_assignment",
++        "tp1_trivial"
++      ],
++      "title": "Hit Source",
++      "type": "string"
++    },
++    "initial_state": {
++      "enum": [
++        "steady",
++        "cold"
++      ],
++      "title": "Initial State",
++      "type": "string"
++    },
++    "payload_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Payload Hash",
++      "type": "string"
++    },
++    "query": {
++      "discriminator": {
++        "mapping": {
++          "decode": "#/$defs/DecodeQuery",
++          "prefill": "#/$defs/PrefillQuery"
++        },
++        "propertyName": "phase"
++      },
++      "oneOf": [
++        {
++          "$ref": "#/$defs/DecodeQuery"
++        },
++        {
++          "$ref": "#/$defs/PrefillQuery"
++        }
++      ],
++      "title": "Query"
++    }
++  },
++  "required": [
++    "embedding_hits",
++    "frequency_ratio",
++    "graph",
++    "hit_source",
++    "initial_state",
++    "payload_hash",
++    "query"
++  ],
++  "title": "PreparedPointV2",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/RequestIntentV3.json
+@@ -0,0 +1,631 @@
++{
++  "$defs": {
++    "DecodeEnvelope": {
++      "additionalProperties": false,
++      "properties": {
++        "batch_max": {
++          "minimum": 1,
++          "title": "Batch Max",
++          "type": "integer"
++        },
++        "context_per_seq_max": {
++          "minimum": 1,
++          "title": "Context Per Seq Max",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "batch_max",
++        "context_per_seq_max"
++      ],
++      "title": "DecodeEnvelope",
++      "type": "object"
++    },
++    "DecodeGrid": {
++      "additionalProperties": false,
++      "properties": {
++        "batch": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Batch",
++          "type": "array"
++        },
++        "context_per_seq": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Context Per Seq",
++          "type": "array"
++        }
++      },
++      "required": [
++        "batch",
++        "context_per_seq"
++      ],
++      "title": "DecodeGrid",
++      "type": "object"
++    },
++    "DecodeVisitWeight": {
++      "additionalProperties": false,
++      "properties": {
++        "batch": {
++          "minimum": 1,
++          "title": "Batch",
++          "type": "integer"
++        },
++        "total_context_tokens": {
++          "minimum": 1,
++          "title": "Total Context Tokens",
++          "type": "integer"
++        },
++        "weight_ratio": {
++          "exclusiveMinimum": 0,
++          "title": "Weight Ratio",
++          "type": "number"
++        }
++      },
++      "required": [
++        "batch",
++        "total_context_tokens",
++        "weight_ratio"
++      ],
++      "title": "DecodeVisitWeight",
++      "type": "object"
++    },
++    "Envelope": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "$ref": "#/$defs/DecodeEnvelope"
++        },
++        "prefill": {
++          "$ref": "#/$defs/PrefillEnvelope"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill"
++      ],
++      "title": "Envelope",
++      "type": "object"
++    },
++    "FidelityDetail": {
++      "additionalProperties": false,
++      "properties": {
++        "compute": {
++          "enum": [
++            0,
++            1,
++            2
++          ],
++          "title": "Compute",
++          "type": "integer"
++        },
++        "dram": {
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            2
++          ],
++          "title": "Dram"
++        },
++        "layer_reuse": {
++          "title": "Layer Reuse",
++          "type": "boolean"
++        },
++        "noc": {
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            2
++          ],
++          "title": "Noc"
++        },
++        "shared_sram": {
++          "description": "Omit only when hardware has no shared SRAM; null is invalid.",
++          "enum": [
++            0,
++            1,
++            "1+ts",
++            "unrepresented"
++          ],
++          "title": "Shared Sram"
++        },
++        "sync": {
++          "pattern": "^(exact|approx\\(Q=[1-9][0-9]*\\))$",
++          "title": "Sync",
++          "type": "string"
++        }
++      },
++      "required": [
++        "compute",
++        "noc",
++        "dram",
++        "sync",
++        "layer_reuse"
++      ],
++      "title": "FidelityDetail",
++      "type": "object"
++    },
++    "Grid": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "$ref": "#/$defs/DecodeGrid"
++        },
++        "frequency_ratio": {
++          "items": {
++            "exclusiveMinimum": 0,
++            "type": "number"
++          },
++          "minItems": 1,
++          "title": "Frequency Ratio",
++          "type": "array"
++        },
++        "prefill": {
++          "$ref": "#/$defs/PrefillGrid"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill",
++        "frequency_ratio"
++      ],
++      "title": "Grid",
++      "type": "object"
++    },
++    "KvLayout": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "minimum": 1,
++          "title": "Block Size Tokens",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "block_size_tokens"
++      ],
++      "title": "KvLayout",
++      "type": "object"
++    },
++    "ModelShape": {
++      "additionalProperties": false,
++      "properties": {
++        "attention": {
++          "enum": [
++            "mha",
++            "gqa"
++          ],
++          "title": "Attention",
++          "type": "string"
++        },
++        "d_ff": {
++          "minimum": 1,
++          "title": "D Ff",
++          "type": "integer"
++        },
++        "expert_d_ff": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Expert D Ff"
++        },
++        "gated_mlp": {
++          "title": "Gated Mlp",
++          "type": "boolean"
++        },
++        "tie_embeddings": {
++          "title": "Tie Embeddings",
++          "type": "boolean"
++        },
++        "vocab_size": {
++          "minimum": 1,
++          "title": "Vocab Size",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "d_ff",
++        "gated_mlp",
++        "vocab_size",
++        "attention",
++        "tie_embeddings"
++      ],
++      "title": "ModelShape",
++      "type": "object"
++    },
++    "ModelSpec": {
++      "additionalProperties": false,
++      "description": "MoE is active-vs-total and nothing more (build-spec \u00a72.3.5).",
++      "properties": {
++        "active_params": {
++          "minimum": 1,
++          "title": "Active Params",
++          "type": "integer"
++        },
++        "d_model": {
++          "minimum": 1,
++          "title": "D Model",
++          "type": "integer"
++        },
++        "experts_per_token": {
++          "default": 0,
++          "minimum": 0,
++          "title": "Experts Per Token",
++          "type": "integer"
++        },
++        "kv_heads": {
++          "minimum": 1,
++          "title": "Kv Heads",
++          "type": "integer"
++        },
++        "n_experts": {
++          "default": 0,
++          "minimum": 0,
++          "title": "N Experts",
++          "type": "integer"
++        },
++        "n_heads": {
++          "minimum": 1,
++          "title": "N Heads",
++          "type": "integer"
++        },
++        "n_layers": {
++          "minimum": 1,
++          "title": "N Layers",
++          "type": "integer"
++        },
++        "name": {
++          "title": "Name",
++          "type": "string"
++        },
++        "total_params": {
++          "minimum": 1,
++          "title": "Total Params",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "name",
++        "total_params",
++        "active_params",
++        "n_layers",
++        "d_model",
++        "n_heads",
++        "kv_heads"
++      ],
++      "title": "ModelSpec",
++      "type": "object"
++    },
++    "Precision": {
++      "additionalProperties": false,
++      "properties": {
++        "compute": {
++          "$ref": "#/$defs/PrecisionFormat",
++          "default": "fp16"
++        },
++        "kv_cache": {
++          "$ref": "#/$defs/PrecisionFormat",
++          "default": "fp16"
++        }
++      },
++      "title": "Precision",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "PrefillEnvelope": {
++      "additionalProperties": false,
++      "properties": {
++        "prompt_tokens_max": {
++          "minimum": 1,
++          "title": "Prompt Tokens Max",
++          "type": "integer"
++        },
++        "prompts_per_iteration_max": {
++          "minimum": 1,
++          "title": "Prompts Per Iteration Max",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "prompt_tokens_max",
++        "prompts_per_iteration_max"
++      ],
++      "title": "PrefillEnvelope",
++      "type": "object"
++    },
++    "PrefillGrid": {
++      "additionalProperties": false,
++      "properties": {
++        "L": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "L",
++          "type": "array"
++        },
++        "n": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "N",
++          "type": "array"
++        }
++      },
++      "required": [
++        "n",
++        "L"
++      ],
++      "title": "PrefillGrid",
++      "type": "object"
++    },
++    "PrefillVisitWeight": {
++      "additionalProperties": false,
++      "properties": {
++        "n_prompts": {
++          "minimum": 1,
++          "title": "N Prompts",
++          "type": "integer"
++        },
++        "prompt_tokens": {
++          "minimum": 1,
++          "title": "Prompt Tokens",
++          "type": "integer"
++        },
++        "weight_ratio": {
++          "exclusiveMinimum": 0,
++          "title": "Weight Ratio",
++          "type": "number"
++        }
++      },
++      "required": [
++        "n_prompts",
++        "prompt_tokens",
++        "weight_ratio"
++      ],
++      "title": "PrefillVisitWeight",
++      "type": "object"
++    },
++    "RotaryEncoding": {
++      "additionalProperties": false,
++      "properties": {
++        "cache_key_state": {
++          "const": "rotated-before-store",
++          "title": "Cache Key State",
++          "type": "string"
++        },
++        "coefficients_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Coefficients Hash",
++          "type": "string"
++        },
++        "kind": {
++          "const": "rope-precomputed/1",
++          "title": "Kind",
++          "type": "string"
++        },
++        "numeric_policy": {
++          "const": "fp32-separate-round-rne/1",
++          "title": "Numeric Policy",
++          "type": "string"
++        },
++        "pairing": {
++          "enum": [
++            "adjacent",
++            "split_halves"
++          ],
++          "title": "Pairing",
++          "type": "string"
++        },
++        "position_policy": {
++          "const": "zero-origin-contiguous/1",
++          "title": "Position Policy",
++          "type": "string"
++        },
++        "rotary_dim": {
++          "minimum": 1,
++          "title": "Rotary Dim",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "kind",
++        "rotary_dim",
++        "pairing",
++        "coefficients_hash",
++        "position_policy",
++        "cache_key_state",
++        "numeric_policy"
++      ],
++      "title": "RotaryEncoding",
++      "type": "object"
++    },
++    "VisitWeights": {
++      "additionalProperties": false,
++      "properties": {
++        "decode": {
++          "items": {
++            "$ref": "#/$defs/DecodeVisitWeight"
++          },
++          "title": "Decode",
++          "type": "array"
++        },
++        "prefill": {
++          "items": {
++            "$ref": "#/$defs/PrefillVisitWeight"
++          },
++          "title": "Prefill",
++          "type": "array"
++        }
++      },
++      "required": [
++        "decode",
++        "prefill"
++      ],
++      "title": "VisitWeights",
++      "type": "object"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "accounting": {
++      "const": "resolved-ops/2",
++      "title": "Accounting",
++      "type": "string"
++    },
++    "analytic_mode": {
++      "enum": [
++        "aggregate",
++        "per_op"
++      ],
++      "title": "Analytic Mode",
++      "type": "string"
++    },
++    "assumptions_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Assumptions Hash",
++      "type": "string"
++    },
++    "component_id": {
++      "minLength": 1,
++      "pattern": "\\S",
++      "title": "Component Id",
++      "type": "string"
++    },
++    "contract": {
++      "const": "uarch-contract/0.3",
++      "title": "Contract",
++      "type": "string"
++    },
++    "envelope": {
++      "$ref": "#/$defs/Envelope"
++    },
++    "grid": {
++      "$ref": "#/$defs/Grid"
++    },
++    "hardware_spec_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Hardware Spec Hash",
++      "type": "string"
++    },
++    "initial_state": {
++      "default": "steady",
++      "enum": [
++        "steady",
++        "cold"
++      ],
++      "title": "Initial State",
++      "type": "string"
++    },
++    "kv_layout": {
++      "$ref": "#/$defs/KvLayout"
++    },
++    "mapping_policy": {
++      "const": "analytic-ops@2",
++      "title": "Mapping Policy",
++      "type": "string"
++    },
++    "model": {
++      "$ref": "#/$defs/ModelSpec"
++    },
++    "model_shape": {
++      "$ref": "#/$defs/ModelShape"
++    },
++    "position_encoding": {
++      "$ref": "#/$defs/RotaryEncoding"
++    },
++    "precision": {
++      "$ref": "#/$defs/Precision"
++    },
++    "preparation_policy": {
++      "const": "balanced-tp/1",
++      "title": "Preparation Policy",
++      "type": "string"
++    },
++    "rk_schema_snapshot": {
++      "pattern": "^[0-9a-f]{40}$",
++      "title": "Rk Schema Snapshot",
++      "type": "string"
++    },
++    "seed": {
++      "minimum": 0,
++      "title": "Seed",
++      "type": "integer"
++    },
++    "tp": {
++      "minimum": 1,
++      "title": "Tp",
++      "type": "integer"
++    },
++    "uarch_fidelity": {
++      "$ref": "#/$defs/FidelityDetail"
++    },
++    "visit_weights": {
++      "anyOf": [
++        {
++          "$ref": "#/$defs/VisitWeights"
++        },
++        {
++          "type": "null"
++        }
++      ],
++      "default": null
++    }
++  },
++  "required": [
++    "rk_schema_snapshot",
++    "component_id",
++    "hardware_spec_hash",
++    "model",
++    "model_shape",
++    "precision",
++    "tp",
++    "envelope",
++    "grid",
++    "mapping_policy",
++    "uarch_fidelity",
++    "kv_layout",
++    "seed",
++    "accounting",
++    "analytic_mode",
++    "assumptions_hash",
++    "contract",
++    "preparation_policy",
++    "position_encoding"
++  ],
++  "title": "RequestIntentV3",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/RotaryBinding.json
+@@ -0,0 +1,61 @@
++{
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "coefficients_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Coefficients Hash",
++      "type": "string"
++    },
++    "input_op_id": {
++      "minLength": 1,
++      "pattern": "\\S",
++      "title": "Input Op Id",
++      "type": "string"
++    },
++    "numeric_policy": {
++      "const": "fp32-separate-round-rne/1",
++      "title": "Numeric Policy",
++      "type": "string"
++    },
++    "pairing": {
++      "enum": [
++        "adjacent",
++        "split_halves"
++      ],
++      "title": "Pairing",
++      "type": "string"
++    },
++    "position_ids": {
++      "items": {
++        "items": {
++          "minimum": 0,
++          "type": "integer"
++        },
++        "minItems": 1,
++        "type": "array"
++      },
++      "minItems": 1,
++      "title": "Position Ids",
++      "type": "array"
++    },
++    "target": {
++      "enum": [
++        "q",
++        "k"
++      ],
++      "title": "Target",
++      "type": "string"
++    }
++  },
++  "required": [
++    "target",
++    "coefficients_hash",
++    "pairing",
++    "numeric_policy",
++    "position_ids",
++    "input_op_id"
++  ],
++  "title": "RotaryBinding",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/RotaryCoefficients.json
+@@ -0,0 +1,101 @@
++{
++  "$defs": {
++    "Producer": {
++      "additionalProperties": false,
++      "properties": {
++        "implementation_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Implementation Hash",
++          "type": "string"
++        },
++        "name": {
++          "minLength": 1,
++          "title": "Name",
++          "type": "string"
++        },
++        "version": {
++          "minLength": 1,
++          "title": "Version",
++          "type": "string"
++        }
++      },
++      "required": [
++        "implementation_hash",
++        "name",
++        "version"
++      ],
++      "title": "Producer",
++      "type": "object"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "coefficients_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Coefficients Hash",
++      "type": "string"
++    },
++    "cos_bits": {
++      "items": {
++        "items": {
++          "pattern": "^[0-9a-f]{8}$",
++          "type": "string"
++        },
++        "minItems": 1,
++        "type": "array"
++      },
++      "minItems": 1,
++      "title": "Cos Bits",
++      "type": "array"
++    },
++    "dtype": {
++      "const": "fp32",
++      "title": "Dtype",
++      "type": "string"
++    },
++    "format": {
++      "const": "uarch-rotary-coefficients/1",
++      "title": "Format",
++      "type": "string"
++    },
++    "position_count": {
++      "minimum": 1,
++      "title": "Position Count",
++      "type": "integer"
++    },
++    "producer": {
++      "$ref": "#/$defs/Producer"
++    },
++    "rotary_dim": {
++      "minimum": 1,
++      "title": "Rotary Dim",
++      "type": "integer"
++    },
++    "sin_bits": {
++      "items": {
++        "items": {
++          "pattern": "^[0-9a-f]{8}$",
++          "type": "string"
++        },
++        "minItems": 1,
++        "type": "array"
++      },
++      "minItems": 1,
++      "title": "Sin Bits",
++      "type": "array"
++    }
++  },
++  "required": [
++    "format",
++    "coefficients_hash",
++    "position_count",
++    "rotary_dim",
++    "dtype",
++    "cos_bits",
++    "sin_bits",
++    "producer"
++  ],
++  "title": "RotaryCoefficients",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/RotaryEncoding.json
+@@ -0,0 +1,55 @@
++{
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "cache_key_state": {
++      "const": "rotated-before-store",
++      "title": "Cache Key State",
++      "type": "string"
++    },
++    "coefficients_hash": {
++      "pattern": "^sha256:[0-9a-f]{64}$",
++      "title": "Coefficients Hash",
++      "type": "string"
++    },
++    "kind": {
++      "const": "rope-precomputed/1",
++      "title": "Kind",
++      "type": "string"
++    },
++    "numeric_policy": {
++      "const": "fp32-separate-round-rne/1",
++      "title": "Numeric Policy",
++      "type": "string"
++    },
++    "pairing": {
++      "enum": [
++        "adjacent",
++        "split_halves"
++      ],
++      "title": "Pairing",
++      "type": "string"
++    },
++    "position_policy": {
++      "const": "zero-origin-contiguous/1",
++      "title": "Position Policy",
++      "type": "string"
++    },
++    "rotary_dim": {
++      "minimum": 1,
++      "title": "Rotary Dim",
++      "type": "integer"
++    }
++  },
++  "required": [
++    "kind",
++    "rotary_dim",
++    "pairing",
++    "coefficients_hash",
++    "position_policy",
++    "cache_key_state",
++    "numeric_policy"
++  ],
++  "title": "RotaryEncoding",
++  "type": "object"
++}
+--- /dev/null
++++ b/contract/schema/rotary-v2/RotaryOpSpec.json
+@@ -0,0 +1,114 @@
++{
++  "$defs": {
++    "Operand": {
++      "additionalProperties": false,
++      "properties": {
++        "block_size_tokens": {
++          "anyOf": [
++            {
++              "minimum": 1,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "default": null,
++          "title": "Block Size Tokens"
++        },
++        "dimensions": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Dimensions",
++          "type": "array"
++        },
++        "dtype": {
++          "$ref": "#/$defs/PrecisionFormat"
++        },
++        "layout": {
++          "enum": [
++            "contiguous",
++            "paged"
++          ],
++          "title": "Layout",
++          "type": "string"
++        }
++      },
++      "required": [
++        "dtype",
++        "dimensions",
++        "layout"
++      ],
++      "title": "Operand",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    }
++  },
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "additionalProperties": false,
++  "properties": {
++    "dimensions": {
++      "patternProperties": {
++        "\\S": {
++          "minimum": 1,
++          "type": "integer"
++        }
++      },
++      "propertyNames": {
++        "minLength": 1
++      },
++      "title": "Dimensions",
++      "type": "object"
++    },
++    "operands": {
++      "patternProperties": {
++        "\\S": {
++          "$ref": "#/$defs/Operand"
++        }
++      },
++      "propertyNames": {
++        "minLength": 1
++      },
++      "title": "Operands",
++      "type": "object"
++    },
++    "operator": {
++      "const": "rotary_embedding",
++      "title": "Operator",
++      "type": "string"
++    },
++    "reduction_axes": {
++      "items": {
++        "minLength": 1,
++        "pattern": "\\S",
++        "type": "string"
++      },
++      "title": "Reduction Axes",
++      "type": "array"
++    }
++  },
++  "required": [
++    "operator",
++    "dimensions",
++    "operands",
++    "reduction_axes"
++  ],
++  "title": "RotaryOpSpec",
++  "type": "object"
++}
+--- a/docs/decisions/U0022-explicit-rope-semantics.md
++++ b/docs/decisions/U0022-explicit-rope-semantics.md
+@@ -261,0 +262,25 @@
++
++### Addendum — accepted additive schema design
++
++Javid accepted the exact four-file design/prose proposal at
++`e622673577017a50f3e436205809f76fdf7ffae7`, recorded in
++[U3-RoPE-schema-v1 acceptance](../reviews/U3-RoPE-schema-v1-acceptance.md) at
++`531d9c923c30dd465cf56c8a5865cd9ce62cdd84`. The [protected schema review patch](../reviews/U3-RoPE-protected-patch-v1/README.md)
++specifies the installable carrier/generator/mirror/test delta; its reviewed author revision
++and the human installation commit are recorded by the coordinator at installation.
++
++Use eleven additive contract roots in `rotary_v2.py`, with their dedicated generator and
++`contract/schema/rotary-v2/` mirrors. Inline the authenticated RotaryCoefficients object in
++each new bundle and, when implemented, each new engine job. Preserve the accepted version
++routing and refuse cross-version reinterpretation; do not widen v1 roots, generated schemas,
++artifact dispatch or acceptance. Carrier parsing alone is not execution admission: full graph,
++closure, rank/hardware, assumptions, job/result and replay validators remain separately required.
++
++Keep legacy analytic core/entry-point/protocol and the v1 public path bytes unchanged.
++The future v2 implementation identity binds its reviewed local execution dependency closure;
++its exact set awaits implementation. New capture stops before unapproved table/report
++integration. No changed implementation may reuse an old identity or evidence. Historical
++Git reproduction does not make stale support current. Even these additive Python modules
++require the U0002 human freeze/generation/adoption lifecycle before public source-bound
++integration; schema installation is no waiver. This addendum changes none of U0022's
++counting, precision, position, coefficient, cache, rank or historical-separation semantics.

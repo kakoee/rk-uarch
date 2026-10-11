@@ -6,6 +6,13 @@ The eight points are decode batch 1/8 × context 128/512 and prefill prompt coun
 length 128/512. A decode row is one iteration generating one token per active sequence;
 a prefill row processes its stated prompts. Neither includes inter-chip collectives.
 
+Scope of the example:
+
+U2 physical-resolved/1 accounts for its captured operator graph. It excludes RoPE
+rotation/conversion work and coefficient traffic; its vector/byte counts and timing
+are not complete RoPE-equipped decoder work. This does not change historical numbers,
+nominal compatibility outcomes, parameter counts or the matrix-count convention.
+
 ## Prepare and draft
 
 Use a fresh output directory. `tables/` is ignored by Git.
