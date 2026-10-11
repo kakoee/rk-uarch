@@ -177,10 +177,24 @@ def test_changed_implementation_same_version_refused(sample):
         )
 
 
-def test_skipped_only_illustration_cannot_become_actual_or_pass():
+def test_skipped_only_illustration_cannot_become_actual_or_pass(monkeypatch):
     path = Path("docs/reviews/U3-U0006-report-example.json")
     value = strict_json_loads(path.read_text())
-    validate(value)
+    # This frozen design illustration records its author's environment, not this runner's.
+    # Isolate the illustration boundary; toolchain drift has its own refusal test below.
+    recorded_toolchain = deepcopy(value["toolchain"])
+    monkeypatch.setattr(report, "toolchain", lambda: deepcopy(recorded_toolchain))
+    assert report.validate_report(
+        value,
+        expected_plan=value["plan"],
+        expected_corpus=value["corpus"],
+        expected_implementation=value["implementation_git_commit"],
+        allow_illustration=True,
+    ) == {
+        "coverage": "none",
+        "outcome": "not_run",
+        "purpose_outcomes": {"diagnostics": "not_run"},
+    }
     with pytest.raises(ValueError, match="[Ii]llustration"):
         report.validate_report(
             value,
@@ -188,8 +202,25 @@ def test_skipped_only_illustration_cannot_become_actual_or_pass():
             expected_corpus=value["corpus"],
             expected_implementation=value["implementation_git_commit"],
         )
+    promoted = deepcopy(value)
+    promoted["reduction"]["outcome"] = "passed"
+    with pytest.raises(ValueError, match="Illustration differs"):
+        validate(promoted)
     value["execution_kind"] = "actual_suite_run"
     with pytest.raises(ValueError, match="[Ii]llustration|[Aa]ctual"):
+        validate(value)
+
+
+@pytest.mark.parametrize(
+    "field", ["python_version", "hypothesis_version", "pytest_version", "uv_lock_sha256"]
+)
+def test_skipped_illustration_toolchain_drift_is_still_refused(monkeypatch, field):
+    value = strict_json_loads(Path("docs/reviews/U3-U0006-report-example.json").read_text())
+    observed = deepcopy(value["toolchain"])
+    monkeypatch.setattr(report, "toolchain", lambda: observed)
+    validate(value)  # Matching environment is a valid control for every mismatch.
+    observed[field] = "different-from-recorded"
+    with pytest.raises(ValueError, match="^Toolchain identity mismatch$"):
         validate(value)
 
 
