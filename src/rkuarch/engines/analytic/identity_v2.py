@@ -7,7 +7,6 @@ for U0002's support/lock binding, or identify installed third-party package byte
 from __future__ import annotations
 
 import ast
-import importlib.util
 from pathlib import Path
 
 from uarch_contract.hashing import content_hash, sha256
@@ -47,8 +46,14 @@ def execution_dependencies() -> dict[str, str]:
             if isinstance(node, ast.Import):
                 pending.extend(alias.name for alias in node.names)
             elif isinstance(node, ast.ImportFrom):
-                name = "." * node.level + (node.module or "")
-                resolved = importlib.util.resolve_name(name, package) if node.level else name
+                if node.level:
+                    parts = package.split(".")
+                    if node.level > len(parts):
+                        raise ValueError("ExecutionDependency: relative import beyond package")
+                    prefix = parts[: len(parts) - node.level + 1]
+                    resolved = ".".join(prefix + ([node.module] if node.module else []))
+                else:
+                    resolved = node.module or ""
                 pending.append(resolved)
                 pending.extend(resolved + "." + alias.name for alias in node.names)
     # Missing execution roots must not silently disappear from the identity.
