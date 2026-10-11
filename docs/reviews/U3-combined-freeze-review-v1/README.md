@@ -65,3 +65,17 @@ then audits the complete candidate before a separate adoption decision and human
 test activation. Final integrated checks and source publication remain later steps.
 The existing helper refuses any occupied output root: if a run stops partway, return its
 error and retained receipts for reconciliation rather than deleting or overwriting them.
+
+## Javid accepted the exact freeze
+
+Javid (@jjaffari), acting for both lanes, replied **yes** to the named
+U3-combined-freeze-v1 decision. [Acceptance](acceptance.json) binds the exact decision
+at `b16bc36`, unchanged proposal `70adf09`, A source `187fe3b` and selected input digest.
+The historical proposal and decision text remain unchanged.
+
+The coordinator reran the commit-pinned read-only preflight after approval: it passed and
+its complete result equals [the recorded preflight](preflight.json). The output root remains
+absent. No human generation helper was executed and no human-only flag was set by an agent.
+Javid may now run the exact command in [the accepted decision](next-decision.md), returning
+its final output and candidate manifest. A remains stopped on the frozen source. Candidate
+adoption, protected-test activation, source publication and closure remain separate.
