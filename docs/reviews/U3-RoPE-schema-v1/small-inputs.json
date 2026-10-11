@@ -1,0 +1,219 @@
+{
+  "coefficients": {
+    "coefficients_hash": "sha256:d1e341a14b332a5a74bfd1cfb5796d5d6ec1315c6bd5f2087b044c465b0d9746",
+    "cos_bits": [
+      [
+        "3f800000"
+      ],
+      [
+        "00000000"
+      ],
+      [
+        "3f800000"
+      ]
+    ],
+    "dtype": "fp32",
+    "format": "uarch-rotary-coefficients/1",
+    "position_count": 3,
+    "producer": {
+      "implementation_hash": "sha256:17813f8915c557c29e92ca1003e3924ff34af6cf0dbd731a46e28666f83e1365",
+      "name": "synthetic-schema-review-only",
+      "version": "1"
+    },
+    "rotary_dim": 2,
+    "sin_bits": [
+      [
+        "00000000"
+      ],
+      [
+        "3f800000"
+      ],
+      [
+        "00000000"
+      ]
+    ]
+  },
+  "position_encoding": {
+    "cache_key_state": "rotated-before-store",
+    "coefficients_hash": "sha256:d1e341a14b332a5a74bfd1cfb5796d5d6ec1315c6bd5f2087b044c465b0d9746",
+    "kind": "rope-precomputed/1",
+    "numeric_policy": "fp32-separate-round-rne/1",
+    "pairing": "adjacent",
+    "position_policy": "zero-origin-contiguous/1",
+    "rotary_dim": 2
+  },
+  "rope_k": {
+    "depends_on": [
+      "k"
+    ],
+    "embedding_local_tokens": null,
+    "fusion": "none",
+    "id": "rope_k",
+    "kv_access": null,
+    "operand_access": {
+      "Cos": "read",
+      "Sin": "read",
+      "X": "read",
+      "Y": "write"
+    },
+    "padding": [],
+    "replication": [],
+    "rotary": {
+      "coefficients_hash": "sha256:d1e341a14b332a5a74bfd1cfb5796d5d6ec1315c6bd5f2087b044c465b0d9746",
+      "input_op_id": "k",
+      "numeric_policy": "fp32-separate-round-rne/1",
+      "pairing": "adjacent",
+      "position_ids": [
+        [
+          2
+        ]
+      ],
+      "target": "k"
+    },
+    "spec": {
+      "dimensions": {
+        "B": 1,
+        "D": 2,
+        "H": 1,
+        "P": 1,
+        "R": 2,
+        "S": 1
+      },
+      "operands": {
+        "Cos": {
+          "block_size_tokens": null,
+          "dimensions": [
+            "B",
+            "S",
+            "P"
+          ],
+          "dtype": "fp32",
+          "layout": "contiguous"
+        },
+        "Sin": {
+          "block_size_tokens": null,
+          "dimensions": [
+            "B",
+            "S",
+            "P"
+          ],
+          "dtype": "fp32",
+          "layout": "contiguous"
+        },
+        "X": {
+          "block_size_tokens": null,
+          "dimensions": [
+            "B",
+            "H",
+            "S",
+            "D"
+          ],
+          "dtype": "bf16",
+          "layout": "contiguous"
+        },
+        "Y": {
+          "block_size_tokens": null,
+          "dimensions": [
+            "B",
+            "H",
+            "S",
+            "D"
+          ],
+          "dtype": "bf16",
+          "layout": "contiguous"
+        }
+      },
+      "operator": "rotary_embedding",
+      "reduction_axes": []
+    },
+    "weight_copies": 1,
+    "work_repeat": 1
+  },
+  "rope_q": {
+    "depends_on": [
+      "q"
+    ],
+    "embedding_local_tokens": null,
+    "fusion": "none",
+    "id": "rope_q",
+    "kv_access": null,
+    "operand_access": {
+      "Cos": "read",
+      "Sin": "read",
+      "X": "read",
+      "Y": "write"
+    },
+    "padding": [],
+    "replication": [],
+    "rotary": {
+      "coefficients_hash": "sha256:d1e341a14b332a5a74bfd1cfb5796d5d6ec1315c6bd5f2087b044c465b0d9746",
+      "input_op_id": "q",
+      "numeric_policy": "fp32-separate-round-rne/1",
+      "pairing": "adjacent",
+      "position_ids": [
+        [
+          2
+        ]
+      ],
+      "target": "q"
+    },
+    "spec": {
+      "dimensions": {
+        "B": 1,
+        "D": 2,
+        "H": 2,
+        "P": 1,
+        "R": 2,
+        "S": 1
+      },
+      "operands": {
+        "Cos": {
+          "block_size_tokens": null,
+          "dimensions": [
+            "B",
+            "S",
+            "P"
+          ],
+          "dtype": "fp32",
+          "layout": "contiguous"
+        },
+        "Sin": {
+          "block_size_tokens": null,
+          "dimensions": [
+            "B",
+            "S",
+            "P"
+          ],
+          "dtype": "fp32",
+          "layout": "contiguous"
+        },
+        "X": {
+          "block_size_tokens": null,
+          "dimensions": [
+            "B",
+            "H",
+            "S",
+            "D"
+          ],
+          "dtype": "bf16",
+          "layout": "contiguous"
+        },
+        "Y": {
+          "block_size_tokens": null,
+          "dimensions": [
+            "B",
+            "H",
+            "S",
+            "D"
+          ],
+          "dtype": "bf16",
+          "layout": "contiguous"
+        }
+      },
+      "operator": "rotary_embedding",
+      "reduction_axes": []
+    },
+    "weight_copies": 1,
+    "work_repeat": 1
+  }
+}
