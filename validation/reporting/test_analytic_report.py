@@ -503,3 +503,35 @@ def test_reused_mutable_result_preserves_every_returned_value():
     assert len(case["results"]) == 2 and case["results"][0] != case["results"][1]
     for identity in case["results"]:
         assert verify_identity(recorder.objects.get(identity), "result_hash") == identity
+
+
+def test_git_binding_ignores_prose_but_refuses_changed_code_same_version(tmp_path, monkeypatch):
+    import subprocess
+
+    def git(*args):
+        return subprocess.check_output(["git", *args], cwd=tmp_path, text=True).strip()
+
+    git("init", "-q")
+    source = tmp_path / "src"
+    source.mkdir()
+    code = source / "engine.py"
+    code.write_text('VERSION = "1"\nVALUE = 1\n')
+    prose = source / "README.md"
+    prose.write_text("Original explanation\n")
+    git("add", ".")
+    git(
+        "-c",
+        "user.name=Report binding fixture",
+        "-c",
+        "user.email=fixture@example.invalid",
+        "commit",
+        "-qm",
+        "test fixture",
+    )
+    commit = git("rev-parse", "HEAD")
+    monkeypatch.setattr(report, "ROOT", tmp_path)
+    prose.write_text("Clarified explanation; implementation unchanged\n")
+    report.check_implementation(commit)
+    code.write_text('VERSION = "1"\nVALUE = 2\n')
+    with pytest.raises(ValueError, match="Implementation bytes changed"):
+        report.check_implementation(commit)

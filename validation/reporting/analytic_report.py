@@ -56,7 +56,16 @@ V1_HASH = "sha256:fa3938f8c009c7b80700d35feba7504e4b4da06e628d2e387480c358963974
 V1_ASSUMPTIONS = "sha256:255afd1ceb9c02a4909464c41e98e16085485a8e500090a8e2d98dc2ee56a896"
 MODES = ["aggregate", "per_op"]
 LEDGERS = ("discovery", "candidate", "mutant")
-BOUND_PATHS = ("src", "contract", "validation", "pyproject.toml", "uv.lock")
+# Report implementation binding, not U0002's independent support inventory/check.
+# Explanatory Markdown may advance with peer work without changing execution bytes.
+BOUND_PATHS = (
+    "src",
+    "contract",
+    "validation",
+    "pyproject.toml",
+    "uv.lock",
+    ":(exclude,glob)**/*.md",
+)
 L0 = {
     "fixed_counts": ("counts", "off_by_one_matrix"),
     "count_rollup": ("counts", None),
