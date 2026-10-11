@@ -174,7 +174,17 @@ def test_context_and_finite_table_replacement_are_distinct_inputs():
     assert different.results[0].counts == c.results[0].counts
 
 
-def test_dispatch_and_dependency_bytes(monkeypatch):
+@pytest.mark.parametrize(
+    "dependency",
+    [
+        "rkuarch/engines/analytic/rotary_v2.py",
+        "rkuarch/hw/derive.py",
+        "rkuarch/workload/capacity_v2.py",
+        "uarch_contract/rotary_v2.py",
+        "uarch_contract/common.py",
+    ],
+)
+def test_dispatch_and_dependency_bytes(monkeypatch, dependency):
     c = capture(active_bundle(), assumptions=physical_assumptions())
     assert execute(c.jobs[0], bundle=c.bundle, assumptions=c.assumptions) == c.results[0]
     for value in ({}, {"protocol": "uarch-engine/3"}, c.jobs[0]):
@@ -185,7 +195,7 @@ def test_dispatch_and_dependency_bytes(monkeypatch):
 
     def changed(path):
         payload = read(path)
-        if path.name == "rotary_v2.py" and path.parent.name == "analytic":
+        if path.as_posix().endswith(dependency):
             return payload + b"\n# changed implementation, same version\n"
         return payload
 
