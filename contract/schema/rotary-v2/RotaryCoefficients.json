@@ -1,0 +1,101 @@
+{
+  "$defs": {
+    "Producer": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "implementation_hash",
+        "name",
+        "version"
+      ],
+      "title": "Producer",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "coefficients_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Coefficients Hash",
+      "type": "string"
+    },
+    "cos_bits": {
+      "items": {
+        "items": {
+          "pattern": "^[0-9a-f]{8}$",
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "minItems": 1,
+      "title": "Cos Bits",
+      "type": "array"
+    },
+    "dtype": {
+      "const": "fp32",
+      "title": "Dtype",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-rotary-coefficients/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "position_count": {
+      "minimum": 1,
+      "title": "Position Count",
+      "type": "integer"
+    },
+    "producer": {
+      "$ref": "#/$defs/Producer"
+    },
+    "rotary_dim": {
+      "minimum": 1,
+      "title": "Rotary Dim",
+      "type": "integer"
+    },
+    "sin_bits": {
+      "items": {
+        "items": {
+          "pattern": "^[0-9a-f]{8}$",
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "minItems": 1,
+      "title": "Sin Bits",
+      "type": "array"
+    }
+  },
+  "required": [
+    "format",
+    "coefficients_hash",
+    "position_count",
+    "rotary_dim",
+    "dtype",
+    "cos_bits",
+    "sin_bits",
+    "producer"
+  ],
+  "title": "RotaryCoefficients",
+  "type": "object"
+}

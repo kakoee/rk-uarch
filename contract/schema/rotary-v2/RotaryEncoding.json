@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cache_key_state": {
+      "const": "rotated-before-store",
+      "title": "Cache Key State",
+      "type": "string"
+    },
+    "coefficients_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Coefficients Hash",
+      "type": "string"
+    },
+    "kind": {
+      "const": "rope-precomputed/1",
+      "title": "Kind",
+      "type": "string"
+    },
+    "numeric_policy": {
+      "const": "fp32-separate-round-rne/1",
+      "title": "Numeric Policy",
+      "type": "string"
+    },
+    "pairing": {
+      "enum": [
+        "adjacent",
+        "split_halves"
+      ],
+      "title": "Pairing",
+      "type": "string"
+    },
+    "position_policy": {
+      "const": "zero-origin-contiguous/1",
+      "title": "Position Policy",
+      "type": "string"
+    },
+    "rotary_dim": {
+      "minimum": 1,
+      "title": "Rotary Dim",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "kind",
+    "rotary_dim",
+    "pairing",
+    "coefficients_hash",
+    "position_policy",
+    "cache_key_state",
+    "numeric_policy"
+  ],
+  "title": "RotaryEncoding",
+  "type": "object"
+}

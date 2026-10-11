@@ -259,3 +259,28 @@ generation, create a general mapping interface, grant licences/resources, enable
 runner, perform independent review, close U3 or modify any adopted artifact. Reported
 Podman availability does not cure source semantics; runner/manual-nightly prerequisites
 remain separate. Any subsequent viable route or amended fallback is Javid's decision.
+
+### Addendum — accepted additive schema design
+
+Javid accepted the exact four-file design/prose proposal at
+`e622673577017a50f3e436205809f76fdf7ffae7`, recorded in
+[U3-RoPE-schema-v1 acceptance](../reviews/U3-RoPE-schema-v1-acceptance.md) at
+`531d9c923c30dd465cf56c8a5865cd9ce62cdd84`. The [protected schema review patch](../reviews/U3-RoPE-protected-patch-v1/README.md)
+specifies the installable carrier/generator/mirror/test delta; its reviewed author revision
+and the human installation commit are recorded by the coordinator at installation.
+
+Use eleven additive contract roots in `rotary_v2.py`, with their dedicated generator and
+`contract/schema/rotary-v2/` mirrors. Inline the authenticated RotaryCoefficients object in
+each new bundle and, when implemented, each new engine job. Preserve the accepted version
+routing and refuse cross-version reinterpretation; do not widen v1 roots, generated schemas,
+artifact dispatch or acceptance. Carrier parsing alone is not execution admission: full graph,
+closure, rank/hardware, assumptions, job/result and replay validators remain separately required.
+
+Keep legacy analytic core/entry-point/protocol and the v1 public path bytes unchanged.
+The future v2 implementation identity binds its reviewed local execution dependency closure;
+its exact set awaits implementation. New capture stops before unapproved table/report
+integration. No changed implementation may reuse an old identity or evidence. Historical
+Git reproduction does not make stale support current. Even these additive Python modules
+require the U0002 human freeze/generation/adoption lifecycle before public source-bound
+integration; schema installation is no waiver. This addendum changes none of U0022's
+counting, precision, position, coefficient, cache, rank or historical-separation semantics.
