@@ -20,6 +20,8 @@ from rkuarch.provenance.reference_contributors import validate_reference_contrib
 
 ROOT = Path(__file__).parents[2]
 ADOPTED = ROOT / "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
+PRIOR_MANIFEST = "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
+CURRENT_MANIFEST = "sha256:20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad"
 ZERO = "sha256:" + "0" * 64
 
 
@@ -28,10 +30,14 @@ def reference_inputs():
     inventory = json.loads(
         (ROOT / "tests/fixtures/u2_b/stage2/reference-inventory.json").read_text()
     )
+    assert inventory["oracle_manifest_sha256"] == PRIOR_MANIFEST
+    raw = (ADOPTED / "MANIFEST.json").read_bytes()
+    assert sha256(raw) == CURRENT_MANIFEST
+    # Create a current carrier while preserving the original v2 fixture and values.
+    inventory["oracle_manifest_sha256"] = CURRENT_MANIFEST
+    inventory["inventory_hash"] = content_hash(inventory, exclude=("inventory_hash",))
     inv = ReferenceInventory.model_validate(inventory)
     store = {inv.inventory_hash: inventory}
-    raw = (ADOPTED / "MANIFEST.json").read_bytes()
-    assert sha256(raw) == inv.oracle_manifest_sha256
     store[sha256(raw)] = raw
     manifest = json.loads(raw)
     for p in (ADOPTED / "u2-inputs/artifacts").glob("*.json"):

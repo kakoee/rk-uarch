@@ -1,0 +1,153 @@
+"""Independent final verification over completed v3 runtime outputs; no producers."""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+from scripts import u2_inputs as ui
+from tests.u2_refresh import audit_candidate, adoption_authority
+
+ROOT = Path('/tmp/U2-adoption-v3-clean')
+INTEGRATION = Path('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration')
+HERE = Path(__file__).resolve().parent
+
+
+def digest(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def files(root):
+    return {p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file()}
+
+
+def compare(left, right, names):
+    size = 0
+    for name in sorted(names):
+        with (left / name).open('rb') as a, (right / name).open('rb') as b:
+            while True:
+                x, y = a.read(1048576), b.read(1048576)
+                assert x == y, name
+                size += len(x)
+                if not x:
+                    break
+    return dict(files=len(names), bytes=size)
+
+
+def main():
+    state = json.loads((HERE / 'runtime-progress.json').read_text())
+    assert state['status'] == 'passed'
+    assert all(p['status'] == 'passed' for p in state['phases'])
+    out = Path(state['output_root'])
+    manifest = out / 'SHA256SUMS'
+    assert digest(manifest) == state['artifact_manifest']['sha256']
+    entries = {}
+    for line in manifest.read_text().splitlines():
+        sha, name = line.split('  ', 1)
+        assert name not in entries and not Path(name).is_absolute() and '..' not in Path(name).parts
+        assert digest(out / name) == sha, name
+        entries[name] = sha
+    assert set(entries) == files(out) - {'SHA256SUMS'}
+    assert len(entries) == state['artifact_manifest']['entries']
+    names = files(out / 'report')
+    assert names == files(out / 'replay-report')
+    replay = compare(out / 'report', out / 'replay-report', names)
+    repeat = compare(out / 'repeat', out / 'report', files(out / 'repeat'))
+    assert replay['files'] == 3316 and repeat['files'] == 6
+    original = json.loads((out / 'report/table.json').read_text())
+    saved = json.loads((out / 'replay-report/table.json').read_text())
+    assert original == saved and len(original['rows']) == 24
+    conditions = original['provenance']['conditional_on']
+    assert len(conditions) == 59
+    assert [c['path'] for c in conditions] == sorted({c['path'] for c in conditions})
+    assert state['RR_C1']['fresh_table_hash'] == state['RR_C1']['replayed_table_hash'] == original['table_hash']
+    assert set(state['capability_refusals']) == {'table_hash', 'report_context_hash', 'renderer_version'}
+    assert set(state['capability_refusals'].values()) == {'RenderIdentityBindingMismatch'}
+    assert state['actual_execution']['calls'] == dict(nominal=1008, physical_point=96, prepare_h1=6)
+    for mode in ('hidden', 'opt-in'):
+        counters = state['renders'][mode]['counters']
+        assert counters.get('visible', 0) == (18768 if mode == 'opt-in' else 0)
+        assert counters['synthetic_assessment'] == 0 and counters['missing_or_incomplete'] == 0
+        assert counters['null_value'] == 12432
+    def unknown_errors(value):
+        for key, item in value.items():
+            if isinstance(item, dict):
+                unknown_errors(item)
+            elif key == 'n_samples':
+                assert item == 0
+            else:
+                assert item is None, (key, item)
+    unknown_errors(state['errors'])
+    surfaces = json.loads((HERE / 'serialized-surface-results.json').read_text())
+    for mode, formats in surfaces.items():
+        for value in formats.values():
+            assert value == dict(checked=40320, visible=18768 if mode == 'opt-in' else 0)
+    assert digest(HERE / 'runtime_driver.py') == state['preflight']['driver_sha256']
+    assert digest(HERE / 'report_helpers.py') == state['preflight']['helpers_sha256']
+    assert digest(ROOT / 'docs/reviews/U2-B-real-report-exits-v1/serialized_surface_check.py') == state['preflight']['surface_checker_sha256']
+    checked = audit_candidate(ui.ADOPTED)
+    assert checked == state['preflight']['audit']
+    adoption_authority(ui.ADOPTED, HERE / 'adoption-review.json', state['preflight']['review_sha256'])
+    current = INTEGRATION / 'contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963'
+    candidate = INTEGRATION / 'tables/U2-real-generation-v3/candidate'
+    prior = INTEGRATION / 'tables/U2-adoption-v3-displaced-v2'
+    assert digest(prior / 'MANIFEST.json') == 'f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e'
+    assert files(current) == files(candidate) == files(prior)
+    assert len(files(current)) == 48
+    adoption = compare(current, candidate, files(current))
+    for name in files(prior):
+        blob = subprocess.check_output(['git', 'show', '769a1fef2320430386888bf450af579ea26cf664:contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/' + name], cwd=INTEGRATION)
+        assert (prior / name).read_bytes() == blob, name
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('v3_execution_driver', HERE / 'runtime_driver.py')
+    driver = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(driver)
+    assert driver.preflight() == state['preflight'] | {'argv': driver.sys.argv}
+    runtime_tree = state['preflight']['validation_tree']
+    installed = json.loads((HERE / 'test-binding-installation.json').read_text())
+    tree = installed['proposal_tree']
+    changed = subprocess.check_output(['git', 'diff', '--name-only', runtime_tree, tree], cwd=INTEGRATION, text=True).splitlines()
+    assert sorted(changed) == sorted(item['path'] for item in installed['paths'])
+    assert not set(changed) & {str(p.relative_to(ROOT)) for p in ui.support_files()}
+    for entry in subprocess.check_output(['git', 'ls-tree', '-r', '-z', tree], cwd=INTEGRATION).split(b'\0'):
+        if not entry:
+            continue
+        meta, name = entry.split(b'\t', 1)
+        oid = meta.decode().split()[2]
+        data = (INTEGRATION / name.decode()).read_bytes()
+        assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == oid, name
+    worktrees = {}
+    for name, branch, head in (
+        ('rk-uarch', 'main', '1e9e794a84c5173812c23a1cf2fc04b85e6f6831'),
+        ('rk-uarch-u2-a', 'u2/analytic', '769a1fef2320430386888bf450af579ea26cf664'),
+        ('rk-uarch-u2-b', 'u2/honesty', '769a1fef2320430386888bf450af579ea26cf664'),
+        ('rk-uarch-u2-integration', 'u2/integration', '769a1fef2320430386888bf450af579ea26cf664'),
+    ):
+        path = INTEGRATION.parent / name
+        actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path, text=True).strip()
+        assert actual == head
+        assert subprocess.check_output(['git', 'branch', '--show-current'], cwd=path, text=True).strip() == branch
+        assert not subprocess.check_output(['git', 'diff', '--cached', '--name-only'], cwd=path)
+        if name == 'rk-uarch':
+            assert not subprocess.check_output(['git', 'status', '--porcelain'], cwd=path)
+        worktrees[name] = dict(branch=branch, head=head, index_clean=True)
+    # Verify current display repairs on the complete outputs, not just unit fixtures.
+    fixtures = json.loads((current / 'parity/fixtures.json').read_text())
+    import html
+    import re
+    for mode in ('hidden', 'opt-in'):
+        rendered_html = (out / 'report' / (mode + '.html')).read_text()
+        rendered_md = (out / 'report' / (mode + '.md')).read_text()
+        assert 'conditional · 59 stipulations' in rendered_html
+        assert 'conditional · 59 stipulations' in rendered_md
+        html_labels = {html.unescape(label) for label in re.findall(r'<dt>(.*?)</dt>', rendered_html)}
+        md_labels = {re.sub(r'\\(.)', r'\1', label) for label in re.findall(r'^\*\*(.*?)\*\*:', rendered_md, re.M)}
+        for fixture in fixtures:
+            assert fixture['id'] in html_labels, fixture['id']
+            assert fixture['id'] in md_labels, fixture['id']
+    record = dict(status='passed', runtime_tree=runtime_tree, final_tested_tree=tree, generated_manifest_sha256=digest(manifest), generated_members=len(entries), generated_bytes=sum((out / n).stat().st_size for n in entries), replay_stream_comparison=replay, repeat_stream_comparison=repeat, runtime_driver_unchanged=True, support_and_adopted_inputs_unchanged=True, actual_producer_counts=state['actual_execution']['calls'], capability_refusals=state['capability_refusals'], current_candidate_identical=adoption, predecessor_48_files_identical_to_committed_v2=True, live_selected_tree_unchanged=True, full_fixture_identifiers_preserved=1008, visible_stipulations=59, worktrees=worktrees, commit_push_tag_cleanup_performed=False)
+    (HERE / 'final-verification.json').write_text(json.dumps(record, indent=2) + '\n')
+    print(json.dumps(record, indent=2))
+
+
+if __name__ == '__main__':
+    main()

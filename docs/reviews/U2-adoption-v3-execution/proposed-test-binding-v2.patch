@@ -1,0 +1,58 @@
+--- a/tests/integration/test_u2_b_r202_public.py
++++ b/tests/integration/test_u2_b_r202_public.py
+@@ -33,7 +33,8 @@
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ ADOPTED = ROOT / "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
+-MANIFEST = "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
++MANIFEST = "sha256:20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad"
++PRIOR_MANIFEST = "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
+ PROFILES = ("retained-.55", "projection-1.0")
+ CATEGORIES = (
+     "model",
+@@ -151,7 +152,7 @@
+     original = json.loads(
+         (ROOT / "tests/fixtures/u2_b/stage2/reference-inventory.json").read_text()
+     )
+-    assert original["oracle_manifest_sha256"] == MANIFEST
++    assert original["oracle_manifest_sha256"] == PRIOR_MANIFEST
+     metadata = json.loads(member("GENERATOR.json"))
+     assert original["reference_model"]["implementation_hash"] == (
+         "sha256:" + metadata["oracle_program_sha256"]
+@@ -166,6 +167,8 @@
+     assert [e.model_dump(mode="json") for e in expected] == original["refusals"]
+     assert pointer == original["refusal_inventory_source"]
+     inventory = copy.deepcopy(original)
++    # Bind this new selection to the exact adopted v3 bytes; retain the v2 fixture.
++    inventory["oracle_manifest_sha256"] = MANIFEST
+     inventory["fixtures"] = [inventory["fixtures"][i] for i in (0, 864)]
+     put(store, inventory, "inventory_hash")
+     inv = ReferenceInventory.model_validate(inventory)
+--- a/tests/unit/test_u2_b_stage2_reference.py
++++ b/tests/unit/test_u2_b_stage2_reference.py
+@@ -20,6 +20,8 @@
+ 
+ ROOT = Path(__file__).parents[2]
+ ADOPTED = ROOT / "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
++PRIOR_MANIFEST = "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
++CURRENT_MANIFEST = "sha256:20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad"
+ ZERO = "sha256:" + "0" * 64
+ 
+ 
+@@ -28,10 +30,14 @@
+     inventory = json.loads(
+         (ROOT / "tests/fixtures/u2_b/stage2/reference-inventory.json").read_text()
+     )
++    assert inventory["oracle_manifest_sha256"] == PRIOR_MANIFEST
++    raw = (ADOPTED / "MANIFEST.json").read_bytes()
++    assert sha256(raw) == CURRENT_MANIFEST
++    # Create a current carrier while preserving the original v2 fixture and values.
++    inventory["oracle_manifest_sha256"] = CURRENT_MANIFEST
++    inventory["inventory_hash"] = content_hash(inventory, exclude=("inventory_hash",))
+     inv = ReferenceInventory.model_validate(inventory)
+     store = {inv.inventory_hash: inventory}
+-    raw = (ADOPTED / "MANIFEST.json").read_bytes()
+-    assert sha256(raw) == inv.oracle_manifest_sha256
+     store[sha256(raw)] = raw
+     manifest = json.loads(raw)
+     for p in (ADOPTED / "u2-inputs/artifacts").glob("*.json"):

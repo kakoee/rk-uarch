@@ -1,0 +1,29 @@
+--- a/contract/tests/test_u2_historical_snapshot.py
++++ b/contract/tests/test_u2_historical_snapshot.py
+@@ -19,8 +19,8 @@
+ from tests import u2_comparison, u2_refresh
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+-CURRENT_MANIFEST = "f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
+-REVIEW_SHA256 = "5ab5192e35d395b93d7da1ee5bac0b33e2a9f0961c5b03fb60a7368981866fbb"
++CURRENT_MANIFEST = "20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad"
++REVIEW_SHA256 = "55787e09a751b67b28b90835ad96041040b1a0dd9cb85ba16538c27fb7597861"
+ 
+ 
+ def test_historical_fixture_is_complete_and_relocatable(tmp_path: Path) -> None:
+--- a/tests/fixtures/u2_b/received-adoption-review.json
++++ b/tests/fixtures/u2_b/received-adoption-review.json
+@@ -2,10 +2,10 @@
+   "decision": "accepted",
+   "format": "uarch-evidence-review/1",
+   "independent": true,
+-  "rationale": "Javid explicitly approved U2-artifact-adoption-v2 after the human created/verified-identical pair and complete coordinator audit: all 1008 workload rows and four actual source-bound refusals unchanged; only manifest and input support binding advance for the RR-C1 provenance-order correction. Administrative exact-artifact adoption only; no model-accuracy or final independent review verdict.",
+-  "review_hash": "sha256:ea86715ad681b9dfcbf29dc326a0f9f87245dc3ca9959595de0d1ced29ff8354",
++  "rationale": "Javid explicitly approved U2-artifact-adoption-v3 after the human created/verified-identical pair and complete coordinator audit: all 1008 workload records and four source-bound precision refusals remain byte-identical to v2. Only generator-script metadata and input-support binding advance for the accepted final software fixes. Administrative exact-artifact adoption only; no model-accuracy claim, replacement of physical discrepancies, or sprint/publication closure.",
++  "review_hash": "sha256:199bc76b0fdc76d6fb47a5dc3678dc1af7953499e5560bbdf54ed9de7ad35780",
+   "reviewed_subject_hashes": [
+-    "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
++    "sha256:20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad"
+   ],
+   "reviewer": "Javid (@jjaffari)"
+ }

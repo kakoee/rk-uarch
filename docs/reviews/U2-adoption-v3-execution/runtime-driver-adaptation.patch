@@ -1,0 +1,87 @@
+--- v2/runtime_driver.py
++++ v3/runtime_driver.py
+@@ -1,4 +1,4 @@
+-"""Actual adopted v2 execution and complete producer-disabled report replay exits."""
++"""Actual adopted v3 execution and complete producer-disabled report replay exits."""
+ import gc
+ import hashlib
+ import importlib
+@@ -24,13 +24,14 @@
+ from tests import u2_comparison as comparison
+ from tests.integration.test_u2_a_condition_order import expected_conditions
+ 
+-ROOT = Path(__file__).resolve().parents[3]
++ROOT = Path('/tmp/U2-adoption-v3-clean')
++INTEGRATION = Path('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration')
+ HERE = Path(__file__).resolve().parent
+ AUTHORITY = HERE / 'adoption-review.json'
+-REVIEW = '5ab5192e35d395b93d7da1ee5bac0b33e2a9f0961c5b03fb60a7368981866fbb'
+-MANIFEST = 'f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e'
+-INPUTS = '9a30b29029a32339dfc6062e138cebc23f7f1474044b414068dd9c8113c1dca0'
+-BASE = '14fa0ede963c03ebe4bdafa3b396e7d513d0f24f'
++REVIEW = '55787e09a751b67b28b90835ad96041040b1a0dd9cb85ba16538c27fb7597861'
++MANIFEST = '20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad'
++INPUTS = '08d0e905cc50943d286b9c6dbcfb2cf844c969dda28b9446162d12734870871c'
++BASE = '6271581813f8be6bbc48ad8863ea1618beb59fce'
+ 
+ 
+ def module(name, path):
+@@ -40,30 +41,40 @@
+     return value
+ 
+ 
+-HELPER = ROOT / 'docs/reviews/U2-B-real-report-exits-v1/real_report_driver.py'
++HELPER = HERE / 'report_helpers.py'
+ SURFACE = ROOT / 'docs/reviews/U2-B-real-report-exits-v1/serialized_surface_check.py'
+ h = module('u2_prior_report_helpers', HELPER)
+ 
+ 
+ def preflight():
+-    assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip() == BASE
+-    assert subprocess.check_output(['git', 'branch', '--show-current'], cwd=ROOT, text=True).strip() == 'u2/integration'
+-    expected = set(json.loads((HERE / 'acceptance-and-placement.json').read_text())['changed_tracked_paths'])
+-    assert set(subprocess.check_output(['git', 'diff', '--name-only'], cwd=ROOT, text=True).splitlines()) == expected
+-    assert not subprocess.check_output(['git', 'diff', '--cached', '--name-only'], cwd=ROOT)
++    entries = subprocess.check_output(['git', 'ls-tree', '-r', '-z', BASE], cwd=INTEGRATION).split(b'\0')
++    count = 0
++    for entry in entries:
++        if not entry:
++            continue
++        meta, name = entry.split(b'\t', 1)
++        mode, kind, oid = meta.decode().split()
++        assert kind == 'blob'
++        path = ROOT / name.decode()
++        data = path.read_bytes()
++        actual = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
++        assert actual == oid, str(path)
++        count += 1
++    assert len(ui.support_files()) == 87
+     assert h.sha(ui.ADOPTED / 'MANIFEST.json') == MANIFEST and h.sha(AUTHORITY) == REVIEW
+     checked = refresh.audit_candidate(ui.ADOPTED)
+     assert checked['input_manifest_sha256'] == INPUTS
+     refresh.adoption_authority(ui.ADOPTED, AUTHORITY, REVIEW)
+-    return dict(audit=checked, source_commit=BASE, support_files=84, tracked_delta=sorted(expected), review_sha256=REVIEW, driver_sha256=h.sha(Path(__file__)), helpers_sha256=h.sha(HELPER), surface_checker_sha256=h.sha(SURFACE), host=platform.node(), platform=platform.platform(), python=sys.version, argv=sys.argv, environment={k: os.environ.get(k) for k in ('PYTHONPATH', 'PYTHONDONTWRITEBYTECODE', 'PYTHONHASHSEED', 'OMP_NUM_THREADS')})
++    return dict(audit=checked, validation_tree=BASE, clean_export_files=count, support_files=87, review_sha256=REVIEW, driver_sha256=h.sha(Path(__file__)), helpers_sha256=h.sha(HELPER), surface_checker_sha256=h.sha(SURFACE), host=platform.node(), platform=platform.platform(), python=sys.version, argv=sys.argv, environment={k: os.environ.get(k) for k in ('PYTHONPATH', 'PYTHONDONTWRITEBYTECODE', 'PYTHONHASHSEED', 'OMP_NUM_THREADS')})
+ 
+ 
+ def main():
+     initial = preflight()
+-    parent = Path(tempfile.mkdtemp(prefix='u2-adoption-v2-runtime-'))
++    parent = INTEGRATION / 'tables/U2-adoption-v3-runtime'
++    parent.mkdir(exist_ok=False)
+     out = parent / 'outputs'
+     out.mkdir()
+-    h.put(HERE / 'output-location.json', dict(root=str(out), source_commit=BASE))
++    h.put(HERE / 'output-location.json', dict(root=str(out), validation_tree=BASE))
+     state = dict(status='running', preflight=initial, output_root=str(out), phases=[], classification='Actual nominal and H1 analytic execution against human-adopted references; no oracle generation or hardware measurements')
+     started = time.monotonic()
+ 
+@@ -137,7 +148,7 @@
+     state['renders']={}
+     for mode in ('hidden','opt-in'):
+         state['renders'][mode]=phase('render_'+mode,lambda mode=mode:h.save_render(verified,out/'report',mode,expectations));flush()
+-    surface = module('u2_surface_v2', SURFACE)
++    surface = module('u2_surface_v3', SURFACE)
+     surface.HERE = HERE
+     phase('serialized_html_markdown_all_ratio_values',surface.main)
+     for mode in ('hidden','opt-in'):

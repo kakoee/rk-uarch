@@ -1,0 +1,11 @@
+--- historical/real_report_driver.py
++++ v3/report_helpers.py
+@@ -240,7 +240,7 @@
+         assert counts["visible"] > 0
+     else:
+         assert all(
+-            m.number is None for p, m in result.metrics.items() if p.startswith("/comparisons/")
++            result.metrics[p].number is None for p in ratios
+         )
+     assert "Energy is unverified" in result.html and "Energy is unverified" in result.markdown
+     directory.mkdir(parents=True, exist_ok=True)

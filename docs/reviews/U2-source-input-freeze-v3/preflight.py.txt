@@ -1,0 +1,101 @@
+"""Read-only source/input/environment validation; no oracle workload computation."""
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    from scripts import u2_inputs
+    from scripts import vendor_rk as vendor
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--require-freeze-record", action="store_true")
+    args = parser.parse_args()
+    spec = json.loads((HERE / "inventory.json").read_text())
+    assert Path.cwd().resolve() == ROOT, "Run from integration repository"
+    assert not os.environ.get("PARAMS"), "Unexpected PARAMS override"
+    if args.require_freeze_record:
+        record = json.loads((HERE / "freeze-record.json").read_text())
+        assert record["decision"] == "frozen under user authorization"
+        assert record["inventory_sha256"] == digest(HERE / "inventory.json")
+        assert record["source_tree"] == spec["source_tree"]
+        assert record["input_manifest_sha256"] == spec["input_manifest_sha256"]
+    for name, expected in spec["review_files_sha256"].items():
+        assert digest(HERE / name) == expected, ("freeze helper/record drift", name)
+    source = json.loads((HERE / "source-tree.json").read_text())
+    with tempfile.TemporaryDirectory(prefix="u2-freeze-v3-index-") as tmp:
+        env = dict(os.environ, GIT_INDEX_FILE=str(Path(tmp) / "index"))
+        subprocess.run(["git", "read-tree", source["base_commit"]], cwd=ROOT, env=env, check=True)
+        for path in source["removed_paths"]:
+            subprocess.run(
+                ["git", "update-index", "--force-remove", "--", path], cwd=ROOT, env=env, check=True
+            )
+        for path, item in source["changed_git_entries"].items():
+            subprocess.run(
+                ["git", "update-index", "--add", "--cacheinfo", item["mode"], item["blob"], path],
+                cwd=ROOT,
+                env=env,
+                check=True,
+            )
+        actual = subprocess.check_output(
+            ["git", "write-tree"], cwd=ROOT, env=env, text=True
+        ).strip()
+        assert actual == spec["source_tree"], "Frozen source tree reconstruction differs"
+        refresh = subprocess.run(
+            ["git", "update-index", "--refresh"], cwd=ROOT, env=env, capture_output=True, text=True
+        )
+        assert refresh.returncode == 0, (
+            "Frozen file drift",
+            refresh.stdout[:4000],
+            refresh.stderr[:1000],
+        )
+        diff = subprocess.check_output(
+            ["git", "diff-files", "--name-only"], cwd=ROOT, env=env, text=True
+        )
+        assert not diff, ("Frozen file drift", diff)
+    inputs = u2_inputs.load_inputs(
+        HERE / "inputs", spec["input_manifest_sha256"], check_support=True
+    )
+    assert inputs.matrix == {k: tuple(v) for k, v in spec["matrix"].items()}
+    old = ROOT / "contract/vendor" / ("rk-sim@" + vendor.PIN)
+    assert digest(old / "MANIFEST.json") == spec["previous_adopted_manifest_sha256"]
+    vendor.check_manifest(old)
+    rk = Path(spec["rk_clone"])
+    vendor.check_clone(rk, vendor.PIN)
+    env = vendor.oracle_environment(rk)
+    assert env["UV_PROJECT_ENVIRONMENT"] == spec["oracle_environment"]
+    vendor.verify_oracle_environment(rk, env)
+    metadata = vendor.record_oracle_environment(rk, env)
+    assert (
+        metadata == json.loads((HERE / "oracle-environment-preflight.json").read_text())["metadata"]
+    )
+    print(
+        json.dumps(
+            {
+                "status": "passed",
+                "source_tree": spec["source_tree"],
+                "input_manifest_sha256": spec["input_manifest_sha256"],
+                "pin": vendor.PIN,
+                "environment_metadata": metadata,
+            },
+            sort_keys=True,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,74 @@
+{
+  "source_tree": "4c940f88f07eb1a22fd64ab5378d66d6b69eced7",
+  "checks": [
+    {
+      "name": "lint",
+      "command": [
+        "uv",
+        "run",
+        "ruff",
+        "check",
+        "."
+      ],
+      "exit_code": 0,
+      "seconds": 0.104,
+      "PYTHONPATH": null,
+      "MYPYPATH": null,
+      "log": "lint.log"
+    },
+    {
+      "name": "typecheck",
+      "command": [
+        "make",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "seconds": 5.746,
+      "PYTHONPATH": null,
+      "MYPYPATH": null,
+      "log": "typecheck.log"
+    },
+    {
+      "name": "imports",
+      "command": [
+        "uv",
+        "run",
+        "lint-imports"
+      ],
+      "exit_code": 0,
+      "seconds": 0.231,
+      "PYTHONPATH": "/tmp/U2-freeze-v3-clean/src:/tmp/U2-freeze-v3-clean/contract",
+      "MYPYPATH": null,
+      "log": "imports.log"
+    },
+    {
+      "name": "schemas",
+      "command": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "uarch_contract.generate",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.415,
+      "PYTHONPATH": "/tmp/U2-freeze-v3-clean/src:/tmp/U2-freeze-v3-clean/contract",
+      "MYPYPATH": null,
+      "log": "schemas.log"
+    }
+  ],
+  "all_passed": true,
+  "all_87_support_paths_match_clean_source_tree": true,
+  "runtime_test_config_diff_from_reviewed_software_tree": [],
+  "full_suite": {
+    "execution": "inherited original independent B reviewer run; not rerun by coordinator",
+    "tree": "53f9f21b7cc3f84c0cbdb5f3f1e74e6e4aeca522",
+    "passed": 1392,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 0,
+    "remaining_failures": "Both strict-support currentness gates; require new human generation and separate adoption.",
+    "xml_sha256": "29824b6c6e856417957155840265266547580f4184fdf1abf1125e945f87b0e3"
+  }
+}

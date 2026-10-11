@@ -1,0 +1,217 @@
+"""Read-only audit of the human-generated v3 candidate; no adoption or oracle calls."""
+
+import hashlib
+import json
+import os
+import subprocess
+from collections import Counter
+from datetime import UTC, datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+HERE = Path(__file__).resolve().parent
+RUN = ROOT / "docs/reviews/U2-real-generation-v3"
+FREEZE = ROOT / "docs/reviews/U2-source-input-freeze-v3"
+NEW = ROOT / "tables/U2-real-generation-v3/candidate"
+PIN = "1e5706e0ebfcc67c1a7333079a35b75f693e9963"
+OLD = ROOT / "contract/vendor" / ("rk-sim@" + PIN)
+NEW_MANIFEST = "20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad"
+OLD_MANIFEST = "f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
+INPUT = "08d0e905cc50943d286b9c6dbcfb2cf844c969dda28b9446162d12734870871c"
+COMMIT = "769a1fef2320430386888bf450af579ea26cf664"
+TREE = "4c940f88f07eb1a22fd64ab5378d66d6b69eced7"
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def inventory(root):
+    assert not any(p.is_symlink() for p in (root, *root.parents))
+    assert not any(p.is_symlink() for p in root.rglob("*"))
+    return {
+        p.relative_to(root).as_posix(): digest(p) for p in sorted(root.rglob("*")) if p.is_file()
+    }
+
+
+def main():
+    from scripts import u2_inputs
+    from scripts import vendor_rk as vendor
+    from tests.u2_refresh import audit_candidate
+
+    assert digest(NEW / "MANIFEST.json") == NEW_MANIFEST
+    assert digest(OLD / "MANIFEST.json") == OLD_MANIFEST
+    assert not (NEW / "SYNTHETIC-REFERENCE").exists()
+    freeze = json.loads((FREEZE / "freeze-record.json").read_text())
+    assert freeze["decision"] == "frozen under user authorization"
+    assert freeze["inventory_sha256"] == digest(FREEZE / "inventory.json")
+    assert freeze["source_tree"] == TREE and freeze["input_manifest_sha256"] == INPUT
+    for status in ("created", "verified-identical"):
+        assert (RUN / (status + ".log")).read_text().strip() == (f"{status}: 48 files at {NEW}")
+    preflights = [
+        json.loads((RUN / name).read_text())
+        for name in ("preflight.json", "preflight-between.json", "preflight-after.json")
+    ]
+    assert preflights[0] == preflights[1] == preflights[2]
+    assert preflights[0]["status"] == "passed"
+    assert preflights[0]["source_tree"] == TREE
+    assert preflights[0]["input_manifest_sha256"] == INPUT
+    assert (RUN / "local-HEAD.txt").read_text().strip() == COMMIT
+    assert (RUN / "local-branch.txt").read_text().strip() == "u2/integration"
+    assert (RUN / "candidate-manifest-sha256.txt").read_text().strip() == (
+        f"{NEW_MANIFEST}  {NEW / 'MANIFEST.json'}"
+    )
+    env = os.environ.copy()
+    env["PATH"] = "/home/jjaff/.local/bin:" + env["PATH"]
+    env["UV_PROJECT_ENVIRONMENT"] = "/tmp/rk-sim-u1-jjaffari-1e5706e"
+    preflight = subprocess.run(
+        [
+            "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+            "-B",
+            str(FREEZE / "preflight.py"),
+            "--require-freeze-record",
+        ],
+        cwd=ROOT,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    assert json.loads(preflight.stdout) == preflights[0]
+    (HERE / "coordinator-preflight.json").write_text(preflight.stdout)
+    checked = audit_candidate(NEW)
+    assert checked == json.loads((RUN / "raw-inspection.json").read_text())
+    assert checked["adopted"] is False
+    delta = u2_inputs.compare_snapshots(OLD, NEW)
+    assert delta == json.loads((RUN / "semantic-diff.json").read_text())
+    assert delta["rows"] == dict(added=[], changed=[], removed=[], unchanged=1008)
+    assert delta["descriptors"] == []
+    assert delta["refusals"]["before"] == delta["refusals"]["after"]
+    a, b = inventory(OLD), inventory(NEW)
+    assert len(a) == len(b) == 48 and a.keys() == b.keys()
+    changed = sorted(p for p in a if a[p] != b[p])
+    assert changed == [
+        "GENERATOR.json",
+        "MANIFEST.json",
+        "u2-inputs/SHA256SUMS",
+        "u2-inputs/support-files.json",
+    ]
+    assert inventory(NEW / "u2-inputs") == inventory(FREEZE / "inputs")
+    u2_inputs.load_inputs(NEW / "u2-inputs", INPUT, check_support=True)
+    rows = json.loads((NEW / "parity/fixtures.json").read_bytes())
+    assert len(rows) == len({row["id"] for row in rows}) == 1008
+    assert Counter(row["query"]["phase"] for row in rows) == {"decode": 504, "prefill": 504}
+    assert all("vector_ops" not in row["counts"] for row in rows)
+    assert all(
+        row["counts"]["memory_write_bytes"] is None
+        for row in rows
+        if row["query"]["phase"] == "decode"
+    )
+    assert (NEW / "parity/fixtures.json").read_bytes() == (
+        OLD / "parity/fixtures.json"
+    ).read_bytes()
+    events = json.loads((NEW / "parity/refusals.json").read_bytes())
+    assert len(events) == 4
+    assert {
+        (Path(e["component_params_file"]).name, e["compute"], e["kv_cache"]) for e in events
+    } == {
+        ("asic_placeholder.yaml", "bf16", "bf16"),
+        ("asic_placeholder.yaml", "fp8", "fp8"),
+        ("npu-l4.yaml", "fp16", "fp16"),
+        ("npu-l4.yaml", "fp8", "fp8"),
+    }
+    for event in events:
+        assert event["callable_source_sha256"] == digest(NEW / "rk/engine/f0/compute.py")
+        assert event["component_params_sha256"] == digest(NEW / event["component_params_file"])
+        assert event["execution"] == "refused" and event["exception"] == "UnsupportedPrecision"
+        assert event["boundary"] == "Accelerator.peak_op_per_s" and event["rk_sha"] == PIN
+    assert (NEW / "parity/refusals.json").read_bytes() == (
+        OLD / "parity/refusals.json"
+    ).read_bytes()
+    ma = json.loads((OLD / "GENERATOR.json").read_text())
+    mb = json.loads((NEW / "GENERATOR.json").read_text())
+    assert ma.keys() == mb.keys()
+    assert [key for key in ma if ma[key] != mb[key]] == ["script_sha256"]
+    assert mb["script_sha256"] == digest(ROOT / "scripts/vendor_rk.py")
+    assert mb["oracle_program_sha256"] == hashlib.sha256(vendor.ORACLE_PROGRAM.encode()).hexdigest()
+    assert mb["environment"] == preflights[0]["environment_metadata"]
+    pinned = []
+    for name in vendor.SOURCES:
+        raw = subprocess.check_output(
+            [
+                "git",
+                "-C",
+                "/home/jjaff/AI-infra-simulation/rk-sim-u1-pin",
+                "show",
+                f"{PIN}:{name}",
+            ]
+        )
+        assert raw == (NEW / name).read_bytes(), name
+        pinned.append(name)
+    relative = OLD.relative_to(ROOT).as_posix()
+    for name in a:
+        assert (
+            subprocess.check_output(["git", "show", f"{COMMIT}:{relative}/{name}"], cwd=ROOT)
+            == (OLD / name).read_bytes()
+        )
+    support = json.loads((NEW / "u2-inputs/support-files.json").read_text())
+    assert len(support) == 87
+    record = {
+        "status": "complete raw candidate audit passed; adoption pending explicit approval",
+        "audited_at_utc": datetime.now(UTC).isoformat(),
+        "audit_source_sha256": digest(Path(__file__)),
+        "source_tree": TREE,
+        "branch_commit": COMMIT,
+        "candidate_manifest_sha256": NEW_MANIFEST,
+        "previous_adopted_manifest_sha256": OLD_MANIFEST,
+        "input_manifest_sha256": INPUT,
+        "human_generation_pair": {
+            "created_and_verified_identical": True,
+            "all_three_preflights_identical": True,
+            "evidence_sha256": inventory(RUN),
+        },
+        "file_counts": {
+            "old": 48,
+            "new": 48,
+            "unchanged": 44,
+            "changed": 4,
+            "added": 0,
+            "removed": 0,
+        },
+        "changed_files": delta["files"],
+        "workload_rows": delta["rows"],
+        "counts_durations_nulls_raw_bytes_unchanged": True,
+        "refusals": {"unchanged": 4, "raw_bytes_unchanged": True, "source_bindings_verified": True},
+        "generator_metadata_change": "script_sha256 only; oracle program and environment unchanged",
+        "pinned_source_files_verified": pinned,
+        "frozen_input_files_verified": 24,
+        "support_files_verified": len(support),
+        "raw_inspection": checked,
+        "predecessor_preserved_in_git": COMMIT + ":" + relative,
+        "canonical_artifact_unchanged": inventory(OLD) == a,
+        "candidate_unchanged": inventory(NEW) == b,
+        "oracle_execution_by_coordinator": False,
+        "adoption_performed": False,
+        "adopted_runtime_consumption_executed": False,
+    }
+    (HERE / "audit.json").write_text(json.dumps(record, indent=2) + "\n")
+    print(
+        json.dumps(
+            {
+                k: record[k]
+                for k in [
+                    "status",
+                    "candidate_manifest_sha256",
+                    "file_counts",
+                    "workload_rows",
+                    "refusals",
+                    "generator_metadata_change",
+                ]
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,80 @@
+{
+  "validation_tree": "57e2963cedfc67e6592132a860cdd96253d428ea",
+  "checks": [
+    {
+      "check": "lint",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "."
+      ],
+      "returncode": 0,
+      "elapsed_s": 0.028178459033370018,
+      "pythonpath": null,
+      "mypypath": null
+    },
+    {
+      "check": "production-types",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "src",
+        "contract/uarch_contract",
+        "scripts"
+      ],
+      "returncode": 0,
+      "elapsed_s": 2.9829013340640813,
+      "pythonpath": null,
+      "mypypath": null
+    },
+    {
+      "check": "contract-test-types",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "--no-explicit-package-bases",
+        "contract/tests"
+      ],
+      "returncode": 0,
+      "elapsed_s": 2.7662373690400273,
+      "pythonpath": null,
+      "mypypath": null
+    },
+    {
+      "check": "imports",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/lint-imports"
+      ],
+      "returncode": 0,
+      "elapsed_s": 0.1096281458158046,
+      "pythonpath": "/tmp/U2-adoption-v3-r202-proposal/src:/tmp/U2-adoption-v3-r202-proposal/contract",
+      "mypypath": null
+    },
+    {
+      "check": "schemas",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate",
+        "--check"
+      ],
+      "returncode": 0,
+      "elapsed_s": 0.3431310320738703,
+      "pythonpath": "/tmp/U2-adoption-v3-r202-proposal/src:/tmp/U2-adoption-v3-r202-proposal/contract",
+      "mypypath": null
+    },
+    {
+      "check": "strict-check",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "elapsed_s": 0.4406898310407996,
+      "pythonpath": "/tmp/U2-adoption-v3-r202-proposal/src:/tmp/U2-adoption-v3-r202-proposal/contract",
+      "mypypath": null
+    }
+  ],
+  "host": "ElfinKidsLaptop",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]"
+}
