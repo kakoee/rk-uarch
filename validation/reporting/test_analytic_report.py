@@ -535,3 +535,123 @@ def test_git_binding_ignores_prose_but_refuses_changed_code_same_version(tmp_pat
     code.write_text('VERSION = "1"\nVALUE = 2\n')
     with pytest.raises(ValueError, match="Implementation bytes changed"):
         report.check_implementation(commit)
+
+
+@pytest.mark.parametrize(
+    "output",
+    [
+        {},
+        {"duration_ps": float("nan")},
+        {"duration_ps": float("inf")},
+        {"duration_ps": -float("inf")},
+        object(),
+        {"nested": [object(), float("nan")]},
+    ],
+    ids=["json-control", "nan", "positive-infinity", "negative-infinity", "object", "nested"],
+)
+def test_invalid_return_full_retention_and_public_validation(output):
+    import base64
+
+    events = []
+
+    def sink(kind, value):
+        events.append((kind, deepcopy(value)))
+
+    def invalid(job):
+        return output
+
+    discovery = report.discover(report.profile("analytic-l0-smoke"), engine=invalid, sink=sink)
+    expected_corpus = report.corpus_from(discovery.cases)
+    expected_plan = report.frozen_plan(discovery)
+    implementation = report.git_head()
+    result = report.replay(
+        discovery,
+        implementation=implementation,
+        engine=invalid,
+        mutant_factory=lambda name: invalid,
+        sink=sink,
+    )
+    assert (
+        report.validate_report(
+            result,
+            expected_plan=expected_plan,
+            expected_corpus=expected_corpus,
+            expected_implementation=implementation,
+            allow_illustration=True,
+        )["outcome"]
+        == "not_run"
+    )
+    calls = [call for cases in result["cases"].values() for case in cases for call in case["calls"]]
+    assert calls and all(c["state"] == "error" and c["diagnostic_hash"] for c in calls)
+    assert all(c["result_hash"] is None for c in calls)
+    assert sum(k == "call_started" for k, _ in events) == len(calls)
+    assert sum(k == "call_finished" for k, _ in events) == len(calls)
+    assert all(c["status"] == "not_run" for cases in result["cases"].values() for c in cases)
+    assert all(r["actual"]["valid_examples"] == 0 for r in result["relations"])
+    assert all(m["status"] == "not_run" for m in result["mutants"])
+    objects = report.Objects(result["objects"])
+    diagnostics = [
+        strict_json_loads(base64.b64decode(objects.get(c["diagnostic_hash"]))) for c in calls
+    ]
+    assert all(d["code"] == "INVALID_ENGINE_OUTPUT" for d in diagnostics)
+    if output == {}:
+        assert all(d == {"code": "INVALID_ENGINE_OUTPUT", "output": {}} for d in diagnostics)
+    else:
+        assert all(
+            d["output_representation"]["format"] == "invalid-engine-output/1" for d in diagnostics
+        )
+        assert "0x" not in canonical_json(diagnostics)
+    # A healthy replay cannot hide the discovery errors or admit their examples.
+    recovered = report.replay(discovery, implementation=implementation)
+    assert (
+        report.validate_report(
+            recovered,
+            expected_plan=expected_plan,
+            expected_corpus=expected_corpus,
+            expected_implementation=implementation,
+            allow_illustration=True,
+        )["outcome"]
+        == "not_run"
+    )
+
+
+def test_invalid_output_diagnostic_is_deterministic_and_explicit():
+    import base64
+
+    class Opaque:
+        def __repr__(self):
+            raise AssertionError("Never format an opaque return with repr")
+
+    class BrokenSerializer(Opaque):
+        def model_dump(self, **kwargs):
+            raise RuntimeError("serializer failed at host-specific address")
+
+    def capture(value):
+        recorder = report.Recorder()
+        cell = report.profile("analytic-l0-smoke")["cells"][0]
+        case = report.exercise(
+            recorder, cell, [fixed_bundle("aggregate")], "discovery", lambda job: value
+        )
+        assert case["status"] == "not_run" and case["reason"] == "ENGINE_ERROR"
+        call = case["calls"][0]
+        diagnostic = base64.b64decode(recorder.objects.get(call["diagnostic_hash"]))
+        return strict_json_loads(diagnostic)
+
+    cycle = []
+    cycle.append(cycle)
+    for output in [cycle, BrokenSerializer()]:
+        first = capture(output)
+        assert canonical_json(first) == canonical_json(capture(output))
+        assert first["code"] == "INVALID_ENGINE_OUTPUT"
+        assert first["output_representation"]["format"] == "invalid-engine-output/1"
+    assert capture(Opaque()) == capture(Opaque())
+    projection = capture({"ok": [7, "text"], "bad": float("nan")})["output_representation"]
+    assert projection["value"]["type"] == "builtins.dict"
+    entries = projection["value"]["items"]
+    assert any(
+        k["value"] == "bad"
+        and v == {"type": "builtins.float", "encoding": "nonfinite", "value": "nan"}
+        for k, v in entries
+    )
+    assert any(k["value"] == "ok" and v["items"][0]["value"] == 7 for k, v in entries)
+    assert capture({}) == {"code": "INVALID_ENGINE_OUTPUT", "output": {}}
