@@ -60,3 +60,12 @@ checks include both schema families, CI-form types/lint/imports, strict vendor/c
 new rotary/replay and legacy table/report checks, then the full suite. Any support-code change
 after freeze requires a new lifecycle. Existing reports retain their original implementation
 bindings; changed support does not become current through historical validation.
+
+## Coordinator preparation checks
+
+Shell and embedded Python syntax and local document links passed. The clean Lane A clone
+was fast-forwarded to published main; no protected installation occurred. The helper's
+`--check` passed all 17 paths, exact patch digest, scratch application and index applicability.
+Its initial hooks-path check was too strict about the existing explicit `.git/hooks` setting;
+it now compares the effective path to the normal clone hook location. The hook configuration
+and hook files were not changed. A final read-only preflight follows publication of this helper.

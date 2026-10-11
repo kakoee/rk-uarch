@@ -43,8 +43,9 @@ for ancestor in (base, proposal, '53435927497eb3e4552e32e2c5e887e0bcb05ddc'):
     require(subprocess.run(['git', '-C', str(root), 'merge-base', '--is-ancestor', ancestor, 'HEAD']).returncode == 0, 'Lane A must integrate the reviewed published main first')
 acceptance = 'docs/reviews/U3-RoPE-install-and-runtime-v1/README.md'
 require(git('show', 'HEAD:' + acceptance) == (folder / 'README.md').read_bytes(), 'accepted installation record absent or changed')
-require(not subprocess.run(['git', '-C', str(root), 'config', '--get', 'core.hooksPath'], capture_output=True).stdout.strip(), 'unexpected custom hooks path')
 hook = Path(text('rev-parse', '--path-format=absolute', '--git-path', 'hooks/pre-commit'))
+normal_hook = Path(text('rev-parse', '--absolute-git-dir')) / 'hooks/pre-commit'
+require(hook.resolve() == normal_hook.resolve(), 'unexpected custom hooks path')
 require(hook.is_file() and os.access(hook, os.X_OK), 'normal pre-commit hook is missing')
 require(all(name in hook.read_text() for name in ('scripts/hooks/human_owned.sh', 'scripts/hooks/frozen_predictions.sh')), 'normal ownership/prediction hooks are missing')
 patch = (root / patch_relative).read_bytes()
