@@ -69,3 +69,24 @@ was fast-forwarded to published main; no protected installation occurred. The he
 Its initial hooks-path check was too strict about the existing explicit `.git/hooks` setting;
 it now compares the effective path to the normal clone hook location. The hook configuration
 and hook files were not changed. A final read-only preflight follows publication of this helper.
+
+## Human installation verified; A implementation released
+
+Javid returned the human receipt for local A commit
+`eeb2f4d74d4c751c55edec1b5ee40f7a40162562`, parent
+`df4caf81969c5aafa90ea183dfc8d9e69334d9f0`, tree
+`cb0d7fd650426706a7cdadf2058bf49637c1ec4d`. The coordinator independently reconstructed
+the approved patch from that parent in disposable scratch and verified all 17 committed
+paths, bytes, modes and live contents, with a clean index/worktree. The
+[verification receipt](installation-verification.json) binds this human commit to the approval.
+
+Installed new carrier tests: **74 passed, 28 skipped**; new schema freshness passed. The
+28 skips are still the pending runtime-admission tests. Strict vendor check refused with
+`input support inventory changed`, as expected. No full suite or runtime implementation
+is claimed. These checks do not grant support currentness. Do not rerun the installer.
+
+The [Lane A implementation handoff](lane-A-implementation.txt) is now released. The human
+schema commit remains only in A's clone; the primary clone publishes this coordination
+record without incorporating the schema change. A preserves its local human commit while
+integrating subsequent published coordination/B work through normal Git. The source-bound
+push remains gated on the combined U0002 lifecycle.
