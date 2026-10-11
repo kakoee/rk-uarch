@@ -1,0 +1,49 @@
+--- fresh-session-proposal
++++ docs/how-it-works.md
+@@ -282,9 +282,10 @@
+ PY
+ ```
+ 
+-Coordinator-owned **local receipts**, not files committed at this revision, are under
+-`/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/`:
+-`U2-main-publication-v1/execution.json` and `U2-published-validation-v1/`.
++The [publication receipt](reviews/U2-main-publication-v1/execution.json) and
++[published-revision validation](reviews/U2-published-validation-v1/README.md) are preserved
++in this documentation selection. They record checks on implementation commit `7fee0a8`;
++the original receipts were local files at that commit and are published with this refresh.
+ The latter's `configuration.json` identifies the actual GitHub cold clone, new environment
+ and cache, reused base interpreter, and temporary generated outputs. Its final verification
+ reports completed U0021 checks on the exact published commit: **1,394 tests passed, no
+@@ -293,17 +294,16 @@
+ The historical B64 ledger is preserved; its later disposition overlay does not convert
+ all earlier pending cases into passes.
+ 
+-The following reads those receipts; it does not rerun their suite or matrix and requires
+-access to that local coordinator directory. A published clone alone does not contain these
+-post-publication receipts. Preserve or publish them separately when reconciling this page.
+-A missing, running or pending receipt is not a pass.
++From the repository root, the following reads the preserved receipts; it does not rerun
++their suite or matrix. The receipts are added by this documentation selection and are absent
++from the earlier implementation-only commit. A missing, running or pending receipt is not a pass.
+ 
+ ```sh
+ python -B - <<'PY'
+ import json
+ from pathlib import Path
+ from xml.etree import ElementTree as ET
+-base = Path('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews')
++base = Path('docs/reviews')
+ p = base / 'U2-published-validation-v1'
+ print('publication', json.loads((base / 'U2-main-publication-v1/execution.json').read_text())['status'])
+ for name in ('configuration', 'final-verification', 'characterize', 'pinned-loader-result'):
+@@ -332,6 +332,7 @@
+ [U0021](decisions/U0021-u2-cold-clone-validation-exception.md) permits this U2 correctness
+ validation on ElfinKidsLaptop Ubuntu/WSL2 plus hosted Ubuntu CI on the same published commit.
+ It does not approve simulator-performance benchmarking on WSL2 or waive U3's Linux
+-self-hosted runner and later hardware-validation requirements. The execution plan's older
+-STATUS remains a coordinator reconciliation item. Publication receipts do not authorize a
+-tag, sprint closure, badge promotion, hardware accuracy claim or deletion of historical evidence.
++self-hosted runner and later hardware-validation requirements. The [closeout proposal](reviews/U2-closeout.md)
++and execution-plan STATUS distinguish completed technical exits from pending human closure
++and tagging. Publication receipts do not authorize a tag, sprint closure, badge promotion,
++hardware accuracy claim or deletion of historical evidence.

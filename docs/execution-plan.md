@@ -33,9 +33,9 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | AD-C2 reconciled; integration1015pass with lint and offline wheel resource/loader validation passed; exact local A/B/integration Git checkpoint proposals under review; real report/final exits pending |
+| **Next** | Javid accepted [U2 closeout](reviews/U2-closeout.md); final documentation commit/push and `u02-end` tagging remain separate |
 | **U1 done** | G1 and closeout accepted by Javid, including U0020; published annotated `u01-end` resolves to `1e9e794a84c5173812c23a1cf2fc04b85e6f6831`; same-commit closeout CI passed |
-| **In progress** | U2 shared baseline accepted by Javid for both lanes; implementation handoffs prepared. U0021 host approval retained; no U2 runtime exit or publication claimed |
+| **U2 closeout accepted; final publication/tag pending** | Main `7fee0a8`: accepted U0003/U0004 scope, adopted v3 references, both software-review loops ACCEPTED, fresh-session documentation refresh complete; U0021 fresh GitHub clone and same-commit hosted CI passed (1,394 tests). Javid accepted U2-closeout-v1; final documentation publication and tag remain pending |
 | **Not started** | U3–U11 |
 | **Paused** | The `nightly` workflow's schedule (2026-10-03): no self-hosted runner yet. Re-enable it when U3 starts (U3, "Before it starts") |
 
@@ -67,6 +67,19 @@ history. Integrate the tested, approved result onto main and tag the approved ma
 at closure. Preserve worker worktrees until publication is verified. The
 [kickoff sequence](reviews/U2-publication-history.md#kickoff)
 explains each transfer and validation step.
+
+Current [U2 closeout evidence](reviews/U2-closeout.md) supersedes earlier pending-status
+notes below without rewriting them. U2 is not the G2 gate: G2 remains U3's fork decision.
+
+**U3 Git workflow, requested by Javid:** A and B use separate working folders against
+main, each committing and pushing to main, synchronizing and resolving conflicts as needed.
+Before pushing, fetch the current remote main and integrate it; use ordinary fast-forward
+pushes and rebase only unpublished local commits. Never force-push shared main or rewrite
+published commits. Integrate on demand with Git diffs and commit IDs; do not copy checkpoint
+trees or create another manual revision-control process. Generated-artifact provenance and
+reproducibility manifests retain their narrow purpose. This records the requested workflow;
+it does not start U3 or waive its Linux/self-hosted-runner prerequisites. Actual hours and
+retro remain unreported until Javid supplies them.
 
 **U1 pin update, 2026-10-04:** Javid (@jjaffari) approved advancing from `11bb530` to
 `1e5706e` before implementation. The seven intervening commits leave `rk/schema/`,

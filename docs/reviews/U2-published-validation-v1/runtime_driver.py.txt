@@ -1,0 +1,200 @@
+"""Actual adopted v3 execution and complete producer-disabled report replay exits."""
+import gc
+import hashlib
+import importlib
+import importlib.util
+import json
+import os
+import platform
+import subprocess
+import sys
+import tempfile
+import time
+from collections import Counter
+from pathlib import Path
+
+from uarch_contract.hashing import canonical_json, content_hash
+from uarch_contract.report_context import RenderSpec
+from rkuarch.report.complete import render_verified
+from rkuarch.table.artifacts import load_verified_report_inputs, verify_report_inputs
+from rkuarch.table.build import CapturedWork, build_table, write_table
+from rkuarch.workload.prepared import load_prepared_input
+from scripts import u2_inputs as ui
+from tests import u2_refresh as refresh
+from tests import u2_comparison as comparison
+from tests.integration.test_u2_a_condition_order import expected_conditions
+
+ROOT = Path('/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo')
+INTEGRATION = ROOT
+HERE = Path(__file__).resolve().parent
+AUTHORITY = ROOT / 'docs/reviews/U2-adoption-v3-execution/adoption-review.json'
+REVIEW = '55787e09a751b67b28b90835ad96041040b1a0dd9cb85ba16538c27fb7597861'
+MANIFEST = '20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad'
+INPUTS = '08d0e905cc50943d286b9c6dbcfb2cf844c969dda28b9446162d12734870871c'
+BASE = '7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60'
+
+
+def module(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    value = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(value)
+    return value
+
+
+HELPER = HERE / 'report_helpers.py'
+SURFACE = ROOT / 'docs/reviews/U2-B-real-report-exits-v1/serialized_surface_check.py'
+h = module('u2_prior_report_helpers', HELPER)
+
+
+def preflight():
+    entries = subprocess.check_output(['git', 'ls-tree', '-r', '-z', BASE], cwd=INTEGRATION).split(b'\0')
+    count = 0
+    for entry in entries:
+        if not entry:
+            continue
+        meta, name = entry.split(b'\t', 1)
+        mode, kind, oid = meta.decode().split()
+        assert kind == 'blob'
+        path = ROOT / name.decode()
+        data = path.read_bytes()
+        actual = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+        assert actual == oid, str(path)
+        count += 1
+    assert len(ui.support_files()) == 87
+    assert h.sha(ui.ADOPTED / 'MANIFEST.json') == MANIFEST and h.sha(AUTHORITY) == REVIEW
+    checked = refresh.audit_candidate(ui.ADOPTED)
+    assert checked['input_manifest_sha256'] == INPUTS
+    refresh.adoption_authority(ui.ADOPTED, AUTHORITY, REVIEW)
+    return dict(audit=checked, validation_tree=BASE, clean_export_files=count, support_files=87, review_sha256=REVIEW, driver_sha256=h.sha(Path(__file__)), helpers_sha256=h.sha(HELPER), surface_checker_sha256=h.sha(SURFACE), host=platform.node(), platform=platform.platform(), python=sys.version, argv=sys.argv, environment={k: os.environ.get(k) for k in ('PYTHONPATH', 'PYTHONDONTWRITEBYTECODE', 'PYTHONHASHSEED', 'OMP_NUM_THREADS')})
+
+
+def main():
+    initial = preflight()
+    parent = Path('/tmp/U2-github-cold-7fee0a8-g2i3kbng/runtime')
+    parent.mkdir(exist_ok=False)
+    out = parent / 'outputs'
+    out.mkdir()
+    h.put(HERE / 'output-location.json', dict(root=str(out), validation_tree=BASE))
+    state = dict(status='running', preflight=initial, output_root=str(out), phases=[], classification='Actual nominal and H1 analytic execution against human-adopted references; no oracle generation or hardware measurements')
+    started = time.monotonic()
+
+    def flush():
+        state['elapsed_s'] = time.monotonic() - started
+        h.put(HERE / 'runtime-progress.json', state)
+
+    def phase(name, fn):
+        row = dict(name=name, status='running')
+        state['phases'].append(row)
+        flush()
+        print(name, 'started', flush=True)
+        t = time.monotonic()
+        try:
+            value = fn()
+        except BaseException as exc:
+            row.update(status='failed', error=repr(exc), elapsed_s=time.monotonic()-t)
+            state.update(status='failed', error=repr(exc)); flush(); raise
+        row.update(status='passed', elapsed_s=time.monotonic()-t)
+        flush(); print(name, row['elapsed_s'], flush=True)
+        return value
+
+    calls = dict(nominal=0, physical_point=0, prepare_h1=0)
+    for owner, name, key in ((comparison.nominal, 'evaluate_nominal', 'nominal'), (comparison, 'physical_point', 'physical_point'), (comparison, 'prepare_h1', 'prepare_h1')):
+        original = getattr(owner, name)
+        def counted(*args, _original=original, _key=key, **kwargs):
+            calls[_key] += 1
+            return _original(*args, **kwargs)
+        setattr(owner, name, counted)
+    run = phase('fresh_actual_adopted_execution', lambda: refresh.consume_adopted(adoption_review=AUTHORITY, review_sha256=REVIEW))
+    assert calls == dict(nominal=1008, physical_point=96, prepare_h1=6), calls
+    assert not run['synthetic'] and not run['nominal_errors']
+    assert (run['nominal'].gate_outcome, run['nominal'].evidence_outcome) == ('compatibility_pass', 'refused')
+    assert (run['physical'].gate_outcome, run['physical'].evidence_outcome) == ('not_assessed', 'execution_failed')
+    states = dict(Counter(f.execution for f in run['physical'].fixtures))
+    assert states == dict(executed=96, execution_failed=48, not_run=864)
+    assert len(run['physical_errors']) == 48 and all('WeightCapacityExceeded' in e['reason'] for e in run['physical_errors'])
+    assert all(len(run[n].fixtures)==1008 and len(run[n].precision_refusal_observations)==4 for n in ('nominal','physical'))
+    state['actual_execution'] = dict(calls=calls.copy(), physical_states=states, nominal_gate=run['nominal'].gate_outcome, nominal_evidence=run['nominal'].evidence_outcome, physical_gate=run['physical'].gate_outcome, physical_evidence=run['physical'].evidence_outcome, direct_refusals_per_track=4)
+    phase('save_fresh_comparisons_and_capture', lambda: refresh.save_comparisons(run, out / 'captured'))
+    def disabled(*args, **kwargs):
+        raise AssertionError('producer called during prepared/captured report replay')
+    for module_name, names in (
+        ('tests.u2_comparison', ('prepare_h1', 'physical_point')),
+        ('contract.tests.nominal_candidate', ('evaluate_nominal',)),
+        ('rkuarch.workload.prepare', ('prepare',)),
+        ('rkuarch.engines.analytic.core', ('run_analytic',)),
+        ('rkuarch.workload.prepared', ('execute_prepared_point',)),
+        ('rkuarch.table.build', ('capture', 'execute_prepared_point')),
+    ):
+        for name in names:
+            setattr(importlib.import_module(module_name), name, disabled)
+    comparison.nominal.evaluate_nominal = disabled
+    state['producer_traps'] = 'Preparation, H1 physical point, nominal candidate, capture and analytic execution disabled for every subsequent phase.'
+    package = phase('fresh_yaml_order_table_package', lambda: refresh.report_package(run))
+    phase('public_write_fresh_package', lambda: write_table(package, out / 'report/table.json'))
+    package_names = h.inventory(out / 'report')
+    assert len(package_names) == 3310
+    verified = phase('public_disk_load_fresh', lambda: load_verified_report_inputs(out / 'report/table.json'))
+    memory = phase('public_memory_verify', lambda: verify_report_inputs(package.table, package.artifacts))
+    assert memory == verified
+    del memory
+    expectations = phase('independent_full_ratio_contributor_coverage', lambda: h.coverage(verified))
+    state['coverage'] = dict(rows=len(verified.table.rows), ratios=len(expectations[0]), recipes=len(verified.dependencies.recipes), sources=len(verified.dependencies.source_recipes), package_files=len(package_names), raw_blobs=sum(isinstance(x,bytes) for x in verified.artifacts.values()))
+    state['errors'] = verified.table.measured_error.model_dump(mode='json')
+    expected_conditions_map = expected_conditions(verified.hardware.model_dump(mode='json'))
+    conditions = verified.table.provenance.conditional_on
+    assert len(conditions)==len(expected_conditions_map)==59
+    assert [v.path for v in conditions]==sorted(expected_conditions_map)
+    assert {v.path:v.value.model_dump(mode='json') for v in conditions}==expected_conditions_map
+    state['renders']={}
+    for mode in ('hidden','opt-in'):
+        state['renders'][mode]=phase('render_'+mode,lambda mode=mode:h.save_render(verified,out/'report',mode,expectations));flush()
+    surface = module('u2_surface_v3', SURFACE)
+    surface.HERE = HERE
+    phase('serialized_html_markdown_all_ratio_values',surface.main)
+    for mode in ('hidden','opt-in'):
+        repeated=phase('repeat_'+mode,lambda mode=mode:h.save_render(verified,out/'repeat',mode,expectations))
+        assert repeated==state['renders'][mode]
+    h.put(out/'repeat-byte-equality.json',phase('repeat_stream_bytes',lambda:h.compare_files(out/'repeat',out/'report',h.inventory(out/'repeat'))))
+    saved_capture=json.loads((out/'captured/physical-capture.json').read_bytes())
+    validated=phase('verify_all_saved_physical_results_producers_disabled',lambda:refresh.verify_physical(run['inputs'],run['original_rows'],saved_capture))
+    assert len(validated)==96
+    saved_prepared=out/'prepared-input.json';saved_prepared.write_text(canonical_json(verified.bundle))
+    bundle=phase('public_canonical_prepared_loader',lambda:load_prepared_input(saved_prepared))
+    c=CapturedWork(bundle,verified.assumptions,verified.request,verified.derivation,verified.jobs,verified.results)
+    replay=phase('rebuild_saved_canonical_table_producers_disabled',lambda:build_table(c,context=verified.context,model_card=verified.model_card,artifacts=verified.artifacts))
+    assert replay==package
+    assert canonical_json(replay.table)==canonical_json(package.table)
+    assert replay.table.rows==verified.table.rows and replay.table.provenance==verified.table.provenance
+    state['RR_C1']=dict(status='passed',fresh_table_hash=package.table.table_hash,replayed_table_hash=replay.table.table_hash,conditions=59,rows=24,complete_package_equal=True,complete_table_bytes_equal=True,all_producers_disabled=True)
+    flush()
+    phase('public_write_replayed_package',lambda:write_table(replay,out/'replay-report/table.json'))
+    assert h.inventory(out/'replay-report')==package_names
+    h.put(out/'replay-package-byte-equality.json',phase('replay_package_stream_bytes',lambda:h.compare_files(out/'report',out/'replay-report',package_names)))
+    loaded=phase('public_replay_disk_load',lambda:load_verified_report_inputs(out/'replay-report/table.json'))
+    assert loaded==verified
+    for mode in ('hidden','opt-in'):
+        rendered=phase('replay_render_'+mode,lambda mode=mode:h.save_render(loaded,out/'replay-report',mode,expectations))
+        assert rendered==state['renders'][mode]
+    names=h.inventory(out/'report');assert names==h.inventory(out/'replay-report')
+    h.put(out/'replay-all-byte-equality.json',phase('replay_all_stream_bytes',lambda:h.compare_files(out/'report',out/'replay-report',names)))
+    state['capability_refusals']={}
+    for field,value in (('table_hash','sha256:'+'0'*64),('report_context_hash','sha256:'+'0'*64),('renderer_version','unreviewed-renderer')):
+        bad=dict(state['renders']['opt-in']['render_spec']);bad[field]=value;bad['render_hash']=content_hash(bad,exclude=('render_hash',))
+        def refusal(bad=bad):
+            try:render_verified(verified,render_spec=RenderSpec.model_validate(bad))
+            except ValueError as exc:
+                assert str(exc)=='RenderIdentityBindingMismatch';return str(exc)
+            raise AssertionError('changed capability accepted')
+        state['capability_refusals'][field]=phase('capability_'+field,refusal);flush()
+    assert calls==state['actual_execution']['calls']
+    assert preflight()['audit']==initial['audit']
+    files={name:dict(bytes=(out/name).stat().st_size,sha256=h.sha(out/name)) for name in sorted(h.inventory(out))}
+    h.put(out/'artifact-index.json',files)
+    (out/'SHA256SUMS').write_text(''.join(v['sha256']+'  '+n+'\n' for n,v in files.items())+h.sha(out/'artifact-index.json')+'  artifact-index.json\n')
+    state.update(status='passed',artifact_manifest=dict(path=str(out/'SHA256SUMS'),sha256=h.sha(out/'SHA256SUMS'),entries=len(files)+1),source_and_support_unchanged=True,nominal_and_physical_producers_never_called_after_fresh_capture=True)
+    flush()
+    print('PASS: fresh execution, full reports, repetition, completely producer-disabled replay and three capability refusals',flush=True)
+
+
+if __name__=='__main__':
+    main()

@@ -1,0 +1,21 @@
+{
+  "classification": "isolated test-only pinned component loader; no oracle calls or generated reference refresh",
+  "export_command": [
+    "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python",
+    "-m",
+    "rkuarch.cli",
+    "rk-component",
+    "hw/designs/npu-l4.yaml",
+    "--component-id",
+    "compute.asic.npu-l4",
+    "--execution-model",
+    "contract/tests/fixtures/u2_b/a2-export/npu-l4.execution-model.json",
+    "--oracle-compat",
+    "--output",
+    "/tmp/U2-github-cold-7fee0a8-g2i3kbng/export-roundtrip"
+  ],
+  "loader_probe": "from pathlib import Path\nimport json,sys,hashlib\nimport rk.components.loader as loader\nvendor=Path(sys.argv[1]); output=Path(sys.argv[2]); assert Path(loader.__file__).resolve()==vendor/'rk/components/loader.py'\nraw=json.loads((output/'oracle-compat.yaml').read_text()); descriptor=loader.load_component_file(output/'oracle-compat.yaml')\nvalue=descriptor.model_dump(mode='json')\nassert descriptor.id==raw['id']=='compute.asic.npu-l4'\nassert value['params']==raw['params'] and value['execution_model']==raw['execution_model']\nassert value['calibration']==raw['calibration']\nsecond=output/'loaded-roundtrip.yaml'; second.write_text(json.dumps(value,sort_keys=True,separators=(',',':'))+'\\n')\nassert loader.load_component_file(second)==descriptor\nprint(json.dumps(dict(status='passed',loader=str(Path(loader.__file__).resolve()),loader_sha256=hashlib.sha256(Path(loader.__file__).read_bytes()).hexdigest(),component_id=descriptor.id,parameters=len(value['params']),params_and_execution_preserved=True,serialized_reload_equal=True,oracle_execution=False),indent=2))\n",
+  "loader_exit_code": 1,
+  "published_commit": "7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60",
+  "PYTHONPATH": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
+}

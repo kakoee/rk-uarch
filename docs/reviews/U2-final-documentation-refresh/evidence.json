@@ -1,0 +1,110 @@
+{
+  "target": {
+    "commit": "7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60",
+    "tree": "deccb57a573717990762e60fb8819f0ae463ce20"
+  },
+  "source_export": "/tmp/U2-doc-refresh-1_ofh_p8/source",
+  "interpreter": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python",
+  "environment": {
+    "PYTHONPATH": "/tmp/U2-doc-refresh-1_ofh_p8/source/src:/tmp/U2-doc-refresh-1_ofh_p8/source/contract",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "MYPYPATH": "unset"
+  },
+  "new_executions": [
+    {
+      "command": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python -B /home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/U2-final-documentation-refresh/reproduce-demo.py.txt",
+      "cwd": "/tmp/U2-doc-refresh-1_ofh_p8/source",
+      "exit_code": 0,
+      "result": {
+        "status": "passed: actual-reviewed eight-point public workflow demonstration",
+        "table_hash": "sha256:d55dfc66a0d33aff209a82353eba7e5316db20eb8cb51d56c9d6ab75124ba6be",
+        "points": 8,
+        "identical_output_files_per_run": 61,
+        "identical_bytes_per_run": 36707563,
+        "saved_replay_producers_disabled": true,
+        "negative_producer_controls": 2,
+        "actual_reviews_bound_without_subject_change": true,
+        "modes": {
+          "default": {
+            "declared_prediction_paths": 1992,
+            "visible_prediction_paths": 0,
+            "render_hash": "sha256:1221d5dc34016d5a53a398f2ba7cc29f59e42fa12598976d20593f73b14ce4c5",
+            "synthetic_presentation_enabled": false
+          },
+          "optin": {
+            "declared_prediction_paths": 1992,
+            "visible_prediction_paths": 1992,
+            "render_hash": "sha256:2adb133ca94d85b120d29521ce0a28f8db98283204f7040a4cb39bd432f11145",
+            "synthetic_presentation_enabled": false
+          }
+        }
+      },
+      "outputs_external": "/tmp/u2-doc-demo-aaqofiip",
+      "log": "demo.log"
+    },
+    {
+      "command": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python -B -m pytest -q -p no:cacheprovider --basetemp=/tmp/U2-doc-refresh-1_ofh_p8/pytest tests/unit/test_u2_a_analytic.py tests/unit/test_u2_b_badges.py tests/unit/test_u2_a_shapes.py::test_h2_fp8_named_model_preparation tests/unit/test_u2_b_stage2_characterize.py",
+      "cwd": "/tmp/U2-doc-refresh-1_ofh_p8/source",
+      "exit_code": 0,
+      "result": "14 passed",
+      "log": "focused-tests.log"
+    },
+    {
+      "commands": "Exact non-demo shell blocks embedded in proposed-how-it-works.md; executed with the stated interpreter on PATH",
+      "results": [
+        {
+          "block": 1,
+          "exit_code": 0,
+          "log": "command-1.log"
+        },
+        {
+          "block": 2,
+          "status": "passed exact embedded script in prior bounded demonstration",
+          "log": "demo.log"
+        },
+        {
+          "block": 3,
+          "exit_code": 0,
+          "log": "command-3.log"
+        },
+        {
+          "block": 4,
+          "exit_code": 0,
+          "log": "command-4.log"
+        }
+      ]
+    },
+    {
+      "commands": "git apply --check how-it-works.patch; apply to private temporary document and compare bytes",
+      "result": "passed"
+    },
+    {
+      "commands": "Resolve each Markdown file link from docs/how-it-works.md against clean publication export",
+      "result": "41 links passed"
+    }
+  ],
+  "inherited_receipts_read_not_rerun": [
+    "U2-main-publication-v1/execution.json",
+    "U2-published-validation-v1/configuration.json",
+    "U2-published-validation-v1/final-verification.json",
+    "U2-published-validation-v1/checks.json",
+    "U2-published-validation-v1/full-suite.xml",
+    "U2-published-validation-v1/ci-final.json",
+    "U2-published-validation-v1/hosted-ci.log",
+    "U2-published-validation-v1/runtime-progress.json",
+    "U2-published-validation-v1/public-demo/result.json",
+    "U2-published-validation-v1/characterize.json",
+    "U2-published-validation-v1/pinned-loader-result.json",
+    "U2-published-validation-v1/case-dispositions.json"
+  ],
+  "receipt_cross_checks": [
+    "JUnit: 1394 tests, no failures/errors/skips; all recorded command exits 0",
+    "CI final: completed/success at target commit; raw log confirms tests and conditional no-ops",
+    "runtime final: passed; nominal compatibility distinct from physical execution_failed/not_assessed",
+    "case overlay pending text retained; later final-verification reports completion without changing ledger"
+  ],
+  "no_full_suite_or_matrix_rerun": true,
+  "preservation": "preservation-after.json",
+  "proposal_sha256": "c1178f4b381abbf0a6010d132b43a4c67bbf7d3d4878451caaaec3ba9822dbe3",
+  "patch_sha256": "b5f6d50c14f508ff0dc73e03ca9433dc77d1bd75b1e1f302f281d94fccff0ee6"
+}

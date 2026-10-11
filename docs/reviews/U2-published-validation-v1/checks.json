@@ -1,0 +1,147 @@
+[
+  {
+    "check": "github-clone",
+    "argv": [
+      "git",
+      "clone",
+      "--no-local",
+      "https://github.com/kakoee/rk-uarch.git",
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng",
+    "exit_code": 0,
+    "elapsed_s": 0.7883910019882023
+  },
+  {
+    "check": "detached-checkout",
+    "argv": [
+      "git",
+      "checkout",
+      "--detach",
+      "7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 0.03483707015402615
+  },
+  {
+    "check": "fresh-environment",
+    "argv": [
+      "uv",
+      "sync",
+      "--frozen",
+      "--extra",
+      "dev",
+      "--python",
+      "/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/bin/python3.12"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 1.8928024971392006
+  },
+  {
+    "check": "environment",
+    "argv": [
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python",
+      "-c",
+      "import json,platform,sys,importlib.metadata as m,hashlib,os;from pathlib import Path; import rkuarch.cli,uarch_contract; print(json.dumps(dict(host=platform.node(),platform=platform.platform(),os_release=Path('/etc/os-release').read_text(),python=sys.version,executable=sys.executable,base_prefix=sys.base_prefix,packages={d.metadata['Name']:d.version for d in m.distributions()},runtime_module=rkuarch.cli.__file__,contract_module=uarch_contract.__file__,uv_lock_sha256=hashlib.sha256(Path('uv.lock').read_bytes()).hexdigest(),environment={k:os.environ.get(k) for k in ('PYTHONPATH','MYPYPATH','UV_CACHE_DIR','UV_PROJECT_ENVIRONMENT','XDG_CACHE_HOME')}),indent=2))"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 0.46450331900268793
+  },
+  {
+    "check": "uv-version",
+    "argv": [
+      "uv",
+      "--version"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 0.0051117148250341415
+  },
+  {
+    "check": "ruff",
+    "argv": [
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/ruff",
+      "check",
+      "."
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 0.024380980990827084
+  },
+  {
+    "check": "production-types",
+    "argv": [
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/mypy",
+      "--cache-dir",
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/mypy-production",
+      "src",
+      "contract/uarch_contract",
+      "scripts"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 2.464547353098169
+  },
+  {
+    "check": "contract-test-types",
+    "argv": [
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/mypy",
+      "--cache-dir",
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/mypy-contract",
+      "--no-explicit-package-bases",
+      "contract/tests"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 4.320928025990725
+  },
+  {
+    "check": "imports",
+    "argv": [
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/lint-imports"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 0.20971874403767288
+  },
+  {
+    "check": "schema-freshness",
+    "argv": [
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python",
+      "-m",
+      "uarch_contract.generate",
+      "--check"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 0.37004479207098484
+  },
+  {
+    "check": "strict-vendor",
+    "argv": [
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python",
+      "scripts/vendor_rk.py",
+      "--check"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 0.48337546503171325
+  },
+  {
+    "check": "full-suite",
+    "argv": [
+      "/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-rs",
+      "--junitxml=/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/U2-published-validation-v1/full-suite.xml"
+    ],
+    "cwd": "/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo",
+    "exit_code": 0,
+    "elapsed_s": 546.2028358338866
+  }
+]

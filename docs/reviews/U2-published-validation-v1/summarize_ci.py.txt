@@ -1,0 +1,14 @@
+from pathlib import Path
+import json,re
+E=Path(__file__).resolve().parent
+ci=json.loads((E/'ci-final.json').read_text());assert ci['headSha']=='7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60' and ci['conclusion']=='success'
+lines=(E/'hosted-ci.log').read_text().splitlines()
+noops={name:[x for x in lines if x.startswith(name+'\t') and 'nothing yet:' in x and not any(p in x for p in ('else echo','##[group]Run'))] for name in ['golden','determinism','native','perf','ordering','licences-and-patches']}
+assert all(noops.values()),noops
+results={name:[x for x in lines if x.startswith(name+'\t') and re.search(r'\b\d+ passed\b',x)] for name in ['python','contract','licences-and-patches']}
+assert all(results.values()),results
+markers=('Current runner version','Runner Image','Ubuntu','24.04','Using CPython','Resolved ','uv version','Installed ')
+environment=[x for x in lines if any(m in x for m in markers) and not '##[debug]' in x]
+record={'published_commit':ci['headSha'],'run_url':ci['url'],'conclusion':ci['conclusion'],'all_jobs':{j['name']:j['conclusion'] for j in ci['jobs']},'executed':['python: lint, both strict type checks, import contracts, pytest selection','contract: strict snapshot verification, contract tests, schema freshness','licences-and-patches: licence tests'],'test_result_log_lines':results,'conditional_noop_log_lines':noops,'environment_log_lines':environment,'limitations':'No golden, CI determinism, native, perf, prediction-ordering or patch-application coverage inferred from no-op steps. Actual U2 determinism and replay execute separately in the fresh WSL2 clone.'}
+(E/'ci-summary.json').write_text(json.dumps(record,indent=2)+'\n')
+print(json.dumps({'tests':results,'noops':noops},indent=2))

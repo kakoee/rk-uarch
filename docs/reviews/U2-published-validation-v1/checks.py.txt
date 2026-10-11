@@ -1,0 +1,36 @@
+from pathlib import Path
+import os,json,subprocess,time,platform,hashlib
+E=Path(__file__).resolve().parent
+c=json.loads((E/'configuration.json').read_text()); root=Path(c['root']); repo=Path(c['clone']); v=Path(c['venv'])
+env=dict(os.environ)
+for key in ('PYTHONPATH','MYPYPATH','VIRTUAL_ENV','UV_PROJECT_ENVIRONMENT','UV_CACHE_DIR','GIT_DIR','GIT_WORK_TREE','GIT_INDEX_FILE'):
+    env.pop(key,None)
+env.update(UV_PROJECT_ENVIRONMENT=str(v),UV_CACHE_DIR=c['uv_cache'],XDG_CACHE_HOME=str(root/'xdg-cache'),PYTHONDONTWRITEBYTECODE='1',PYTHONHASHSEED='0',OMP_NUM_THREADS='1')
+checks=[]
+def run(label,args,cwd=repo):
+    start=time.monotonic(); print(label,'started',flush=True)
+    with (E/(label+'.log')).open('w') as out:
+        p=subprocess.run(args,cwd=cwd,env=env,stdout=out,stderr=subprocess.STDOUT)
+    checks.append(dict(check=label,argv=list(map(str,args)),cwd=str(cwd),exit_code=p.returncode,elapsed_s=time.monotonic()-start))
+    (E/'checks.json').write_text(json.dumps(checks,indent=2)+'\n')
+    print(label,p.returncode,flush=True)
+    if p.returncode:raise SystemExit(p.returncode)
+run('github-clone',['git','clone','--no-local','https://github.com/kakoee/rk-uarch.git',str(repo)],root)
+run('detached-checkout',['git','checkout','--detach',c['commit']])
+def git(*args):return subprocess.check_output(['git',*args],cwd=repo,env=env,text=True).strip()
+assert git('rev-parse','HEAD')==c['commit'] and not git('status','--porcelain')
+assert not git('branch','--show-current')
+assert not (repo/'.git/objects/info/alternates').exists()
+(E/'initial-git.json').write_text(json.dumps({'commit':git('rev-parse','HEAD'),'tree':git('rev-parse','HEAD^{tree}'),'origin':git('remote','get-url','origin'),'detached':True,'status':git('status','--porcelain'),'object_alternates':False},indent=2)+'\n')
+run('fresh-environment',['uv','sync','--frozen','--extra','dev','--python',c['base_python']])
+code="""import json,platform,sys,importlib.metadata as m,hashlib,os;from pathlib import Path; import rkuarch.cli,uarch_contract; print(json.dumps(dict(host=platform.node(),platform=platform.platform(),os_release=Path('/etc/os-release').read_text(),python=sys.version,executable=sys.executable,base_prefix=sys.base_prefix,packages={d.metadata['Name']:d.version for d in m.distributions()},runtime_module=rkuarch.cli.__file__,contract_module=uarch_contract.__file__,uv_lock_sha256=hashlib.sha256(Path('uv.lock').read_bytes()).hexdigest(),environment={k:os.environ.get(k) for k in ('PYTHONPATH','MYPYPATH','UV_CACHE_DIR','UV_PROJECT_ENVIRONMENT','XDG_CACHE_HOME')}),indent=2))"""
+run('environment',[str(v/'bin/python'),'-c',code]);run('uv-version',['uv','--version'])
+run('ruff',[str(v/'bin/ruff'),'check','.'])
+run('production-types',[str(v/'bin/mypy'),'--cache-dir',str(root/'mypy-production'),'src','contract/uarch_contract','scripts'])
+run('contract-test-types',[str(v/'bin/mypy'),'--cache-dir',str(root/'mypy-contract'),'--no-explicit-package-bases','contract/tests'])
+run('imports',[str(v/'bin/lint-imports')])
+run('schema-freshness',[str(v/'bin/python'),'-m','uarch_contract.generate','--check'])
+run('strict-vendor',[str(v/'bin/python'),'scripts/vendor_rk.py','--check'])
+run('full-suite',[str(v/'bin/python'),'-m','pytest','-q','-rs','--junitxml='+str(E/'full-suite.xml')])
+assert not git('status','--porcelain')
+(E/'suite-completion.json').write_text(json.dumps({'status':'passed','commit':c['commit'],'final_git_status':git('status','--porcelain'),'fresh_venv_and_cache':True,'existing_base_interpreter_reused':c['base_python'],'runtime_matrix_separate':True},indent=2)+'\n')

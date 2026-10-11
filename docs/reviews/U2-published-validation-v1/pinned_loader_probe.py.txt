@@ -1,0 +1,31 @@
+"""Test-only C10 probe: load real public export bytes; no oracle execution/generation."""
+from pathlib import Path
+import json,os,subprocess,hashlib
+E=Path(__file__).resolve().parent;c=json.loads((E/'configuration.json').read_text());repo=Path(c['clone']);root=Path(c['root']);py=Path(c['venv'])/'bin/python';output=root/'export-roundtrip'
+env=dict(os.environ);env.pop('PYTHONPATH',None);env.pop('MYPYPATH',None);env['PYTHONDONTWRITEBYTECODE']='1'
+args=[str(py),'-m','rkuarch.cli','rk-component','hw/designs/npu-l4.yaml','--component-id','compute.asic.npu-l4','--execution-model','contract/tests/fixtures/u2_b/a2-export/npu-l4.execution-model.json','--oracle-compat','--output',str(output)]
+with (E/'pinned-export.log').open('w') as log:p=subprocess.run(args,cwd=repo,env=env,stdout=log,stderr=subprocess.STDOUT)
+assert p.returncode==0
+assert (output/'oracle-compat.yaml').read_bytes()==(repo/'contract/tests/fixtures/u2_b/a2-export/npu-l4.oracle-compat.yaml').read_bytes()
+vendor=repo/'contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963'
+# Isolated child sees only the committed pinned loader, not any upstream checkout.
+probe='''from pathlib import Path
+import json,sys,hashlib
+import rk.components.loader as loader
+vendor=Path(sys.argv[1]); output=Path(sys.argv[2]); assert Path(loader.__file__).resolve()==vendor/'rk/components/loader.py'
+raw=json.loads((output/'oracle-compat.yaml').read_text()); descriptor=loader.load_component_file(output/'oracle-compat.yaml')
+value=descriptor.model_dump(mode='json')
+assert descriptor.id==raw['id']=='compute.asic.npu-l4'
+assert value['params']==raw['params'] and value['execution_model']==raw['execution_model']
+assert value['calibration']==raw['calibration']
+second=output/'loaded-roundtrip.yaml'; second.write_text(json.dumps(value,sort_keys=True,separators=(',',':'))+'\\n')
+assert loader.load_component_file(second)==descriptor
+print(json.dumps(dict(status='passed',loader=str(Path(loader.__file__).resolve()),loader_sha256=hashlib.sha256(Path(loader.__file__).read_bytes()).hexdigest(),component_id=descriptor.id,parameters=len(value['params']),params_and_execution_preserved=True,serialized_reload_equal=True,oracle_execution=False),indent=2))
+'''
+env['PYTHONPATH']=str(vendor)
+p=subprocess.run([str(py),'-c',probe,str(vendor),str(output)],cwd=root,env=env,text=True,capture_output=True)
+(E/'pinned-loader.log').write_text(p.stdout+p.stderr)
+print(p.stdout+p.stderr)
+(E/'pinned-loader-command.json').write_text(json.dumps({'classification':'isolated test-only pinned component loader; no oracle calls or generated reference refresh','export_command':args,'loader_probe':probe,'loader_exit_code':p.returncode,'published_commit':c['commit'],'PYTHONPATH':str(vendor)},indent=2)+'\n')
+assert p.returncode==0
+(E/'pinned-loader-result.json').write_text(p.stdout)

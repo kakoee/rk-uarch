@@ -1,0 +1,134 @@
+{
+  "published_commit": "7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60",
+  "run_url": "https://github.com/kakoee/rk-uarch/actions/runs/38101625804",
+  "conclusion": "success",
+  "all_jobs": {
+    "golden": "success",
+    "determinism": "success",
+    "ordering": "success",
+    "perf": "success",
+    "native": "success",
+    "licences-and-patches": "success",
+    "contract": "success",
+    "python": "success"
+  },
+  "executed": [
+    "python: lint, both strict type checks, import contracts, pytest selection",
+    "contract: strict snapshot verification, contract tests, schema freshness",
+    "licences-and-patches: licence tests"
+  ],
+  "test_result_log_lines": {
+    "python": [
+      "python\ttests (fails on an empty suite, by design)\t2026-10-11T01:39:50.1803214Z 1394 passed in 1014.21s (0:16:54)"
+    ],
+    "contract": [
+      "contract\tcontract and parity harness self-tests (not workload parity)\t2026-10-11T01:22:58.3593171Z 579 passed in 11.05s"
+    ],
+    "licences-and-patches": [
+      "licences-and-patches\tlicences\t2026-10-11T01:22:45.5096630Z 2 passed in 0.82s"
+    ]
+  },
+  "conditional_noop_log_lines": {
+    "golden": [
+      "golden\tRun if [ -n \"$(find tests/golden/expected -name '*.json' -print -quit)\" ]; then\t2026-10-11T01:22:44.1734312Z nothing yet: no expected files"
+    ],
+    "determinism": [
+      "determinism\tRun if [ -n \"$(find tests/golden/scenarios -name '*.yaml' -print -quit)\" ]; then\t2026-10-11T01:22:44.0386007Z nothing yet: no golden scenarios"
+    ],
+    "native": [
+      "native\tRun if [ -n \"$(find native/crates -name '*.rs' -print -quit 2>/dev/null)\" ]; then\t2026-10-11T01:22:42.3112996Z nothing yet: no native sources"
+    ],
+    "perf": [
+      "perf\tRun if [ -n \"$(find validation/perf -name '*.json' -print -quit 2>/dev/null)\" ]; then\t2026-10-11T01:22:45.6990955Z nothing yet: no perf baselines"
+    ],
+    "ordering": [
+      "ordering\tRun if [ -n \"$(find validation/L3_silicon -path '*/predictions/*' -type f -print -quit)\" ]; then\t2026-10-11T01:22:44.1889151Z nothing yet: no predictions"
+    ],
+    "licences-and-patches": [
+      "licences-and-patches\tpatches\t2026-10-11T01:22:45.5746707Z nothing yet: no patches"
+    ]
+  },
+  "environment_log_lines": [
+    "golden\tSet up job\t\ufeff2026-10-11T01:22:40.8944312Z Current runner version: '2.337.0'",
+    "golden\tSet up job\t2026-10-11T01:22:40.8980507Z ##[group]Runner Image Provisioner",
+    "golden\tSet up job\t2026-10-11T01:22:40.8993392Z Ubuntu",
+    "golden\tSet up job\t2026-10-11T01:22:40.8994293Z 24.04.5",
+    "golden\tSet up job\t2026-10-11T01:22:40.8997159Z ##[group]Runner Image",
+    "golden\tSet up job\t2026-10-11T01:22:40.8998248Z Image: ubuntu-24.04",
+    "golden\tSet up job\t2026-10-11T01:22:40.9000970Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "golden\tRun astral-sh/setup-uv@v3\t2026-10-11T01:22:43.2954973Z Successfully installed uv version 0.13.0",
+    "golden\tRun uv sync --extra dev\t2026-10-11T01:22:43.4019555Z Using CPython 3.12.3 interpreter at: /usr/bin/python3.12",
+    "golden\tRun uv sync --extra dev\t2026-10-11T01:22:43.4046023Z Resolved 41 packages in 0.83ms",
+    "golden\tRun uv sync --extra dev\t2026-10-11T01:22:44.1410728Z Installed 35 packages in 49ms",
+    "determinism\tSet up job\t\ufeff2026-10-11T01:22:40.9097611Z Current runner version: '2.337.0'",
+    "determinism\tSet up job\t2026-10-11T01:22:40.9135143Z ##[group]Runner Image Provisioner",
+    "determinism\tSet up job\t2026-10-11T01:22:40.9148345Z Ubuntu",
+    "determinism\tSet up job\t2026-10-11T01:22:40.9149412Z 24.04.5",
+    "determinism\tSet up job\t2026-10-11T01:22:40.9152170Z ##[group]Runner Image",
+    "determinism\tSet up job\t2026-10-11T01:22:40.9153244Z Image: ubuntu-24.04",
+    "determinism\tSet up job\t2026-10-11T01:22:40.9156125Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "determinism\tRun astral-sh/setup-uv@v3\t2026-10-11T01:22:43.1950034Z Successfully installed uv version 0.13.0",
+    "determinism\tRun uv sync --extra dev\t2026-10-11T01:22:43.3139557Z Using CPython 3.12.3 interpreter at: /usr/bin/python3.12",
+    "determinism\tRun uv sync --extra dev\t2026-10-11T01:22:43.3167752Z Resolved 41 packages in 0.91ms",
+    "determinism\tRun uv sync --extra dev\t2026-10-11T01:22:44.0053803Z Installed 35 packages in 42ms",
+    "ordering\tSet up job\t\ufeff2026-10-11T01:22:41.4271509Z Current runner version: '2.337.0'",
+    "ordering\tSet up job\t2026-10-11T01:22:41.4293833Z ##[group]Runner Image Provisioner",
+    "ordering\tSet up job\t2026-10-11T01:22:41.4300287Z Ubuntu",
+    "ordering\tSet up job\t2026-10-11T01:22:41.4300785Z 24.04.5",
+    "ordering\tSet up job\t2026-10-11T01:22:41.4302438Z ##[group]Runner Image",
+    "ordering\tSet up job\t2026-10-11T01:22:41.4302956Z Image: ubuntu-24.04",
+    "ordering\tSet up job\t2026-10-11T01:22:41.4304355Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "perf\tSet up job\t\ufeff2026-10-11T01:22:41.2212115Z Current runner version: '2.337.0'",
+    "perf\tSet up job\t2026-10-11T01:22:41.2233597Z ##[group]Runner Image Provisioner",
+    "perf\tSet up job\t2026-10-11T01:22:41.2240559Z Ubuntu",
+    "perf\tSet up job\t2026-10-11T01:22:41.2241105Z 24.04.5",
+    "perf\tSet up job\t2026-10-11T01:22:41.2242528Z ##[group]Runner Image",
+    "perf\tSet up job\t2026-10-11T01:22:41.2243079Z Image: ubuntu-24.04",
+    "perf\tSet up job\t2026-10-11T01:22:41.2244505Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "perf\tRun astral-sh/setup-uv@v3\t2026-10-11T01:22:45.0094122Z Successfully installed uv version 0.13.0",
+    "perf\tRun uv sync --extra dev\t2026-10-11T01:22:45.1519984Z Using CPython 3.12.3 interpreter at: /usr/bin/python3.12",
+    "perf\tRun uv sync --extra dev\t2026-10-11T01:22:45.1540929Z Resolved 41 packages in 0.79ms",
+    "perf\tRun uv sync --extra dev\t2026-10-11T01:22:45.6708740Z Installed 35 packages in 38ms",
+    "native\tSet up job\t\ufeff2026-10-11T01:22:40.9318620Z Current runner version: '2.337.0'",
+    "native\tSet up job\t2026-10-11T01:22:40.9347990Z ##[group]Runner Image Provisioner",
+    "native\tSet up job\t2026-10-11T01:22:40.9356783Z Ubuntu",
+    "native\tSet up job\t2026-10-11T01:22:40.9357358Z 24.04.5",
+    "native\tSet up job\t2026-10-11T01:22:40.9359044Z ##[group]Runner Image",
+    "native\tSet up job\t2026-10-11T01:22:40.9359685Z Image: ubuntu-24.04",
+    "native\tSet up job\t2026-10-11T01:22:40.9361343Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "licences-and-patches\tSet up job\t\ufeff2026-10-11T01:22:40.8610691Z Current runner version: '2.337.0'",
+    "licences-and-patches\tSet up job\t2026-10-11T01:22:40.8644803Z ##[group]Runner Image Provisioner",
+    "licences-and-patches\tSet up job\t2026-10-11T01:22:40.8655324Z Ubuntu",
+    "licences-and-patches\tSet up job\t2026-10-11T01:22:40.8656051Z 24.04.5",
+    "licences-and-patches\tSet up job\t2026-10-11T01:22:40.8658370Z ##[group]Runner Image",
+    "licences-and-patches\tSet up job\t2026-10-11T01:22:40.8659217Z Image: ubuntu-24.04",
+    "licences-and-patches\tSet up job\t2026-10-11T01:22:40.8661632Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "licences-and-patches\tRun astral-sh/setup-uv@v3\t2026-10-11T01:22:43.2310044Z Successfully installed uv version 0.13.0",
+    "licences-and-patches\tRun uv sync --extra dev\t2026-10-11T01:22:43.3929201Z Using CPython 3.12.3 interpreter at: /usr/bin/python3.12",
+    "licences-and-patches\tRun uv sync --extra dev\t2026-10-11T01:22:43.3953410Z Resolved 41 packages in 0.94ms",
+    "licences-and-patches\tRun uv sync --extra dev\t2026-10-11T01:22:44.1011685Z Installed 35 packages in 49ms",
+    "contract\tSet up job\t\ufeff2026-10-11T01:22:41.7385976Z Current runner version: '2.337.0'",
+    "contract\tSet up job\t2026-10-11T01:22:41.7411526Z ##[group]Runner Image Provisioner",
+    "contract\tSet up job\t2026-10-11T01:22:41.7419781Z Ubuntu",
+    "contract\tSet up job\t2026-10-11T01:22:41.7420277Z 24.04.5",
+    "contract\tSet up job\t2026-10-11T01:22:41.7421926Z ##[group]Runner Image",
+    "contract\tSet up job\t2026-10-11T01:22:41.7422569Z Image: ubuntu-24.04",
+    "contract\tSet up job\t2026-10-11T01:22:41.7424214Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "contract\tRun astral-sh/setup-uv@v3\t2026-10-11T01:22:44.9157007Z Successfully installed uv version 0.13.0",
+    "contract\tRun uv sync --extra dev\t2026-10-11T01:22:45.0339807Z Using CPython 3.12.3 interpreter at: /usr/bin/python3.12",
+    "contract\tRun uv sync --extra dev\t2026-10-11T01:22:45.0364831Z Resolved 41 packages in 0.89ms",
+    "contract\tRun uv sync --extra dev\t2026-10-11T01:22:45.7014584Z Installed 35 packages in 44ms",
+    "python\tSet up job\t\ufeff2026-10-11T01:22:41.1628979Z Current runner version: '2.337.0'",
+    "python\tSet up job\t2026-10-11T01:22:41.1655612Z ##[group]Runner Image Provisioner",
+    "python\tSet up job\t2026-10-11T01:22:41.1664482Z Ubuntu",
+    "python\tSet up job\t2026-10-11T01:22:41.1665087Z 24.04.5",
+    "python\tSet up job\t2026-10-11T01:22:41.1666740Z ##[group]Runner Image",
+    "python\tSet up job\t2026-10-11T01:22:41.1667565Z Image: ubuntu-24.04",
+    "python\tSet up job\t2026-10-11T01:22:41.1669280Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md",
+    "python\tRun astral-sh/setup-uv@v3\t2026-10-11T01:22:44.4153653Z Successfully installed uv version 0.13.0",
+    "python\tRun uv sync --extra dev\t2026-10-11T01:22:44.5260571Z Using CPython 3.12.3 interpreter at: /usr/bin/python3.12",
+    "python\tRun uv sync --extra dev\t2026-10-11T01:22:44.5287015Z Resolved 41 packages in 0.84ms",
+    "python\tRun uv sync --extra dev\t2026-10-11T01:22:45.3401091Z Installed 35 packages in 38ms"
+  ],
+  "limitations": "No golden, CI determinism, native, perf, prediction-ordering or patch-application coverage inferred from no-op steps. Actual U2 determinism and replay execute separately in the fresh WSL2 clone."
+}

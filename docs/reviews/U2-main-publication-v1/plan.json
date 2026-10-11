@@ -1,0 +1,49 @@
+{
+  "decision_id": "U2-main-publication-v1",
+  "status": "prepared for separate publication approval; not executed",
+  "prepared_at_utc": "2026-10-11T01:19:28.472983+00:00",
+  "repository": "https://github.com/kakoee/rk-uarch.git",
+  "working_directory": "/home/jjaff/AI-infra-simulation/rk-uarch",
+  "expected_local_and_remote_main": "1e9e794a84c5173812c23a1cf2fc04b85e6f6831",
+  "target_commit": "7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60",
+  "target_tree": "deccb57a573717990762e60fb8819f0ae463ce20",
+  "operation_1": "Fast-forward local main to the exact integration commit; no new merge commit",
+  "operation_2": "Push only refs/heads/main to origin refs/heads/main with followTags disabled and no force",
+  "commands_after_rechecking_preconditions": [
+    [
+      "git",
+      "merge",
+      "--ff-only",
+      "7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60"
+    ],
+    [
+      "git",
+      "-c",
+      "push.followTags=false",
+      "push",
+      "origin",
+      "refs/heads/main:refs/heads/main"
+    ]
+  ],
+  "verify_after_each_operation": true,
+  "remote_main_checked": "1e9e794a84c5173812c23a1cf2fc04b85e6f6831\trefs/heads/main",
+  "outgoing_commit_count": 9,
+  "new_unique_blob_bytes_since_old_main": 13382015,
+  "size_note": "Uncompressed new Git blob content across all outgoing history, not the network transfer size; large untracked outputs remain local.",
+  "worker_branches_pushed": false,
+  "tag_created_or_pushed": false,
+  "worktrees_removed": false,
+  "sprint_closed": false,
+  "preconditions": [
+    "Local main still clean at expected old commit",
+    "Remote main still at expected old commit",
+    "Integration still at exact target with clean tracked state",
+    "Commit verification still matches approved checkpoint receipt"
+  ],
+  "remaining_gates_after_publication": [
+    "Fresh GitHub clone of target on ElfinKidsLaptop Ubuntu/WSL2 with isolated environment and complete U0021 exits",
+    "Hosted Ubuntu CI on exact target; distinguish executed jobs from conditional no-ops",
+    "Reconcile validation evidence and obtain separate sprint-closure/tag approval"
+  ],
+  "failure_handling": "Stop and reconcile actual local/remote heads if any command fails; never force push or reset to recover automatically."
+}

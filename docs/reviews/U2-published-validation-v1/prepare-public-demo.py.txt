@@ -1,0 +1,33 @@
+from pathlib import Path
+import json,os,subprocess,hashlib,difflib
+E=Path(__file__).resolve().parent;c=json.loads((E/'configuration.json').read_text());root=Path(c['root']);repo=Path(c['clone']);py=Path(c['venv'])/'bin/python';d=root/'public-inputs';d.mkdir(exist_ok=False);e=E/'public-demo';e.mkdir(exist_ok=False)
+env=dict(os.environ);env.pop('PYTHONPATH',None);env.pop('MYPYPATH',None);env.pop('VIRTUAL_ENV',None);env['PYTHONDONTWRITEBYTECODE']='1'
+commands=json.loads((repo/'docs/reviews/U2-public-demo-v1/commands.json').read_text());receipt=[]
+for n,row in enumerate(commands):
+    argv=[str(py)]+row['argv'][1:]
+    argv=[x.replace('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1',str(d)).replace('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/U2-public-demo-v1',str(repo/'docs/reviews/U2-public-demo-v1')) for x in argv]
+    with (e/f'fresh-input-{n}.log').open('w') as out:p=subprocess.run(argv,cwd=repo,env=env,stdout=out,stderr=subprocess.STDOUT)
+    receipt.append({'argv':argv,'exit_code':p.returncode});(e/'fresh-input-commands.json').write_text(json.dumps(receipt,indent=2)+'\n')
+    assert p.returncode==0,argv
+# Reconstruct only the previously accepted singleton administrative declaration;
+# its exact file bytes must match the immutable published receipt below.
+registry={'entries':[{'family':'u2-h1-npu-l4-only','hardware_spec_hash':'sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9'}],'format':'uarch-family-registry/1','registry_hash':'sha256:c8e33266930c4548767c25c66586e20e7a062fbb2cc25545624fd5e5a01aec7b','review_hash':'sha256:'+'0'*64,'version':'u2-public-demo-v1-singleton-proposal'}
+(d/'draft/registry.json').write_text(json.dumps(registry,sort_keys=True,separators=(',',':'))+'\n')
+expected=json.loads((repo/'docs/reviews/U2-public-demo-v1/capture-receipt.json').read_text())['files']
+actual={p.relative_to(d).as_posix():{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size} for p in d.rglob('*') if p.is_file()}
+assert actual==expected,'Fresh inputs differ from reviewed subjects; stop without reusing reviews'
+(e/'fresh-input-verification.json').write_text(json.dumps({'status':'passed','exact_files':len(actual),'new_capture':True,'singleton_registry_reconstructed_byte_identically':True,'matches_published_review_subject_inputs':True},indent=2)+'\n')
+source=repo/'docs/reviews/U2-public-demo-v1/completion/run-demo.py.txt';old=source.read_text();new=old
+start=new.index("I = Path(");end=new.index('from uarch_contract.evidence import ReviewRecord')
+new=new[:start]+f"I = Path({str(repo)!r})\nR = I / 'docs/reviews/U2-public-demo-v1'\nE = Path({str(e)!r})\nD = Path({str(d)!r})\nO = Path({str(root/'public-outputs')!r})\nT = {c['commit']!r}\nS = I\nPY = Path({str(py)!r})\nassert not O.exists()\nO.mkdir()\nsys.path[:0] = [str(S / 'src'), str(S / 'contract')]\n"+new[end:]
+# This invocation is now a published-revision cold-clone public-demo subcheck;
+# the prior result's explicit full-gate false stays false until all checks finish.
+(e/'run-demo.py').write_text(new)
+(e/'driver-adaptation.patch').write_text(''.join(difflib.unified_diff(old.splitlines(True),new.splitlines(True),fromfile=str(source.relative_to(repo)),tofile='run-demo.py')))
+with (e/'run-demo.log').open('w') as out:p=subprocess.run([str(py),str(e/'run-demo.py')],cwd=repo,env=env,stdout=out,stderr=subprocess.STDOUT)
+print('Public demo exit:',p.returncode,flush=True);assert p.returncode==0
+# Human-facing characterization produces both JSON and Markdown; inspect both.
+args=[str(py),'-m','rkuarch.cli','characterize','hw/designs/npu-l40s.yaml','--model','llama-3.1-70b','--precision','fp8','--tp','8','--output',str(root/'characterize.json')]
+# The exact supported hardware filename is resolved from committed designs.
+choices=list((repo/'hw/designs').glob('*.yaml'));print('Designs:',[x.name for x in choices])
+(e/'characterize-proposal.json').write_text(json.dumps({'argv':args,'not_executed':True},indent=2)+'\n')

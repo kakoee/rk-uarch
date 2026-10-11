@@ -1,0 +1,31 @@
+--- docs/reviews/U2-public-demo-v1/completion/run-demo.py.txt
++++ run-demo.py
+@@ -10,19 +10,16 @@
+ import tarfile
+ import time
+ 
+-I = Path('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration')
++I = Path('/tmp/U2-github-cold-7fee0a8-g2i3kbng/repo')
+ R = I / 'docs/reviews/U2-public-demo-v1'
+-E = R / 'completion'
+-D = I / 'tables/U2-public-demo-v1'
+-O = I / 'tables/U2-public-demo-v1-completion'
+-T = '53f9f21b7cc3f84c0cbdb5f3f1e74e6e4aeca522'
+-S = Path('/tmp/U2-public-demo-completion-source')
+-PY = Path('/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python')
+-assert not O.exists() and not S.exists(), 'Require fresh output and source directories'
+-O.mkdir(); S.mkdir()
+-archive = subprocess.check_output(['git', 'archive', T], cwd=I)
+-with tarfile.open(fileobj=io.BytesIO(archive)) as tf:
+-    tf.extractall(S, filter='data')
++E = Path('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/U2-published-validation-v1/public-demo')
++D = Path('/tmp/U2-github-cold-7fee0a8-g2i3kbng/public-inputs')
++O = Path('/tmp/U2-github-cold-7fee0a8-g2i3kbng/public-outputs')
++T = '7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60'
++S = I
++PY = Path('/tmp/U2-github-cold-7fee0a8-g2i3kbng/venv/bin/python')
++assert not O.exists()
++O.mkdir()
+ sys.path[:0] = [str(S / 'src'), str(S / 'contract')]
+ from uarch_contract.evidence import ReviewRecord
+ from uarch_contract.hashing import review_subject_hash, verify_identity

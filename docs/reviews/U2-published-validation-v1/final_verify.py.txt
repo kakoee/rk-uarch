@@ -1,0 +1,73 @@
+from pathlib import Path
+import hashlib,html,json,re,subprocess,xml.etree.ElementTree as ET
+from datetime import datetime,timezone
+E=Path(__file__).resolve().parent
+c=json.loads((E/'configuration.json').read_text());repo=Path(c['clone'])
+def sha(p):
+    with p.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+def git(*a):return subprocess.check_output(['git',*a],cwd=repo,text=True).strip()
+def files(p):return {f.relative_to(p).as_posix() for f in p.rglob('*') if f.is_file()}
+s=json.loads((E/'runtime-progress.json').read_text());assert s['status']=='passed'
+assert len(s['phases'])==25 and all(p['status']=='passed' for p in s['phases'])
+assert s['preflight']['validation_tree']==c['commit']
+assert s['actual_execution']['calls']==dict(nominal=1008,physical_point=96,prepare_h1=6)
+assert s['actual_execution']['physical_states']==dict(executed=96,execution_failed=48,not_run=864)
+assert s['nominal_and_physical_producers_never_called_after_fresh_capture']
+assert len(s['capability_refusals'])==3 and set(s['capability_refusals'].values())=={'RenderIdentityBindingMismatch'}
+out=Path(s['output_root']);entries={}
+for line in (out/'SHA256SUMS').read_text().splitlines():
+    h,n=line.split('  ',1);assert n not in entries and not Path(n).is_absolute() and '..' not in Path(n).parts
+    assert sha(out/n)==h,n;entries[n]=h
+assert set(entries)==files(out)-{'SHA256SUMS'}
+assert len(entries)==9962==s['artifact_manifest']['entries']
+assert sha(out/'SHA256SUMS')==s['artifact_manifest']['sha256']
+prior=repo/'docs/reviews/U2-adoption-v3-execution/runtime-output-SHA256SUMS'
+assert (out/'SHA256SUMS').read_bytes()==prior.read_bytes(),'Generated members differ from committed reference run'
+replay=json.loads((out/'replay-all-byte-equality.json').read_text());repeat=json.loads((out/'repeat-byte-equality.json').read_text())
+assert len(replay)==3316 and len(repeat)==6
+# Recheck saved package byte identity using file hashes already verified above.
+for n in files(out/'report'):
+    assert entries['report/'+n]==entries['replay-report/'+n]
+for n in files(out/'repeat'):
+    assert entries['repeat/'+n]==entries['report/'+n]
+assert s['RR_C1']['complete_package_equal'] and s['RR_C1']['complete_table_bytes_equal']
+assert s['RR_C1']['conditions']==59 and s['RR_C1']['rows']==24
+fixture_dir=repo/'contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963'
+fixtures=json.loads((fixture_dir/'parity/fixtures.json').read_text())
+for mode in ('hidden','opt-in'):
+    counters=s['renders'][mode]['counters']
+    assert counters.get('visible',0)==(18768 if mode=='opt-in' else 0)
+    assert counters['synthetic_assessment']==0 and counters['missing_or_incomplete']==0
+    assert counters['null_value']==12432
+    ht=(out/'report'/(mode+'.html')).read_text();md=(out/'report'/(mode+'.md')).read_text()
+    assert 'conditional · 59 stipulations' in ht and 'conditional · 59 stipulations' in md
+    hl={html.unescape(x) for x in re.findall(r'<dt>(.*?)</dt>',ht)}
+    ml={re.sub(r'\\(.)',r'\1',x) for x in re.findall(r'^\*\*(.*?)\*\*:',md,re.M)}
+    assert all(f['id'] in hl and f['id'] in ml for f in fixtures)
+    del ht,md,hl,ml
+for formats in json.loads((E/'serialized-surface-results.json').read_text()).values():
+    assert all(r['checked']==40320 for r in formats.values())
+checks=json.loads((E/'checks.json').read_text());assert all(x['exit_code']==0 for x in checks)
+assert json.loads((E/'suite-completion.json').read_text())['status']=='passed'
+xml=ET.parse(E/'full-suite.xml').getroot();suites=list(xml.iter('testsuite'));counts={k:sum(int(s.attrib.get(k,0)) for s in suites) for k in ('tests','failures','errors','skipped')}
+assert counts==dict(tests=1394,failures=0,errors=0,skipped=0),counts
+demo=json.loads((E/'public-demo/result.json').read_text());assert demo['status'].startswith('passed') and demo['source_tree']==c['commit'] and demo['saved_replay_producers_disabled']
+assert json.loads((E/'characterize.json').read_text())['status']=='passed'
+loader=json.loads((E/'pinned-loader-result.json').read_text());assert loader['status']=='passed' and loader['upstream_commit']=='1e5706e0ebfcc67c1a7333079a35b75f693e9963' and loader['loader_bytes_match_committed_snapshot']
+ci_scope=json.loads((E/'ci-summary.json').read_text());assert len(ci_scope['conditional_noop_log_lines'])==6
+ci=json.loads((E/'ci-final.json').read_text());assert ci['headSha']==c['commit'] and ci['conclusion']=='success' and ci['status']=='completed'
+assert all(j['conclusion']=='success' for j in ci['jobs'])
+assert git('rev-parse','HEAD')==c['commit'] and git('rev-parse','HEAD^{tree}')=='deccb57a573717990762e60fb8819f0ae463ce20'
+assert not git('branch','--show-current') and not git('status','--porcelain')
+assert git('remote','get-url','origin')=='https://github.com/kakoee/rk-uarch.git'
+assert not (repo/'.git/objects/info/alternates').exists()
+# Remote state and all original worktrees stay unchanged by validation.
+remote=subprocess.check_output(['git','ls-remote','--heads','origin','main'],cwd=repo,text=True).strip()
+assert remote==c['commit']+'\trefs/heads/main'
+parents=Path('/home/jjaff/AI-infra-simulation'); expected={'rk-uarch':c['commit'],'rk-uarch-u2-integration':c['commit'],'rk-uarch-u2-a':'4e67eaf1d5ab68785a902e04da412931d70f9d09','rk-uarch-u2-b':'11facde03f6d79b85260dc7ec14dd4d409947a71'}
+for folder,h in expected.items():
+    assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=parents/folder,text=True).strip()==h
+    for args in (['diff','--name-only'],['diff','--cached','--name-only']):assert not subprocess.check_output(['git',*args],cwd=parents/folder)
+record={'status':'U0021 published-revision checks passed','recorded_at_utc':datetime.now(timezone.utc).isoformat(),'published_commit':c['commit'],'tree':git('rev-parse','HEAD^{tree}'),'clone':str(repo),'origin':git('remote','get-url','origin'),'initial_and_final_git_clean':True,'detached':True,'new_venv_and_cache':True,'reused_base_interpreter':c['base_python'],'suite':counts,'runtime_phases':25,'actual_execution':s['actual_execution'],'rows':24,'comparison_paths':40320,'visible_stipulations':59,'fixture_identifiers_preserved':1008,'default_visible_comparisons':0,'opt_in_labelled_visible_comparisons':18768,'repeated_files':6,'repeated_bytes':sum(v['bytes'] for v in repeat.values()),'replay_files':3316,'replay_bytes':sum(v['bytes'] for v in replay.values()),'output_manifest_sha256':sha(out/'SHA256SUMS'),'output_manifest_members':len(entries),'same_as_committed_local_run_manifest':True,'public_cli_demo_files':demo['identical_output_files_per_run'],'public_cli_demo_bytes':demo['identical_bytes_per_run'],'hosted_ci_url':ci['url'],'hosted_ci_commit':ci['headSha'],'worker_worktrees_preserved':True,'pinned_loader_roundtrip':'passed: actual H1 public export and serialized reload; isolated pinned upstream checkout; no oracle execution','ci_noop_jobs_or_steps':[n if n!='licences-and-patches' else 'licences-and-patches / patches' for n in ci_scope['conditional_noop_log_lines']],'limitations':['WSL2 correctness validation, not simulator-performance benchmarking','Nominal aggregate compatibility only; no physical full-workload duration validation','96 physical discrepancies,48 capacity failures,864 not-run cases retained','Four existing upstream precision-refusal observations per track retained, not freshly generated','Reports retain STUB, unknown error, unverified energy; no hardware accuracy or evidence eligibility granted','Full-matrix administrative packaging reviews remain labelled synthetic; public eight-point demo binds real independent AI declaration reviews'],'tag_cleanup_closure_performed':False}
+(E/'final-verification.json').write_text(json.dumps(record,indent=2)+'\n')
+print(json.dumps(record,indent=2))

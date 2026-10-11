@@ -4,8 +4,7 @@ U2 implements a standalone stateless analytic estimate of one chip's LLM workloa
 plus reproducible tables and provenance-aware reports. This description targets published
 main commit `7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60`, tree
 `deccb57a573717990762e60fb8819f0ae463ce20`. Publication and published-revision validation
-have receipts; Javid accepted [U2 closeout](reviews/U2-closeout.md). Final documentation
-publication and `u02-end` remain pending. The
+have receipts; `u02-end` and sprint closure are still pending. The
 [public workflow](u2-workflow.md) prepares explicit operators and mapping, executes the
 analytic engine and packages results with reviewed source declarations. The
 [accepted design](u2-design.md) defines its scope and limitations.
@@ -283,10 +282,9 @@ for rel in ('MANIFEST.json', 'u2-inputs/SHA256SUMS'):
 PY
 ```
 
-The [publication receipt](reviews/U2-main-publication-v1/execution.json) and
-[published-revision validation](reviews/U2-published-validation-v1/README.md) are preserved
-in this documentation selection. They record checks on implementation commit `7fee0a8`;
-the original receipts were local files at that commit and are published with this refresh.
+Coordinator-owned **local receipts**, not files committed at this revision, are under
+`/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/`:
+`U2-main-publication-v1/execution.json` and `U2-published-validation-v1/`.
 The latter's `configuration.json` identifies the actual GitHub cold clone, new environment
 and cache, reused base interpreter, and temporary generated outputs. Its final verification
 reports completed U0021 checks on the exact published commit: **1,394 tests passed, no
@@ -295,16 +293,17 @@ H2 characterization and the pinned upstream loader round trip (no oracle executi
 The historical B64 ledger is preserved; its later disposition overlay does not convert
 all earlier pending cases into passes.
 
-From the repository root, the following reads the preserved receipts; it does not rerun
-their suite or matrix. The receipts are added by this documentation selection and are absent
-from the earlier implementation-only commit. A missing, running or pending receipt is not a pass.
+The following reads those receipts; it does not rerun their suite or matrix and requires
+access to that local coordinator directory. A published clone alone does not contain these
+post-publication receipts. Preserve or publish them separately when reconciling this page.
+A missing, running or pending receipt is not a pass.
 
 ```sh
 python -B - <<'PY'
 import json
 from pathlib import Path
 from xml.etree import ElementTree as ET
-base = Path('docs/reviews')
+base = Path('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews')
 p = base / 'U2-published-validation-v1'
 print('publication', json.loads((base / 'U2-main-publication-v1/execution.json').read_text())['status'])
 for name in ('configuration', 'final-verification', 'characterize', 'pinned-loader-result'):
@@ -333,7 +332,6 @@ the cold clone. The [workflow](../.github/workflows/ci.yml) defines these distin
 [U0021](decisions/U0021-u2-cold-clone-validation-exception.md) permits this U2 correctness
 validation on ElfinKidsLaptop Ubuntu/WSL2 plus hosted Ubuntu CI on the same published commit.
 It does not approve simulator-performance benchmarking on WSL2 or waive U3's Linux
-self-hosted runner and later hardware-validation requirements. The [accepted closeout](reviews/U2-closeout.md)
-and execution-plan STATUS distinguish accepted technical completion from pending final
-documentation publication and tagging. Publication receipts do not authorize a tag, sprint closure, badge promotion,
-hardware accuracy claim or deletion of historical evidence.
+self-hosted runner and later hardware-validation requirements. The execution plan's older
+STATUS remains a coordinator reconciliation item. Publication receipts do not authorize a
+tag, sprint closure, badge promotion, hardware accuracy claim or deletion of historical evidence.

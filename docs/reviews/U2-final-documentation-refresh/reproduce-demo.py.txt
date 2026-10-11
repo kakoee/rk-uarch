@@ -1,0 +1,64 @@
+# Run from a clean export/clone of 7fee0a8 with the locked dependencies available.
+import hashlib, json, os, subprocess, sys, tempfile
+from pathlib import Path
+repo = Path.cwd()
+r = repo / 'docs/reviews/U2-public-demo-v1'
+work = Path(tempfile.mkdtemp(prefix='u2-doc-demo-'))
+d = work / 'inputs'
+d.mkdir()
+e = work / 'receipts'
+e.mkdir()
+os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+os.environ['PYTHONPATH'] = f'{repo}/src:{repo}/contract'
+os.environ.pop('MYPYPATH', None)
+sys.path[:0] = [str(repo / 'src'), str(repo / 'contract')]
+import rkuarch.cli, uarch_contract
+assert Path(rkuarch.cli.__file__).is_relative_to(repo)
+assert Path(uarch_contract.__file__).is_relative_to(repo)
+old_root = '/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration'
+commands = []
+for row in json.loads((r / 'commands.json').read_text()):
+    argv = [sys.executable] + [a.replace(old_root + '/tables/U2-public-demo-v1', str(d))
+        .replace(old_root + '/docs/reviews/U2-public-demo-v1', str(r))
+        for a in row['argv'][1:]]
+    p = subprocess.run(argv, capture_output=True, text=True)
+    commands.append({'argv': argv, 'exit_code': p.returncode, 'output': p.stdout + p.stderr})
+    (e / 'fresh-input-commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+    assert p.returncode == 0, commands[-1]
+# Reconstruct the exact reviewed administrative singleton, not a new family claim.
+registry = {'entries': [{'family': 'u2-h1-npu-l4-only',
+    'hardware_spec_hash': 'sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9'}],
+    'format': 'uarch-family-registry/1',
+    'registry_hash': 'sha256:c8e33266930c4548767c25c66586e20e7a062fbb2cc25545624fd5e5a01aec7b',
+    'review_hash': 'sha256:' + '0' * 64, 'version': 'u2-public-demo-v1-singleton-proposal'}
+(d / 'draft/registry.json').write_text(json.dumps(registry, sort_keys=True, separators=(',', ':')) + '\n')
+actual = {p.relative_to(d).as_posix(): {'sha256': hashlib.sha256(p.read_bytes()).hexdigest(),
+    'bytes': p.stat().st_size} for p in d.rglob('*') if p.is_file()}
+assert actual == json.loads((r / 'capture-receipt.json').read_text())['files'], 'Changed subjects: do not reuse reviews'
+# Retarget only the historical driver's path/export setup; retain its review hash,
+# subject, byte-equality, display-permission and disabled-producer assertions.
+source = (r / 'completion/run-demo.py.txt').read_text()
+start = source.index('I = Path(')
+end = source.index('from uarch_contract.evidence import ReviewRecord')
+setup = f'''I = Path({str(repo)!r})
+R = I / 'docs/reviews/U2-public-demo-v1'
+E = Path({str(e)!r})
+D = Path({str(d)!r})
+O = Path({str(work / 'outputs')!r})
+T = '7fee0a8ed0c5d7bbb20b65c1cf68672470a5ac60'
+S = I
+PY = Path({sys.executable!r})
+assert not O.exists()
+O.mkdir()
+sys.path[:0] = [str(S / 'src'), str(S / 'contract')]
+'''
+driver = work / 'run-demo.py'
+driver.write_text(source[:start] + setup + source[end:])
+subprocess.run([sys.executable, '-B', str(driver)], check=True)
+from rkuarch.table.artifacts import load_verified_report_inputs
+from uarch_contract.hashing import content_hash
+v = load_verified_report_inputs(work / 'outputs/fresh-a/table/table.json')
+row = v.table.rows[0]
+print('ROW', json.dumps(row.model_dump(mode='json'), sort_keys=True))
+print('ROW_CONTENT_HASH', content_hash(row))
+print('OUTPUT_ROOT', work)
