@@ -198,3 +198,39 @@ def test_dispatch_and_dependency_bytes(monkeypatch):
     assert engine_identity() == original
     restored = replay(c.bundle, c.request, c.jobs, c.results, assumptions=c.assumptions)
     assert [canonical_json(r) for r in restored.results] == [canonical_json(r) for r in c.results]
+
+
+def test_moe_expert_multiplicity_does_not_multiply_rope():
+    intent, hw, coeff = inputs()
+    data = intent.model_dump(mode="json")
+    # 600 shared/router + 384 per expert; 3 stored experts, 2 active, globally.
+    data["model"].update(n_experts=3, experts_per_token=2, total_params=1752, active_params=1368)
+    data["model_shape"]["expert_d_ff"] = 8
+    b = prepare(RequestIntentV3.model_validate(data), hw, coefficients=coeff)
+    c = capture(b, assumptions=physical_assumptions())
+    ropes = [o for o in c.results[0].per_op if o.scope.op_class == "rotary_embedding"]
+    assert [o.instances for o in ropes] == [2, 2]
+    assert [o.counts.vector_ops for o in ropes] == [80, 40]
+    up = next(o for o in c.results[0].per_op if o.scope.op_class == "ffn_up")
+    assert up.instances == 4
+
+
+def test_representative_ranks_require_conserved_equal_hits_at_every_point():
+    intent, hw, coeff = inputs(tp=2)
+    data = intent.model_dump(mode="json")
+    data["grid"]["decode"]["batch"] = [2]
+    b = prepare(
+        RequestIntentV3.model_validate(data),
+        hw,
+        coefficients=coeff,
+        embedding_hits=((1, 1), (3, 3)),
+    )
+    assert b.rank.kind == "balanced_tp_representative"
+    assert b.rank.equivalent_ranks == (0, 1)
+    bad = b.model_dump(mode="json")
+    bad["points"][0]["embedding_hits"] = [2, 0]
+    embed = bad["points"][0]["graph"]["groups"][0]["ops"][0]
+    embed["embedding_local_tokens"] = 2
+    CASES["rehash"](bad)
+    with pytest.raises(ValueError, match="equivalence|equivalent"):
+        validate_execution_bundle(bad)

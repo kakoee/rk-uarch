@@ -12,7 +12,7 @@ from uarch_contract.hashing import content_hash
 from uarch_contract.rotary_v2 import PreparedBundleV2
 
 from rkuarch.engines.analytic.rotary_v2 import counts, engine_identity
-from rkuarch.engines.protocol_v2 import validate_engine_job, validate_engine_result
+from rkuarch.engines.protocol_v2 import EngineResultV2, validate_engine_job, validate_engine_result
 from rkuarch.table.capture_v2 import capture, replay
 from rkuarch.workload.prepared_v2 import physical_assumptions, validate_execution_bundle
 
@@ -130,9 +130,10 @@ def test_rehashed_result_cannot_invent_work(kind):
     elif kind == "scope":
         r["per_op"][0]["scope"]["op_class"] = "rotary_embedding"
     elif kind == "null":
-        r["busy_time_ps"]["compute"] = 0
+        r["busy_time_ps"]["compute"] = 0.0
     else:
         r["duration_ps"] *= 2
+    r = EngineResultV2.model_validate(r).model_dump(mode="json")
     CASES["seal"](r, "result_hash")
     validate_engine_result(c.results[0], c.jobs[0], c.bundle, c.request, assumptions=c.assumptions)
     with pytest.raises(ValueError):
