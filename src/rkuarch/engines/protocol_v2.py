@@ -35,7 +35,6 @@ class EngineIdentityV2(FrozenModel):
 
 
 class EngineJobV2(FrozenModel):
-    coefficients: RotaryCoefficients
     accounting: Literal["resolved-ops/2"]
     assumptions_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
     bundle_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
@@ -54,6 +53,7 @@ class EngineJobV2(FrozenModel):
     request_hash: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
     seed: Annotated[int, Field(strict=True, ge=0)]
     state_model: Literal["stateless_roofline"]
+    coefficients: RotaryCoefficients
 
 
 class EngineResultV2(FrozenModel):

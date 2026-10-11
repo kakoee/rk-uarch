@@ -106,3 +106,13 @@ def test_v2_subprocess_equality_and_schema_mirrors(tmp_path):
     for values in ((j[:-1], r[:-1]), (j[::-1], r[::-1]), (j + j, r + r)):
         with pytest.raises(ValueError):
             replay(c.bundle, c.request, *values, assumptions=c.assumptions)
+
+
+def test_all_engine_roots_match_accepted_prototype_exactly():
+    import runpy
+
+    from rkuarch.engines.protocol_v2 import SCHEMA_ROOTS
+
+    proposal = runpy.run_path("docs/reviews/U3-RoPE-schema-v1/schema_prototype.py")
+    for actual, approved in zip(SCHEMA_ROOTS, proposal["ENGINE_ROOTS"], strict=True):
+        assert actual.model_json_schema() == approved.model_json_schema()
