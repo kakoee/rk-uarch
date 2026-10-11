@@ -1,0 +1,32 @@
+Continue Lane B in your existing independent clone on main. Fetch and integrate current
+main normally, preserving peer commits. Read CLAUDE.md, accepted U0006 and this folder's
+README. This is coordinator reconciliation, not an independent U-REVIEW verdict.
+
+Correct SR-C1 only in validation/reporting/ and its owned tests/docs. Recorder.invoke
+cannot serialize a NaN/non-JSON return into its INVALID_ENGINE_OUTPUT diagnostic. It
+leaves an error call with diagnostic_hash=null and no call_finished event. The exercise
+handler labels the case PROTOCOL_REJECTION, but the resulting report fails its own
+validator. Run the saved probe_invalid_output.py from repo root with PYTHONPATH=.:src:contract.
+A serializable malformed {} is the positive error-retention control.
+
+Write discriminating tests first. Retain stable diagnostics and finish events for invalid
+engine returns, including nonfinite values and non-JSON objects. Retain exact JSON output
+where possible; use an explicit deterministic diagnostic representation when it is not
+possible, not fabricated valid output, unstable repr addresses, or silent loss of the call.
+An errored call remains not_run and must never count as a killed mutant or valid example.
+Keep external plan/corpus/implementation pins, call accounting and conservative reductions.
+Demonstrate full discovery/replay/public validation for both controls and failure probes,
+and remove/restore the relevant production fix in scratch to prove the tests discriminate.
+Preserve ordinary engine-exception and malformed-identity controls as well.
+
+Run the focused report tests, applicable static checks and strict vendor verification.
+Commit normally, then regenerate both qualifying profiles from clean committed code with
+two frozen-corpus replays, and validate using their external pins. Old reports retain their
+original eab89e0 identity; do not relabel them. Retain concise new report evidence, not code
+checkpoint copies. Keep partial/not_run and any distinct-case shortfall honest. Follow
+normal main commit/fetch/integration and separate push; no force push or protected edits.
+
+No production attachment, v2 admission, support-rule changes, new dependencies, candidate
+simulator execution, runner/nightly changes or independent-review claim. Stop with exact
+commits, commands, regression/revert results, new report bindings and remaining limitations.
+Do not launch another agent.
