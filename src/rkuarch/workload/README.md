@@ -1,5 +1,10 @@
 # workload — one iteration's operator graph
 
+U2 physical-resolved/1 accounts for its captured operator graph. It excludes RoPE
+rotation/conversion work and coefficient traffic; its vector/byte counts and timing
+are not complete RoPE-equipped decoder work. This does not change historical numbers,
+nominal compatibility outcomes, parameter counts or the matrix-count convention.
+
 Input: rk-sim ModelSpec + ModelShape (parity ≤ 1% or loading fails) + precision + tp + a
 canonical query (decode: B sequences of T/B; prefill: n prompts of L). Output: the operator
 graph of ONE rank of a tp-way tensor-parallel split (heads, KV heads, FFN and vocabulary

@@ -244,6 +244,11 @@ approvals through a passing software test.
 
 ## Why rk-sim also estimates runtime
 
+U2 physical-resolved/1 accounts for its captured operator graph. It excludes RoPE
+rotation/conversion work and coefficient traffic; its vector/byte counts and timing
+are not complete RoPE-equipped decoder work. This does not change historical numbers,
+nominal compatibility outcomes, parameter counts or the matrix-count convention.
+
 rk-uarch estimates the resolved physical operator graph on one chip. rk-sim has a separate
 coarse aggregate iteration-cost model. Pinned outputs of that model provide compatibility
 evidence; production rk-uarch neither imports rk-sim nor tunes physical work to its conventions.

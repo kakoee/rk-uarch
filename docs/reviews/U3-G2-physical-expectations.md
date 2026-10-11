@@ -6,6 +6,13 @@ specification, not a generated oracle, runtime bundle, simulator measurement or 
 review of Lane A. No production counting function or upstream simulator was called to derive
 these numbers. Acceptance must bind this file together with the proposal by Git revision.
 
+Accepted U0022 coverage clarification (historical matrix expectations below are unchanged):
+
+U2 physical-resolved/1 accounts for its captured operator graph. It excludes RoPE
+rotation/conversion work and coefficient traffic; its vector/byte counts and timing
+are not complete RoPE-equipped decoder work. This does not change historical numbers,
+nominal compatibility outcomes, parameter counts or the matrix-count convention.
+
 ## Inputs and scope
 
 Dimension source: unchanged [U2 8B shape](../../contract/fixtures/model_shapes/llama-3.1-8b.json)
