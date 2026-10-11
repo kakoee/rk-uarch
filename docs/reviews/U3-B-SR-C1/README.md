@@ -170,3 +170,14 @@ elapsed times of 461.64 s / 441.65 s. These overlapping validation workloads are
 simulator benchmarks or evidence for U0005/200 seconds. Original model-v1 engine,
 assumptions and toolchain identities remain in the source; no accepted review, measurement
 authority, model-card hash, designated-host execution or U-P6 completion is fabricated.
+
+## Publication reconciliation
+
+New report evidence was committed as `ca43d887f6ee1138ea7765517d77d0770886ef79`.
+Final fetch found coordinator `d141f8e0cd2a903be6caed2c2b70d8ac51333a13`, recording
+A's human installation in A's local clone. It was inspected and preserved by ordinary
+merge `29eb63d8865b1af926a19538ae4244aaf2bd26a6`. Only coordination documents arrived;
+the protected installation/runtime commits were not merged into this clone. Strict vendor
+verification and the actual-report implementation guard against `85a5ad2` passed after
+integration. Historical `U3-B-standalone-report-execution/` bytes are unchanged. No focused
+or full suite was repeated for this documentation-only merge or evidence publication.
