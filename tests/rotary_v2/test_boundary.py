@@ -8,12 +8,13 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
+from uarch_contract.hashing import content_hash
+from uarch_contract.rotary_v2 import PreparedBundleV2
+
 from rkuarch.engines.analytic.rotary_v2 import counts, engine_identity
 from rkuarch.engines.protocol_v2 import validate_engine_job, validate_engine_result
 from rkuarch.table.capture_v2 import capture, replay
 from rkuarch.workload.prepared_v2 import physical_assumptions, validate_execution_bundle
-from uarch_contract.hashing import content_hash
-from uarch_contract.rotary_v2 import PreparedBundleV2
 
 CASES = runpy.run_path(str(Path("contract/tests/rotary_v2_cases.py")))
 
