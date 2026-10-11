@@ -1,15 +1,22 @@
 """Complete five-channel physical/nominal observations; these are not oracle comparisons."""
 
+from collections.abc import Callable
+from typing import cast
+
 import pytest
+from uarch_contract.hardware import HardwareSpec
+from uarch_contract.prepared import PreparedBundle
+from uarch_contract.request import RequestIntent
 
 from contract.tests.test_u2_nominal_candidate import candidate, nominal_input
+from rkuarch.engines.protocol import EngineResult
 from tests.unit.test_u2_a_shapes import inputs, prepare, run
 
 
-def test_independent_physical_nominal_discrepancies_remain_visible():
-    i, hw = inputs()
-    b = prepare(i, hw)
-    actual = run(b)
+def test_independent_physical_nominal_discrepancies_remain_visible() -> None:
+    i, hw = cast(Callable[[], tuple[RequestIntent, HardwareSpec]], inputs)()
+    b = cast(Callable[[RequestIntent, HardwareSpec], PreparedBundle], prepare)(i, hw)
+    actual = cast(Callable[[PreparedBundle], EngineResult], run)(b)
     base = nominal_input().model_dump(mode="json")
     base.update(model=i.model.model_dump(), query=b.points[0].query.model_dump())
     base["selected_peak"]["value"] = 0.002
@@ -30,4 +37,6 @@ def test_independent_physical_nominal_discrepancies_remain_visible():
     assert observed["memory_write_bytes"] == (288, None)
     assert observed["duration_s"] == pytest.approx((1.892e-6, 1.016e-6))
     # Retain the large discrepancy; never tune work or label absent reference channels passed.
-    assert (observed["matrix_ops"][0] - 1288) / 1288 < -0.05
+    matrix_ops = observed["matrix_ops"][0]
+    assert matrix_ops is not None
+    assert (matrix_ops - 1288) / 1288 < -0.05

@@ -1,6 +1,18 @@
-# B1 independent acceptance inputs and pending tests
+# U2 B acceptance inputs and execution status
 
-These files were authored by B before B report/comparison runtime implementation. No A fixture was copied. They are proposals and synthetic unit inputs, not generated engine results, adopted oracle rows, validation evidence or Javid decisions. All 64 semantic cases in acceptance-cases.json remain **pending execution**. The 14 runnable tests check existing carrier/input integrity and adopted inventory only.
+Current status at reviewed commit `769a1fef2320430386888bf450af579ea26cf664`: v2
+oracle adoption and the complete analytic comparison/report capture are committed.
+See [adoption execution](../../../docs/reviews/U2-adoption-v2-execution/README.md) and
+[Stage 2 response](../../../docs/reviews/U2-lane-B-response.md). The original B26,
+B64, proof77, revision42 and PR3-nine namespaces remain distinct; no bulk ledger
+promotion follows from carrier tests or an administrative acceptance receipt.
+B05/S10 production-card semantics and R202 complete contributor enforcement are
+under Stage 2 correction, with required A adapters tested separately in scratch.
+Real positive measurement/history/energy eligibility remains unsupported.
+
+## Historical B1 preparation (preserved below as historical statements)
+
+These files were authored by B before B report/comparison runtime implementation. No A fixture was copied. They are proposals and synthetic unit inputs, not generated engine results, adopted oracle rows, validation evidence or Javid decisions. At B1 submission all 64 semantic cases were pending; its 14 runnable checks covered carrier/input integrity and inventory only. These are historical counts, not the current suite or a claim that later execution never occurred.
 
 ## Exact fixture roles
 
@@ -13,7 +25,7 @@ These files were authored by B before B report/comparison runtime implementation
 - badge-cases.json, evidence-scope-cases.json, display-cases.json, r1-omission-cases.json, r2-mutation-cases.json, report-context-cases.json: test-case specifications, **not** runtime schemas or a private ledger. IDs specify setup and expected result; acceptance-cases.json indexes them and the twelve numeric surfaces. matrix-plan.json is a selection test specification, not ComponentPrecision or generated output.
 - contract/tests/fixtures/u2_b/component-precisions.json: array of two exact accepted ComponentPrecision objects bound to actual retained upstream-only descriptors and the adopted manifest. Companion asic_placeholder-execution.json and nvidia_h100_sxm-execution.json retain the actual .55 stub scalar inputs. Supported KV selections come from the accepted retained matrix, not new silicon evidence. This is deliberately the retained subset; it is **not** the completed seven-pair generation inventory. Real npu-l4 ExportBinding waits for accepted hardware and A1's actual export.
 
-## Executable checks now
+## Historical B1 executable command
 
 Run from the B root with the existing interpreter, no installation or cache writes:
 
@@ -23,7 +35,7 @@ Run from the B root with the existing interpreter, no installation or cache writ
 
 No skip substitutes for a pending implementation. The badge-named file tests hardware prerequisites, not badge behavior. Fixture closure tests bind canonical bodies, review subjects and pointers, not eligibility. Matrix tests enumerate selections, not successful oracle execution. All B typed fixture objects were additionally checked read-only with the system's existing jsonschema against the preserved accepted proposed.schema.json; jsonschema is not added to project dependencies.
 
-## Runtime tests after A1 reconciliation
+## Historical B1 planned runtime tests
 
 Use the following existing delivery paths; no parallel types or fallback adapters:
 
@@ -41,3 +53,8 @@ Use the following existing delivery paths; no parallel types or fallback adapter
 | contract/tests/test_u2_physical_discrepancy_reporting.py | Complete captured/imported-bundle attempts, A-F12, selected-rank conservation (C03–C04/C11), all failures/unknowns recorded; no physical accuracy assertion from recording completeness. |
 
 Delivery's final report-context.json, render-default.json and render-opt-in.json are intentionally pending complete table/bundle closure and executable A1 APIs. There are no invented hashes for nonexistent results/tables and no synthetic stand-in npu-l4 export. The supplied report-context-cases.json states their acceptance requirements. This is a B1 readiness limit, not a change to final delivery scope.
+
+The final paragraph above records the B1 readiness limit. Current A interfaces,
+actual H1 export, full table/comparison capture, v2 adoption and HTML/Markdown reports
+now exist. Their validation limits and newly found blockers are recorded separately
+in the Stage 2 response; the original synthetic fixture bodies remain unchanged.

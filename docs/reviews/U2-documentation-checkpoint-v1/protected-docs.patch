@@ -1,0 +1,28 @@
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -8,10 +8,11 @@
+ 
+ ## Commands
+ - test: `uv run pytest -q` · fast: `make test-fast` (excludes nightly, silicon, native)
+-- typecheck: `uv run mypy src contract` · lint: `uv run ruff check`
++- typecheck: `make typecheck` (both CI commands) · lint: `uv run ruff check .`
+ - native: `make native` · `make native-test` (Linux box / engine container)
+-- table: `uv run uarch table <spec> --model <name> --precision <fmt> --engine analytic|fork|native`
+-- report: `uv run uarch report <table>` · study: `uv run uarch study <studyspec>`
++- table/report workflow: [prepare → capture → independent review → assemble → table → report](docs/u2-workflow.md)
++- table help: `make table` · report help: `make report`; pass explicit CLI arguments with `ARGS='...'`
++- U2 supports the analytic engine and workers=1; fork/native engines and study execution are later work.
+ - vendor rk-sim: `make vendor-rk SHA=<sha> RK=<path>` (humans only)
+ 
+ ## Invariants (violating these = stop and ask)
+--- a/docs/decisions/U0003-one-chip-one-set-of-facts.md
++++ b/docs/decisions/U0003-one-chip-one-set-of-facts.md
+@@ -5,7 +5,7 @@
+ 
+ The [human acceptance record](../reviews/U2-U0003-acceptance-record.md) records the exact
+ authorization and briefing identity. The immutable reviewed
+-[original ADR and 116-entry package](../reviews/U2-inputs/A-R1-R2-proposal-8def4c6d2c27/docs/decisions/U0003-one-chip-one-set-of-facts.md)
++[original ADR and selected normative package text](../u2-design.md)
+ remain the normative design together with the accepted six-item brief and corrected R1/R2
+ rules. Their historical PROPOSED/pending-acceptance labels describe authorship history;
+ this record supplies the subsequent human decision. Do not edit the preserved proposal.

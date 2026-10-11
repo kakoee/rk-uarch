@@ -6,21 +6,25 @@ import importlib
 import json
 import socket
 from pathlib import Path
+from types import ModuleType
+from typing import Any, NoReturn
 
 import pytest
 from uarch_contract.hashing import content_hash, verify_identity
 
+from contract.tests.nominal_candidate import NominalInput
+
 ZERO = "sha256:" + "0" * 64
 
 
-def candidate():
+def candidate() -> ModuleType:
     return importlib.import_module("contract.tests.nominal_candidate")
 
 
-def nominal_input(**changes):
+def nominal_input(**changes: Any) -> NominalInput:
     c = candidate()
 
-    def sourced(value, unit):
+    def sourced(value: float, unit: str) -> dict[str, Any]:
         return dict(
             value=value,
             unit=unit,
@@ -31,7 +35,7 @@ def nominal_input(**changes):
             rationale=None,
         )
 
-    execution = dict(
+    execution: dict[str, Any] = dict(
         format="uarch-execution-model/1",
         execution_model_hash=ZERO,
         kind="scalar_efficiency",
@@ -70,10 +74,10 @@ def nominal_input(**changes):
     )
     value = c.NominalInput.model_validate(value).model_dump(mode="json")
     value["input_hash"] = content_hash(value, exclude=("input_hash",))
-    return c.NominalInput.model_validate(value)
+    return NominalInput.model_validate(value)
 
 
-def test_decode_literal():
+def test_decode_literal() -> None:
     result = candidate().evaluate_nominal(nominal_input())
     assert result.counts.model_dump() == dict(
         matrix_ops=592.0, memory_read_bytes=296.0, memory_write_bytes=None, vector_ops=None
@@ -82,7 +86,7 @@ def test_decode_literal():
     verify_identity(result, "output_hash")
 
 
-def test_prefill_literal_includes_writes_and_full_square():
+def test_prefill_literal_includes_writes_and_full_square() -> None:
     value = nominal_input(query=dict(phase="prefill", n_prompts=2, prompt_tokens=3))
     result = candidate().evaluate_nominal(value)
     assert result.counts.model_dump() == dict(
@@ -104,7 +108,9 @@ def test_prefill_literal_includes_writes_and_full_square():
         ({"precision": dict(compute="int4", kv_cache="int4")}, 592, 74, 1.184),
     ],
 )
-def test_independent_perturbations(change, matrix, reads, duration):
+def test_independent_perturbations(
+    change: dict[str, Any], matrix: float, reads: float, duration: float
+) -> None:
     value = nominal_input(**change)
     if value.precision.compute.value.startswith("int"):
         data = value.model_dump(mode="json")
@@ -116,7 +122,7 @@ def test_independent_perturbations(change, matrix, reads, duration):
     assert result.duration_s == pytest.approx(duration)
 
 
-def test_active_params_and_tp_once():
+def test_active_params_and_tp_once() -> None:
     data = nominal_input().model_dump(mode="json")
     data["model"].update(
         total_params=1000, active_params=120, n_experts=4, experts_per_token=1, kv_heads=2
@@ -129,7 +135,7 @@ def test_active_params_and_tp_once():
     assert result.duration_s == pytest.approx(2.16)
 
 
-def test_split_memory_and_retained_point55():
+def test_split_memory_and_retained_point55() -> None:
     data = nominal_input().model_dump(mode="json")
     data["execution_model"]["kind"] = "split_efficiency"
     data["execution_model"]["memory"] = dict(data["execution_model"]["compute"])
@@ -153,7 +159,7 @@ def test_split_memory_and_retained_point55():
         ("tp", 2, "ProjectionScope"),
     ],
 )
-def test_refusals(field, value, match):
+def test_refusals(field: str, value: Any, match: str) -> None:
     data = nominal_input().model_dump(mode="json")
     data[field] = value
     parsed = (
@@ -165,7 +171,7 @@ def test_refusals(field, value, match):
         candidate().evaluate_nominal(parsed)
 
 
-def test_identity_and_extra_expected_fields_refused():
+def test_identity_and_extra_expected_fields_refused() -> None:
     data = nominal_input().model_dump(mode="json")
     data["model_identity"]["implementation_hash"] = ZERO
     with pytest.raises(ValueError, match="ModelIdentityMismatch"):
@@ -175,15 +181,17 @@ def test_identity_and_extra_expected_fields_refused():
             candidate().NominalInput.model_validate(dict(data, **{name: 0}))
 
 
-def test_execution_has_no_file_network_or_prohibited_import_access(monkeypatch):
+def test_execution_has_no_file_network_or_prohibited_import_access(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     c = candidate()
     value = nominal_input()
     original_import = builtins.__import__
 
-    def no_access(*args, **kwargs):
+    def no_access(*args: Any, **kwargs: Any) -> NoReturn:
         raise AssertionError("candidate attempted external access")
 
-    def restricted_import(name, *args, **kwargs):
+    def restricted_import(name: str, *args: Any, **kwargs: Any) -> ModuleType:
         assert not any(word in name for word in ("vendor", "parity", "rkuarch", "operators"))
         assert name != "rk" and not name.startswith("rk.")
         return original_import(name, *args, **kwargs)
@@ -196,10 +204,11 @@ def test_execution_has_no_file_network_or_prohibited_import_access(monkeypatch):
         assert c.evaluate_nominal(value).duration_s == pytest.approx(2.96)
 
 
-def test_candidate_source_identity_and_schemas():
+def test_candidate_source_identity_and_schemas() -> None:
     import hashlib
 
     c = candidate()
+    assert c.__file__ is not None
     source = Path(c.__file__).read_bytes()
     assert (
         c.candidate_identity().implementation_hash == "sha256:" + hashlib.sha256(source).hexdigest()

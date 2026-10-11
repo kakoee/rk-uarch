@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from contract.tests import nominal_candidate
 from contract.tests.historical_snapshot import (
     HISTORICAL_MANIFEST,
     authenticate_historical,
@@ -22,7 +23,7 @@ CURRENT_MANIFEST = "f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60c
 REVIEW_SHA256 = "5ab5192e35d395b93d7da1ee5bac0b33e2a9f0961c5b03fb60a7368981866fbb"
 
 
-def test_historical_fixture_is_complete_and_relocatable(tmp_path):
+def test_historical_fixture_is_complete_and_relocatable(tmp_path: Path) -> None:
     source = historical_snapshot()
     destination = tmp_path / "cold-clone" / "historical"
     shutil.copytree(source, destination)
@@ -37,7 +38,9 @@ def test_historical_fixture_is_complete_and_relocatable(tmp_path):
 
 
 @pytest.mark.parametrize("mutation", ["member", "missing", "extra", "rehashed"])
-def test_historical_fixture_refuses_changed_bytes_or_inventory(tmp_path, mutation):
+def test_historical_fixture_refuses_changed_bytes_or_inventory(
+    tmp_path: Path, mutation: str
+) -> None:
     destination = tmp_path / "historical"
     shutil.copytree(historical_snapshot(), destination)
     path = destination / "schema.json"
@@ -55,7 +58,7 @@ def test_historical_fixture_refuses_changed_bytes_or_inventory(tmp_path, mutatio
         authenticate_historical(destination)
 
 
-def test_current_canonical_is_exact_adopted_1008_four_real_refusals():
+def test_current_canonical_is_exact_adopted_1008_four_real_refusals() -> None:
     root = ui.ADOPTED
     assert vr.digest((root / "MANIFEST.json").read_bytes()) == CURRENT_MANIFEST
     assert root == ROOT / "contract/vendor" / f"rk-sim@{vr.PIN}"
@@ -96,12 +99,14 @@ def test_current_canonical_is_exact_adopted_1008_four_real_refusals():
     assert accepted.reviewed_subject_hashes == ("sha256:" + CURRENT_MANIFEST,)
 
 
-def test_historical_guard_refuses_current_canonical_before_candidate(tmp_path, monkeypatch):
+def test_historical_guard_refuses_current_canonical_before_candidate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     assert vr.digest((ui.ADOPTED / "MANIFEST.json").read_bytes()) == CURRENT_MANIFEST
     directory = tmp_path / "inputs"
     inputs = ui.load_inputs(directory, ui.prepare_inputs(directory))
     monkeypatch.setattr(
-        u2_comparison.nominal, "evaluate_nominal", lambda *a: pytest.fail("candidate called")
+        nominal_candidate, "evaluate_nominal", lambda *a: pytest.fail("candidate called")
     )
     with pytest.raises(ValueError, match="historical adopted identity changed"):
         u2_comparison.run_historical(inputs)

@@ -8,10 +8,11 @@ stipulations it is conditional on. Detail is not accuracy.
 
 ## Commands
 - test: `uv run pytest -q` · fast: `make test-fast` (excludes nightly, silicon, native)
-- typecheck: `uv run mypy src contract` · lint: `uv run ruff check`
+- typecheck: `make typecheck` (both CI commands) · lint: `uv run ruff check .`
 - native: `make native` · `make native-test` (Linux box / engine container)
-- table: `uv run uarch table <spec> --model <name> --precision <fmt> --engine analytic|fork|native`
-- report: `uv run uarch report <table>` · study: `uv run uarch study <studyspec>`
+- table/report workflow: [prepare → capture → independent review → assemble → table → report](docs/u2-workflow.md)
+- table help: `make table` · report help: `make report`; pass explicit CLI arguments with `ARGS='...'`
+- U2 supports the analytic engine and workers=1; fork/native engines and study execution are later work.
 - vendor rk-sim: `make vendor-rk SHA=<sha> RK=<path>` (humans only)
 
 ## Invariants (violating these = stop and ask)

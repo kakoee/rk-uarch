@@ -139,6 +139,8 @@ def validate_engine_result(value: object, job: object) -> EngineResult:
         math.fsum(op.compute_time_ps for op in r.per_op),
         math.fsum(op.memory_time_ps for op in r.per_op),
     )
+    if not math.isclose(r.u_c0_duration_ps, aggregate, rel_tol=1e-9, abs_tol=1e-3):
+        raise ValueError("EngineResultMismatch: u_c0_duration_ps")
     expected = aggregate if j.mode == "aggregate" else math.fsum(op.duration_ps for op in r.per_op)
     if not math.isclose(r.duration_ps, expected, rel_tol=1e-9, abs_tol=1e-3):
         raise ValueError("EngineResultMismatch: duration_ps")

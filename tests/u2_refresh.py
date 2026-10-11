@@ -8,18 +8,23 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict, cast
 
-from pydantic import TypeAdapter
+from pydantic import JsonValue, TypeAdapter
+from uarch_contract.assumptions import AssumptionSet
 from uarch_contract.comparison import (
+    ComparisonArtifact,
     ComparisonFixture,
     ExpectedPrecisionRefusal,
     PrecisionCheckInput,
     PrecisionCheckTrace,
+    PrecisionRefusalObservation,
     ReferenceInventory,
 )
 from uarch_contract.evidence import ReviewRecord
+from uarch_contract.exports import ComponentPrecision
 from uarch_contract.hashing import (
     artifact_identity,
     content_hash,
@@ -27,18 +32,62 @@ from uarch_contract.hashing import (
     strict_json_loads,
     verify_identity,
 )
-from uarch_contract.prepared import Query
+from uarch_contract.prepared import PreparedBundle, Query
 from uarch_contract.request import CharacterizationRequest
 
+from contract.tests import nominal_candidate
+from contract.tests.parity import rank_counts
 from contract.tests.u2_comparison import assemble_comparison, precision_observation
-from rkuarch.engines.protocol import validate_engine_job, validate_engine_result
+from rkuarch.engines.protocol import (
+    EngineJob,
+    EngineResult,
+    validate_engine_job,
+    validate_engine_result,
+)
 from rkuarch.hw.derive import derive_rk_params
-from rkuarch.table.build import CapturedWork, computation_sources
+from rkuarch.table.build import CapturedWork, TablePackage, computation_sources
 from rkuarch.workload.characterize import capacity_summary
 from rkuarch.workload.prepared import physical_assumptions, validate_execution_bundle
 from scripts import u2_inputs as ui
 from scripts import vendor_rk as vr
 from tests import u2_comparison as old
+
+
+# Test orchestration shapes, not alternate shared wire contracts.
+class PhysicalAttempt(TypedDict, total=False):
+    execution: str
+    error: str | None
+    bundle_hash: str | None
+    assumptions_hash: str | None
+    job_hash: str | None
+    result_hash: str | None
+    failure_hash: str
+
+
+class PhysicalCapture(TypedDict):
+    attempts: dict[str, PhysicalAttempt]
+    artifacts: dict[str, object]
+
+
+ValidatedPhysical = tuple[
+    PreparedBundle, AssumptionSet, CharacterizationRequest, EngineJob, EngineResult
+]
+
+
+class ConsumerRun(TypedDict):
+    nominal: ComparisonArtifact
+    physical: ComparisonArtifact
+    inventory: ReferenceInventory
+    artifacts: dict[str, object]
+    inputs: ui.Inputs
+    original_rows: list[dict[str, JsonValue]]
+    physical_capture: PhysicalCapture
+    validated_physical: dict[str, ValidatedPhysical]
+    nominal_errors: list[dict[str, str]]
+    physical_errors: list[dict[str, str | None]]
+    limitations: list[str]
+    synthetic: bool
+
 
 SYNTHETIC_MARKER = b"Explicit synthetic test premises; not real adoption or oracle output.\n"
 
@@ -105,19 +154,33 @@ def adoption_authority(root: Path, review_path: Path, trusted_review_sha256: str
     return review
 
 
-def consume_adopted(*, adoption_review: Path, review_sha256: str, physical_replay=None):
+def consume_adopted(
+    *,
+    adoption_review: Path,
+    review_sha256: str,
+    physical_replay: PhysicalCapture | None = None,
+) -> ConsumerRun:
     """Only the canonical adopted location plus a separately trusted adoption review."""
     review = adoption_authority(ui.ADOPTED, adoption_review, review_sha256)
     return _consume(ui.ADOPTED, synthetic=False, physical_replay=physical_replay, review=review)
 
 
-def consume_synthetic(root: Path, *, physical_replay=None):
+def consume_synthetic(root: Path, *, physical_replay: PhysicalCapture | None = None) -> ConsumerRun:
     if (root / "SYNTHETIC-REFERENCE").read_bytes() != SYNTHETIC_MARKER:
         raise ValueError("SyntheticPremiseRequired")
     return _consume(root, synthetic=True, physical_replay=physical_replay)
 
 
-def precision_records(inputs, raw: bytes, source: bytes, store, *, synthetic: bool):
+def precision_records(
+    inputs: ui.Inputs,
+    raw: bytes,
+    source: bytes,
+    store: dict[str, object],
+    *,
+    synthetic: bool,
+) -> tuple[
+    dict[str, str], tuple[ExpectedPrecisionRefusal, ...], tuple[PrecisionRefusalObservation, ...]
+]:
     """Bind every trace fact to its exact captured event, not merely an existing pointer."""
     if sha256(source) != "sha256:" + old.DIRECT_SOURCE:
         raise ValueError("RefusalSourceMismatch: callable bytes")
@@ -127,7 +190,7 @@ def precision_records(inputs, raw: bytes, source: bytes, store, *, synthetic: bo
     if not isinstance(events, list):
         raise ValueError("RefusalSourceMismatch: event list")
 
-    def raw_record(data, kind, identity):
+    def raw_record(data: bytes, kind: str, identity: str) -> dict[str, object]:
         return old.put(
             store,
             dict(
@@ -162,7 +225,7 @@ def precision_records(inputs, raw: bytes, source: bytes, store, *, synthetic: bo
     # Independent accepted expectation inventory; never derived from observed successes.
     pointer, expected_values, _ = old.precision_plan(inputs, store)
     plan = dict(
-        store[pointer["artifact_hash"]],
+        cast(dict[str, JsonValue], store[pointer["artifact_hash"]]),
         capture_source=dict(
             artifact_hash=callable_source["source_hash"], json_pointer="/raw_blob_sha256"
         ),
@@ -254,17 +317,24 @@ def precision_records(inputs, raw: bytes, source: bytes, store, *, synthetic: bo
     return pointer, expected, tuple(observations)
 
 
-def _query(row):
-    return TypeAdapter(Query).validate_python(
+def _query(row: Mapping[str, JsonValue]) -> Query:
+    return TypeAdapter[Query](Query).validate_python(
         {
             k: v
-            for k, v in row["query"].items()
+            for k, v in cast(dict[str, JsonValue], row["query"]).items()
             if k not in ("total_prompt_tokens", "sum_of_squared_prompt_tokens")
         }
     )
 
 
-def _common(row, entry):
+def _common(row: Mapping[str, JsonValue], entry: ComponentPrecision) -> dict[str, object]:
+    model = cast(dict[str, JsonValue], row["model"])
+    shape = cast(dict[str, JsonValue], row["model_shape"])
+    kv_heads, vocab, tp = (
+        cast(int, model["kv_heads"]),
+        cast(int, shape["vocab_size"]),
+        cast(int, row["tp"]),
+    )
     return dict(
         fixture_id=row["id"],
         component_binding_hash=entry.binding.binding_hash,
@@ -272,21 +342,30 @@ def _common(row, entry):
         precision=row["precision"],
         tp=row["tp"],
         projection_scope=dict(
-            global_kv_heads=row["model"]["kv_heads"],
-            global_vocab=row["model_shape"]["vocab_size"],
-            kv_replicated=row["model"]["kv_heads"] < row["tp"],
-            padded_vocab=math.ceil(row["model_shape"]["vocab_size"] / row["tp"]) * row["tp"],
+            global_kv_heads=kv_heads,
+            global_vocab=vocab,
+            kv_replicated=kv_heads < tp,
+            padded_vocab=math.ceil(vocab / tp) * tp,
         ),
     )
 
 
-def capture_physical(inputs, rows):
+def capture_physical(
+    inputs: ui.Inputs,
+    rows: Sequence[Mapping[str, JsonValue]],
+) -> PhysicalCapture:
     """Existing A bundles/jobs/results plus attempt index; not a parallel capture contract."""
-    artifacts, attempts, groups = {}, {}, {}
+    artifacts: dict[str, object] = {}
+    attempts: dict[str, PhysicalAttempt] = {}
+    groups: dict[
+        tuple[str, int], tuple[PreparedBundle | None, AssumptionSet | None, str | None]
+    ] = {}
+    bundle: PreparedBundle | None
+    assumptions: AssumptionSet | None
     for row in rows:
         if row["component_params_file"] != "components/npu-l4.yaml":
             continue
-        key = (row["model_id"], row["tp"])
+        key = (cast(str, row["model_id"]), cast(int, row["tp"]))
         if key not in groups:
             try:
                 bundle, assumptions = old.prepare_h1(inputs, model_id=key[0], tp=key[1])
@@ -322,7 +401,7 @@ def capture_physical(inputs, rows):
                     ),
                 ),
             )
-            attempts[row["id"]] = dict(
+            attempts[cast(str, row["id"])] = dict(
                 execution="execution_failed",
                 error=error,
                 bundle_hash=None,
@@ -333,7 +412,8 @@ def capture_physical(inputs, rows):
             )
             continue
         point = next(p for p in bundle.points if p.query == _query(row))
-        attempt = dict(
+        assert assumptions is not None
+        attempt: PhysicalAttempt = dict(
             bundle_hash=bundle.bundle_hash,
             assumptions_hash=assumptions.assumptions_hash,
             job_hash=None,
@@ -343,18 +423,24 @@ def capture_physical(inputs, rows):
         try:
             job, result = old.physical_point(bundle, assumptions, point)
         except Exception as exc:
-            attempt.update(execution="execution_failed", error=type(exc).__name__ + ": " + str(exc))
+            attempt.update(
+                dict(execution="execution_failed", error=type(exc).__name__ + ": " + str(exc))
+            )
         else:
             attempt.update(
-                execution="executed", job_hash=job.job_hash, result_hash=result.result_hash
+                dict(execution="executed", job_hash=job.job_hash, result_hash=result.result_hash)
             )
             artifacts[job.job_hash] = job.model_dump(mode="json")
             artifacts[result.result_hash] = result.model_dump(mode="json")
-        attempts[row["id"]] = attempt
+        attempts[cast(str, row["id"])] = attempt
     return dict(attempts=attempts, artifacts=artifacts)
 
 
-def verify_physical(inputs, rows, capture):
+def verify_physical(
+    inputs: ui.Inputs,
+    rows: Sequence[Mapping[str, JsonValue]],
+    capture: PhysicalCapture,
+) -> dict[str, ValidatedPhysical]:
     """Replay validates actual A contracts/joins; never invokes prepare or an engine."""
     selected = [r for r in rows if r["component_params_file"] == "components/npu-l4.yaml"]
     if set(capture["attempts"]) != {r["id"] for r in selected}:
@@ -365,9 +451,9 @@ def verify_physical(inputs, rows, capture):
     validated = {}
     bundles = {}
     for row in selected:
-        a = capture["attempts"][row["id"]]
+        a = capture["attempts"][cast(str, row["id"])]
         if a["bundle_hash"] is None:
-            failure = store[a["failure_hash"]]
+            failure = cast(dict[str, JsonValue], store[a["failure_hash"]])
             if (
                 artifact_identity(failure) != a["failure_hash"]
                 or failure["requested"]
@@ -394,9 +480,10 @@ def verify_physical(inputs, rows, capture):
         if a["bundle_hash"] not in bundles:
             bundles[a["bundle_hash"]] = validate_execution_bundle(store[a["bundle_hash"]])
         bundle = bundles[a["bundle_hash"]]
-        assumptions = AssumptionSet.model_validate(store[a["assumptions_hash"]])
+        assumptions = AssumptionSet.model_validate(store[cast(str, a["assumptions_hash"])])
         verify_identity(assumptions, "assumptions_hash")
         entry = next(e for e in inputs.entries if e.component_id == "compute.asic.npu-l4")
+        assert entry.binding.kind == "uarch_projection"
         if (
             bundle.intent.model.model_dump(mode="json") != row["model"]
             or bundle.intent.model_shape.model_dump(mode="json") != row["model_shape"]
@@ -414,11 +501,11 @@ def verify_physical(inputs, rows, capture):
         )
         if a["execution"] == "executed":
             capacity_summary(bundle, point)
-            job = validate_engine_job(store[a["job_hash"]], bundle, request)
-            result = validate_engine_result(store[a["result_hash"]], job)
+            job = validate_engine_job(store[cast(str, a["job_hash"])], bundle, request)
+            result = validate_engine_result(store[cast(str, a["result_hash"])], job)
             if job.point != point or job.assumptions_hash != assumptions.assumptions_hash:
                 raise ValueError("RefusalSourceMismatch: physical point/assumptions")
-            validated[row["id"]] = (bundle, assumptions, request, job, result)
+            validated[cast(str, row["id"])] = (bundle, assumptions, request, job, result)
         elif a["execution"] == "execution_failed":
             if a["job_hash"] is not None or a["result_hash"] is not None or not a["error"]:
                 raise ValueError("RefusalSourceMismatch: failed attempt fabricated result")
@@ -435,7 +522,13 @@ def verify_physical(inputs, rows, capture):
     return validated
 
 
-def _consume(root, *, synthetic, physical_replay=None, review=None):
+def _consume(
+    root: Path,
+    *,
+    synthetic: bool,
+    physical_replay: PhysicalCapture | None = None,
+    review: ReviewRecord | None = None,
+) -> ConsumerRun:
     audit = audit_candidate(root)
     inputs = ui.load_inputs(root / "u2-inputs", audit["input_manifest_sha256"])
     rows = strict_json_loads((root / "parity/fixtures.json").read_bytes())
@@ -471,7 +564,7 @@ def _consume(root, *, synthetic, physical_replay=None, review=None):
             e for e in inputs.entries if "components/" + ui.role(e) == row["component_params_file"]
         )
         common = _common(row, entry)
-        ref = dict(old.rank_counts(row), duration_s=row["duration_s"], vector_ops=None)
+        ref = dict(rank_counts(row), duration_s=row["duration_s"], vector_ops=None)
         values = {
             n: dict(
                 state="absent"
@@ -545,7 +638,7 @@ def _consume(root, *, synthetic, physical_replay=None, review=None):
         ]
         if a.get("error"):
             for ch in physical_channels:
-                ch["reason"] = "Captured execution failure: " + a["error"]
+                ch["reason"] = "Captured execution failure: " + cast(str, a["error"])
         physical_rows.append(
             ComparisonFixture.model_validate(
                 dict(
@@ -561,7 +654,7 @@ def _consume(root, *, synthetic, physical_replay=None, review=None):
                 )
             )
         )
-    inv = old.put(
+    inventory_data = old.put(
         store,
         dict(
             format="uarch-reference-inventory/1",
@@ -574,7 +667,7 @@ def _consume(root, *, synthetic, physical_replay=None, review=None):
         ),
         "inventory_hash",
     )
-    inv = ReferenceInventory.model_validate(inv)
+    inv = ReferenceInventory.model_validate(inventory_data)
     comparisons = {}
     limits = (
         "Explicit synthetic reference premises; not oracle execution or adoption."
@@ -590,7 +683,7 @@ def _consume(root, *, synthetic, physical_replay=None, review=None):
         "No real L3/L4 or energy eligibility; unknown reference channels remain unassessed.",
     )
     for key, track, model, fixtures in [
-        ("nominal", "nominal_compatibility", old.nominal.candidate_identity(), nominal_rows),
+        ("nominal", "nominal_compatibility", nominal_candidate.candidate_identity(), nominal_rows),
         ("physical", "physical_discrepancy", physical_assumptions().model, physical_rows),
     ]:
         c = assemble_comparison(
@@ -606,7 +699,8 @@ def _consume(root, *, synthetic, physical_replay=None, review=None):
         store[c.comparison_hash] = c.model_dump(mode="json")
         comparisons[key] = c
     return dict(
-        **comparisons,
+        nominal=comparisons["nominal"],
+        physical=comparisons["physical"],
         inventory=inv,
         artifacts=store,
         inputs=inputs,
@@ -624,7 +718,7 @@ def _consume(root, *, synthetic, physical_replay=None, review=None):
     )
 
 
-def report_package(run, *, captured=None):
+def report_package(run: ConsumerRun, *, captured: CapturedWork | None = None) -> TablePackage:
     """Full comparison coverage; a real H1 table supplies the report's hardware context."""
     validated = run["validated_physical"]
     if captured is None:
@@ -681,7 +775,7 @@ def report_package(run, *, captured=None):
     return old.report_package(c, dict(run, comparison_source_recipes=recipes), run["inputs"])
 
 
-def save_comparisons(run, destination: Path) -> None:
+def save_comparisons(run: ConsumerRun, destination: Path) -> None:
     """Preserve raw closure and actual captures before potentially costly report validation."""
     destination.mkdir(parents=True, exist_ok=False)
     closure = destination / "comparison-artifacts"
@@ -690,10 +784,12 @@ def save_comparisons(run, destination: Path) -> None:
         (closure / (identity[7:] + ".json")).write_bytes(
             value if isinstance(value, bytes) else vr.canonical(value)
         )
-    for name in ("nominal", "physical", "inventory"):
-        (destination / (name + ".json")).write_bytes(
-            vr.canonical(run[name].model_dump(mode="json"))
-        )
+    for name, value in (
+        ("nominal", run["nominal"]),
+        ("physical", run["physical"]),
+        ("inventory", run["inventory"]),
+    ):
+        (destination / (name + ".json")).write_bytes(vr.canonical(value.model_dump(mode="json")))
     (destination / "physical-capture.json").write_bytes(vr.canonical(run["physical_capture"]))
     (destination / "observations.json").write_bytes(
         vr.canonical(

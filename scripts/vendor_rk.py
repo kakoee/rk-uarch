@@ -14,6 +14,7 @@ import os
 import re
 import shlex
 import subprocess
+import sys
 import tempfile
 import tomllib
 from pathlib import Path
@@ -1052,4 +1053,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Direct script execution exposes scripts/, not its parent package directory.
+    # Module/library invocations already resolve scripts and keep their import paths.
+    if not __package__:
+        sys.path.insert(0, str(ROOT))
     main()

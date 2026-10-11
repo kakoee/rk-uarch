@@ -31,5 +31,10 @@ Those missing facts remain open. Before executable reference use, obtain reviewe
 or a separately reviewed fidelity limitation for every consumed unknown.
 This is a file-specific draft restriction, not a ban on all genuine stub-backed predictions.
 
-Actual export, bridge checks, oracle generation/adoption and the complete B-F16 lifecycle
-remain outstanding; this input acceptance is not runtime or hardware validation.
+Actual H1 export, pinned bridge execution and human v2 generation/adoption now have
+committed records in [v2 adoption execution](../docs/reviews/U2-adoption-v2-execution/README.md).
+The approved inputs and original generation identities remain unchanged. Stage 2
+source corrections require coordinator reconciliation and a later source/input freeze
+where applicable; see [B response](../docs/reviews/U2-publication-history.md#b-documentation-correction). Neither
+adoption nor complete analytic report capture establishes hardware/model validation.
+Independent review, remaining acceptance cases and sprint closure remain separate.

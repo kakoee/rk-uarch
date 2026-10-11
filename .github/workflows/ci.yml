@@ -13,7 +13,9 @@ jobs:
       - name: lint
         run: uv run ruff check .
       - name: typecheck
-        run: uv run mypy src contract scripts
+        run: |
+          uv run mypy src contract/uarch_contract scripts
+          uv run mypy --no-explicit-package-bases contract/tests
       - name: imports
         run: uv run lint-imports
       - name: tests (fails on an empty suite, by design)

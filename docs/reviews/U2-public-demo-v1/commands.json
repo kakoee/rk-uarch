@@ -1,0 +1,88 @@
+[
+  {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-m",
+      "rkuarch.cli",
+      "validate",
+      "hw/designs/npu-l4.yaml"
+    ],
+    "cwd": "/tmp/U2-public-demo-v1-source",
+    "exit_code": 0,
+    "elapsed_seconds": 0.712
+  },
+  {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-m",
+      "rkuarch.cli",
+      "assumptions",
+      "--model",
+      "physical-resolved",
+      "--output",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/assumptions.json"
+    ],
+    "cwd": "/tmp/U2-public-demo-v1-source",
+    "exit_code": 0,
+    "elapsed_seconds": 0.249
+  },
+  {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-m",
+      "rkuarch.cli",
+      "prepare",
+      "hw/designs/npu-l4.yaml",
+      "--model",
+      "llama-3.1-8b",
+      "--precision",
+      "bf16",
+      "--tp",
+      "1",
+      "--grid",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/U2-public-demo-v1/grid.json",
+      "--output",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/prepared.json"
+    ],
+    "cwd": "/tmp/U2-public-demo-v1-source",
+    "exit_code": 0,
+    "elapsed_seconds": 0.339
+  },
+  {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-m",
+      "rkuarch.cli",
+      "capture",
+      "--prepared-input",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/prepared.json",
+      "--assumptions",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/assumptions.json",
+      "--output",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/capture"
+    ],
+    "cwd": "/tmp/U2-public-demo-v1-source",
+    "exit_code": 0,
+    "elapsed_seconds": 2.356
+  },
+  {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-m",
+      "rkuarch.cli",
+      "companions",
+      "draft",
+      "--prepared-input",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/prepared.json",
+      "--assumptions",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/assumptions.json",
+      "--capture-dir",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/capture",
+      "--output",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1/draft"
+    ],
+    "cwd": "/tmp/U2-public-demo-v1-source",
+    "exit_code": 0,
+    "elapsed_seconds": 1.106
+  }
+]

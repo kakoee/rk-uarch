@@ -6,7 +6,9 @@ sync:        ; uv sync --extra dev
 test:        ; uv run pytest -q
 test-fast:   ; uv run pytest -q -m "not nightly and not silicon and not native"
 lint:        ; uv run ruff check .
-typecheck:   ; uv run mypy
+typecheck:
+	uv run mypy src contract/uarch_contract scripts
+	uv run mypy --no-explicit-package-bases contract/tests
 imports:     ; uv run lint-imports
 gen:         ; uv run python -m uarch_contract.generate
 gen-check:   ; uv run python -m uarch_contract.generate --check
@@ -14,8 +16,10 @@ golden-update: ; @echo "make golden-update lands in U-P7"; exit 1
 # Export values as data; the Python CLI parses optional shell-quoted PARAMS paths.
 export SHA RK PARAMS
 vendor-rk:   ; uv run --no-sync python scripts/vendor_rk.py
-table:       ; @echo "uarch table lands in U-P3"; exit 1
-report:      ; @echo "uarch report lands in U-P4"; exit 1
+# Pass CLI arguments explicitly, e.g. make table ARGS='--help'.
+ARGS ?= --help
+table:       ; uv run uarch table $(ARGS)
+report:      ; uv run uarch report $(ARGS)
 image:       ; @echo "the engine image lands in U-P5 (Linux box only)"; exit 1
 native:      ; @echo "the native engine (Rust, cargo) lands in U-P11a"; exit 1
 native-test: ; @echo "native tests (cargo test) land in U-P11a"; exit 1

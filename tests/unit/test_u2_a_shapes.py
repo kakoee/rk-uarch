@@ -3,18 +3,21 @@
 import importlib
 import json
 from pathlib import Path
+from typing import Literal
 
 import pytest
 from uarch_contract.hardware import HardwareSpec
 from uarch_contract.hashing import content_hash, spec_hash
+from uarch_contract.prepared import PreparedBundle
 from uarch_contract.request import RequestIntent
 
+from rkuarch.engines.protocol import EngineResult
 from rkuarch.workload.prepared import execute_prepared_point, physical_assumptions
 
 FIX = Path(__file__).resolve().parents[2] / "contract/tests/fixtures/u2/independent-bundle.json"
 
 
-def inputs(**updates):
+def inputs(**updates: object) -> tuple[RequestIntent, HardwareSpec]:
     b = json.loads(FIX.read_text())
     i = b["intent"]
     i["assumptions_hash"] = physical_assumptions().assumptions_hash
@@ -22,17 +25,38 @@ def inputs(**updates):
     return RequestIntent.model_validate(i), HardwareSpec.model_validate(b["hardware_spec"])
 
 
-def prepare(i, hw, **kw):
-    return importlib.import_module("rkuarch.workload.prepare").prepare(i, hw, **kw)
+def prepare(
+    i: RequestIntent,
+    hw: HardwareSpec,
+    *,
+    rank_index: int = 0,
+    embedding_hits: tuple[tuple[int, ...], ...] | None = None,
+    synthetic_assignment: bool = False,
+    attention_mask: Literal["full_square", "causal"] = "full_square",
+    lm_head: Literal["all", "last"] = "all",
+    fused_attention: bool = True,
+) -> PreparedBundle:
+    from rkuarch.workload.prepare import prepare as prepare_bundle
+
+    return prepare_bundle(
+        i,
+        hw,
+        rank_index=rank_index,
+        embedding_hits=embedding_hits,
+        synthetic_assignment=synthetic_assignment,
+        attention_mask=attention_mask,
+        lm_head=lm_head,
+        fused_attention=fused_attention,
+    )
 
 
-def run(b, index=0):
+def run(b: PreparedBundle, index: int = 0) -> EngineResult:
     return execute_prepared_point(
         b, b.points[index].payload_hash, assumptions=physical_assumptions()
     )[1]
 
 
-def test_standalone_literal_decoder_and_capacity():
+def test_standalone_literal_decoder_and_capacity() -> None:
     i, hw = inputs()
     b = prepare(i, hw)
     r = run(b)
@@ -48,7 +72,7 @@ def test_standalone_literal_decoder_and_capacity():
     assert "activation" in " ".join(cap.warnings).lower()
 
 
-def test_selected_rank_and_explicit_assignment():
+def test_selected_rank_and_explicit_assignment() -> None:
     i, hw = inputs(tp=2)
     with pytest.raises(ValueError, match="embedding|assignment"):
         prepare(i, hw)
@@ -65,7 +89,7 @@ def test_selected_rank_and_explicit_assignment():
         prepare(i, hw, embedding_hits=((1, 1), (1, 1)))
 
 
-def test_capacity_refusal_and_warning():
+def test_capacity_refusal_and_warning() -> None:
     i, hw = inputs()
     raw = hw.model_dump(mode="json")
     raw["memory"]["dram"]["capacity_bytes"]["value"] = 743
@@ -79,7 +103,7 @@ def test_capacity_refusal_and_warning():
     assert any("KV" in w for w in c.warnings)
 
 
-def test_moe_tied_residency_and_activity_once():
+def test_moe_tied_residency_and_activity_once() -> None:
     i, hw = inputs()
     raw = i.model_dump(mode="json")
     # common148 (tied), router24, FFN192 per expert: total748, active556.
@@ -93,7 +117,7 @@ def test_moe_tied_residency_and_activity_once():
     assert any("MoE" in s for s in b.points[0].graph.omissions)
 
 
-def test_modes_layers_and_cold_identity():
+def test_modes_layers_and_cold_identity() -> None:
     i, hw = inputs()
     a = prepare(i, hw)
     b = prepare(i.model_copy(update={"analytic_mode": "aggregate"}), hw)
@@ -108,7 +132,7 @@ def test_modes_layers_and_cold_identity():
     assert run(expanded).counts == run(a).counts
 
 
-def test_prefill_attention_and_head_literals():
+def test_prefill_attention_and_head_literals() -> None:
     i, hw = inputs()
     raw = i.model_dump(mode="json")
     raw["grid"]["prefill"]["L"] = [3]
@@ -119,17 +143,25 @@ def test_prefill_attention_and_head_literals():
     unfused = prepare(i, hw, fused_attention=False)
     # Across 2 layers: pairs 18 vs12 => 96 matrix and60 vector difference.
     assert run(full, 1).counts.matrix_ops - run(causal, 1).counts.matrix_ops == 96
-    assert run(full, 1).counts.vector_ops - run(causal, 1).counts.vector_ops == 60
+    full_vector = run(full, 1).counts.vector_ops
+    causal_vector = run(causal, 1).counts.vector_ops
+    assert full_vector is not None and causal_vector is not None
+    assert full_vector - causal_vector == 60
     assert run(full, 1).counts.memory_read_bytes == run(causal, 1).counts.memory_read_bytes
     assert run(full, 1).counts.matrix_ops - run(last, 1).counts.matrix_ops == 128
     assert run(full, 1).counts.matrix_ops == run(unfused, 1).counts.matrix_ops
     assert run(full, 1).counts.vector_ops == run(unfused, 1).counts.vector_ops
     # Two intermediates each written+read: 18*2 bytes*2 intermediates*2 layers.
     assert run(unfused, 1).counts.memory_read_bytes - run(full, 1).counts.memory_read_bytes == 144
-    assert run(unfused, 1).counts.memory_write_bytes - run(full, 1).counts.memory_write_bytes == 144
+    unfused_writes = run(unfused, 1).counts.memory_write_bytes
+    full_writes = run(full, 1).counts.memory_write_bytes
+    assert unfused_writes is not None and full_writes is not None
+    assert unfused_writes - full_writes == 144
 
 
-def test_authoritative_replay_never_reprepares(monkeypatch, tmp_path):
+def test_authoritative_replay_never_reprepares(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     i, hw = inputs()
     b = prepare(i, hw, fused_attention=False, attention_mask="causal", lm_head="last")
     p = tmp_path / "prepared.json"
@@ -143,7 +175,7 @@ def test_authoritative_replay_never_reprepares(monkeypatch, tmp_path):
     assert run(loaded) == run(b)
 
 
-def test_imported_unfused_missing_cache_dependency_refuses():
+def test_imported_unfused_missing_cache_dependency_refuses() -> None:
     i, hw = inputs()
     b = prepare(i, hw, fused_attention=False).model_dump(mode="json")
     p = b["points"][0]
@@ -158,8 +190,11 @@ def test_imported_unfused_missing_cache_dependency_refuses():
         validate_execution_bundle(b)
 
 
-def reseal(raw):
-    for p in raw["points"]:
+def reseal(raw: dict[str, object]) -> dict[str, object]:
+    points = raw["points"]
+    assert isinstance(points, list)
+    for p in points:
+        assert isinstance(p, dict)
         p["payload_hash"] = content_hash(p, exclude=("payload_hash",))
     raw["intent_hash"] = content_hash(raw["intent"])
     raw["bundle_hash"] = content_hash(raw, exclude=("bundle_hash",))
@@ -170,7 +205,7 @@ def reseal(raw):
     "mutation",
     ["replication", "paging", "dimensions", "padding", "equivalence", "group_dependency"],
 )
-def test_imported_physical_metadata_cannot_be_rehashed_away(mutation):
+def test_imported_physical_metadata_cannot_be_rehashed_away(mutation: str) -> None:
     from rkuarch.workload.prepared import validate_execution_bundle
 
     i, hw = inputs(tp=2)
@@ -211,7 +246,7 @@ def test_imported_physical_metadata_cannot_be_rehashed_away(mutation):
         validate_execution_bundle(reseal(b))
 
 
-def test_vocab_padding_and_kv_replication_execute_physical_extents():
+def test_vocab_padding_and_kv_replication_execute_physical_extents() -> None:
     i, hw = inputs(tp=2)
     raw = i.model_dump(mode="json")
     raw["model_shape"]["vocab_size"] = 7
@@ -223,7 +258,7 @@ def test_vocab_padding_and_kv_replication_execute_physical_extents():
     assert run(b).counts.matrix_ops > 0
 
 
-def test_characterize_captures_scopes_and_unknown_errors():
+def test_characterize_captures_scopes_and_unknown_errors() -> None:
     i, hw = inputs()
     b = prepare(i, hw)
     report = importlib.import_module("rkuarch.workload.characterize").characterize(b)
@@ -235,9 +270,9 @@ def test_characterize_captures_scopes_and_unknown_errors():
     assert err.cold_vs_steady.n_samples == 0 and err.cold_vs_steady.max_rel is None
 
 
-def test_h2_fp8_named_model_preparation():
+def test_h2_fp8_named_model_preparation() -> None:
     import yaml
-    from uarch_contract.precision import Precision
+    from uarch_contract.precision import Precision, PrecisionFormat
 
     root = Path(__file__).resolve().parents[2]
     hw = HardwareSpec.model_validate(
@@ -255,7 +290,7 @@ def test_h2_fp8_named_model_preparation():
         hardware_spec_hash=spec_hash(hw),
         component_id="npu-m256",
         tp=8,
-        precision=Precision(compute="fp8", kv_cache="fp8").model_dump(),
+        precision=Precision(compute=PrecisionFormat.FP8, kv_cache=PrecisionFormat.FP8).model_dump(),
     )
     if hw.shared_sram is not None:
         raw["uarch_fidelity"]["shared_sram"] = "unrepresented"
@@ -269,7 +304,7 @@ def test_h2_fp8_named_model_preparation():
 
 
 @pytest.mark.parametrize("ratio", [0.5, 1.0, 1.5, 2.0])
-def test_frequency_counts_invariant_and_timing_monotone(ratio):
+def test_frequency_counts_invariant_and_timing_monotone(ratio: float) -> None:
     i, hw = inputs()
     raw = i.model_dump(mode="json")
     raw["grid"]["frequency_ratio"] = [ratio]
@@ -286,13 +321,13 @@ def test_frequency_counts_invariant_and_timing_monotone(ratio):
     )
 
 
-def test_property_embedding_conservation():
+def test_property_embedding_conservation() -> None:
     from hypothesis import given, settings
     from hypothesis import strategies as st
 
     @settings(max_examples=12, derandomize=True, database=None, deadline=None)
     @given(st.integers(min_value=1, max_value=9), st.integers(min_value=0, max_value=1))
-    def check(tokens, rank):
+    def check(tokens: int, rank: int) -> None:
         i, hw = inputs(tp=2)
         raw = i.model_dump(mode="json")
         raw["grid"]["decode"]["batch"] = [tokens]
@@ -306,7 +341,7 @@ def test_property_embedding_conservation():
     check()
 
 
-def test_imported_padding_must_connect_physical_ffn_extents():
+def test_imported_padding_must_connect_physical_ffn_extents() -> None:
     from rkuarch.workload.prepared import validate_execution_bundle
 
     i, hw = inputs()
@@ -333,7 +368,9 @@ def test_imported_padding_must_connect_physical_ffn_extents():
     assert run(b).counts.vector_ops == 596
 
 
-def test_subprocess_capture_uses_transport_not_parent_engine(monkeypatch):
+def test_subprocess_capture_uses_transport_not_parent_engine(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from rkuarch.engines.analytic import core
     from rkuarch.table.build import capture
 
@@ -344,7 +381,7 @@ def test_subprocess_capture_uses_transport_not_parent_engine(monkeypatch):
     assert c.results[0].counts.matrix_ops == 1184
 
 
-def test_attribution_source_capture_is_complete():
+def test_attribution_source_capture_is_complete() -> None:
     from rkuarch.table.build import capture, source_scopes, table_recipes
 
     i, hw = inputs()
@@ -362,7 +399,7 @@ def test_attribution_source_capture_is_complete():
             assert scopes[(result.result_hash, pointer)]
 
 
-def test_empty_logical_vocab_shard_refuses_instead_of_fabricating_padding():
+def test_empty_logical_vocab_shard_refuses_instead_of_fabricating_padding() -> None:
     i, hw = inputs(tp=2)
     raw = i.model_dump(mode="json")
     raw["model_shape"]["vocab_size"] = 1
@@ -371,9 +408,9 @@ def test_empty_logical_vocab_shard_refuses_instead_of_fabricating_padding():
         prepare(RequestIntent.model_validate(raw), hw, synthetic_assignment=True, rank_index=1)
 
 
-def test_h2_mixed_compute_and_kv_storage_preserve_roles():
+def test_h2_mixed_compute_and_kv_storage_preserve_roles() -> None:
     import yaml
-    from uarch_contract.precision import Precision
+    from uarch_contract.precision import Precision, PrecisionFormat
 
     root = Path(__file__).resolve().parents[2]
     hw = HardwareSpec.model_validate(
@@ -384,7 +421,9 @@ def test_h2_mixed_compute_and_kv_storage_preserve_roles():
     raw.update(
         hardware_spec_hash=spec_hash(hw),
         component_id=hw.id,
-        precision=Precision(compute="bf16", kv_cache="fp8").model_dump(),
+        precision=Precision(
+            compute=PrecisionFormat.BF16, kv_cache=PrecisionFormat.FP8
+        ).model_dump(),
     )
     if hw.shared_sram is not None:
         raw["uarch_fidelity"]["shared_sram"] = "unrepresented"

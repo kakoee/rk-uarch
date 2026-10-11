@@ -5,9 +5,10 @@ canonical query (decode: B sequences of T/B; prefill: n prompts of L). Output: t
 graph of ONE rank of a tp-way tensor-parallel split (heads, KV heads, FFN and vocabulary
 divided by tp; no collectives), using contract/operators.py only. Attention is one
 attention_fused operator: scores stay on chip and never reach DRAM. A multiply-add is two
-operations. Layer reuse must be declared in
-the graph, and its error is measured by table/. KV is read in pages of the request's
-block_size_tokens. MoE is active-parameter dense-equivalent only. `omissions` lists routing,
+operations. Layer reuse must be declared in the graph; its experimental error is unknown
+at U2 (zero samples, null estimates). KV traffic reads valid tokens, not page capacity.
+For T=17 and block_size_tokens=16, two pages are allocated but only 17 tokens are read;
+page-rounded capacity accounting remains separate. MoE is active-parameter dense-equivalent only. `omissions` lists routing,
 imbalance, all-to-all, host/runtime time, address translation, coherence and mixed
 prefill/decode iterations; they become table warnings. Independent physical correctness/discrepancy tests and separate nominal compatibility run
 on every change; no nominal pass is claimed as physical parity.

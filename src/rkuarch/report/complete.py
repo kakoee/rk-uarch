@@ -27,10 +27,10 @@ from .badged import Badged, badged
 from .evaluation import Evaluator, combine_assessments
 from .plot import Plot, roofline
 from .proofs import proof_statuses
-from .prose import safe_prose
+from .prose import CapturedIdentifier, safe_prose
 from .render import _markdown, lint_template
 
-VERSION = "u2-complete-report/1"
+VERSION = "u2-complete-report/2"
 TEMPLATES = Path(__file__).with_name("templates")
 
 
@@ -107,13 +107,16 @@ class Document:
         declaration = self.declared_input(path, value) if assessment is None else None
         a = assessment if assessment is not None else declaration or self.evaluator.metric(path)
         rendered = badged(value, unit, a, self.p, execution=execution)
-        if declaration is not None:
+        if declaration is not None and value is not None:
+            # Exact captured input metadata is not a computed prediction. Only the
+            # closed declared_input pointer allow-list can reach this branch.
+            number = str(value) if type(value) is int else repr(float(value))
+            source = declaration.contributors[0]
             rendered = replace(
                 rendered,
-                text=rendered.text.replace(
-                    "STUB — unvalidated model prediction",
-                    "STUB — declared captured input; not a measurement",
-                ),
+                number=number,
+                text=f"{number} {unit} · declared captured input; not a measurement; "
+                f"source={source.artifact_hash}{source.json_pointer}",
             )
         if not a.display_recipe:
             rendered = replace(
@@ -125,6 +128,51 @@ class Document:
 
     def declared_input(self, path: str, value: Any) -> MetricAssessment | None:
         """Quote a fixed existing captured input pointer, never authorize a result field."""
+        match = re.fullmatch(
+            r"/comparisons/(0|[1-9][0-9]*)/fixtures/(0|[1-9][0-9]*)/"
+            r"(tp|query/(batch|total_context_tokens|n_prompts|prompt_tokens)|"
+            r"projection_scope/(global_kv_heads|global_vocab|padded_vocab))",
+            path,
+        )
+        if match:
+            comparison = self.v.comparisons[int(match[1])]
+            fixture = comparison.fixtures[int(match[2])]
+            inventory = self.v.artifacts[comparison.reference_inventory_hash]
+            matches = [
+                i
+                for i, f in enumerate(inventory["fixtures"])
+                if f["fixture_id"] == fixture.fixture_id
+            ]
+            if len(matches) != 1:
+                raise ValueError("CapturedInputBindingMismatch: fixture identity")
+            reference_pointer = f"/fixtures/{matches[0]}/" + match[3]
+            if (
+                resolve_pointer(inventory, reference_pointer) != value
+                or resolve_pointer(fixture.model_dump(mode="json"), "/" + match[3]) != value
+            ):
+                raise ValueError("CapturedInputBindingMismatch: fixture coordinate")
+            model = EvidenceAssessment(
+                "stub",
+                content_hash(comparison.reference_model),
+                "input",
+                "input",
+                reasons=("declared reference fixture coordinate; not a prediction",),
+            )
+            return replace(
+                badge_for((), (model,), design_status=self.v.hardware.design_status),
+                contributors=(
+                    DependencySelector(
+                        kind="prepared_content",
+                        artifact_hash=comparison.reference_inventory_hash,
+                        json_pointer=reference_pointer,
+                    ),
+                    DependencySelector(
+                        kind="model_evidence",
+                        artifact_hash=comparison.reference_inventory_hash,
+                        json_pointer="/reference_model",
+                    ),
+                ),
+            )
         pointer = None
         if path.startswith("/kv_layout/") or path == "/tp":
             pointer = "/intent" + path
@@ -205,7 +253,12 @@ class Document:
                     self.text(
                         str(value),
                         identity=bool(
-                            isinstance(value, str) and re.fullmatch(r"sha256:[0-9a-f]{64}", value)
+                            isinstance(value, str)
+                            and (
+                                re.fullmatch(r"sha256:[0-9a-f]{64}", value)
+                                or path == "/request/model/name"
+                                or re.fullmatch(r"/rows/[0-9]+/op_results/[0-9]+/id", path)
+                            )
                         ),
                     ),
                 )
@@ -249,25 +302,19 @@ class Document:
             self.metrics["/hardware/" + path] = metric
             entries.append((path, metric))
         conditions = v.table.provenance.conditional_on
-        if conditions:
-            stipulations = tuple(m for _, m in entries if m.assessment.conditional_on)
-            count = self.number(
-                "/hardware/stipulation_inventory_count",
-                len(stipulations),
-                "stipulations",
-                assessment=combine_assessments(
-                    tuple(m.assessment for m in stipulations), v.hardware.design_status
-                ),
-            )
-            count = replace(
-                count,
-                text=count.text.replace(
-                    "STUB — unvalidated model prediction",
-                    "STUB — input inventory; not a prediction",
-                ),
-            )
-            self.metrics["/hardware/stipulation_inventory_count"] = count
-            entries.insert(0, ("Stipulation inventory count", count))
+        stipulations = tuple(m for _, m in entries if m.assessment.conditional_on)
+        count_value = len(stipulations)
+        count = Badged(
+            str(count_value),
+            f"conditional · {count_value} stipulations; input inventory; not a prediction",
+            "stipulations",
+            combine_assessments(
+                tuple(m.assessment for m in stipulations), v.hardware.design_status
+            ),
+            self.p.render_hash,
+        )
+        self.metrics["/hardware/stipulation_inventory_count"] = count
+        entries.insert(0, ("Stipulation inventory count", count))
         self.section(
             "Conditional hardware inputs and original claim provenance",
             [
@@ -312,8 +359,8 @@ class Document:
         entries = [
             ("Initial state", self.text(v.table.initial_state)),
             ("Composite fidelity", self.text(v.table.composite_fidelity, identity=True)),
-            ("Mapping policy", self.text(v.request.mapping_policy)),
-            ("Producer", self.text(v.table.preparation.name)),
+            ("Mapping policy", self.text(v.request.mapping_policy, identity=True)),
+            ("Producer", self.text(v.table.preparation.name, identity=True)),
             ("Producer version", self.text(v.table.preparation.version, identity=True)),
             (
                 "Producer implementation",
@@ -345,10 +392,13 @@ class Document:
             "Model card and evidence",
             [
                 ("Model identity", self.text(content_hash(v.assumptions.model), identity=True)),
-                ("Model", self.text(v.assumptions.model.name)),
-                ("Engine", self.text(v.model_card.model_id.engine)),
+                ("Model", self.text(v.assumptions.model.name, identity=True)),
+                ("Engine", self.text(v.model_card.model_id.engine, identity=True)),
                 ("Engine version", self.text(v.model_card.model_id.engine_version, identity=True)),
-                ("Model mapping policy", self.text(v.model_card.model_id.mapping_policy)),
+                (
+                    "Model mapping policy",
+                    self.text(v.model_card.model_id.mapping_policy, identity=True),
+                ),
                 ("Supplied card badge (not eligibility)", self.text(v.model_card.badge)),
                 ("Model badge", self.text("STUB — no positive real proof profile is implemented")),
                 ("Validated model error", self.text("unknown")),
@@ -534,10 +584,10 @@ class Document:
                     fields = [(k, guarded if k == opath + "/" + name else m) for k, m in fields]
                 fields.extend(self.fields(op.scope, opath + "/scope"))
                 fields.append(("Source identity", self.text(row.result_hash, identity=True)))
-                self.section("Operator " + safe_prose(op.id), fields)
+                self.section("Operator " + op.id, fields)
                 points.append(
                     (
-                        safe_prose(op.id),
+                        CapturedIdentifier("op_id", op.id),
                         self.metrics[opath + "/operational_intensity_ops_per_byte"],
                         self.metrics[opath + "/achieved_ops_per_s"],
                         self.metrics[opath + "/ridge_ops_per_byte"],
@@ -571,9 +621,7 @@ class Document:
                     ]
                 )
                 for fi, f in enumerate(c.fixtures):
-                    entries.append(
-                        (safe_prose(f.fixture_id), self.text(f.execution + "; " + f.outcome))
-                    )
+                    entries.append((f.fixture_id, self.text(f.execution + "; " + f.outcome)))
                     for ki, ch in enumerate(f.channels):
                         path = f"/comparisons/{ci}/fixtures/{fi}/channels/{ki}"
                         entries.append(
@@ -668,6 +716,9 @@ class Document:
                         )
                     entries.extend(
                         self.fields(f.precision, f"/comparisons/{ci}/fixtures/{fi}/precision")
+                    )
+                    entries.extend(
+                        self.fields(f.tp, f"/comparisons/{ci}/fixtures/{fi}/tp", "ranks")
                     )
                     entries.extend(self.fields(f.query, f"/comparisons/{ci}/fixtures/{fi}/query"))
                     entries.extend(

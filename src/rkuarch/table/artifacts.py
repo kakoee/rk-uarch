@@ -398,6 +398,21 @@ def _load_verified(
         if files[table.request_hash] != request.model_dump(mode="json"):
             raise ValueError("TableBindingMismatch: request companion")
     files.loaded[table.request_hash] = request.model_dump(mode="json")
+    from rkuarch.provenance.reference_contributors import validate_reference_contributors
+
+    declared_context = ReportContext.model_validate(files[table.artifacts.report_context_hash])
+    declared_dependencies = MetricDependencies.model_validate(
+        files[declared_context.metric_dependencies_hash]
+    )
+    declared_comparisons = tuple(
+        ComparisonArtifact.model_validate(files[h]) for h in declared_context.comparison_hashes
+    )
+    validate_reference_contributors(
+        declared_dependencies,
+        tuple(c.reference_inventory_hash for c in declared_comparisons),
+        files,
+        read_raw=files.raw,
+    )
     _complete_closure(table.table_hash, files)
     table = validate_table_bindings(table, files)
     hardware = bundle.hardware_spec
@@ -473,6 +488,17 @@ def _load_verified(
     registry = FamilyRegistry.model_validate(files[context.family_registry_hash])
     if sum(e.hardware_spec_hash == table.hardware_spec_hash for e in registry.entries) != 1:
         raise ValueError("AmbiguousFamily: current hardware")
+    from rkuarch.provenance.model_card import validate_production_model_card
+    from rkuarch.table.build import CapturedWork
+
+    validate_production_model_card(
+        card,
+        captured=CapturedWork(
+            bundle, assumptions, request, derivation, tuple(jobs), tuple(results)
+        ),
+        context=context,
+        artifacts=files,
+    )
     dependencies = MetricDependencies.model_validate(files[context.metric_dependencies_hash])
     terminal = validate_metric_dependencies(dependencies, files)
     _verify_computation_sources(

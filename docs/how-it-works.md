@@ -1,145 +1,107 @@
 # How rk-uarch works
 
-This describes the validated U1 implementation published at
-`44559fb1672e4d3468b4b6fc930cfdf4b4c1e99e`. U1 provides the shared contracts, generated
-schemas, a human-generated rk-sim evidence snapshot and a test-only parity harness.
-There is no simulation engine, workload producer, working table/report CLI or engine
-result yet. The [U1 closeout](reviews/U1-closeout.md) records validation and Javid's
-2026-10-07 G1 approval and closeout acceptance. The published annotated `u01-end` now
-resolves to `1e9e794a84c5173812c23a1cf2fc04b85e6f6831`;
-[closeout CI](https://github.com/kakoee/rk-uarch/actions/runs/37588171798) passed on that
-revision. The [U2 kickoff record](reviews/U2-orchestration-kickoff.md) records independent
-verification. U2 shared design is accepted under [U0003](decisions/U0003-one-chip-one-set-of-facts.md);
-implementation handoffs are prepared. No U2 producer or engine is implemented yet.
-Its approved validation-host arrangement is recorded separately in
-[U0021](decisions/U0021-u2-cold-clone-validation-exception.md), without extending U0020.
+U2 implements a standalone stateless analytic estimate of one chip's LLM workload,
+plus reproducible tables and provenance-aware reports. The [public workflow](u2-workflow.md)
+starts with a sourced hardware spec and model shape, prepares explicit operators and
+mapping, executes the analytic engine, and packages the results with reviewed source
+declarations. The [accepted design](u2-design.md) defines the scope and limitations.
 
-## Contracts and their limits
+## From an NPU specification to an iteration estimate
 
-The Python package [uarch_contract](../contract/uarch_contract/) defines
-`uarch-contract/0.1`: sourced hardware values, HardwareSpec, ModelSpec/ModelShape,
-operator vocabulary, precision, requests, rows/tables, model cards, error records and
-canonical hashes. [U0001](decisions/U0001-the-integration-contract.md) is accepted in full.
-The 69 committed [JSON Schemas](../contract/schema/) describe the wire structure;
-Python validators additionally enforce cross-field semantics. Schema validity alone
-cannot establish provenance truth, artifact identity or evidence applicability.
-Round trips and schema freshness are pinned by `test_round_trip_all_models` and
-`test_schema_freshness` in [the contract tests](../contract/tests/test_u_p1.py).
+Hardware values declare units and either a claim with its source or a stipulation
+with its rationale. H1 and H2 are proposed designs, not measured products. Validation
+checks those declarations; it does not establish that a physical chip achieves them.
 
-| Boundary | Implemented behavior and tests |
-| --- | --- |
-| Hardware provenance | Claims require provenance and, except stubs, a source; stipulations require rationale and are refused in reference hardware. Hardware leaf units are checked without conversion. See [source/refusal tests](../contract/tests/test_u_p1.py) and [unit-map regressions](../contract/tests/test_u_p1_review.py). |
-| Pinned vocabulary | ModelSpec fields and PrecisionFormat members match the vendored pin. Five-field claims round-trip; stipulations cannot become upstream claims. The accepted exception is stricter stub handling: uarch requires `source=None`, while upstream accepts blank strings. No blank-to-null conversion occurs. See [vendored round trips](../contract/tests/test_vendored_round_trip.py). |
-| DRAM origin | Explicit `direct`/`preset` timing mode is required. Preset claims bind to the named file and full SHA; no citation-string heuristic or fallback selects a preset. See `test_timing_mode_is_required_and_direct_has_no_preset` and preset regressions in [test_u_p1.py](../contract/tests/test_u_p1.py). |
-| Shapes and requests | ModelShape checks total/active parameter consistency; requests validate shard divisibility and balanced KV replication. MoE's two FFN-width fields must agree. These validate descriptions; they do not build a workload. See [shape/shard tests](../contract/tests/test_u_p1.py) and [MoE regressions](../contract/tests/test_u_p1_review.py). |
-| Fidelity | All-zero hardware detail is C0; C2 requires compute 2, NoC/DRAM 2 or 1+ts, exact sync and 1+ts shared SRAM if present. Other detailed combinations are C1. Omitted shared SRAM means physically absent; explicit null is refused. Approximate sync never promotes fidelity. See exhaustive composite tests and the no-SRAM C2 roofline test in [test_u_p1.py](../contract/tests/test_u_p1.py). These are carrier rules, not delivered engine fidelities. |
-| Table identity and cycles | `hardware_spec_hash` is required, survives round-trip and participates in the table digest. Only `provenance.conditional_on[*].value` may echo hardware stipulations in cycles; results and derived params cannot. See [A-F1/A-F2 regressions](../contract/tests/test_u_p1_followup.py). Actual spec/path/value equality belongs to U-P3. |
-| Hashes | Validated defaults, sorted object keys, normalized signed zero and preserved list order determine canonical identity; only the table's own top-level digest is excluded from its hash. See `test_hash_fresh_processes_and_key_order` in [test_u_p1.py](../contract/tests/test_u_p1.py), [canonicalization regressions](../contract/tests/test_u_p1_review.py), and [hardware digest coverage](../contract/tests/test_u_p1_followup.py). Parsing a digest string does not authenticate it. |
-| Evidence carriers | Unsampled errors and unmodelled diagnostics remain null, not zero. Above-stub cards require evidence IDs, but the carrier does not load a ledger or promote a model. Energy needs its own evidence. See [null/default tests](../contract/tests/test_u_p1.py) and [badge/error/energy regressions](../contract/tests/test_u_p1_review.py). |
+Preparation resolves the model's operator counts, tensor-parallel shard, KV reads and
+writes, precision and selected-rank work. A row covers one chip's shard, one iteration
+and all model layers, excluding inter-chip collectives. For example, decode batch 8,
+context 512 means the rank's work to generate one token for each of eight sequences
+with that context. Prefill has separate prompt-count and prompt-length coordinates.
+The saved prepared bundle is authoritative on replay; loading it never silently
+rebuilds the mapping or changes the shard.
 
-A future table represents one chip's shard, one iteration, all layers, without collectives.
-The table consumer must not divide already-sharded work by tp again. These are accepted
-[seam requirements](decisions/U0001-the-integration-contract.md#the-nine-seam-rules), not
-implemented reader behavior. The existing [toy table](../contract/tests/fixtures/toy_table.json)
-is handwritten synthetic carrier data with synthetic identities; it is not an engine run.
-Its nulls and explicit `not_run` parity classification are checked by
-[the toy tests](../contract/tests/test_u_p1.py) and
-[parity-carrier regressions](../contract/tests/test_u_p1_followup.py).
+The U2 analytic engine uses declared compute throughput and memory bandwidth to form
+compute and memory time bounds. Its aggregate U-C0 bound is the maximum of aggregate
+resource times; its per-operator estimate sums each operator's limiting time. These
+are stateless roofline estimates. They do not model detailed queueing, cache histories,
+inter-chip communication, compiler scheduling or measured chip efficiency. Per-op
+and aggregate durations are checked for consistency. An internally consistent result
+still has unknown hardware error.
 
-## Vendored evidence and isolation
+`capture` saves one authenticated job/result per prepared point. `companions draft`
+writes a STUB model card and UNREVIEWED source recipes. An independent reviewer must
+check the exact final declarations, hardware-family registry and intake completeness.
+`companions assemble` consumes those actual review records and refuses missing,
+rejected, non-independent or mismatched subjects. It cannot prove that an author did
+not withhold an attempt from every input; that is part of the external intake review.
 
-The committed [snapshot](../contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/)
-binds upstream `1e5706e0ebfcc67c1a7333079a35b75f693e9963` to manifest SHA256
-`b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d` and the publication
-commit above. It contains 20 files: upstream sources/schema/lock, two component inputs,
-three attributed model-shape sidecars, generator metadata, 864 oracle records, two precision
-refusals and the manifest. Counts, coverage, component digests, sidecar attribution and
-refusals are checked by [test_committed_snapshot.py](../contract/tests/test_committed_snapshot.py).
-Exact generator and oracle identities are in [the closeout](reviews/U1-closeout.md#publication-and-artifact-identity).
+`table` binds the hardware, prepared workload, assumptions, engine results and report
+context into a self-contained package. Saved-capture replay reuses validated results
+without executing producers. Canonical identities and deterministic condition ordering
+make equivalent saved inputs reproduce the same bytes. U2 does not claim later
+multi-worker or native-engine determinism.
 
-The oracle records came from pinned rk-sim `iteration_cost()` through human-operated
-[vendoring](../scripts/vendor_rk.py). Javid's two saved runs report
-[created](reviews/U1-publication-records/generation-first.log) and
-[verified-identical](reviews/U1-publication-records/generation-second.log).
-They cover three models, tp 1/8, and 24 decode/prefill queries across six
-component/precision groups. Placeholder inputs are stub arithmetic fixtures. Oracle
-counts are replica-wide; oracle durations describe one representative tp rank without
-collectives. They are rk-sim reference evidence, not rk-uarch predictions or hardware
-accuracy measurements. Coverage and recorded scopes are pinned by
-[committed-snapshot tests](../contract/tests/test_committed_snapshot.py) and
-[vendor-tooling tests](../contract/tests/test_vendor_tooling.py).
+## What the report says about trust
 
-Strict verification separately checks manifest integrity, recorded identity and current
-compatibility with the exact generator/oracle fingerprints and locked generation-environment
-metadata. A matching manifest alone proves neither adoption nor authenticity. Tests load
-vendored classes privately; production imports of rk/vendor/test helpers are forbidden.
-CI consumes committed bytes without an upstream checkout, oracle rerun or credentials.
-See [U0002](decisions/U0002-the-vendored-snapshot-and-parity-discipline.md),
-[strict compatibility/isolation regressions](../contract/tests/test_u_p2_review.py), and
-[the workflow](../.github/workflows/ci.yml). Any later generator change requires the
-reviewed human artifact-refresh lifecycle, including at the same upstream SHA.
+The current [0.2 contract](../contract/uarch_contract/) carries results and explicit
+provenance. Structural schema validity, content identity, source applicability and
+performance validation are separate checks. Hashes establish content identity; they
+do not turn a synthetic record into a measurement.
 
-## What the parity harness proves
+The public loaders check the complete contributor closure and reject unsupported
+positive model-card assertions. The actual analytic model has known-empty consumed
+energy scope; that means it models no energy, not zero energy or verified consumption.
+Error bands remain unknown. A reviewed source declaration does not promote a badge.
 
-[The harness](../contract/tests/parity.py) compares a candidate's counts with a uniform
-replica/tp projection only within supported unreplicated, unpadded scope. It refuses
-replicated KV, padding and missing scope dimensions before calling the candidate,
-retains every fixture's outcome, and prevents incomplete coverage from entering a success
-carrier. An ordinary numerical failure remains failed. See
-[projection and coverage tests](../contract/tests/test_projection_scope.py).
+Default HTML and Markdown reports show `conditional · N stipulations` and readable
+model/operation identities while hiding unvalidated computed predictions. Declared
+inputs retain their sources. Explicit `--show-unvalidated-predictions` exposes labelled
+STUB predictions without promoting them. [U0004](decisions/U0004-stipulated-values-and-the-estimated-ceiling.md)
+and the [assembly rules](companion-assembly.md) govern these distinctions.
 
-For each positive-reference fixture/channel, raw error is `(actual-reference)/reference`.
-Named adjustments consume a total absolute budget of at most 5%; the residual after signed
-adjustments must be within 0.5%. Splitting or cancellation cannot recover budget. Zero/null
-references have no relative-error denominator and permit no adjustments. Tests pin these
-boundaries in [test_u_p2_review.py](../contract/tests/test_u_p2_review.py) and
-[test_u_p1_followup.py](../contract/tests/test_u_p1_followup.py).
+## Why rk-sim also estimates runtime
 
-The harness preserves fixture/channel attribution, raw error, signed adjustment, absolute
-spend and residual in the contract carrier. Its default is `harness_self_test`; even a
-frozen-oracle echo remains a self-test after serialization. A caller-supplied
-`workload_parity` label and identities cannot authenticate an arbitrary implementation.
-See [carrier integration tests](../contract/tests/test_parity_carrier.py). All current
-parity runs test the harness, not an actual U2 workload. The test-only Channel translation
-changes names without scaling, tp division or null conversion, as checked in
-[test_vendor_tooling.py](../contract/tests/test_vendor_tooling.py).
+rk-uarch's production estimate describes the resolved physical operator graph on one
+chip. rk-sim also has an existing coarse aggregate iteration-cost model. U2 retains
+pinned outputs from that separate model as compatibility evidence. rk-uarch does not
+call rk-sim in production or force physical work to match its aggregate conventions.
 
-## Validation and what comes next
+Accepted U0003 direction S separates two checks. The physical track checks resolved
+work, analytic arithmetic and replay, and retains physical-versus-reference gaps.
+A separate test-only nominal model reproduces the aggregate model's conventions and
+checks the existing numerical compatibility limits. Passing the nominal track is not
+validation of the physical workload's duration or of silicon accuracy.
 
-The exact publication passed 379 strict contract tests, 385 full-suite tests, four
-prompt-sync checks, mypy (47 source files), Ruff, two import contracts, schema freshness
-and strict vendor verification. Exact commands and outputs are in the durable
-[cold-clone report](reviews/U1-cold-clone-evidence/report.txt) and
-[closeout command table](reviews/U1-closeout.md#published-revision-validation).
-Same-commit [hosted CI](https://github.com/kakoee/rk-uarch/actions/runs/37585143201) succeeded.
-Its golden, determinism, native, perf, ordering and patch checks were conditional no-ops;
-the closeout distinguishes them from executed checks.
+The last independently rerun full adopted matrix, on `769a1fe`, retained 1,008 nominal
+cases with zero duration error. The physical track retained 96 executed discrepancies,
+48 capacity failures and 864 not-run cases. Those outcomes are not 1,008 successful
+physical predictions. They are historical runtime evidence, not a rerun of the later
+software-response tree or newly current artifact evidence.
 
-There are no real engine rows to quote, no golden designs with a composite or badge, and
-no engine stipulation count or measured error band. Those sprint-refresh requirements are
-inapplicable to U1; neither the toy nor the oracle echo substitutes for them. Engine
-L0/L0m/L1, worker/thread determinism, native/fork comparison, silicon validation and
-performance-host measurements are also inapplicable. Error remains unknown and energy
-unverified; passing contract tests does not raise an accuracy badge.
+## Current checkpoint and remaining exits
 
-[U0019](decisions/U0019-standalone-preparation-and-prepared-input-replay.md) fixes standalone
-preparation and prepared-input replay ownership. G1 is approved; at U2 kickoff, U0003 must settle
-concrete payloads, identities and compatibility before U2 implementations diverge. U2
-then owns producers, U-C0, actual workload parity, table/report paths, artifact-aware
-checks and replay acceptance. Read the [U2 kickoff obligations](reviews/U2-kickoff-obligations.md)
-and [closeout carry-forward](reviews/U1-closeout.md#u2-obligations-and-later-boundaries),
-including B-F16, A-F9 and unresolved embedding accounting. No U2 implementation is included
-in this refresh.
+Both original reviewers accepted the scoped software responses on Git tree
+`53f9f21b7cc3f84c0cbdb5f3f1e74e6e4aeca522`. B independently ran the full suite there:
+1,392 passed and two strict-support gates failed, with no errors or skips. A and B
+also checked CI-form lint/type commands on clean exports. This describes a reviewed
+uncommitted tree, not a publication commit or hosted-CI result.
 
-U0003 S boundary: physical-resolved runs authoritative prepared work and has independent
-correctness/replay tests plus complete physical-versus-nominal discrepancy reports. The
-separately identified nominal-rk-compatibility candidate is test-only; its unchanged count
-and stored-duration thresholds replace the former physical nominal-parity gate explicitly.
-Report inputs include complete comparison/evidence/registry/recipe closure. Default STUB
-magnitudes are hidden; explicit finite-prediction opt-in requires complete contributors and
-visible unvalidated labels on every surface. No live timestamps, null-as-zero or ambient
-artifact lookup. Exported extended hardware truth and five-field test projections are distinct.
+The adopted v2 reference manifest remains
+`f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e`.
+Source changes made its input-support binding stale. Strict current verification must
+continue refusing until the combined freeze, human generation and separately approved
+adoption. Historical-integrity mode cannot substitute for that gate.
 
-The exact U2 baseline is now accepted by Javid: see [acceptance record](reviews/U2-U0003-acceptance-record.md)
-and [common baseline](reviews/U2-common-baseline-v1.md). Earlier kickoff descriptions above
-are historical; runtime correctness, full exits and publication remain outstanding.
+The eight-point [public demonstration](reviews/U2-public-demo-v1/completion/README.md)
+now uses actual accepted independent declaration reviews. Two fresh runs and a saved
+replay with producers disabled reproduced all 61 package/report files byte for byte.
+This completes that standalone demonstration; it does not replace the full matrix.
+Documentation publication and final runtime/currentness checks remain separate from
+local commits, pushing main, tagging and sprint closure.
+
+[U0021](decisions/U0021-u2-cold-clone-validation-exception.md) requires a fresh GitHub
+clone on ElfinKidsLaptop's Ubuntu/WSL2 environment plus hosted Ubuntu CI on the identical
+published commit. Record actual commands and distinguish executed checks from CI jobs
+that do nothing because their inputs are absent. This exception does not authorize
+WSL2 simulator-performance benchmarking or waive U3's Linux self-hosted runner and
+later hardware-validation requirements. No U1 CI result satisfies the U2 gate.

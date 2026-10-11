@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from uarch_contract.report_context import RenderSpec
 
 from .badged import Badged, badged
-from .prose import safe_prose
+from .prose import CapturedIdentifier, safe_prose
 
 
 @dataclass(frozen=True)
@@ -19,7 +19,8 @@ class Plot:
 
 
 def roofline(
-    points: tuple[tuple[str, Badged, Badged, Badged, Badged], ...], permissions: RenderSpec
+    points: tuple[tuple[str | CapturedIdentifier, Badged, Badged, Badged, Badged], ...],
+    permissions: RenderSpec,
 ) -> Plot:
     for _, *metrics in points:
         for metric in metrics:
@@ -61,7 +62,8 @@ def roofline(
     descriptions = []
     for label, x, y, ridge, peak in visible:
         cx, cy = xy(x, y)
-        text = safe_prose(label) + ": " + x.text + "; " + y.text
+        name = label.value if isinstance(label, CapturedIdentifier) else safe_prose(label)
+        text = name + ": " + x.text + "; " + y.text
         out.append(
             '<circle cx="'
             + cx

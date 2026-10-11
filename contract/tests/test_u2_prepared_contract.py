@@ -3,6 +3,7 @@
 import json
 from copy import deepcopy
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
@@ -15,11 +16,11 @@ from rkuarch.engines.protocol import EngineJob, EngineResult
 FIXTURES = Path(__file__).parent / "fixtures/u2"
 
 
-def literal(name):
-    return json.loads((FIXTURES / name).read_text())
+def literal(name: str) -> dict[str, Any]:
+    return cast(dict[str, Any], json.loads((FIXTURES / name).read_text()))
 
 
-def test_independent_two_point_bundle_and_counts():
+def test_independent_two_point_bundle_and_counts() -> None:
     bundle = PreparedBundle.model_validate(literal("independent-bundle.json"))
     assert len(bundle.points) == 2
     assert bundle.rank.tp == 1
@@ -37,7 +38,7 @@ def test_independent_two_point_bundle_and_counts():
 @pytest.mark.parametrize(
     "version", ["uarch-contract/0.1", "uarch-contract/0.3", "uarch-contract/1.0"]
 )
-def test_current_request_refuses_other_versions(version):
+def test_current_request_refuses_other_versions(version: str) -> None:
     data = literal("request.json")
     data["contract"] = version
     with pytest.raises(ValidationError):
@@ -45,14 +46,14 @@ def test_current_request_refuses_other_versions(version):
 
 
 @pytest.mark.parametrize("bad", [True, "1", 1.5, 0])
-def test_rank_integer_is_json_integer(bad):
+def test_rank_integer_is_json_integer(bad: object) -> None:
     data = literal("independent-bundle.json")
     data["rank"]["tp"] = bad
     with pytest.raises(ValidationError):
         PreparedBundle.model_validate(data)
 
 
-def test_unknown_fields_and_required_null():
+def test_unknown_fields_and_required_null() -> None:
     data = literal("engine-result.json")
     data["unknown"] = 0
     with pytest.raises(ValidationError):
@@ -63,7 +64,7 @@ def test_unknown_fields_and_required_null():
         EngineResult.model_validate(data)
 
 
-def test_hash_excludes_only_self_and_retains_nested_identity():
+def test_hash_excludes_only_self_and_retains_nested_identity() -> None:
     data = literal("independent-bundle.json")
     assert verify_identity(data, "bundle_hash") == data["bundle_hash"]
     changed = deepcopy(data)
@@ -76,13 +77,13 @@ def test_hash_excludes_only_self_and_retains_nested_identity():
     assert content_hash(changed, exclude=("bundle_hash",)) != data["bundle_hash"]
 
 
-def test_duplicate_json_keys_and_nonfinite_refused():
+def test_duplicate_json_keys_and_nonfinite_refused() -> None:
     for text in ['{"a": 1, "a": 2}', '{"a": NaN}', '{"a": Infinity}']:
         with pytest.raises(ValueError):
             strict_json_loads(text)
 
 
-def test_bundle_verifier_checks_structure_beyond_hashes():
+def test_bundle_verifier_checks_structure_beyond_hashes() -> None:
     from uarch_contract.prepared import validate_prepared_bundle
 
     data = literal("independent-bundle.json")
@@ -93,7 +94,7 @@ def test_bundle_verifier_checks_structure_beyond_hashes():
         validate_prepared_bundle(data)
 
 
-def test_engine_arithmetic_verifier_rejects_rehashed_wrong_count():
+def test_engine_arithmetic_verifier_rejects_rehashed_wrong_count() -> None:
     from rkuarch.engines.protocol import validate_engine_result
 
     result = literal("engine-result.json")
@@ -106,7 +107,7 @@ def test_engine_arithmetic_verifier_rejects_rehashed_wrong_count():
 
 
 @pytest.mark.parametrize("case", literal("negative-cases.json"), ids=lambda c: c["id"])
-def test_accepted_prepared_negative_cases(case):
+def test_accepted_prepared_negative_cases(case: dict[str, Any]) -> None:
     from uarch_contract.hashing import resolve_pointer
     from uarch_contract.prepared import validate_prepared_bundle
 
@@ -124,7 +125,7 @@ def test_accepted_prepared_negative_cases(case):
         validate_prepared_bundle(data)
 
 
-def test_job_binds_request_and_original_captured_producer():
+def test_job_binds_request_and_original_captured_producer() -> None:
     from rkuarch.engines.protocol import validate_engine_job
 
     job = literal("engine-job.json")
@@ -135,7 +136,7 @@ def test_job_binds_request_and_original_captured_producer():
         validate_engine_job(job, literal("independent-bundle.json"), literal("request.json"))
 
 
-def test_complete_job_identity_closure_refuses_deep_source_tampering():
+def test_complete_job_identity_closure_refuses_deep_source_tampering() -> None:
     from uarch_contract.hashing import artifact_identity, verify_declared_artifact_closure
 
     assumptions = json.loads(
@@ -153,7 +154,7 @@ def test_complete_job_identity_closure_refuses_deep_source_tampering():
         verify_declared_artifact_closure(identity, store)
 
 
-def test_nominal_identity_is_not_a_production_engine_selector():
+def test_nominal_identity_is_not_a_production_engine_selector() -> None:
     data = literal("engine-job.json")
     data["engine"]["model"]["name"] = "nominal-rk-compatibility"
     with pytest.raises(ValueError, match="not a production engine"):

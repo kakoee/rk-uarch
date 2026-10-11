@@ -5,7 +5,7 @@ Acceptance: U2-U0003-acceptance-v1 in the coordinator session. No Reza approval 
 
 The [human acceptance record](../reviews/U2-U0003-acceptance-record.md) records the exact
 authorization and briefing identity. The immutable reviewed
-[original ADR and 116-entry package](../reviews/U2-inputs/A-R1-R2-proposal-8def4c6d2c27/docs/decisions/U0003-one-chip-one-set-of-facts.md)
+[original ADR and selected normative package text](../u2-design.md)
 remain the normative design together with the accepted six-item brief and corrected R1/R2
 rules. Their historical PROPOSED/pending-acceptance labels describe authorship history;
 this record supplies the subsequent human decision. Do not edit the preserved proposal.

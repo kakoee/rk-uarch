@@ -173,6 +173,7 @@ def _compat_app(argv: list[str]) -> None:
             sub.add_argument("--assumptions", type=Path, required=True)
             sub.add_argument("--workers", type=int, default=1)
         if name == "table":
+            sub.add_argument("--capture-dir", type=Path)
             sub.add_argument("--context", type=Path, required=True)
             sub.add_argument("--model-card", type=Path, required=True)
             sub.add_argument("--artifact-dir", type=Path, required=True)
@@ -203,6 +204,9 @@ def _compat_app(argv: list[str]) -> None:
                 _write(args.output / "oracle-compat.yaml", descriptor)
                 _write(args.output / "binding.json", canonical_json(binding).encode() + b"\n")
             return
+        if args.command == "table" and args.capture_dir is not None:
+            if args.prepared_input is None or args.workers != 1:
+                raise ValueError("CaptureReplay: requires --prepared-input and workers=1")
         bundle = _bundle(args)
         if args.command == "prepare":
             data = canonical_json(bundle).encode() + b"\n"
@@ -224,19 +228,32 @@ def _compat_app(argv: list[str]) -> None:
             from rkuarch.table.build import build_table, capture, captured_artifacts, write_table
 
             assumptions = AssumptionSet.model_validate(_json(args.assumptions))
-            captured = capture(
-                bundle, assumptions=assumptions, workers=args.workers, subprocess_engine=True
-            )
+            if args.command == "table" and args.capture_dir is not None:
+                from rkuarch.table.companions import load_captured_work
+
+                captured = load_captured_work(args.capture_dir, bundle, assumptions)
+            else:
+                captured = capture(
+                    bundle, assumptions=assumptions, workers=args.workers, subprocess_engine=True
+                )
             if args.command == "capture":
                 for h, value in captured_artifacts(captured).items():
                     _write(args.output / (h[7:] + ".json"), canonical_json(value).encode() + b"\n")
                 return
             from rkuarch.table.artifacts import _complete_closure, _Files
+            from rkuarch.table.companions import read_artifact_directory
 
             context = ReportContext.model_validate(_json(args.context))
             card = ModelCard.model_validate(_json(args.model_card))
             files = _Files(args.artifact_dir)
+            # Retain the explicit package, including original raw reference/refusal inputs
+            # whose identities are resolved inside validators rather than envelope fields.
+            files.loaded.update(read_artifact_directory(args.artifact_dir, raw_blobs=True))
             files.loaded.update(captured_artifacts(captured))
+            # capture validated this bundle; index its embedded spec before recipe closure.
+            files.loaded[bundle.intent.hardware_spec_hash] = bundle.hardware_spec.model_dump(
+                mode="json"
+            )
             files.loaded[context.context_hash] = context.model_dump(mode="json")
             _complete_closure(context.context_hash, files)
             package = build_table(
@@ -346,6 +363,186 @@ def validate_command(
 
 
 app.command("report")(report_command)
+
+
+@app.command("assumptions")
+def assumptions_command(
+    output: Annotated[Path, typer.Option("--output")],
+    model: Annotated[str, typer.Option("--model")] = "physical-resolved",
+) -> None:
+    """Export the current physical analytic declaration; no review or evidence authority."""
+    from rkuarch.table.companions import write_outputs
+    from rkuarch.workload.prepared import physical_assumptions
+
+    try:
+        if model != "physical-resolved":
+            raise ValueError("UnsupportedModel: assumptions supports physical-resolved")
+        write_outputs({output: canonical_json(physical_assumptions()).encode() + b"\n"})
+    except (ValueError, TypeError, OSError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(2) from None
+
+
+companions_app = typer.Typer(no_args_is_help=True, pretty_exceptions_enable=False)
+app.add_typer(companions_app, name="companions")
+
+
+@companions_app.command("draft")
+def companions_draft_command(
+    prepared_input: Annotated[Path, typer.Option("--prepared-input")],
+    assumptions: Annotated[Path, typer.Option("--assumptions")],
+    capture_dir: Annotated[Path, typer.Option("--capture-dir")],
+    output: Annotated[Path, typer.Option("--output")],
+) -> None:
+    """Draft intrinsic dependencies and a STUB card; stop for actual independent review."""
+    from rkuarch.table.companions import draft_companions, load_captured_work, write_outputs
+    from rkuarch.workload.prepared import load_prepared_input
+
+    try:
+        c = load_captured_work(
+            capture_dir,
+            load_prepared_input(prepared_input),
+            AssumptionSet.model_validate(_json(assumptions)),
+        )
+        card, deps, subject = draft_companions(c)
+        write_outputs(
+            {
+                output / "model-card.json": canonical_json(card).encode() + b"\n",
+                output / "metric-dependencies.json": canonical_json(deps).encode() + b"\n",
+                output / "review-subject.txt": (subject + "\n").encode(),
+                output / "README.txt": (
+                    "UNREVIEWED declarations; not verified artifacts.\n"
+                    "The all-zero review_hash is unresolved; no ReviewRecord is issued.\n"
+                    "Review exact dependencies and every supplied comparison attempt externally.\n"
+                    "Supply an independently reviewed family registry "
+                    "and both real review records.\n"
+                    "Assembly binds those explicit reviews; it does not issue or approve them.\n"
+                    "Review subject (changes if declarations change): " + subject + "\n"
+                    "STUB; error unknown; energy unverified. See table/companions.md.\n"
+                ).encode(),
+            }
+        )
+    except (ValueError, TypeError, OSError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(2) from None
+    typer.echo("UNREVIEWED draft written; stop for actual independent declaration reviews.")
+
+
+@companions_app.command("assemble")
+def companions_assemble_command(
+    prepared_input: Annotated[Path, typer.Option("--prepared-input")],
+    assumptions: Annotated[Path, typer.Option("--assumptions")],
+    capture_dir: Annotated[Path, typer.Option("--capture-dir")],
+    recipes: Annotated[Path, typer.Option("--recipes")],
+    recipe_review: Annotated[Path, typer.Option("--recipe-review")],
+    registry: Annotated[Path, typer.Option("--registry")],
+    registry_review: Annotated[Path, typer.Option("--registry-review")],
+    model_card: Annotated[Path, typer.Option("--model-card")],
+    artifact_dir: Annotated[Path, typer.Option("--artifact-dir")],
+    output: Annotated[Path, typer.Option("--output")],
+    comparison: Annotated[list[Path] | None, typer.Option("--comparison")] = None,
+    no_comparisons: Annotated[bool, typer.Option("--no-comparisons")] = False,
+) -> None:
+    """Bind supplied declaration reviews and delegate policy/assembly to B's public helper."""
+    from uarch_contract.comparison import ComparisonArtifact
+    from uarch_contract.evidence import ReviewRecord
+    from uarch_contract.hashing import content_hash, verify_identity
+    from uarch_contract.registry import FamilyRegistry
+    from uarch_contract.report_context import MetricDependencies
+
+    from rkuarch.table.build import captured_artifacts
+    from rkuarch.table.companions import (
+        UNREVIEWED,
+        add_artifact,
+        load_captured_work,
+        read_artifact_directory,
+        write_outputs,
+    )
+    from rkuarch.workload.prepared import load_prepared_input
+
+    try:
+        if bool(comparison) == no_comparisons:
+            raise ValueError("ComparisonIntake: choose --comparison or explicit --no-comparisons")
+        c = load_captured_work(
+            capture_dir,
+            load_prepared_input(prepared_input),
+            AssumptionSet.model_validate(_json(assumptions)),
+        )
+        store = (
+            read_artifact_directory(artifact_dir, raw_blobs=True) if artifact_dir.exists() else {}
+        )
+        for value in captured_artifacts(c).values():
+            add_artifact(store, value)
+        add_artifact(store, c.bundle.hardware_spec)
+        deps = MetricDependencies.model_validate(_json(recipes))
+        family = FamilyRegistry.model_validate(_json(registry))
+        card = ModelCard.model_validate(_json(model_card))
+        dep_review = ReviewRecord.model_validate(_json(recipe_review))
+        fam_review = ReviewRecord.model_validate(_json(registry_review))
+        verify_identity(deps, "dependencies_hash")
+        verify_identity(family, "registry_hash")
+        for declaration, review, path in (
+            (deps, dep_review, recipes),
+            (family, fam_review, registry),
+        ):
+            if declaration.review_hash not in (UNREVIEWED, review.review_hash):
+                raise ValueError(f"ReviewBindingMismatch: {path}: existing review differs")
+            add_artifact(store, review)
+        # Bind only the explicitly supplied records. B validates their actual subjects,
+        # decisions, independence, family, source closure and comparison completeness.
+        deps = deps.model_copy(update={"review_hash": dep_review.review_hash})
+        deps = deps.model_copy(
+            update={"dependencies_hash": content_hash(deps, exclude=("dependencies_hash",))}
+        )
+        family = family.model_copy(update={"review_hash": fam_review.review_hash})
+        family = family.model_copy(
+            update={"registry_hash": content_hash(family, exclude=("registry_hash",))}
+        )
+        for value in (deps, family, card):
+            add_artifact(store, value)
+        comparisons = tuple(ComparisonArtifact.model_validate(_json(p)) for p in comparison or [])
+        identities = tuple(add_artifact(store, value) for value in comparisons)
+        if len(set(identities)) != len(identities):
+            raise ValueError("ComparisonIntake: duplicate --comparison")
+        try:
+            from rkuarch.provenance.companions import assemble_stub_context
+        except ModuleNotFoundError as exc:
+            if exc.name != "rkuarch.provenance.companions":
+                raise
+            raise ValueError("PeerImplementationMissing: rkuarch.provenance.companions") from exc
+        context, package = assemble_stub_context(
+            c,
+            dependencies=deps,
+            registry=family,
+            model_card=card,
+            comparison_hashes=identities,
+            artifacts=store,
+        )
+        context = ReportContext.model_validate(context)
+        verify_identity(context, "context_hash")
+        outputs = {}
+        for identity, value in package.items():
+            if isinstance(value, bytes):
+                from uarch_contract.hashing import sha256
+
+                if sha256(value) != identity:
+                    raise ValueError(f"ArtifactHashMismatch: returned bytes {identity}")
+                data = value
+            else:
+                if add_artifact({}, value) != identity:
+                    raise ValueError(f"ArtifactHashMismatch: returned object {identity}")
+                data = canonical_json(value).encode() + b"\n"
+            outputs[artifact_dir / (identity[7:] + ".json")] = data
+        context_bytes = canonical_json(context).encode() + b"\n"
+        outputs[artifact_dir / (context.context_hash[7:] + ".json")] = context_bytes
+        if output in outputs and outputs[output] != context_bytes:
+            raise ValueError(f"OutputConflict: {output}")
+        outputs[output] = context_bytes
+        write_outputs(outputs)
+    except (ValueError, TypeError, OSError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(2) from None
+    typer.echo("Offline context assembled from supplied reviews; STUB, energy unverified.")
 
 
 if __name__ == "__main__":

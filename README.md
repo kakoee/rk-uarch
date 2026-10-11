@@ -1,22 +1,34 @@
 # rk-uarch
 
-A microarchitecture-level simulator of one AI accelerator. It turns a hardware spec and an
-LLM model description into a characterization table — the cost of one inference iteration
-per (batch, context) point — at a stated fidelity, with its own errors measured and a badge
-earned only against real silicon. rk-sim reads those tables to price a custom ASIC at C2.
+rk-uarch estimates one AI accelerator's work for an LLM inference iteration. U2
+implements a stateless analytic engine, saved-input replay, characterization tables
+and provenance-aware reports. Each row describes one chip's shard across all layers,
+without inter-chip collectives. Predictions remain STUB: reproducibility and verified
+provenance do not establish silicon accuracy, an error band or verified energy.
 
 ## Quickstart
-    uv sync --extra dev
-    make test-fast
-    uv run uarch table hw/designs/npu-l4.yaml --model llama-3.1-8b --precision bf16 --engine analytic
-    uv run uarch report tables/<hash>.json
+
+```sh
+uv sync --extra dev
+uv run uarch validate hw/designs/npu-l4.yaml
+uv run uarch table --help
+uv run uarch report --help
+```
+
+To produce a table and report, follow the [public workflow](docs/u2-workflow.md).
+It prepares and captures a workload, drafts its source declarations, stops for actual
+independent declaration reviews, then assembles the table context. The review step is
+required; a bare hardware/model command is insufficient.
 
 ## Repo map
-contract/ the shared vocabulary · hw/ designs and references · src/rkuarch/ the harness ·
-native/ the Rust engine · validation/ the evidence · measure/ silicon kits · docs/ everything else
+
+`contract/`: shared vocabulary; `hw/`: designs and references; `src/rkuarch/`:
+preparation, engines, tables and reports; `native/`: later native engine work;
+`validation/`: evidence; `measure/`: silicon kits; `docs/`: design and execution plan.
 
 ## Working here
-Read CLAUDE.md, then docs/build-spec.md §0. Sprints and prompts: docs/execution-plan.md.
 
-## Status
-See docs/execution-plan.md STATUS and docs/how-it-works.md.
+Read [CLAUDE.md](CLAUDE.md), then [build-spec §0](docs/build-spec.md).
+See [how it works](docs/how-it-works.md), the [accepted U2 design](docs/u2-design.md)
+and [execution plan](docs/execution-plan.md). U2 software review acceptance is scoped;
+artifact refresh, the public demonstration and publication exits remain separate.

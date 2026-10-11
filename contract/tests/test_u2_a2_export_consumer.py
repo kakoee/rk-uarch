@@ -1,10 +1,13 @@
 """U2-AB2-C1: actual received export positive, independent rehashed negative mutations."""
 
 import json
+from collections.abc import Callable
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 import pytest
+from uarch_contract.exports import ComponentPrecision
 from uarch_contract.hashing import artifact_identity, canonical_json, content_hash, sha256
 
 from scripts.vendor_rk import PIN, validate_u2_component_inputs
@@ -13,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPORT = ROOT / "contract/tests/fixtures/u2_b/a2-export"
 
 
-def inputs():
+def inputs() -> tuple[dict[str, Any], dict[str, bytes], dict[str, Any]]:
     artifacts = {}
     for path in EXPORT.glob("*.json"):
         value = json.loads(path.read_text())
@@ -30,11 +33,19 @@ def inputs():
     return entry, descriptors, artifacts
 
 
-def rehash(value, field):
+def rehash(value: Any, field: str) -> None:
     value[field] = content_hash(value, exclude=(field,))
 
 
-def rebound(entry, descriptors, artifacts, *, execution_change=None, join_change=None):
+def rebound(
+    entry: dict[str, Any],
+    descriptors: dict[str, bytes],
+    artifacts: dict[str, Any],
+    *,
+    execution_change: Callable[[dict[str, Any]], None] | None = None,
+    join_change: Callable[[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]], None]
+    | None = None,
+) -> tuple[dict[str, Any], dict[str, bytes], dict[str, Any]]:
     entry, descriptors, artifacts = deepcopy((entry, descriptors, artifacts))
     binding = entry["binding"]
     truth = artifacts[binding["primary_export_hash"]]
@@ -80,12 +91,14 @@ def rebound(entry, descriptors, artifacts, *, execution_change=None, join_change
     return entry, descriptors, artifacts
 
 
-def validate(values):
+def validate(
+    values: tuple[dict[str, Any], dict[str, bytes], dict[str, Any]],
+) -> tuple[ComponentPrecision, ...]:
     entry, descriptors, artifacts = values
     return validate_u2_component_inputs([entry], descriptors, artifacts, require_full=False)
 
 
-def test_AB2_C1_actual_A2_export_accepts_unchanged():
+def test_AB2_C1_actual_A2_export_accepts_unchanged() -> None:
     values = inputs()
     assert (EXPORT / "PIN").read_text().strip() == PIN
     assert sha256(next(iter(values[1].values()))) == (
@@ -96,11 +109,11 @@ def test_AB2_C1_actual_A2_export_accepts_unchanged():
     assert values == before
 
 
-def stipulation(e):
+def stipulation(e: dict[str, Any]) -> None:
     e["compute"].update(kind="stipulation", provenance=None, rationale="negative mutation")
 
 
-def promoted(e):
+def promoted(e: dict[str, Any]) -> None:
     e["compute"].update(
         provenance="measured", source="https://example.invalid/negative", date="2026-01-01"
     )
@@ -118,7 +131,9 @@ def promoted(e):
         lambda e: e["compute"].update(date="2026-01-01"),
     ],
 )
-def test_AB2_C1_rehashed_wrong_execution_input_refuses(mutate):
+def test_AB2_C1_rehashed_wrong_execution_input_refuses(
+    mutate: Callable[[dict[str, Any]], None],
+) -> None:
     values = inputs()
     validate(values)  # Every mutation has the actual export as a passing control.
     with pytest.raises(ValueError):
@@ -136,14 +151,16 @@ def test_AB2_C1_rehashed_wrong_execution_input_refuses(mutate):
         lambda b, t, d, p: b.update(upstream_sha="0" * 40),
     ],
 )
-def test_AB2_C1_rehashed_inconsistent_source_projection_refuses(mutate):
+def test_AB2_C1_rehashed_inconsistent_source_projection_refuses(
+    mutate: Callable[[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]], None],
+) -> None:
     values = inputs()
     validate(values)
     with pytest.raises(ValueError):
         validate(rebound(*values, join_change=mutate))
 
 
-def test_AB2_C1_unsupported_KV_and_changed_pair_refuse():
+def test_AB2_C1_unsupported_KV_and_changed_pair_refuse() -> None:
     for compute, kv in [("bf16", "fp8"), ("fp16", "bf16")]:
         entry, descriptors, artifacts = inputs()
         entry["precisions"] = [dict(compute=compute, kv_cache=kv)]
@@ -152,7 +169,7 @@ def test_AB2_C1_unsupported_KV_and_changed_pair_refuse():
             validate((entry, descriptors, artifacts))
 
 
-def test_AB2_C1_full_approved_input_inventory_includes_actual_export():
+def test_AB2_C1_full_approved_input_inventory_includes_actual_export() -> None:
     entry, descriptors, artifacts = inputs()
     directory = ROOT / "contract/tests/fixtures/u2_b"
     retained = json.loads((directory / "component-precisions.json").read_text())

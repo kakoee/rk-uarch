@@ -156,7 +156,10 @@ def test_characterize_twin_uses_same_capture_and_exact_literals(tmp_path):
             assert op["id"] in text and op["scope"]["op_class"] in text
             for v in op["counts"].values():
                 assert str(v) in text
-    assert "| 1184.0 | 572.0 | 1296.0 | 288.0 | 1892000.0 |" in text
+    assert "| 1184.0 · STUB | 572.0 · STUB | 1296.0 · STUB | 288.0 · STUB |" in text
+    assert "Duration ps" not in text and "U-C0 ps" not in text
+    assert "1892000.0" not in text
+    assert report["results"][0]["duration_ps"] == 1892000.0
     assert "total_context_tokens" in text and "prompt_tokens" in text
     assert "Array fill" in text and "Intensity regime" in text and "Dimensions" in text
     assert "unknown" in text and "Energy: unverified" in text

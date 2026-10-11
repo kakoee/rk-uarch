@@ -1,0 +1,58 @@
+[
+  {
+    "argv": [
+      "git",
+      "apply",
+      "--check",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/docs/reviews/U2-documentation-checkpoint-v1/protected-docs.patch"
+    ],
+    "exit_code": 0,
+    "runtime_imports": null,
+    "elapsed_seconds": 0.011,
+    "log": "check-1.log"
+  },
+  {
+    "argv": [
+      "make",
+      "table"
+    ],
+    "exit_code": 0,
+    "runtime_imports": "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/src:/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/contract",
+    "elapsed_seconds": 0.519,
+    "log": "check-2.log"
+  },
+  {
+    "argv": [
+      "make",
+      "report"
+    ],
+    "exit_code": 0,
+    "runtime_imports": "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/src:/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/contract",
+    "elapsed_seconds": 0.397,
+    "log": "check-3.log"
+  },
+  {
+    "argv": [
+      "make",
+      "typecheck"
+    ],
+    "exit_code": 0,
+    "runtime_imports": null,
+    "elapsed_seconds": 6.766,
+    "log": "check-4.log"
+  },
+  {
+    "argv": [
+      "uv",
+      "run",
+      "ruff",
+      "check",
+      "."
+    ],
+    "exit_code": 1,
+    "runtime_imports": null,
+    "elapsed_seconds": 0.36,
+    "local_only_log": "check-5.log",
+    "summary": "1588 findings from full live worktree, including unselected historical files; clean Git-selection lint must be checked separately."
+  }
+]

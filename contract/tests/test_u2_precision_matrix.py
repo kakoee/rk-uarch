@@ -16,7 +16,7 @@ VENDOR = historical_snapshot()
 FIXTURES = ROOT / "contract/tests/fixtures/u2_b"
 
 
-def test_same_pin_and_complete_frozen_file_hashes():
+def test_same_pin_and_complete_frozen_file_hashes() -> None:
     manifest = json.loads((VENDOR / "MANIFEST.json").read_text())
     assert manifest["rk_sha"] == PIN
     assert sha256((VENDOR / "MANIFEST.json").read_bytes()) == (
@@ -26,14 +26,14 @@ def test_same_pin_and_complete_frozen_file_hashes():
         assert sha256((VENDOR / name).read_bytes()) == "sha256:" + expected
 
 
-def test_retained_component_pairs_bind_real_inputs_and_unchanged_efficiency():
+def test_retained_component_pairs_bind_real_inputs_and_unchanged_efficiency() -> None:
     components = json.loads((FIXTURES / "component-precisions.json").read_text())
     rows = json.loads((VENDOR / "parity/fixtures.json").read_text())
     observed = Counter(
         (row["component_params_file"], row["precision"]["compute"], row["precision"]["kv_cache"])
         for row in rows
     )
-    expected = set()
+    expected: set[tuple[str, str, str]] = set()
     for entry in components:
         binding = entry["binding"]
         component = VENDOR / binding["component_file"]
@@ -60,7 +60,7 @@ def test_retained_component_pairs_bind_real_inputs_and_unchanged_efficiency():
     assert len(rows) == 864
 
 
-def test_proposed_selection_is_1008_unique_queries_with_four_separate_refusals():
+def test_proposed_selection_is_1008_unique_queries_with_four_separate_refusals() -> None:
     plan = json.loads((ROOT / "tests/fixtures/u2_b/matrix-plan.json").read_text())
     rows = json.loads((VENDOR / "parity/fixtures.json").read_text())
     queries = {canonical_json(row["query"]) for row in rows}
@@ -82,7 +82,7 @@ def test_proposed_selection_is_1008_unique_queries_with_four_separate_refusals()
     assert plan["new_execution_efficiency"]["value"] == 1.0
 
 
-def test_B2_explicit_bindings_reject_missing_duplicate_and_inferred_inputs():
+def test_B2_explicit_bindings_reject_missing_duplicate_and_inferred_inputs() -> None:
     import pytest
 
     from scripts.vendor_rk import validate_u2_component_inputs
@@ -107,7 +107,7 @@ def test_B2_explicit_bindings_reject_missing_duplicate_and_inferred_inputs():
         validate_u2_component_inputs(entries, descriptors, artifacts, require_full=False)
 
 
-def test_B2_staging_preserves_two_distinct_whole_revisions(tmp_path):
+def test_B2_staging_preserves_two_distinct_whole_revisions(tmp_path: Path) -> None:
     import pytest
 
     from scripts.vendor_rk import (

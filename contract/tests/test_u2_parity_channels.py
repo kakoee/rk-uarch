@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 VENDOR = historical_snapshot()
 
 
-def test_actual_declared_unknown_channels_do_not_include_matrix():
+def test_actual_declared_unknown_channels_do_not_include_matrix() -> None:
     rows = json.loads((VENDOR / "parity/fixtures.json").read_text())
     assert len(rows) == 864
     assert all("vector_ops" not in row["counts"] for row in rows)
@@ -23,7 +23,7 @@ def test_actual_declared_unknown_channels_do_not_include_matrix():
     assert all(row["counts"]["memory_read_bytes"] > 0 for row in rows)
 
 
-def test_existing_refusals_are_recorded_events_not_four_new_checks():
+def test_existing_refusals_are_recorded_events_not_four_new_checks() -> None:
     refusals = json.loads((VENDOR / "parity/refusals.json").read_text())
     assert len(refusals) == 2
     assert {(r["compute"], r["kv_cache"]) for r in refusals} == {("bf16", "bf16"), ("fp8", "fp8")}

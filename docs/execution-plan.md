@@ -53,7 +53,7 @@ are unchanged. Javid approved G1 and accepted the complete closeout, including U
 confirmed the published closeout and annotated tag, plus successful
 [closeout CI](https://github.com/kakoee/rk-uarch/actions/runs/37588171798) on the exact tagged
 commit. Historical pending wording in U1 evidence is retained as history. See the
-[U2 kickoff record](reviews/U2-orchestration-kickoff.md) for verified identities, isolated
+[U2 kickoff record](reviews/U2-publication-history.md#kickoff) for verified identities, isolated
 worktrees, ownership, carry-forward obligations and bounded worker prompts.
 [U0021](decisions/U0021-u2-cold-clone-validation-exception.md) records Javid's newly approved
 U2-only WSL2 fresh GitHub clone plus same-published-commit hosted Ubuntu CI exception.
@@ -65,7 +65,7 @@ push or mandatory PR workflow without discussion with Javid. Prepare reviewed lo
 checkpoints, keeping commit and push separate; uncommitted files are not protected by branch
 history. Integrate the tested, approved result onto main and tag the approved main revision
 at closure. Preserve worker worktrees until publication is verified. The
-[kickoff sequence](reviews/U2-orchestration-kickoff.md#local-checkpoints-integration-and-publication)
+[kickoff sequence](reviews/U2-publication-history.md#kickoff)
 explains each transfer and validation step.
 
 **U1 pin update, 2026-10-04:** Javid (@jjaffari) approved advancing from `11bb530` to
@@ -619,18 +619,18 @@ B1 input decision accepted: [U0004/H1/H2 and draft-only references](reviews/U2-B
 The [frozen B1 addition](reviews/U2-common-baseline-b1-addendum.md) supplements unchanged
 baseline v1. Input acceptance is not physical validation or a completed B-F16 exit.
 
-Corrected A1 checkpoint: [coordinator recheck](reviews/U2-A1-coordinator-recheck.md).
+Corrected A1 checkpoint: [coordinator recheck](reviews/U2-publication-history.md#a1).
 Shared interfaces are reconciled; A2/B2 handoffs are prepared. Remaining runtime,
 artifact, independent-review and publication checks are not completed by this checkpoint.
 
-B2 intermediate intake: [coordinator review](reviews/U2-B2-coordinator-review.md).
+B2 intermediate intake: [coordinator review](reviews/U2-publication-history.md#b2-intake).
 One source-scope correction precedes active B2 integration. Declared A2/report/tooling
 dependencies remain open; the generator fingerprint gate has not been waived.
 
-Corrected B2: [recheck and partial integration](reviews/U2-B2-coordinator-recheck.md).
+Corrected B2: [recheck and partial integration](reviews/U2-publication-history.md#b2-correction).
 B2-C1 is resolved; the integrated generator fingerprint gate still fails. Exact
 proof/energy protocol, A2-dependent runtime/report checks and tooling freeze remain pending.
 
-A2 interfaces: [coordinator reconciliation](reviews/U2-A2-coordinator-reconciliation.md).
+A2 interfaces: [coordinator reconciliation](reviews/U2-publication-history.md#a2).
 Delivered to B; standalone production and full runtime exits remain pending. B
 consumer input-kind mismatch and the generator fingerprint gate remain explicit.

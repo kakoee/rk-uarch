@@ -100,7 +100,7 @@ def characterize(bundle: PreparedBundle) -> dict[str, object]:
 def characterize_markdown(captured: dict[str, object]) -> str:
     """Deterministic workload-selection twin of characterize(), without rerunning computation.
 
-    This exposes the same unvalidated predictions as the raw JSON. It does not interpret
+    This presents counts and scope for selection; timing remains in raw JSON. It does not interpret
     evidence, assign badges, promote unknowns or implement B's table-report protocol.
     """
     import html
@@ -123,6 +123,9 @@ def characterize_markdown(captured: dict[str, object]) -> str:
     def row(values: tuple[object, ...]) -> str:
         return "| " + " | ".join(cell(value) for value in values) + " |"
 
+    def stub(value: object) -> str:
+        return ("unknown" if value is None else str(value)) + " · STUB"
+
     jobs = TypeAdapter(tuple[EngineJob, ...]).validate_python(captured["jobs"])
     results = TypeAdapter(tuple[EngineResult, ...]).validate_python(captured["results"])
     capacities = TypeAdapter(tuple[dict[str, Any], ...]).validate_python(captured["capacity"])
@@ -130,8 +133,9 @@ def characterize_markdown(captured: dict[str, object]) -> str:
         "# Workload selection — unvalidated physical predictions",
         "",
         "Raw analytic workload capture for benchmark selection; no evidence or accuracy claim.",
-        "Per-op counts and times cover the stated instances. Per-op times are isolated estimates;",
-        "they are not additive aggregate-mode timing. Unknown scope is not measured scope.",
+        "Counts, allocation estimates and intensity are STUB, unvalidated selection inputs.",
+        "Computed timing estimates remain only in the raw JSON; no timing claim is shown here.",
+        "Query and shape coordinates are declared inputs, not measurements.",
         "",
         f"JSON bytes SHA256: {sha256((canonical_json(captured) + chr(10)).encode())}",
         f"Prepared bundle: {cell(captured['prepared_bundle_hash'])}",
@@ -173,17 +177,13 @@ def characterize_markdown(captured: dict[str, object]) -> str:
             f"{job.engine.model.implementation_hash}",
             f"Assumptions: {job.assumptions_hash}",
             "",
-            row(
-                ("Matrix ops", "Vector ops", "Read bytes", "Write bytes", "Duration ps", "U-C0 ps")
-            ),
-            row(("---",) * 6),
-            row(
-                (*result.counts.model_dump().values(), result.duration_ps, result.u_c0_duration_ps)
-            ),
+            row(("Matrix ops", "Vector ops", "Read bytes", "Write bytes")),
+            row(("---",) * 4),
+            row(tuple(stub(value) for value in result.counts.model_dump().values())),
             "",
-            f"Known weight bytes: {cell(capacity['weight_bytes'])}; "
-            f"paged KV bytes: {cell(capacity['kv_bytes'])}; "
-            f"total peak bytes: {cell(capacity['total_peak_bytes'])}.",
+            f"Known weight bytes: {cell(stub(capacity['weight_bytes']))}; "
+            f"paged KV bytes: {cell(stub(capacity['kv_bytes']))}; "
+            f"total peak bytes: {cell(stub(capacity['total_peak_bytes']))}.",
             "",
             "### Per-op computation",
             "",
@@ -197,11 +197,10 @@ def characterize_markdown(captured: dict[str, object]) -> str:
                     "Read bytes",
                     "Write bytes",
                     "Intensity ops/byte",
-                    "Duration ps",
                     "Bound",
                 )
             ),
-            row(("---",) * 10),
+            row(("---",) * 9),
         ]
         specs = {g.id + "/" + op.id: op.spec for g in job.point.graph.groups for op in g.ops}
         for op in result.per_op:
@@ -210,17 +209,16 @@ def characterize_markdown(captured: dict[str, object]) -> str:
                     (
                         op.id,
                         op.scope.op_class,
-                        op.instances,
-                        *op.counts.model_dump().values(),
-                        op.operational_intensity_ops_per_byte,
-                        op.duration_ps,
+                        stub(op.instances),
+                        *(stub(value) for value in op.counts.model_dump().values()),
+                        stub(op.operational_intensity_ops_per_byte),
                         op.bound,
                     )
                 )
             )
         lines += [
             "",
-            "### Captured shape and precision scope",
+            "### Captured Shape and precision scope",
             "",
             row(
                 (
@@ -244,7 +242,7 @@ def characterize_markdown(captured: dict[str, object]) -> str:
                         op.id,
                         canonical_json(specs[op.id].dimensions),
                         canonical_json(scope.precision_roles),
-                        scope.array_fill,
+                        stub(scope.array_fill),
                         scope.intensity_regime,
                         scope.mapping_match,
                         scope.noc_load_regime,
@@ -254,7 +252,8 @@ def characterize_markdown(captured: dict[str, object]) -> str:
             )
         lines += ["", "### Omissions and unknowns", ""]
         lines.extend(
-            "- " + cell(text) for text in (*job.point.graph.omissions, *capacity["warnings"])
+            "- " + cell(text) + " · STUB (unvalidated capture)"
+            for text in (*job.point.graph.omissions, *capacity["warnings"])
         )
         lines.extend("- Unrepresented: " + cell(path) for path in result.unrepresented)
         lines += [

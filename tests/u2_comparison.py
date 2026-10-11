@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import math
 from contextlib import ExitStack
-from typing import Any
+from typing import Any, TypedDict, cast
 from unittest.mock import patch
 
 import yaml
-from pydantic import TypeAdapter
+from pydantic import JsonValue, TypeAdapter
+from uarch_contract.assumptions import AssumptionSet, ModelIdentity
 from uarch_contract.comparison import (
     ReferenceInventory,
     reduce_outcomes,
@@ -16,12 +17,15 @@ from uarch_contract.comparison import (
     validate_comparison,
 )
 from uarch_contract.hashing import artifact_identity, content_hash, sha256
+from uarch_contract.model_card import Verification
 from uarch_contract.model_shape import ModelSpec
-from uarch_contract.prepared import Query
+from uarch_contract.prepared import PreparedBundle, PreparedPoint, Query
 from uarch_contract.sourced import SourcedValue
 
 from contract.tests import nominal_candidate as nominal
 from contract.tests.parity import projection_incompatibilities, rank_counts
+from rkuarch.engines.protocol import EngineJob, EngineResult
+from rkuarch.table.build import CapturedWork, TablePackage
 from scripts import u2_inputs, vendor_rk
 
 DIRECT_SOURCE = "40cd36ed696e378ade013b804554e668795fe45668410e963a8b978adc07ee32"
@@ -39,7 +43,10 @@ def put(store: dict[str, Any], value: dict[str, Any], own: str | None = None) ->
 def adopted_rows() -> list[dict[str, Any]]:
     import json
 
-    return json.loads((u2_inputs.ADOPTED / "parity/fixtures.json").read_bytes())
+    return cast(
+        list[dict[str, JsonValue]],
+        json.loads((u2_inputs.ADOPTED / "parity/fixtures.json").read_bytes()),
+    )
 
 
 def channel(
@@ -155,7 +162,7 @@ def nominal_attempt(
         )
 
     model = ModelSpec.model_validate(row["model"])
-    query = TypeAdapter(Query).validate_python(
+    query: Query = TypeAdapter(Query).validate_python(
         {
             k: v
             for k, v in row["query"].items()
@@ -302,6 +309,7 @@ def run_historical(
         != u2_inputs.ADOPTED_MANIFEST
     ):
         raise ValueError("historical adopted identity changed")
+    fingerprint: str | None
     try:
         vendor_rk.check_generator(u2_inputs.ADOPTED)
     except ValueError as exc:
@@ -315,6 +323,10 @@ def run_historical(
     store[sha256(raw)] = raw
     rows = adopted_rows()
     if fixture_ids is not None:
+        # Selected inventories retain the original hash-bound full raw member;
+        # a reviewed subset alone cannot prove the source of each selected row.
+        original_rows = (u2_inputs.ADOPTED / "parity/fixtures.json").read_bytes()
+        store[sha256(original_rows)] = original_rows
         wanted = set(fixture_ids)
         if len(wanted) != len(fixture_ids) or not wanted <= {r["id"] for r in rows}:
             raise ValueError("unknown/duplicate requested fixture")
@@ -340,8 +352,8 @@ def run_historical(
             kv_replicated=row["model"]["kv_heads"] < row["tp"],
             padded_vocab=math.ceil(row["model_shape"]["vocab_size"] / row["tp"]) * row["tp"],
         )
-        query = (
-            TypeAdapter(Query)
+        query: dict[str, JsonValue] = (
+            TypeAdapter[Query](Query)
             .validate_python(
                 {
                     k: v
@@ -520,7 +532,15 @@ def run_historical(
     )
 
 
-def prepare_h1(inputs: u2_inputs.Inputs, *, model_id: str, tp: int, compact: bool = False):
+class PreparationGrid(TypedDict):
+    decode: dict[str, list[int]]
+    prefill: dict[str, list[int]]
+    frequency_ratio: list[float]
+
+
+def prepare_h1(
+    inputs: u2_inputs.Inputs, *, model_id: str, tp: int, compact: bool = False
+) -> tuple[PreparedBundle, AssumptionSet]:
     """Actual A producer + guarded adapter, using accepted H1 and unchanged nominal sidecar."""
     from uarch_contract.hardware import HardwareSpec
     from uarch_contract.request import RequestIntent
@@ -533,7 +553,7 @@ def prepare_h1(inputs: u2_inputs.Inputs, *, model_id: str, tp: int, compact: boo
     )
     model = next(m for m in inputs.models if m["id"] == model_id)
     assumptions = physical_assumptions()
-    grid = dict(
+    grid: PreparationGrid = dict(
         decode=dict(
             batch=[1] if compact else [1, 8, 32],
             context_per_seq=[128] if compact else [128, 512, 4096, 16384],
@@ -580,7 +600,9 @@ def prepare_h1(inputs: u2_inputs.Inputs, *, model_id: str, tp: int, compact: boo
     return bundle, assumptions
 
 
-def physical_point(bundle, assumptions, point):
+def physical_point(
+    bundle: PreparedBundle, assumptions: AssumptionSet, point: PreparedPoint
+) -> tuple[EngineJob, EngineResult]:
     from contract.tests.u2_prepared_adapter import evaluate_captured
     from rkuarch.workload.characterize import capacity_summary
 
@@ -598,7 +620,9 @@ def physical_point(bundle, assumptions, point):
     )
 
 
-def capture_h1(inputs: u2_inputs.Inputs, *, model_id: str, tp: int, compact: bool = False):
+def capture_h1(
+    inputs: u2_inputs.Inputs, *, model_id: str, tp: int, compact: bool = False
+) -> CapturedWork:
     from uarch_contract.request import CharacterizationRequest
 
     from rkuarch.hw.derive import derive_rk_params
@@ -624,7 +648,8 @@ def run_h1_matrix(inputs: u2_inputs.Inputs) -> dict[str, Any]:
     store = {}
     for model in inputs.models:
         for tp in (1, 8):
-            bundle = assumptions = None
+            bundle: PreparedBundle | None = None
+            assumptions: AssumptionSet | None = None
             try:
                 bundle, assumptions = prepare_h1(inputs, model_id=model["id"], tp=tp)
                 store[bundle.bundle_hash] = bundle.model_dump(mode="json")
@@ -632,7 +657,7 @@ def run_h1_matrix(inputs: u2_inputs.Inputs) -> dict[str, Any]:
             except Exception as exc:
                 preparation_error = type(exc).__name__ + ": " + str(exc)
             for index, q in enumerate(vendor_rk.QUERIES):
-                case = dict(
+                case: dict[str, object] = dict(
                     fixture_id=f"{model['id']}/bf16/bf16/tp{tp}/npu-l4.yaml/{index}",
                     query=q,
                     reference="absent: no adopted H1 oracle row",
@@ -648,10 +673,11 @@ def run_h1_matrix(inputs: u2_inputs.Inputs) -> dict[str, Any]:
                     )
                 else:
                     try:
+                        assert assumptions is not None
                         point = bundle.points[index]
                         actual_query = point.query.model_dump(mode="json")
                         expected_query = (
-                            TypeAdapter(Query)
+                            TypeAdapter[Query](Query)
                             .validate_python(
                                 {
                                     k: v
@@ -694,7 +720,9 @@ def run_h1_matrix(inputs: u2_inputs.Inputs) -> dict[str, Any]:
     )
 
 
-def report_package(captured, run: dict[str, Any], inputs: u2_inputs.Inputs):
+def report_package(
+    captured: CapturedWork, run: dict[str, Any], inputs: u2_inputs.Inputs
+) -> TablePackage:
     """File-complete demonstration with explicit synthetic review scaffolding.
 
     Uses real captures/candidates and authentic historical blobs. It creates no accuracy
@@ -727,10 +755,16 @@ def report_package(captured, run: dict[str, Any], inputs: u2_inputs.Inputs):
         r["id"]: r for r in (run["original_rows"] if "original_rows" in run else adopted_rows())
     }
 
-    def selector(kind, identity, pointer):
+    def selector(kind: str, identity: str, pointer: str) -> dict[str, str]:
         return dict(kind=kind, artifact_hash=identity, json_pointer=pointer)
 
-    def source(identity, pointer, model, purpose, selectors):
+    def source(
+        identity: str,
+        pointer: str,
+        model: ModelIdentity,
+        purpose: str,
+        selectors: list[dict[str, str]],
+    ) -> None:
         source_recipes[(identity, pointer)] = dict(
             artifact_hash=identity,
             model_identity_hash=content_hash(model),
@@ -852,7 +886,7 @@ def report_package(captured, run: dict[str, Any], inputs: u2_inputs.Inputs):
                         )
                     )
 
-    def reviewed(value, own):
+    def reviewed(value: dict[str, object], own: str) -> dict[str, object]:
         review = put(
             store,
             dict(
@@ -933,7 +967,7 @@ def report_package(captured, run: dict[str, Any], inputs: u2_inputs.Inputs):
         model_id=legacy_model_id(captured.jobs[0], captured.bundle),
         badge="stub",
         evidence=(),
-        verification={},
+        verification=Verification(),
     )
     if "original_rows" in run:
         # Package only declared comparison/report closure, not unrelated attempts in

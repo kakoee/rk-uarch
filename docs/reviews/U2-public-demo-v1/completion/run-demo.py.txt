@@ -1,0 +1,217 @@
+"""Coordinator execution evidence; real reviews are read-only inputs, never issued here."""
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import platform
+import subprocess
+import sys
+import tarfile
+import time
+
+I = Path('/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration')
+R = I / 'docs/reviews/U2-public-demo-v1'
+E = R / 'completion'
+D = I / 'tables/U2-public-demo-v1'
+O = I / 'tables/U2-public-demo-v1-completion'
+T = '53f9f21b7cc3f84c0cbdb5f3f1e74e6e4aeca522'
+S = Path('/tmp/U2-public-demo-completion-source')
+PY = Path('/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python')
+assert not O.exists() and not S.exists(), 'Require fresh output and source directories'
+O.mkdir(); S.mkdir()
+archive = subprocess.check_output(['git', 'archive', T], cwd=I)
+with tarfile.open(fileobj=io.BytesIO(archive)) as tf:
+    tf.extractall(S, filter='data')
+sys.path[:0] = [str(S / 'src'), str(S / 'contract')]
+from uarch_contract.evidence import ReviewRecord
+from uarch_contract.hashing import review_subject_hash, verify_identity
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def inventory(root):
+    return {str(p.relative_to(root)): {'sha256': digest(p), 'bytes': p.stat().st_size}
+            for p in sorted(root.rglob('*')) if p.is_file()}
+
+
+captured = json.loads((R / 'capture-receipt.json').read_text())
+assert inventory(D) == captured['files']
+review_inventory = inventory(R / 'external-review')
+expected = {
+    'recipe-review.json': '3330e639e9ff8e63ee5eb3a5c781e624f6ec452012fcc1468cf66a535aef4d4a',
+    'registry-review.json': 'a090507e409354152d852a4b2466f1e4905e0b559c6bd177ef4b3ed87c0c4ebd',
+}
+review_receipt = []
+for filename, declaration, subject_name in [
+    ('recipe-review.json', 'metric-dependencies.json', 'recipes'),
+    ('registry-review.json', 'registry.json', 'registry'),
+]:
+    path = R / 'external-review' / filename
+    assert digest(path) == expected[filename]
+    rec = ReviewRecord.model_validate_json(path.read_bytes())
+    verify_identity(rec, 'review_hash')
+    subject = review_subject_hash(json.loads((D / 'draft' / declaration).read_bytes()))
+    assert subject == captured['review_subjects'][subject_name]
+    assert rec.reviewed_subject_hashes == (subject,)
+    assert rec.decision == 'accepted' and rec.independent
+    review_receipt.append({'file': filename, 'file_sha256': digest(path),
+                           'review_hash': rec.review_hash, 'subject': subject,
+                           'reviewer': rec.reviewer, 'rationale': rec.rationale})
+(E / 'review-intake.json').write_text(json.dumps(review_receipt, indent=2) + '\n')
+env = os.environ.copy()
+env['PYTHONPATH'] = f'{S}/src:{S}/contract'
+env['PYTHONDONTWRITEBYTECODE'] = '1'
+env.pop('MYPYPATH', None)
+trap = O / 'producer-trap'
+trap.mkdir()
+(trap / 'guard.py').write_text('''import sys
+import rkuarch.table.build as build
+import rkuarch.workload.prepared as prepared
+import rkuarch.engines.analytic.core as core
+
+def forbidden(*args, **kwargs):
+    raise RuntimeError("U2_DEMO_PRODUCER_DISABLED")
+
+build.capture = forbidden
+prepared.prepare_engine_job = forbidden
+prepared.execute_prepared_point = forbidden
+core.run_analytic = forbidden
+
+class NoPreparation:
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == "rkuarch.workload.prepare":
+            forbidden()
+
+sys.meta_path.insert(0, NoPreparation())
+print("U2_DEMO_GUARD_INSTALLED", file=sys.stderr)
+''')
+commands = []
+
+
+def run(label, argv, blocked=False, expected_refusal=False):
+    local = env.copy()
+    if blocked:
+        local['PYTHONPATH'] = f'{trap}:{S}/src:{S}/contract'
+        prefix = [str(PY), '-c', 'import guard; from rkuarch.cli import app; app()']
+    else:
+        prefix = [str(PY), '-m', 'rkuarch.cli']
+    argv = [str(a) for a in argv]
+    start = time.monotonic()
+    p = subprocess.run(prefix + argv, cwd=S, env=local, text=True,
+                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    (E / (label + '.log')).write_text(p.stdout)
+    row = {'label': label, 'argv': prefix + argv, 'cwd': str(S),
+           'PYTHONPATH': local['PYTHONPATH'], 'returncode': p.returncode,
+           'seconds': round(time.monotonic() - start, 3), 'producers_disabled': blocked,
+           'expected_refusal': expected_refusal}
+    commands.append(row)
+    (E / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+    print(label, p.returncode, flush=True)
+    if blocked:
+        assert 'U2_DEMO_GUARD_INSTALLED' in p.stdout, p.stdout
+    if expected_refusal:
+        assert p.returncode != 0 and 'U2_DEMO_PRODUCER_DISABLED' in p.stdout, p.stdout
+    else:
+        assert p.returncode == 0, p.stdout
+
+
+def assemble(dest):
+    run('assemble-' + dest.name, [
+        'companions', 'assemble', '--prepared-input', D / 'prepared.json',
+        '--assumptions', D / 'assumptions.json', '--capture-dir', D / 'capture',
+        '--recipes', D / 'draft/metric-dependencies.json',
+        '--recipe-review', R / 'external-review/recipe-review.json',
+        '--registry', D / 'draft/registry.json',
+        '--registry-review', R / 'external-review/registry-review.json',
+        '--model-card', D / 'draft/model-card.json', '--no-comparisons',
+        '--artifact-dir', dest / 'companions', '--output', dest / 'context.json',
+    ], blocked=True)
+
+
+for name in ['fresh-a', 'fresh-b', 'saved-replay']:
+    dest = O / name
+    dest.mkdir()
+    assemble(dest)
+    common = ['--assumptions', D / 'assumptions.json', '--context', dest / 'context.json',
+              '--model-card', D / 'draft/model-card.json', '--artifact-dir', dest / 'companions',
+              '--output', dest / 'table/table.json']
+    if name == 'saved-replay':
+        run('table-' + name, ['table', '--prepared-input', D / 'prepared.json',
+            '--capture-dir', D / 'capture', *common], blocked=True)
+    else:
+        run('table-' + name, ['table', 'hw/designs/npu-l4.yaml', '--model', 'llama-3.1-8b',
+            '--precision', 'bf16', '--tp', '1', '--grid', R / 'grid.json', *common])
+    for mode in ['default', 'optin']:
+        args = ['report', dest / 'table/table.json', '--output', dest / (mode + '.html'),
+                '--markdown', dest / (mode + '.md')]
+        if mode == 'optin':
+            args.append('--show-unvalidated-predictions')
+        run('report-' + name + '-' + mode, args, blocked=True)
+
+run('guard-negative-capture', ['capture', '--prepared-input', D / 'prepared.json',
+    '--assumptions', D / 'assumptions.json', '--output', O / 'forbidden-capture'],
+    blocked=True, expected_refusal=True)
+run('guard-negative-prepare', ['prepare', 'hw/designs/npu-l4.yaml', '--model', 'llama-3.1-8b',
+    '--precision', 'bf16', '--tp', '1', '--grid', R / 'grid.json',
+    '--output', O / 'forbidden-prepared.json'], blocked=True, expected_refusal=True)
+assert not (O / 'forbidden-capture').exists()
+assert not (O / 'forbidden-prepared.json').exists()
+first = inventory(O / 'fresh-a')
+assert inventory(O / 'fresh-b') == first
+assert inventory(O / 'saved-replay') == first
+(E / 'output-manifest.json').write_text(json.dumps(first, indent=2) + '\n')
+from rkuarch.table.artifacts import load_verified_report_inputs
+from rkuarch.table.companions import load_captured_work
+from rkuarch.workload.prepared import load_prepared_input
+from uarch_contract.assumptions import AssumptionSet
+from rkuarch.report.complete import render_verified
+v = load_verified_report_inputs(O / 'fresh-a/table/table.json')
+c = load_captured_work(D / 'capture', load_prepared_input(D / 'prepared.json'),
+                      AssumptionSet.model_validate_json((D / 'assumptions.json').read_bytes()))
+assert v.bundle == c.bundle and v.results == c.results and len(v.results) == 8
+assert v.model_card.badge == 'stub'
+assert v.model_card.validated_error_band is None and v.model_card.energy_verification is None
+assert not v.evidence and not v.comparisons and not v.verifications
+assert v.dependencies.review_hash == review_receipt[0]['review_hash']
+assert v.registry.review_hash == review_receipt[1]['review_hash']
+assert review_subject_hash(v.dependencies) == captured['review_subjects']['recipes']
+assert review_subject_hash(v.registry) == captured['review_subjects']['registry']
+assert len(v.registry.entries) == 1
+mode_receipts = {}
+for mode, show in [('default', False), ('optin', True)]:
+    rendered = render_verified(v, show_unvalidated_predictions=show)
+    assert rendered.html.encode() == (O / 'fresh-a' / (mode + '.html')).read_bytes()
+    assert rendered.markdown.encode() == (O / 'fresh-a' / (mode + '.md')).read_bytes()
+    assert 'conditional · 59 stipulations' in rendered.markdown
+    assert 'llama-3.1-8b' in rendered.markdown
+    assert 'energy unverified' in rendered.markdown and 'unknown' in rendered.markdown
+    recipe_paths = {r.metric_path for r in v.dependencies.recipes}
+    assert recipe_paths <= rendered.metrics.keys()
+    visible = [p for p in recipe_paths if rendered.metrics[p].number is not None]
+    assert bool(visible) == show
+    for p in visible:
+        m = rendered.metrics[p]
+        assert m.assessment.badge == 'stub' and 'STUB' in m.text and 'error unknown' in m.text
+    mode_receipts[mode] = {'declared_prediction_paths': len(recipe_paths),
+                           'visible_prediction_paths': len(visible),
+                           'render_hash': rendered.render_spec.render_hash,
+                           'synthetic_presentation_enabled': rendered.render_spec.allow_synthetic_presentation}
+assert inventory(D) == captured['files']
+assert inventory(R / 'external-review') == review_inventory
+final = {'status': 'passed: actual-reviewed eight-point public workflow demonstration',
+         'source_tree': T, 'python': sys.version, 'platform': platform.platform(),
+         'output_directory': str(O), 'points': 8, 'table_hash': v.table.table_hash,
+         'context_hash': v.context.context_hash, 'identical_output_files_per_run': len(first),
+         'identical_bytes_per_run': sum(f['bytes'] for f in first.values()),
+         'runs_compared': ['fresh-a', 'fresh-b', 'saved-replay'],
+         'saved_replay_producers_disabled': True, 'negative_producer_controls': 2,
+         'assembly_and_report_commands_producers_disabled': True,
+         'actual_reviews_bound_without_subject_change': True,
+         'modes': mode_receipts, 'original_inputs_and_external_review_files_unchanged': True,
+         'comparison_intake': [], 'full_matrix_exit': False, 'oracle_generated_or_adopted': False,
+         'u0021_gate': False, 'commit_push_tag_closure': False}
+(E / 'result.json').write_text(json.dumps(final, indent=2) + '\n')
+print(json.dumps(final, indent=2), flush=True)

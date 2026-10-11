@@ -199,7 +199,14 @@ def test_offline_report_subset_and_capabilities(report_subset, tmp_path, monkeyp
     shown = render_verified(
         verified, show_unvalidated_predictions=True, allow_synthetic_presentation=True
     )
-    assert all(m.number is None for p, m in hidden.metrics.items() if p.startswith("/comparisons/"))
+    for path, metric in hidden.metrics.items():
+        if not path.startswith("/comparisons/"):
+            continue
+        if "declared captured input; not a measurement" in metric.text:
+            assert metric.number is not None
+            assert "source=sha256:" in metric.text
+        else:
+            assert metric.number is None
     assert "STUB" in shown.html and "STUB" in shown.markdown
     assert all(
         m.assessment.badge == "stub"

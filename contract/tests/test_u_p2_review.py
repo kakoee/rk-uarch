@@ -321,9 +321,13 @@ def test_f12_ci_typechecks_b_deliverables() -> None:
 
     config = tomllib.loads((v.ROOT / "pyproject.toml").read_text())
     workflow = (v.ROOT / ".github/workflows/ci.yml").read_text()
-    assert "uv run mypy src contract scripts" in workflow or {"src", "contract", "scripts"} <= set(
-        config["tool"]["mypy"]["files"]
+    monolithic = "uv run mypy src contract scripts" in workflow
+    split = (
+        "uv run mypy src contract/uarch_contract scripts" in workflow
+        and "uv run mypy --no-explicit-package-bases contract/tests" in workflow
     )
+    configured_all = {"src", "contract", "scripts"} <= set(config["tool"]["mypy"]["files"])
+    assert monolithic or split or configured_all
 
 
 def test_f15_vendor_readme_documents_layout_and_lifecycle() -> None:

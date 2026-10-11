@@ -163,7 +163,7 @@ def test_original_stipulations_are_explicit_input_quotes(comparison_inputs):
     assert "not a hardware measurement" in text
     assert "unvalidated model prediction" not in text
     inventory = d.metrics["/hardware/stipulation_inventory_count"]
-    assert inventory.number == repr(float(len(originals)))
+    assert inventory.number == str(len(originals))
     assert "input inventory; not a prediction" in inventory.text
     for path, original in originals:
         quote = d.metrics["/hardware/" + path]

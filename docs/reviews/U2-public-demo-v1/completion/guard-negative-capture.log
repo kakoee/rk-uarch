@@ -1,0 +1,37 @@
+U2_DEMO_GUARD_INSTALLED
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/main.py", line 1154, in __call__
+    raise e
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/main.py", line 1137, in __call__
+    return get_command(self)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/_click/core.py", line 801, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/core.py", line 1197, in main
+    return _main(
+           ^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/core.py", line 187, in _main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/core.py", line 1119, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/_click/core.py", line 740, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/_click/core.py", line 483, in invoke
+    return callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/typer/main.py", line 1524, in wrapper
+    return callback(**use_params)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/U2-public-demo-completion-source/src/rkuarch/cli.py", line 300, in _forward_command
+    _compat_app([ctx.info_name, *ctx.args])
+  File "/tmp/U2-public-demo-completion-source/src/rkuarch/cli.py", line 236, in _compat_app
+    captured = capture(
+               ^^^^^^^^
+  File "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration/tables/U2-public-demo-v1-completion/producer-trap/guard.py", line 7, in forbidden
+    raise RuntimeError("U2_DEMO_PRODUCER_DISABLED")
+RuntimeError: U2_DEMO_PRODUCER_DISABLED

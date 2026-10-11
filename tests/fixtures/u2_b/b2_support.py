@@ -2,7 +2,9 @@
 
 import json
 from pathlib import Path
+from typing import cast
 
+from pydantic import JsonValue
 from uarch_contract.evidence import EvidenceScopeCase
 from uarch_contract.hashing import artifact_identity, content_hash, review_subject_hash, sha256
 from uarch_contract.report_context import ReportContext
@@ -21,14 +23,16 @@ DIMENSIONS = (
 )
 
 
-def put(store, value, own=None):
+def put(
+    store: dict[str, object], value: dict[str, object], own: str | None = None
+) -> dict[str, object]:
     if own:
         value[own] = content_hash(value, exclude=(own,))
     store[artifact_identity(value)] = value
     return value
 
 
-def review(store, value, own):
+def review(store: dict[str, object], value: dict[str, object], own: str) -> dict[str, object]:
     r = put(
         store,
         dict(
@@ -45,8 +49,14 @@ def review(store, value, own):
     return put(store, value, own)
 
 
-def fixture(*, rung="L3", purpose="counts", channel="matrix_ops", band=None):
-    store = {}
+def fixture(
+    *,
+    rung: str = "L3",
+    purpose: str = "counts",
+    channel: str = "matrix_ops",
+    band: dict[str, float] | None = None,
+) -> tuple[ReportContext, EvidenceScopeCase, dict[str, object], dict[str, object]]:
+    store: dict[str, object] = {}
     # Reuse the accepted prepared identity as test input, not an independently built workload.
     bundle = json.loads((ROOT / "contract/tests/fixtures/u2/independent-bundle.json").read_text())
     put(store, bundle)
@@ -179,20 +189,30 @@ def fixture(*, rung="L3", purpose="counts", channel="matrix_ops", band=None):
     )
 
 
-def replace_evidence(context, store, evidence, **changes):
+def replace_evidence(
+    context: ReportContext,
+    store: dict[str, object],
+    evidence: dict[str, object],
+    **changes: object,
+) -> tuple[ReportContext, dict[str, object]]:
     evidence = dict(evidence, **changes)
     evidence = review(store, evidence, "evidence_hash")
-    context = context.model_dump(mode="json")
-    context["evidence_index"] = {evidence["evidence_id"]: evidence["evidence_hash"]}
-    put(store, context, "context_hash")
-    return ReportContext.model_validate(context), evidence
+    context_data = context.model_dump(mode="json")
+    context_data["evidence_index"] = {evidence["evidence_id"]: evidence["evidence_hash"]}
+    put(store, context_data, "context_hash")
+    return ReportContext.model_validate(context_data), evidence
 
 
-def metric_fixture():
+def metric_fixture() -> tuple[
+    ReportContext,
+    dict[tuple[str, str, str], tuple[EvidenceScopeCase, ...]],
+    dict[str, object],
+    dict[str, object],
+]:
     """Independent literal DAG with both source models, not a runtime comparison artifact."""
     context, scope, store, actual_evidence = fixture()
-    context = context.model_dump(mode="json")
-    actual_assumptions = store[context["assumptions_hash"]]
+    context_data = context.model_dump(mode="json")
+    actual_assumptions = cast(dict[str, object], store[context_data["assumptions_hash"]])
     reference_model = dict(
         name="nominal-rk-compatibility",
         version="B-independent-reference",
@@ -211,7 +231,7 @@ def metric_fixture():
     )
     rs = scope.model_copy(update={"model_identity_hash": rh})
     verification = dict(
-        store[actual_evidence["verification_hashes"][0]],
+        cast(dict[str, object], store[cast(list[str], actual_evidence["verification_hashes"])[0]]),
         model_identity_hash=rh,
         scope=[rs.model_dump(mode="json")],
     )
@@ -223,8 +243,8 @@ def metric_fixture():
         verification_hashes=[verification["verification_hash"]],
     )
     evidence = review(store, evidence, "evidence_hash")
-    context["evidence_index"][evidence["evidence_id"]] = evidence["evidence_hash"]
-    context["verification_hashes"].append(verification["verification_hash"])
+    context_data["evidence_index"][evidence["evidence_id"]] = evidence["evidence_hash"]
+    context_data["verification_hashes"].append(verification["verification_hash"])
     raw = put(
         store,
         dict(
@@ -289,7 +309,7 @@ def metric_fixture():
                 )
             )
     recipes = []
-    for name, purpose, fields in [
+    for name, purpose, metric_fields in [
         ("count", "counts", ["matrix_ops", "reference_matrix_ops"]),
         ("timing", "duration", ["duration_ps", "reference_duration_s"]),
     ]:
@@ -301,7 +321,7 @@ def metric_fixture():
                 applicable_dimensions=list(DIMENSIONS),
                 selectors=[
                     dict(kind="result_field", artifact_hash=raw_hash, json_pointer="/" + f)
-                    for f in fields
+                    for f in metric_fields
                 ],
             )
         )
@@ -316,20 +336,20 @@ def metric_fixture():
         ),
         "dependencies_hash",
     )
-    context["metric_dependencies_hash"] = deps["dependencies_hash"]
-    put(store, context, "context_hash")
-    scopes = {
+    context_data["metric_dependencies_hash"] = deps["dependencies_hash"]
+    put(store, context_data, "context_hash")
+    scopes: dict[tuple[str, str, str], tuple[EvidenceScopeCase, ...]] = {
         (s.model_identity_hash, p, "whole_iteration"): (s,)
         for s in (scope, rs)
         for p in ("counts", "duration")
     }
-    return ReportContext.model_validate(context), scopes, store, deps
+    return ReportContext.model_validate(context_data), scopes, store, deps
 
 
-def proposal_artifacts():
+def proposal_artifacts() -> dict[str, dict[str, JsonValue]]:
     """Read-only accepted A test support for independent C1/C2 regression mutations."""
     directory = ROOT / "docs/reviews/U2-U0003-proposal"
-    store = {}
+    store: dict[str, dict[str, JsonValue]] = {}
     for path in [*directory.glob("*.json"), *(directory / "fixtures").glob("*.json")]:
         value = json.loads(path.read_text())
         if isinstance(value, dict):
