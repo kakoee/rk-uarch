@@ -98,3 +98,75 @@ review is authorized by this correction. Runner registration/manual nightly rema
 with Reza; local receipts do not satisfy that gate. Tool selection, instrumentation,
 fallback, U0005/200-second limit and G2 verdict remain pending. Stop after publication for
 coordinator reconciliation; no later implementation or sprint closure follows automatically.
+
+## Commits and new qualifying execution
+
+- `cbaa1632a00e12ac8469a146707a4e02ea33b2d7`: tested SR-C1 implementation, seven
+  added tests, scratch revert harness and regression receipts.
+- `85a5ad29820bc1c8638d844e192c6e4d778c107b`: normal merge preserving coordinator
+  approval/installer documents through `df4caf81969c5aafa90ea183dfc8d9e69334d9f0`.
+  No execution dependencies changed in this merge. **Both new suites and reports bind
+  this clean committed implementation**, after the tests and fix were committed.
+
+Each generator ran once with the unchanged model-v1 profile definitions. Each froze its
+new concrete corpus before two sequential qualifying replays in one process. All four
+reports passed internal validation; both external validator commands exited 0 and both
+literal `cmp` commands exited 0. No favorable-run selection or additional discovery occurred.
+
+```sh
+uv run --no-sync python -m validation.reporting.analytic_report generate --profile analytic-l0 --output /tmp/u3-b-src1-l0 > /tmp/u3-b-src1-l0.stdout 2> /tmp/u3-b-src1-l0.stderr
+uv run --no-sync python -m validation.reporting.analytic_report generate --profile analytic-l0m --output /tmp/u3-b-src1-l0m > /tmp/u3-b-src1-l0m.stdout 2> /tmp/u3-b-src1-l0m.stderr
+cmp /tmp/u3-b-src1-l0/report-1.json /tmp/u3-b-src1-l0/report-2.json
+cmp /tmp/u3-b-src1-l0m/report-1.json /tmp/u3-b-src1-l0m/report-2.json
+uv run --no-sync python -m validation.reporting.analytic_report validate --report /tmp/u3-b-src1-l0/report-1.json --expected-plan /tmp/u3-b-src1-l0/plan.json --expected-corpus /tmp/u3-b-src1-l0/corpus.json --expected-implementation 85a5ad29820bc1c8638d844e192c6e4d778c107b > /tmp/u3-b-src1-l0.validate.stdout 2> /tmp/u3-b-src1-l0.validate.stderr
+uv run --no-sync python -m validation.reporting.analytic_report validate --report /tmp/u3-b-src1-l0m/report-1.json --expected-plan /tmp/u3-b-src1-l0m/plan.json --expected-corpus /tmp/u3-b-src1-l0m/corpus.json --expected-implementation 85a5ad29820bc1c8638d844e192c6e4d778c107b > /tmp/u3-b-src1-l0m.validate.stdout 2> /tmp/u3-b-src1-l0m.validate.stderr
+```
+
+[New execution artifacts](execution/) contain one lossless gzip of the canonical report
+per identical pair, exact external plan/corpus pins, original combined two-attempt receipts,
+call journals and captured stdout/stderr. Empty stderr files are retained. No code snapshots
+or broad manifests are added. Reports retain all inputs/results/counterexamples; journals
+retain the actual two replay attempts separately. Stable report bytes exclude operational
+host/timing/stdout/stderr. Gzip uses mtime=0; source hashes refer to decompressed bytes.
+
+| New observation | L0 | L0m |
+| --- | ---: | ---: |
+| Distinct frozen cases / discovery entries | 336 / 336 | 238 / 240 |
+| Candidate / mutant cases per replay | 336 / 384 | 238 / 96 |
+| Discovery calls | 864 | 768 |
+| Candidate / mutant calls per replay | 864 / 960 | 760 / 384 |
+| Actual calls: discovery once + two replays | 4,512 | 3,056 |
+| Journal call starts / finishes | 4,512 / 4,512 | 3,056 / 3,056 |
+| Relations pass / skip / not_run | 14 / 14 / 0 | 9 / 13 / 5 |
+| Mutant records killed, per replay | 8 | 2 |
+| Whole-rung coverage / outcome | partial / not_run | partial / not_run |
+
+All five named mutants were rejected by their target assertions in both modes, with
+24 matched valid control and 24 fault cases per mutant/mode per replay. Candidate errors
+are not used as kills. L0 duration-purpose passes; its other purposes remain not_run.
+L0m duration-purpose remains not_run. Its aggregate-clock cell has **22/24 distinct
+admitted cases** from 24 observed bodies; two repeated inputs are retained in discovery.
+The other four not_run cells remain the deferred unused-stipulation and DRAM-bound-clock
+pairs. No budget was lowered or cases added to hide the shortfall. This fresh discovery
+is distinct from the historical 21/24 corpus, whose bytes/identity are unchanged. Profile
+definitions and the verification scope have not been expanded.
+
+| Canonical source binding | L0 | L0m |
+| --- | --- | --- |
+| Raw bytes | 14,830,926 | 30,699,048 |
+| Raw SHA256 | `694682267f0d8d6fe30f150815313e1a00a36c35e565ac54ad2e9eea5d92b7e7` | `2a57c5033aaf748087320cdad56ffd7f1a8a5a47118afaf3feb3f63baab79c84` |
+| Plan SHA256 | `82a4f2aa8ca8f52b7c4c18720f73621f44d53efe9ec3050df046f0a94f1f177d` | `75c23ff5ac02957511aaa7a1f9e363d54f6834c7f173014f81c3824c8e577886` |
+| Corpus SHA256 | `524d66e5da316f3e6b1e5ef5abf05358e5457b1cc572eca6c420c7c12676fcad` | `a7264c772a5151eef82150145ee9033da7848222829952d98fc816e7aa646533` |
+
+To validate retained L0 bytes, decompress `execution/L0-report.json.gz` to a temporary
+JSON file and use that file with `execution/L0-plan.json`, `execution/L0-corpus.json`
+and the full `85a5ad2` implementation pin above; use L0m counterparts for L0m. These
+pins must come from the reviewed publication, not be inferred from an untrusted report.
+A different checkout cannot reuse the same version string to evade implementation checks.
+No hash depends on the later artifact-publication commit.
+
+Operational receipts record nightly=not_run, no operational errors, and local generator
+elapsed times of 461.64 s / 441.65 s. These overlapping validation workloads are not
+simulator benchmarks or evidence for U0005/200 seconds. Original model-v1 engine,
+assumptions and toolchain identities remain in the source; no accepted review, measurement
+authority, model-card hash, designated-host execution or U-P6 completion is fabricated.
