@@ -11,8 +11,33 @@ primary `89d5d6a`: 26 passed / 29 skipped in 75.71 s, all five mutants in both m
 using B's locked interpreter with primary `src:contract` on PYTHONPATH. Neither is
 a new execution in this supplement, a coordinator full run or independent review.
 
-## 1. Exact proposed ADR decision text
+Revision against [accepted next-work scope](U3-next-direction-v1-acceptance.md),
+`ad23500bc5f360727c660acd71781b4dc530115c`: the conservative direction is endorsed;
+this revised payload and implementation scope still await coordinator review and
+Javid's concrete decision. This revision replaces internal-draw bookkeeping with
+observation at the test-body/engine boundary, and limits the next implementation
+proposal to standalone B-owned validation. Historical test receipts above are unchanged.
 
+## 1. Exact proposed ADR text
+
+Proposed human destination:
+`docs/decisions/U0006-what-verification-can-and-cannot-establish.md`.
+The following context, decision, consequences and exclusions are the proposed text;
+no protected ADR is created by this author.
+
+> # U0006 — What verification can and cannot establish
+>
+> **Status:** proposed; requires Javid's acceptance and human-owned commit.
+>
+> **Context.** The accepted U2 aggregate/per-op analytic engine exposes resolved
+> accounting and roofline predictions, not executed telemetry. B's bounded
+> [preparation](../reviews/U3-U0006-proposal.md) and
+> [report proposal](../reviews/U3-U0006-report-supplement.md) distinguish those claims.
+> [U3-next-direction-v1](../reviews/U3-next-direction-v1-acceptance.md) endorses the
+> conservative direction and requests a bounded revision, not wholesale profile acceptance.
+>
+> **Decision.**
+>
 > L0/L0m verification is a scoped statement about executed checks of a declared
 > model, never silicon validation. Preserve STUB, unknown error and independently
 > unverified energy under U0003/U0004. Analytic shape accounting is not executed
@@ -23,8 +48,10 @@ a new execution in this supplement, a coordinator full run or independent review
 > Partial, empty or skipped-only coverage cannot be summarized as passed.
 >
 > Freeze relation definitions, premises, domains, modes, case-selection rules and
-> budgets before execution. Retain all executed cases and counterexamples, with
-> exact implementation, assumptions, suite and input/result bindings. Separate
+> budgets before execution. Retain every actual engine invocation, input, result
+> and observed counterexample, including executed shrinking attempts and mutant
+> controls, with exact implementation, assumptions, suite and input/result bindings.
+> Separate
 > engine checks on fixed prepared work, producer-path checks and mutant results.
 > A mutant rejection demonstrates test discrimination, not an engine failure or
 > hardware accuracy. Hash identity, an actual test run and independent accepted
@@ -32,11 +59,35 @@ a new execution in this supplement, a coordinator full run or independent review
 > report from another implementation. A report must retain omissions and failures;
 > review cannot erase them or expand their scope.
 >
-> Use the existing SourceRecord/VerificationRecord/review/context carriers with
-> the analytic source profile below. Rich relation states live in source bytes;
-> the three-valued VerificationRecord outcome is their conservative reduction.
-> This profile supplies no measurement authority. Its implementation, actual
-> execution, review and publication are separate steps after this decision.
+> Freeze concrete admitted inputs before two qualifying replays. Preserve discovery
+> failures even if a replay passes. Observe generation and engine calls through
+> supported public APIs and an explicit recording wrapper. Do not retain a second
+> ledger of framework-internal rejected draws that never invoke the engine; report
+> unavailable internal counts as unavailable, never as zero. Record all actual
+> calls even when a framework cannot label which belong to shrinking. Example
+> budgets, observed generation, retained cases and actual executions are distinct.
+>
+> Reduce failed applicable relations or failed required mutant discrimination to
+> failed; otherwise unfinished, skipped, empty or under-budget coverage reduces to
+> not_run; only nonempty complete passing coverage reduces to passed. Rich relation
+> states remain in canonical source bytes. The three VerificationRecord outcomes
+> can carry conservative reductions only after separately authorized integration.
+>
+> **Consequences.** The proposed first implementation is standalone analytic report
+> generation and validation under B-owned validation paths. Bind exact implementation,
+> assumptions, suite, concrete inputs and results; refuse missing/tampered cases and
+> changed implementations even with unchanged version strings. Git retains source
+> history; retain only report-relevant artifacts and existing content identities.
+> Stable report bytes exclude operational timing/host/nightly receipts, which refer
+> to their report hash. No circular dependency on a later publication commit.
+>
+> **Does not do.** This decision supplies no measurement authority and accepts no
+> test run or review. Production provenance dispatch, A loader changes, card
+> attachment and evidence eligibility are deferred; initial L0/L0m references stay
+> null. It does not accept a fork, change U0003/U0004, alter U2 historical evidence,
+> waive U0002, discharge nightly/U-P6 gates, authorize private Hypothesis hooks or
+> modify protected carriers. Concrete profile review and implementation authorization
+> remain separate from this proposal's publication.
 
 ## 2. Canonical source profile (exact proposed fields)
 
@@ -57,12 +108,12 @@ exact bytes. Arrays retain meaningful order; declared sets are sorted unique.
 | `engine`, `model` | Full accepted EngineIdentity and ModelIdentity; `model == engine.model` |
 | `implementation_git_commit` | Full pre-execution clean checkout commit; engine, protocol, preparation and contract code must match that checkout, not just core.py's hash |
 | `assumptions` | Full accepted AssumptionSet with validated assumptions_hash and exact model/algorithm equality |
-| `suite` | `{id, version, git_commit, entrypoint, plan_hash}`; commit is the clean committed suite implementation used, entrypoint names its runner, plan_hash is content_hash(plan) |
+| `suite` | `{id, version, git_commit, entrypoint, plan_hash}`; commit is the clean committed suite implementation used, entrypoint names its runner (an explicitly prospective name only for illustration), plan_hash is content_hash(plan) |
 | `toolchain` | `{python_version, hypothesis_version, pytest_version, uv_lock_sha256}`; exact versions/lock bytes, no environment path |
 | `discovery_plan` | Original plan committed before discovery; same fields as plan, corpus_hash=null; its digest is content_hash(discovery_plan). |
 | `plan` | `{profile_id, profile_version, rung, purposes, modes, cells, selection}`; purposes is a sorted subset of counts/duration/diagnostics/energy; modes is exactly `["aggregate","per_op"]`; rung is L0 or L0m |
 | `execution` | `{state, stop_reason, ledger_count}`; ledger_count sums all three ledger lengths; state is `complete` or `interrupted`; stop_reason null only for complete execution |
-| `corpus` | `{entries, discovery_case_ids}`; entries are ordered `{cell_id, ordinal, discovery_case_id, input_hashes}` for every admitted concrete example, including counterexamples; discovery_case_ids lists every discovery attempt. No plan/report hash in this object. |
+| `corpus` | `{entries, discovery_case_ids}`; entries are ordered `{cell_id, ordinal, discovery_case_id, input_hashes}` for each distinct admitted input tuple, including counterexamples and executed shrink inputs; discovery_case_ids lists every retained discovery case (including repeated inputs). No plan/report hash in this object. |
 | `cases` | `{discovery, candidate, mutant}`: three ordered ledgers using the case fields below; no success-only sampling. The discovery ledger is frozen; each qualifying report records one candidate replay. |
 | `relations` | Exactly one result for every plan cell, including skips/not-run cells |
 | `mutants` | Separately labeled discrimination records; never mixed into candidate relation outcomes |
@@ -88,49 +139,70 @@ from captures, not a Cartesian product; missing family/registry or another requi
 binding prevents a carrier projection. Do not invent a family. `premises[]` is
 `{id, predicate, observation_selectors}`; predicate is a versioned checker identifier
 and each selector uses the same prospective role/pointer form. `budget` is
-`{max_examples, required_valid_examples, max_draws}`; this profile proposes
-24, 24, 240 respectively for generated cells, and 1, 1, 1 for a literal control.
+`{max_examples, required_valid_examples, max_engine_invocations}`; this profile proposes
+24, 24, 240 respectively for generated cells. The third field caps actual engine
+invocations per cell per ledger, including mutant controls; a literal control uses
+1, 1 and its prospectively declared number of calls (not necessarily one).
 Budget exhaustion before required coverage is not-run, never an automatic pass.
+The wrapper refuses calls beyond the cap and stops that phase with a dedicated
+runner budget outcome; it must not misclassify this as an assertion counterexample.
 `required_mutants` names the applicable faults below, or an empty array.
 
 `plan.selection` is `{policy, database, derandomize, seed, phases, deadline_ms,
 retain, corpus_hash}`. Proposed policy is `hypothesis-freeze-replay/1`, database
 null, derandomize true, seed null, deadline_ms null, phases exactly
-`["generate","shrink"]`, retain `all`, and corpus_hash null in the pre-discovery plan. Freeze it to content_hash(corpus) before the
+`["generate","shrink"]`, retain `all_engine_calls_and_counterexamples`, and
+corpus_hash null in the pre-discovery plan. Freeze it to content_hash(corpus) before the
 qualifying replays; this sole permitted completion changes plan_hash, with the
 pre-discovery plan retained as `discovery_plan` at the top level. All other plan
 fields must remain identical. Phase changes require a new prospective plan/run.
 
-Each ledger case is `{case_id, cell_id, ordinal, stage, draw_index, origin_case_id, status, reason,
-inputs, results, calls, premise_results, assertion_id, failure_fingerprint}`. `case_id`
-is ledger name plus cell_id plus its zero-based ledger ordinal; stage is
-generate/shrink/replay. Origin_case_id is null for original draws, otherwise names
-the retained discovery case being shrunk/replayed; draw_index identifies its root draw;
-status is pass/fail/skip/not_run/rejected_draw. Inputs/results are ordered object
-hash references (pairs retain low/high order). Calls are ordered
-`{job_hash, result_hash, diagnostic_hash, state}` records: state is completed/error/
-not_run, and nullable result/diagnostic hashes resolve only to actual retained
-outputs. Results equal the ordered non-null result hashes; engine_evaluations counts
-calls other than not_run, not planned jobs. Premise results are `{id, state, reason, observation_pointers}`,
-state true/false/unobservable; observation_pointers contains the resolved existing
-ArtifactPointers (empty for unavailable observations). Non-executed cases have empty results; failure
-fingerprints are null or `{assertion_id, observed}` with canonical observed
-values, not tracebacks or addresses. Reason values use stable catalogue codes, not
-host paths, timings or unnormalized exception text. A rejected draw is a recorded
-selection event, not a skipped relation
-and not a valid example. Reason is null only for pass. Every observed counterexample
-is retained before shrinking and remains a failure even if a later attempt differs.
+Each ledger case is `{case_id, cell_id, ordinal, stage, origin_case_id, status,
+reason, inputs, results, calls, premise_results, assertion_id, failure_fingerprint}`.
+Case_id is ledger name plus cell_id plus its zero-based ledger ordinal; stage is
+`discovery` or `replay`. Origin_case_id is null during discovery, otherwise the
+corpus entry's discovery_case_id. Do not invent parent-draw IDs or shrink-phase
+labels from private framework state. Status is pass/fail/skip/not_run. Inputs/results
+are ordered object hashes (pairs retain low/high order). Calls are ordered
+`{job_hash, result_hash, diagnostic_hash, state}` records, state completed/error/
+not_run; nullable hashes resolve only to retained actual outputs. Results equal
+ordered non-null result hashes. Persist the job before invocation and the output
+before running assertions; retain exceptions/partial output, not just successful
+results. An interrupted in-flight call is an error with a stable interruption reason,
+never a fabricated result. Do not call validation failures an unexecuted engine result.
+Premise results are `{id, state, reason, observation_pointers}`, state true/false/
+unobservable and pointers resolve to retained objects (empty when unavailable).
+Failure_fingerprint is null or `{assertion_id, observed}` with canonical values.
+Reasons are stable catalogue codes, null only for pass; raw traceback/host context
+belongs to the separate operational receipt. Every observed counterexample is
+retained before framework shrinking/retry, even if it precedes an engine call.
+
+Keep discovery cases whenever the body invokes the engine or observes a counterexample;
+retain every such invocation, including repeated inputs, executed shrinking attempts
+and failure reproduction. Do not store a case for an internal rejected draw that
+never reaches that boundary. A body that rejects before any engine call increments
+only the observed-body counter; it contributes no valid example. No dependency on
+Hypothesis private internals or scraping verbose/statistics output is permitted.
+The wrapper surrounds **all** calls, including repeat checks and mutant controls.
 
 Each `relations[]` is `{cell_id, applicability, reason, status, premise_results,
 actual, case_ids}`. Applicability is applicable/inapplicable/unobservable;
-status is pass/fail/skip/not_run. `actual` is `{draws, rejected_draws,
-valid_examples, engine_evaluations, shrink_attempts}` and is derived from the
-ledger. Draw/rejection/shrink counts come from discovery; valid_examples and
-engine_evaluations come from this report's candidate replay only. Valid_examples
-counts admitted original draws whose required calls reached the assertion; repeat
-calls and shrink attempts do not increase it. One example may produce several
-jobs/results; pytest test counts and max_examples are not actual example counts. Full validity requires matching IDs,
-orders, object closure, counts and plan membership, including unexecuted cells.
+status is pass/fail/skip/not_run. `actual` has exactly:
+
+| Field | Observation and counting rule |
+| --- | --- |
+| `observed_body_entries` | Discovery test-body entries after public strategy argument delivery, counted by our wrapper; includes repeats and body-level rejects, not framework-internal generation. Zero only if none observed. |
+| `internal_draws`, `internal_rejections`, `executed_shrink_calls` | Null in this first profile: not observed through the selected public API. Null means unavailable, not zero. Executed shrink calls are still retained in discovery; they are not separately classified. |
+| `valid_examples` | Distinct admitted corpus entries whose required candidate replay calls/assertions completed (passing or failing). Duplicate inputs, repeat calls and mutant calls do not inflate it. This is not Hypothesis's internal valid-example count. |
+| `engine_evaluations` | `{discovery, candidate, mutant}`: counts all calls other than not_run in each cell's three ledgers; mutant count includes controls. Discovery results can fail the relation regardless of replay results. |
+
+Observed_body_entries is an explicitly measured scalar, not reconstructible from
+the retained-call subset; it must be at least its retained discovery-case count.
+All other available counts are recomputed from the ledgers/corpus. Unknown counts
+cannot satisfy coverage budgets. Full validity requires exact IDs, order, object
+closure and plan/corpus membership, including unexecuted cells. The versioned
+profile registry fixes its complete relation list; deleting a skipped/deferred cell
+cannot create a new successful report under the same profile ID/version.
 
 **Initial relation catalogue** (version suffix `/1` is mandatory):
 
@@ -209,10 +281,21 @@ Python/Hypothesis version, settings and collection identity; a seed alone is not
 case specification. The published 24-example setting is a budget, not a retained
 case corpus. Do not reconstruct lost original cases from its JUnit summary.
 Proposed runner freezes the ordered generated concrete corpus, validates all its
-identities and hashes it **before** the report-qualifying replay pair. Include all
-rejected draws and all generation/shrinking attempts in the retained selection
-ledger; execution outcomes belong to the replay ledger. Run that same frozen
-corpus twice with producers disabled for fixed-input cells; for producer cells
+identities and hashes it **before** the report-qualifying replay pair. Retain all
+observed engine calls and counterexamples during discovery,
+including executed shrinking and reproduction, without labeling private phases.
+Use public `given`, `settings`, `Phase` and strategies plus the suite's own boundary
+wrapper; do not use Hypothesis observability/internal callbacks. The property body
+receives concrete strategy values before the wrapper prepares/calls the engine.
+Prefer constructive strategies; a framework rejection before body entry is unknown.
+Public settings keep database=None, derandomize=True, deadline=None and generate/
+shrink phases. `max_examples=24` is a search target, not a guarantee of 24 distinct
+retained cases. Freeze first-occurrence-ordered distinct admitted input tuples into
+the corpus; retain every repeated invocation separately. An executed shrink input
+may enter the corpus, but does not erase its earlier counterexample. If fewer than
+24 distinct admitted cases finish the replay, retain under-budget/not_run (or failed
+if a counterexample exists). No extra successes are generated to hide a failure.
+Run that same frozen corpus twice with producers disabled for fixed-input cells; for producer cells
 retain intents, emitted bundles and producer identity and compare those too.
 Identical plans/corpora/implementations must produce identical canonical raw report
 bytes (both reports embed the same frozen discovery ledger). Failure/shrink attempts
@@ -221,8 +304,9 @@ cannot erase them. A fresh discovery with changed corpus is a different report.
 
 Plan/corpus commitments precede outcome observation for the qualifying pair; any
 failure found during discovery is recorded, never excluded to select passing cases.
-The selection record and case ledger are report artifacts, not a manual source
-revision system. Retain all case objects for this bounded scope, not a sample.
+The observed-call records and corpus are report artifacts, not a manual source
+revision system. No ledger of never-invoked internal draws is required. Retain all
+case objects for this bounded scope, not a sample.
 Within objects verify hardware spec_hash, intent/request identities, bundle and point
 hashes, job/result identities and original joins; rehashing a substituted graph or
 result cannot excuse an inconsistent binding. Compare full EngineIdentity/model,
@@ -263,34 +347,38 @@ the bounded `u2-proof-bundle/2` profile via `proof_raw.py`, independent expected
 links and synthetic literal eligibility; it rejects this proposed format and our
 honest independence=false. Do not set that flag true or relax the old interpreter.
 
-Proposed implementation is a distinct B-owned analytic profile parser/reducer with
-explicit dispatch, source closure and review checks, plus coordinated A loader/card
-admission checks. It verifies self-consistency, never feeds L3/L4 or measured-error
-eligibility. Existing carriers can transport this meaning; they do not supply its
+**Deferred integration, outside the first implementation scope:** a distinct analytic
+profile interpreter/dispatch and coordinated A loader/card admission would eventually
+be needed. The first standalone generator/validator does not create SourceRecord,
+VerificationRecord, ReviewRecord, ReportContext or ModelCard artifacts, decide evidence
+eligibility, or modify either production interpreter. Standalone self-consistency
+reports never feed L3/L4 or measured-error eligibility. Existing carriers can transport this meaning; they do not supply its
 semantics automatically. No protected carrier change is selected. The sole protected
 text proposal is §1 for eventual human-authored
 `docs/decisions/U0006-what-verification-can-and-cannot-establish.md`. New parser/profile
 semantics need human agreement before implementation; edits to bound support code
 still require U0002 human generation/adoption. No change is applied in this task.
 
-## 6. Illustrative excerpt and bounded acceptance plan
+## 6. Illustration and bounded acceptance plan
 
-**Illustration only, not a complete loadable source or executed evidence.** The
-required identity/plan/case/object fields are omitted here for readability. These
-example statuses would describe a future report, not reinterpret historical tests:
+The [complete skipped-only illustration](U3-U0006-report-example.json) includes every
+required source field and no placeholder hashes or omitted members. The file is
+readable JSON transport; canonical_json produces the proposed stable raw bytes
+without indentation or a trailing newline. It is an
+`illustration`, **not executed evidence**, and uses a deliberately small diagnostic
+profile with exactly the little-law cell in each mode. Both cells are unobservable,
+all actual engine-call counts are zero, internal counts are unavailable (null), the
+corpus is empty and reduction is none/not_run. It is not the full U-P6 profile and
+cannot claim rung completion. No queue telemetry or accepted review is invented.
+The profile ID is explicitly illustrative and must be refused in actual-run mode.
 
-```json
-{
-  "format": "uarch-analytic-verification-source/1",
-  "execution_kind": "illustration",
-  "input_kind": "synthetic_fixture",
-  "relations": [
-    {"cell_id": "analytic.attribution_sum/1:aggregate:d4-bf16", "applicability": "applicable", "status": "pass", "actual": {"draws": 24, "rejected_draws": 0, "valid_examples": 24, "engine_evaluations": 48, "shrink_attempts": 0}},
-    {"cell_id": "L0.little_law/1:aggregate:d4-bf16", "applicability": "unobservable", "status": "skip", "reason": "UNOBSERVABLE_QUEUE"}
-  ],
-  "reduction": {"coverage": "partial", "outcome": "not_run", "purpose_outcomes": {"duration": "passed", "diagnostics": "not_run"}}
-}
-```
+Its engine/assumptions and lock identities are taken from the existing source; the
+suite commit is this revision's pre-work base and its proposed entrypoint does not
+exist there. That is permitted **only** for illustration, never actual_suite_run.
+The validator's actual-run path must verify the entrypoint exists at the declared
+clean suite commit. The example's omission of engine jobs/results follows from zero
+invocations, not permission to omit any executed case. Full executed-case retention
+is covered by the tests-first plan below; no new analytic execution is claimed here.
 
 Before runtime implementation, write bounded discriminating tests with actual run
 controls and explicitly mock reviews only in test fixtures (never accepted reviews
@@ -306,12 +394,60 @@ not substitutes for the declared 24-valid-example production plan.
 | Inject applicable attribution failure | Cell fail and purpose/whole-rung failed, including when later execution is interrupted; mutant killed status cannot erase candidate failure. |
 | Passes plus skips, or one applicable deferred check | Partial/not_run; zero promoted rung/card hashes. Completed narrower purpose may retain scoped passed without changing whole-rung outcome. |
 | Skipped-only or empty applicable set | none/not_run, never all([])=passed; absent concrete scope yields no VerificationRecord. |
-| Stop before budget; max_examples exceeds actual; rejected draws | not_run unless an applicable failure already exists; ledger-derived actual counts differ from configured budget. |
-| Missing, pending, rejected, non-independent or wrong-subject review | Missing/mismatch refuses closure; pending/rejected/non-independent deny positive eligibility, retain status. No fabricated approval on rerun. |
+| Stop before budget; max_examples exceeds distinct observed cases | not_run unless a failure exists; no substitution of max_examples for actuals. Duplicate/reproduction calls do not inflate valid_examples. |
+| Framework rejects before body/engine; body rejects before engine | No internal-draw ledger; internal counts null, body count only where observed. Zero engine calls only if actually none. |
+| Counterexample shrinks, then replay passes | Preserve all invoked inputs/results and the original failure; discovery failure still dominates. No private phase labels required. |
+| Missing, pending, rejected, non-independent or wrong-subject review | Deferred carrier-integration test, not first standalone scope. Standalone reports cannot assert accepted review or eligibility and never emit card references. Existing review rules remain unchanged. |
 | Surviving mutant or invalid control | Suite-power failure; unmatched crash/identity/schema exception does not count as killed. Candidate relations retain their own outcomes. |
-| Raw profile dispatched to current U2 proof interpreter | Unsupported; new dispatcher must not weaken old /2 independence or synthetic-only rules. |
+| Raw profile dispatched to current U2 proof interpreter | Unsupported remains expected; no production dispatcher change in first scope. |
 
 No test in this table has been implemented or executed by this prose-only task.
+
+### Exact first implementation plan (pending coordinator review)
+
+1. Add tests first under proposed `validation/reporting/test_analytic_report.py` for
+   the table above's standalone cases. Reuse current accepted synthetic fixtures,
+   checks, strategies and five named mutants; no golden/schema changes. Include an
+   actual passing fixed-input control in each mode, producer-path separation and a
+   spy that proves every engine call (including errors, repeats, shrink attempts and
+   mutant controls) is retained. The smallest literal plan uses one distinct case
+   per mode; generated profiles keep the 24-example target/coverage rule above.
+2. Add only `validation/reporting/analytic_report.py` (and a package initializer if
+   needed): local proposal-shape validation, canonicalization/reduction, recording
+   wrapper, discovery/corpus freeze and deterministic replay. Reuse current carrier
+   validators and identity functions. No contract schema, production CLI or dependency
+   changes.
+   Proposed commands: `python -m validation.reporting.analytic_report generate
+   --profile <committed-profile-id> --output <directory>` and `... validate
+   --report <path> --expected-plan <path> --expected-corpus <path>
+   --expected-implementation <commit>`. Generate emits the frozen corpus and both
+   raw replay reports plus separate operational receipts. Validate compares caller-
+   supplied expectations; a report's self-declared identities cannot authorize reuse.
+3. Freeze the full L0/L0m catalogue, domains, omissions, mutant obligations and both
+   modes from §2 and the published preparation under versioned profile IDs. The
+   illustrative profile is never a production default. Preserve fixed prepared-work
+   replay without invoking the producer; the distinct producer path retains intents,
+   emitted bundles and producer identities on every execution. Local work files
+   retain only report objects/receipts; Git commits the suite, not checkpoint copies.
+4. Validate closure, original versus replay input joins, exact planned coverage,
+   every corpus entry's expected replay and counted calls. Retained discovery cases
+   cannot be dropped by rehashing a smaller corpus against a caller-pinned expectation.
+   Abrupt termination may leave an incomplete local record: refuse a missing/corrupt
+   report, never manufacture complete coverage; orderly interruption yields not_run
+   unless an applicable counterexample already exists. Compare complete stable bytes
+   across the two replays; use fresh identically initialized mutant wrappers in each
+   replay and retain control/fault calls separately. Operational receipts retain
+   each attempt separately.
+5. Run the new bounded tests, existing L0/L0m controls/mutants and applicable API
+   regressions; then `ruff check .`, `mypy src contract/uarch_contract scripts`,
+   `mypy --no-explicit-package-bases contract/tests`, `lint-imports` and a full
+   suite at the meaningful integrated **code** checkpoint (all via the locked uv
+   environment). Report actual totals and
+   skips. Production dispatch, A loader edits, model-card attachment and evidence
+   eligibility require a later separately authorized task. No fork or nightly gate
+   is discharged by this future local implementation.
+
+This plan is a reviewable scope, not permission to implement it now.
 
 ## 7. Future DMA, queue and clock premises; reconciliation with A
 
@@ -379,9 +515,9 @@ No queue/trace contract is invented here, and the fork cannot use the current
 analytic-only protocol unchanged. Analytic source/report work depends on none of
 those unavailable fork observations.
 
-## Checks for this proposal commit
+## Historical checks and this revision
 
-Executed locally: `uv run pytest -q tests/unit/test_prompt_sync.py
+At the prior supplement commit, executed locally: `uv run pytest -q tests/unit/test_prompt_sync.py
  tests/unit/test_u2_b_proof.py::test_verification_literal_positive_and_real_mode_unsupported
  tests/unit/test_u2_b_proof.py::test_verification_failed_not_run_preserved
  tests/unit/test_u2_b_proof.py::test_reference_must_have_independent_accepted_review
@@ -392,26 +528,34 @@ regressions and document checks, not execution of the proposed acceptance plan.
 No full suite, new analytic run, fork, model-card attachment, or nightly rerun for
 this prose-only change; no static-code check is presented as new runtime evidence.
 
+This bounded revision: `uv run --no-sync pytest -q tests/unit/test_prompt_sync.py`
+completed **4 passed in 0.14 s**. Document-only assertions checked the complete
+example's fields, accepted EngineIdentity/AssumptionSet, implementation/lock and
+plan/corpus hashes, both-mode skipped coverage, null unavailable counts, and canonical
+JSON round-trip; local links and `git diff --check` pass. Canonical round-trip is
+not two executed replay runs. No new report validator/runner or acceptance tests were
+implemented, and no engine invocation, full suite or static-code suite was rerun for
+this Markdown/illustrative-JSON change. Earlier full/bounded results remain historical.
+
 ## 8. Exact decisions and implementation path
 
-Javid's decisions requested, **not recorded approvals**:
+The conservative direction is already endorsed. These concrete decisions remain:
 
-1. Accept §1 as U0006 wording, with §3's failure-first, partial/empty/unfinished-not_run
-   reductions; human commits the ADR. Existing U0003/U0004 policy stays settled.
-2. Accept the §2/4 analytic raw profile, complete retained corpus/ledger and
-   implementation binding, plus separate operational receipts; retain the exact
-   historical skip/result receipts without backfilling cases or actual counts.
-3. Accept existing carriers, honest contract_test/independence=false, separately
-   reviewed purpose records, and initial null L0/L0m card references; defer a
-   multi-purpose card representation rather than silently changing its meaning.
-4. Accept §7 as required observations/premises for future applicable telemetry checks;
-   reconcile A's published source-only blockers, including RoPE disposition and
-   diagnostic coverage, before any dependent fork boundary proposal.
+1. Accept the exact §1 ADR wording; Javid's acceptance and human ADR commit are
+   separate from this proposal commit. U0003/U0004 remain settled.
+2. Approve the revised §2/4 source fields and §6 complete illustration: retained
+   engine calls/counterexamples, frozen distinct admitted corpus, observed counts
+   versus null internal counts, supported APIs and unchanged failure-first reductions.
+3. After coordinator review, authorize only §6's standalone B-owned implementation/
+   tests. Keep production dispatch, A loader work, carrier/card attachment and evidence
+   eligibility deferred, with initial L0/L0m card hashes null. §5's carrier mapping and
+   §7's fork telemetry questions remain future proposals, not additional scope here.
 
-Then: B writes §6 acceptance tests and proposed analytic parser/runner, coordinates
-A-owned loader admission, and follows U0002 for any bound-source changes; execute
-frozen analytic runs, obtain actual independent review, then authorize context/report
-integration. No such implementation/attachment is authorized by publishing this
-supplement. Reza remains unavailable; installation, runner readiness and designated
-`javid@152.53.209.203` nightly execution remain pending. No server/schedule changes,
-host waiver, fork run, independent-review verdict, tag or sprint closure follows.
+After coordinator review and explicit authorization, B writes §6's tests and standalone
+validation generator; production integration and review/eligibility remain deferred.
+Any bound-source change still follows U0002 human generation/adoption. Publishing this
+proposal authorizes none of that implementation. Per the accepted direction, Javid now
+reports container packages installed and rootless Podman 4.3.1/mapping checks passed;
+image execution, resource reservation, runner account/readiness and successful manual
+nightly remain unverified. No server/schedule change, host waiver, fork run, independent-
+review verdict, tag or sprint closure follows.
