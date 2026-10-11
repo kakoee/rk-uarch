@@ -357,12 +357,24 @@ A's published [source findings and interface questions](U3-U0005-proposal.md), �
 already distinguish declared shapes from observable executed counts and identify
 Dummy fallback, fused/KV/precision and attribution gaps. The coordinator's local
 `U3-preparation-v1/lane-A-planning-followup.txt` requests source-only operator/statistics/
-licence feasibility, with blocked routes explicitly stopped. At base `89d5d6a` no
-completed follow-up supplement is published; this document does not infer its result.
-Coordinator reconciliation must name A's resulting commit and settle: native field
-names/units and complete operator correspondence; padding versus useful work;
-DMA/queue inventories and time boundaries; critical-path versus busy-time attribution;
-refused capabilities and exact fork identity/image/config/point/rank bindings.
+licence feasibility, with blocked routes explicitly stopped. A's subsequent [source-only supplement](U3-A-source-feasibility-supplement.md),
+commit `aa537279260f94828b92aa6e42c9ae85b14f856c`, was fetched, inspected and merged.
+It reports stopped ONNXim paths, a blocked supplied PyTorchSim route and no established
+complete feasible route; native instruction/cycle counts do not supply per-op MAC
+observations, and mixed logs do not establish complete stable statistics. Its proposed
+instrumentation is unapplied and cannot repair semantic gaps. These are A's source
+findings, not a B simulator run or independent review.
+
+Coordinator reconciliation must settle A §3 alongside this §7: RoPE's absence from
+U2 needs explicit human semantic disposition before any translation choice; preserve
+accepted RMS semantics. Resolve native field names/units and complete operator
+correspondence; padding versus useful work; DMA/queue inventories and time boundaries;
+critical-path versus busy-time attribution; refused capabilities and exact fork
+identity/image/config/point/rank bindings. Point-select diagnostic coverage must not
+be presented as the complete decode/prefill grid or full-model execution. B's future
+checks must reject missing, duplicated, swapped, skipped or padded observed work
+against the agreed source correspondence. Feasibility, instrumentation permission,
+licence closure and host readiness remain separate pending dependencies.
 No queue/trace contract is invented here, and the fork cannot use the current
 analytic-only protocol unchanged. Analytic source/report work depends on none of
 those unavailable fork observations.
@@ -393,7 +405,8 @@ Javid's decisions requested, **not recorded approvals**:
    reviewed purpose records, and initial null L0/L0m card references; defer a
    multi-purpose card representation rather than silently changing its meaning.
 4. Accept §7 as required observations/premises for future applicable telemetry checks;
-   reconcile A's source-only follow-up before any dependent fork boundary proposal.
+   reconcile A's published source-only blockers, including RoPE disposition and
+   diagnostic coverage, before any dependent fork boundary proposal.
 
 Then: B writes §6 acceptance tests and proposed analytic parser/runner, coordinates
 A-owned loader admission, and follows U0002 for any bound-source changes; execute
