@@ -285,6 +285,60 @@ def as_json(value):
     return value.model_dump(mode="json") if hasattr(value, "model_dump") else value
 
 
+def invalid_output_diagnostic(value):
+    """Keep JSON exactly when encodable; otherwise describe, never repair, the return.
+
+    The tagged fallback is diagnostic data, not EngineResult JSON. Only built-in
+    containers are traversed; opaque values explicitly retain type only, without
+    invoking repr, user serializers or property access. Cycles/depth are explicit.
+    """
+    try:
+        raw = strict_json_loads(canonical_json(value).encode("utf-8"))
+    except Exception:
+        pass
+    else:
+        return {"code": "INVALID_ENGINE_OUTPUT", "output": raw}
+
+    def describe(item, ancestors=()):
+        kind = type(item)
+        node = {"type": kind.__module__ + "." + kind.__qualname__}
+        if kind is float and not math.isfinite(item):
+            node.update(
+                encoding="nonfinite",
+                value="nan" if math.isnan(item) else ("+infinity" if item > 0 else "-infinity"),
+            )
+        elif kind is int and item.bit_length() > 4096:
+            node.update(encoding="hex", value=hex(item))
+        elif kind is str:
+            # Surrogates cannot enter the canonical UTF-8 diagnostic bytes.
+            node.update(
+                encoding="unicode_escape", value=item.encode("unicode_escape").decode("ascii")
+            )
+        elif kind in (type(None), bool, int, float):
+            node["value"] = item
+        elif id(item) in ancestors:
+            node["unavailable"] = "cycle"
+        elif len(ancestors) >= 64:
+            node["unavailable"] = "depth_limit"
+        elif kind in (dict, list, tuple):
+            path = (*ancestors, id(item))
+            if kind is dict:
+                node["items"] = sorted(
+                    [[describe(k, path), describe(v, path)] for k, v in item.items()],
+                    key=canonical_json,
+                )
+            else:
+                node["items"] = [describe(v, path) for v in item]
+        else:
+            node["unavailable"] = "unsupported_python_value"
+        return node
+
+    return {
+        "code": "INVALID_ENGINE_OUTPUT",
+        "output_representation": {"format": "invalid-engine-output/1", "value": describe(value)},
+    }
+
+
 def request_for(bundle):
     return CharacterizationRequest.model_validate(
         {**as_json(bundle.intent), "prepared_input_hash": bundle.bundle_hash}
@@ -395,15 +449,14 @@ class Recorder:
             self.interrupted = True
             self.emit("call_finished", {"case_id": case["case_id"], "call": call})
             raise EngineStopped() from exc
+        raw = output
         try:
             raw = as_json(output)
             EngineResult.model_validate(raw)
             result_hash = self.objects.add("result", raw)
-        except (ValueError, TypeError) as exc:
-            # Keep exact returned JSON bytes where available, including malformed outputs.
-            call["diagnostic_hash"] = self.objects.add(
-                "diagnostic", {"code": "INVALID_ENGINE_OUTPUT", "output": as_json(output)}
-            )
+        except Exception as exc:
+            # Diagnostic encoding must not repeat the output's serialization failure.
+            call["diagnostic_hash"] = self.objects.add("diagnostic", invalid_output_diagnostic(raw))
             self.operational.append(traceback.format_exc())
             self.interrupted = True
             self.emit("call_finished", {"case_id": case["case_id"], "call": call})
