@@ -90,7 +90,23 @@ def test_independent_rotary_count_literals(dtype, r, b, s, repeat, q, k, read, w
 
 @pytest.mark.parametrize(
     "field",
-    ["hardware", "rank", "coefficients", "request_hash", "assumptions_hash", "engine", "point"],
+    [
+        "hardware",
+        "rank",
+        "coefficients",
+        "request_hash",
+        "assumptions_hash",
+        "engine",
+        "point",
+        "bundle_hash",
+        "point_hash",
+        "producer",
+        "precision",
+        "fidelity_detail",
+        "mode",
+        "seed",
+        "initial_state",
+    ],
 )
 def test_rehashed_job_refuses_broken_join(field):
     c = capture(active_bundle(), assumptions=physical_assumptions())
@@ -104,6 +120,18 @@ def test_rehashed_job_refuses_broken_join(field):
         CASES["seal"](j[field], "coefficients_hash")
     elif field == "engine":
         j[field]["implementation_hash"] = "sha256:" + "1" * 64
+    elif field == "producer":
+        j[field]["version"] = "different"
+    elif field == "precision":
+        j[field] = dict(compute="fp32", kv_cache="fp32")
+    elif field == "fidelity_detail":
+        j[field]["compute"] = 1
+    elif field == "mode":
+        j[field] = "aggregate"
+    elif field == "seed":
+        j[field] += 1
+    elif field == "initial_state":
+        j[field] = "cold"
     elif field == "point":
         j[field]["graph"]["groups"][1]["repeat"] = 3
         CASES["seal"](j[field], "payload_hash")
@@ -151,3 +179,48 @@ def test_assumptions_and_version_refusal():
         capture(c.bundle, assumptions=v1_assumptions())
     assert engine_identity().version == "resolved-ops/2"
     assert content_hash(c.request) == c.jobs[0].request_hash
+
+
+@pytest.mark.parametrize("field", ["prepared_input_hash", "seed", "position_encoding"])
+def test_request_intent_join_with_rehashed_job(field):
+    c = capture(active_bundle(), assumptions=physical_assumptions())
+    r = c.request.model_dump(mode="json")
+    if field == "seed":
+        r[field] += 1
+    elif field == "position_encoding":
+        r[field]["pairing"] = "split_halves"
+    else:
+        r[field] = "sha256:" + "1" * 64
+    j = c.jobs[0].model_dump(mode="json")
+    j["request_hash"] = content_hash(r)
+    if field == "seed":
+        j["seed"] = r["seed"]
+    CASES["seal"](j, "job_hash")
+    validate_engine_job(c.jobs[0], c.bundle, c.request, assumptions=c.assumptions)
+    with pytest.raises(ValueError, match="reconstructed request"):
+        validate_engine_job(j, c.bundle, r, assumptions=c.assumptions)
+
+
+@pytest.mark.parametrize("case", ["v1", "missing_rotary", "changed_model", "changed_limitations"])
+def test_active_assumptions_not_just_hash_correspondence(case):
+    from uarch_contract.assumptions import AssumptionSet
+
+    capture(active_bundle(), assumptions=physical_assumptions())
+    b = active_bundle().model_dump(mode="json")
+    a = physical_assumptions().model_dump(mode="json")
+    if case == "v1":
+        from rkuarch.workload.prepared import physical_assumptions as v1_assumptions
+
+        a = v1_assumptions().model_dump(mode="json")
+    elif case == "missing_rotary":
+        a["algorithms"].pop("rotary")
+    elif case == "changed_model":
+        a["model"]["implementation_hash"] = "sha256:" + "1" * 64
+    else:
+        a["limitations"] = ["false completeness claim"]
+    CASES["seal"](a, "assumptions_hash")
+    b["intent"]["assumptions_hash"] = a["assumptions_hash"]
+    CASES["rehash"](b)
+    validate_execution_bundle(b)  # graph-valid; all input hashes now agree
+    with pytest.raises(ValueError, match="AssumptionMismatch"):
+        capture(b, assumptions=AssumptionSet.model_validate(a))
