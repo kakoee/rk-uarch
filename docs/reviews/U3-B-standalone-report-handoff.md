@@ -221,3 +221,15 @@ limit and G2 verdict remain pending. Runner registration/manual nightly remain p
 with Reza. These local executions provide no designated-host nightly receipt or waiver,
 no joint exit, sprint closure or independent-review verdict. Stop here for reconciliation;
 no production attachment or later implementation follows automatically.
+
+## Publication integration receipt
+
+Report artifacts and this handoff were committed as
+`18b033aa0aaacd0357de27059bd03ef4507bd04b`. A final fetch found A's approved prose
+clarification `c3e7788614406fb9926fd70de6b1a5e0d22c320d` and unapplied protected-patch
+package `53435927497eb3e4552e32e2c5e887e0bcb05ddc`; both were inspected and preserved
+by normal merge `8360995f4f7c35f8b619351f62f856ea789ab776`. The protected patch was
+not applied or exercised by B. No report-bound execution bytes changed. After that
+merge, Ruff, schema freshness, strict vendor/support currentness and the actual-report
+implementation guard against `eab89e0` passed. The full-suite receipt above remains the
+single integrated code run, not a second run attributed to this documentation merge.
