@@ -1,0 +1,25 @@
+diff --git a/contract/tests/test_rotary_v2_runtime_pending.py b/contract/tests/test_rotary_v2_runtime_pending.py
+--- a/contract/tests/test_rotary_v2_runtime_pending.py
++++ b/contract/tests/test_rotary_v2_runtime_pending.py
+@@ -1,7 +1,7 @@
+-"""Discriminating future admission tests; none is runtime evidence yet.
++"""U0022 runtime admission checks, activated by a separate human-owned commit.
+ 
+-Remove this explicit skip only under later runtime authorization when the new A validator
+-exists. The unmodified positive control must pass before each counterexample is refused.
++The unmodified positive control must pass before each counterexample is refused.
++Carrier parsing remains distinct from execution admission. No G2 verdict is implied.
+ """
+ 
+ import importlib
+@@ -18,9 +18,8 @@
+     PreparedBundleV2.model_validate(runtime_counterexample(case))
+ 
+ 
+-@pytest.mark.skip(reason="PENDING: authorized v2 runtime admission validator is not implemented")
+ @pytest.mark.parametrize("case", RUNTIME_REFUSALS)
+-def test_future_full_admission_refuses_counterexample(case: str) -> None:
++def test_full_admission_refuses_counterexample(case: str) -> None:
+     boundary = importlib.import_module("rkuarch.workload.prepared_v2")
+     admitted = boundary.validate_execution_bundle(examples()["bundle"])
+     assert admitted.format == "uarch-prepared/2"
