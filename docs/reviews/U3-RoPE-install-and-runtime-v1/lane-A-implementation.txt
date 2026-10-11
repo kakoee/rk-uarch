@@ -1,9 +1,15 @@
 Continue Lane A in the existing rk-uarch-u3-a independent clone on local main. Do not launch
 another agent. Read CLAUDE.md and U3-RoPE-install-and-runtime-v1/README.md, the accepted
 U0022/U0006 ADRs, U3-RoPE-schema-v1/README.md sections 2–5 and the protected patch handoff.
-Javid approved U3-RoPE-install-and-runtime-v1. Begin only after the coordinator supplies
-and verifies the human installation commit. Verify that commit is in your local ancestry
-and contains exactly the reviewed 17-path protected patch. Do not install or edit protected
+Javid approved U3-RoPE-install-and-runtime-v1. RELEASED: coordinator independently verified
+human installation commit eeb2f4d74d4c751c55edec1b5ee40f7a40162562, parent
+df4caf81969c5aafa90ea183dfc8d9e69334d9f0, tree cb0d7fd650426706a7cdadf2058bf49637c1ec4d.
+All 17 paths match the approved patch exactly; live/index state was clean. New carrier tests
+passed 74/74, with 28 runtime-admission skips; schema freshness passed; strict currentness
+refused as expected. Verify this commit remains in your local ancestry. Read the coordinator
+installation-verification.json (primary clone or fetched published main) before beginning.
+Your local main now contains unpublished protected work: use an ordinary merge if published
+coordination/B commits diverge, preserving the human commit. Do not reset/rebase it away. Do not install or edit protected
 paths yourself, set UARCH_HUMAN, bypass hooks, or treat carrier parsing as execution admission.
 
 Implement the accepted additive v2 boundary with tests first. Proposed owned modules:
