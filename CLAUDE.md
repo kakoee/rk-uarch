@@ -1,8 +1,11 @@
 # rk-uarch — a microarchitecture-level simulator of one chip, feeding rk-sim
 
 ## What this is
-A harness around simulation engines (analytic, a pinned published fork, and our own native
-Rust engine) that produces characterization tables rk-sim reads as the C2 compute answer.
+One progressively developed native Rust timing simulator, with a retained analytic U-C0
+baseline and Python preparation/product layers, produces characterization tables for rk-sim.
+Independent mathematics and behavioral checks verify each stage; optional matched component
+references add scoped evidence, and frozen-prediction silicon measurements validate accuracy.
+A complete external fork and a second substantial Python contention engine are not required.
 The product is the honesty: every row carries its fidelity, its evidence, and the
 stipulations it is conditional on. Detail is not accuracy.
 
@@ -12,7 +15,8 @@ stipulations it is conditional on. Detail is not accuracy.
 - native: `make native` · `make native-test` (Linux box / engine container)
 - table/report workflow: [prepare → capture → independent review → assemble → table → report](docs/u2-workflow.md)
 - table help: `make table` · report help: `make report`; pass explicit CLI arguments with `ARGS='...'`
-- U2 supports the analytic engine and workers=1; fork/native engines and study execution are later work.
+- Published runtime remains analytic (including additive RoPE v2); native, grids and studies are planned.
+- U0005: U3 designs the native stage; U4a builds its bounded kernel/models after schema and runner decisions; U4b expands tables; U6 qualifies. No runtime release follows from the direction alone.
 - vendor rk-sim: `make vendor-rk SHA=<sha> RK=<path>` (humans only)
 
 ## Invariants (violating these = stop and ask)

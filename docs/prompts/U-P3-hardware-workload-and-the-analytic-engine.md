@@ -22,12 +22,11 @@ test-only nominal compatibility; compatibility does not prove physical full-work
 Use the existing OpSpec vocabulary and engine protocol. Workload construction belongs to
 preparation; analytic engines consume resolved operators. No detailed mapper lands in U2.
 
-TASK: the first honest number end to end. Analytic only; the fork and the native engine come
-later.
+TASK: the first honest number end to end. Analytic only; the native engine comes later under U0005.
 
 1. hw/ — four specs:
    - hw/designs/npu-l4.yaml — a PROPOSED large-core design (2×2 grid of big systolic cores,
-     HBM). The class the forks model.
+     HBM). The large-core architecture class.
    - hw/designs/npu-m256.yaml — a PROPOSED mesh design (16×16 grid of small cores, SRAM per
      core, one or two 2-D NoCs, GDDR or HBM). The class the native engine will model.
    - hw/references/tpu-v5e.yaml and hw/references/blackhole-p100a.yaml — REFERENCE specs,
@@ -134,7 +133,7 @@ later.
    high-level/prepared overrides. Round-trip the actual prepared payload, not a recipe that
    calls the builder again. Preserve model-based table/characterize convenience commands.
 10. Implement the U0003-approved protocol/schema fixtures and a read-only freshness check.
-    Reuse these fixtures in the fork adapter and Rust protocol work; do not create another IR.
+    Reuse these fixtures in later Rust protocol work; do not create another workload IR.
 
 ACCEPTANCE TESTS (write first):
 1. NOMINAL COMPATIBILITY: the separately named test-only nominal candidate matches each
@@ -188,7 +187,7 @@ ADDITIONAL ACCEPTANCE — physical conventions and prepared inputs:
 - Architecture checks prove the analytic execution path does not invoke preparation.
   Public schemas, prompt-sync and the protocol fixtures are fresh.
 
-GUARDRAILS: Do not touch the fork or the native engine; they are U-P5 and U-P11a–c. Do not add
+GUARDRAILS: Do not implement native here; U-P5 designs it and U-P11a–c deliver it later. Do not add
 interpolation or a process pool; that is U-P7. Do not tune the operator graph to hit rk-sim's
 numbers, because the deviations are findings. Never write a number you cannot source as a claim:
 stipulate it in designs/ with a rationale, or stub it in references/.

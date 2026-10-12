@@ -1,4 +1,4 @@
-# U-P11a · U6 · Lane A — Native engine kernel: time, events, the wheel, ownership, and the protocol
+# U-P11a · U4a · Lane A — Native engine kernel: time, events, the wheel, ownership, and the protocol
 
 _From build-spec §8. One prompt, one fresh session._
 
@@ -16,15 +16,19 @@ shapes, resource assignments, dependencies and policies; no model builder or map
 inside the engine. Timing/events are outputs of executing those inputs. Extend the accepted
 protocol only through its versioned schema procedure, not a parallel Rust-only format.
 
-TASK: the kernel of native/, uarch's own event-driven engine, in Rust, built in the engine
-container, and the plumbing that puts it behind exactly the same engine protocol as the
-fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
-`uarch-engine`. Single-threaded. No subsystem models yet: U-P11b adds them.
+PREREQUISITES: accepted U-P5 stage design, human-committed mapped protocol/U0011 decisions,
+U-P7's minimal mapped fixtures and verified Linux runner/manual-nightly readiness. Existing
+analytic carriers do not prove a mapped native schema already exists. No kernel work before
+these conditions. Full U-P7 grid/error campaigns are later and are not prerequisites here.
 
-1. BEFORE MEASURING ANYTHING, write in ADR U0011 (a) the speed factor over the fork that you
-   expect on npu-l4 and on a 16×16 mesh, and why (G5 checks it), and (b) a single-point
-   wall-clock budget for the npu-m256 and 32×32 grids, above which parallelism inside one
-   simulation is needed (U9's gate reads it).
+TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
+EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
+jobs; no subsystem models yet. U-P11b adds the bounded model stage.
+
+1. BEFORE MEASURING, obtain human acceptance of U0011's absolute per-point time/memory
+   budgets, exact workload/host scope and later npu-m256/32×32 budget (U9 reads it). No
+   fork-relative speed target and no adoption of the old 200-second fork proposal. Record
+   calibration protocol and host noise separately from simulated chip time.
 2. Build: native/Cargo.toml (workspace) with crates/uarch-engine (the `uarch-engine`
    binary); native/rust-toolchain.toml pinning the current stable Rust, recorded in U0011;
    a committed Cargo.lock. Dependencies ONLY serde and serde_json, plus proptest as a
@@ -68,8 +72,8 @@ fork: EngineJob JSON in, EngineResult JSON out, invoked as a subprocess binary
 8. A fixed-delay executor: a TaskGraph whose jobs are fixed delays (no models yet),
    dependencies resolved by events, so the kernel runs end to end before any model exists.
 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
-   parser, identical in shape to engines/fork/, so `uarch table ... --engine native` reaches
-   the binary.
+   parser, using the approved mapped protocol. First test the execution boundary directly;
+   the complete `uarch table ... --engine native` path follows in U4b.
 10. The protocol as a schema: reuse U2/U4's EngineJob/EngineResult schemas and fixture
     messages from engines/protocol.py in src/rkuarch/engines/schema/. `make gen` keeps exporting
     them; the freshness check remains read-only. Test Rust serde types against those fixtures,
@@ -97,12 +101,12 @@ ACCEPTANCE TESTS (write first):
 
 GUARDRAILS: No subsystem models; they are U-P11b. No unsafe. No threads, no SIMD intrinsics
 (std::simd, core::arch), no GPU, no MPI; those are U-P17 at the earliest, and only what it
-builds. Do not delete or bypass the
-fork: it is the permanent L2 reference. Cycles never leave native/ and engines/. Do not
+builds. Small test-only independent scheduling oracles are allowed; no second production
+engine. Cycles never leave native/ and engines/. Do not
 optimise before determinism holds.
 
-ADR: docs/decisions/U0011-the-native-engine-core.md, started here: the expected speed factor
-and the single-point budget (both written before any measurement), the pinned Rust version,
+ADR: docs/decisions/U0011-the-native-engine-core.md, proposed for human commit: absolute
+budgets and scope written before measurement, the pinned Rust version,
 the time base as built (build-spec Rev 2.3: resolved integer freq_hz, rounded edges),
 and each departure from the vision note. The lookahead-collapse premise in particular: real routers take several
 cycles per hop (Tenstorrent documents ~9 router-to-router on Blackhole), so it is not L = 1.

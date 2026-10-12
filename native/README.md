@@ -20,3 +20,11 @@ the engine container; `make native`, `make native-test`. Binary: uarch-engine
 - The engine protocol's JSON Schema (src/rkuarch/engines/schema/) is the contract with the
   harness; a Rust test holds the serde types to it.
 - Determinism before speed. A speed-up that changes bytes is a bug.
+
+## Delivery status and order
+
+Native is planned, not yet implemented. U0005 selects one progressive production engine:
+U3 stage design → U4a mapped fixtures/kernel/bounded models → U4b full table → U6
+qualification → U7 detail. Independent mathematics and behavioral tests accompany each
+stage. No complete fork or second Python contention engine is a prerequisite. Optional
+reference matches are scoped verification; only applicable silicon evidence validates.

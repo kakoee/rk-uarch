@@ -16,7 +16,7 @@ PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
 ADR (in rk-uarch, READ-ONLY): docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
 Use the accepted table/preparation provenance from the boundary schema. Where mapping
 assumptions affect interpretation, disclose whether preparation was local, externally
-supplied or delegated to a fork. Do not imply a compiler mapping was reproduced solely from
+supplied or externally delegated, if that separately admitted path exists. Do not imply a compiler mapping was reproduced solely from
 a policy name, and do not build a compiler or prepared-input exporter in this UI prompt.
 
 TASK: a stipulation reaches a human as what it is — a scoped question, not a weak claim — and

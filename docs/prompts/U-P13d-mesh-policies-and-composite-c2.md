@@ -34,8 +34,9 @@ composite rule in code, and full C2 tables at mesh scale.
    build-spec §7.4 says for default vs override.
 3. Scale: build full tables for npu-m256 (16×16) and a 32×32 variant. Record the simulator
    metrics from U-P12 for both, and the single-point wall-clock against ADR U0011's budget.
-4. If G5 was rescheduled from U6 (U-P11c item 3), run it now at the closest matching
-   configuration.
+4. Extend G5's independent correctness corpus and public-boundary fault checks to every
+   new modeled mechanism. Run admitted matched component references; missing optional
+   references are disclosed and do not become a deferred whole-fork requirement.
 
 ACCEPTANCE TESTS (write first):
 1. G6: the npu-m256 table reports composite C2 with detail {compute: 2, noc: "1+ts",

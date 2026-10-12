@@ -13,12 +13,13 @@ PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
 ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
 Extend U2's saved-input path with the existing TaskGraph; policies are versioned
 preparation producers outside engines. Imported mapped inputs bypass policy execution and
-are validated unchanged. The fork's declared internal-mapping exception remains explicit;
-a supplied native mapping cannot silently turn into a fork default.
+are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
 
-TASK: turn a CharacterizationRequest into a complete, hashed, honestly-errored table, driven
-by the fork, at the composite build-spec §2.4's rule gives for the fork's levels as ADR U0005
-records them: C2 only if they qualify, and C1, said so, if they do not.
+TASK: deliver mapping and then a complete native table in two phases. U4a mapping/schema
+work precedes U-P11a/b; U4b full tables follow the bounded native executor. Do not require
+a complete table before building the engine that produces it. The mapped schema and minimal
+fixtures must first receive the U-P5 human decision. This prompt's full acceptance belongs
+to U4b, not the bounded prototype. Compute 1 / NoC 0 / DRAM 0 earns at most C1.
 
 1. mapping/ — standalone preparation: named, versioned policies, each a pure function
    (validated prepared op graph, HardwareSpec) ->
@@ -28,10 +29,6 @@ records them: C2 only if they qualify, and C1, said so, if they do not.
      cores).
    - os-tiled@1 for the large-core class (output-stationary, output tiles split across
      cores), so a dataflow study has a second policy to compare (U-P14).
-   - onnxim-compat@1: reproduces the chosen fork's own tiling decisions, read from its source
-     and cited by file and line in the policy's docstring. It exists so a native engine can
-     later be compared with the fork ON THE SAME WORK. Without it every future disagreement
-     is ambiguous between "different engine" and "different mapping".
    A policy's name@version is a stipulation on every row. A better policy is a new version,
    never an edit. No search, no autotuning. Every policy declares the matrix dataflow it
    needs (refused on a spec whose dataflows lack it) and its buffer depth (double or triple
@@ -74,7 +71,7 @@ records them: C2 only if they qualify, and C1, said so, if they do not.
    attribution_s is diagnostic only; it is never fed back into a max() form.
 7. Rows carry peak_resident_bytes. If HBM residency exceeds the spec's capacity, raise
    ResidencyExceedsCapacity for weights, and warn for KV, mirroring rk-sim's M0 rule.
-8. `uarch table ... --engine fork --workers N` builds the full default grid for npu-l4 ×
+8. `uarch table ... --engine native --workers N` builds the full default grid for npu-l4 ×
    Llama-3.1-70B-class × fp8 and bf16, tp = 8, and also tp = 1 where the weights fit the
    spec's capacity (a weight-residency refusal at tp = 1 is recorded, never worked around).
 9. initial_state travels in every EngineJob; steady primes one iteration at the same point
@@ -96,7 +93,8 @@ ACCEPTANCE TESTS (write first):
    seeded and reproducible.
 5. G3 (execution-plan §4): the npu-l4 table passes L0, L0m and L1 (U-P6 and U-P8) as run by
    Lane B, and its model card says stub.
-6. onnxim-compat@1 reproduces the fork's tile counts per op on three shapes, cited to source.
+6. Both supported policies reproduce independently derived tile/transfer expectations;
+   no mandatory external-tool compatibility policy is added.
 7. layer_reuse and cold_vs_steady errors are present, finite, seeded and reproducible.
 8. A tile larger than a core's SRAM is refused with SramCapacityExceeded, naming the core and
    the bytes.
@@ -105,7 +103,7 @@ ACCEPTANCE TESTS (write first):
     that has it.
 11. A prefill row at L = 32768 builds with no SramCapacityExceeded, and its attention DRAM
     bytes equal Q, K, V and O within named deviations.
-12. The table's composite equals what build-spec §2.4's rule gives for ADR U0005's levels.
+12. The table's composite follows build-spec §2.4 and the actual U0011 implementation levels.
 13. interpolate.py reproduces interpolation_vectors.json, and a query outside the grid in
     that file is refused.
 
@@ -116,7 +114,7 @@ ADDITIONAL ACCEPTANCE — prepared inputs:
   placement changes content/cache identity even if the model and policy label are unchanged.
 - Unsupported supplied mapping, stale hardware binding, bad dependencies, and missing error
   sample coverage are refused; no implicit retiling or regeneration occurs.
-- Fork/native correspondence compares the resolved work supported by the fork; a shared
+- Optional reference comparisons must establish resolved-input correspondence; a shared
   policy label alone cannot pass the mapping-match check.
 
 GUARDRAILS: No mapping search. Never silently clamp an out-of-grid query. Do not correct the

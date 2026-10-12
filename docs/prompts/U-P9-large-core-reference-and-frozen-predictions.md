@@ -4,8 +4,7 @@ _From build-spec §8. One prompt, one fresh session._
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, validation/README.md, validation/L3_silicon/README.md, build-spec
-§2.7 (rung L3), hw/references/tpu-v5e.yaml, ADR U0005, the chosen fork's paper (its TPU
-validation section: what it measured, and how). From rk-sim READ-ONLY: docs/prompts/P11-*.md
+§2.7 (rung L3), hw/references/tpu-v5e.yaml, ADR U0005 and the native stage's U0011 scope. From rk-sim READ-ONLY: docs/prompts/P11-*.md
 and docs/execution-plan.md S7–S8 (the A100-fits, H100-held-out discipline this copies).
 
 PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
@@ -45,13 +44,13 @@ measurement. That is its whole design.
    (host and launch gaps excluded); its mapping match (XLA chooses the tiling on TPU, so
    benchmarks are `compiler-chosen` unless one pins the layout); its initial state (steady,
    matching the kit's warm-up); and the compiler-reported FLOPs and bytes the kit records.
-2. Configure the engine for the reference: the fork via config_writer from
+2. Configure the native engine for the reference using
    hw/references/tpu-v5e.yaml. Every microarchitectural parameter the vendor does not publish
    is a STUB claim in that spec (never a stipulation). Count them, and list them in
    predictions/UNKNOWNS.md: the L3 error will be method error plus unknown-parameter error,
    and the card must say how many unknowns there were.
 3. Predictions: for each benchmark, uarch's predicted duration, FLOPs and bytes, from the
-   fork AND from U-C0 aggregate and per_op, written to
+   admitted native level AND from U-C0 aggregate and per_op, written to
    validation/L3_silicon/tpu-v5e/predictions/<id>.json with engine versions, image digest,
    spec hash, mapping policy, mapping match, initial state, and the row diagnostics where the
    engine reports them (U-P10 compares them with device counters). Commit them in ONE commit

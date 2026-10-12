@@ -1,69 +1,57 @@
-# U-P12 · U6 · Lane B — The differential harness, determinism gates, and simulator metrics
+# U-P12 · U4/U6 · Lane B — Independent native verification, scoped comparisons and metrics
 
 _From build-spec §8. One prompt, one fresh session._
 
 ```text
-CONTEXT TO LOAD: CLAUDE.md, validation/L2_differential/README.md, build-spec §2.5, §2.8, §6.6
-(determinism), ADR U0011's expected speed factor. You do not need the native engine to be
-finished: you need the engine protocol, which already exists.
+CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.5, §2.7, §2.8, §6.6,
+ADR U0005/U0006, U-P5's accepted stage design, U0011's prospective absolute budgets.
 
-PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
-ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
-Compare prepared workload content and resolved mapping correspondence before comparing
-engine results. Preserve each producer/version and engine identity. Byte-identical shared
-TaskGraphs are preferred; fork-specific encoding needs explicit audited equivalence evidence.
-Matching policy names without matching shapes, placement, precision and run conditions fails.
+TASK: build verification alongside the bounded native stage in U4, and complete independent
+qualification/metrics in U6. This is not a second timing simulator or mandatory fork harness.
 
-TASK: make "native agrees with fork" a measured, attributable, continuously checked fact,
-and make simulator performance a regression-tested quantity rather than an anecdote.
+1. Create a stage-indexed corpus with expected counts, transfers and durations independently
+   derived from the declared model: fixed-delay critical paths, exact clock edges, resident
+   GEMM, latency-bound DMA, exclusive-resource serialization and legal independent overlap.
+   Include human-worked U-P8 fixtures. No production helper manufactures its own expected
+   answers. Record the derivation, applicability, author/reviewer and implementation binding.
+2. Exercise conservation, dependency order, capacities and outstanding-request limits,
+   contention at represented levels, attribution and refusal semantics through the real
+   public native boundary. Demonstrate a discriminating fault for each mechanism, including
+   an extra hop cycle, ignored DMA limit, missing dependency and dropped work. Capture before,
+   broken and restored outcomes; setup errors are not correct refusals.
+3. Determinism: repeated result/table bytes; workers 1/N in U4b; debug/release native replay;
+   saved mapped inputs with producers disabled. Full threaded checks remain U9. Nightly
+   must execute real native debug tests; add Ramulator ASan checks only when the bridge exists.
+4. Optional external comparisons use matched work/precision, resolved tiles/placement,
+   architecture parameters, levels and initial state. Reject mismatched equivalence claims;
+   record unavailable, unsupported and same-code cases. Criteria and scope are registered
+   before results. Failures cannot be hidden by removing the reference after observing them.
+   A narrow component match never verifies the complete chip. No mandatory 3%/95% full-grid
+   fork agreement or native/fork speed ratio. U-P8 owns the admitted reference selection.
+5. validation/perf/: record host instructions per simulated cycle via perf where permitted,
+   otherwise host ns per simulated cycle, explicitly distinct. Record events per simulated
+   cycle and per completed job, memory usage, host elapsed time, and cross-thread/sync metrics
+   (zero by construction before U9). Set a regression threshold only after measuring the
+   noise floor in the declared environment and obtaining U0012 acceptance. A synthetic 2×
+   slowdown must trip the checker. No events-per-second headline or WSL performance claim.
+6. Keep `uarch diff <table-a> <table-b>` for matched component comparisons and U-P14 design
+   studies. Label the comparison purpose: design variants may intentionally differ, but
+   that difference is not an engine-equivalence experiment. Preserve provenance and scopes.
 
-1. validation/L2_differential/native_vs_fork/: given a request and a list of
-   (engine, level-config) pairs, build both tables through the table interface, then report
-   per-point relative deviation, the fraction of points within 3%, and per-subsystem
-   attribution. Attribution uses each engine's critical-path attribution_s, busy times and
-   diagnostics (where both report them), so a
-   disagreement can be bisected to compute, NoC, DRAM or sync. Only configurations where both
-   engines run the SAME mapping (onnxim-compat@1) and MATCHING sub-model levels are
-   comparable, and the harness refuses the rest with the mismatch named.
-2. Determinism gates in CI, for every engine in the matrix:
-   - table built twice → byte-identical;
-   - --workers 1 vs --workers N → byte-identical;
-   - nightly: the native engine's debug build (overflow checks on) runs the golden requests
-     clean, and from U-P13b the Ramulator 2 bridge runs its tests under AddressSanitizer.
-3. validation/perf/: simulator-performance metrics recorded per golden request, per engine
-   version, as data:
-   - HOST INSTRUCTIONS PER SIMULATED CYCLE, via `perf stat` where the box permits it.
-     Otherwise host nanoseconds per simulated cycle, labelled as such and never mixed with
-     instruction counts;
-   - events per simulated cycle, and events per completed tensor job;
-   - cross-thread messages per simulated cycle, and sync operations per million simulated
-     cycles. Both are 0 by construction until U-P17, and the report says so rather than
-     omitting them;
-   - NOT events per second as a headline. The vision note is right about this.
-   A regression gate fails a PR that worsens host-cost-per-simulated-cycle by more than a
-   threshold you set in ADR U0012 (with its noise floor measured first).
-4. POWER: commit a mutant native engine that adds one cycle to every router hop. Assert the
-   harness catches it, and attributes the disagreement to the NoC, not to compute or DRAM.
-5. `uarch diff <table-a> <table-b>` prints per-point deviation and attribution. The design
-   study (U-P14) reuses it.
+ACCEPTANCE:
+- U4a: independent literal corpus and discriminating public-boundary tests for admitted
+  mechanisms; required missing tests block stage acceptance. U0006 reductions remain exact.
+- U4b: table/replay/worker determinism and required complete-work counts pass.
+- U6/G5: all required native cases executed, reviewed, no unresolved correctness failures;
+  mesh table, diagnostics, mutant detection/attribution and absolute host metrics complete.
+- Mismatched inputs are refused for equivalence claims; same-code references never earn
+  independent status. Optional missing evidence is explicit, not fabricated success.
+- Performance gate catches the synthetic slowdown; no positive badge or silicon claim.
 
-ACCEPTANCE TESTS:
-1. G5's criterion (≥95% of shared points within 3%) is computed and recorded for the npu-l4
-   grid at matched levels.
-2. The one-cycle mutant is caught and attributed to the NoC.
-3. The harness refuses a comparison with mismatched mapping or levels, naming the mismatch.
-4. Performance baselines are recorded for every golden request, and the regression gate trips
-   on a synthetic 2× slowdown.
+GUARDRAILS: Report failures to A; do not fix production in the reviewer session or tune the
+model. Retain counterexamples and unsupported cases. No second substantial Python engine.
 
-ADDITIONAL ACCEPTANCE — prepared inputs:
-- Two inputs with the same model/tp/policy label but different resolved tiles or placements
-  are refused as an engine-equivalence comparison. A numerical gap must not be attributed
-  to engine physics until input and mapping correspondence is established.
-
-GUARDRAILS: Do not call agreement "validation" anywhere, in code, reports or ADRs. It is L2.
-Do not fix a disagreement here. Report it with its attribution and hand it to Lane A.
-Do not headline events per second.
-
-ADR: docs/decisions/U0012-native-vs-fork-agreement.md, with the agreement fraction, the
-per-subsystem attribution of what did not agree, and the performance noise floor.
+ADR: docs/decisions/U0012-native-verification-and-simulator-metrics.md (proposal for human
+commit): required scopes, independent derivations, optional references and their limits,
+performance noise floor and regression threshold. The old native-vs-fork title is retired.
 ```

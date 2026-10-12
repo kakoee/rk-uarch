@@ -1,4 +1,4 @@
-# U-P11b · U6 · Lane A — Native engine models: compute level 1, NoC and DRAM level 0, and the TaskGraph executor
+# U-P11b · U4a/U4b · Lane A — Native engine models: compute level 1, NoC and DRAM level 0, and the TaskGraph executor
 
 _From build-spec §8. One prompt, one fresh session._
 
@@ -14,8 +14,13 @@ Mapping policy identifiers are provenance, not instructions for the native engin
 Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
 placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
 
-TASK: the models at the levels this sprint builds, and the executor that runs a real
-TaskGraph through them, so the native engine produces real rows.
+TASK: implement the accepted bounded U4a native stage, then expand the same implementation
+in U4b. U-P5 fixes the first workload/precision/hardware slice and refusal matrix. Start with
+independent literal fixtures and public execution; only after they pass expand to complete
+U-P7 table/operator/precision coverage. Unsupported work refuses, never disappears from a
+claimed complete layer. Existing v2 RoPE, casts and coefficient traffic must be preserved
+when that workload is admitted. All acceptance below is required for the full stage unless
+explicitly scheduled for U6; a bounded stage alone cannot close G3.
 
 1. Models (build-spec §2.4):
    - compute level 1: tile-job intervals, meaning pipeline fill and drain for the job's
@@ -30,8 +35,8 @@ TaskGraph through them, so the native engine produces real rows.
      distant core's bandwidth is latency-bound; barriers cost sync.barrier_latency_cycles.
    EngineResult reports fidelity_detail honestly: {compute: 1, noc: 0, dram: 0}. The
    composite for that is C1 at best, and the table must say so.
-2. TaskGraph executor: runs the TaskGraph from mapping/ (ws-rowsplit@1, os-tiled@1 and
-   onnxim-compat@1; npu-m256 uses ws-rowsplit@1 until the mesh policies land in U-P13d),
+2. TaskGraph executor: runs mapping/ output (ws-rowsplit@1 and os-tiled@1; the initial
+   npu-m256 qualification in U6 uses ws-rowsplit@1 until U-P13d),
    resolving dependencies by events, attention_fused tiles included. initial_state steady
    primes one iteration inside the same simulation and reports the second (two priming
    iterations when the job asks for the warm-up check).
@@ -39,12 +44,13 @@ TaskGraph through them, so the native engine produces real rows.
    that bounded it, and the parts sum to duration_ps.
 
 ACCEPTANCE TESTS (write first):
-1. The FULL L0, L0m and L1 suites pass against the native engine through the engine
-   protocol, with no suite code changed.
+1. All required applicable L0, L0m and L1 cases pass at the public native boundary.
+   Preserve U0006 unsupported/not_run reductions; do not rewrite expectations to match
+   the engine. Tests distinguish executed work from expected input totals.
 2. Determinism: same job → byte-identical EngineResult across 3 runs, and between debug and
    release builds.
-3. `uarch table hw/designs/npu-m256.yaml ... --engine native` builds a full table: the mesh
-   class, which the fork cannot represent.
+3. U4b builds the required npu-l4 table through the public CLI. The initial npu-m256
+   full-table qualification is U6/G5, and is not claimed by the bounded U4a prototype.
 4. The latency-bound stream fixture (U-P8) passes, and lowering max_outstanding lowers a
    distant core's achieved bandwidth.
 5. Halving accumulator_bytes on a GEMM whose output tile then no longer fits never shortens
@@ -57,8 +63,8 @@ ADDITIONAL ACCEPTANCE — prepared inputs:
   run. No hidden reconstruction from ModelSpec or tp is allowed.
 
 GUARDRAILS: Only the levels above: NoC "1+ts", DRAM 1 and 2, and compute 2 are U-P13a–c. No
-threads. Do not optimise before the determinism and L0–L1 suites pass. Do not tune a model
-toward the fork; U-P11c measures agreement.
+threads. Do not optimise before determinism and applicable L0–L1 pass. Do not tune to
+reference results. U-P11c/U-P12 qualify the expanded native scope in U6.
 
 ADR: append to docs/decisions/U0011-the-native-engine-core.md the models built and every spec
 field the native engine lists as unrepresented at these levels.

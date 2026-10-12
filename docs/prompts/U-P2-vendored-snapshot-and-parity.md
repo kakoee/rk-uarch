@@ -25,7 +25,7 @@ exact and that uarch counts work the way rk-sim does, without CI ever touching r
       2 common precision configurations (compute/kv_cache: FP16/FP16 and FP16/FP8)
       × tp ∈ {1, 8} × at least 24 queries spanning decode (B, T) and prefill
       (T, Q); the decode queries include B ∈ {1, 8, 32} × context per sequence ∈ {512, 4096}
-      (gate G2(c)'s points). Each fixture records IterationCounts.matrix_ops,
+      (the original fork-plan decode fixture grid, retained as historical compatibility scope). Each fixture records IterationCounts.matrix_ops,
       memory_read_bytes, memory_write_bytes, the query, the tp, and rk-sim's own durations
       (decode_s or prefill_s from IterationCost) for each component params file it was run
       with: rk-sim's library entries asic_placeholder.yaml and nvidia_h100_sxm.yaml always,
@@ -86,7 +86,8 @@ ACCEPTANCE TESTS (write first):
    contract/vendor/.
 5. `make vendor-rk` run twice at the same SHA produces byte-identical output.
 6. Every fixture carries a tp, a component params file name and rk-sim's duration for it,
-   and the fixture set contains G2(c)'s six decode points.
+   and the fixture set retains the original six decode batch/context pairs. These are not
+   the revised native-stage G2 readiness gate.
 
 GUARDRAILS: Never hand-edit anything under contract/vendor/; regenerate it. Never give CI
 access to rk-sim. Do not "fix" a parity failure by widening the tolerance. Declare the

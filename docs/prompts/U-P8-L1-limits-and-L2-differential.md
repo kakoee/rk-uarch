@@ -4,7 +4,7 @@ _From build-spec §8. One prompt, one fresh session._
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.7, third_party/README.md,
-ADR U0005 (which fork sub-models are BookSim 2 or Ramulator 2). Documentation for BookSim 2 (BSD-2, Stanford), Ramulator 2 (MIT, CMU SAFARI), SCALE-Sim v3
+ADR U0005 (one production simulator and scoped references), U0006 and the U0011 stage design. Documentation for BookSim 2 (BSD-2, Stanford), Ramulator 2 (MIT, CMU SAFARI), SCALE-Sim v3
 (MIT). Optionally Gemmini (BSD-3, UC Berkeley) and Verilator (LGPL-3.0/Artistic-2.0).
 
 PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
@@ -15,8 +15,9 @@ that cannot consume equivalent resolved inputs must be reported as unmatched rat
 being compared solely by model name, tp or a policy label.
 
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
-implements the same abstraction as independent, published models. Both run through the
-engine protocol against every engine in the matrix.
+is compared with independent models only where abstractions and inputs match. Required L1
+runs for each applicable admitted capability. L2 tool selection is optional and recorded
+prospectively in U0008; once a comparison is admitted its declared bound is not optional.
 
 1. validation/L1_limits/:
    - uncontended point-to-point transfer = hops × router_latency + serialisation (bytes /
@@ -37,15 +38,15 @@ engine protocol against every engine in the matrix.
    committed as a scan or Markdown under validation/L1_limits/hand/. An unfilled hand
    fixture SKIPS with its id and is listed in the report. It never passes. rk-sim calls
    these the defence against plausible garbage; the same reason applies here.
-2. validation/L2_differential/ (the nightly job):
-   - NoC: the engine's NoC vs STANDALONE BookSim2 (built in the engine image) on
-     uniform-random, transpose and hotspot traffic, over an injection-rate sweep. If the
-     engine's NoC IS BookSim 2 (ADR U0005 says which fork sub-models are), the comparison is
-     refused as not independent and the report says so; the bound then waits for the native
-     NoC (U-P13a). ENFORCED:
+2. validation/L2_differential/ (admitted scoped references in the nightly job):
+   - NoC: where compatible, native's reservation NoC vs STANDALONE BookSim2 on
+     uniform-random, transpose and hotspot traffic, over an injection-rate sweep. NoC level
+     0 does not model contention: report the sweep as not_run until U-P13a, not a pass or
+     a forced equivalence. Same-code comparisons are not independent. Once admitted, enforce:
      latency within 10% below 70% of BookSim's saturation throughput. Above that, record,
      don't assert;
-   - DRAM: vs Ramulator 2 standalone on streaming, random and strided traces;
+   - DRAM: matched streaming, random and strided traces vs Ramulator 2 standalone. If
+     native uses that same library, this checks integration only, not independent physics;
    - tile compute: vs SCALE-Sim v3 cycle counts for GEMM shapes on the matching array and
      dataflow, one run per dataflow the spec declares;
    - optional: one systolic tile vs Gemmini RTL under Verilator (a cycle-exact reference for
@@ -67,17 +68,19 @@ engine protocol against every engine in the matrix.
    mean what you want them to mean. Report it on the first page.
 
 ACCEPTANCE TESTS:
-1. All L1 pass for U-C0 and the fork; the roofline-floor assertion runs over every row of the
+1. All applicable required L1 pass for U-C0 and admitted native stages; unsupported cases
+   remain not_run under U0006. The roofline-floor assertion runs over every row of the
    npu-l4 table.
 2. The two hand fixtures exist, pass, and have committed working.
-3. The L2 nightly job runs end to end and publishes its report; the NoC bound is enforced.
-4. A mutant (NoC with router latency read as 1 instead of the spec value) is caught by L1
-   and shows up in L2.
+3. Nightly runs the admitted comparisons and publishes executed, unsupported, unavailable
+   and not-independent cases. The NoC bound applies only to the admitted matched scope.
+   Empty reference sets are not a passing L2 verdict and cannot discharge L1 or silicon gates.
+4. A mutant (NoC with router latency read as 1 instead of the spec value) is caught by the
+   independent applicable L1 case, and by L2 where that comparison is admitted.
 5. The derated DRAM check and the latency-bound stream check run for every engine they apply
    to; a mutant DMA that ignores max_outstanding fails the latency-bound check.
 6. At least one hand fixture covers the latency-bound stream.
-7. The harness refuses to compare a sub-model with itself (a fork NoC that is BookSim 2,
-   against BookSim 2), naming both.
+7. The harness refuses to call a same-code comparison independent, naming both implementations.
 
 GUARDRAILS: Do not tune engine parameters to close an L2 gap. Record it and attribute it.
 Agreement between two simulators is L2 and NOTHING MORE. It never appears in a model card as

@@ -1,5 +1,7 @@
 # containers — the engine image
 
-Dockerfile.engine builds the pinned fork, BookSim 2 and Ramulator 2 at pinned SHAs, and the
-native engine, unattended, from a script. Build and run on the Linux box only; never on a
-laptop. The image digest is recorded in every EngineResult produced inside it.
+Dockerfile.engine is planned to build native and explicitly admitted dependencies/references
+at pinned revisions, unattended. It does not require a complete external simulator. Native
+build/run and performance work require the designated Linux host and real runner/manual
+nightly readiness. The image digest is recorded in results produced inside it; the present
+base image is not evidence that native or any reference is implemented.

@@ -44,7 +44,9 @@ CHECK, in order:
    result without a covering curve? Any C2 row faster than its u_c0_duration_s?
 8. Determinism: build one golden table at --workers 1 and --workers N yourself and diff the
    bytes. From U9, also at 1 and 4 threads in exact mode.
-9. From U6: run the native-vs-fork harness on one matched configuration yourself.
+9. From U4a: independently re-derive and execute a native-stage literal case and its
+   discriminating fault. From U6: run the G5 qualification selection yourself. Inspect
+   optional reference scope/independence; never call a missing full fork a defect.
 10. Scope: anything built that build-spec §1.3 lists as out? Name it.
 11. READMEs: does any directory's README now describe something that is no longer true?
 
