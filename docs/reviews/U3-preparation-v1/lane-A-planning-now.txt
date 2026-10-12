@@ -1,0 +1,61 @@
+Run in /home/jjaff/AI-infra-simulation/rk-uarch-u3-a in a fresh Lane A session.
+Current task: bounded G2 planning only. Do not start U-P5 implementation or candidate runs.
+
+Javid (@jjaffari) is acting human decision-maker for both lanes. Do not claim Reza's approval.
+The published U2 baseline is annotated u02-end, peeling to
+79bc1f014306e520aacba3491d60ae6c644b26a8. Main may advance with peer work: fetch and inspect
+its changes rather than resetting to the tag. Keep U2 history and accepted policies intact.
+Read CLAUDE.md, applicable instructions/CODEOWNERS, docs/execution-plan.md U3/G2,
+docs/how-it-works.md, docs/u2-design.md, accepted U0003/U0004/U0019/U0021 and your prompt.
+
+U3 WORKFLOW (Javid's instruction supersedes the old template's blanket uncommitted stop):
+Use your own clone with its own .git and local main. The other lane has a separate clone.
+For coherent owned changes, inspect the diff, run applicable checks, make a normal commit,
+then fetch origin and integrate remote main before a separate normal push of main only.
+Rebase only unpublished local commits. If a push races with the peer and is rejected,
+fetch/integrate/test/retry; never force-push or rewrite shared history. Do not introduce
+mandatory PRs, copy checkpoint trees, create broad file manifests or accumulate a second
+manual revision-control system. Use commit IDs/diffs for handoffs; keep artifact hashes
+only where the provenance/reproducibility contract needs them. Coordinate shared files
+before editing, and do not overwrite the peer's changes.
+
+Protected paths remain human-owned: contract/, CLAUDE.md, docs/decisions/,
+tests/golden/expected/. Prepare exact proposals and stop at those human decisions/commits.
+Never set UARCH_HUMAN or bypass hooks. Never weaken strict support currentness; changes to
+bound inputs require U0002's human generation/adoption lifecycle. Stop for concrete
+schema/semantic decisions without treating already accepted policies as new questions.
+
+Write discriminating tests before runtime changes. Use current CI commands, not the stale
+template's combined mypy command: ruff check .; mypy src contract/uarch_contract scripts;
+mypy --no-explicit-package-bases contract/tests; lint-imports; appropriate pytest selections
+and full-suite at meaningful integrated checkpoints. Explain skips and no-ops. No repeated
+full suite for unchanged prose. Keep main's public analytic table/report path working.
+Do not tag, close U3, start later prompts or act as your own independent reviewer.
+
+HOST STATUS: javid@152.53.209.203 is the designated native Debian12 host. Python3.12.14,
+uv0.12.13, Rust/cargo1.99 and tmux are available under Javid's account. Podman/Docker and
+newuidmap/newgidmap are absent. Javid has subordinate-ID ranges, but the administrator Reza
+is unavailable. Runner state is unverified and nightly is paused. No waiver or alternate
+benchmark host is approved. Do not install system software or attempt privilege workarounds.
+
+Read U-P5's required context and both candidate papers in full; inspect upstream source
+read-only. Prepare a concrete G2/U0005 proposal under docs/reviews/U3-U0005-proposal.md,
+not the protected ADR path. State the intended grid and table-build budget and derive a
+proposed per-point limit before candidate measurements. Do not treat it as accepted until
+Javid accepts the exact text and the human-owned U0005 is committed.
+
+Include candidate pins/licence dependencies, supported prepared-input/precision/rank
+coverage, exact independent physical count expectations, determinism/timeout procedure,
+proposed rootless runtime, resource/concurrency assumptions for this shared Linux host,
+and A/B interface ownership against actual U2 APIs. Unknowns remain explicit. Do not use
+nominal compatibility as physical G2 evidence or claim mapping equivalence from delegation.
+Record updated effort estimates with administrator/reviewer waits separate.
+
+This session may produce compact planning documents and independently derived expectation
+specifications only. No simulator build, execution, measurement, adapter implementation,
+container image, runtime schema or protected-file modification. U-P5 waits for the online
+runner/manual nightly prerequisite and accepted committed pre-registration.
+
+Commit and push the coherent owned planning documents on main using the Git workflow above.
+Handoff: docs/reviews/U3-A-planning-handoff.md, exact commit ID(s), unresolved decisions and
+next dependency. Preserve data references instead of copying checkpoint trees. Stop there.

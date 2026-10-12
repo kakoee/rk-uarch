@@ -1,0 +1,71 @@
+{
+  "decision_id": "U2-cleanup-v1",
+  "status": "prepared; deletion approval pending",
+  "archive": "/home/jjaff/AI-infra-simulation/u2-preservation-20261011T025342Z/u2-uncommitted-evidence.tar.gz",
+  "archive_sha256": "a1c76ea24feca766327ae2dfd36a03d4d94fda9f3e196ecd801faa6368923287",
+  "archive_bytes": 499256832,
+  "archive_verified_member_count": 132880,
+  "remove_only_worktrees": [
+    {
+      "path": "/home/jjaff/AI-infra-simulation/rk-uarch-u2-a",
+      "branch": "u2/analytic",
+      "head": "4e67eaf1d5ab68785a902e04da412931d70f9d09",
+      "allocated_bytes": 646144000,
+      "uncommitted_files_preserved": 14009
+    },
+    {
+      "path": "/home/jjaff/AI-infra-simulation/rk-uarch-u2-b",
+      "branch": "u2/honesty",
+      "head": "11facde03f6d79b85260dc7ec14dd4d409947a71",
+      "allocated_bytes": 2537426944,
+      "uncommitted_files_preserved": 20636
+    },
+    {
+      "path": "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration",
+      "branch": "u2/integration",
+      "head": "79bc1f014306e520aacba3491d60ae6c644b26a8",
+      "allocated_bytes": 8850534400,
+      "uncommitted_files_preserved": 98235
+    }
+  ],
+  "allocated_bytes_reclaimable": 12034105344,
+  "retained": [
+    "primary rk-uarch working folder and shared .git",
+    "all three local U2 branch refs",
+    "verified compressed archive outside the repository",
+    "both U1 worktrees",
+    "all unrelated folders and /tmp outputs"
+  ],
+  "excluded_from_archive": "Only disposable environment/compiler/test caches and tracked files already preserved in the retained branch heads; ignored tables/ and all other uncommitted non-cache files are included.",
+  "preconditions": [
+    "Archive SHA256 still matches",
+    "Every archived member still equals live source bytes, and current non-cache untracked file set equals archive membership",
+    "All three tracked worktrees/indexes clean and branch heads unchanged",
+    "Published u02-end still peels to 79bc1f014306e520aacba3491d60ae6c644b26a8"
+  ],
+  "commands_after_approval": [
+    [
+      "git",
+      "worktree",
+      "remove",
+      "--force",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-a"
+    ],
+    [
+      "git",
+      "worktree",
+      "remove",
+      "--force",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-b"
+    ],
+    [
+      "git",
+      "worktree",
+      "remove",
+      "--force",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u2-integration"
+    ]
+  ],
+  "branch_deletion": false,
+  "created_at_utc": "2026-10-11T02:57:23.078526+00:00"
+}

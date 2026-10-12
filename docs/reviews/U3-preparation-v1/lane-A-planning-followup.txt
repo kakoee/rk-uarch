@@ -1,0 +1,55 @@
+Continue in /home/jjaff/AI-infra-simulation/rk-uarch-u3-a.
+Task: bounded source-only feasibility and decision preparation. U-P5 implementation,
+candidate builds and measurements remain gated. This is not U0005 acceptance.
+
+Coordinator reconciliation of f581b50da69ff9b75b0c6c7a68342da647270200 and
+c7fcb6f9a49dcc5afadc93d452151b1c4e8b92f7:
+- Planning deliverables received unchanged on primary main 89d5d6aff5f9735a219ebc7d63a86fa2fe420e21.
+- Independently recomputed all 12 count rows, both parameter counts, tiny total and FFN
+  padding delta, and timing-budget arithmetic without production imports. They agree.
+- Source spot-check confirms OperationFactory's unknown-operator Dummy fallback.
+- No simulator execution, full-suite rerun, independent U-REVIEW or G2 acceptance claimed.
+- The 200-second proposal covers a synthetic one-layer diagnostic, not the full 8B model
+  or proof of a 24-hour full-model table. Preserve that distinction.
+
+Read current CLAUDE.md and the prior lane-A-planning-now.txt boundaries. Fetch and integrate
+current main before work; B has published bounded analytic tests. Preserve peer changes.
+
+Prepare one compact supplement under docs/reviews/, using pinned source inspection only:
+
+1. Resolve feasibility before detailed implementation design. For each mandatory prepared
+   operator, identify the actual candidate execution path, preserved semantics and observable
+   work. Cover fused attention, valid-token paged KV, normalization, RoPE, gating, embedding,
+   head, precision, repeats and rank shapes. Distinguish declared-input counts from actual
+   executed counts and padded/issued work. Unknown/Dummy execution cannot pass. If the
+   existing fork cannot represent required work, state the specific blocker and stop that
+   route; do not invent a simulator extension or silently relax coverage.
+2. Name native statistics files/fields and units from source, including nondeterministic
+   content. Explain how exact per-operator counts and three-run equality can be established.
+   If instrumentation is necessary, propose its exact scope separately; do not implement it
+   or grant it permission to change physics or manufacture count parity.
+3. For a feasible route, propose the minimum exact versioned boundary under docs/reviews/:
+   fields, ownership, prepared point/rank binding, image/configuration identity, result
+   validation, unsupported-input refusals and preservation of existing analytic replay.
+   Identify decisions B must reconcile. Do not edit protected schemas or runtime code.
+   If feasibility remains blocked, list the affected boundary questions instead of building
+   a speculative complete interface.
+4. Turn licence/dependency questions into concrete decisions: exact missing pins/notices,
+   proposed scan scope, and components outside the current allow-list. Separate source
+   evidence from unverified image contents. Propose exceptions only; no allow-list changes,
+   dependencies installed, or legal-compliance claim.
+5. Correct the host inventory distinction. Javid's reported preflight gives 12 logical CPUs,
+   MemTotal 32,863,040 kB (~31.3 GiB), and free home disk 962,551,283,712 bytes at that time.
+   Physical-core topology, current availability, cgroup delegation and an exclusive
+   allocation remain unverified. Your 24 GiB/100 GiB reservation is proposed, not granted.
+   Reza remains unavailable; no root access, privilege workaround or alternate-host waiver.
+
+Keep the proposed threshold prospective and unchanged absent a clearly identified decision;
+do not tune it using candidate runs. Finish with a short exact decision list for Javid,
+separating diagnostic scope/budget from schema, licences and host reservation. No automatic
+fallback implementation, acceptance claim or new adversarial-review session.
+
+Use normal Git diffs and commits. Commit coherent owned planning changes, fetch/integrate,
+run applicable checks and push main separately; no force push, copied checkpoint trees or
+broad manifests. Preserve the original planning commit as history. Handoff the commit ID,
+source-supported conclusions, unresolved blockers and next dependency. Stop there.

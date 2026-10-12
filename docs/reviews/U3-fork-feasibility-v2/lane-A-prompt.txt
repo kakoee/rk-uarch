@@ -1,0 +1,370 @@
+U3 / Lane A — Fork feasibility after RoPE: decision investigation, not implementation
+
+I am Javid (@jjaffari), acting human decision-maker for both lanes. Work in a fresh
+Lane A session in:
+  /home/jjaff/AI-infra-simulation/rk-uarch-u3-a
+
+Your task is to give me an evidence-backed, understandable decision about how to
+proceed with U3's external simulator. Continue the existing investigation; do not
+restart broad tool scouting or repeat the earlier report with new wording.
+
+This is an author/investigation session, not independent U-REVIEW. Investigate source
+read-only and write a proposal. Do not implement, build, patch or run a candidate.
+The normal U3 Git workflow applies to your own proposal documents, as specified below.
+No sub-agents, other author sessions, upstream issue submissions or messages to others.
+
+1. CURRENT BASELINE AND WHAT HAS CHANGED
+
+Verified published baseline:
+  commit 456215cdf9ec4ec383ce2604a483ee4bfa7f5991
+  tree   2570682d1af20a0860b70b9bbd79a0ec75ad1a4b
+
+This includes the accepted U0022 additive RoPE carriers/runtime, human artifact adoption
+and activation of all 28 previously pending rotary admission checks. Hosted CI passed
+on this exact commit:
+  https://github.com/kakoee/rk-uarch/actions/runs/38198912991
+  Python: 1,691 passed, 29 existing skips, 10 deselected.
+  Contract: 681 passed. Static checks and strict support currentness passed.
+The preceding full local suite had 1,701 passed and the same 29 skips. These counts
+are overlapping evidence, not additive. Several conditional CI jobs are still no-ops.
+
+The RoPE implementation now exists in rk-uarch. It does not establish that an external
+simulator executes RoPE correctly, supports our entire workload, exposes actual counts,
+or meets any performance requirement. It is analytic accounting, not a numerical tensor
+execution kernel or silicon validation.
+
+Current model: physical-resolved/2; engine: resolved-ops/2.
+Execution implementation identity:
+  sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6
+Adopted reference manifest:
+  1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a
+Frozen input digest:
+  27c6238d42e57dc4f2b1baf0c8846c11f1eec2968176dcefcdc463beb64bc80f
+There are 97 support-bound files. Do not change any of them in this investigation.
+
+Public v1 CLI/table/report behavior and historical U2 results remain separate and
+unchanged. The additive v2 capture/replay API does not itself provide a public v2
+product/report path or fork-result carrier. Do not assume the v2 analytic EngineResult
+can simply be reused for a simulator with different observations and timing semantics.
+
+B's standalone verification reports remain model-v1 evidence, partial/not_run. The
+L0m aggregate-clock relation retains its 22/24 distinct-case shortfall. No positive v2
+or fork verification, card attachment, independent review or U3 closure follows from
+those reports or the green hosted CI.
+
+First inspect branch, HEAD, index, worktree and remotes. Fetch/integrate current main
+without overwriting local work. Confirm the baseline is an ancestor. If peer commits
+have arrived, record the actual investigation revision and assess their relevant delta;
+do not discard them or reset to this baseline. If the baseline is not available or the
+history is unexpectedly divergent, diagnose that before changing anything.
+
+2. READ IN THIS ORDER
+
+Read the relevant contents, not every historical archive:
+
+- CLAUDE.md and .github/CODEOWNERS.
+- docs/execution-plan.md: U3, G2, the U3 Git workflow and relevant fallback consequences.
+  Its top-level STATUS contains older wording; reconcile it with later accepted records
+  and actual Git history rather than treating stale status as the current state.
+- docs/prompts/U-P5-fork-selection-and-adapter.md, as requirements/context only.
+  THIS session does not authorize its build, adapter, measurement or fallback tasks.
+- docs/build-spec.md: engine/prepared boundary, fidelity/composite rules and grid-budget
+  sections relevant to a proposed route. Do not read rk-sim vision documents.
+- docs/decisions/U0000-record-architecture-decisions.md,
+  docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md,
+  docs/decisions/U0022-explicit-rope-semantics.md, including its schema addendum,
+  docs/decisions/U0006-what-verification-can-and-cannot-establish.md.
+  Follow U0002's artifact rules and accepted U0003/U0004 where a question touches them;
+  do not reopen their settled policies.
+- docs/reviews/U3-U0005-proposal.md and U3-G2-physical-expectations.md.
+- docs/reviews/U3-A-source-feasibility-supplement.md.
+- docs/reviews/U3-next-direction-v1-acceptance.md.
+- docs/reviews/U3-RoPE-runtime-v1/README.md and
+  docs/reviews/U3-final-local-validation-v1/README.md.
+  Earlier local/unpublished/pending-activation wording in the runtime handoff is historical;
+  the publication and activation facts above supersede it.
+- docs/reviews/U3-B-SR-C1-coordinator-recheck.md and the relevant interface/telemetry
+  sections of U3-U0006-report-supplement.md.
+- third_party/README.md, third_party/LICENSES.md, containers/README.md and the current
+  nightly workflow for applicable constraints.
+
+Inspect the live v2 source selectively to understand actual interfaces, especially:
+  src/rkuarch/workload/{producer_v2,prepared_v2,capacity_v2}.py
+  src/rkuarch/engines/{protocol_v2.py,analytic/rotary_v2.py,analytic/dispatch.py}
+  src/rkuarch/table/capture_v2.py
+  contract/uarch_contract/rotary_v2.py (read only)
+
+Do not execute the historical protected-installation, generation, adoption or commit
+helpers. Those actions already happened. Do not regenerate evidence to inspect it.
+
+3. SCOPE OF THIS NEW INVESTIGATION
+
+The earlier next-direction approval deferred further tool investigation. This new
+prompt releases bounded READ-ONLY feasibility investigation of the two existing
+candidates and preparation of decision alternatives. It does not release U-P5 execution.
+
+Start from the previously inspected immutable pins:
+- ONNXim: a1e86296e080fa1c82f8ad3f1b6de1079c192afc
+  https://github.com/PSAL-POSTECH/ONNXim
+- PyTorchSim: 5ec17ff2d18c08d10ae4bf5b101cd9e131a3fba3 (v1.0.0)
+  https://github.com/PSAL-POSTECH/PyTorchSim
+
+Reuse available source checkouts after verifying their identities and cleanliness.
+Otherwise read upstream source or obtain a disposable source-only checkout outside
+tracked project paths. Network reads, Git fetches and primary-source research are in
+scope. Do not execute downloaded scripts, build systems, candidate Python modules,
+submodule hooks, compilers or simulator code. Do not pull images or binary artifacts.
+
+The previous author read both papers in full. Treat that as an inherited claim, not
+something you personally performed. Consult the relevant full-paper sections and
+source for your own reasoning; reread more where a disputed claim requires it. Prefer
+immutable source permalinks and original papers over third-party summaries.
+
+Do not browse an open-ended list of alternative simulators. A specific upstream fix,
+release or documented input route may be inspected if it plausibly resolves a named
+blocker. Record its full commit and the exact relevant delta. A newer commit is an
+alternative for decision, not permission to change our accepted comparison baseline.
+Do not continuously chase moving main. If neither existing candidate offers a credible
+bounded route, say so and prepare an explicit plan-amendment option.
+
+4. THE QUESTION TO ANSWER
+
+Can either candidate execute the work rk-uarch now declares, through a faithful and
+maintainable adapter, with enough trustworthy observation to evaluate G2?
+
+Explain the answer from a chip/workload perspective: which operations execute, what
+memory they access, how one chip's rank is represented, what determines simulated
+latency, and what the tool can actually report. Do not lead with hashes or process.
+A simulator's modeled device latency and the host time required to compute that latency
+are different quantities; keep them separate throughout.
+
+Produce a delta from the prior supplement:
+- What did the completed RoPE work resolve in rk-uarch?
+- Which external-tool blockers are unchanged?
+- Which earlier statements need correction, and what evidence changes them?
+- Which questions remain unknown without a separately approved experiment?
+
+The main deliverable is a recommendation with actionable alternatives and costs, not
+another inventory that leaves me to infer the decision.
+
+5. REQUIRED ANALYSIS
+
+A. Faithful execution routes and workload coverage
+
+For each credible candidate route, trace declared prepared input through lowering,
+operator construction, scheduling/execution and observation. Distinguish the native
+LLM route, ONNX graph route, compiler route and any documented lower-level interface.
+A wrapper may translate supported work; it must not repair missing simulator physics.
+
+Use a compact coverage table with: requirement; source path/symbol/immutable citation;
+status; missing work; proposed change category; and remaining proof needed.
+Use statuses such as source-supported, contradicted by source, unproven, and explicitly
+outside the proposed scope. Source-supported is not runtime-verified.
+
+Cover the complete proposed diagnostic, not just its GEMMs:
+- Embedding, rank-local hit vectors, Q/K/V projections, output projection, FFN up/gate/down,
+  activation/gating, all required norms, residuals, final norm and lm_head.
+- Fused QK-softmax-AV behavior and whether score/probability tensors spill to DRAM.
+- Valid-token paged KV reads, new-token K/V append, existing-cache state and position
+  conventions. Preserve attended length; do not silently turn C into C+1 or a page-rounded C.
+- Accepted RoPE Q/new-K placement, unchanged V, explicit coefficients/profile/positions,
+  adjacent/split-halves pairing, partial rotation, FP32 operations and explicit casts,
+  coefficient traffic, tail transfers and cache/profile consistency.
+- Rank-local Q/KV heads, GQA, replicated KV, physical padding, selected/equivalent ranks,
+  group/work repeats and once-only head/tail work. Never shard an already resolved rank again.
+- BF16 operands versus FP32 accumulation and the distinctions between storage width,
+  arithmetic semantics and supported throughput. Do not equate a two-byte setting with BF16.
+- Requested hardware behavior, named DRAM configuration, initial state, mapping delegation,
+  unsupported exact mappings and unrepresented fields/warnings.
+
+Explicitly revisit the existing concrete blockers: ONNXim's unknown-op Dummy path,
+missing/skipped operations, native graph differences and tp8 GQA assertion; PyTorchSim's
+called dummy RoPE example, unproven fused/paged execution, host fallback possibilities,
+compiler/latency dependencies and limited executed-work observability.
+Confirm only as deeply as needed to decide a route. If source conclusively rules a route
+out, record why and stop spending time designing its adapter. Do not disable assertions,
+replace operators privately, or infer that fixing our RoPE input made either tool support it.
+
+B. Separate the kinds of work
+
+For every necessary change, classify it explicitly:
+1. Adapter/configuration work using existing faithful candidate capabilities.
+2. Build/reproducibility packaging, without changed simulated behavior.
+3. Observation-only instrumentation of work that really executes.
+4. Simulator/compiler semantic, scheduling, memory, precision or timing changes.
+5. A change to our required workload, coverage, gate, threshold or fidelity policy.
+
+Categories 3-5 require separate decisions. Category 4 is especially material: U-P5 forbids
+patching the engine to make parity pass. You may describe the scope, risk and cost of such
+an alternative, but cannot implement it or treat it as authorized wrapper work.
+Do not disguise omission of required model work as an ordinary unrepresented hardware warning.
+Do not recommend a reduced diagnostic without clearly naming the changed claim and gate.
+
+C. Observable work, duration and reproducibility
+
+Identify actual statistic producers, files/fields, units and their relation to execution:
+- scalar MAC/operation counts versus issued GEMM instructions, padded tile capacity,
+  declared input shapes or expected analytic counts;
+- vector work, memory requests/bytes, skipped/eliminated work and per-prepared-op attribution;
+- simulation duration versus busy-time sums and true critical-path attribution;
+- deterministic simulation statistics versus host timestamps, paths, elapsed wall time
+  and other operational telemetry.
+
+Can the tool demonstrate exact completed per-op matrix work at two ops/MAC and preserve
+required nonmatrix work? If not, which specific observation is missing? Analytical
+recomputation from input dimensions cannot serve as independent executed-work evidence.
+For an instrumentation alternative, name the source sites, data availability, effect on
+host cost and tests needed to show no simulated behavior changes. Missing execution cannot
+be repaired by logging expected counts.
+
+Explain whether the currently proposed three-run complete-statistics comparison is feasible.
+Any different stable statistics protocol must be proposed prospectively, with raw logs kept;
+no post-hoc sorting, stripping, rounding or selected-counter equality presented as satisfying
+the existing proposal. A source inspection cannot establish runtime determinism or speed.
+Preserve U0006's distinctions among identity, actual execution, independent review and accuracy.
+
+D. Minimal integration consequences
+
+For a credible route only, sketch the minimum adapter seam into the ACTUAL v2 boundary:
+input/point/rank/coefficient closure; unsupported-input admission; image/config/source pins;
+result/statistics identity; separate validation of simulator observations; mapping/state
+warnings; prepared-input replay with producers disabled; and future table/report ownership.
+Name A/B/shared-path responsibilities and the exact decisions B must reconcile.
+
+Do not design a complete speculative schema or implement public v2/fork reporting here.
+Do not weaken analytic validators or insert fork observations into analytic evidence.
+If no route qualifies, describe the unresolved interface questions instead.
+
+E. Source/dependency/licence and host feasibility
+
+For each serious option, identify decision-relevant immutable dependency gaps, missing
+licence grants/notices, out-of-allow-list components and compiler/latency assets. Distinguish
+source inspection from actual built-image inventory. Neither a paper's MIT description nor
+one vendored header establishes licensing for an entire repository. Do not offer a legal
+compliance verdict, change the allow-list or invent a permissive exception.
+
+Current host facts: Reza installed packages; Javid reported successful rootless Podman 4.3.1
+and user-namespace checks on Debian 12 host v2202507191245365394, accessed as
+javid@152.53.209.203. Earlier source-supplement claims that Podman is absent are outdated.
+Reported topology is 12 logical CPUs and about 31.3 GiB RAM; this is not a current exclusive
+resource reservation. Runner registration, runner-account environment, resource enforcement
+and successful manual nightly remain unverified. Do not contact/change the server, register
+a runner, dispatch a workflow or assume Javid's environment covers another Linux account.
+
+List prerequisites for a later experiment. Container availability does not resolve semantic
+or evidence blockers. Keep host/admin waits separate from engineering effort. No WSL2
+simulator-performance run or waiver is permitted.
+
+F. Diagnostic scope, cost and recommendation
+
+The existing 200-second limit is still an UNACCEPTED prospective proposal for a synthetic
+one-layer decode diagnostic, not full-model runtime or demonstrated full-table cost.
+Its proposal has 12 B/context/tp points plus two extra selected-rank cases, three repetitions
+(42 invocations per candidate), and separate prepared-only prefill coverage. Verify these
+against the existing proposal; do not silently substitute a smaller matrix or promote it
+to full-model evidence. RoPE does not change learned parameter counts or matrix counts,
+but adds explicit vector/byte work and coefficient requirements to new-version inputs.
+
+Explain whether the old diagnostic remains a useful prospective decision test after RoPE.
+If recommending any amendment, give its exact scope and consequences, separately from the
+unchanged option. Do not choose a threshold from unperformed measurements or treat the old
+planning allocation as accepted. Distinguish a build, a small capability experiment and the
+actual preregistered G2 evaluation.
+
+Compare a small number of actionable alternatives:
+- A specifically evidenced existing-tool route, if one is credible.
+- A narrowly identified upstream revision or separately approved observation/extension route,
+  only where source supports discussing it; expose all policy changes and maintenance cost.
+- An explicit amendment/defer/fallback option if no tool faithfully meets current requirements.
+
+The execution plan mentions a Python U-C1 fallback after both candidates fail. We have source
+blockers, not an empirical finding that both candidates failed G2. Explain the exact human
+plan/ADR amendment needed to choose that direction now, its implications for U4/U5/U6 and G5,
+and what would remain unbuilt. Do not implement it or automatically invoke the fallback.
+
+For each serious option, estimate active engineering effort by adapter, packaging,
+instrumentation or engine changes, evidence work and review. Use ranges with assumptions,
+confidence and dependencies; avoid invented precision. Separate exploration effort from
+implementation and human/admin/calendar waits. Supersede suspended estimates explicitly
+rather than treating them as commitments. If a missing capability makes a credible estimate
+impossible, say what small experiment would resolve that uncertainty.
+
+Finish with one recommended next step, why it is preferable, its principal risk, and the
+smallest concrete authorization required. If no route is defensible, recommend that outcome
+plainly. Do not ask me to approve a vague instruction to 'keep investigating.'
+
+6. DELIVERABLES
+
+Write a compact decision package under a NEW directory in your A clone:
+  docs/reviews/U3-fork-feasibility-v2/
+Do not rewrite earlier author findings, accepted decisions or historical evidence.
+
+Required files:
+- README.md: begin with a plain-language executive explanation (about 500 words or less),
+  what changed since the earlier investigation, coverage/evidence findings, options/costs,
+  recommendation and honest remaining unknowns. Additional technical sections can follow.
+- next-decision.md: exact bounded action requested from Javid, scope, exclusions, needed
+  preconditions, success/refusal criteria and stop point. Separate tool direction from
+  instrumentation, workload/gate amendments, licence exceptions, host allocation and
+  measurement authority. Do not present any of them as already accepted.
+- proposed-U0005.md: draft ADR context, proposed decision, consequences and what it does
+  not establish. Clearly separate existing accepted rules, proposed preregistration and
+  unperformed future measurements. An infeasibility/plan amendment is not a measured G2
+  verdict. Leave unresolved values visibly unresolved; do not fill an invented result.
+
+Optional: one concise source-evidence table or small original arithmetic/static-inspection
+script if it materially supports a disputed claim. No copied upstream trees, huge logs,
+repository-wide hash inventories, checkpoint snapshots or duplicate evidence ledger.
+Immutable Git permalinks, normal diffs and commit IDs suffice for source history.
+
+If proposing an experiment, specify its exact inputs/work, pin, commands or command skeleton,
+expected observations, positive/negative controls, timeout/resource envelope, interpretation
+of each outcome and stopping criteria. Mark it UNEXECUTED and conditional on its distinct
+approval and prerequisites. Do not run it or write an executable auto-installer to obtain
+implicit permission.
+
+7. VALIDATION, GIT AND STOP CONDITIONS
+
+Allowed: source inspection, ordinary document edits, small independent static/arithmetic
+checks that execute no candidate code, and appropriate existing repository checks. The
+proposal must distinguish your executed checks from inherited claims and future tests.
+Do not rerun the entire runtime suite merely for prose or claim green CI as simulator proof.
+
+Verify local links, citation pins, arithmetic you rely on, Git whitespace and exact path
+scope. Run scoped lint if adding Python under reviews; never add it under support-bound
+src/, contract/ or scripts/. Use the existing environment; no new dependency installation.
+Where repository checks are necessary, use current commands rather than the template's
+obsolete mypy target:
+  ruff check .
+  mypy src contract/uarch_contract scripts
+  mypy --no-explicit-package-bases contract/tests
+with PYTHONPATH and MYPYPATH unset for CI-style static checks. Choose only checks appropriate
+to the actual changes, and disclose what you did not run.
+
+Normal U3 Git workflow: own independent A clone, main, normal coherent commits for your
+proposal, fetch/integrate peer main before publishing, then a separate normal push to main.
+No mandatory PR, force-push, reset of peer work, copied integration tree or new revision-control
+scheme. Preserve published and human-owned commits; use ordinary merges when necessary.
+Do not stage anyone else's work. Keep the coordinator's prompt and local publication receipt
+outside your change set unless already received through normal Git history.
+
+This prompt permits only your planning-document publication. It does NOT authorize:
+- simulator/compiler/container builds or execution, image pulls, dependency installs,
+  benchmarks, new statistics, oracle generation/adoption or support exclusions;
+- runtime, test, schema, configuration, hardware, workflow or third-party implementation edits;
+- protected contract/, tests/golden/expected/, CLAUDE.md or docs/decisions/ edits;
+- changing accepted semantics, thresholds, source pins used for acceptance, claimed fidelity,
+  badges, evidence eligibility, preregistered coverage or historical results;
+- server changes, runner setup, workflow dispatch, U-P7, native-engine work, tagging or closure.
+Do not set UARCH_HUMAN, bypass hooks, or treat a sandbox permission as project authorization.
+
+Do not stop merely because the existing candidates have blockers: completing the decision
+package is the task. Record unknowns and concrete alternatives. Ask only if genuinely missing
+information prevents a useful bounded proposal; continue independent work while waiting.
+Do not request another approval just to perform the read-only investigation authorized here.
+
+Final handoff: exact baseline and final commit(s), push/remote status, files, recommended
+option and why, material blockers, effort range, exact human decisions, your actual checks,
+and the next dependency. State explicitly that no candidate was built or run, no measurement
+or G2 verdict exists, and no implementation or policy change was made. Stop for coordinator
+reconciliation before implementation or experiments. Do not claim independent acceptance.

@@ -1,0 +1,55 @@
+Run in /home/jjaff/AI-infra-simulation/rk-uarch-u3-b.
+Task: implement the accepted standalone analytic report generator/validator and tests.
+
+Javid approved U3-RoPE-and-verification-v1. The human-owned ADR commit
+f62eb7025dd5a48f03a81e92bc334f58bfb2a202 is verified and published on main.
+Fetch and integrate current main in your own independent clone; confirm that commit
+is an ancestor. Read CLAUDE.md, docs/reviews/U3-RoPE-and-verification-v1/README.md,
+and accepted U0006/U0022. Javid is acting human decision-maker for both lanes.
+
+Use normal owned commits, fetch/integration, relevant checks and a separate push of
+main. Rebase only unpublished commits; never force-push, set UARCH_HUMAN or bypass hooks.
+Preserve peer work and historical evidence. Do not copy checkpoint trees or make broad
+manifests. Protected paths remain human-owned. Tool selection, further candidate scouting,
+instrumentation, fallback, U0005/200-second limit and G2 verdict remain pending.
+Runner registration/manual nightly remains pending with Reza; no host waiver is granted.
+
+Exact accepted implementation scope: sections 2–4 and 6 of
+ docs/reviews/U3-U0006-report-supplement.md at
+ 428b7bb29664b7de2b8c8ef8ce3a8bad2e5245ee,
+with that revision's U3-U0006-report-example.json and the human-committed U0006.
+Sections 5 production integration and 7 future telemetry are NOT implementation scope.
+U0022 describes future RoPE inputs; do not invent v2 observations or silently change the
+current analytic verification corpus. Historical model-v1 scope/limitations stay explicit.
+
+Write discriminating tests first under validation/reporting/test_analytic_report.py,
+then implement validation/reporting/analytic_report.py and a package initializer if needed.
+Keep production source, CLI, protected contracts, dependencies, loader/card admission,
+provenance dispatch, review eligibility, workflows and host configuration unchanged.
+If the approved scope cannot be implemented without any such change, identify the exact
+blocker and propose that change separately rather than silently widening the task.
+
+Implement the specified generate/validate commands, caller-pinned plan/corpus/implementation
+expectations, complete profile catalogue and both analytic modes. Record all actual calls,
+errors and observed counterexamples, including mutant controls and executed shrinking;
+use supported APIs and null unavailable internal counts. Preserve discovery failures through
+replay, distinct admitted case accounting, invocation caps, partial/not_run and failure-first
+reductions. Skipped-only examples must never produce a passed report or actual-run claim.
+
+Demonstrate passing populated actual-run controls in both modes, no hidden producer calls
+on fixed-input replay, explicit producer-path separation, two byte-identical qualifying
+reports over a frozen corpus, and the specified tamper/missing-case/version/coverage/budget/
+mutant refusals. Commit suite/profile code before report-qualifying runs requiring a clean
+committed implementation; keep operational receipts separate from stable source bytes.
+Do not backfill historical JUnit runs or fabricate accepted independent reviews/card hashes.
+
+Reuse existing dependencies, fixtures and identity validators. Retain only relevant report
+artifacts, not whole-tree snapshots. Run the new tests, existing bounded analytic/mutant
+controls, appropriate API regressions, exact CI Ruff/mypy/import/schema/current-support
+checks, then one full suite at the meaningful integrated code checkpoint. Explain all skips
+and any checks not run; local execution does not satisfy the self-hosted nightly gate.
+
+Publish coherent owned changes with Git integration as above. Handoff exact commit IDs,
+commands/results, actual generation/replay evidence, discriminating failures and remaining
+integration dependencies. Stop for coordinator reconciliation; no production attachment,
+independent-review verdict, sprint closure or later implementation follows automatically.
