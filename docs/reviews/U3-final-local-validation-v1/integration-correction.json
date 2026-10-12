@@ -1,0 +1,27 @@
+{
+  "initial_target": "314b6a17d15433d8d69a1d86be0e8c5c4aa177f3",
+  "issue": "Coordinator review probe import order depended on new modules being present; Ruff I001 in docs/reviews/U3-RoPE-runtime-reconciliation-v1/probe.py",
+  "initial_lint": [
+    {
+      "name": "ruff",
+      "command": [
+        ".venv/bin/ruff",
+        "check",
+        "."
+      ],
+      "exit_code": 1,
+      "elapsed_seconds": 0.08,
+      "stdout": "I001 [*] Import block is un-sorted or un-formatted\n  --> docs/reviews/U3-RoPE-runtime-reconciliation-v1/probe.py:3:1\n   |\n 1 |   \"\"\"Coordinator arithmetic/replay probe; run from the reviewed A checkout.\"\"\"\n 2 |\n 3 | / import builtins\n 4 | | import json\n 5 | | import runpy\n 6 | | from copy import deepcopy\n 7 | | from itertools import product\n 8 | | from unittest.mock import patch\n 9 | |\n10 | | from rkuarch.table.capture_v2 import capture, replay\n11 | | from rkuarch.workload.capacity_v2 import capacity_summary\n12 | | from rkuarch.workload.prepared_v2 import physical_assumptions\n13 | | from rkuarch.workload.producer_v2 import prepare\n14 | | from uarch_contract.hardware import HardwareSpec\n15 | | from uarch_contract.hashing import canonical_json, spec_hash\n16 | | from uarch_contract.rotary_v2 import RequestIntentV3, RotaryCoefficients\n   | |________________________________________________________________________^\n17 |\n18 |   cases = runpy.run_path(\"contract/tests/rotary_v2_cases.py\")\n   |\nhelp: Organize imports\n   |\n9  |\n10 + from uarch_contract.hardware import HardwareSpec\n11 + from uarch_contract.hashing import canonical_json, spec_hash\n12 + from uarch_contract.rotary_v2 import RequestIntentV3, RotaryCoefficients\n13 +\n14 | from rkuarch.table.capture_v2 import capture, replay\n15 | from rkuarch.workload.capacity_v2 import capacity_summary\n16 | from rkuarch.workload.prepared_v2 import physical_assumptions\n17 | from rkuarch.workload.producer_v2 import prepare\n   - from uarch_contract.hardware import HardwareSpec\n   - from uarch_contract.hashing import canonical_json, spec_hash\n   - from uarch_contract.rotary_v2 import RequestIntentV3, RotaryCoefficients\n18 |\n   |\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option.\n",
+      "stderr": ""
+    }
+  ],
+  "full_suite_interrupted": true,
+  "interrupted_result": "13 passed in 45.02s",
+  "interrupted_is_full_suite_evidence": false,
+  "correction_commit": "92a21ca04904a93783fc4cc369783b276a4c5399",
+  "correction_scope": [
+    "docs/reviews/U3-RoPE-runtime-reconciliation-v1/probe.py"
+  ],
+  "source_support_changed": false,
+  "new_full_suite_started": true
+}

@@ -1,0 +1,170 @@
+{
+  "commit": "3a148a0bc953ad0a536de1934184ba9e313e544d",
+  "tree": "24f1a418ea052d1400c89c38b1968d142d0f829e",
+  "command": "env -u PYTHONPATH -u MYPYPATH .venv/bin/python -m pytest -q -rs --junitxml=/tmp/u3-final-local-full-suite.xml",
+  "exit_code": 0,
+  "tests": 1730,
+  "passed": 1701,
+  "skipped": 29,
+  "failures": 0,
+  "errors": 0,
+  "elapsed_seconds": 822.16,
+  "junit": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "29",
+    "tests": "1730",
+    "time": "822.146",
+    "timestamp": "2026-10-11T19:27:05.606787-07:00",
+    "hostname": "ElfinKidsLaptop"
+  },
+  "skips": [
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[executed_mac_conservation-aggregate]",
+      "reason": "analytic/aggregate: executed_mac_conservation: U2 reports shape-derived matrix_ops, not executed MAC telemetry"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[executed_mac_conservation-per_op]",
+      "reason": "analytic/per_op: executed_mac_conservation: U2 reports shape-derived matrix_ops, not executed MAC telemetry"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[dma_conservation-aggregate]",
+      "reason": "analytic/aggregate: dma_conservation: No DMA traffic/compute-consumption boundary observations in U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[dma_conservation-per_op]",
+      "reason": "analytic/per_op: dma_conservation: No DMA traffic/compute-consumption boundary observations in U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[window_utilisation-aggregate]",
+      "reason": "analytic/aggregate: window_utilisation: No resource busy windows; analytic busy_time_ps is null"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[window_utilisation-per_op]",
+      "reason": "analytic/per_op: window_utilisation: No resource busy windows; analytic busy_time_ps is null"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[little_law-aggregate]",
+      "reason": "analytic/aggregate: little_law: No queues, occupancy, arrivals or residence times in U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[little_law-per_op]",
+      "reason": "analytic/per_op: little_law: No queues, occupancy, arrivals or residence times in U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[causality-aggregate]",
+      "reason": "analytic/aggregate: causality: EngineResult.trace is None; dependency validation is not timed causality"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[causality-per_op]",
+      "reason": "analytic/per_op: causality: EngineResult.trace is None; dependency validation is not timed causality"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[sram_placement-aggregate]",
+      "reason": "analytic/aggregate: sram_placement: No placement or per-event SRAM occupancy in analytic_ops"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[sram_placement-per_op]",
+      "reason": "analytic/per_op: sram_placement: No placement or per-event SRAM occupancy in analytic_ops"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[energy_conservation-aggregate]",
+      "reason": "analytic/aggregate: energy_conservation: No energy observation in EngineResult; energy remains unverified"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[energy_conservation-per_op]",
+      "reason": "analytic/per_op: energy_conservation: No energy observation in EngineResult; energy remains unverified"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[noc_sram_bandwidth-aggregate]",
+      "reason": "analytic/aggregate: noc_sram_bandwidth: NoC and SRAM bandwidth are unrepresented by U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[noc_sram_bandwidth-per_op]",
+      "reason": "analytic/per_op: noc_sram_bandwidth: NoC and SRAM bandwidth are unrepresented by U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[core_permutation-aggregate]",
+      "reason": "analytic/aggregate: core_permutation: No core IDs or mapping placement in analytic_ops"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[core_permutation-per_op]",
+      "reason": "analytic/per_op: core_permutation: No core IDs or mapping placement in analytic_ops"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[idle_core-aggregate]",
+      "reason": "analytic/aggregate: idle_core: No mapped idle-core set; all spec cores contribute to resolved peak"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[idle_core-per_op]",
+      "reason": "analytic/per_op: idle_core: No mapped idle-core set; all spec cores contribute to resolved peak"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[unused_stipulation-aggregate]",
+      "reason": "analytic/aggregate: unused_stipulation: Deferred: generated reference fixtures contain only stub claims"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[unused_stipulation-per_op]",
+      "reason": "analytic/per_op: unused_stipulation: Deferred: generated reference fixtures contain only stub claims"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[latency_monotonicity-aggregate]",
+      "reason": "analytic/aggregate: latency_monotonicity: Router/DRAM/job/barrier latency is unrepresented by U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[latency_monotonicity-per_op]",
+      "reason": "analytic/per_op: latency_monotonicity: Router/DRAM/job/barrier latency is unrepresented by U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[dma_outstanding-aggregate]",
+      "reason": "analytic/aggregate: dma_outstanding: DMA max_outstanding is unrepresented by U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[dma_outstanding-per_op]",
+      "reason": "analytic/per_op: dma_outstanding: DMA max_outstanding is unrepresented by U-C0"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[cold_steady-aggregate]",
+      "reason": "analytic/aggregate: cold_steady: stateless_roofline models neither cold startup nor steady-state history"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_unobservable_or_deferred_relation[cold_steady-per_op]",
+      "reason": "analytic/per_op: cold_steady: stateless_roofline models neither cold startup nor steady-state history"
+    },
+    {
+      "class": "validation.L0_invariants.test_analytic_capabilities",
+      "name": "test_per_op_exact_clock_precondition",
+      "reason": "analytic/per_op: memory-only embedding violates whole-query compute-bound premise"
+    }
+  ],
+  "hosted_ci": false
+}

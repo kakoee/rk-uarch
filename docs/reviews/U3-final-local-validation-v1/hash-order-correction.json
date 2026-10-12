@@ -1,0 +1,15 @@
+{
+  "failed_commit": "92a21ca04904a93783fc4cc369783b276a4c5399",
+  "interrupted_run": "2 failed, 547 passed in 289.40s",
+  "complete_suite": false,
+  "root_cause": "Test setup assumed received comparison hashes were not lexicographically sorted; refreshed artifact identities invalidated that assumption before the CLI call.",
+  "corrected_commit": "3a148a0bc953ad0a536de1934184ba9e313e544d",
+  "scope": [
+    "tests/integration/test_u2_a_companions_cli.py"
+  ],
+  "correction": "Canonicalize test inputs, explicitly swap recipe indexes for wrong-index, explicitly drop a supplied comparison for omit. Preserve original refusal message, no-output and artifact-preservation assertions.",
+  "targeted_result": "2 passed in 7.71s",
+  "protected_paths_changed": false,
+  "production_changed": false,
+  "adopted_artifacts_changed": false
+}
