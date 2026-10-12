@@ -1,0 +1,53 @@
+..................FF.................................................... [  4%]
+........................................................................ [  8%]
+........................................................................ [ 12%]
+........................................................................ [ 16%]
+........................................................................ [ 20%]
+........................................................................ [ 24%]
+........................................................................ [ 29%]
+.............................................
+=================================== FAILURES ===================================
+_____ test_real_cli_rejects_wrong_indexes_or_missing_attempts[wrong-index] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-700/test_real_cli_rejects_wrong_in0')
+attack = 'wrong-index'
+
+    @pytest.mark.parametrize("attack", ["wrong-index", "omit"])
+    def test_real_cli_rejects_wrong_indexes_or_missing_attempts(tmp_path, attack):
+        from tests.integration.test_u2_b_r202_public import selected_package
+        from tests.u2_a_companion_inputs import write_assembly_inputs
+        from tests.unit.test_u2_b_companions import arguments, canonical_comparisons
+
+        require_real_peer()
+        verified, _, _, _ = selected_package.__wrapped__()
+        inputs = arguments(verified)
+>       assert inputs["comparison_hashes"] != tuple(sorted(inputs["comparison_hashes"]))
+E       AssertionError: assert ('sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3') != ('sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3')
+E        +  where ('sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3') = tuple(['sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3'])
+E        +    where ['sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3'] = sorted(('sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3'))
+
+tests/integration/test_u2_a_companions_cli.py:761: AssertionError
+________ test_real_cli_rejects_wrong_indexes_or_missing_attempts[omit] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-700/test_real_cli_rejects_wrong_in1')
+attack = 'omit'
+
+    @pytest.mark.parametrize("attack", ["wrong-index", "omit"])
+    def test_real_cli_rejects_wrong_indexes_or_missing_attempts(tmp_path, attack):
+        from tests.integration.test_u2_b_r202_public import selected_package
+        from tests.u2_a_companion_inputs import write_assembly_inputs
+        from tests.unit.test_u2_b_companions import arguments, canonical_comparisons
+
+        require_real_peer()
+        verified, _, _, _ = selected_package.__wrapped__()
+        inputs = arguments(verified)
+>       assert inputs["comparison_hashes"] != tuple(sorted(inputs["comparison_hashes"]))
+E       AssertionError: assert ('sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3') != ('sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3')
+E        +  where ('sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3') = tuple(['sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3'])
+E        +    where ['sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3'] = sorted(('sha256:75ecfe74e741a0902196ad4774b564a619877ff87fbad47156e7114f8a7e1a31', 'sha256:dc6ec3c398993a59c968f1399ac02a7663cceedf109b34834e4abf8aaaa58fa3'))
+
+tests/integration/test_u2_a_companions_cli.py:761: AssertionError
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/home/jjaff/AI-infra-simulation/rk-uarch-u3-a/contract/uarch_contract/hashing.py:240: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+2 failed, 547 passed in 289.40s (0:04:49)

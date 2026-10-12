@@ -1,0 +1,128 @@
+[
+  {
+    "name": "ruff",
+    "command": [
+      ".venv/bin/ruff",
+      "check",
+      "."
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.02,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "production-types",
+    "command": [
+      ".venv/bin/mypy",
+      "src",
+      "contract/uarch_contract",
+      "scripts"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.13,
+    "stdout": "Success: no issues found in 78 source files\n",
+    "stderr": ""
+  },
+  {
+    "name": "contract-test-types",
+    "command": [
+      ".venv/bin/mypy",
+      "--no-explicit-package-bases",
+      "contract/tests"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.13,
+    "stdout": "Success: no issues found in 31 source files\n",
+    "stderr": ""
+  },
+  {
+    "name": "imports",
+    "command": [
+      ".venv/bin/lint-imports"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.09,
+    "stdout": "\n\u2554\u2550\u2550\u2557\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25b6\u2554\u2557 \u2554\u2557      \u2554\u2557\u25c0\u2500\u2500\u2500\u2510\n\u255a\u2563\u2560\u255d\u25c0\u2500\u2500\u2500\u2500\u2500\u2510  \u2554\u255d\u255a\u2557\u2551\u2551\u2500\u2500\u2500\u2500\u25b6\u2554\u255d\u255a\u2557   \u2502\n \u2551\u2551   \u2554\u2550\u2550\u2566\u2550\u2550\u2566\u2569\u2557\u2554\u255d\u2551\u2551  \u2554\u2566\u2550\u2569\u2557\u2554\u255d\u2554\u2550\u2566\u2550\u2550\u2557\n \u2551\u2551\u2554\u2550\u2550\u2563\u2554\u2557\u2551\u2554\u2557\u2551\u2554\u2563\u2551 \u2551\u2551 \u2554\u256c\u2563\u2554\u2557\u2551\u2551 \u2551\u2502\u2551\u2554\u2550\u255d\n\u2554\u2563\u2560\u2563\u2551\u2551\u2551\u255a\u255d\u2551\u255a\u255d\u2551\u2551\u2551\u255a\u2557\u2551\u255a\u2550\u255d\u2551\u2551\u2551\u2551\u2551\u255a\u2557\u2551\u2550\u2563\u2551\n\u255a\u2550\u2550\u2569\u2569\u2569\u2563\u2554\u2550\u2569\u2550\u2550\u2569\u255d\u255a\u2550\u255d\u255a\u2550\u2550\u2550\u2569\u2569\u255d\u255a\u2569\u2550\u2569\u2569\u2550\u2569\u255d\n  \u2514\u2500\u2500\u25b6\u2551\u2551                    \u25b2 \n      \u255a\u255d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n\n---------\nContracts\n---------\n\nAnalyzed 101 files, 600 dependencies.\n-------------------------------------\n\nrk-uarch never imports rk-sim KEPT\nthe contract imports nothing from the harness KEPT\n\nContracts: 2 kept, 0 broken.\n",
+    "stderr": ""
+  },
+  {
+    "name": "contract-v1-schema",
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "uarch_contract.generate",
+      "--check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.3,
+    "stdout": "Contract schemas are fresh.\n",
+    "stderr": ""
+  },
+  {
+    "name": "contract-v2-schema",
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "uarch_contract.generate_rotary_v2",
+      "--check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.21,
+    "stdout": "Rotary-v2 schemas are fresh.\n",
+    "stderr": ""
+  },
+  {
+    "name": "engine-v1-schema",
+    "command": [
+      ".venv/bin/python",
+      "-c",
+      "from rkuarch.engines.protocol import generate; generate(check=True)"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.2,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "engine-v2-schema",
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "rkuarch.engines.protocol_v2",
+      "--check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.23,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "name": "strict-vendor",
+    "command": [
+      ".venv/bin/python",
+      "scripts/vendor_rk.py",
+      "--check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.37,
+    "stdout": "snapshot manifest, matrix and current compatibility verified: /home/jjaff/AI-infra-simulation/rk-uarch-u3-a/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963\n",
+    "stderr": ""
+  },
+  {
+    "name": "strict-contract",
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-rs",
+      "contract/tests",
+      "--require-vendor"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 7.04,
+    "stdout": "........................................................................ [ 10%]\n........................................................................ [ 21%]\n........................................................................ [ 31%]\n........................................................................ [ 42%]\n........................................................................ [ 52%]\n........................................................................ [ 63%]\n........................................................................ [ 74%]\n........................................................................ [ 84%]\n........................................................................ [ 95%]\n.................................                                        [100%]\n681 passed in 6.80s\n",
+    "stderr": ""
+  }
+]
