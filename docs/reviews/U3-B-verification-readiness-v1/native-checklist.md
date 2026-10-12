@@ -2,8 +2,10 @@
 
 Interface-independent questions for the upcoming U-P5/U0011 package under accepted
 U0005, U0006 and U0022. No native fields, schema, implementation or review verdict is
-created here. Every row below is **pending A's proposal**, then the indicated decision
-and future execution. A table of intended tests is not a passed test suite.
+created here. Every row below depends on **reconciliation of A's exact proposal**, then
+the indicated decision and future execution. A's package arrived during publication;
+see the integration note in [this handoff](README.md#publication-integration). A table
+of intended tests is not a passed test suite.
 
 | Review obligation | Required proposal detail from A | B's proposed check and discriminating fault |
 |---|---|---|

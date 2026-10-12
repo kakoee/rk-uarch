@@ -167,3 +167,36 @@ STUB, unknown error and unverified energy remain. The designated Linux/self-host
 in the published execution plan are **unchanged and pending**; discussion does not amend
 them. They do not block this analytic/documentation preparation. No U-P6 completion,
 independent-review verdict, G2 acceptance, native implementation release or U3 closure.
+
+
+## Publication integration
+
+B's assessment/derivations/checklist commit is
+`14f40ad3986c1edeaebce2a1af63e40a7d540da9`. The subsequent fetch found A's design
+`bc01563853c38c7ac514548f68be7d16482b344f`; normal merge
+`049f73e1d74d2757d053a40d69639e5829515eff` preserved all six incoming proposal documents.
+No runtime, tests, protected paths or historical artifacts changed in that merge.
+A's [README](../U3-native-stage-design-v1/README.md),
+[decision list](../U3-native-stage-design-v1/next-decision.md) and relevant E4 premises
+were inspected for this integration note, not adjudicated as an independent review.
+
+The coordinator now has both packages. Specific reconciliation dependencies are:
+
+- A proposes BF16 component-only M/K/B stages and explicit full-v1/v2 decoder refusal
+  until expansion T. Decide that bounded scope and its preserved full-grid obligations;
+  B's RoPE arithmetic is future coverage design, not evidence that native B admits RoPE.
+- A's E4 proposes infinite-bandwidth NoC-0 and separate DRAM/channel/core-port service.
+  B's finite-link 10 ns illustration is conditional and does not test that model. Freeze
+  the accepted service convention, credit lifetime and observations before deriving the
+  actual native corpus; do not force matching answers by changing either example silently.
+- Reconcile A's V07/V08/V13/V21 inventories, DMA-credit histories and later queue windows
+  against B's control-volume/window checklist. Proposed observation availability is not
+  execution; a required unimplemented case blocks its checkpoint.
+- A's mapped carriers/U0011, two human hand fixtures, exact toolchain/budgets and FP8/RoPE
+  expansion decisions remain human/coordinator dependencies. Its runner-policy amendment
+  is a proposal; the currently published prerequisite still applies.
+
+Only B-owned documentation was updated after the merge. Documentation link and whitespace
+checks passed again. The strict-support pass above remains the actual baseline check;
+no unchanged runtime suite or artifact lifecycle was repeated for peer prose integration.
+Stop for coordinator review of these proposals; no native review verdict is supplied here.
