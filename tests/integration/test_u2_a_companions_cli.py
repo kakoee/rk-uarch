@@ -753,14 +753,24 @@ def test_real_peer_preserves_complete_supplied_comparisons(tmp_path):
 def test_real_cli_rejects_wrong_indexes_or_missing_attempts(tmp_path, attack):
     from tests.integration.test_u2_b_r202_public import selected_package
     from tests.u2_a_companion_inputs import write_assembly_inputs
-    from tests.unit.test_u2_b_companions import arguments, canonical_comparisons
+    from tests.unit.test_u2_b_companions import arguments, canonical_comparisons, change_deps
 
     require_real_peer()
     verified, _, _, _ = selected_package.__wrapped__()
-    inputs = arguments(verified)
-    assert inputs["comparison_hashes"] != tuple(sorted(inputs["comparison_hashes"]))
-    if attack == "omit":
-        canonical_comparisons(inputs)
+    inputs = canonical_comparisons(arguments(verified))
+    assert len(inputs["comparison_hashes"]) == 2
+    if attack == "wrong-index":
+        # Construct wrong recipe indexes explicitly; refreshed artifact hashes can
+        # change sort order without changing the comparisons' meaning.
+        def swap_indexes(dependencies):
+            for recipe in dependencies["recipes"]:
+                parts = recipe["metric_path"].split("/")
+                if parts[1] == "comparisons":
+                    parts[2] = str(1 - int(parts[2]))
+                    recipe["metric_path"] = "/".join(parts)
+
+        change_deps(inputs, swap_indexes)
+    elif attack == "omit":
         # Full store/declarations still contain the omitted attempt.
         inputs["comparison_hashes"] = inputs["comparison_hashes"][:-1]
     opts = write_assembly_inputs(inputs, tmp_path)
