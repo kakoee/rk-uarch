@@ -7,13 +7,14 @@ from copy import deepcopy
 from itertools import product
 from unittest.mock import patch
 
+from uarch_contract.hardware import HardwareSpec
+from uarch_contract.hashing import canonical_json, spec_hash
+from uarch_contract.rotary_v2 import RequestIntentV3, RotaryCoefficients
+
 from rkuarch.table.capture_v2 import capture, replay
 from rkuarch.workload.capacity_v2 import capacity_summary
 from rkuarch.workload.prepared_v2 import physical_assumptions
 from rkuarch.workload.producer_v2 import prepare
-from uarch_contract.hardware import HardwareSpec
-from uarch_contract.hashing import canonical_json, spec_hash
-from uarch_contract.rotary_v2 import RequestIntentV3, RotaryCoefficients
 
 cases = runpy.run_path("contract/tests/rotary_v2_cases.py")
 original_import = builtins.__import__
