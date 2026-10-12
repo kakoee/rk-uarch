@@ -19,8 +19,8 @@ from scripts import vendor_rk as vr
 from tests import u2_comparison, u2_refresh
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT_MANIFEST = "20eee19b0e864ad07a7b122da7544e385116fdd50d279e1fac1bfbbf03a697ad"
-REVIEW_SHA256 = "55787e09a751b67b28b90835ad96041040b1a0dd9cb85ba16538c27fb7597861"
+CURRENT_MANIFEST = "1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
+REVIEW_SHA256 = "58f0f04b55aa228c9831cc2427f0f86a4aa3c1ae8f9327eb3660ae160323300c"
 
 
 def test_historical_fixture_is_complete_and_relocatable(tmp_path: Path) -> None:
@@ -93,7 +93,7 @@ def test_current_canonical_is_exact_adopted_1008_four_real_refusals() -> None:
         assert event["rk_sha"] == vr.PIN and event["execution"] == "refused"
         assert event["exception"] == "UnsupportedPrecision"
         assert event["boundary"] == "Accelerator.peak_op_per_s"
-    review = ROOT / "tests/fixtures/u2_b/received-adoption-review.json"
+    review = ROOT / "tests/fixtures/u3_rope/received-adoption-review.json"
     assert vr.digest(review.read_bytes()) == REVIEW_SHA256
     accepted = u2_refresh.adoption_authority(root, review, REVIEW_SHA256)
     assert accepted.reviewed_subject_hashes == ("sha256:" + CURRENT_MANIFEST,)
