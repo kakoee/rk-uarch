@@ -41,8 +41,8 @@ This task stops after normal commits/push and coordinator handoff.
   Markdown files and both JSON projections, including edges, component counts/intervals,
   DMA channel service, RoPE, queue windows and all displayed effort subtotals. Local link
   existence checks pass; the final count is reported by that reproducible block.
-- `git diff --check` and staged `git diff --cached --check`: required before commit;
-  final publication handoff records the executed outcome. Stage only this package.
+- `git diff --check` and staged `git diff --cached --check`: passed before commit.
+  Staged path review contained only the eight new package Markdown files.
 - Hardware diff from initial HEAD through amendment baseline: no npu-l4 changes, so the
   inherited hardware identity is retained, not claimed as a fresh hardware measurement.
 - No pytest/mypy/native/container/CI suite is represented as run for new Markdown only.
@@ -53,3 +53,21 @@ and Git commands used reviewed escalated execution in the user-designated worktr
 The first attempted documentation writer used unavailable `python`; it exited before
 creating files. The successful writer/checker used `python3`. Neither attempt invoked a
 runtime candidate, artifact generator or dependency installation.
+
+## Published design commit
+
+Exact proposal commit: **`3ebe76b87881e83f0aa62e91018346d1d1b065d4`**,
+`docs(u3-a): revise native stage design for accepted delivery amendment`.
+Normal push advanced origin/main from `30812df` to `3ebe76b`; `git ls-remote` confirmed
+that exact published HEAD. Fetch immediately before push found no additional peer changes;
+normal integration reported already up to date. No published history was rewritten.
+
+All eight files, **25 local links**, two JSON projections and independent arithmetic/
+effort assertions passed the reproducible documentation checker. Existing executable
+pre-commit hooks ran the human-owned-path and frozen-prediction guards successfully.
+The worktree/index were clean after the design push. Amendment ancestry passed again.
+No runtime, protected path or historical package appears in the proposal diff.
+
+This publication note is a separate documentation commit; its exact hash is in the final
+author response. Review/decision content is pinned by the design commit above. Coordinator
+must still adjudicate the listed decisions and G2; publication supplies no acceptance.
