@@ -147,3 +147,17 @@ actual model/interface choices and dependency policy, not just correction receip
 Retain A/B sessions for author responses. Javid's stage/U0011/schema-plan decision,
 separate policy/migration decision, toolchain closure and later exact protected
 installation remain separate. No further author correction is requested at this point.
+
+
+## Review allocation correction
+
+The user correctly identified that the standing process is per lane. The combined
+review recommendation above is superseded; its historical text is retained. Use two
+fresh non-author sessions, with [A's prompt](lane-A-independent-review.txt) and
+[B's prompt](lane-B-independent-review.txt). Both review `184d2c2` and independently
+check shared boundaries. B's scope includes its readiness/consumer proposals as well
+as the dependency repair. Each reviewer writes a distinct report and later adjudicates
+that lane's author responses. The coordinator reconciles shared findings.
+
+No proposal or accepted policy changed. This corrects review allocation only, not the
+reviewed commit, pending human decisions or implementation authority.
