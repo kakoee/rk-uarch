@@ -95,62 +95,95 @@ DMA for tile1 into slot1 may overlap compute of tile0 in slot0; reuse of slot0 b
 tile0's last consumer completes is refused. Occupancy is the union of live allocations,
 not cumulative allocation totals or payload traffic.
 
-### E4: NoC-0, DRAM-0 and DMA limits (B)
+### E4: exact NoC0 / DRAM0 / DMA convention (Stage 2 A-F2/F3)
 
-NoC-0 unicast pays h*2 NoC cycles at 1 GHz, independent of bytes: two hops=4000 ps.
-Request and response each traverse their explicit routes. No link serialization/queue
-or VC contention exists at this level. U-P8's finite-link-width formula becomes
-hops*latency + **zero** serialization under the level-0 infinite-bandwidth premise;
-its finite-bandwidth contention/serialization cases remain not_run until that level
-exists. This applicability clarification needs acceptance with U0011, not silent
-introduction of a reservation model or pretending the finite-link test passed.
+These are revised proposed laws, not tuned measurements. E1–E3 arithmetic is unchanged.
+Write NE_d(t,n)=next_edge(domain d,t,n) with the accepted integer edge rule in E2.
+Every cycle-valued phase uses it; no `t + cycles*rounded_period`, including hop return.
+NoC hop arrival is NE_noc(t,h*router_latency_cycles) for h>0; h=0 returns t exactly.
+NoC0 has infinite bandwidth, no serialization/VC/link reservation. Latency/pipeline
+alignment is real modeled time, not discarded to retain the old answer.
 
-Proposed DRAM-0 fixed latency is t_rp+t_rcd+t_cl=48 DRAM cycles, regardless of history;
-no modeled open-row advantage. Refresh derates service bandwidth, not this latency:
-chip cap=10^12*(1−350/3900)=10^12*71/78 bytes/s;
-per-channel cap=4437500000000/39 bytes/s. Do not multiply chip bandwidth by eight.
-One full request's channel service time=256*10^12/cap=159744/71 ps;
-ceil=2250 ps. Maintain an exact rational channel virtual finish time and round each
-completion edge up once; don't accumulate rounded per-request periods. Fractional
-service arithmetic and deterministic channel FIFO are bookkeeping for a bandwidth cap,
-not a row-buffer/FR-FCFS model. Do not claim modeled DRAM queue-depth or credit enforcement.
+DRAM latency: align L0=NE_dram(arrival,0); complete L=NE_dram(arrival,
+t_rp_cycles+t_rcd_cycles+t_cl_cycles). Baseline48 cycles. Bandwidth is continuous rational
+bytes/second, not cycles: chip cap=10^12*(1−350/3900)=10^12*71/78; channel cap=4437500000000/39.
+For each FIFO channel request, S=max(integer latency completion L, previous exact F),
+F=S+transaction_bytes*10^12/cap; publish `channel_end_ps=ceil(F)` exactly once. Preserve
+rational F between requests; **do not align channel completion to a DRAM edge** or feed
+ceil(F) back into the next service. Canonical service observations use ceil(S)/ceil(F)
+and also exact reduced `service_start_ps_ratio`/`service_end_ps_ratio` numerator/denominator
+pairs. These are bandwidth-time values, not an exception to the cycle conversion invariant.
+At idle admission the integer-ready L participates in max; no phantom service starts early.
 
-Read lifecycle: credit acquired at request issue; request hop delay; align to DRAM edge;
-48-cycle latency; FIFO channel bandwidth service; response hop delay; align to core edge;
-per-core DMA port payload service at 256 bytes/core cycle; commit into SRAM and release
-credit. All four DMA engines share that core port. Write lifecycle: acquire credit,
-core-port payload service, request route, DRAM edge + latency + channel service,
-return acknowledgement route, core edge, then release. No response payload port service
-for a write acknowledgement. Requests cannot issue on fractional core edges. Read/write
-requests share their channel cap; no independent double bandwidth. Credit covers the
-entire round trip. DMA request counters and core-port/channel waits are observable;
-DRAM physical queue/row statistics are null.
+Read: acquire one credit/issue on a core edge; request route; DRAM latency; channel
+service; response route from ceil(F); wait for shared core port; start at
+NE_core(max(response,port_free),0), complete at NE_core(start,ceil(payload_bytes/dma_rate));
+commit destination and release credit together. Write: acquire credit on a core edge;
+shared core port first with the same service rule; request route from port completion;
+DRAM latency/channel service; acknowledgement route; release at NE_core(ack_arrival,0).
+Write ack has no payload-port service. Credit remains held through all waits and final
+commit/ack. One core port is shared by all engines and read/write payload; one channel
+cap is shared by reads/writes. Each read response and write payload transfer pays its own
+ceil(payload/rate) port cycles; do not pool unrelated fragments' remainders.
 
-Two-hop 256-byte read issued at t=0: request arrives 4000; latency ends 52000;
-channel completes ceil(52000+159744/71)=54250; response arrives 58250;
-core edge=59000; one payload-service cycle completes at **60000 ps**.
-For two same-channel reads issued at 0 with sufficient credits: second channel finish
-ceil(52000+2*159744/71)=56500; response 60500; edge 61000; DMA completion
-**62000 ps**. If a test-only hardware variant limits that DMA engine to one outstanding
-request, second issue is 60000, completion **120000 ps**. These are exact two-request
-fixtures, not asymptotic bandwidth measurements. A stock-limit fixture submits 33 reads
-on one DMA engine: at most 32 may be live; request 33 cannot issue before the first
-completion at 60000 ps. Observe credit/issue history as well as duration, since a
-bandwidth bottleneck can mask an ignored-credit bug in the final makespan. Hardware variants are separately sourced
-synthetic fixture inputs, proposed under B-owned hw/designs/ with stipulation rationales, and refuse under B's production hardware hash.
+At a core edge, issue all ready requests that have credits in canonical (engine_id,
+request_id) order; there is **no separate finite issue-rate cap** in B. A read issues no
+payload onto the core port. Write issues acquire credits before queuing for that port.
+Later ready requests wait until NE_core(ready,0). NoC/DRAM arrivals do not require a second
+core-domain issue. Only compute jobs pay job_overhead_cycles, once per mapped compute
+tile; DMA/NoC jobs pay none, barriers pay only their NoC-domain barrier latency. This is
+an explicit assumption requiring human acceptance despite the spec's generic overhead
+rationale, not a new hardware fact.
 
-For a long low-load single-request stream the cap is 256 bytes/60000 ps =
-4266666666.666… bytes/s, below channel bandwidth. A synthetic two-credit, large-latency
-stream must approach min(channel cap, shared DMA-port cap, credits*256/round_trip), with
-startup/drain excluded explicitly and ≤5% tolerance under U-P8's premises. Reducing
-credits never speeds this fixed mapping. A separate prepopulated channel-service fixture
-isolates sustained DRAM cap (8 channels sum to 10^12*71/78), so insufficient DMA arrival
-rate cannot be misdiagnosed as a derating failure. Exact finite-stream bounds include
-startup/terminal inventory; no universal steady-state equality for arbitrary queued loads.
+Fixtures: core0=(0,0), local DMA engine0; controller3 attaches(1,1), channels6/7. Request j
+(0-based) uses HBM address1536+2048*j, length256, hence channel6 and local channel offset256*j.
+SRAM offset256*j, valid initialized source for writes/valid allocated destination for reads.
+Mesh route X then Y has2 hops each way, NoC index0. Read bursts of1/2/5/33 issue at0 with
+32 credits (except request33); two-read one-credit variant issues second at60000. IDs r00,
+r01,… determine same-time channel order. No job overhead and no other traffic. Buffers
+are nonaliasing and within capacity. Therefore the33rd read cannot issue before60000;
+this is not a placement-independent statement. Channel0 from core0 instead completes
+at52000; channels2–5 at56000. B freezes exact addresses/routes in its future profile.
 
-Barrier example: arrivals at 60000 and 62000; NoC edge already aligned; 32 cycles
-release at 94000 ps. A consumer cannot issue earlier. Channel/port service intervals
-serialize only for the same resource; independent channels/cores may overlap.
+Complete proposed timestamps in ps (alone unless noted). `req_align` is NoC entry edge;
+`dram_align`, `resp_align`, `core_align` expose crossing waits. Channel service start for
+burst read2 is the exact prior F, displayed as ceil54250. Port intervals are explicit.
+
+| Case (core/noc/dram GHz) | credit/issue | write port | req_align → request arrival | dram_align → latency end | channel start → end (ceil) | resp_align → response/ack | core_align → read port end / write release |
+| --- | ---: | --- | --- | --- | --- | --- | --- |
+| read1 (1/1/1) | 0 | none | 0 → 4000 | 4000 → 52000 | 52000 → 54250 | 55000 → 59000 | 59000 → 60000 |
+| read2 same burst (1/1/1) | 0 | none | 0 → 4000 | 4000 → 52000 | 54250 → 56500 | 57000 → 61000 | 61000 → 62000 |
+| write1 (1/1/1) | 0 | [0,1000) | 1000 → 5000 | 5000 → 53000 | 53000 → 55250 | 56000 → 60000 | 60000 → 60000 |
+| read1 (1/1.2/1) | 0 | none | 0 → 3334 | 4000 → 52000 | 52000 → 54250 | 55000 → 58334 | 59000 → 60000 |
+| write1 (1/1.2/1) | 0 | [0,1000) | 1667 → 5000 | 5000 → 53000 | 53000 → 55250 | 55834 → 59167 | 60000 → 60000 |
+| read1 (0.8/1.2/0.9) | 0 | none | 0 → 3334 | 3334 → 56667 | 56667 → 58917 | 59167 → 62500 | 62500 → 63750 |
+| write1 (0.8/1.2/0.9) | 0 | [0,1250) | 1667 → 5000 | 5556 → 58889 | 58889 → 61139 | 61667 → 65000 | 65000 → 65000 |
+
+Wait attribution is to the receiving modeled mechanism: request/response NoC alignment
+and hops→noc; DRAM entry alignment, latency, channel wait/service/ceil quantization,
+core-port wait/alignment/service and ack-to-core alignment→memory. Compute staging/wave/
+drain alignment→compute; initial compute overhead alignment/service→overhead; barrier
+alignment/latency→sync. Waiting for another owner follows that owner's causal predecessor
+rather than inventing a new busy interval. For first baseline read: noc[0,4000),
+memory[4000,54250), noc[54250,59000), memory[59000,60000); sum60000. Unequal-clock read
+(0.8/1.2/0.9): noc[0,3334), memory[3334,58917), noc[58917,62500), memory[62500,63750).
+Channel and NoC alignment observations must distinguish the old58250 response from59000;
+final-time equality at1GHz cannot establish canonical replay. The old fixed-ps NoC reading
+at1.2GHz yielded59000 instead of60000 and must fail the new exact clock assertion.
+
+Refresh fault fixture: five same-channel256-byte reads at0,32 credits, addresses as above.
+Final completions **[60000,62000,64000,66000,69000]**. Removing refresh derating gives
+**[60000,62000,64000,66000,68000]**: the first two are masked, fifth discriminates. Also
+check first channel end54250 versus54048, since no final-time masking occurs there.
+This is a prospective model fixture; B re-derives it and freezes identity before native
+execution. Missing/surviving fault blocks V13, never repaired by widening tolerance.
+
+Barrier arrivals60000/62000 yield NE_noc(62000,32)=94000 at1GHz. Lower-credit stream and
+refresh bandwidth limits retain their ±5% steady-window criteria only with independently
+proved saturation/latency premises and startup/drain treatment. The single-credit low-load
+read bound is256/60000 ps=12800000000/3 bytes/s. Separate prepopulated channel-service
+fixtures isolate bandwidth; a slow DMA arrival stream is not a refresh saturation test.
+Those transport fixtures use the explicit B test-profile admission, not production scope.
 
 ### E5: retained v2 obligations (R where consumed and T, refused at B)
 
@@ -199,7 +232,7 @@ A crash or setup error is not a timing/count mutant kill.
 | V10 B | 2-hop NoC transfer 4000; 2-hop read 60000; barrier release94000 | Extra hop cycle / latency forced to1; omit barrier overhead |
 | V11 B | Live buffer inventory stays within capacity; slot reuse waits; E3 half accumulator refuses | Ignore live alias or capacity; free buffer at issue rather than final consumer |
 | V12 B | Resident C1 interval702000, C2 547000; DMA slot1 overlaps compute slot0 with legal dependencies | Omit overhead/fill/staging/drain; serialize independent DMA/compute; overwrite slot0 |
-| V13 B | E4 exact derating, long-stream ±5% with frozen window/premises; queue conservation | Omit refresh factor; multiply total BW by8; drop terminal inventory |
+| V13 B | E4 five-read refresh discriminator69000 vs68000, exact channel end54250 vs54048; long-stream ±5% with frozen window/premises; queue conservation | Omit refresh factor; multiply total BW by8; drop terminal inventory |
 | V14 K2/B/R | Attribution causal intervals sum exactly to duration, E1 picks b→c; unmodeled diagnostics null | Normalize busy-time sum as path; double attribution; null→0 |
 | V15 K1/K2/B/R | Three fresh-process results byte equal, debug/release equal, two qualifying saved replays | Include wall clock/path/hash-map order; change code with unchanged version |
 | V16 M/B | Producer-disabled saved and relocated imports give same results; changed placement changes graph/job identity | Invoke mapper/model/coefficient producer; key cache by filename/policy name |
@@ -207,7 +240,7 @@ A crash or setup error is not a timing/count mutant kill.
 | V18 R/T | E5 plus complete independent layer/head/tail counts; once-only groups; explicit v2 casts/traffic | Drop/duplicate Q/K, rotate V/cache/pages, extra TP division, omit casts/tails/coefficients |
 | V19 R/T | Paged/fused memory correspondence; scores remain SRAM; exact append and named rotated producers | Spill score to HBM; full-page payload; append twice; feed unrotated K |
 | V20 T | Full grid/error coverage; 1/8 workers, repeated table bytes, all consumer-required policies/precisions; steady1/steady2 | Skip required point; worker-order assembly; report priming counters as measured iteration |
-| V21 B/R/U6 | Trace causality/owners/overlap; Little's law on declared completed window ≤1%; modeled diagnostics | Omit queued interval or censored request; prohibit all overlap |
+| V21 B then first stationary claim | B requires finite-window membership/causality/owner/overlap checks and observations; stationary Little's law ≤1% only at first claim with frozen population/window/boundary, normally U6 or earlier reliance | Omit queued interval or censored request; prohibit all overlap |
 | V22 U6 | Absolute host receipts; prospective noise protocol; accepted regression detector catches synthetic2× | Disable delay detector / compare wrong input or host identity |
 
 V05 is an intentional ownership fault whose required observation is a refusal/assertion,
@@ -266,8 +299,8 @@ hand working or a native execution result.
 Add V23 (B): DMA window inventory 32+128−64=96; remove one completion and require the
 inventory assertion. V24 (B): interface's 8000/6000 request-ps windows; remove initial
 membership and require area assertion. V25 (B): allocation union at every alloc/free,
-including slot reservations; early-free/alias fault. V26 (K1/K2): zero milestones→3000
-ps and zero-hop propagation/cyclic refusal; phase-regression fault. V27 (R): signed-suite
+including slot reservations; early-free/alias fault. V26 (K1/K2, retained at B): busy-owner zero job→5000 ps, bypass fault→3000;
+zero-hop propagation/cyclic refusal and phase-regression fault. V27 (R): signed-suite
 coverage/steady/attribution, omitted fused-unit work blocks G3a. V28 (T): no FP8/RoPE
 substitution, complete ragged error jobs, C2 consistency; omitted point blocks G3b.
 Each requires baseline/fault/restored controls, frozen inputs and independent assertions.
@@ -291,8 +324,8 @@ claim execution or approval.
 | --- | --- | --- |
 | C1 v1 aggregate-only compute-clock distinct coverage | Before first bound, analytic frequency prediction or report relying on this aggregate domain, whichever first | Historical `analytic.aggregate_clock/1:aggregate:d4-bf16-v1` remains 22/24, not_run; B's proposed aggregate-only 24-anchor remedy, bounded discovery, 240 calls/ledger and separate unchanged-clock mutant need acceptance |
 | Native component-clock checks (separate from analytic C1) | E2 at K1 privately/K2 publicly; isolated resident-compute E3 clock relation at B under its explicit synthetic test profile | Independently derive edge/timing expectations from accepted native conventions and true premises; no aggregate anchor, analytic pass or whole-query per_op law is inherited |
-| Future per_op exact reciprocal-clock domain (separate proposal) | Before any claim using that domain, if proposed and approved | Existing whole-query premise is false with memory-only embedding and remains skipped; a new domain needs independent dominance proof for every op, exact selection/budgets and separate approval, not the aggregate C1 remedy |
-| C2 memory/mixed clock | Before B/R/U6 floor relying on changed clocks; no later than applicable U-P9 baseline | B proves aggregate/per-op dominance independently; T'=T only with its premises; wrong-memory-scaling mutant |
+| Future per_op exact reciprocal-clock domain (separate proposal) | Before any claim using that domain, if proposed and approved | Existing whole-query premise is false with memory-only operators head/embed and layers/kv and remains skipped; a new domain needs independent dominance proof for every op, exact selection/budgets and separate approval, not the aggregate C1 remedy |
+| C2 memory/mixed clock | Before first actual analytic bound/frequency prediction relying on changed clocks; no later than applicable U-P9 baseline | B proves memory dominance at the base (slower) clock (then also k·f); aggregate T'=T requires aggregate dominance, per_op T'=T requires it for every op; wrong-memory-scaling mutant |
 | C3 unused stipulation | Before any fixture/report/study claims invariance: earliest B metamorphic use, otherwise U-P14 | B supplies admitted proposed-design TDP100/200 W fixture/rationale; identity changes, timing does not; 24 pairs/cap retained |
 | C4 unavailable execution observations | Never use analytic counts for native telemetry; native analogues required at K2/B/R/U6 as represented | Keep unsupported/skipped/not_run; energy after separate evidence, physical queues when represented |
 | C5 independent v2 corpus/producer/replay/mutants | Before any native v2 roofline reliance, even before silicon; no later than applicable R RoPE/layer acceptance and U-P9 baseline | B freezes stratified modes/formats/pairing/R/context/rank/repeat/attention cells; unavailable precision is no implicit native admission |
@@ -304,7 +337,9 @@ claim execution or approval.
 U-P9/U-P15 baseline predictions are consumers even without a C2 assertion. If reliance
 moves earlier, its checks move too. K1 uses independent math, not analytic answers, so
 unrelated report completion does not block it. B may use independently derived component
-bounds; any added analytic comparison immediately triggers applicable checks. C1–C5 are
+bounds only; no analytic component API or full-model admission bypass is proposed.
+First actual admitted analytic reliance triggers applicable checks, R/U-P9 at the latest
+for required baselines; an earlier new comparison needs its own admitted interface. C1–C5 are
 not blanket-paused. Two genuinely human-worked L1 fixtures, including latency-bound DMA,
 remain required before B's applicable L1 acceptance; agent arithmetic does not supply them.
 

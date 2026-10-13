@@ -48,8 +48,12 @@ service = F(256*10**12,cap)
 assert service == F(159744,71)
 assert math.ceil(52000+service) == 54250
 assert math.ceil(52000+2*service) == 56500
-assert math.ceil(F(54250+4000,1000))*1000+1000 == 60000
-assert math.ceil(F(56500+4000,1000))*1000+1000 == 62000
+def next_edge_1ghz(t, n):
+    return (math.ceil(F(t, 1000)) + n)*1000
+assert next_edge_1ghz(54250, 4) == 59000
+assert next_edge_1ghz(56500, 4) == 61000
+assert next_edge_1ghz(next_edge_1ghz(54250, 4), 1) == 60000
+assert next_edge_1ghz(next_edge_1ghz(56500, 4), 1) == 62000
 assert 62000+32000 == 94000
 assert (2*17*4*2, 2*32*4*2, 2*1*4*2) == (272,512,16)
 assert (3*5*4*4*4, 3*(2*4*4*6+8*4*4), 3*2*4*4*6) == (960,960,576)
@@ -58,7 +62,10 @@ assert (20+20+10+32, 32+32+16+52) == (82,132)
 assert (12+8+8+24, 20+14+12+40) == (52,86)
 assert (6+4+4+8, 10+6+6+12) == (22,34)
 assert (82+52+22, 132+86+34) == (156,252)
-assert (60+48+12, 100+80+20) == (120,200)
+assert (40+28+8, 64+48+12) == (76,124)  # shared W
+assert (20+20+4, 36+32+8) == (44,76)  # R-specific
+assert (76+44, 124+76) == (120,200)
+assert (76+108, 124+188) == (184,312)  # W+T if R has not supplied W
 assert (28+32+8, 48+56+16) == (68,120)
 assert (60+36+12, 104+64+20) == (108,188)
 assert (3*(2+2+2), 3*(4+4+4)) == (18,36)

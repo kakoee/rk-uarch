@@ -123,3 +123,15 @@ Staged whitespace and existing human-owned/frozen-prediction hooks passed withou
 Worktree/index were clean after push. This receipt is a separate documentation commit,
 identified in the final author response. Stop for coordinator reconciliation; no pending
 human or B decision listed above is implicitly accepted by publication.
+
+## Stage 2 author follow-up
+
+The records above describe their historical revisions. The current Stage 2 correction
+is in [the author response](../U3-lane-A-response.md); its exact commits and checks
+supersede the earlier scope/effort/timestamp summaries only where explicitly listed.
+For A-C1, both `head/embed` and `layers/kv` are memory-only; the earlier embedding-only
+explanation above was incomplete. Historical reason codes/reports remain unchanged.
+Aggregate anchors, native component clocks and any future true-premise per_op domain
+remain separate. E4 now uses named-domain next_edge at every cycle leg; no old timestamp
+is preserved by tuning. The proposal is still awaiting coordinator/reviewer/Javid
+reconciliation, not G2 acceptance. No historical evidence has been changed.

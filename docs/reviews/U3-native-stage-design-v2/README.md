@@ -7,8 +7,8 @@ all historical proposals and evidence remain intact.
 The first model stage remains a single-threaded BF16 component executor on the frozen
 stipulated npu-l4: small WS GEMMs, explicit DMA/unicast, buffers and barriers. Separate
 M / K1 / K2 / B / R / T. K1 internals may overlap M after accepted kernel semantics and
-exact toolchain/license decisions. K2 public execution waits for installed approved mapped
-carriers. R serves the actual TPU benchmark suite; full product tables first serve U7.
+exact toolchain/license decisions. K2 public execution waits for installed approved fixed-delay carriers/fixtures/import;
+the component mapper is first required at B. R serves the actual TPU benchmark suite; full product tables first serve U7.
 Correctness Linux CI, controlled-host performance and executed nightly have separate exits.
 
 ## Review package and authority
@@ -29,11 +29,12 @@ preserved older U0005 text. Inputs: [A v1](../U3-native-stage-design-v1/README.m
 [B v1](../U3-B-verification-readiness-v1/README.md). Their stale full-grid/runner wording
 is explicitly superseded here; their evidence is not relabeled or edited.
 
-The requested `/home/jjaff/AI-infra-simulation/rk-uarch-u3-a` started clean at
+Original v2 publication inspection: `/home/jjaff/AI-infra-simulation/rk-uarch-u3-a` started clean at
 `bc01563853c38c7ac514548f68be7d16482b344f`. Fetch and fast-forward integrated all published
 peer history through amendment `30812dfc322b742b81521e350d7d5b541221ca0d`; ancestry passed.
 There were no local edits to move or overwrite. CLAUDE.md and CODEOWNERS were read;
-no applicable AGENTS.md was found. Only this new proposal directory is edited.
+no applicable AGENTS.md was found. Only the new proposal directory was edited then;
+Stage 2 changed paths and checks are recorded in the author response.
 
 ## Exact B scope retained
 
@@ -59,11 +60,13 @@ compute1 / NoC0 / DRAM0 / exact sync / layer_reuse=false, composite at most C1.
 Banks, physical DRAM queues/rows, NoC contention and energy remain unrepresented/null.
 Completed work is observed from jobs; functional tensor execution is outside scope.
 
-Refuse full v1/v2 models, all non-q_projection operators, rotary/casts/KV/fused attention,
+Production refuses full v1/v2 models, all non-q_projection operators, rotary/casts/KV/fused attention,
 other precision/ranks/hardware, steady state, K spill, multicast, imported padding,
 invalid placements/capacities/dependencies, unknown versions and unsupported fidelity.
 [Interface R01–R21](interface.md) gives literal negative cases; verification E1–E4 gives
-positive mechanisms. R and T expand only through their own exact accepted scopes.
+positive mechanisms. The Stage 2 test-profile matrix separately admits verification-only
+variants and retained kernel regressions; it cannot widen production admission. R and T
+expand only through their own exact accepted scopes.
 
 ## G2 disposition
 
@@ -90,3 +93,15 @@ and any future true-premise per_op domain stay separate. Historical evidence is 
 consults B's published audit and identifies initializer/import/data relationships that may
 enter support; it claims neither a new closure count nor an exemption from generation
 binding. See the [follow-up handoff](handoff.md#bounded-coordinator-follow-up).
+
+## Stage 2 author correction scope
+
+The [author response](../U3-lane-A-response.md) addresses A-F1–A-F10 individually and
+links [discriminating proposal checks](../U3-A-stage2-proposal-checks.md). Interface now
+specifies frozen test-profile admission (production hardware unchanged), owner-granted
+zero jobs, count versions/validation order, all hardware leaves and owner/bank IDs.
+Verification E4 now uses named-domain edges for every cycle leg, rational channel service
+and a five-read refresh fault. Delivery corrects K2 prerequisites, separates reusable W
+operator effort from TPU-specific R, names U6 inputs/U0011-Q and narrows only the proposed
+small performance fixture. Historical v1 and published evidence are unchanged. These are
+unaccepted author corrections; the same reviewer returns after coordinator reconciliation.
