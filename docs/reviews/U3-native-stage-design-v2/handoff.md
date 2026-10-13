@@ -114,3 +114,12 @@ U0011 B scope and environment/gate policy. Three clock scopes are explicit; only
 existing A-owned Markdown files changed. `git diff --check` and amendment ancestry passed.
 These are documentation checks, not corpus execution. Publication hashes and normal-hook
 results will be recorded after the correction commit.
+
+Published correction: **`c17cb9cfb56c8c08db2f2a1d4501bcf5360939eb`**,
+`docs(u3-a): correct aggregate clock scope and map M dependencies`. Normal push advanced
+main from `8867c0c` to this commit; `git ls-remote` confirmed the exact published hash.
+The pre-push fetch/integration was already up to date; all incoming peer history remains.
+Staged whitespace and existing human-owned/frozen-prediction hooks passed without bypass.
+Worktree/index were clean after push. This receipt is a separate documentation commit,
+identified in the final author response. Stop for coordinator reconciliation; no pending
+human or B decision listed above is implicitly accepted by publication.
