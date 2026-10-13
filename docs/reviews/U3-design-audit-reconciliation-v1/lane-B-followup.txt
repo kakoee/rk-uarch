@@ -1,0 +1,39 @@
+Continue the existing U3-B session in rk-uarch-u3-b. Inspect/preserve local changes,
+fetch and integrate main normally, retaining peer history. Read current instructions.
+
+Coordinator reconciliation is in:
+docs/reviews/U3-design-audit-reconciliation-v1/README.md
+If not published yet, use these self-contained findings; do not copy coordinator trees.
+
+The direction is retained. Complete these bounded test corrections in the UNAPPLIED
+repair proposal, using private exports for execution. Do not install the repair live.
+
+B-C1: Removing just load_inputs' new-policy call to u2_support.verify leaves all 30
+proposed tests passing. A coordinator synthetic public-input probe shows the real hook
+refuses changed bound hw/derive.py bytes, while disabled enforcement accepts them.
+Add durable public-load_inputs controls with clearly synthetic rehashed inputs:
+valid new-policy control, bound-byte and inventory/new-dependency drift, policy
+substitution and legacy dispatch. Assert specific intended refusals. Demonstrate the
+loader-call removal makes applicable attacks succeed and new tests fail; restored
+controls pass. Helper-only tests are not sufficient. Synthetic controls are neither
+generation provenance nor real new-policy adoption; that positive gate remains later.
+
+B-C2: test_legacy_integrity_survives_but_currentness_requires_migration unconditionally
+expects check_generator(ui.ADOPTED) to fail, although ui.ADOPTED is the current artifact
+path. Separate a pinned legacy case from legitimate current-artifact behavior so the
+test does not reject future approved adoption. Keep strict library validation and
+historical/current distinctions; do not merely remove coverage or forge actual-run data.
+
+Reconcile A's forthcoming M import/initializer/data note against the audited closure.
+You can complete the tests before that note arrives; explicitly retain the consultation
+dependency if necessary. No policy or inventory narrowing is accepted by this task.
+
+Preserve prior evidence/receipts as historical results. Revise the exact proposal patch
+and its bindings using Git, and publish a short correction handoff with before/fault/
+restored results and remaining real-migration checks. No copied checkpoint trees.
+Run focused regressions and exact CI-style static checks with ambient import paths
+removed; do not claim a full-suite run if none occurred.
+
+Normal commits/push to main, preserve A's history. No live runtime/enforcement edits,
+generation/adoption, protected changes, new analytic corpus, or gate acceptance.
+Stop for coordinator reconciliation.
