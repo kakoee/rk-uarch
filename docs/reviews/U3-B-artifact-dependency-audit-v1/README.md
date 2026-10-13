@@ -1,5 +1,10 @@
 # U0002 dependency audit and unapplied migration proposal
 
+**Correction:** [B-C1/B-C2 follow-up](../U3-B-dependency-audit-correction-v1/README.md)
+updates only the unapplied patch tests and supplies its new SHA256. The execution receipts
+and `evidence.json` below remain historical for the original `a602683` patch; they do not
+claim coverage of the later public-loader fault. Policy/inventory proposals are unchanged.
+
 **Author audit/prototype, not independent review or permission to install.** This executes
 the bounded task in [proposal v1](../U3-artifact-dependency-repair-proposal-v1/README.md)
 and its [v2 deadline](../U3-artifact-dependency-repair-proposal-v2/README.md).

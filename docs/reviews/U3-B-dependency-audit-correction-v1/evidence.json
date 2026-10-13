@@ -1,0 +1,62 @@
+{
+  "status": "proposal only; repair unapplied in live clone; synthetic controls are not generation or adoption",
+  "export_commit": "8867c0c86cddf17adafafe1717f57d8bc220a2d1",
+  "export_tree": "4aebedf347705570c48b800ba86575cb9e8779c0",
+  "integrated_peer_commit": "5c8191541ea0c9161b8d21344ba7be0d28fac0c5",
+  "a_dependency_note_commit": "c17cb9cfb56c8c08db2f2a1d4501bcf5360939eb",
+  "historical_patch_commit": "a6026833bba6badb3003b730af31ad0aeaf51346",
+  "historical_patch_sha256": "bb15bd236938c659b3c07b8be03121aaa5f41ee339560ba150a7cb4cec8391f8",
+  "corrected_patch_path": "docs/reviews/U3-B-artifact-dependency-audit-v1/repair.patch",
+  "corrected_patch_sha256": "97d0ec302606838a7055ec3d43ce1d3b759e8e015ecb796eed154ce4b0915e55",
+  "change_scope": "only proposed test file changed; proposed scripts/u2_inputs.py and scripts/u2_support.py byte-identical to previous patch; no inventory/policy change",
+  "existing_adopted_manifest_sha256": "1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a",
+  "existing_input_manifest_sha256": "27c6238d42e57dc4f2b1baf0c8846c11f1eec2968176dcefcdc463beb64bc80f",
+  "pinned_legacy_manifest_sha256": "b3a575d0e3f27a4057678a2298609a580fd5a5e1dd858b0f4af086f2dc9e0e1d",
+  "environment": "existing B .venv, no installation; env -u PYTHONPATH -u MYPYPATH for every recorded test/static command",
+  "private_export": "temporary git archive of export_commit, patch applied only there; discarded after checks",
+  "fault": "replace only load_inputs new-policy u2_support.verify(...) invocation with pass; helper remains unchanged; restore exact saved loader bytes",
+  "runs": {
+    "original_tests_before_fault": "30 passed in 4.57 s",
+    "original_tests_loader_call_removed": "30 passed in 4.42 s (blind spot reproduced)",
+    "corrected_tests_first_fault": "4 failed, 40 passed, 1 skipped in 7.42 s; all failures DID NOT RAISE ValueError",
+    "corrected_tests_first_restored": "44 passed, 1 skipped in 8.03 s",
+    "corrected_tests_final_fault": "4 failed, 40 passed, 1 skipped in 6.75 s; same four attacks accepted",
+    "corrected_tests_final_restored": "44 passed, 1 skipped in 7.84 s",
+    "policy_and_vendor_entry_regressions": "53 passed, 1 skipped in 10.04 s",
+    "existing_integrity_environment_regressions": "14 passed, 36 deselected in 0.38 s",
+    "live_strict_vendor": "passed at integrated_peer_commit",
+    "patched_export_strict_vendor": "expected exit 1: input support inventory changed; not a successful migration",
+    "ruff_initial": "one E501 in new test; line wrapped; subsequent Ruff passed",
+    "ruff_final": "passed",
+    "mypy_src_contract_scripts": "79 files passed",
+    "mypy_contract_tests": "31 files passed",
+    "lint_imports": "2 kept, 0 broken; 101 files, 600 dependencies",
+    "patch_applicability": "git apply --check passed in live clone; patch never applied live"
+  },
+  "fault_cases": [
+    "bound_bytes",
+    "missing_entry",
+    "wrong_hash",
+    "new_dependency"
+  ],
+  "skip": "current new-policy adoption positive: no real human-generated/adopted support-policy.json exists; legacy integrity still validated before skip",
+  "commands": {
+    "prefix": "env -u PYTHONPATH -u MYPYPATH /home/jjaff/AI-infra-simulation/rk-uarch-u3-b/.venv/bin/",
+    "policy": "python -m pytest -q -rs tests/unit/test_u2_support_policy.py",
+    "fault": "python -m pytest -q -rs --tb=line tests/unit/test_u2_support_policy.py",
+    "entry_regression": "python -m pytest -q -rs tests/unit/test_u2_support_policy.py tests/unit/test_vendor_script_entry.py",
+    "integrity_regression": "python -m pytest -q contract/tests/test_u_p2_review.py -k 'f3_metadata or f3_program or f4_strict or f7_environment_tampering or f7_ci_runtime' --require-vendor",
+    "static": [
+      "ruff check .",
+      "mypy src contract/uarch_contract scripts",
+      "mypy --no-explicit-package-bases contract/tests",
+      "lint-imports"
+    ],
+    "strict_live_and_export": "python scripts/vendor_rk.py --check"
+  },
+  "import_resolution": "pytest uses repository-configured pythonpath in private export; mypy uses explicit targets/config. lint-imports uses existing B editable src/contract roots, independently compared byte-for-byte with unchanged export import-contract subjects; no ambient PYTHONPATH/MYPYPATH.",
+  "full_suite_executed": false,
+  "generation_executed": false,
+  "adoption_executed": false,
+  "remaining": "exact M patch/read inventory, independent review and separate policy/migration decision; actual new-policy generation/currentness and complete migration audits remain unexecuted"
+}

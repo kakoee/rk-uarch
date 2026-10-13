@@ -183,7 +183,7 @@
 +            raise ValueError("input support bytes changed: " + name)
 --- /dev/null
 +++ b/tests/unit/test_u2_support_policy.py
-@@ -0,0 +1,208 @@
+@@ -0,0 +1,382 @@
 +"""Prospective support-policy controls; no oracle or candidate generation."""
 +
 +import pytest
@@ -346,15 +346,32 @@
 +        p.unlink(missing_ok=True)
 +
 +
-+def test_legacy_integrity_survives_but_currentness_requires_migration():
++def test_pinned_legacy_integrity_is_not_current_generator_compatibility():
++    from contract.tests.historical_snapshot import historical_snapshot
++    from scripts import vendor_rk as vendor
++
++    # Fixed, authenticated U1 bytes, independent of the mutable ui.ADOPTED path.
++    legacy = historical_snapshot()
++    vendor.check_manifest(legacy)
++    vendor.check_generator(legacy, current=False)
++    vendor.check_snapshot_inputs(legacy)
++    with pytest.raises(
++        ValueError, match="^GENERATOR current incompatibility: generator script fingerprint differs"
++    ):
++        vendor.check_generator(legacy, current=True)
++
++
++def test_current_new_policy_adoption_requires_strict_validation():
 +    from scripts import u2_inputs as ui
 +    from scripts import vendor_rk as vendor
 +
++    # A real positive gate, never satisfied by the synthetic controls below.
 +    vendor.check_manifest(ui.ADOPTED)
 +    vendor.check_generator(ui.ADOPTED, current=False)
 +    vendor.check_snapshot_inputs(ui.ADOPTED)
-+    with pytest.raises(ValueError, match="support inventory changed"):
-+        vendor.check_generator(ui.ADOPTED)
++    if not (ui.ADOPTED / "u2-inputs/support-policy.json").exists():
++        pytest.skip("real new-policy human generation/adoption has not occurred")
++    vendor.check_generator(ui.ADOPTED, current=True)
 +
 +
 +@pytest.mark.parametrize(
@@ -383,7 +400,7 @@
 +    frozen = replica / "u2-inputs"
 +    identity = vendor.digest((frozen / "SHA256SUMS").read_bytes())
 +    vendor.check_manifest(replica)
-+    # Structural control only; the unchanged artifact needs policy migration.
++    # Structural control only; does not assert current source compatibility.
 +    ui.load_inputs(frozen, identity, check_support=False)
 +    path = frozen / member
 +    path.chmod(0o644)
@@ -392,3 +409,160 @@
 +        vendor.check_manifest(replica)
 +    with pytest.raises(ValueError, match="input bytes changed"):
 +        ui.load_inputs(frozen, identity, check_support=False)
++
++
++@pytest.fixture
++def synthetic_public_inputs(tmp_path, monkeypatch):
++    """Rehashed carrier copies ONLY: no generator metadata, provenance or adoption.
++
++    Existing typed carriers remain intact. Recompute the input manifest after every
++    intentional support-metadata substitution so tests reach the public policy gate.
++    Never invoke prepare_inputs or copy/relabel a whole generated snapshot.
++    """
++    import shutil
++
++    from scripts import u2_inputs as ui
++    from scripts import vendor_rk as vendor
++
++    def forbidden(*args, **kwargs):
++        pytest.fail("synthetic public-load control must not run a producer")
++
++    for module, name in (
++        (ui, "prepare_inputs"),
++        (vendor, "run_oracle"),
++        (vendor, "collect_snapshot"),
++    ):
++        monkeypatch.setattr(module, name, forbidden)
++    frozen = tmp_path / "synthetic-rehashed-inputs-not-adoption"
++    shutil.copytree(ui.ADOPTED / "u2-inputs", frozen)
++    for path in frozen.rglob("*"):
++        if path.is_file():
++            path.chmod(0o644)
++    (frozen / "support-policy.json").write_bytes(vendor.canonical(policy.POLICY))
++    (frozen / "support-files.json").write_bytes(vendor.canonical(policy.inventory()))
++    return frozen
++
++
++def rehash_synthetic_inputs(frozen):
++    from scripts import vendor_rk as vendor
++
++    files = {p.relative_to(frozen).as_posix(): p for p in frozen.rglob("*") if p.is_file()}
++    files.pop("SHA256SUMS")
++    manifest = "".join(
++        vendor.digest(path.read_bytes()) + "  " + name + "\n"
++        for name, path in sorted(files.items())
++    ).encode()
++    (frozen / "SHA256SUMS").write_bytes(manifest)
++    return vendor.digest(manifest)
++
++
++def test_public_load_valid_new_policy(synthetic_public_inputs):
++    from scripts import u2_inputs as ui
++
++    identity = rehash_synthetic_inputs(synthetic_public_inputs)
++    result = ui.load_inputs(synthetic_public_inputs, identity)
++    assert result.manifest_sha256 == identity
++    assert result.entries and result.models and result.matrix
++    assert result.root == synthetic_public_inputs
++
++
++@pytest.mark.parametrize("attack", ["bound_bytes", "missing_entry", "wrong_hash", "new_dependency"])
++def test_public_load_new_policy_drift_refuses(synthetic_public_inputs, attack):
++    import json
++
++    from scripts import u2_inputs as ui
++    from scripts import vendor_rk as vendor
++
++    frozen = synthetic_public_inputs
++    identity = rehash_synthetic_inputs(frozen)
++    assert ui.load_inputs(frozen, identity).entries
++    name = "src/rkuarch/hw/derive.py"
++    source = policy.ROOT / name
++    added = source.with_name("public_load_new_dependency.py")
++    assert not added.exists()
++    original = source.read_bytes()
++    support_file = frozen / "support-files.json"
++    support = json.loads(support_file.read_bytes())
++    refusal = "^input support bytes changed: src/rkuarch/hw/derive\\.py$"
++    try:
++        if attack == "bound_bytes":
++            assert b"2 * cores * rate.value" in original
++            source.write_bytes(
++                original.replace(b"2 * cores * rate.value", b"3 * cores * rate.value")
++            )
++        elif attack == "missing_entry":
++            del support[name]
++            support_file.write_bytes(vendor.canonical(support))
++            refusal = "^input support inventory changed$"
++        elif attack == "wrong_hash":
++            support[name] = "0" * 64
++            support_file.write_bytes(vendor.canonical(support))
++        else:
++            added.write_text("VALUE = 1\n")
++            source.write_bytes(original + b"\nfrom .public_load_new_dependency import VALUE\n")
++            refusal = "^input support inventory changed$"
++        identity = rehash_synthetic_inputs(frozen)
++        # Integrity/typed validation still succeeds; currentness must refuse.
++        assert ui.load_inputs(frozen, identity, check_support=False).entries
++        with pytest.raises(ValueError, match=refusal):
++            ui.load_inputs(frozen, identity, check_support=True)
++    finally:
++        source.write_bytes(original)
++        added.unlink(missing_ok=True)
++
++
++@pytest.mark.parametrize("check_support", [False, True])
++@pytest.mark.parametrize(
++    "value",
++    [{}, {"format": "unknown"}, {**policy.POLICY, "selection": "trust-output-equality"}],
++)
++def test_public_load_policy_substitution_refuses(synthetic_public_inputs, value, check_support):
++    from scripts import u2_inputs as ui
++    from scripts import vendor_rk as vendor
++
++    frozen = synthetic_public_inputs
++    (frozen / "support-policy.json").write_bytes(vendor.canonical(value))
++    with pytest.raises(ValueError, match="^unrecognized input support policy$"):
++        ui.load_inputs(frozen, rehash_synthetic_inputs(frozen), check_support=check_support)
++
++
++@pytest.mark.parametrize("attack", ["bound_bytes", "missing_entry", "new_file"])
++def test_public_load_legacy_dispatch(synthetic_public_inputs, monkeypatch, attack):
++    from scripts import u2_inputs as ui
++    from scripts import vendor_rk as vendor
++
++    def wrong_dispatch(*args, **kwargs):
++        pytest.fail("legacy inputs must retain the complete legacy rule")
++
++    monkeypatch.setattr(policy, "verify", wrong_dispatch)
++    frozen = synthetic_public_inputs
++    (frozen / "support-policy.json").unlink()
++    support = {p.relative_to(ui.ROOT).as_posix(): vendor.digest(p.read_bytes())
++               for p in ui.support_files()}
++    support_file = frozen / "support-files.json"
++    support_file.write_bytes(vendor.canonical(support))
++    identity = rehash_synthetic_inputs(frozen)
++    assert ui.load_inputs(frozen, identity, check_support=True).entries
++    name = "src/rkuarch/hw/derive.py"
++    source = ui.ROOT / name
++    added = source.with_name("public_load_legacy_added.py")
++    assert not added.exists()
++    original = source.read_bytes()
++    try:
++        if attack == "bound_bytes":
++            source.write_bytes(original + b"\n# changed legacy bound bytes\n")
++            refusal = "^input support changed: src/rkuarch/hw/derive\\.py$"
++        elif attack == "missing_entry":
++            del support[name]
++            support_file.write_bytes(vendor.canonical(support))
++            refusal = "^input support inventory changed$"
++        else:
++            added.write_text("VALUE = 1\n")
++            refusal = "^input support inventory changed$"
++        identity = rehash_synthetic_inputs(frozen)
++        assert ui.load_inputs(frozen, identity, check_support=False).entries
++        with pytest.raises(ValueError, match=refusal):
++            ui.load_inputs(frozen, identity, check_support=True)
++    finally:
++        source.write_bytes(original)
++        added.unlink(missing_ok=True)
