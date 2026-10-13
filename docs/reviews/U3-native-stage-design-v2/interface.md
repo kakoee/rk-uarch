@@ -289,7 +289,8 @@ remaining dependencies, not completed by these field tables.
 Add required `observations`, tagged `format=uarch-native-observations/1`, to the proposed
 result. Each section has `status=observed|unrepresented` and a reason when unrepresented.
 An observed empty list means no activity, not a nonempty qualifying test. K2 observes
-jobs/events/resources; B also observes DMA, allocation and represented service queues.
+jobs/events/resources; B resource_intervals also observes DMA, allocation and represented
+service queues. Retained B fixed_delay regressions observe the same mechanisms as K2.
 These deterministic records participate in result identity independently of optional
 Chrome trace. Future compression cannot discard records needed by required checks.
 
@@ -304,7 +305,8 @@ Chrome trace. Future compression cannot discard records needed by required check
 | resource_intervals | owner_id, job_id, start_ps, end_ps, activity, limiting_resource_id; channel service additionally service_start_ps_ratio/service_end_ps_ratio | Utilization uses interval union/window/capacity, not overlapping sums; no NoC0 link-busy diagnostic |
 | critical_path | start_ps, end_ps, cause_job_id, predecessor_id (nullable), limiting_resource_id, category=compute\|memory\|noc\|sync\|overhead | Causal partition of [0,duration_ps), including waits caused by resource predecessors; equal longest causes choose lowest job ID then resource ID |
 
-All times are integer picoseconds and domains reference resolved clocks. Events retain
+Timestamp fields are integer picoseconds; exact channel service ratio pairs preserve
+bandwidth time before quantization. Domains reference resolved clocks. Events retain
 dispatch order; other sections sort by canonical ID/time. For window [a,b), initial
 inventory is immediately before events at a; include a and exclude b events, then sample
 final inventory. Per named boundary/direction, separately for payload/transaction units:
@@ -489,7 +491,7 @@ case manifest; malformed input need not become a valid point to test refusal.
 
 Allowed variant families for the future catalogue: max_outstanding1/2/32; accumulator
 131072/262144; nonzero clock variants (core0.8/1/1.2/2GHz, NoC1/1.2GHz, DRAM0.9/1GHz)
-and core frequency ratios1/2 with resolved scales_with_core; DRAM bandwidth and operand/
+and core frequency ratios {1,2} with resolved scales_with_core; DRAM bandwidth and operand/
 DMA rates×1/×2; positive router/job/barrier/DRAM latency×1/×2; refresh omitted only as a
 fault (not an accepted alternate expected answer); TDP100/200; symmetric core relabeling
 and one unused column (2×3) for the idle-core test with explicit matching routes. B may
@@ -508,7 +510,10 @@ an execution-time mutable allowlist. This session installs no specs/profile or c
 Normal component prepare, characterize, table, report/card attachment must reject
 verification_only manifests and all registered test-spec hashes, even if copied/renamed or
 presented without the profile. This requires a reviewed admission registry of catalogue
-spec hashes before fixture installation; registry changes bind loader identity. Production
+spec hashes before fixture installation; registry changes bind loader identity. Only dedicated
+synthetic fixture specs enter the test-only registry. Baseline npu-l4 may appear in a test
+profile without becoming test-only hardware; its test invocation/result still binds
+verification_only, while the exact cold production tuple remains admitted. Production
 B still uses its single pinned hash. Verification records may cite test results as scoped
 verification, but product reports, model predictions and table rows cannot consume them.
 Refusals: missing/mismatched profile/case→TestProfileMismatch; unlisted tuple→TestVariantNotAdmitted;

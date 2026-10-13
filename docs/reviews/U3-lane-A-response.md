@@ -128,3 +128,36 @@ Both read-only reviewer SHA256 values above remain unchanged. Amendment/Stage 1 
 and `git diff --check` pass. Fetch immediately before commit found main unchanged at
 `d7b00b8`; no peer history was rewritten. Normal guard/publication results and exact commit
 IDs are recorded in the follow-up receipt, rather than a self-referential commit hash.
+
+
+## Publication and final follow-up
+
+Published correction: **`98640e22173ab334d4f98e2306d7286d07c96e64`**,
+`docs(u3-a): answer Stage 2 findings with exact proposal corrections`.
+Normal push advanced main from `d7b00b8a2203da440c9e797b8166f9a47289e468`; ls-remote
+confirmed the exact correction hash. The active executable `.git/hooks/pre-commit` ran
+its human-owned and frozen-prediction guards without bypass. The tree/index were clean.
+Exact correction diff: `git diff d7b00b8..98640e2 -- docs/reviews/U3-native-stage-design-v2
+ docs/reviews/U3-A-stage2-proposal-checks.md docs/reviews/U3-lane-A-response.md` (one command).
+
+This follow-up clarifies that the synthetic-only registry never registers baseline
+npu-l4 merely because a test profile uses it: the pinned cold production tuple remains
+admitted; test results on that same hardware still bind verification_only. It also spells
+frequency-ratio variants as the set {1,2}, and adds the corresponding admission-projection
+assertions. Final comparison found B's extra half-open boundary-snapshot sentence; the
+quoted H-DMA now includes it, matching the existing interface convention. Observation
+wording also distinguishes integer timestamps from exact channel-service ratios and
+retained fixed-delay regressions from B subsystem observations. No production scope or accepted carrier changes. The same f1–f10 and package
+checks pass after this clarification; original Stage 1 selection still fails all ten.
+Its exact publication hash is supplied in the final handoff (a commit cannot name itself).
+
+B's response was still uncommitted when read; no peer file was copied or included in A's
+commit. Read-only consulted SHA256 values:
+
+- `U3-lane-B-response.md`: `dc59623a52735686f672d5fa02ddb964c158a656c085c00267e0fe2962b5178e`.
+- `U3-B-readiness-supplement-v1/README.md`: `bafa3a47a8895164b48fcefd937b7c57c0ffff0d5ee38c62949b84d2dafe49f1`.
+
+H-DMA/H-CLOCK strings match after whitespace normalization. B-F3/F5/F6 remain B's deferred
+shared decisions; the coordinator must reconcile B's eventual published response and E4
+expectations with these A commits before Stage 3. Normal fetch/integration continues before
+the follow-up push; any incoming peer commit is retained. Publication is not acceptance.

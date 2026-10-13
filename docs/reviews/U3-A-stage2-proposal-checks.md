@@ -82,6 +82,8 @@ def f1():
     digest = lambda x: hashlib.sha256(json.dumps(x,sort_keys=True).encode()).hexdigest()
     assert digest(marker) != digest(dict(marker, invocation='production'))
     assert 'proposed-design stipulation with a rationale' in i
+    assert 'Baseline npu-l4 may appear in a test' in i
+    assert admits(('B','production','component','cold','base',1))
 
 
 def f2():

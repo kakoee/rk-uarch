@@ -276,7 +276,8 @@ B's H-DMA/H-CLOCK text, for Javid after A/B reconciliation (no live edits):
 - H-DMA: “For each represented DMA boundary, direction and declared byte unit,
 freeze the request population and half-open observation window [t0,t1). With no cancellation
 or loss, verify `in_flight_end = in_flight_start + issued_bytes - completed_bytes` from actual
-issue/completion observations, including requests crossing either boundary. Payload versus
+issue/completion observations, including requests crossing either boundary. Start/end state
+is immediately before events at t0/t1 respectively. Payload versus
 transaction/padding bytes, multicast duplication, partial completion, cancellation and
 retry semantics require explicit ledger terms before the applicable check. Verify local
 resident capacity separately from distinct allocation/lifetime/alias observations. Compute
