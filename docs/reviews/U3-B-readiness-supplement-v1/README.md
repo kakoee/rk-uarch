@@ -129,3 +129,42 @@ are recorded separately, not represented as live enforcement. No full suite, nat
 TPU run, reference installation, report regeneration or nightly occurred. Documentation
 link/whitespace checks and patch applicability are checked before publication. Stop for
 coordinator reconciliation; neither this schedule nor the audit accepts a gate or sprint.
+
+
+## Peer revision received during publication
+
+Owned audit commit: `a602683`; readiness/consumer proposal commit: `cbb4fcd`.
+Final fetch found A's design `3ebe76b87881e83f0aa62e91018346d1d1b065d4` and publication
+handoff `c828510`; normal merge `a32b75235dc2982767b0ebf35a987881a6a0c9ea` preserved
+all eight incoming Markdown files. No runtime/support/input bytes arrived in that merge;
+the audit's source baseline and unapplied patch applicability remain unchanged.
+
+A's [current v2 proposal](../U3-native-stage-design-v2/README.md),
+[decision ledger](../U3-native-stage-design-v2/decisions.md) and analytic first-reliance
+matrix in [verification](../U3-native-stage-design-v2/verification.md) are now concrete
+reconciliation inputs, replacing “forthcoming revision” as a dependency. Their receipt
+is not B acceptance of E3/E4, mapped fields, observations, budgets or U0011.
+
+Specific points for coordinator/A reconciliation:
+
+- A's C1 row says “v1 compute-clock distinct coverage, both modes.” The historical 22/24
+  cell and proposed 24-anchor remedy are **aggregate-only**. The existing per_op exact
+  whole-query relation remains premise-invalid due to memory-only embedding. A separate
+  true-premise per_op domain may be proposed; it cannot inherit an aggregate remedy/pass.
+- A now requires finite-window DMA/queue/allocation observations at B (V23–V25). Their
+  applicable accounting/control-volume checks therefore precede B acceptance; do not wait
+  for U6 optional traces. Finite residence-overlap identity is distinct from a steady-state
+  Little's-law claim; physical unmodeled DRAM queues still supply no passing evidence.
+- A identifies independent component bounds at B and moves exact v2 work to R when
+  consumed. Select exact analytic floor cases before the first actual comparison, not
+  merely by the name of a stage. U-P15 Blackhole aggregate/per_op predictions are another
+  first-use consumer: requalify new reference/version/domain scopes before that U8 freeze.
+- Use the audit delta to examine actual M initialization/schema dependencies, then obtain
+  Javid's repair/migration or retain-enforcement decision **before M installation**. A's
+  proposed 18–36-hour lifecycle allowance is an estimate for reconciliation, not an
+  authorized human window or a guarantee that three cycles suffice. Toolchain and exact
+  carrier installation decisions remain separate; U0023 runner policy is not reopened.
+
+Link/whitespace and unapplied-patch checks passed after this prose-only merge. No audit,
+replay, runtime or full-suite result was relabeled as a run on A's proposal. Stop for
+coordinator review of the combined decision set.
