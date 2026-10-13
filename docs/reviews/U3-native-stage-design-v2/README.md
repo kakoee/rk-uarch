@@ -73,9 +73,20 @@ positive mechanisms. R and T expand only through their own exact accepted scopes
 | Mapped schema plan | Interface fields, strict unions/identities/observations and patch inventory | Human plan decision; exact patch/install before K2; dependency audit or explicit retain-enforcement decision before M install |
 | Kernel semantics/toolchain | U0011, E1/E2, zero-delay convention, delivery closure list | Exact semantic decision and immutable Rust/tool/license closure before K1; pins unresolved |
 | Derivations/public faults/U0006 | Verification V01–V28 and B checklist crosswalk | B review/frozen corpus, two human hand fixtures, future actual executions |
-| Analytic first-use deadlines | Verification's C1–C5 and remaining relation table | B/coordinator case-level selection; applicable checks pass before reliance |
+| Analytic first-use deadlines | Verification's aggregate-only C1, separate native/per_op clock scopes, C2–C5 and remaining relations | B/coordinator case-level selection; applicable checks pass before reliance |
 | Reference/product consumers and effort | R six-class readiness, T U7 demo, separate estimates | Reference/contract feasibility and product semantics decisions; no hardware spend authorized |
 | Performance/automation | Distinct correctness/performance/nightly conditions | Budgets/host acceptance before measurements; real nightly by G5 automation |
 
 G2 remains pending, including independent review and human adjudication. Publication is
 a bounded design handoff, not permission to start native code or install any schema.
+
+## Coordinator follow-up
+
+The [published reconciliation](../U3-design-audit-reconciliation-v1/README.md) identifies
+A-C1: the historical 22/24 cell and proposed anchor remedy are aggregate-only. The current
+verification attachment and U0011 text now state that scope; native component-clock tests
+and any future true-premise per_op domain stay separate. Historical evidence is unchanged.
+[Interface's proposed-M dependency note](interface.md#proposed-m-dependencies-for-bs-audit)
+consults B's published audit and identifies initializer/import/data relationships that may
+enter support; it claims neither a new closure count nor an exemption from generation
+binding. See the [follow-up handoff](handoff.md#bounded-coordinator-follow-up).

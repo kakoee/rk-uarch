@@ -116,6 +116,15 @@ review each boundary rather than guarantee three are sufficient. Agents prepare 
 and handoff; humans alone authorize/generate/adopt. A safe repair requires separate policy
 acceptance and migration; this proposal cannot waive current enforcement.
 
+The dependency-audit estimate above was the original planning allowance, not a claim
+that B's subsequently published audit is still unstarted. Its
+[published remaining-work estimate](../U3-B-artifact-dependency-audit-v1/README.md) and
+[coordinator findings](../U3-design-audit-reconciliation-v1/README.md) now inform that
+separate decision. A's concrete consultation is the
+[proposed-M dependency note](interface.md#proposed-m-dependencies-for-bs-audit); B must
+confirm the actual prospective closure after the schema/import design is settled. No
+other estimates, stage/model choices or U0023 release conditions change in this follow-up.
+
 ## Exact tools and reproducible environment
 
 No tools/dependencies are installed or resolved here. Before K1, a pin-only proposal must

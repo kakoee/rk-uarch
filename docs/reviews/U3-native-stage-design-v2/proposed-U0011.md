@@ -125,8 +125,12 @@ surviving required mutants fail; otherwise missing/empty/skipped/incomplete/unde
 coverage is not_run. Only complete nonempty passing applicable coverage passes. B owns
 independent corpus/reductions, A supplies mechanisms, coordinator reconciles disagreements.
 Analytic C1–C5 and remaining cells have first-consumer deadlines in verification.md, including
-native roofline checks and U-P9/U-P15 baselines. Unrelated report completion does not gate
-K1; required checks must pass before reliance. Never replace them with optional L2.
+native roofline checks and U-P9/U-P15 baselines. C1's historical 22/24 clock cell and
+proposed deterministic-anchor remedy are aggregate-only. Independent native component-clock
+tests and any separately approved true-premise per_op domain do not inherit that remedy
+or its evidence; the existing per_op whole-query reciprocal premise remains invalid with
+memory-only embedding. Unrelated report completion does not gate K1; required checks must
+pass before reliance. Never replace them with optional L2.
 
 ## Reference readiness, product and qualification
 

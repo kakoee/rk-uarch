@@ -227,8 +227,9 @@ not_run, unless a separately observed applicable assertion already failed. SR-C1
 recording behavior must survive native integration; do not repair malformed output.
 
 Premises matter: whole-query clock inverse scaling is not valid for mixed memory/compute;
-use isolated compute E3. Cold/steady, DRAM row hit, bank conflicts, energy, finite NoC
-contention and Little's law for unmodeled physical DRAM queues are not B passes.
+use independently justified isolated native compute E3. That test is separate from the
+aggregate-only analytic C1 remedy and any future true-premise per_op domain. Cold/steady,
+DRAM row hit, bank conflicts, energy, finite NoC contention and Little's law for unmodeled physical DRAM queues are not B passes.
 Use completed DMA inventory/response windows for B conservation; B/R/U6's declared queue
 metric must include terminal/censored intervals. The C2 roofline gate is inapplicable to
 B's C1 label; same-work basic compute/bandwidth lower bounds still detect impossible B
@@ -282,12 +283,15 @@ U6/T consumer; B's capacity refusal does not pass that later capability test.
 ## Analytic obligations by first reliance
 
 B freezes and seeks authorization for exact version/mode/domain selections before C1–C5
-implementation. Historical L0 14 pass/14 skip and L0m 9 pass/13 skip/5 not_run, clock
-22/24, remain their original results. Deadlines below do not claim execution or approval.
+implementation. Historical L0 14 pass/14 skip and L0m 9 pass/13 skip/5 not_run, and the
+aggregate-only clock cell at 22/24, remain their original results. Deadlines below do not
+claim execution or approval.
 
 | Remaining scope | First consumer/deadline | Required disposition / owner |
 | --- | --- | --- |
-| C1 v1 compute-clock distinct coverage, both modes | Before first native bound relying on the clock law, or analytic prediction/report using it, whichever first | B's new 24-anchor floor plus bounded discovery, 240 calls/ledger and separate unchanged-clock mutant need acceptance; 22/24 remains not_run |
+| C1 v1 aggregate-only compute-clock distinct coverage | Before first bound, analytic frequency prediction or report relying on this aggregate domain, whichever first | Historical `analytic.aggregate_clock/1:aggregate:d4-bf16-v1` remains 22/24, not_run; B's proposed aggregate-only 24-anchor remedy, bounded discovery, 240 calls/ledger and separate unchanged-clock mutant need acceptance |
+| Native component-clock checks (separate from analytic C1) | E2 at K1 privately/K2 publicly; isolated resident-compute E3 clock relation at B under its explicit synthetic test profile | Independently derive edge/timing expectations from accepted native conventions and true premises; no aggregate anchor, analytic pass or whole-query per_op law is inherited |
+| Future per_op exact reciprocal-clock domain (separate proposal) | Before any claim using that domain, if proposed and approved | Existing whole-query premise is false with memory-only embedding and remains skipped; a new domain needs independent dominance proof for every op, exact selection/budgets and separate approval, not the aggregate C1 remedy |
 | C2 memory/mixed clock | Before B/R/U6 floor relying on changed clocks; no later than applicable U-P9 baseline | B proves aggregate/per-op dominance independently; T'=T only with its premises; wrong-memory-scaling mutant |
 | C3 unused stipulation | Before any fixture/report/study claims invariance: earliest B metamorphic use, otherwise U-P14 | B supplies admitted proposed-design TDP100/200 W fixture/rationale; identity changes, timing does not; 24 pairs/cap retained |
 | C4 unavailable execution observations | Never use analytic counts for native telemetry; native analogues required at K2/B/R/U6 as represented | Keep unsupported/skipped/not_run; energy after separate evidence, physical queues when represented |

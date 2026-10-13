@@ -20,7 +20,7 @@ name the reviewed commit and exact clauses. The earlier proposal/evidence files 
 | B generic finite-link and fixed-round-trip examples | Retained as conditional mathematics, not B model calibration | NoC0 has no link serialization; E4 has explicit service/credit lifecycle |
 | DMA-in = compute-consumed + writeback shorthand | Revised proposal: per-boundary/direction inventory | Reuse/new outputs invalidate shorthand; needs B/coordinator reconciliation |
 | Attribution as summed/normalized busy times | Explicitly rejected (v1 already rejected) | Actual causal partition including resource waits; hypothesis only for G4 error allocation |
-| Remaining analytic work as whole G2 prerequisite | Revised to exact first-use deadlines | C1–C5 not blanket-paused; floors and predictions are consumers, not just reports |
+| Remaining analytic work as whole G2 prerequisite | Revised to exact first-use deadlines | C1–C5 not blanket-paused; C1 22/24 and its proposed anchor remedy are aggregate-only; native component-clock and future true-premise per_op tests stay separate |
 | Designated host/runner/nightly before any coding | Revised under accepted U0023 | Real Linux correctness independent; controlled-host + nightly still required for qualified performance/full G5/U9/final closure |
 | 5s/512MiB small component budget | Retained solely as proposed ceiling | Exact host/fixture/allocation acceptance before measurement |
 | 60/120/300s future points and 11.2h grid estimate | Withdrawn; deferred fresh budgets | Inputs/consumers changed; no carryover forecast |
@@ -40,7 +40,9 @@ name the reviewed commit and exact clauses. The earlier proposal/evidence files 
    patch inventory. Next M work prepares an exact installable patch/fixtures for review;
    human installation precedes public mapper/wiring/K2. No installable patch is pretended
    complete by these field tables. R benchmark and T product extensions have separate reviews.
-3. **B audit, A consulted, Javid policy decision:** before M protected install audit all
+3. **B audit, A consulted, Javid policy decision:** use the published B audit and
+   [proposed-M dependency note](interface.md#proposed-m-dependencies-for-bs-audit) to
+   reconcile actual imports/data before M protected install; audit all
    relevant generator/support dependencies (dynamic imports, data/environment included),
    relevant/unrelated change controls and migration. If not ready, explicitly retain
    current enforcement and approve/budget human M/K2/B lifecycle checkpoints. No implied waiver.
@@ -49,6 +51,8 @@ name the reviewed commit and exact clauses. The earlier proposal/evidence files 
    K1. Any allow-list exception needs exact justification/ADR. No dependency installed here.
 5. **B/coordinator verification decision:** review mandatory observations and V01–V28,
    freeze independent corpus/call budgets/faults and analytic C1–C5 first-use selections;
+   C1 anchors address aggregate only, with native component-clock and future per_op
+   true-premise domains requiring their own justification;
    assign two human L1 derivations including latency-bound DMA. Keep historical reports
    partial/not_run. Agent review of B's arithmetic is not independent B acceptance.
 6. **B reference sourcing/observability, A representation/admission, Javid target/carrier

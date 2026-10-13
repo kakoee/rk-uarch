@@ -71,3 +71,46 @@ No runtime, protected path or historical package appears in the proposal diff.
 This publication note is a separate documentation commit; its exact hash is in the final
 author response. Review/decision content is pinned by the design commit above. Coordinator
 must still adjudicate the listed decisions and G2; publication supplies no acceptance.
+
+## Bounded coordinator follow-up
+
+This follow-up continues the existing v2 package in place; the earlier publication record
+above remains historical. Starting HEAD was `c82851020489d4a0fd7279dfbc7c798916c29cec`,
+with a clean worktree/index. Fetch/normal fast-forward integrated peer audit/readiness and
+coordinator work through `8867c0c86cddf17adafafe1717f57d8bc220a2d1`. Current CLAUDE.md,
+U0023, coordinator reconciliation and B's audit/migration/readiness supplement were read.
+
+A-C1 is corrected in verification/U0011 and dependent summaries: historical 22/24 and the
+proposed deterministic-anchor remedy are **aggregate-only**. Independent native component-
+clock tests and a possible future true-premise per_op domain are separate; the existing
+per_op whole-query reciprocal premise remains invalid due to memory-only embedding.
+Historical reports, thresholds, omissions and outcomes are preserved; no corpus is run.
+
+[Proposed-M dependency note](interface.md#proposed-m-dependencies-for-bs-audit) lists planned
+files, initializer imports/re-exports, common-carrier and component-export relationships,
+non-import reads and possible support-closure edges. Current broad U0002 enforcement stays
+operative. B must confirm actual edges/data controls when M's exact patch exists; its
+baseline 52-entry proposal is neither M's future count nor installed policy. B-C1/B-C2
+repair tests and migration decisions remain with B/coordinator, not altered by this note.
+
+Focused checks are the existing standard-library documentation checker, a review of the
+Git diff and unchanged scope/model/host sections against `8867c0c`, amendment/peer ancestry,
+proposal-only changed paths, whitespace and normal human-owned/frozen-prediction commit
+guards. Exact executed results and publication commit IDs follow below or in the final
+author response; these checks are not runtime evidence or independent acceptance.
+
+Unchanged: M/K1/K2/B/R/T and permitted M/K1 overlap; U7 full tables; U0023 correctness/
+performance/nightly separation; B scope and E1–E5 model conventions; all unrelated decisions.
+No engine, protected patch/schema installation, artifact generation/adoption, corpus
+execution or G2 acceptance. Stop for coordinator reconciliation. Remaining decisions are
+aggregate remedy authorization, any new per_op domain, exact M imports/data and B audit
+closure/controls, separate policy/migration, and the already listed stage/tool/schema gates.
+
+Follow-up author checks passed: the existing checker reports eight Markdown files,
+**36 local links**, two JSON projections and independent arithmetic/effort assertions.
+A focused comparison with `8867c0c` confirms seven unchanged sections: README B scope;
+delivery task graph, R/T readiness and host/performance policy; verification E1–E5;
+U0011 B scope and environment/gate policy. Three clock scopes are explicit; only seven
+existing A-owned Markdown files changed. `git diff --check` and amendment ancestry passed.
+These are documentation checks, not corpus execution. Publication hashes and normal-hook
+results will be recorded after the correction commit.

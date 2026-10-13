@@ -304,3 +304,85 @@ Before M installation, B completes the U0023 dependency audit and presents polic
 choices. If repair is not ready, Javid explicitly decides to retain current enforcement
 and budgets M/K2/B adoption cycles. No narrowed support inventory, stale receipt acceptance
 or automatic generation/adoption is included.
+
+## Proposed-M dependencies for B's audit
+
+Bounded A consultation against published main
+`8867c0c86cddf17adafafe1717f57d8bc220a2d1`, B's
+[audit](../U3-B-artifact-dependency-audit-v1/README.md),
+[support delta](../U3-B-artifact-dependency-audit-v1/support-delta.json) and
+[unaccepted migration](../U3-B-artifact-dependency-audit-v1/migration.md).
+B's 97→52 inventory (39 retained, 58 removed, 13 added) is its audited baseline proposal,
+not M's future count or an installed policy. Coordinator B-C1/B-C2 findings remain B's
+separate correction task. No patch is applied, importer executed or artifact produced here.
+
+**Observed current relationships.** `scripts/u2_inputs.py` imports
+`uarch_contract.exports` and `rkuarch.hw.export`; the latter imports `hw.derive`, which
+imports `rkuarch.engines.protocol.ResolvedHardware`. Importing these submodules executes
+parent initializers. `uarch_contract/__init__.py` re-exports prepared, hardware, model,
+request/table, export, evidence and report-context carriers. B therefore retains it and
+those reached modules, including `common.py`, `hashing.py`, `exports.py`, `prepared.py`,
+`operators.py`, `hardware.py`, `precision.py`, `request.py` and `table.py` as whole files.
+`rkuarch`, `hw`, `engines` and `scripts` initializers are also retained; the inspected
+initializers currently contain only docstrings, plus ENGINE_VERSION in `rkuarch`.
+Changing a reached file matters even when its newly added function is not called.
+
+**Planned source/edge inventory.** Names below make the existing M inventory concrete;
+new filenames and placement remain proposed until the exact protected schema patch is
+reviewed. This does not alter stage semantics or authorize these files to be installed.
+
+| Planned file or relationship | Intended imports/use | Potential effect on B's proposed support closure |
+| --- | --- | --- |
+| `contract/uarch_contract/mapped.py` | Reuse common FrozenModel/strict scalar types, hashing, HardwareSpec, OpSpec, PreparedOp/Producer/RankScope/KvAccess; import `rotary_v2` carriers for the proposed immutable v2 model closure | M importing a retained carrier alone does not create a reverse edge from generator roots. But any reached initializer/carrier importing mapped brings mapped and its transitive imports into support; then currently removed `rotary_v2.py` may re-enter too |
+| `contract/uarch_contract/__init__.py` | Prefer explicit mapped-submodule imports at callers; no new root re-export is needed merely for that access. Whether the human schema patch adds public root exports remains unresolved | A new `.mapped` re-export is a direct inclusion edge from an already retained file. Its bytes and full new closure bind; do not exempt it as convenience-only |
+| Shared `common.py`, `hashing.py`, `prepared.py`, `operators.py`, `hardware.py`, `precision.py`, `request.py`, `table.py`, `exports.py` | Prefer reuse without widening old roots; any needed shared validator/type refactor must be listed in the exact patch | All are already retained. Byte changes trigger drift; imports of mapped/rotary/shared helpers add edges even inside functions or TYPE_CHECKING. Do not narrow support by saying only the new carrier uses a changed helper |
+| Proposed `contract/uarch_contract/generate_mapped.py`, `contract/schema/mapped/`, `contract/fixtures/mapped/`, protected admission/canonicalization tests | Dedicated schema/fixture workflow imports mapped roots, reads/checks its own outputs; no registration in old analytic schema roots is proposed | A dedicated unimported generator is not automatically reached under the proposed policy, but is covered by current broad Python enumeration. Importing it from a reached initializer/common module would enter the audited closure; dynamic schema registration would need explicit policy review, not presumed support |
+| Proposed `src/rkuarch/engines/protocol_mapped.py` and `schema/mapped/` | M boundary definitions/mirrors import mapped/common/fidelity/count carriers; K2 later consumes the same boundary | If existing retained `engines/protocol.py` or `engines/__init__.py` imports the new module for dispatch/re-export, it enters support. Prefer additive direct imports; final dispatch location is still a schema/wiring decision |
+| Proposed `src/rkuarch/mapping/component.py`, `mapping/policies/ws_rowsplit.py`, `workload/mapped.py` | Component producer/mapper, export/import loader, strict closure validation; direct mapped/protocol imports plus sourced hardware resolution | Currently unimported mapping/workload initializers and their modules are outside B's proposed closure only while no reached root imports them. A shared initializer/loader/derive import can bring them in. Exact paths/helpers are not implemented |
+| `src/rkuarch/hw/derive.py`, `hw/export.py`; possible additive mapped hardware resolver | M needs full resolved resource/topology data beyond existing analytic ResolvedHardware. Prefer a separately named resolver, with exact placement decided in M | Editing either retained file binds the changed whole file. Importing an additive resolver there brings its closure in even if oracle formulas stay unchanged. Moving ResolvedHardware or common validation can change the existing export→derive→protocol chain |
+| K2 `src/rkuarch/engines/native/` runner/parser and later native serde fixtures | Consume M carriers/fixtures; no execution added to M | Follow actual imports through retained engines/derive/initializers. Pure Rust files are not Python import edges, but helper/build/data/lock dependencies require review; neither current nor proposed policy promises zero K2/B cycles |
+
+Here **mapped export** means serializing prepared work; existing `hw.export` means
+component truth/oracle projection. These are different functions, not proof of independent
+dependencies. Shared canonicalization, source resolution, export carriers, initializers
+and schema registration can connect them. M proposes no oracle formula or staging-root
+change, but any such change discovered in implementation must return to B's audit.
+
+**New non-import reads proposed for M.** Loader inputs include saved mapped bundle/point
+JSON, explicit full hardware specification, assumptions, and referenced closure content;
+model-scope validation reads supplied v1/v2/coefficient data only where that scope is
+admitted. Component M has no RoPE execution or generated coefficient default. Local
+mapping reads the selected explicit HardwareSpec and component OpSpecs. Canonical/schema
+checks read mapped schema mirrors and hand-authored JSON/refusal/canonicalization fixtures.
+An implementation-identity inventory may read producer/validator source and environment
+or lock records; its exact scope still needs design review. No plugin search, implicit
+home-directory configuration, network fetching or new environment-selected defaults are
+proposed. That is an intended boundary, not an audit of code that does not yet exist.
+
+These data are preparation/test inputs or outputs unless reached by nominal input staging,
+generation or strict verification. B must classify each actual read and any glob/registry
+that makes it reachable. A mapped schema mirror being an output does not make a later
+validator read irrelevant. New runtime read paths are not discovered completely by the
+proposed static import walker: register reviewed files/families explicitly if consumed
+from a reached module, and add missing/changed/substituted-data controls. Existing B data
+families already bind npu-l4 YAML, locks, component precision/execution inputs, retained
+provenance, `a2-export` JSON/YAML/PIN and canonical model-shape mirrors. Adding/changing
+files within those families affects inventory even without a Python import; placing a
+mapped fixture there would not be unrelated. New proposed mapped schema/fixture locations
+are outside those particular globs, which is not an exemption if a reached reader uses them.
+
+**Uncertainties and handoff to B.** Exact root re-exports, shared-validator placement,
+hardware resolution, dispatch location, generators/fixture paths and file-read inventory
+are unresolved until M's concrete schema patch. A supplies that patch's imports (including
+parent initializers, local/conditional/TYPE_CHECKING edges), data paths and environment
+inputs; B then states the actual retained/added edges, rechecks static-analysis limits and
+adds relevant/unrelated-change controls through the public support loader. No projected
+closure count or zero-adoption promise is made here. Do not apply B's patch or treat its
+unimported-native-file test as proof that these actual mapped relationships are unrelated.
+
+Live U0002 still enumerates all Python files under src/rkuarch, contract/uarch_contract
+and scripts, so planned additive Python files change current support even with no new
+import edge. A narrower accepted policy plus real human migration would be needed to use
+B's proposed reachability rule. Before protected M install, resolve exact repair/migration
+or explicitly retain current enforcement and budget source-bound cycles. This prerequisite
+does not become a new dependency for unrelated K1 design preparation.
