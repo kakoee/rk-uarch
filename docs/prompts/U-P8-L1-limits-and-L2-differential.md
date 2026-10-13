@@ -14,6 +14,14 @@ comparison. A difference caused by another mapping is not an engine discrepancy.
 that cannot consume equivalent resolved inputs must be reported as unmatched rather than
 being compared solely by model name, tp or a policy label.
 
+REFERENCE READINESS (U0023, separate bounded handoff): with A, prepare a sourced TPU
+inventory, map required suite operations to representable hardware/native capabilities,
+and establish measurement granularity/observability from primary documentation. Count
+unknowns and distinguish structural/timing assumptions from carrier placeholders. No
+measurements, cloud spend or silently fabricated fields. Identify contract extensions and
+native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
+readiness process for Blackhole before U-P15. Readiness does not require a full table.
+
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
 is compared with independent models only where abstractions and inputs match. Required L1
 runs for each applicable admitted capability. L2 tool selection is optional and recorded
@@ -70,10 +78,11 @@ prospectively in U0008; once a comparison is admitted its declared bound is not 
 ACCEPTANCE TESTS:
 1. All applicable required L1 pass for U-C0 and admitted native stages; unsupported cases
    remain not_run under U0006. The roofline-floor assertion runs over every row of the
-   npu-l4 table.
+   admitted execution scope; full consumer rows join this check at G3b.
 2. The two hand fixtures exist, pass, and have committed working.
 3. Nightly runs the admitted comparisons and publishes executed, unsupported, unavailable
-   and not-independent cases. The NoC bound applies only to the admitted matched scope.
+   and not-independent cases by G5 automation qualification; before then execute required
+   selections explicitly on approved Linux. The NoC bound applies only to matched scope.
    Empty reference sets are not a passing L2 verdict and cannot discharge L1 or silicon gates.
 4. A mutant (NoC with router latency read as 1 instead of the spec value) is caught by the
    independent applicable L1 case, and by L2 where that comparison is admitted.

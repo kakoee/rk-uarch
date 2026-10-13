@@ -12,11 +12,18 @@ stipulations it is conditional on. Detail is not accuracy.
 ## Commands
 - test: `uv run pytest -q` · fast: `make test-fast` (excludes nightly, silicon, native)
 - typecheck: `make typecheck` (both CI commands) · lint: `uv run ruff check .`
-- native: `make native` · `make native-test` (Linux box / engine container)
+- native: `make native` · `make native-test` (approved Linux/pinned tools; controlled host for performance)
 - table/report workflow: [prepare → capture → independent review → assemble → table → report](docs/u2-workflow.md)
 - table help: `make table` · report help: `make report`; pass explicit CLI arguments with `ARGS='...'`
 - Published runtime remains analytic (including additive RoPE v2); native, grids and studies are planned.
-- U0005: U3 designs the native stage; U4a builds its bounded kernel/models after schema and runner decisions; U4b expands tables; U6 qualifies. No runtime release follows from the direction alone.
+- U0005/U0023: U3 design; U4a bounded kernel/models; U4b reference-suite readiness; U5 TPU;
+  U6 expanded qualification; U7 full product tables; U8 Blackhole; U10 rk-sim integration.
+  Silicon success is not a prerequisite for table production. No blanket runtime release.
+- K1 internals may overlap mapped schema preparation after semantic/toolchain acceptance;
+  K2 public wiring requires installed approved carriers. Correctness uses real Linux CI;
+  G5-correctness gates U7/G6/G3b/U10. Controlled-host evidence and executed self-hosted
+  nightly gate full G5, U9 entry, simulator-performance claims and final closure.
+- U0002 source binding is unchanged pending a separate dependency-audit/migration proposal.
 - vendor rk-sim: `make vendor-rk SHA=<sha> RK=<path>` (humans only)
 
 ## Invariants (violating these = stop and ask)

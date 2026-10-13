@@ -19,8 +19,11 @@ you wrote it earlier in this conversation, SAY SO AND STOP. A clean verdict from
 worse than no review, because it will be believed.
 
 CHECK, in order:
-1. Does the sprint's joint exit criterion actually run, on the Linux box, from a cold clone?
-   Execute it. Paste the output.
+1. Does the applicable sprint exit run on the exact reviewed revision? Execute the
+   authorized checks and record actual output. U0023 correctness closure additionally needs
+   fresh hosted Linux checkout and separate fresh local clone on the same published commit;
+   performance needs the controlled host. Missing access/evidence stays pending. No-op
+   native jobs are not readiness; do not contact hosts or spend without authorization.
 2. Does any number reach a human without its badge? Grep report templates for raw values;
    run `uarch report` on the sprint's tables and scan for "±0"; check CLI output paths.
 3. Did any golden change? If so, is there a docs/decisions/U*.md for it, and does it match the
@@ -42,8 +45,10 @@ CHECK, in order:
 7. Fidelity: any composite C2 that breaks build-spec §2.4's rule (compute below 2, NoC or DRAM
    below "1+ts"), any engine whose levels were not derived from §2.4's table, or any lax sync
    result without a covering curve? Any C2 row faster than its u_c0_duration_s?
-8. Determinism: build one golden table at --workers 1 and --workers N yourself and diff the
-   bytes. From U9, also at 1 and 4 threads in exact mode.
+8. Determinism: at the bounded native stage reproduce saved-job/debug-release results;
+   when table workers are delivered, build a representative table at 1/N workers and diff
+   bytes. Full product coverage belongs to G3b. From U9 also test exact-mode 1/4 threads.
+   Do not introduce a full-grid prerequisite into a component or silicon-readiness review.
 9. From U4a: independently re-derive and execute a native-stage literal case and its
    discriminating fault. From U6: run the G5 qualification selection yourself. Inspect
    optional reference scope/independence; never call a missing full fork a defect.

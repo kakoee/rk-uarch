@@ -15,6 +15,14 @@ conditions. Measurements use the declared mapping match; a compiler-chosen mappi
 assumed equal to the local policy. Replaying predictions must not silently re-prepare inputs
 with a newer producer.
 
+READINESS: G3a must already establish a usable sourced reference, native admission,
+required suite coverage and measurement observability. A/B prepare these in U3/U4b; the
+draft carrier stubs are not runnable physical assumptions. Exact unknowns and claim limits
+must be reviewed, with any contract/target decision resolved. Hardware access/budget is
+separate. No full table or G3b prerequisite. Do not fix engine gaps in this freeze session.
+No pilot measurements are authorized; prospective development/held-out policy would need
+a separate decision. A successful G4 verdict is not required for later table production.
+
 TASK: produce, and COMMIT BEFORE ANY MEASUREMENT EXISTS, uarch's predictions for a suite of
 microbenchmarks on Google Cloud TPU v5e, the large-core reference. This prompt never sees a
 measurement. That is its whole design.

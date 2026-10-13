@@ -14,13 +14,23 @@ Mapping policy identifiers are provenance, not instructions for the native engin
 Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
 placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
 
-TASK: implement the accepted bounded U4a native stage, then expand the same implementation
-in U4b. U-P5 fixes the first workload/precision/hardware slice and refusal matrix. Start with
-independent literal fixtures and public execution; only after they pass expand to complete
-U-P7 table/operator/precision coverage. Unsupported work refuses, never disappears from a
-claimed complete layer. Existing v2 RoPE, casts and coefficient traffic must be preserved
-when that workload is admitted. All acceptance below is required for the full stage unless
-explicitly scheduled for U6; a bounded stage alone cannot close G3.
+TASK: execute only the authorized phase. B (U4a) implements the accepted small component
+slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
+U-P7 T in U7. Unsupported work refuses, never disappears from a claimed complete layer.
+
+B prerequisites/exit: K2 and approved component inputs; implement the admitted subset of
+items 1–3, independent literal/fault checks and applicable acceptance below. Full decoder,
+extra hardware/precision, steady state or spill remain refused until explicitly admitted.
+Record every deferred acceptance case with R or later consumer; do not claim G3a from B.
+
+R prerequisites/exit: reviewed TPU sourcing, reference representability/measurement scope,
+exact required suite and protected contract decisions. Add native reference admission and
+all required operators/precisions, including RoPE/casts/coefficient traffic and fused/paged
+KV work where used. Validate no omitted work, reference fields/unknowns, decoder execution,
+steady/priming behavior and benchmark-granularity correspondence. Int8 is admitted only when
+required/supported, never inferred from BF16. Required missing scope blocks G3a. Implement
+reference changes here, before U-P9's prediction-only freeze session. No silicon results or
+tuning in this task. B and R both require applicable public-boundary tests before acceptance.
 
 1. Models (build-spec §2.4):
    - compute level 1: tile-job intervals, meaning pipeline fill and drain for the job's
@@ -35,8 +45,8 @@ explicitly scheduled for U6; a bounded stage alone cannot close G3.
      distant core's bandwidth is latency-bound; barriers cost sync.barrier_latency_cycles.
    EngineResult reports fidelity_detail honestly: {compute: 1, noc: 0, dram: 0}. The
    composite for that is C1 at best, and the table must say so.
-2. TaskGraph executor: runs mapping/ output (ws-rowsplit@1 and os-tiled@1; the initial
-   npu-m256 qualification in U6 uses ws-rowsplit@1 until U-P13d),
+2. TaskGraph executor: runs only explicitly admitted mapping/ output (no automatic
+   os-tiled or second-hardware requirement); U6 mesh admission is separately verified,
    resolving dependencies by events, attention_fused tiles included. initial_state steady
    primes one iteration inside the same simulation and reports the second (two priming
    iterations when the job asks for the warm-up check).
@@ -49,13 +59,15 @@ ACCEPTANCE TESTS (write first):
    the engine. Tests distinguish executed work from expected input totals.
 2. Determinism: same job → byte-identical EngineResult across 3 runs, and between debug and
    release builds.
-3. U4b builds the required npu-l4 table through the public CLI. The initial npu-m256
-   full-table qualification is U6/G5, and is not claimed by the bounded U4a prototype.
+3. B passes its declared component cases. R passes G3a's actual benchmark suite and reference
+   admission, not a full table. U6 uses representative mesh points; G3b full tables are U7.
 4. The latency-bound stream fixture (U-P8) passes, and lowering max_outstanding lowers a
    distant core's achieved bandwidth.
 5. Halving accumulator_bytes on a GEMM whose output tile then no longer fits never shortens
    it, and the extra SRAM traffic appears in ext_counts.
-6. attribution_s sums to duration_s on every row.
+6. attribution_s sums to duration_s; independent critical-path fixtures and discriminating
+   faults check assignment, serialization and permitted overlap before G4 uses it. A large
+   attribution share is not proof of the cause of silicon error.
 
 ADDITIONAL ACCEPTANCE — prepared inputs:
 - Replay a saved mapped job with local workload/mapping producers unavailable and compare

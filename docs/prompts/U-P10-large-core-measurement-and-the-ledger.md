@@ -8,6 +8,10 @@ validation/ledger/README.md, validation/L3_silicon/tpu-v5e/SUITE.md, build-spec 
 From rk-sim READ-ONLY: docs/prompts/P10-measurement-kit-write-before-renting-anything.md,
 rk/calibration/ (the ledger's shape), docs/decisions/0021 and anchor-semantics.md.
 
+PREREQUISITES: G3a, the frozen exact suite/predictions and separately authorized hardware
+access/spend. G3b tables are not an input. Missing access leaves U5 open; independent
+engine/table development can continue without a physical-validation claim.
+
 TASK: measure the reference chip, compare against the frozen predictions, and let the ledger,
 and only the ledger, decide what the model card may say.
 
@@ -35,7 +39,9 @@ and only the ledger, decide what the model card may say.
    median |relative error| ≤ 25% across all benchmarks, and no class median above 50%. It is
    evaluated separately for matched and compiler-chosen benchmarks, and the verdict names the
    group; an empty group is reported as "no evidence", never as a pass. The same script
-   computes G4's fail-branch attribution exactly as execution-plan §4 defines it.
+   computes G4's fail-branch allocation exactly as execution-plan §4 defines it. This is
+   a prioritization heuristic, not proof of the subsystem causing the observed error.
+   Attribution must have been independently qualified before the prediction freeze.
 5. Promotion: provenance/ reads the ledger. A model card moves from stub to estimated ONLY
    through ledger entries, ONLY for the family and op classes those entries cover, with
    validated_error_band set to the observed band for that scope. Never by hand, and never

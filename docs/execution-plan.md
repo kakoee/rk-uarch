@@ -1,6 +1,6 @@
 # rk-uarch — Execution Plan
 
-**The working document:** twelve sprints (U0–U11), two lanes, ten gates. For each sprint it
+**The working document:** twelve sprints (U0–U11), two lanes, with G3 split into readiness and table gates. For each sprint it
 says what to build, who builds it, which prompt to run, and the one thing you must be able to
 run at the end.
 
@@ -28,8 +28,11 @@ effort each sprint's prompts imply, in hours, derived from the prompts.
 
 **Rev 3 direction, 2026-10-12.** Effective with human-committed U0005: one progressive
 production simulator; no mandatory full fork or second substantial Python contention engine.
-U3 designs the bounded native stage, U4 builds it before its tables, U6 qualifies it. The
-older revision notes and §7 estimates are historical, not the amended schedule or budget.
+U3 designs the bounded native stage, U4 builds it and prepares the reference benchmark
+scope, U6 qualifies expanded capability, U7 produces the first full product tables.
+**Rev 3.1, U0023:** G3a is silicon readiness; G3b is consumed-table readiness. G4/G7
+success is not a table-production prerequisite. Correctness, performance and automation
+have distinct host requirements. The older notes and §7 estimates are historical.
 
 ## STATUS
 
@@ -38,12 +41,12 @@ older revision notes and §7 estimates are historical, not the amended schedule 
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | Complete the exact U0005/documentation installation, then U-P5 bounded native-stage design; no native runtime release yet |
+| **Next** | Reconcile U-P5 under U0023; prepare exact component/schema and toolchain decisions, independent checks and reference feasibility. No blanket runtime release |
 | **U1 done** | Published `u01-end` at `1e9e794a84c5173812c23a1cf2fc04b85e6f6831` |
 | **U2 done** | Accepted closeout and `u02-end` at `79bc1f0`; approved cleanup preserved the evidence archive and branch history |
 | **U3 in progress** | Accepted U0006/U0022, published RoPE runtime/adoption/activation; CI on `456215c` passed. Source-only feasibility published at `42fc341`. B reports remain partial/not_run; no native/fork run, G2 or U3 closure claimed |
 | **Not started** | U4–U11 |
-| **Runner pending** | Rootless Linux checks received; runner registration and executed manual nightly remain unverified, schedule paused. Required before native build/run/performance work; documentation/analytic preparation can proceed |
+| **Runner pending** | Registration and executed manual nightly remain unverified. Not a correctness-development prerequisite under U0023; controlled-host performance and G5 nightly qualification remain pending |
 
 Update this block and `docs/how-it-works.md` at every sprint boundary.
 
@@ -84,7 +87,7 @@ pushes and rebase only unpublished local commits. Never force-push shared main o
 published commits. Integrate on demand with Git diffs and commit IDs; do not copy checkpoint
 trees or create another manual revision-control process. Generated-artifact provenance and
 reproducibility manifests retain their narrow purpose. This records the requested workflow;
-it does not waive Linux/self-hosted-runner prerequisites for native work. Actual hours and
+host obligations now follow U0023; it does not waive performance or nightly qualification. Actual hours and
 retro remain unreported until Javid supplies them.
 
 **U1 pin update, 2026-10-04:** Javid (@jjaffari) approved advancing from `11bb530` to
@@ -116,12 +119,14 @@ overall schedule, particularly for U2/U4, before treating those figures as commi
 | 1 | Open the sprint below. Read your lane's row and the joint exit criterion | both |
 | 2 | Run your lane's prompt in a **fresh session** with `TEMPLATE-implementation-session.md`. One prompt, one session | each |
 | 3 | Answer the agent when it stops. A prompt that says *stop* or *ask* means stopping is correct | each |
-| 4 | **Integrate.** Merge both lanes to `main`, then check the joint exit criterion on the Linux box from a cold clone | both |
+| 4 | **Integrate.** Publish the approved main revision, then run applicable correctness exits from a fresh hosted Linux checkout and a separate fresh local clone on that same commit; add controlled-host checks where required by U0023 | both |
 | 5 | Run **U-REVIEW** on the *other* lane's work, in a fresh session. All three stages | each, crossed |
 | 6 | Run `STANDING-how-it-works-refresh.md` in a fresh session. Tag `uNN-end`, log actual hours, then a 15-minute retro: *what did the agents get wrong?* | both |
 
-**The standing rule:** `main` always builds a table. A sprint whose two lanes did not integrate
-did not finish.
+**The standing rule:** preserve the working analytic table path on main. This does not
+require every native checkpoint to emit a table. A sprint whose required lane work did not
+integrate did not finish. Missing silicon resources keep that campaign open; they do not
+block independent native work or honestly labeled table production.
 
 ---
 
@@ -141,9 +146,9 @@ did not finish.
 | U-P1 ∥ U-P2 | One writes schemas; the other vendors rk-sim's and generates fixtures by running rk-sim |
 | U-P3 ∥ U-P4 | After U0003's prepared-input/public-schema prerequisite is accepted, provenance uses the fixed table shape and a toy table; it need not wait for the producer/engine implementation |
 | U-P5 ∥ U-P6 | Native-stage design and analytic verification can proceed independently |
-| U-P7 mapping phase ∥ U-P8 | Independent closed forms can be prepared before native exists |
+| U-P7 M ∥ U-P11a K1 ∥ U-P8 | Accepted semantics allow internal kernel mechanics and independent expectations while public mapped carriers are prepared |
 | U-P11a/b ∥ U-P12 foundations | Accepted mapped protocol enables independent tests alongside the kernel; executions wait for it |
-| U-P13a–d ∥ U-P14 | Studies run on any engine through the table interface |
+| U-P13a–c ∥ U-P14 preparation | Study schemas/suites can be prepared independently; execution waits for the admitted engine, point/table adapter and declared inputs |
 | U-P17 ∥ U-P18 | Pre-registration and the harness can land before the parallel engine does |
 
 **Serial inside a sprint.** Named so nobody schedules them together:
@@ -151,15 +156,17 @@ did not finish.
 | Order | Why |
 |---|---|
 | U-P9 → U-P10 (measurement step) | Predictions must be committed before any measurement exists. Lane B writes and dry-runs its kit in parallel, and measures only after the freeze |
-| U-P15 → U-P16 (measurement step) | Same rule |
+| U-P16 S → U-P15a → U-P15 → U-P16 M | B reference/readiness, A native admission, separate freeze, then measurement; no implementation in the freeze session |
 | Boundary schema PR → U-P19 → U-P20 | Both run in rk-sim and touch provenance. The schema PR comes first, then P18, then P19 |
-| U-P5 → U-P7 mapping phase → U-P11a → U-P11b bounded → U-P7/U-P11b full table | U3 design, U4a protocol/kernel/models, U4b coverage/grid; no engine/table dependency cycle |
-| U4b → U-P11c / U-P12 completion | U6 qualifies the existing core; it does not build it again |
+| U-P5 → (U-P7 M and U-P11a K1) → K2 → U-P11b B | Internal kernel work may overlap mapping; public wiring waits for approved carriers; models wait for the verified boundary |
+| B → U-P11b R / reference readiness → G3a → U-P9 freeze → U-P10 measurement | U4b covers the actual U5 suite, not a full unrelated grid |
+| Verified B → U-P11c / U-P12 completion → G5 | U6 qualifies the expanded scope without requiring G4 success or TPU availability |
+| G5-correctness → U7 depth/G6 plus U-P7 T/G3b → U10 | Full G5 performance/automation remain separately open without blocking these correctness/product milestones |
 | U-P13a, U-P13b, U-P13c → U-P13d | The three subsystems in any order, then the composite rule that needs all three |
 
 **Lane allocation after the amendment.** U4 now carries native core work previously in U6.
 Re-estimate the critical path and ownership in U-P5 before scheduling; §7 is historical.
-Mapping, runtime and independent test design can overlap only after their boundary is accepted.
+Internal mechanics and independent derivations may overlap M; public protocol wiring waits for its accepted boundary.
 
 ---
 
@@ -205,38 +212,36 @@ Mapping, runtime and independent test design can overlap only after their bounda
 
 | | |
 |---|---|
-| **Goal** | A reviewed bounded design for one production native engine, alongside honest analytic verification |
-| **Lane A** | U-P5: mapped protocol/stage design, independent examples, refusal/expansion matrix, toolchain/license proposal and prospective host budgets; retain completed RoPE work |
-| **Lane B** | U-P6: L0/L0m capability-aware analytic checks, discriminating mutants and reports; accepted U0006 reductions and remaining coverage remain explicit |
-| **Joint exit criterion** | Revised **G2** accepted; required analytic checks executed; outstanding unsupported coverage disclosed; independent U-REVIEW and human closure still required |
-| **Depends on** | U2; accepted U0006/U0022; exact new protected stage/schema decisions before implementation |
-| **Host** | Documentation and analytic preparation may continue. Before native builds/runs: designated Linux host, registered self-hosted `uarch` runner, schedule enabled and a manual nightly executing applicable tests successfully. No no-op readiness claim |
-| **Not in this sprint** | Fork build/adapter, substantial Python fallback, native implementation, measurements |
-| **Effort** | Re-estimate remaining design/review; old fork and U-C1 estimates do not apply |
+| **Goal** | A useful bounded stage with executable tasks, independent checks and real consumers |
+| **Lane A** | U-P5: component scope, M/K1/K2/B boundaries, toolchain/license proposal and exact schema decision package; with B, reference representability |
+| **Lane B** | U-P6: record each analytic obligation's first consumer; independent native expectations; reference sourcing/measurement feasibility and a bounded test-only consumer-conformance proposal |
+| **Joint exit** | G2 design accepted, outstanding implementation/evidence explicit; independent review and human closure remain required |
+| **Prerequisites** | Accepted semantics and toolchain before K1; exact schema before K2. Unrelated analytic reporting and runner registration do not block internal kernel work |
+| **Not claimed** | No native accuracy, completed schema installation or blanket acceptance of A's proposed U0011 |
 
-### U4 · Progressive native core and the complete table
+### U4 · Bounded native engine and silicon readiness
 
 | | |
 |---|---|
-| **Goal** | Build the eventual native engine in a bounded stage, then expand it to the required complete table; C1 at most initially and STUB pending silicon |
-| **Lane A — U4a** | U-P7 mapping/schema phase → U-P11a fixed-delay Rust kernel → U-P11b small declared workload/precision/hardware slice, with replay/refusals and independent tests |
-| **Lane A — U4b** | Expand the same U-P11b engine and complete U-P7: both native mapping policies, required workload/precision coverage, fused attention, grid/pool, interpolation, composition, layer reuse, cold/steady and frequency errors |
-| **Lane B** | U-P8 independent L1 limits/human fixtures; foundational U-P12 behavioral, mutation and replay checks. Admit optional matched component references prospectively; absence never counts as passing evidence |
-| **Joint exit criterion** | **G3**: required npu-l4 × 70B-class fp8/bf16 tp8 table, correct levels and STUB; required complete-work checks and L0/L0m/L1 pass, mapped replay and workers 1/N byte-identical, approximation errors published |
-| **Depends on** | G2 and exact stage/schema decisions; Linux/runner/manual-nightly readiness before native implementation |
-| **Not in this sprint** | C2 depth, threads, silicon measurements; a limited U4a prototype does not discharge G3 |
-| **Effort** | Re-estimate with U-P11a/b moved here; do not count them again in U6 |
+| **Lane A — U4a** | U-P7 M and U-P11a K1, then K2 and U-P11b B: single-threaded verified execution of the approved component slice |
+| **Lane A — U4b** | U-P11b R: complete the actual U5 workload/reference admission, including required operators, RoPE/conversions, memory and initial-state behavior |
+| **Lane B** | U-P8 and foundational U-P12: independent cases/faults, required analytic floor checks, attribution qualification; source the reference and establish measurable benchmark granularity with A |
+| **Joint exit** | G3a: actual reference-suite readiness and verification; no full-grid table prerequisite |
+| **Depends on** | G2; exact stage/schema/toolchain decisions; reference feasibility and admission before G3a |
+| **Parallel progress** | If reference feasibility/access is unresolved, retain the open G3a/campaign gate and proceed only with independently ready U6 tasks; do not call U4/U5 closed |
+| **Not in this sprint** | No C2 depth, threads, mandatory FP8/os-tiled/ragged grid or automatic silicon measurement authorization |
+| **Effort** | Re-estimate M/K1/K2/B/R; old full-table T effort is not a current U4 forecast |
 
 ### U5 · Silicon I: the large-core class
 
 | | |
 |---|---|
 | **Goal** | Find out whether the method tracks a real large-core chip, and say so either way |
-| **Lane A** | Reference model of TPU v5e; SUITE.md signed with B; predictions frozen and committed first → **U-P9** |
+| **Lane A** | Use the already admitted usable TPU v5e reference and signed suite; freeze predictions → **U-P9**. Engine/reference readiness is U4b work, not an implicit task in the freeze session |
 | **Lane B** | Measurement kit dry-run on CPU JAX, then measure on Cloud TPU v5e after the freeze; ledger; promotion → **U-P10** |
 | **Joint exit criterion** | **Gate G4** evaluated and published · `check_ordering` green · `uarch ledger` shows every entry · promotion, if any, scoped to the large-core family |
 | **Effort** | A 35 · B 57 · plus Cloud TPU v5e time (§7) |
-| **Depends on** | G3 |
+| **Depends on** | G3a plus authorized hardware access/budget; no product-table dependency |
 | **Not in this sprint** | Any model change in response to results. That belongs to G4's fail branch, in a later prompt |
 
 ### U6 · Native qualification and diagnostics
@@ -244,10 +249,10 @@ Mapping, runtime and independent test design can overlap only after their bounda
 | | |
 |---|---|
 | **Goal** | Qualify the native core built in U4, including initial mesh execution and absolute simulator cost |
-| **Lane A** | U-P11c: complete diagnostics/traces, initial npu-m256 table, verification and absolute time/memory measurements against prospective U0011 budgets |
+| **Lane A** | U-P11c: diagnostics/traces, npu-m256 admission at declared representative points, integrated regression and absolute time/memory measurements |
 | **Lane B** | Complete U-P12: independent native verification, discriminating faults, determinism, comparison-scope checks and performance regression gate |
-| **Joint exit criterion** | Revised **G5**; required native L0/L0m/L1 and hand-derived cases pass; saved mapped replay, debug/release and worker determinism; diagnostics/attribution and initial mesh table complete; absolute host metrics recorded |
-| **Depends on** | G3; G4 need not pass, but no accuracy is claimed without applicable silicon evidence |
+| **Joint exit criterion** | Full **G5** = correctness + performance + automation. Each has its own recorded outcome; correctness alone releases ready U7/U10 work, never closes full G5/U6 |
+| **Depends on** | Verified U4a bounded engine and admitted inputs for the scope being qualified. G3a/TPU availability and G4 success do not gate independent U6 work; no accuracy claim without evidence |
 | **Not in this sprint** | Rebuilding the U4 core, mandatory fork agreement/speed ratio, C2 depth or threads |
 | **Effort** | Re-estimate qualification scope after U-P5; U-P11a/b no longer charged here |
 
@@ -256,11 +261,11 @@ Mapping, runtime and independent test design can overlap only after their bounda
 | | |
 |---|---|
 | **Goal** | An honest composite C2 from our own engine, at mesh scale, and the first thing a chip architect would use it for |
-| **Lane A** | In four sessions: reservation NoC with cycle timestamps and NoC barriers → **U-P13a**; DRAM queues with back-pressure, Ramulator 2 as a library configured from the spec, address interleaving → **U-P13b**; SRAM bank conflicts and DMA interleave (shared SRAM listed as unrepresented) → **U-P13c**; mesh mapping policies, the composite rule, mesh-scale tables → **U-P13d** |
-| **Lane B** | Design studies over a versioned workload suite: variants, the diff report with geometric-mean speedup, a local-sensitivity tornado, energy with conditions → **U-P14** |
-| **Joint exit criterion** | **Gate G6**: npu-m256 composite C2 with honest detail · contention, interleaving, back-pressure and bank conflicts visibly bite at level ≥1 and not below · the three example studies render · extend independent verification to the new mechanisms |
+| **Lane A** | U-P13a–d: deeper NoC/DRAM/compute and composite C2; U-P7 T: first full product table for the declared npu-m256 demo/consumer scope, after required hardware/precision/semantic decisions |
+| **Lane B** | U-P14 studies at declared suite points (or grids when consumed), with a tested point/table adapter; prepare Blackhole sourcing/measurement feasibility with A before U8 native admission/freeze |
+| **Joint exit criterion** | **G6 + G3b**: verified native C2 mechanisms, first full product table with errors/replay/worker checks, and three study examples. Representative scale points suffice where no grid consumer exists |
 | **Effort** | A 145 · B 49 |
-| **Depends on** | G5 |
+| **Depends on** | G5-correctness plus exact product input/semantic decisions. G5-performance/automation may remain open; neither they nor passing G4/G7 gate tables, G6/G3b or U10 |
 | **Not in this sprint** | Parallelism inside a simulation |
 
 ### U8 · Silicon II: the mesh class
@@ -268,11 +273,11 @@ Mapping, runtime and independent test design can overlap only after their bounda
 | | |
 |---|---|
 | **Goal** | Find out whether our engine tracks a real mesh chip, and whether more detail was more accurate |
-| **Lane A** | Blackhole reference model; SUITE.md signed with B, with an end-to-end class; predictions frozen at every fidelity level, plus tt-npe's → **U-P15** |
-| **Lane B** | TT-Metalium kit, dry-run on ttsim, then measure on the card after the freeze; ledger; the per-level error table → **U-P16** |
+| **Lane A** | U-P15a implements/tests Blackhole reference admission after B's U-P16 S; then a separate U-P15 session verifies inputs and freezes the signed suite at each available level, with any admitted matched tt-npe scope |
+| **Lane B** | U-P16 S owns reference YAML completion/sourcing and measurement feasibility without card access; after U-P15a and U-P15, U-P16 M dry-runs the kit and measures on the authorized card, recording per-level outcomes and optional-reference dispositions |
 | **Joint exit criterion** | **Gate G7** evaluated and published · the error table by fidelity level is on the first page · `check_ordering` green |
 | **Effort** | A 41 · B 75 · plus the Blackhole p100a and its host (§7) |
-| **Depends on** | G6 |
+| **Depends on** | G6, verified Blackhole suite/reference readiness and authorized hardware access; full table rows are not the measurement input |
 | **Not in this sprint** | Model changes in response to results |
 
 ### U9 · Parallel engine, and the synchronisation experiment
@@ -284,7 +289,7 @@ Mapping, runtime and independent test design can overlap only after their bounda
 | **Lane B** | Pre-registered error-vs-quantum experiment at a credit-backpressured boundary; published curve; the enforcement rule → **U-P18** |
 | **Joint exit criterion** | **Gate G8**: exact mode byte-identical at 1, 2, 4 and 8 threads · the curve published with its verdict in the first sentence · a lax result outside a covering curve reports C1 |
 | **Effort** | A 125 · B 61 |
-| **Depends on** | G6, and a recorded need: the native engine breaches ADR U0011's single-point wall-clock budget (measured in U-P11c and U-P13d), or both founders record in an ADR that they want the synchronisation experiment (the funded plan's G1) regardless. Without either, U9 is deferred until after U11, which does not depend on it |
+| **Depends on** | G6, full G5 (including controlled-host performance and executed self-hosted nightly), and a recorded need: the native engine breaches ADR U0011's single-point wall-clock budget (measured in U-P11c and U-P13d), or both founders record in an ADR that they want the synchronisation experiment (the funded plan's G1) regardless. Without either, U9 is deferred until after U11, which does not depend on it |
 | **Not in this sprint** | Optimistic sync, SIMD, GPU, MPI |
 
 ### U10 · Integration into rk-sim
@@ -297,7 +302,7 @@ Mapping, runtime and independent test design can overlap only after their bounda
 | **Lane B** | rk-sim **P19** (= **U-P20**): `<Badged>` conditional, the chip panel, picker rules, the Compare banner, Assumptions |
 | **Joint exit criterion** | **Gate G9**: rk-sim golden `asic_c2.yaml` runs · the Fidelity Map shows `C2 · uarch@x · <hash>` · tp double-count test, tp-mismatch test, envelope test and mixed-fidelity pair pass · every rk-sim gate green · rk-sim's own P14 ACCEPTED |
 | **Effort** | A 43 · B 55 |
-| **Depends on** | G3 at minimum (G6 recommended) · an rk-sim sprint boundary |
+| **Depends on** | G6 + G3b and separately accepted rk-sim boundary at its own sprint boundary. Reader must reject non-C2/inconsistent composites; no silicon-pass prerequisite |
 | **Not in this sprint** | Any change to rk-sim beyond the ADR, P18 and P19 |
 
 ### U11 · Hardening
@@ -305,7 +310,7 @@ Mapping, runtime and independent test design can overlap only after their bounda
 | | |
 |---|---|
 | **Goal** | A stranger can run it; either of you can perform build-spec §1.2 cold |
-| **Both** | **U-P21** |
+| **Both** | **U-P21**, with full G5 performance/automation complete before final closure |
 | **Joint exit criterion** | **Gate G10**: each of you performs the §1.2 demo cold, twice, with no crashes · a stranger builds a table from the README |
 | **Effort** | A 20 · B 20 |
 | **Not in this sprint** | Model, threshold or badge-rule changes |
@@ -336,35 +341,48 @@ its schema with Lane B. Before U3, prove standalone preparation and file replay 
 an external fixture without producer dependencies, and prove mismatches fail before execution.
 This is part of U2's exit, not a new claim of accuracy or a dependency on rk-sim P16.
 
-**G2 · Native-stage design and verification readiness (U3).** Required before U4a:
-- accepted exact bounded stage, capability/refusal matrix and full-grid expansion plan;
-- human-approved mapped protocol/schema plan including v2 RoPE, legacy handling, identities,
-  replay and no independent workload reconstruction inside Rust;
-- independent literal derivations and public-boundary behavioral/mutation obligations with
-  precise U0006 reductions and stage-specific execution requirements;
-- accepted toolchain/license plan and prospective absolute host budget proposal; no borrowed
-  fork timing limit or fabricated measurement;
-- required U-P6 analytic checks executed, partial/not_run coverage and review gaps disclosed;
-- owners, stage ordering, revised effort and remaining runner/human dependencies recorded.
+**G2 · Native-stage design readiness (U3).** Required before the authorized native tasks:
+- exact bounded scope/refusals and M/K1/K2/B/R task acceptance; independent derivations,
+  public-boundary faults and conservative U0006 reductions;
+- human-approved mapped schema plan; exact protected installation before K2, not K1;
+- accepted kernel semantics and exact toolchain/license closure before K1; prospective
+  performance workloads/budgets separately accepted before measurements;
+- each analytic U-P6 obligation assigned a consumer and deadline, with existing outcomes
+  preserved. Required floor/correctness cases precede their first reliance; unrelated
+  report completion does not block kernel development;
+- reference feasibility and later product decisions scheduled, ownership and revised effort
+  recorded. A proposal is not a runtime pass or blanket approval of all its details.
 
-*Pass:* design is accepted, not an engine measured or validated. Runtime release additionally
-requires the exact schema/stage approvals and Linux runner/manual-nightly readiness. *Fail:*
-resolve the missing design/verification decision; do not fall back to a second Python engine.
-Prior source inspection remains source inspection, not an empirical fork G2 failure.
+**G3a · Silicon-suite readiness (U4b).** Gates U5 prediction freeze, not product tables:
+- usable sourced TPU reference, explicit unknowns and structural assumptions, representability
+  and measurement-observability review; required native formats/operators admitted;
+- complete required suite work, including decoder/RoPE/casts/KV/traffic where applicable;
+  steady/priming checks at benchmark points; no silent work omission;
+- applicable independent L0/L0m/L1, complete-work observations, public-boundary faults,
+  mapped producer-disabled replay, debug/release determinism and relied-on U-C0 checks;
+- critical-path attribution and diagnostics actually used by G4 verified; attribution is
+  a model accounting convention, not proof of the physical cause of error;
+- signed suite and frozen-prediction/order infrastructure ready. Hardware access/spend
+  is separately authorized. Unsupported required benchmark work blocks this gate or needs
+  a human scope amendment; unknown numerical placeholders are not usable chip estimates.
 
-**G3 · A full table exists (U4).**
-- *Pass:* one proposed design, one ModelSpec, fp8 and bf16, tp = 8, over a declared envelope.
-  Native's composite follows its implemented levels in U0011 and build-spec §2.4; initial
-  compute 1 / NoC 0 / DRAM 0 is at most C1. Required applicable L0/L0m/L1 and independent
-  completed-work counts pass. Unsupported required grid work blocks G3, never silently drops
-  from the denominator. Optional component references record matched scope and independence;
-  the 10% NoC bound below 70% saturation is retained for an admitted compatible comparison
-  after reservation NoC exists. NoC-0 contention comparisons remain not_run, not passes.
-  Leave-one-out interpolation error is ≤5% median and ≤15% max. Composition, layer-reuse and
-  cold-vs-steady errors are reported. The derated-DRAM and latency-bound L1 checks pass.
-  Builds are byte-identical. The model card says stub.
-- *Fail:* do not measure silicon. An unverified model compared against silicon produces an
-  error nobody can attribute. Fix what failed, then rerun G3.
+**G3b · First full consumed table (U7).** Separate from silicon success:
+- freeze the actual consumer request/envelope, hardware, exact model/precision/tp, policies,
+  initial state, coefficients and prepared error jobs. The full npu-m256/70B/FP8/tp8 demo
+  remains required unless separately amended; resolve U0022 precision/ragged and hardware
+  extensions before dependent work, never omit RoPE or substitute BF16 silently;
+- public table/report pipeline, complete required coverage, applicable verification and
+  composite from implemented mechanisms. U10's C2 consumer additionally requires G6;
+- LOO interpolation error ≤5% median and ≤15% max; composition, layer-reuse, cold/steady
+  and priming errors reported with sample counts; envelope refusal and contract vectors;
+- repeat and workers 1/N byte identity, authenticated prepared replay with producers off;
+- model card reflects actual applicable evidence: STUB/unknown error without validation.
+  Failing or unrun G4/G7 does not prohibit tables. Missing required table points or semantic
+  prerequisites blocks G3b, not an otherwise ready unrelated silicon campaign.
+
+No mandatory full npu-l4 C1 grid gates U5 and no full C1 mesh grid gates U6. Small tables
+and direct results may be used earlier for declared tests/consumers. Large generated grids
+must name their consumer; input breadth and engine detail do not establish accuracy.
 
 **G4 · The large-core method tracks silicon (U5).**
 - *Setup:* predictions frozen first; ≥24 measurements covering all six classes of U-P9
@@ -375,36 +393,45 @@ Prior source inspection remains source inspection, not an empirical fork G2 fail
   verdict is stated per mapping-match group (matched, compiler-chosen); an empty group is "no
   evidence", never a pass.
 - *Fail:* the card stays stub, and **the errors are published anyway**.
-  - If one subsystem explains ≥70% of the error, allow one bounded fix prompt, measured against
-    a **new** frozen prediction set. "Explains" is computed by script from the frozen
-    predictions: each benchmark's |error| is assigned to the subsystem with the largest share
+  - If the attribution heuristic assigns ≥70% of the error to one subsystem, allow one bounded investigation/fix prompt, measured against
+    a **new** frozen prediction set. This selects a hypothesis, not a proven cause.
+    Compute the allocation by script from the frozen predictions: each benchmark's |error| is assigned to the subsystem with the largest share
     of that prediction's `attribution_s`, and the test is whether one subsystem receives ≥70%
     of the summed |error|.
   - Otherwise the honest status is "verified, unvalidated", and the plan continues on that
     basis.
 
-**G5 · Independent native qualification (U6).**
-- *Pass:* execute all required stage-qualified literal and behavioral cases: counts/transfers,
-  clock edges/critical paths, conservation, dependency order, capacity/queue limits, shared
-  resource serialization and permitted overlap; preserve independently authored derivations.
-  Discriminating public-boundary faults demonstrate detection, with restored controls passing.
-  Required L0/L0m/L1, mapped producer-disabled replay, debug/release and workers 1/N determinism,
-  diagnostic null handling, attribution and the initial npu-m256 table pass. Record absolute
-  time/memory against prospective U0011 budgets on the declared Linux environment, and U0012's
-  noise-aware regression controls. Independent U-REVIEW remains required.
-- *External comparisons:* optional and limited to prospectively admitted matched scopes;
-  retain failures and unavailable/not-independent outcomes. No 3%-on-95% whole-fork gate or
-  fork-relative speed target. Missing optional evidence cannot discharge required checks.
-- *Fail:* a missing/failed required correctness case blocks G5/U7 until fixed or the scope is
-  explicitly amended. Exceeding host budgets is published and informs U9; missing performance
-  measurements leave qualification pending. Neither implies silicon accuracy.
+**G5 · Independent native qualification (U6), three explicit obligations.**
+- **G5-correctness:** required scope-qualified literal/behavioral cases pass: counts,
+  transfers, clocks/critical paths, conservation, ordering, capacity/queue limits,
+  serialization/overlap, public-boundary faults with restored controls, L0/L0m/L1,
+  mapped producer-disabled replay and debug/release identity. Batch workers 1/N where
+  delivered; full-table worker checks are G3b. Qualify diagnostics/attribution and
+  representative npu-m256 admission, rerun integrated regressions and obtain independent
+  review. Missing/failed required correctness blocks U7/G6/G3b/U10 dependent work.
+- **G5-performance:** prospective U0011 budgets and U0012 noise/regression controls evaluated
+  on the designated controlled Linux host, with exact workload/environment and observations.
+  Publish exceeded budgets honestly; those findings inform U9 rather than imply accuracy.
+- **G5-automation:** an executed applicable self-hosted nightly, with real suite/environment
+  receipts. A registered idle runner or no-op job is not completion.
+- **Full G5:** all three obligations complete. Missing performance or automation leaves
+  full G5/U6 closure pending, and blocks U9 entry, any simulator-performance claim and final
+  closure. It does not block U7/G6/G3b/U10 once correctness and their own requirements pass.
+  Observations collected to establish performance readiness are provisional while either
+  host evidence or nightly is missing, never qualified claims.
+- Optional external comparisons retain scope/failures/unavailable/not-independent outcomes;
+  no whole-fork agreement or speed-ratio requirement. Missing optional evidence cannot
+  discharge correctness. No G5 outcome establishes silicon accuracy.
 
-**G6 · Native composite C2 (U7).**
+**G6 · Native composite C2 (U7).** Requires G5-correctness, not G5-performance/automation.
+U-P13d separates functional scale admission from host metrics; missing host/nightly cannot
+silently become a C2/table/integration prerequisite. Performance obligations remain open.
 - *Pass:* compute is at level 2, NoC and DRAM at level 2 or 1+ts, and sync is exact (build-spec
   §2.4); no row is faster than its U-C0 roofline; new mechanisms pass independent mathematical/behavioral
   checks, and any prospectively admitted compatible L2 bounds hold. Absent optional references
   stay disclosed; C2 denotes represented detail, never validated accuracy.
-- *Fail:* report the composite as C1. That is still a shippable, honest answer.
+- *Fail:* report the actual lower composite, honestly usable within that scope. It does
+  not satisfy G6 or U10's C2-only admission; no relabeling to complete G9.
 
 **G7 · The mesh method tracks silicon (U8).** G4's thresholds, applied to native composite C2
 on the mesh family, over ≥36 measurements covering all eight classes of U-P15 (end-to-end
@@ -425,13 +452,16 @@ among them).
   only C2 path. The funded plan's G1 has its answer.
 
 **G9 · Integrated (U10).**
-- *Pass:* the exit criterion above, and rk-sim's P14 is ACCEPTED.
+- *Pass:* G6 + G3b and the exit criterion above, including non-C2/inconsistent-detail
+  rejection; rk-sim's P14 is ACCEPTED. G5-correctness gates this work; full G5
+  performance/automation may remain open. No silicon-pass requirement is added.
 - *Fail:* uarch stays standalone (a CLI, tables and reports), and rk-sim's main is untouched
   beyond the accepted ADR.
 
 **G10 · Definition of done (U11).**
-- *Pass:* build-spec §1.2 is performed cold, twice by each founder, and a stranger builds a
-  table from the README.
+- *Pass:* full G5, including controlled-host performance and executed self-hosted nightly,
+  is complete; build-spec §1.2 is performed cold twice by each founder, and a stranger
+  builds a table from the README. Starting U7/U10 earlier does not waive final closure gates.
 - *Fail:* file each failure as a bug against its owning prompt, fix it, and rerun.
 
 ---
@@ -442,12 +472,12 @@ This is the same list U-REVIEW walks.
 
 | # | Check | Where the rule lives |
 |---|---|---|
-| 1 | The joint exit criterion runs on the Linux box from a cold clone | §3 |
+| 1 | Applicable exits run from a fresh hosted Linux checkout and separate fresh local clone on the same published commit; controlled-host checks where required | U0023 / §3 |
 | 2 | No number reaches a human without badge, conditions and error band | `report/README.md` |
 | 3 | No stipulation outside `hw/designs/`; no claim without a source | `hw/README.md` |
 | 4 | Golden diffs: none, or each justified by an ADR | `tests/golden/README.md` |
-| 5 | L0, L0m and L1 green for every engine; mutants caught (nightly) | `validation/README.md` |
-| 6 | Determinism: 1 vs N workers, and 1 vs N threads from U9, byte-identical | build-spec §6.6 |
+| 5 | Required stage-applicable L0/L0m/L1 and mutants executed; unsupported/not_run stays explicit, real nightly required by G5 | U0006 / U0023 |
+| 6 | Replay/debug-release determinism at native stages; 1/N table workers when that path is delivered; 1/N threads from U9 | build-spec §6.6 |
 | 7 | No composite C2 that breaks the rule; no row below its U-C0 | build-spec §2.4 |
 | 8 | Predictions precede results; nothing frozen was edited | `validation/L3_silicon/README.md` |
 | 9 | Model cards promoted only by the ledger, and only in scope | `validation/ledger/README.md` |
@@ -469,12 +499,12 @@ This is the same list U-REVIEW walks.
 | **U-P4** | U2 · B | Badges, model cards, applicability, the report |
 | **U-P5** | U3 · A | Bounded native-stage design, protocol and verification readiness |
 | **U-P6** | U3 · B | L0 invariants, L0m metamorphic, mutants |
-| **U-P7** | U4 · A | Mapping policies, grid, interpolation, measured errors, the first full table |
+| **U-P7** | U4 M / U7 T · A | Early mapping/fixtures; later consumer-driven grid, interpolation/errors and first full product table |
 | **U-P8** | U4 · B | L1 limits (with hand fixtures), L2 differential |
 | **U-P9** | U5 · A | TPU v5e reference model; frozen predictions |
 | **U-P10** | U5 · B | TPU measurement kit; ledger; promotion; G4 |
-| **U-P11a** | U4a · A | Native kernel: time, events, wheel, ownership, protocol |
-| **U-P11b** | U4a/U4b · A | Native models (compute 1, NoC 0, DRAM 0), TaskGraph executor, attribution |
+| **U-P11a** | U4a · A | K1 internal kernel; K2 approved public protocol wiring |
+| **U-P11b** | U4a B / U4b R · A | Bounded models, then required reference-suite coverage/admission and attribution |
 | **U-P11c** | U6 · A | Native qualification, diagnostics, G5 and absolute host cost |
 | **U-P12** | U4/U6 · B | Independent verification, scoped comparisons, determinism and metrics |
 | **U-P13a** | U7 · A | Native NoC at 1+ts; NoC barriers |
@@ -482,8 +512,9 @@ This is the same list U-REVIEW walks.
 | **U-P13c** | U7 · A | Native compute level 2: bank conflicts, DMA interleave |
 | **U-P13d** | U7 · A | Mesh policies, the composite rule, C2 at mesh scale |
 | **U-P14** | U7 · B | Design studies |
-| **U-P15** | U8 · A | Blackhole reference model; frozen predictions per level |
-| **U-P16** | U8 · B | Blackhole measurement kit; the per-level verdict; G7 |
+| **U-P15a** | U8 preparation · A | Implement/verify Blackhole native admission from U-P16 S reference handoff |
+| **U-P15** | U8 · A | Verify admitted Blackhole reference; freeze predictions per level |
+| **U-P16** | U8 · B | S reference completion/readiness; M kit, measurements and per-level verdict/G7 |
 | **U-P17** | U9 · A | Parallel engine: exact conservative mode, labelled lax mode |
 | **U-P18** | U9 · B | The synchronisation experiment; G8 |
 | **U-P19** | U10 · A · *in rk-sim* | rk-sim P18: characterized C2 cost |

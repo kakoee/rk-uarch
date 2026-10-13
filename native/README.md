@@ -24,7 +24,12 @@ the engine container; `make native`, `make native-test`. Binary: uarch-engine
 ## Delivery status and order
 
 Native is planned, not yet implemented. U0005 selects one progressive production engine:
-U3 stage design → U4a mapped fixtures/kernel/bounded models → U4b full table → U6
-qualification → U7 detail. Independent mathematics and behavioral tests accompany each
+U3 design → U4a M plus K1, then K2/bounded models → U4b reference-suite readiness.
+U6 adds qualification at representative mesh points; U7 adds detail and full product tables. Independent mathematics and behavioral tests accompany each
 stage. No complete fork or second Python contention engine is a prerequisite. Optional
 reference matches are scoped verification; only applicable silicon evidence validates.
+
+U0023 separates K1 internal mechanics from K2 public schema wiring and correctness CI
+from controlled-host performance. U5/U8 silicon success is not a table-production gate.
+G5-correctness alone gates U7/G6/G3b/U10; full G5, U9 entry, simulator-performance
+claims and final closure still require controlled-host evidence and self-hosted nightly.

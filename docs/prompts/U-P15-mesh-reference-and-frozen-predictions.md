@@ -17,18 +17,28 @@ conditions. Measurements use the declared mapping match; a compiler-chosen mappi
 assumed equal to the local policy. Replaying predictions must not silently re-prepare inputs
 with a newer producer.
 
+READINESS: B's U-P16 S completes the reference and measurement-feasibility handoff;
+A's U-P15a implements and verifies native admission, required formats/operator/mapping
+scope before this separate prediction-freeze session. These phases may be prepared in U7. These are explicit preparatory tasks,
+not permission to edit the engine while generating predictions. Unknowns have reviewed
+treatment/limits, never arbitrary runnable carrier placeholders. G6 and hardware access
+authorization are required; full product tables and passing G4 are not measurement inputs.
+If required suite work cannot be represented or observed, stop for a concrete decision.
+No pilot, purchase or measurement is authorized by this preparation instruction.
+
 TASK: the same discipline as U-P9, for the class the native engine exists for: a mesh of many
 small cores. Predictions are committed before any measurement exists, and this prompt never
 sees one.
 
-1. Complete hw/references/blackhole-p100a.yaml as a REFERENCE: claims only, every number with
+1. Verify the already admitted hw/references/blackhole-p100a.yaml as a REFERENCE: claims only, every number with
    a URL, unknowns as stub claims. Model what the docs describe: two NoCs in opposite
    directions on a torus, the per-hop latencies, flit width, SRAM per core, the GDDR6
    channels and bandwidth, the numeric formats including BLOCKFP8 with its scale bytes. List
-   every stub the engine reads in predictions/UNKNOWNS.md. Fill the Rev-2 fields from the docs
-   where they exist (GDDR6 organisation and timing, interleaving, DMA/NIU outstanding
-   requests, barrier mechanism, accumulator and operand-buffer capacity, controller queues
-   and credits); otherwise stub them, counts included.
+   every stub the engine reads in predictions/UNKNOWNS.md. Verify that B's completed
+   reference already records GDDR6 organization/timing, interleaving, DMA/NIU outstanding
+   requests, barriers, accumulator/operand capacity and controller queues/credits with
+   reviewed unknown treatment. If a field must change, return to U-P16 S/U-P15a, revalidate
+   and restart the freeze. Do not fill or alter the reference in this prediction session.
 2. Agree validation/L3_silicon/blackhole/SUITE.md with Lane B FIRST, signed by both, with
    at least 36 benchmarks covering every one of these eight classes:
    - NoC: point-to-point latency vs hop count on each NoC; k-to-1 contention at k ∈ {2,4,8};
@@ -60,16 +70,18 @@ sees one.
    which stands for level 0), written to
    validation/L3_silicon/blackhole/predictions/<id>.json with full provenance, mapping match,
    initial state, predicted FLOPs and bytes, and the row diagnostics. Also run
-   tt-npe on the NoC benchmarks and commit its outputs as a SECOND prediction set, labelled
-   as the vendor's estimator. It is an L2 reference, and its own error against silicon is
-   information too.
+   tt-npe only for a prospectively admitted, matched and license-closed NoC scope; commit
+   its outputs as a separate vendor-estimator prediction set. Unavailable/unmatched cases
+   remain not_run and do not block required native silicon evidence. An admitted failure
+   cannot be erased by withdrawing the tool. This is optional L2, not whole-chip truth.
 4. One commit, message beginning "FROZEN PREDICTIONS:". check_ordering already enforces the
    rest.
 
 ACCEPTANCE TESTS:
 1. SUITE.md signed by both lanes before prediction generation.
 2. ≥ 36 prediction files covering all eight classes; each has a native prediction per
-   available level and U-C0 predictions; NoC benchmarks also have tt-npe predictions.
+   available level and U-C0 predictions; admitted matched NoC cases have tt-npe predictions
+   or explicit retained outcomes. Optional absence is not passing evidence.
 3. The reference spec loads as design_status: reference, with zero stipulations.
 4. UNKNOWNS.md is complete: a test cross-checks it against the stubs the engine read.
 

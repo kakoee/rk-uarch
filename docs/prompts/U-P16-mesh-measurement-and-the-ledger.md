@@ -5,9 +5,24 @@ _From build-spec §8. One prompt, one fresh session._
 ```text
 CONTEXT TO LOAD: CLAUDE.md, measure/README.md, validation/L3_silicon/blackhole/SUITE.md,
 validation/ledger/README.md, ADR U0010 (how the first verdict was reached; reuse it). Tenstorrent
-tt-metal documentation: TT-Metalium kernels, the device program profiler, tt-smi. PREREQUISITE:
-a host with the Blackhole p100a installed, Ubuntu 22.04 as the card's docs require, and tt-smi
-reporting the card. If any of that is not true, stop and say so.
+tt-metal documentation: TT-Metalium kernels, the device program profiler, tt-smi; U0023
+and U-P15a. Name the authorized phase in the handoff: S sourcing/readiness or M measurement.
+
+PHASE S — before U-P15a, no card/access prerequisite:
+- B completes hw/references/blackhole-p100a.yaml from primary documentation, records exact
+  sources, formats, structural/timing unknowns and proposed treatments, and reconciles
+  representability with A. Unknown carrier placeholders are not usable physical estimates.
+- B drafts the suite's observable profiler boundaries, mapping match, initial state and
+  counts; identify unmeasurable requirements before engine/prediction work. Resolve any
+  protected or unsupported-scope decision, or record it as a blocker rather than invent it.
+- Handoff accepted reference bytes, source inventory, required capability list and explicit
+  unknowns to U-P15a. Stop: no engine edits, measurements or predictions in S.
+
+PHASE M — after U-P15a admission and U-P15 freeze:
+Require the authorized card/host, OS/runtime supported by its pinned documentation and
+tt-smi identifying the card; verify exact versions rather than assuming an old OS literal.
+If unavailable, M stays pending while source preparation can proceed. Execute the task and
+acceptance below only after these prerequisites and hardware-access approval.
 
 TASK: measure the mesh reference, compare against every frozen prediction set, and let the
 ledger say what the native engine, per fidelity level, is entitled to claim.
@@ -25,7 +40,9 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    plus the derived durations and the derivation script's hash) are committed immutable under
    validation/L3_silicon/blackhole/results/.
 3. Ledger entries, one per (benchmark × prediction source): native at each fidelity level,
-   U-C0, and tt-npe. The same key discipline as U-P10, and classes split by mapping match.
+   U-C0, and tt-npe only in its prospectively admitted matched scope with an actual frozen
+   prediction. Absent/unmatched optional cases remain not_run, never fabricated ledger
+   entries. Retain admitted failures. Use U-P10's keys and split by mapping match.
 4. THE NEW THING THIS VERDICT CAN SAY, which the first could not: whether MORE DETAIL IS
    MORE ACCURATE for this class. Report the error by class for each native fidelity level
    side by side. "Closer" means a lower median |error| in that class; it is reported per
@@ -34,8 +51,10 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    whether it is also accuracy.
 5. Gate G7 (execution-plan §4): the same thresholds as G4, applied to native composite C2 on
    the mesh family. Promotion is scoped to the mesh family and the passing classes only.
-6. tt-npe vs silicon on NoC benchmarks goes in the report as context, labelled as an L2
-   reference's own error. It is not our evidence.
+6. For admitted matched tt-npe predictions, report their silicon comparison as context,
+   labelled as the vendor estimator's own error. Otherwise report unavailable/unmatched/
+   not_run with reasons. Optional absence does not block G7 or count as passing evidence;
+   admitted failures cannot be hidden by withdrawing the reference. It is not our evidence.
 
 ACCEPTANCE TESTS (write first):
 1. The dry run completes and the ledger refuses its SYNTHETIC outputs.

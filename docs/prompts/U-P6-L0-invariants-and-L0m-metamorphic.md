@@ -14,6 +14,13 @@ producer's counts/shape resolution separate from engine invariants on fixed inpu
 metamorphic graph/mapping changes explicitly, update their content identity, and never let
 an engine repair a deliberately invalid mapping through hidden re-preparation.
 
+PHASING (U0023): dispose each outstanding analytic obligation by its first consumer:
+native roofline checks, U5/U8 baseline predictions, reports or later capability. Required
+checks pass before reliance; unrelated report completion does not block K1. Keep previous
+outcomes, missing coverage and U0006 reductions. Do not blanket-pause C1–C5, lower case
+counts or call unobservable mechanisms verified. Native checks follow admitted mechanisms.
+Provide the dependency disposition before a revised execution selection is authorized.
+
 TASK: the rungs that establish that the simulator does not contradict itself, and relations
 that must hold even though nobody knows the right answer. They run against ANY engine through
 the engine protocol: today U-C0, the progressively admitted native engine later. Write
@@ -60,7 +67,8 @@ them once.
    against the mutant and asserts it FAILS. Mark these tests so they run nightly.
 
 ACCEPTANCE TESTS:
-1. Every L0 and L0m suite passes against U-C0 (aggregate and per_op).
+1. Every required applicable L0/L0m case passes before its declared use; aggregate/per_op
+   and version scopes stay explicit. Unsupported/not_run cases prevent whole-rung claims.
 2. Every committed mutant is caught, by name.
 3. Reports are hash-stable across runs.
 4. When the bounded native stage lands (U4a), run every applicable case through its public

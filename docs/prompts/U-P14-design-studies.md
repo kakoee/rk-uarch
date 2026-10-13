@@ -17,13 +17,18 @@ incompatible; re-mapping requires an explicit study choice and recorded producer
 identity includes prepared content and its bindings, not just model/tp or policy label.
 
 TASK: the thing a chip architect actually does with this tool, which is to compare designs. A
-study is a set of tables over stipulated variants, and a report that says what moved and why.
+study compares declared operating points over stipulated variants. Use sparse suite points
+where sufficient; full grids only when a named consumer uses their envelope/interpolation.
+Implement and test the minimal point-result/table adapter if the current report path needs
+it. Preserve hashes, provenance, refusals and scope; do not invent dense rows or interpolate
+from unapproved sparse coverage. U0023 does not require passing silicon to run a study.
 
 1. src/rkuarch/study/: a StudySpec (YAML) names a base design, a list of parameter paths with
    values (one-at-a-time, or a small full grid), a versioned workload
    suite (or one request template), and one engine and fidelity. `uarch study <studyspec>`
-   builds each variant's table through the existing pipeline. Tables are cached by request
-   hash, so a rerun rebuilds nothing.
+   executes each variant at those suite points through the admitted pipeline/adapter.
+   Results are cached by complete request/prepared/engine identity. Dense table generation
+   is requested explicitly when needed, never inferred from a sparse result package.
 2. VARIANTS MAY ONLY CHANGE WHAT A PROPOSED DESIGN IS FREE TO CHOOSE: its stipulated values
    (counts included: array, grid, banks, channels, queue depths), its categorical fields
    (dataflows, topology, interleave scheme, scheduler, page policy, sync mechanism) and the
@@ -34,7 +39,7 @@ study is a set of tables over stipulated variants, and a report that says what m
    variant that changes sram.bytes without re-stipulating energy.pj_per_byte.sram is refused,
    naming both paths.
 3. The diff report (uarch diff from U-P12, extended):
-   - per grid point, the relative change in duration, with its attribution split, showing
+   - per declared study point, the relative change in duration, with its attribution split, showing
      which regime moved (compute-, memory-, NoC- or sync-bound) and which did not move at all;
    - per workload in the suite, each variant's normalised speedup over the base, and their
      geometric mean. Never an arithmetic mean of ratios;
@@ -71,9 +76,11 @@ ACCEPTANCE TESTS (write first):
 7. A variant that changes sram.bytes without pj_per_byte.sram is refused, naming both paths.
 8. Energy renders "unverified" with no energy_verification, and "unknown" at frequency ratio
    0.6 when voltage_ratio is absent.
-9. The dataflow study runs: each variant's conditional_on names its dataflows and mapping
+9. After the explicit hardware/dataflow extension and mappings are accepted, the dataflow study runs: each variant's conditional_on names its dataflows and mapping
    policy, and a variant whose dataflows lack its policy's dataflow is refused.
 10. A count variant (npu-m256 SRAM banks 16 → 32) runs, and its change is in conditional_on.
+11. Point/table adapters preserve identical values/provenance for shared points, refuse
+    missing coverage and never silently interpolate a sparse study into a product grid.
 
 ADDITIONAL ACCEPTANCE — prepared inputs:
 - A variant invalidating a supplied mapping is refused without calling a local mapper.

@@ -15,6 +15,11 @@ workload and mapped TaskGraph. Partitioning simulator ownership must not reparti
 tensors or change the declared chip mapping. Record prepared input identity with every run
 so timing differences cannot hide a change in the workload producer.
 
+U9 ENTRY: G6 and the existing recorded-need/funded-experiment decision, plus full G5
+including controlled-host performance evidence and executed self-hosted nightly. The
+funded-experiment alternative does not waive either host/nightly prerequisite. Every
+performance/scaling claim uses the designated controlled host and actual run receipts.
+
 TASK: measure whether lax synchronisation survives a BACKPRESSURED boundary, publish the curve
 whatever its shape, and wire the result into what the composite fidelity may claim.
 

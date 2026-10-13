@@ -26,13 +26,21 @@ This prompt remains table consumption at runtime: no live rk-uarch, compiler or 
 invocation, and no new tensor sharding in the reader. A future rk-sim prepared-input exporter
 is a separately approved integration; it is not a prerequisite or an implicit part of P18.
 
+PREREQUISITES: G6 plus G3b for the consumed C2 table and rk-sim's own accepted boundary.
+G5-correctness is required; pending G5-performance/automation does not block this
+product integration or waive full G5/final closure. An early test-only adapter is not integration. A passing silicon campaign
+is not mandatory, but actual evidence limits, STUB/unknown error and conditions must survive.
+
 TASK: a component whose effective compute fidelity is C2 is priced, every iteration, from a
 uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
 
 1. rk/engine/characterized/ (new; engine layer; Lane A): loader.py reads a table file, verifies
    table_hash by recomputing it, checks the contract MAJOR version, checks the table's
    hardware_spec_hash against the component's characterization.spec_hash and the table's tp against
-   the plan's tp for that component, and returns a frozen object.
+   the plan's tp for that component, and returns a frozen object. Before admission, require
+   composite_fidelity=C2 and consistency with the adopted per-subsystem/sync rule. Missing,
+   lower or inconsistent detail raises CompositeFidelityMismatch; no upgrade or fallback
+   for a supplied invalid table. Hash verification alone is insufficient.
    cost.py: CharacterizedIterationCost, satisfying EXACTLY the interface f1 already calls on
    IterationCost (decode_s, prefill_s, decode_counts, prefill_counts, collective_s, spill_s,
    power_point, kv_byte_per_context_token, tp, and whatever else f1 reads). If f1 annotates
@@ -90,13 +98,19 @@ ACCEPTANCE TESTS (write first):
    points the characterized cost reproduces IterationCost exactly (==), and between points
    within the declared interpolation error. This proves the path independently of uarch's
    physics. The characterized cost also reproduces rk-uarch's
-   contract/fixtures/interpolation_vectors.json within 1e-12 relative.
+   contract/fixtures/interpolation_vectors.json within 1e-12 relative. Exercise this test
+   below product admission, at the cost/interpolation unit boundary. The C0 fixture keeps
+   its true fidelity and must be refused by the production C2 loader; never relabel it C2.
+   Test 7 separately covers production admission with eligible/ineligible fixtures.
 3. Envelope refusal at build time; spec-hash mismatch; params mismatch; tp mismatch;
    contract-major mismatch; non-finite row; DVFS without a frequency axis; a cold table in
    R1; a KV block-size mismatch: one test each, each raising the named error.
 4. Default-degrades / override-raises asserted as a pair in one test.
 5. Every existing golden is byte-identical. The C0 and R0/R1 paths are untouched.
 6. R1 with a C2 component: determinism, Little's law and conservation (P5's tests) still hold.
+7. Valid hash-recomputed C0/C1, missing-composite and C2-with-inconsistent-detail tables
+   are refused with CompositeFidelityMismatch before pricing/fidelity display; an admitted
+   C2 positive control succeeds. Existing C0 plumbing fixtures never grant C2 eligibility.
 
 GUARDRAILS: Never import rk-uarch; rk-sim reads files. Do not change f1's scheduling
 semantics. Do not extrapolate, clamp, or refit a table. Do not edit tests/golden/expected/ or

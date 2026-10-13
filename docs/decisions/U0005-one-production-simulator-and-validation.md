@@ -6,6 +6,13 @@ accepted fork-selection verdict. No candidate was built or run and no empirical 
 is asserted. The source-only investigation at `42fc3414d6329675164940aa40289689d7ef81ea`
 remains historical evidence, including its now-unselected Python U-C1 design recommendation.
 
+## Prospective sequencing amendment
+
+Once human-installed, [U0023](U0023-consumer-driven-delivery-and-validation-readiness.md)
+supersedes this ADR's delivery ordering and host/runner prerequisites as specified there.
+The original decision below is preserved; use U0023 and the current execution plan for
+future task release. The one-engine direction and verification/validation limits remain.
+
 ## Context
 
 The previous plan required a complete external simulator before the native engine, then

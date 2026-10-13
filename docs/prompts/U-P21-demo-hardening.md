@@ -14,6 +14,10 @@ on the cold setup. Neither path requires a live rk-sim clone or a compiler to pr
 results. Verify replay with local producers disabled, including input-content/cache identity;
 keep the later rk-sim table-consumption demo independent of preparation services.
 
+FINAL-CLOSURE PREREQUISITE: full G5-correctness/performance/automation, including controlled-
+host performance evidence and executed self-hosted nightly, must be complete. U7 tables
+and U10 integration may have proceeded on correctness alone; this does not waive closure.
+
 TASK: a stranger can run it, and either founder can perform the build-spec §1.2 demo cold,
 including the other lane's parts.
 

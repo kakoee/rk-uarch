@@ -5,9 +5,9 @@ _From build-spec §8. One prompt, one fresh session._
 ```text
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/engines/README.md, build-spec §2.5
 (the engine protocol and TaskGraph) and §2.8 (the native engine specification; it is the
-spec, not background), ADR U0005, U0007. Javid's ../rk-sim/docs/vision/elements_of_parallel_DES.md
-from rk-sim, READ-ONLY, for the parts §2.8 adopts, and build-spec §2.8's "departures" table
-for the parts it rejects and why.
+spec, not background), ADR U0005/U0023 and the accepted U0011 decisions. Build-spec §2.8
+contains the adopted mechanisms and departures; no rk-sim vision-document access is needed
+or authorized by this prompt.
 
 PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
 ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
@@ -16,17 +16,25 @@ shapes, resource assignments, dependencies and policies; no model builder or map
 inside the engine. Timing/events are outputs of executing those inputs. Extend the accepted
 protocol only through its versioned schema procedure, not a parallel Rust-only format.
 
-PREREQUISITES: accepted U-P5 stage design, human-committed mapped protocol/U0011 decisions,
-U-P7's minimal mapped fixtures and verified Linux runner/manual-nightly readiness. Existing
-analytic carriers do not prove a mapped native schema already exists. No kernel work before
-these conditions. Full U-P7 grid/error campaigns are later and are not prerequisites here.
+PHASES AND PREREQUISITES (name the phase in the handoff):
+- K1: accepted kernel/time/event semantics and exact Rust/toolchain/dependency/license
+  decisions. Implement items 2–8 internally; use private unit fixtures, not a new public IR.
+  Run acceptance 1/1a/2/3/5 at the internal boundary, with canonical internal result bytes.
+  K1 may overlap M; no public schema claim or production mapped admission follows.
+- K2: additionally require human-installed mapped carriers/U0011 boundary and M's fixtures.
+  Implement items 9–10 and execute every acceptance case at the public subprocess boundary.
+  Existing analytic carriers are not a mapped native protocol. Stop after the named phase.
+- Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+  registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+  U0023; full-table work is later, not a kernel prerequisite.
 
 TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
 EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
 jobs; no subsystem models yet. U-P11b adds the bounded model stage.
 
 1. BEFORE MEASURING, obtain human acceptance of U0011's absolute per-point time/memory
-   budgets, exact workload/host scope and later npu-m256/32×32 budget (U9 reads it). No
+   budgets and exact workload/host scope (including scale points when U9 will use them).
+   This is required before performance measurement, not before correctness coding. No
    fork-relative speed target and no adoption of the old 200-second fork proposal. Record
    calibration protocol and host noise separately from simulated chip time.
 2. Build: native/Cargo.toml (workspace) with crates/uarch-engine (the `uarch-engine`
@@ -39,6 +47,8 @@ jobs; no subsystem models yet. U-P11b adds the bounded model stage.
    clippy runs with -D warnings and disallows HashMap and HashSet; rustfmt is enforced.
    Add the Rust toolchain to containers/Dockerfile.engine, and wire `make native` and
    `make native-test` to cargo.
+   Before K1 CI evidence counts, B pins the CI toolchain and cargo-deny version under
+   the accepted tool/license decision; the existing unpinned conditional job is not ready.
 3. Time: u64 picoseconds. Each clock domain has the resolved integer freq_hz from the
    EngineJob, NEVER A ROUNDED PERIOD (1.2 GHz is 833.33… ps, and rounding it either way
    biases every row or breaks the roofline floor). EDGES ARE ROUNDED, PERIODS ARE NOT: edge k
@@ -73,7 +83,7 @@ jobs; no subsystem models yet. U-P11b adds the bounded model stage.
    dependencies resolved by events, so the kernel runs end to end before any model exists.
 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
    parser, using the approved mapped protocol. First test the execution boundary directly;
-   the complete `uarch table ... --engine native` path follows in U4b.
+   the complete consumer table path follows in U7 under U-P7 T.
 10. The protocol as a schema: reuse U2/U4's EngineJob/EngineResult schemas and fixture
     messages from engines/protocol.py in src/rkuarch/engines/schema/. `make gen` keeps exporting
     them; the freshness check remains read-only. Test Rust serde types against those fixtures,

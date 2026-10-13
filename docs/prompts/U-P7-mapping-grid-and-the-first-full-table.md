@@ -1,4 +1,4 @@
-# U-P7 · U4 · Lane A — Mapping policies, the grid, interpolation, and the first full table
+# U-P7 · U4 M / U7 T · Lane A — Mapping first, then consumer-driven full tables
 
 _From build-spec §8. One prompt, one fresh session._
 
@@ -15,11 +15,36 @@ Extend U2's saved-input path with the existing TaskGraph; policies are versioned
 preparation producers outside engines. Imported mapped inputs bypass policy execution and
 are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
 
-TASK: deliver mapping and then a complete native table in two phases. U4a mapping/schema
-work precedes U-P11a/b; U4b full tables follow the bounded native executor. Do not require
-a complete table before building the engine that produces it. The mapped schema and minimal
-fixtures must first receive the U-P5 human decision. This prompt's full acceptance belongs
-to U4b, not the bounded prototype. Compute 1 / NoC 0 / DRAM 0 earns at most C1.
+TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
+component boundary; T (U7) delivers the first full product table. A small table may be
+built earlier for a named use, but no full grid gates silicon. Passing G4/G7 is not a
+prerequisite for producing an honestly labeled table. U0023 replaces the old U4b full grid.
+
+PHASE M — inputs and exit:
+- Require exact accepted component scope/semantics and human-installed mapped carriers
+  before public mapper/wiring. U-P11a K1 internals may proceed separately.
+- Implement only the admitted mapping slice from item 1 and export/import validation in
+  item 10, with scope-appropriate fixtures; later policies/operators stay refused.
+- Independently derive placements, capacity, jobs/transfers/dependencies; test invalid
+  dimensions/resources/capacity and producer-disabled imported replay identity. A changed
+  placement changes identity; no implicit remapping. Public execution tests wait for K2/B.
+- Handoff schema/producer versions, admitted/refused scope and exact tests. Stop: items
+  2–9 and the full-table acceptance below are T, not an M release requirement.
+
+PHASE T — inputs and exit:
+- Require verified engine scope and the declared U7 consumer manifest: exact design,
+  ModelSpec/shape, precision/tp, coefficients, policies, initial state, grid and error jobs.
+- Complete missing full-model/rank/precision/operator admission under the U-P11b model
+  discipline and U-P13 mechanisms before generating the grid: all layers, once-only
+  head/tail, RoPE/conversions/coefficients, KV and capacity, with independent complete-work
+  checks. TPU-specific R completion is neither sufficient nor required for this product scope.
+- Deliver items 1–10 at that scope and all applicable full-table acceptance below (G3b).
+  The first full demo table is npu-m256 × 70B-class × FP8 × tp8, with G6 for C2.
+- Resolve FP8/RoPE, ragged composition, hardware formats/dataflows and public schema changes
+  before dependent runs. The accepted npu-l4 remains WS/BF16 until separately revised.
+  A missing required point blocks G3b; do not silently drop it or change its precision.
+- Product scope changes require their own acceptance. Full npu-l4/32×32 grids have no
+  automatic requirement; use declared study/scale points where sufficient.
 
 1. mapping/ — standalone preparation: named, versioned policies, each a pure function
    (validated prepared op graph, HardwareSpec) ->
@@ -27,8 +52,10 @@ to U4b, not the bounded prototype. Compute 1 / NoC 0 / DRAM 0 earns at most C1.
    multicast), barriers, dependencies.
    - ws-rowsplit@1 for the large-core class (weight-stationary, output rows split across
      cores).
-   - os-tiled@1 for the large-core class (output-stationary, output tiles split across
-     cores), so a dataflow study has a second policy to compare (U-P14).
+   - os-tiled@1 for the large-core dataflow study when its hardware revision is accepted;
+     it is not a prerequisite for an unrelated mesh table.
+   - U-P13d owns summa-2d@1 and head-parallel@1 for the mesh consumer. Scope each mapping
+     and acceptance case to its actual hardware/operator inputs.
    A policy's name@version is a stipulation on every row. A better policy is a new version,
    never an edit. No search, no autotuning. Every policy declares the matrix dataflow it
    needs (refused on a spec whose dataflows lack it) and its buffer depth (double or triple
@@ -71,9 +98,10 @@ to U4b, not the bounded prototype. Compute 1 / NoC 0 / DRAM 0 earns at most C1.
    attribution_s is diagnostic only; it is never fed back into a max() form.
 7. Rows carry peak_resident_bytes. If HBM residency exceeds the spec's capacity, raise
    ResidencyExceedsCapacity for weights, and warn for KV, mirroring rk-sim's M0 rule.
-8. `uarch table ... --engine native --workers N` builds the full default grid for npu-l4 ×
-   Llama-3.1-70B-class × fp8 and bf16, tp = 8, and also tp = 1 where the weights fit the
-   spec's capacity (a weight-residency refusal at tp = 1 is recorded, never worked around).
+8. `uarch table ... --engine native --workers N` builds the complete declared consumer
+   grid. The npu-m256/70B/FP8/tp8 demo remains required. Additional BF16, npu-l4, tp1 or
+   policy variants need a named consumer and accepted scope; capacity failures remain
+   explicit, never worked around or omitted to make an envelope pass.
 9. initial_state travels in every EngineJob; steady primes one iteration at the same point
    and reports the second.
 
@@ -91,16 +119,18 @@ ACCEPTANCE TESTS (write first):
 3. Interpolating at a grid point returns the grid value exactly.
 4. LOO and composition errors are present, finite, and reported. The composition sample is
    seeded and reproducible.
-5. G3 (execution-plan §4): the npu-l4 table passes L0, L0m and L1 (U-P6 and U-P8) as run by
-   Lane B, and its model card says stub.
-6. Both supported policies reproduce independently derived tile/transfer expectations;
-   no mandatory external-tool compatibility policy is added.
+5. G3b (execution-plan §4): the consumer table passes applicable L0/L0m/L1 through Lane B,
+   and its card reports only actual applicable evidence: stub/unknown error without it.
+   C2 admission requires G6; neither C2 nor a complete grid proves physical accuracy.
+6. Every policy in the consumer scope reproduces independent tile/transfer expectations;
+   required second-policy studies remain U-P14 work, not a blanket silicon prerequisite.
+   No mandatory external-tool compatibility policy is added.
 7. layer_reuse and cold_vs_steady errors are present, finite, seeded and reproducible.
 8. A tile larger than a core's SRAM is refused with SramCapacityExceeded, naming the core and
    the bytes.
 9. With uniform visit_weights, weighted_median_rel equals median_rel.
-10. os-tiled@1 is refused on a spec whose dataflows lack output_stationary, and runs on one
-    that has it.
+10. At the U-P14 dataflow-study delivery, os-tiled@1 refuses unsupported dataflows and
+    runs on its accepted supporting spec; this does not gate an unrelated mesh table.
 11. A prefill row at L = 32768 builds with no SramCapacityExceeded, and its attention DRAM
     bytes equal Q, K, V and O within named deviations.
 12. The table's composite follows build-spec §2.4 and the actual U0011 implementation levels.

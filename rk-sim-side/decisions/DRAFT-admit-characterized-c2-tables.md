@@ -32,6 +32,11 @@ Two things in rk-sim currently refuse this, correctly:
 A `compute_resource` may run at **C2** when, and only when, it carries a characterization
 table conforming to `uarch-contract/<MAJOR>`. Nothing else on §1.3's out-of-scope list moves:
 no C1 anywhere, no M1+ or N1+, no online co-simulation, no uarch import. rk-sim **reads files**.
+The reader must verify composite C2 and consistent subsystem/synchronization detail under
+the adopted contract. A valid hash does not establish this. Missing, lower or inconsistent
+composites raise `CompositeFidelityMismatch` before pricing or a C2 display. U10 requires
+G6 plus G3b, and this boundary still needs rk-sim's own approval. No silicon-pass
+prerequisite or badge promotion is implied by C2 admission.
 
 ### 2 · The schema PR
 

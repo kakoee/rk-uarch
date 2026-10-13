@@ -89,6 +89,14 @@ human-committed [U0005](decisions/U0005-one-production-simulator-and-validation.
 Earlier revision notes describe history; mandatory fork selection, a Python U-C1 fallback
 and permanent native/fork agreement are superseded. No runtime or completed gate is implied.
 
+**Rev 3.1 — U0023 consumer-driven sequencing.** After human installation, U0023 governs
+the bounded post-fork amendment: U4a engine; U4b actual reference-suite readiness (G3a);
+U5 TPU; U6 expanded qualification; U7 first full product tables (G3b) and G6 depth;
+U8 Blackhole (U-P16 S reference → U-P15a admission → U-P15 freeze → U-P16 M measurement);
+U10 rk-sim consumption. Passing silicon is not required to produce tables.
+Preserve honest scope/error/badges. Correctness CI, controlled-host performance and nightly
+automation have distinct requirements; U0002 remains unchanged pending a separate proposal.
+
 ## §1 · WHAT WE ARE BUILDING
 
 ### 1.1 One paragraph
@@ -138,7 +146,7 @@ toward it from U1.
 | DRAM | levels 0–2 | Latency + bandwidth cap derated for refresh → per-channel queue with row buffer and the spec's page policy → Ramulator 2 (library), configured from the spec's organisation and timing |
 | Shared SRAM (optional) | levels 0–1 | Capacity + bandwidth cap → per-port queue, attached to the NoC like a memory controller. In the contract from 0.1; engine support is deferred until after U8, and until then a spec with a shared SRAM lists it as unrepresented, so its composite is never C2 |
 | Engines | — | One production native Rust simulator; retained U-C0 analytic baseline; optional scoped external references outside the production requirement |
-| Parallelism | — | Across grid points from U4; inside a simulation from U9: exact conservative mode, plus a lax mode labelled approximate |
+| Parallelism | — | Across grid points at U7/G3b; inside a simulation from U9: exact conservative mode, plus a lax mode labelled approximate |
 | Evidence | — | L0 invariants, L0m metamorphic, L1 analytical limits, L2 differential, L3 two reference chips, ledger, model cards; workload fidelity against compiler-reported counts; diagnostic fidelity against device counters where a chip exposes them; L0 energy conservation (the energy L2 rung is deferred until after U8) |
 | Product | — | Tables, CLI, static reports with architect diagnostics, `uarch characterize`, design studies over a versioned workload suite, rk-sim integration (U-P19, U-P20) |
 
@@ -604,11 +612,13 @@ accepted revised boundary, so it never invents its own preparation metadata.
 and `uarch table --prepared-input <bundle> --engine analytic`, alongside the existing high-level
 CLI. Save/load/replay works without invoking the producer; U2 includes no detailed mapper.
 U-P5 designs the minimal native stage and mapped protocol, including U0022 v2 scope.
-U-P7 first delivers approved TaskGraph artifacts and hand fixtures in U4a; U-P11a/b then
-build the kernel and bounded native executor. U4b expands the same engine and U-P7 table
-pipeline to the complete grid and query/state cases required by error experiments. Missing
-coverage refuses rather than invoking hidden preparation. U-P12 starts independent native
-verification alongside U4 and completes qualification in U6. U-P14 explicitly
+U-P7 M delivers approved TaskGraph artifacts and hand fixtures in U4a; U-P11a K1 internal
+mechanics may overlap M after semantic/toolchain decisions. K2 public wiring waits for the
+installed mapped carriers, then U-P11b B implements bounded models. U4b R adds the actual
+reference-suite workload/hardware admission before U-P9, not a full grid. U-P7 T in U7
+delivers the consumer grid and query/state cases required by table-error experiments.
+Missing coverage refuses rather than invoking hidden preparation. U-P12 verifies each
+stage; U6 qualifies expanded scope at representative mesh points. U-P14 explicitly
 separates re-preparation for design variants from replay of a fixed external mapping.
 
 The external-producer capability is exercised with standalone file fixtures; no running
@@ -765,11 +775,14 @@ time; it does not start a compiler or rk-uarch during an rk-sim simulation.
 
 #### Progressive delivery and verification
 
-U3/U-P5 designs the bounded mapped native scope; existing analytic-v2 support does not
-imply that mapped Rust carriers exist. U4a delivers approved mapping fixtures, fixed-delay
-kernel and a small supported slice in that order. U4b expands the same implementation to
-U-P7's complete table. U6 completes mesh qualification, diagnostics and absolute performance
-metrics; it does not rebuild the core. U7 adds depth, U9 conditionally adds threads.
+U3/U-P5 designs the bounded scope; analytic-v2 support is not mapped Rust admission.
+U4a delivers M/K1/K2/B as U0023 specifies; U4b verifies actual reference-suite readiness.
+U5 predicts/measures TPU benchmark points, not an unrelated npu-l4 grid. U6 adds verified
+mesh admission, diagnostics and controlled-host metrics without a full C1 mesh table.
+U7 adds depth and the first full product table for declared study/demo consumers. U8
+measures Blackhole; U10 implements the actual rk-sim consumer. U9 remains conditional.
+G4/G7 success is never a prerequisite for producing or using explicitly unvalidated tables.
+Silicon/reference delays keep their gate open but do not block independent native tasks.
 
 At every stage publish exact admitted/refused scope and U0006 outcomes. Required independent
 literal derivations, public-boundary behavioral tests and discriminating mutants are hard
@@ -780,7 +793,7 @@ Small test-only oracles are permitted; a second substantial Python simulator is 
 
 The first stage's precise slice, mapped schema, toolchain/license closure and absolute
 host budgets require the subsequent U-P5 human decision. This architecture change alone
-starts no native implementation. G2/G3/G5 in execution-plan define the separate exits.
+starts no native implementation. G2/G3a/G3b/G5 in execution-plan define the separate exits.
 
 ### 2.9 Parallel execution (U9)
 
@@ -813,7 +826,7 @@ boundary (temporal decoupling).
 | Harness | Python 3.12, uv, Pydantic v2, NumPy, PyYAML, Typer, Jinja2 for reports |
 | Development | pytest, hypothesis, mypy (strict), ruff, import-linter |
 | Engine | Rust (stable, pinned), Cargo with a committed lockfile, serde_json, proptest; clippy `-D warnings`, rustfmt, cargo-deny for licences; in the nightly job, the debug build (overflow checks on) runs the golden requests, AddressSanitizer covers the Ramulator 2 bridge, and loom plus ThreadSanitizer cover the U9 mailboxes |
-| Container | Docker, built on the Linux box only |
+| Container | Pinned image/toolchain on approved Linux; hosted correctness builds allowed, controlled host for performance under U0023 |
 | References | BookSim 2 (BSD-2), Ramulator 2 (MIT), SCALE-Sim v3 (MIT), Gemmini (BSD-3) with Verilator (LGPL-3.0/Artistic-2.0), tt-npe and ttsim (Apache-2.0); Accelergy and Timeloop, each only after its licence passes the allow-list |
 | Measurement | JAX on Cloud TPU v5e (plus XLA's compiled cost analysis for workload fidelity); TT-Metalium with the device profiler on Blackhole p100a |
 
@@ -917,24 +930,33 @@ check 11).
 
 ### 4.0 · `/CLAUDE.md`
 
-```markdown
+```text
 # rk-uarch — a microarchitecture-level simulator of one chip, feeding rk-sim
 
 ## What this is
 One progressively developed native Rust timing simulator, with a retained analytic U-C0
-baseline and Python preparation/product layers, producing characterization tables for rk-sim.
-Verification uses independent mathematics, behavioral checks and optional matched component
-references; scoped hardware measurements establish validation. No mandatory full fork or
-second substantial Python contention engine is part of the production architecture.
+baseline and Python preparation/product layers, produces characterization tables for rk-sim.
+Independent mathematics and behavioral checks verify each stage; optional matched component
+references add scoped evidence, and frozen-prediction silicon measurements validate accuracy.
+A complete external fork and a second substantial Python contention engine are not required.
 The product is the honesty: every row carries its fidelity, its evidence, and the
 stipulations it is conditional on. Detail is not accuracy.
 
 ## Commands
 - test: `uv run pytest -q` · fast: `make test-fast` (excludes nightly, silicon, native)
-- typecheck: `uv run mypy src contract` · lint: `uv run ruff check`
-- native: `make native` · `make native-test` (Linux box / engine container)
-- table: `uv run uarch table <spec> --model <name> --precision <fmt> --engine analytic|native`
-- report: `uv run uarch report <table>` · study: `uv run uarch study <studyspec>`
+- typecheck: `make typecheck` (both CI commands) · lint: `uv run ruff check .`
+- native: `make native` · `make native-test` (approved Linux/pinned tools; controlled host for performance)
+- table/report workflow: [prepare → capture → independent review → assemble → table → report](docs/u2-workflow.md)
+- table help: `make table` · report help: `make report`; pass explicit CLI arguments with `ARGS='...'`
+- Published runtime remains analytic (including additive RoPE v2); native, grids and studies are planned.
+- U0005/U0023: U3 design; U4a bounded kernel/models; U4b reference-suite readiness; U5 TPU;
+  U6 expanded qualification; U7 full product tables; U8 Blackhole; U10 rk-sim integration.
+  Silicon success is not a prerequisite for table production. No blanket runtime release.
+- K1 internals may overlap mapped schema preparation after semantic/toolchain acceptance;
+  K2 public wiring requires installed approved carriers. Correctness uses real Linux CI;
+  G5-correctness gates U7/G6/G3b/U10. Controlled-host evidence and executed self-hosted
+  nightly gate full G5, U9 entry, simulator-performance claims and final closure.
+- U0002 source binding is unchanged pending a separate dependency-audit/migration proposal.
 - vendor rk-sim: `make vendor-rk SHA=<sha> RK=<path>` (humans only)
 
 ## Invariants (violating these = stop and ask)
@@ -1216,7 +1238,7 @@ its own U-C0. No optimiser, no fitted surrogate, no area model.
 
 ### 4.13 · `/native/README.md`
 
-```markdown
+```text
 # native — our event-driven engine (Rust)
 
 Spec: docs/build-spec.md §2.8 (and §2.9 for parallel execution). A Cargo workspace, built in
@@ -1239,6 +1261,19 @@ the engine container; `make native`, `make native-test`. Binary: uarch-engine
 - The engine protocol's JSON Schema (src/rkuarch/engines/schema/) is the contract with the
   harness; a Rust test holds the serde types to it.
 - Determinism before speed. A speed-up that changes bytes is a bug.
+
+## Delivery status and order
+
+Native is planned, not yet implemented. U0005 selects one progressive production engine:
+U3 design → U4a M plus K1, then K2/bounded models → U4b reference-suite readiness.
+U6 adds qualification at representative mesh points; U7 adds detail and full product tables. Independent mathematics and behavioral tests accompany each
+stage. No complete fork or second Python contention engine is a prerequisite. Optional
+reference matches are scoped verification; only applicable silicon evidence validates.
+
+U0023 separates K1 internal mechanics from K2 public schema wiring and correctness CI
+from controlled-host performance. U5/U8 silicon success is not a table-production gate.
+G5-correctness alone gates U7/G6/G3b/U10; full G5, U9 entry, simulator-performance
+claims and final closure still require controlled-host evidence and self-hosted nightly.
 ```
 
 ### 4.14 · `/third_party/README.md`
@@ -1255,14 +1290,18 @@ references are optional and scoped; shared implementation is not independent evi
 
 ### 4.15 · `/containers/README.md`
 
-```markdown
+```text
 # containers — the engine image
 
-Dockerfile.engine is planned to build native and explicitly admitted dependencies/references
-at pinned revisions, unattended. It does not require a complete external simulator. Native
-build/run and performance work require the designated Linux host and real runner/manual
-nightly readiness. The image digest is recorded in results produced inside it; the present
-base image is not evidence that native or any reference is implemented.
+Dockerfile.engine is planned to build native and admitted dependencies at pinned revisions.
+Correctness builds may run on approved Linux/hosted CI under U0023; no complete external
+simulator or pre-existing self-hosted runner is required. Record actual toolchain and image
+identities. The current image and source-empty CI job do not establish native readiness.
+Simulator-performance evidence needs the designated controlled Linux host. Long jobs need
+adequate authorized capacity; nightly qualification requires an executed applicable suite
+for full G5. G5-correctness alone permits U7/G6/G3b/U10; host/nightly remain required
+for full G5, U9 entry, simulator-performance claims and final closure. No host allocation,
+runner registration or dependency exception is implicit.
 ```
 
 ### 4.16 · `/validation/README.md`
@@ -1437,9 +1476,18 @@ determinism, licences, patches, native, ordering, perf. A job may report "nothin
 - ordering: no `predictions/`;
 - perf: no baselines.
 
-The tests job fails on an empty suite. Nightly (on the Linux box as a self-hosted runner) runs
-the mutants, the L2 suite, the native debug build over the golden requests, AddressSanitizer on
-the Ramulator 2 bridge, and (from U9) loom and ThreadSanitizer on the mailboxes.
+The tests job fails on an empty suite. Correctness runs on approved Linux with pinned
+tools; when native exists, execute real fmt/clippy/test/license and debug/release checks.
+U0023 requires an executed applicable self-hosted nightly by G5 automation qualification:
+mutants, admitted L2, native debug cases, ASan when the Ramulator bridge exists and
+loom/ThreadSanitizer from U9. Before that, required correctness selections run explicitly;
+their nightly marker cannot hide them. Long runs need authorized capacity/limits, not
+necessarily a GitHub runner. Performance claims require controlled-host evidence and an executed self-hosted nightly.
+G5-correctness releases U7/G6/G3b/U10; full G5, U9 entry and final closure require
+performance and automation too. Pending obligations never become a pass by proceeding.
+Prospective sprint closure uses a fresh hosted Linux checkout plus a separate fresh local
+clone on the same published commit, with additional controlled-host checks as applicable.
+Historic U0020/U0021 exceptions and receipts remain unchanged.
 
 **6.8 Patches.** `third_party/patches/NNNN-<slug>.patch`, one reason line each.
 
@@ -1497,6 +1545,12 @@ table-backed cost satisfies the same interface the R1 DES already calls:
    (§2.3.4). Its `tp` equals the plan's tp for that component, checked at build time; a table
    built for another tp is refused, never rescaled.
 
+**Admission is separate from the nine mapping rules.** U10 requires G6 plus G3b and the
+separately accepted rk-sim boundary. Reject non-C2 or inconsistent subsystem/sync detail
+before pricing/display, even if hashes are valid. Small test-only checks against vendored
+IterationCost can expose interface gaps earlier but are not rk-sim integration or validation.
+They preserve nulls/refusals and cannot upgrade an analytic table's fidelity.
+
 ### 7.3 What lands in rk-sim
 
 | Order | What | Who | Where |
@@ -1521,6 +1575,7 @@ raises; nothing degrades silently.*
 | Table hardware_spec_hash ≠ component characterization.spec_hash | `SpecHashMismatch` | same |
 | Table `provenance.params` ≠ component's params | `ParamsMismatch` | same |
 | Table tp ≠ plan's tp | `TpMismatch` | same |
+| Supplied table is not C2 or has inconsistent/missing detail | `CompositeFidelityMismatch` | same |
 | Contract major-version mismatch | `ContractMajorMismatch` | same |
 | Contract minor-version mismatch | Warning | Warning |
 | Peak resident HBM > declared capacity | `ResidencyExceedsCapacity` for weights; warning for KV (rk-sim's M0 rule) | same |
@@ -1547,7 +1602,7 @@ Neither requires changing rk-sim now.
 Ready-to-paste prompts for a coding agent. The same texts live one per file in `docs/prompts/`, and `tests/unit/test_prompt_sync.py` fails if the two ever differ.
 
 **Conventions.** The native engine's two largest steps are split so that each fits one
-session: U-P11a/b (U4a/U4b), U-P11c (U6), and U-P13a–d (U7); "U-P11" and "U-P13"
+session: U-P11a K1/K2 and U-P11b B/R (U4), U-P7 M/T (U4/U7), U-P11c (U6), and U-P13a–d (U7); "U-P11" and "U-P13"
 name those groups. U-P7 has a mapping phase before native and a table phase after it.
 One prompt = one fresh session, started with `docs/prompts/TEMPLATE-implementation-session.md`. Each prompt assumes `CLAUDE.md` is loaded and names the files to read, so it does not repeat the standing rules. **Every prompt carries acceptance tests the agent writes first and must show passing.** That check is the entire productivity mechanism. Where a prompt says *stop*, the agent stopping is the correct outcome. The sprint and lane of each prompt are in `docs/execution-plan.md` §6.
 
@@ -2266,7 +2321,7 @@ commercially uncomfortable, and that it is the thesis applied without exceptions
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, docs/decisions/U0005-one-production-simulator-and-validation.md,
-U0006, U0019, U0022, build-spec §2.4–§2.8, execution-plan U3–U6 and G2/G3/G5,
+U0006, U0019, U0022, build-spec §2.4–§2.8, U0023, execution-plan U3–U10 and G2/G3a/G3b/G5,
 U-P7, U-P8, U-P11a–c, U-P12, and the published U3 RoPE/runtime and feasibility handoffs.
 
 TASK: design the modest first stage of the eventual production Rust engine, with exact
@@ -2279,14 +2334,18 @@ Retain the accepted analytic baseline; do not design a second substantial Python
    legacy v1 handling, explicit v2 RoPE/conversion/coefficient traffic, fused paged attention,
    precision/rank/KV scope and all refusals. Existing v2 analytic support is not native admission.
 2. Bound U4a: one declared hardware configuration, precision and small workload slice, with
-   independent examples, then an explicit expansion path to U4b's full required grid. Start
+   independent examples, then separate expansion paths to U4b's reference suite and U7's
+   declared product table. Start
    single-threaded, compute 1 / NoC 0 / DRAM 0, exact sync, composite at most C1. State which
    operators run and which refuse at every checkpoint. A GEMM-only stage cannot claim a
    decoder layer or full-model prediction. No C2, threads or silicon accuracy claim.
-3. Break the dependency cycle explicitly: U-P7 mapping/schema phase → U-P11a fixed-delay
-   kernel → U-P11b bounded models/executor → U-P7/U-P11b full coverage/table phase. Hand-built
-   mapped fixtures may test the kernel; they do not stand in for production preparation.
-   U-P8 and foundational U-P12 tests can develop against the accepted boundary in parallel.
+3. Specify M / K1 / K2 / B / R / T tasks: M mapped carriers/fixtures; K1 internal kernel
+   after accepted semantics/toolchain (may overlap M); K2 public wiring after M installation;
+   B bounded models; R actual reference-suite readiness; T first consumed full table in U7.
+   Private K1 fixtures are not a competing public format. U-P8/U-P12 independent derivations
+   may develop alongside M/K1; public tests wait for K2. No table prerequisite for R.
+   With B, schedule TPU sourcing, representability/observability and native admission before
+   U-P9. Return any contract/target gap for a decision; do not invent unknown chip facts.
 4. Produce the exact verification matrix: independently derived integer counts/transfers,
    clock edges, critical paths, conservation, dependency order, bounded outstanding requests,
    serialization on shared resources, legal overlap on independent resources, replay and
@@ -2295,7 +2354,8 @@ Retain the accepted analytic baseline; do not design a second substantial Python
    Derive expectations independently, not by calling production formulas to manufacture them.
 5. Propose the reproducible Rust/container environment, license/dependency closure and
    prospective absolute time/memory budgets per declared host/workload. Do not reuse the
-   unaccepted 200-second fork diagnostic proposal. List runner/manual-nightly prerequisites;
+   unaccepted 200-second fork diagnostic proposal. Separate correctness Linux CI from
+   controlled-host performance and G5 nightly qualification under U0023;
    no candidate build, container run, native measurement or host modification in this task.
 6. Map each future external comparison to a component and matched assumptions. Tools are
    optional; name unavailable/unmatched/not-independent evidence honestly. No whole-chip
@@ -2307,7 +2367,12 @@ Retain the accepted analytic baseline; do not design a second substantial Python
 
 ACCEPTANCE:
 - Every U4a capability and refusal has a literal example and independently justified test.
-- The schedule has no dependency cycle and does not count kernel work again in U6.
+- The schedule names each deliverable's first consumer, has no dependency cycle and does
+  not count kernel work again in U6. Required analytic checks have explicit first-use deadlines.
+- Table production and silicon success are separate. Full product tables first serve U7;
+  old T budgets and grid requirements are not automatically accepted.
+- Exact component/carrier and semantic/toolchain decisions are separate from host budgets;
+  neither A's prior proposal nor this direction grants blanket installation authority.
 - G2's design checklist is explicitly disposed; unimplemented/unexecuted cases stay pending.
 - All protected changes remain unapplied proposals. Ask for the exact stage/schema decision
   only after the package is complete and reviewable. No runtime implementation in this task.
@@ -2331,6 +2396,13 @@ Exercise saved prepared jobs as well as the standalone frontend. Keep tests of t
 producer's counts/shape resolution separate from engine invariants on fixed inputs. Apply
 metamorphic graph/mapping changes explicitly, update their content identity, and never let
 an engine repair a deliberately invalid mapping through hidden re-preparation.
+
+PHASING (U0023): dispose each outstanding analytic obligation by its first consumer:
+native roofline checks, U5/U8 baseline predictions, reports or later capability. Required
+checks pass before reliance; unrelated report completion does not block K1. Keep previous
+outcomes, missing coverage and U0006 reductions. Do not blanket-pause C1–C5, lower case
+counts or call unobservable mechanisms verified. Native checks follow admitted mechanisms.
+Provide the dependency disposition before a revised execution selection is authorized.
 
 TASK: the rungs that establish that the simulator does not contradict itself, and relations
 that must hold even though nobody knows the right answer. They run against ANY engine through
@@ -2378,7 +2450,8 @@ them once.
    against the mutant and asserts it FAILS. Mark these tests so they run nightly.
 
 ACCEPTANCE TESTS:
-1. Every L0 and L0m suite passes against U-C0 (aggregate and per_op).
+1. Every required applicable L0/L0m case passes before its declared use; aggregate/per_op
+   and version scopes stay explicit. Unsupported/not_run cases prevent whole-rung claims.
 2. Every committed mutant is caught, by name.
 3. Reports are hash-stable across runs.
 4. When the bounded native stage lands (U4a), run every applicable case through its public
@@ -2395,7 +2468,7 @@ L0–L2 evidence never lifts a model above stub, and why: agreement with yoursel
 another simulator, is not agreement with silicon.
 ```
 
-### U-P7 · U4 · Lane A — Mapping policies, the grid, interpolation, and the first full table
+### U-P7 · U4 M / U7 T · Lane A — Mapping first, then consumer-driven full tables
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, src/rkuarch/{mapping,table,workload}/README.md, build-spec §2.3.3
@@ -2410,11 +2483,36 @@ Extend U2's saved-input path with the existing TaskGraph; policies are versioned
 preparation producers outside engines. Imported mapped inputs bypass policy execution and
 are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
 
-TASK: deliver mapping and then a complete native table in two phases. U4a mapping/schema
-work precedes U-P11a/b; U4b full tables follow the bounded native executor. Do not require
-a complete table before building the engine that produces it. The mapped schema and minimal
-fixtures must first receive the U-P5 human decision. This prompt's full acceptance belongs
-to U4b, not the bounded prototype. Compute 1 / NoC 0 / DRAM 0 earns at most C1.
+TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
+component boundary; T (U7) delivers the first full product table. A small table may be
+built earlier for a named use, but no full grid gates silicon. Passing G4/G7 is not a
+prerequisite for producing an honestly labeled table. U0023 replaces the old U4b full grid.
+
+PHASE M — inputs and exit:
+- Require exact accepted component scope/semantics and human-installed mapped carriers
+  before public mapper/wiring. U-P11a K1 internals may proceed separately.
+- Implement only the admitted mapping slice from item 1 and export/import validation in
+  item 10, with scope-appropriate fixtures; later policies/operators stay refused.
+- Independently derive placements, capacity, jobs/transfers/dependencies; test invalid
+  dimensions/resources/capacity and producer-disabled imported replay identity. A changed
+  placement changes identity; no implicit remapping. Public execution tests wait for K2/B.
+- Handoff schema/producer versions, admitted/refused scope and exact tests. Stop: items
+  2–9 and the full-table acceptance below are T, not an M release requirement.
+
+PHASE T — inputs and exit:
+- Require verified engine scope and the declared U7 consumer manifest: exact design,
+  ModelSpec/shape, precision/tp, coefficients, policies, initial state, grid and error jobs.
+- Complete missing full-model/rank/precision/operator admission under the U-P11b model
+  discipline and U-P13 mechanisms before generating the grid: all layers, once-only
+  head/tail, RoPE/conversions/coefficients, KV and capacity, with independent complete-work
+  checks. TPU-specific R completion is neither sufficient nor required for this product scope.
+- Deliver items 1–10 at that scope and all applicable full-table acceptance below (G3b).
+  The first full demo table is npu-m256 × 70B-class × FP8 × tp8, with G6 for C2.
+- Resolve FP8/RoPE, ragged composition, hardware formats/dataflows and public schema changes
+  before dependent runs. The accepted npu-l4 remains WS/BF16 until separately revised.
+  A missing required point blocks G3b; do not silently drop it or change its precision.
+- Product scope changes require their own acceptance. Full npu-l4/32×32 grids have no
+  automatic requirement; use declared study/scale points where sufficient.
 
 1. mapping/ — standalone preparation: named, versioned policies, each a pure function
    (validated prepared op graph, HardwareSpec) ->
@@ -2422,8 +2520,10 @@ to U4b, not the bounded prototype. Compute 1 / NoC 0 / DRAM 0 earns at most C1.
    multicast), barriers, dependencies.
    - ws-rowsplit@1 for the large-core class (weight-stationary, output rows split across
      cores).
-   - os-tiled@1 for the large-core class (output-stationary, output tiles split across
-     cores), so a dataflow study has a second policy to compare (U-P14).
+   - os-tiled@1 for the large-core dataflow study when its hardware revision is accepted;
+     it is not a prerequisite for an unrelated mesh table.
+   - U-P13d owns summa-2d@1 and head-parallel@1 for the mesh consumer. Scope each mapping
+     and acceptance case to its actual hardware/operator inputs.
    A policy's name@version is a stipulation on every row. A better policy is a new version,
    never an edit. No search, no autotuning. Every policy declares the matrix dataflow it
    needs (refused on a spec whose dataflows lack it) and its buffer depth (double or triple
@@ -2466,9 +2566,10 @@ to U4b, not the bounded prototype. Compute 1 / NoC 0 / DRAM 0 earns at most C1.
    attribution_s is diagnostic only; it is never fed back into a max() form.
 7. Rows carry peak_resident_bytes. If HBM residency exceeds the spec's capacity, raise
    ResidencyExceedsCapacity for weights, and warn for KV, mirroring rk-sim's M0 rule.
-8. `uarch table ... --engine native --workers N` builds the full default grid for npu-l4 ×
-   Llama-3.1-70B-class × fp8 and bf16, tp = 8, and also tp = 1 where the weights fit the
-   spec's capacity (a weight-residency refusal at tp = 1 is recorded, never worked around).
+8. `uarch table ... --engine native --workers N` builds the complete declared consumer
+   grid. The npu-m256/70B/FP8/tp8 demo remains required. Additional BF16, npu-l4, tp1 or
+   policy variants need a named consumer and accepted scope; capacity failures remain
+   explicit, never worked around or omitted to make an envelope pass.
 9. initial_state travels in every EngineJob; steady primes one iteration at the same point
    and reports the second.
 
@@ -2486,16 +2587,18 @@ ACCEPTANCE TESTS (write first):
 3. Interpolating at a grid point returns the grid value exactly.
 4. LOO and composition errors are present, finite, and reported. The composition sample is
    seeded and reproducible.
-5. G3 (execution-plan §4): the npu-l4 table passes L0, L0m and L1 (U-P6 and U-P8) as run by
-   Lane B, and its model card says stub.
-6. Both supported policies reproduce independently derived tile/transfer expectations;
-   no mandatory external-tool compatibility policy is added.
+5. G3b (execution-plan §4): the consumer table passes applicable L0/L0m/L1 through Lane B,
+   and its card reports only actual applicable evidence: stub/unknown error without it.
+   C2 admission requires G6; neither C2 nor a complete grid proves physical accuracy.
+6. Every policy in the consumer scope reproduces independent tile/transfer expectations;
+   required second-policy studies remain U-P14 work, not a blanket silicon prerequisite.
+   No mandatory external-tool compatibility policy is added.
 7. layer_reuse and cold_vs_steady errors are present, finite, seeded and reproducible.
 8. A tile larger than a core's SRAM is refused with SramCapacityExceeded, naming the core and
    the bytes.
 9. With uniform visit_weights, weighted_median_rel equals median_rel.
-10. os-tiled@1 is refused on a spec whose dataflows lack output_stationary, and runs on one
-    that has it.
+10. At the U-P14 dataflow-study delivery, os-tiled@1 refuses unsupported dataflows and
+    runs on its accepted supporting spec; this does not gate an unrelated mesh table.
 11. A prefill row at L = 32768 builds with no SramCapacityExceeded, and its attention DRAM
     bytes equal Q, K, V and O within named deviations.
 12. The table's composite follows build-spec §2.4 and the actual U0011 implementation levels.
@@ -2533,6 +2636,14 @@ Pin the prepared workload/mapping identity and represented scope for each refere
 comparison. A difference caused by another mapping is not an engine discrepancy. References
 that cannot consume equivalent resolved inputs must be reported as unmatched rather than
 being compared solely by model name, tp or a policy label.
+
+REFERENCE READINESS (U0023, separate bounded handoff): with A, prepare a sourced TPU
+inventory, map required suite operations to representable hardware/native capabilities,
+and establish measurement granularity/observability from primary documentation. Count
+unknowns and distinguish structural/timing assumptions from carrier placeholders. No
+measurements, cloud spend or silently fabricated fields. Identify contract extensions and
+native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
+readiness process for Blackhole before U-P15. Readiness does not require a full table.
 
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
 is compared with independent models only where abstractions and inputs match. Required L1
@@ -2590,10 +2701,11 @@ prospectively in U0008; once a comparison is admitted its declared bound is not 
 ACCEPTANCE TESTS:
 1. All applicable required L1 pass for U-C0 and admitted native stages; unsupported cases
    remain not_run under U0006. The roofline-floor assertion runs over every row of the
-   npu-l4 table.
+   admitted execution scope; full consumer rows join this check at G3b.
 2. The two hand fixtures exist, pass, and have committed working.
 3. Nightly runs the admitted comparisons and publishes executed, unsupported, unavailable
-   and not-independent cases. The NoC bound applies only to the admitted matched scope.
+   and not-independent cases by G5 automation qualification; before then execute required
+   selections explicitly on approved Linux. The NoC bound applies only to matched scope.
    Empty reference sets are not a passing L2 verdict and cannot discharge L1 or silicon gates.
 4. A mutant (NoC with router latency read as 1 instead of the spec value) is caught by the
    independent applicable L1 case, and by L2 where that comparison is admitted.
@@ -2624,6 +2736,14 @@ alongside predictions, including producer versions, content hashes, hardware bin
 conditions. Measurements use the declared mapping match; a compiler-chosen mapping is not
 assumed equal to the local policy. Replaying predictions must not silently re-prepare inputs
 with a newer producer.
+
+READINESS: G3a must already establish a usable sourced reference, native admission,
+required suite coverage and measurement observability. A/B prepare these in U3/U4b; the
+draft carrier stubs are not runnable physical assumptions. Exact unknowns and claim limits
+must be reviewed, with any contract/target decision resolved. Hardware access/budget is
+separate. No full table or G3b prerequisite. Do not fix engine gaps in this freeze session.
+No pilot measurements are authorized; prospective development/held-out policy would need
+a separate decision. A successful G4 verdict is not required for later table production.
 
 TASK: produce, and COMMIT BEFORE ANY MEASUREMENT EXISTS, uarch's predictions for a suite of
 microbenchmarks on Google Cloud TPU v5e, the large-core reference. This prompt never sees a
@@ -2695,6 +2815,10 @@ validation/ledger/README.md, validation/L3_silicon/tpu-v5e/SUITE.md, build-spec 
 From rk-sim READ-ONLY: docs/prompts/P10-measurement-kit-write-before-renting-anything.md,
 rk/calibration/ (the ledger's shape), docs/decisions/0021 and anchor-semantics.md.
 
+PREREQUISITES: G3a, the frozen exact suite/predictions and separately authorized hardware
+access/spend. G3b tables are not an input. Missing access leaves U5 open; independent
+engine/table development can continue without a physical-validation claim.
+
 TASK: measure the reference chip, compare against the frozen predictions, and let the ledger,
 and only the ledger, decide what the model card may say.
 
@@ -2722,7 +2846,9 @@ and only the ledger, decide what the model card may say.
    median |relative error| ≤ 25% across all benchmarks, and no class median above 50%. It is
    evaluated separately for matched and compiler-chosen benchmarks, and the verdict names the
    group; an empty group is reported as "no evidence", never as a pass. The same script
-   computes G4's fail-branch attribution exactly as execution-plan §4 defines it.
+   computes G4's fail-branch allocation exactly as execution-plan §4 defines it. This is
+   a prioritization heuristic, not proof of the subsystem causing the observed error.
+   Attribution must have been independently qualified before the prediction freeze.
 5. Promotion: provenance/ reads the ledger. A model card moves from stub to estimated ONLY
    through ledger entries, ONLY for the family and op classes those entries cover, with
    validated_error_band set to the observed band for that scope. Never by hand, and never
@@ -2760,9 +2886,9 @@ table of errors by class.
 ```text
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/engines/README.md, build-spec §2.5
 (the engine protocol and TaskGraph) and §2.8 (the native engine specification; it is the
-spec, not background), ADR U0005, U0007. Javid's ../rk-sim/docs/vision/elements_of_parallel_DES.md
-from rk-sim, READ-ONLY, for the parts §2.8 adopts, and build-spec §2.8's "departures" table
-for the parts it rejects and why.
+spec, not background), ADR U0005/U0023 and the accepted U0011 decisions. Build-spec §2.8
+contains the adopted mechanisms and departures; no rk-sim vision-document access is needed
+or authorized by this prompt.
 
 PREPARATION BOUNDARY (build-spec §2.5.1, approved direction 2026-10-06):
 ADR: docs/decisions/U0019-standalone-preparation-and-prepared-input-replay.md.
@@ -2771,17 +2897,25 @@ shapes, resource assignments, dependencies and policies; no model builder or map
 inside the engine. Timing/events are outputs of executing those inputs. Extend the accepted
 protocol only through its versioned schema procedure, not a parallel Rust-only format.
 
-PREREQUISITES: accepted U-P5 stage design, human-committed mapped protocol/U0011 decisions,
-U-P7's minimal mapped fixtures and verified Linux runner/manual-nightly readiness. Existing
-analytic carriers do not prove a mapped native schema already exists. No kernel work before
-these conditions. Full U-P7 grid/error campaigns are later and are not prerequisites here.
+PHASES AND PREREQUISITES (name the phase in the handoff):
+- K1: accepted kernel/time/event semantics and exact Rust/toolchain/dependency/license
+  decisions. Implement items 2–8 internally; use private unit fixtures, not a new public IR.
+  Run acceptance 1/1a/2/3/5 at the internal boundary, with canonical internal result bytes.
+  K1 may overlap M; no public schema claim or production mapped admission follows.
+- K2: additionally require human-installed mapped carriers/U0011 boundary and M's fixtures.
+  Implement items 9–10 and execute every acceptance case at the public subprocess boundary.
+  Existing analytic carriers are not a mapped native protocol. Stop after the named phase.
+- Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+  registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+  U0023; full-table work is later, not a kernel prerequisite.
 
 TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
 EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
 jobs; no subsystem models yet. U-P11b adds the bounded model stage.
 
 1. BEFORE MEASURING, obtain human acceptance of U0011's absolute per-point time/memory
-   budgets, exact workload/host scope and later npu-m256/32×32 budget (U9 reads it). No
+   budgets and exact workload/host scope (including scale points when U9 will use them).
+   This is required before performance measurement, not before correctness coding. No
    fork-relative speed target and no adoption of the old 200-second fork proposal. Record
    calibration protocol and host noise separately from simulated chip time.
 2. Build: native/Cargo.toml (workspace) with crates/uarch-engine (the `uarch-engine`
@@ -2794,6 +2928,8 @@ jobs; no subsystem models yet. U-P11b adds the bounded model stage.
    clippy runs with -D warnings and disallows HashMap and HashSet; rustfmt is enforced.
    Add the Rust toolchain to containers/Dockerfile.engine, and wire `make native` and
    `make native-test` to cargo.
+   Before K1 CI evidence counts, B pins the CI toolchain and cargo-deny version under
+   the accepted tool/license decision; the existing unpinned conditional job is not ready.
 3. Time: u64 picoseconds. Each clock domain has the resolved integer freq_hz from the
    EngineJob, NEVER A ROUNDED PERIOD (1.2 GHz is 833.33… ps, and rounding it either way
    biases every row or breaks the roofline floor). EDGES ARE ROUNDED, PERIODS ARE NOT: edge k
@@ -2828,7 +2964,7 @@ jobs; no subsystem models yet. U-P11b adds the bounded model stage.
    dependencies resolved by events, so the kernel runs end to end before any model exists.
 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
    parser, using the approved mapped protocol. First test the execution boundary directly;
-   the complete `uarch table ... --engine native` path follows in U4b.
+   the complete consumer table path follows in U7 under U-P7 T.
 10. The protocol as a schema: reuse U2/U4's EngineJob/EngineResult schemas and fixture
     messages from engines/protocol.py in src/rkuarch/engines/schema/. `make gen` keeps exporting
     them; the freshness check remains read-only. Test Rust serde types against those fixtures,
@@ -2881,13 +3017,23 @@ Mapping policy identifiers are provenance, not instructions for the native engin
 Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
 placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
 
-TASK: implement the accepted bounded U4a native stage, then expand the same implementation
-in U4b. U-P5 fixes the first workload/precision/hardware slice and refusal matrix. Start with
-independent literal fixtures and public execution; only after they pass expand to complete
-U-P7 table/operator/precision coverage. Unsupported work refuses, never disappears from a
-claimed complete layer. Existing v2 RoPE, casts and coefficient traffic must be preserved
-when that workload is admitted. All acceptance below is required for the full stage unless
-explicitly scheduled for U6; a bounded stage alone cannot close G3.
+TASK: execute only the authorized phase. B (U4a) implements the accepted small component
+slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
+U-P7 T in U7. Unsupported work refuses, never disappears from a claimed complete layer.
+
+B prerequisites/exit: K2 and approved component inputs; implement the admitted subset of
+items 1–3, independent literal/fault checks and applicable acceptance below. Full decoder,
+extra hardware/precision, steady state or spill remain refused until explicitly admitted.
+Record every deferred acceptance case with R or later consumer; do not claim G3a from B.
+
+R prerequisites/exit: reviewed TPU sourcing, reference representability/measurement scope,
+exact required suite and protected contract decisions. Add native reference admission and
+all required operators/precisions, including RoPE/casts/coefficient traffic and fused/paged
+KV work where used. Validate no omitted work, reference fields/unknowns, decoder execution,
+steady/priming behavior and benchmark-granularity correspondence. Int8 is admitted only when
+required/supported, never inferred from BF16. Required missing scope blocks G3a. Implement
+reference changes here, before U-P9's prediction-only freeze session. No silicon results or
+tuning in this task. B and R both require applicable public-boundary tests before acceptance.
 
 1. Models (build-spec §2.4):
    - compute level 1: tile-job intervals, meaning pipeline fill and drain for the job's
@@ -2902,8 +3048,8 @@ explicitly scheduled for U6; a bounded stage alone cannot close G3.
      distant core's bandwidth is latency-bound; barriers cost sync.barrier_latency_cycles.
    EngineResult reports fidelity_detail honestly: {compute: 1, noc: 0, dram: 0}. The
    composite for that is C1 at best, and the table must say so.
-2. TaskGraph executor: runs mapping/ output (ws-rowsplit@1 and os-tiled@1; the initial
-   npu-m256 qualification in U6 uses ws-rowsplit@1 until U-P13d),
+2. TaskGraph executor: runs only explicitly admitted mapping/ output (no automatic
+   os-tiled or second-hardware requirement); U6 mesh admission is separately verified,
    resolving dependencies by events, attention_fused tiles included. initial_state steady
    primes one iteration inside the same simulation and reports the second (two priming
    iterations when the job asks for the warm-up check).
@@ -2916,13 +3062,15 @@ ACCEPTANCE TESTS (write first):
    the engine. Tests distinguish executed work from expected input totals.
 2. Determinism: same job → byte-identical EngineResult across 3 runs, and between debug and
    release builds.
-3. U4b builds the required npu-l4 table through the public CLI. The initial npu-m256
-   full-table qualification is U6/G5, and is not claimed by the bounded U4a prototype.
+3. B passes its declared component cases. R passes G3a's actual benchmark suite and reference
+   admission, not a full table. U6 uses representative mesh points; G3b full tables are U7.
 4. The latency-bound stream fixture (U-P8) passes, and lowering max_outstanding lowers a
    distant core's achieved bandwidth.
 5. Halving accumulator_bytes on a GEMM whose output tile then no longer fits never shortens
    it, and the extra SRAM traffic appears in ext_counts.
-6. attribution_s sums to duration_s on every row.
+6. attribution_s sums to duration_s; independent critical-path fixtures and discriminating
+   faults check assignment, serialization and permitted overlap before G4 uses it. A large
+   attribution share is not proof of the cause of silicon error.
 
 ADDITIONAL ACCEPTANCE — prepared inputs:
 - Replay a saved mapped job with local workload/mapping producers unavailable and compare
@@ -2941,22 +3089,30 @@ field the native engine lists as unrepresented at these levels.
 
 ```text
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, build-spec §2.3.3, §2.5 and §2.8,
-ADR U0005/U0006/U0011, U4b's native/table handoffs, U-P8 and U-P12 verification results.
+ADR U0005/U0023/U0006/U0011, accepted bounded native handoffs, U-P8 and U-P12 results.
+
+G5 OUTCOMES: record correctness, performance and automation separately. Correctness
+releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains open if host
+evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
+any simulator-performance claim and final closure. No implied waiver from proceeding.
 
 TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
-expand to the initial npu-m256 table, and execute G5's independent verification obligations.
+admit npu-m256 at declared representative points, and execute G5's verification obligations.
+The bounded engine and this scope's verified inputs are prerequisites; TPU availability,
+G3a completion and G4 success are not. Do not call those campaigns closed by proceeding.
 
 1. Fill modeled diagnostics; unmodeled quantities remain null. Preserve actual levels and
    incomplete evidence, STUB/unknown error/unverified energy; no automatic badge promotion.
 2. With --trace emit a deterministic Chrome-trace resource timeline. Check dependency
    edges, owner mutations, exclusive-resource serialization and explicitly permitted
    overlap; a blanket prohibition on overlap across different resources is incorrect.
-3. Build the initial npu-m256 table using admitted mappings. Verify independent counts,
+3. Execute declared representative npu-m256 jobs using admitted mappings. Verify independent counts,
    transfers, clock edges, hand-worked critical paths, conservation, DMA/queue limits,
    shared-resource contention where represented and compute/DMA overlap under U-P12.
    Missing required cases fail G5; unsupported optional reference comparisons stay not_run.
 4. Repeat exact saved mapped-input execution with producers disabled, debug/release builds
-   and table workers 1/N. Record exact environments and identities. Run the real native
+   and batch workers 1/N where delivered. Full table workers are G3b. Record exact
+   environments and identities. Re-run applicable integrated regressions and the real native
    CI/nightly selection; a job that executes no native tests cannot discharge this gate.
 5. Measure single-point host time/memory for the prospectively declared U0011 workload and
    host scope. Publish noise and regressions. No fork-relative speed requirement; exceeding
@@ -2967,13 +3123,18 @@ ACCEPTANCE:
    fault injections discriminate each required mechanism. No full-fork agreement substitute.
 2. Unmodeled diagnostics render as not modeled, never zero; attribution sums to duration.
 3. Trace and resource constraints hold; independent-resource overlap has a positive control.
-4. Native replay and debug/release/worker determinism pass; the initial mesh table completes.
-5. Absolute performance measurements are published against the prospective budgets. Missing
-   measurements leave performance qualification pending, not a claimed pass.
+4. Native replay, debug/release and applicable batch-worker determinism pass; representative
+   mesh admission completes. No full C1 mesh table is required.
+5. Controlled-host measurements are recorded against prospective budgets. Qualified
+   performance claims require both host evidence and executed self-hosted nightly; until
+   then observations are provisional and performance qualification remains pending. An executed
+   applicable self-hosted nightly is required for G5 automation qualification; no-op jobs fail it.
 
 GUARDRAILS: No threads, tuning to reference/silicon results or weakening expectations to
 make the engine pass. Same-code and shared-assumption limits stay visible. L0–L2 is not L3.
-A failed correctness case blocks G5; any scope narrowing needs a new human decision.
+A failed correctness case blocks G5-correctness and its dependent work; missing host/nightly
+blocks full G5, U9 entry, performance claims and closure, not otherwise ready product work.
+Any scope narrowing needs a new human decision.
 
 ADR: propose completion of U0011 and U0012-native-verification-and-simulator-metrics.md
 for human commit. Preserve historical observations; no changes to silicon thresholds.
@@ -2984,6 +3145,11 @@ for human commit. Preserve historical observations; no changes to silicon thresh
 ```text
 CONTEXT TO LOAD: CLAUDE.md, validation/README.md, build-spec §2.5, §2.7, §2.8, §6.6,
 ADR U0005/U0006, U-P5's accepted stage design, U0011's prospective absolute budgets.
+
+Record G5-correctness, G5-performance and G5-automation separately. U7/G6/G3b/U10 depend
+on correctness and their own tests, not host/nightly completion. Full G5, U9 entry, any
+simulator-performance claim and final closure require both controlled-host evidence and
+executed self-hosted nightly. Retain missing obligations even when product work proceeds.
 
 TASK: build verification alongside the bounded native stage in U4, and complete independent
 qualification/metrics in U6. This is not a second timing simulator or mandatory fork harness.
@@ -2998,9 +3164,10 @@ qualification/metrics in U6. This is not a second timing simulator or mandatory 
    public native boundary. Demonstrate a discriminating fault for each mechanism, including
    an extra hop cycle, ignored DMA limit, missing dependency and dropped work. Capture before,
    broken and restored outcomes; setup errors are not correct refusals.
-3. Determinism: repeated result/table bytes; workers 1/N in U4b; debug/release native replay;
+3. Determinism: repeated native result bytes in U4; table workers 1/N in U7/G3b; debug/release native replay;
    saved mapped inputs with producers disabled. Full threaded checks remain U9. Nightly
-   must execute real native debug tests; add Ramulator ASan checks only when the bridge exists.
+   must execute real native debug tests by G5. Before then run required selections explicitly
+   on approved Linux correctness CI. Add Ramulator ASan checks only when the bridge exists.
 4. Optional external comparisons use matched work/precision, resolved tiles/placement,
    architecture parameters, levels and initial state. Reject mismatched equivalence claims;
    record unavailable, unsupported and same-code cases. Criteria and scope are registered
@@ -3013,16 +3180,24 @@ qualification/metrics in U6. This is not a second timing simulator or mandatory 
    (zero by construction before U9). Set a regression threshold only after measuring the
    noise floor in the declared environment and obtaining U0012 acceptance. A synthetic 2×
    slowdown must trip the checker. No events-per-second headline or WSL performance claim.
-6. Keep `uarch diff <table-a> <table-b>` for matched component comparisons and U-P14 design
+6. Bounded early conformance: test the nine rules and permitted vendored IterationCost
+   interfaces using small analytic fixtures. Record what runs through real vendored code
+   and what is adapter scaffolding. Never relabel C0/C1 as C2, replace null with zero or
+   claim rk-sim integration/independent validation. Interpolation/serving/orchestrator and
+   future consumer coverage remain pending until implemented. Propose protected vectors
+   through the normal schema process; no production rk import or rk-sim edit.
+7. Keep `uarch diff <table-a> <table-b>` for matched component comparisons and U-P14 design
    studies. Label the comparison purpose: design variants may intentionally differ, but
    that difference is not an engine-equivalence experiment. Preserve provenance and scopes.
 
 ACCEPTANCE:
 - U4a: independent literal corpus and discriminating public-boundary tests for admitted
   mechanisms; required missing tests block stage acceptance. U0006 reductions remain exact.
-- U4b: table/replay/worker determinism and required complete-work counts pass.
+- U4b/G3a: actual reference-suite work/replay and attribution used by G4 pass.
+- U7/G3b: table/replay/worker determinism and required complete-work counts pass.
 - U6/G5: all required native cases executed, reviewed, no unresolved correctness failures;
-  mesh table, diagnostics, mutant detection/attribution and absolute host metrics complete.
+  representative mesh admission, diagnostics, mutant detection/attribution and controlled-host
+  metrics complete; applicable integrated regressions rerun. No full C1 mesh grid required.
 - Mismatched inputs are refused for equivalence claims; same-code references never earn
   independent status. Optional missing evidence is explicit, not fabricated success.
 - Performance gate catches the synthetic slowdown; no positive badge or silicon claim.
@@ -3195,7 +3370,11 @@ resolved mapped inputs, never chooses SUMMA/head placement itself. Export/import
 policy version, hardware binding and content identity; no search or compiler integration.
 
 TASK: make the mesh class a first-class target and the composite honest: mesh policies, the
-composite rule in code, and full C2 tables at mesh scale.
+composite rule in code, and the U-P7 T full product table at its actual earned composite.
+G6 verifies mechanisms; G3b verifies the consumed table. Both require G5-correctness,
+not its performance/automation completion. No silicon-pass prerequisite. Keep functional
+scale admission separate from pending host metrics; no performance claim while controlled-
+host evidence or executed self-hosted nightly is missing.
 
 1. Mesh-class mapping policies in src/rkuarch/mapping/ (Python, shared by every engine):
    - summa-2d@1: GEMM outputs blocked over the core grid, operands multicast along rows
@@ -3212,8 +3391,14 @@ composite rule in code, and full C2 tables at mesh scale.
    Emit the full per-subsystem vector as fidelity_detail, with build-spec §2.4's keys and
    values only. A request that asks for C2 and cannot get it degrades or raises exactly as
    build-spec §7.4 says for default vs override.
-3. Scale: build full tables for npu-m256 (16×16) and a 32×32 variant. Record the simulator
-   metrics from U-P12 for both, and the single-point wall-clock against ADR U0011's budget.
+3. Product: build the complete npu-m256 consumer table under U-P7 T/G3b. Resolve required
+   hardware/precision/RoPE/ragged and schema decisions first, preserving the demo scope.
+   Scale: use prospectively declared representative 16×16 and 32×32 points, after an
+   accepted 32×32 design exists. Verify functional scale admission on approved correctness
+   Linux. Separately record U-P12 controlled-host costs against U0011 for the scale-metric
+   obligation, with executed self-hosted nightly before any qualified performance claim.
+   Pending metrics do not block G6/G3b/U10; they do block the corresponding performance
+   qualification, U9 entry and final closure. No full 32×32 grid without a named consumer.
 4. Extend G5's independent correctness corpus and public-boundary fault checks to every
    new modeled mechanism. Run admitted matched component references; missing optional
    references are disclosed and do not become a deferred whole-fork requirement.
@@ -3225,7 +3410,12 @@ ACCEPTANCE TESTS (write first):
 2. Roofline floor: no row of any native table is faster than its U-C0 roofline.
 3. summa-2d@1 and head-parallel@1 pass L0's per-core bytes and MACs check against the graph.
 4. Determinism: byte-identical at 1 and N workers; the debug build runs clean.
-5. The 32×32 table builds, and its metrics and wall-clock are recorded.
+5. Functional: declared 32×32 scale points execute with verified inputs/scope and correctness
+   checks. Missing required design/admission blocks this functional obligation.
+6. Separate scale-metric obligation: controlled-host observations and executed self-hosted
+   nightly support any performance claim. Keep its pending status separate; acceptance 6
+   does not gate G6/G3b/U10, but is required for the scale performance claim, U9 entry and
+   final closure. Never fabricate metrics or close the obligation from functional success.
 
 GUARDRAILS: Do not claim C2 below the rule. No threads yet. Do not remove the level-0 and
 level-1 paths: they are the fast modes, and the ladder is a feature.
@@ -3251,13 +3441,18 @@ incompatible; re-mapping requires an explicit study choice and recorded producer
 identity includes prepared content and its bindings, not just model/tp or policy label.
 
 TASK: the thing a chip architect actually does with this tool, which is to compare designs. A
-study is a set of tables over stipulated variants, and a report that says what moved and why.
+study compares declared operating points over stipulated variants. Use sparse suite points
+where sufficient; full grids only when a named consumer uses their envelope/interpolation.
+Implement and test the minimal point-result/table adapter if the current report path needs
+it. Preserve hashes, provenance, refusals and scope; do not invent dense rows or interpolate
+from unapproved sparse coverage. U0023 does not require passing silicon to run a study.
 
 1. src/rkuarch/study/: a StudySpec (YAML) names a base design, a list of parameter paths with
    values (one-at-a-time, or a small full grid), a versioned workload
    suite (or one request template), and one engine and fidelity. `uarch study <studyspec>`
-   builds each variant's table through the existing pipeline. Tables are cached by request
-   hash, so a rerun rebuilds nothing.
+   executes each variant at those suite points through the admitted pipeline/adapter.
+   Results are cached by complete request/prepared/engine identity. Dense table generation
+   is requested explicitly when needed, never inferred from a sparse result package.
 2. VARIANTS MAY ONLY CHANGE WHAT A PROPOSED DESIGN IS FREE TO CHOOSE: its stipulated values
    (counts included: array, grid, banks, channels, queue depths), its categorical fields
    (dataflows, topology, interleave scheme, scheduler, page policy, sync mechanism) and the
@@ -3268,7 +3463,7 @@ study is a set of tables over stipulated variants, and a report that says what m
    variant that changes sram.bytes without re-stipulating energy.pj_per_byte.sram is refused,
    naming both paths.
 3. The diff report (uarch diff from U-P12, extended):
-   - per grid point, the relative change in duration, with its attribution split, showing
+   - per declared study point, the relative change in duration, with its attribution split, showing
      which regime moved (compute-, memory-, NoC- or sync-bound) and which did not move at all;
    - per workload in the suite, each variant's normalised speedup over the base, and their
      geometric mean. Never an arithmetic mean of ratios;
@@ -3305,9 +3500,11 @@ ACCEPTANCE TESTS (write first):
 7. A variant that changes sram.bytes without pj_per_byte.sram is refused, naming both paths.
 8. Energy renders "unverified" with no energy_verification, and "unknown" at frequency ratio
    0.6 when voltage_ratio is absent.
-9. The dataflow study runs: each variant's conditional_on names its dataflows and mapping
+9. After the explicit hardware/dataflow extension and mappings are accepted, the dataflow study runs: each variant's conditional_on names its dataflows and mapping
    policy, and a variant whose dataflows lack its policy's dataflow is refused.
 10. A count variant (npu-m256 SRAM banks 16 → 32) runs, and its change is in conditional_on.
+11. Point/table adapters preserve identical values/provenance for shared points, refuse
+    missing coverage and never silently interpolate a sparse study into a product grid.
 
 ADDITIONAL ACCEPTANCE — prepared inputs:
 - A variant invalidating a supplied mapping is refused without calling a local mapper.
@@ -3319,6 +3516,49 @@ fitted surrogate; rk-sim deliberately refuses fitted Sobol indices, and so does 
 No area model: area is not modelled, and the report says so.
 
 ADR: docs/decisions/U0014-what-a-design-study-may-claim.md.
+```
+
+### U-P15a · U8 preparation · Lane A — Blackhole native admission before prediction freeze
+
+```text
+CONTEXT TO LOAD: CLAUDE.md, U0023, execution-plan U8, U-P13a–d, U-P15/U-P16,
+the accepted native scope, and B's U-P16 S reference/measurement-feasibility handoff.
+
+TASK: implement and independently verify the Blackhole reference's native admission before
+any U-P15 prediction generation. This is the named engine implementation task that unblocks
+the later freeze; it is not a measurement or tuning session.
+
+ENTRY:
+- B owns completion of hw/references/blackhole-p100a.yaml in U-P16 S, with sourced claims,
+  exact formats, counted unknowns, representability and measurement-granularity decisions.
+  No card or paid access is needed for source research; no arbitrary carrier placeholders
+  become executable physical assumptions. Stop on missing required reference decisions.
+- G6 mechanisms and required protected schema/precision decisions are available. If the
+  scope requires a contract or semantic extension, propose the exact patch and stop before
+  dependent implementation. Do not imply existing RoPE/format rules already admit BLOCKFP8.
+
+WORK:
+1. Map each accepted benchmark requirement to concrete native capability and independent
+   cases: torus routing, two opposite-direction NoCs, flit/credit and DMA behavior, SRAM,
+   GDDR6/controller configuration, barriers, formats including scale/conversion traffic,
+   and complete decoder/mapping scope. Identify represented versus unrepresented mechanisms
+   at each requested fidelity level. Do not retune a spec to match published timings.
+2. Implement only the accepted support gaps in the one production engine and preparation
+   path. Consume the exact reference and resolved mappings; preserve history and refusal
+   behavior for other inputs. B supplies independent expected counts/timing/behavior and
+   public-boundary faults. Source-bound edits follow the still-current U0002 lifecycle.
+3. Execute required admission/refusal, complete-work, mapped replay and debug/release
+   checks. Verify the actual suite's formats and initial states before saying it is ready.
+   Missing required benchmark support blocks this handoff or needs a new human decision.
+
+EXIT: exact reference/engine/schema identities, independently checked capability matrix,
+commands/results and remaining limitations are handed to U-P15 and U-P16. No prediction
+freeze starts until required readiness checks pass. Record optional reference availability
+separately; absence of tt-npe does not waive native requirements or become positive evidence.
+
+GUARDRAILS: no hardware measurements, pilot, access purchase, prediction generation or
+evidence promotion. No engine changes during the later U-P15 freeze. B owns the reference
+YAML; human-owned schema/ADR changes retain their normal approval/install process.
 ```
 
 ### U-P15 · U8 · Lane A — The mesh reference model, and predictions frozen before anyone measures
@@ -3338,18 +3578,28 @@ conditions. Measurements use the declared mapping match; a compiler-chosen mappi
 assumed equal to the local policy. Replaying predictions must not silently re-prepare inputs
 with a newer producer.
 
+READINESS: B's U-P16 S completes the reference and measurement-feasibility handoff;
+A's U-P15a implements and verifies native admission, required formats/operator/mapping
+scope before this separate prediction-freeze session. These phases may be prepared in U7. These are explicit preparatory tasks,
+not permission to edit the engine while generating predictions. Unknowns have reviewed
+treatment/limits, never arbitrary runnable carrier placeholders. G6 and hardware access
+authorization are required; full product tables and passing G4 are not measurement inputs.
+If required suite work cannot be represented or observed, stop for a concrete decision.
+No pilot, purchase or measurement is authorized by this preparation instruction.
+
 TASK: the same discipline as U-P9, for the class the native engine exists for: a mesh of many
 small cores. Predictions are committed before any measurement exists, and this prompt never
 sees one.
 
-1. Complete hw/references/blackhole-p100a.yaml as a REFERENCE: claims only, every number with
+1. Verify the already admitted hw/references/blackhole-p100a.yaml as a REFERENCE: claims only, every number with
    a URL, unknowns as stub claims. Model what the docs describe: two NoCs in opposite
    directions on a torus, the per-hop latencies, flit width, SRAM per core, the GDDR6
    channels and bandwidth, the numeric formats including BLOCKFP8 with its scale bytes. List
-   every stub the engine reads in predictions/UNKNOWNS.md. Fill the Rev-2 fields from the docs
-   where they exist (GDDR6 organisation and timing, interleaving, DMA/NIU outstanding
-   requests, barrier mechanism, accumulator and operand-buffer capacity, controller queues
-   and credits); otherwise stub them, counts included.
+   every stub the engine reads in predictions/UNKNOWNS.md. Verify that B's completed
+   reference already records GDDR6 organization/timing, interleaving, DMA/NIU outstanding
+   requests, barriers, accumulator/operand capacity and controller queues/credits with
+   reviewed unknown treatment. If a field must change, return to U-P16 S/U-P15a, revalidate
+   and restart the freeze. Do not fill or alter the reference in this prediction session.
 2. Agree validation/L3_silicon/blackhole/SUITE.md with Lane B FIRST, signed by both, with
    at least 36 benchmarks covering every one of these eight classes:
    - NoC: point-to-point latency vs hop count on each NoC; k-to-1 contention at k ∈ {2,4,8};
@@ -3381,16 +3631,18 @@ sees one.
    which stands for level 0), written to
    validation/L3_silicon/blackhole/predictions/<id>.json with full provenance, mapping match,
    initial state, predicted FLOPs and bytes, and the row diagnostics. Also run
-   tt-npe on the NoC benchmarks and commit its outputs as a SECOND prediction set, labelled
-   as the vendor's estimator. It is an L2 reference, and its own error against silicon is
-   information too.
+   tt-npe only for a prospectively admitted, matched and license-closed NoC scope; commit
+   its outputs as a separate vendor-estimator prediction set. Unavailable/unmatched cases
+   remain not_run and do not block required native silicon evidence. An admitted failure
+   cannot be erased by withdrawing the tool. This is optional L2, not whole-chip truth.
 4. One commit, message beginning "FROZEN PREDICTIONS:". check_ordering already enforces the
    rest.
 
 ACCEPTANCE TESTS:
 1. SUITE.md signed by both lanes before prediction generation.
 2. ≥ 36 prediction files covering all eight classes; each has a native prediction per
-   available level and U-C0 predictions; NoC benchmarks also have tt-npe predictions.
+   available level and U-C0 predictions; admitted matched NoC cases have tt-npe predictions
+   or explicit retained outcomes. Optional absence is not passing evidence.
 3. The reference spec loads as design_status: reference, with zero stipulations.
 4. UNKNOWNS.md is complete: a test cross-checks it against the stubs the engine read.
 
@@ -3408,9 +3660,24 @@ ADR: docs/decisions/U0015-the-mesh-reference-and-what-it-can-support.md.
 ```text
 CONTEXT TO LOAD: CLAUDE.md, measure/README.md, validation/L3_silicon/blackhole/SUITE.md,
 validation/ledger/README.md, ADR U0010 (how the first verdict was reached; reuse it). Tenstorrent
-tt-metal documentation: TT-Metalium kernels, the device program profiler, tt-smi. PREREQUISITE:
-a host with the Blackhole p100a installed, Ubuntu 22.04 as the card's docs require, and tt-smi
-reporting the card. If any of that is not true, stop and say so.
+tt-metal documentation: TT-Metalium kernels, the device program profiler, tt-smi; U0023
+and U-P15a. Name the authorized phase in the handoff: S sourcing/readiness or M measurement.
+
+PHASE S — before U-P15a, no card/access prerequisite:
+- B completes hw/references/blackhole-p100a.yaml from primary documentation, records exact
+  sources, formats, structural/timing unknowns and proposed treatments, and reconciles
+  representability with A. Unknown carrier placeholders are not usable physical estimates.
+- B drafts the suite's observable profiler boundaries, mapping match, initial state and
+  counts; identify unmeasurable requirements before engine/prediction work. Resolve any
+  protected or unsupported-scope decision, or record it as a blocker rather than invent it.
+- Handoff accepted reference bytes, source inventory, required capability list and explicit
+  unknowns to U-P15a. Stop: no engine edits, measurements or predictions in S.
+
+PHASE M — after U-P15a admission and U-P15 freeze:
+Require the authorized card/host, OS/runtime supported by its pinned documentation and
+tt-smi identifying the card; verify exact versions rather than assuming an old OS literal.
+If unavailable, M stays pending while source preparation can proceed. Execute the task and
+acceptance below only after these prerequisites and hardware-access approval.
 
 TASK: measure the mesh reference, compare against every frozen prediction set, and let the
 ledger say what the native engine, per fidelity level, is entitled to claim.
@@ -3428,7 +3695,9 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    plus the derived durations and the derivation script's hash) are committed immutable under
    validation/L3_silicon/blackhole/results/.
 3. Ledger entries, one per (benchmark × prediction source): native at each fidelity level,
-   U-C0, and tt-npe. The same key discipline as U-P10, and classes split by mapping match.
+   U-C0, and tt-npe only in its prospectively admitted matched scope with an actual frozen
+   prediction. Absent/unmatched optional cases remain not_run, never fabricated ledger
+   entries. Retain admitted failures. Use U-P10's keys and split by mapping match.
 4. THE NEW THING THIS VERDICT CAN SAY, which the first could not: whether MORE DETAIL IS
    MORE ACCURATE for this class. Report the error by class for each native fidelity level
    side by side. "Closer" means a lower median |error| in that class; it is reported per
@@ -3437,8 +3706,10 @@ ledger say what the native engine, per fidelity level, is entitled to claim.
    whether it is also accuracy.
 5. Gate G7 (execution-plan §4): the same thresholds as G4, applied to native composite C2 on
    the mesh family. Promotion is scoped to the mesh family and the passing classes only.
-6. tt-npe vs silicon on NoC benchmarks goes in the report as context, labelled as an L2
-   reference's own error. It is not our evidence.
+6. For admitted matched tt-npe predictions, report their silicon comparison as context,
+   labelled as the vendor estimator's own error. Otherwise report unavailable/unmatched/
+   not_run with reasons. Optional absence does not block G7 or count as passing evidence;
+   admitted failures cannot be hidden by withdrawing the reference. It is not our evidence.
 
 ACCEPTANCE TESTS (write first):
 1. The dry run completes and the ledger refuses its SYNTHETIC outputs.
@@ -3470,6 +3741,11 @@ Compare worker/thread/synchronization configurations using the same saved prepar
 workload and mapped TaskGraph. Partitioning simulator ownership must not repartition model
 tensors or change the declared chip mapping. Record prepared input identity with every run
 so timing differences cannot hide a change in the workload producer.
+
+U9 ENTRY: G6 and the existing recorded-need/funded-experiment decision, plus full G5
+including controlled-host performance evidence and executed self-hosted nightly. The
+funded-experiment alternative does not waive either host/nightly prerequisite. Every
+performance/scaling claim uses the designated controlled host and actual run receipts.
 
 TASK: parallelism INSIDE one simulation, built so that the exact mode is byte-identical to the
 single-threaded engine. Only then comes a lax mode, and it is labelled as approximate everywhere it
@@ -3541,6 +3817,11 @@ workload and mapped TaskGraph. Partitioning simulator ownership must not reparti
 tensors or change the declared chip mapping. Record prepared input identity with every run
 so timing differences cannot hide a change in the workload producer.
 
+U9 ENTRY: G6 and the existing recorded-need/funded-experiment decision, plus full G5
+including controlled-host performance evidence and executed self-hosted nightly. The
+funded-experiment alternative does not waive either host/nightly prerequisite. Every
+performance/scaling claim uses the designated controlled host and actual run receipts.
+
 TASK: measure whether lax synchronisation survives a BACKPRESSURED boundary, publish the curve
 whatever its shape, and wire the result into what the composite fidelity may claim.
 
@@ -3609,13 +3890,21 @@ This prompt remains table consumption at runtime: no live rk-uarch, compiler or 
 invocation, and no new tensor sharding in the reader. A future rk-sim prepared-input exporter
 is a separately approved integration; it is not a prerequisite or an implicit part of P18.
 
+PREREQUISITES: G6 plus G3b for the consumed C2 table and rk-sim's own accepted boundary.
+G5-correctness is required; pending G5-performance/automation does not block this
+product integration or waive full G5/final closure. An early test-only adapter is not integration. A passing silicon campaign
+is not mandatory, but actual evidence limits, STUB/unknown error and conditions must survive.
+
 TASK: a component whose effective compute fidelity is C2 is priced, every iteration, from a
 uarch cost table instead of the C0 roofline, with the R1 DES unchanged.
 
 1. rk/engine/characterized/ (new; engine layer; Lane A): loader.py reads a table file, verifies
    table_hash by recomputing it, checks the contract MAJOR version, checks the table's
    hardware_spec_hash against the component's characterization.spec_hash and the table's tp against
-   the plan's tp for that component, and returns a frozen object.
+   the plan's tp for that component, and returns a frozen object. Before admission, require
+   composite_fidelity=C2 and consistency with the adopted per-subsystem/sync rule. Missing,
+   lower or inconsistent detail raises CompositeFidelityMismatch; no upgrade or fallback
+   for a supplied invalid table. Hash verification alone is insufficient.
    cost.py: CharacterizedIterationCost, satisfying EXACTLY the interface f1 already calls on
    IterationCost (decode_s, prefill_s, decode_counts, prefill_counts, collective_s, spill_s,
    power_point, kv_byte_per_context_token, tp, and whatever else f1 reads). If f1 annotates
@@ -3673,13 +3962,19 @@ ACCEPTANCE TESTS (write first):
    points the characterized cost reproduces IterationCost exactly (==), and between points
    within the declared interpolation error. This proves the path independently of uarch's
    physics. The characterized cost also reproduces rk-uarch's
-   contract/fixtures/interpolation_vectors.json within 1e-12 relative.
+   contract/fixtures/interpolation_vectors.json within 1e-12 relative. Exercise this test
+   below product admission, at the cost/interpolation unit boundary. The C0 fixture keeps
+   its true fidelity and must be refused by the production C2 loader; never relabel it C2.
+   Test 7 separately covers production admission with eligible/ineligible fixtures.
 3. Envelope refusal at build time; spec-hash mismatch; params mismatch; tp mismatch;
    contract-major mismatch; non-finite row; DVFS without a frequency axis; a cold table in
    R1; a KV block-size mismatch: one test each, each raising the named error.
 4. Default-degrades / override-raises asserted as a pair in one test.
 5. Every existing golden is byte-identical. The C0 and R0/R1 paths are untouched.
 6. R1 with a C2 component: determinism, Little's law and conservation (P5's tests) still hold.
+7. Valid hash-recomputed C0/C1, missing-composite and C2-with-inconsistent-detail tables
+   are refused with CompositeFidelityMismatch before pricing/fidelity display; an admitted
+   C2 positive control succeeds. Existing C0 plumbing fixtures never grant C2 eligibility.
 
 GUARDRAILS: Never import rk-uarch; rk-sim reads files. Do not change f1's scheduling
 semantics. Do not extrapolate, clamp, or refit a table. Do not edit tests/golden/expected/ or
@@ -3768,6 +4063,10 @@ on the cold setup. Neither path requires a live rk-sim clone or a compiler to pr
 results. Verify replay with local producers disabled, including input-content/cache identity;
 keep the later rk-sim table-consumption demo independent of preparation services.
 
+FINAL-CLOSURE PREREQUISITE: full G5-correctness/performance/automation, including controlled-
+host performance evidence and executed self-hosted nightly, must be complete. U7 tables
+and U10 integration may have proceeded on correctness alone; this does not waive closure.
+
 TASK: a stranger can run it, and either founder can perform the build-spec §1.2 demo cold,
 including the other lane's parts.
 
@@ -3815,8 +4114,11 @@ you wrote it earlier in this conversation, SAY SO AND STOP. A clean verdict from
 worse than no review, because it will be believed.
 
 CHECK, in order:
-1. Does the sprint's joint exit criterion actually run, on the Linux box, from a cold clone?
-   Execute it. Paste the output.
+1. Does the applicable sprint exit run on the exact reviewed revision? Execute the
+   authorized checks and record actual output. U0023 correctness closure additionally needs
+   fresh hosted Linux checkout and separate fresh local clone on the same published commit;
+   performance needs the controlled host. Missing access/evidence stays pending. No-op
+   native jobs are not readiness; do not contact hosts or spend without authorization.
 2. Does any number reach a human without its badge? Grep report templates for raw values;
    run `uarch report` on the sprint's tables and scan for "±0"; check CLI output paths.
 3. Did any golden change? If so, is there a docs/decisions/U*.md for it, and does it match the
@@ -3838,8 +4140,10 @@ CHECK, in order:
 7. Fidelity: any composite C2 that breaks build-spec §2.4's rule (compute below 2, NoC or DRAM
    below "1+ts"), any engine whose levels were not derived from §2.4's table, or any lax sync
    result without a covering curve? Any C2 row faster than its u_c0_duration_s?
-8. Determinism: build one golden table at --workers 1 and --workers N yourself and diff the
-   bytes. From U9, also at 1 and 4 threads in exact mode.
+8. Determinism: at the bounded native stage reproduce saved-job/debug-release results;
+   when table workers are delivered, build a representative table at 1/N workers and diff
+   bytes. Full product coverage belongs to G3b. From U9 also test exact-mode 1/4 threads.
+   Do not introduce a full-grid prerequisite into a component or silicon-readiness review.
 9. From U4a: independently re-derive and execute a native-stage literal case and its
    discriminating fault. From U6: run the G5 qualification selection yourself. Inspect
    optional reference scope/independence; never call a missing full fork a defect.

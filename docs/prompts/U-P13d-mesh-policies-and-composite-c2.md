@@ -15,7 +15,11 @@ resolved mapped inputs, never chooses SUMMA/head placement itself. Export/import
 policy version, hardware binding and content identity; no search or compiler integration.
 
 TASK: make the mesh class a first-class target and the composite honest: mesh policies, the
-composite rule in code, and full C2 tables at mesh scale.
+composite rule in code, and the U-P7 T full product table at its actual earned composite.
+G6 verifies mechanisms; G3b verifies the consumed table. Both require G5-correctness,
+not its performance/automation completion. No silicon-pass prerequisite. Keep functional
+scale admission separate from pending host metrics; no performance claim while controlled-
+host evidence or executed self-hosted nightly is missing.
 
 1. Mesh-class mapping policies in src/rkuarch/mapping/ (Python, shared by every engine):
    - summa-2d@1: GEMM outputs blocked over the core grid, operands multicast along rows
@@ -32,8 +36,14 @@ composite rule in code, and full C2 tables at mesh scale.
    Emit the full per-subsystem vector as fidelity_detail, with build-spec §2.4's keys and
    values only. A request that asks for C2 and cannot get it degrades or raises exactly as
    build-spec §7.4 says for default vs override.
-3. Scale: build full tables for npu-m256 (16×16) and a 32×32 variant. Record the simulator
-   metrics from U-P12 for both, and the single-point wall-clock against ADR U0011's budget.
+3. Product: build the complete npu-m256 consumer table under U-P7 T/G3b. Resolve required
+   hardware/precision/RoPE/ragged and schema decisions first, preserving the demo scope.
+   Scale: use prospectively declared representative 16×16 and 32×32 points, after an
+   accepted 32×32 design exists. Verify functional scale admission on approved correctness
+   Linux. Separately record U-P12 controlled-host costs against U0011 for the scale-metric
+   obligation, with executed self-hosted nightly before any qualified performance claim.
+   Pending metrics do not block G6/G3b/U10; they do block the corresponding performance
+   qualification, U9 entry and final closure. No full 32×32 grid without a named consumer.
 4. Extend G5's independent correctness corpus and public-boundary fault checks to every
    new modeled mechanism. Run admitted matched component references; missing optional
    references are disclosed and do not become a deferred whole-fork requirement.
@@ -45,7 +55,12 @@ ACCEPTANCE TESTS (write first):
 2. Roofline floor: no row of any native table is faster than its U-C0 roofline.
 3. summa-2d@1 and head-parallel@1 pass L0's per-core bytes and MACs check against the graph.
 4. Determinism: byte-identical at 1 and N workers; the debug build runs clean.
-5. The 32×32 table builds, and its metrics and wall-clock are recorded.
+5. Functional: declared 32×32 scale points execute with verified inputs/scope and correctness
+   checks. Missing required design/admission blocks this functional obligation.
+6. Separate scale-metric obligation: controlled-host observations and executed self-hosted
+   nightly support any performance claim. Keep its pending status separate; acceptance 6
+   does not gate G6/G3b/U10, but is required for the scale performance claim, U9 entry and
+   final closure. Never fabricate metrics or close the obligation from functional success.
 
 GUARDRAILS: Do not claim C2 below the rule. No threads yet. Do not remove the level-0 and
 level-1 paths: they are the fast modes, and the ladder is a feature.
