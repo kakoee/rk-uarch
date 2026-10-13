@@ -1,5 +1,13 @@
 # U0002 dependency audit and unapplied migration proposal
 
+**Stage 2 revision:** [B-F1/B-F8 response](../U3-lane-B-response.md) and
+[bounded evidence](../U3-B-stage2-v1/README.md) supersede the mechanism and patch bindings
+below. The unapplied patch now proposes closed import namespaces, early command guards,
+complete scripts binding and isolated mutation tests. Its baseline inventory is **56**,
+not the historical 52; original inventories/results remain unchanged historical evidence.
+The current patch also changes the proposed vendor bootstrap and package initializer,
+so its full script fingerprint needs the normal separately approved human lifecycle.
+
 **Correction:** [B-C1/B-C2 follow-up](../U3-B-dependency-audit-correction-v1/README.md)
 updates only the unapplied patch tests and supplies its new SHA256. The execution receipts
 and `evidence.json` below remain historical for the original `a602683` patch; they do not

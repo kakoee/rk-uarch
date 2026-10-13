@@ -16,7 +16,20 @@ not require an unsafe repair merely to meet that deadline.
 > `uarch-input-support/2` / `generator-imports-and-data/1` tooling policy, current support
 > comprises the conservative local import closure of the reviewed staging/generator/verifier
 > roots, including package initializers and function-local imports, the policy implementation
-> itself, and explicitly reviewed non-import inputs. Compare exact inventory and file bytes;
+> itself, all Python files below scripts/, explicitly reserved top-level module files and
+> existing reserved-namespace initializers, and reviewed non-import inputs. Under the actual
+> ROOT, scripts/, src/ and contract/ search roots, refuse any new importable top-level module
+> or namespace name outside the explicit reviewed local names/types. This covers names used
+> by transitive imports as well as direct ones; it is not a direct-import-only guarantee.
+> Adding a new top-level local name requires policy/source review. Nested unrelated consumer
+> files and non-importable prose may remain unbound, unless reached or explicitly included.
+> Run the name guard before non-bootstrap imports in direct staging/vendor entry points and
+> package initialization, and again during strict support inventory verification. Its proposed
+> bootstrap requires normal CPython >=3.12 with builtin sys and frozen os; other bootstraps
+> refuse. Trusted startup/environment and no concurrent source race remain premises, not a
+> sandbox against malicious interpreter hooks or arbitrary reflection. Bind existing reserved
+> namespace initializers so adding/changing one cannot evade the inventory.
+> Compare exact inventory and file bytes;
 > reject unknown policy, unresolved/dynamic dependency forms outside the reviewed mechanism,
 > ambiguous or shadowed imports, symlinks, missing/extra dependencies and content drift.
 > Introducing dependencies requires their inclusion and review, not unchanged output values.
@@ -39,12 +52,14 @@ not require an unsafe repair merely to meet that deadline.
 
 This text does not amend U0003/U0004/U0006/U0022, precision refusals, matrix counts,
 nominal durations or evidence eligibility. The policy's known static-analysis/environment
-limits in README are part of the review, not an implicit guarantee of arbitrary-code safety.
+limits in the Stage 2 handoff and README are part of the review, not an implicit guarantee
+of arbitrary-code safety.
 
 ## Exact migration sequence proposed, not executed
 
-1. Coordinator/A review the patch at its recorded baseline; confirm each of the 58 removals
-   and 13 additions by purpose. Resolve A's new mapped imports/data before narrowing. Human
+1. Coordinator/A review the Stage 2 patch and its 97→56 support delta; confirm each of the
+   58 removals and 17 additions by purpose, including the four additions beyond Stage 1.
+   Resolve A's new mapped imports/data before narrowing. Human
    accepts the exact policy and code revision (or declines it) before M installation.
 2. For the repair route, finish tests-first integration on a separately authorized source
    revision; keep vendor fingerprints and legacy branch strict. Commit normal reviewed
@@ -64,7 +79,8 @@ limits in README are part of the review, not an implicit guarantee of arbitrary-
    source/pin checks, matrix/attribution/refusals and complete old/new semantic query joins.
    Compare every count, duration and null, not an output sample; expected numerical delta
    is zero but any difference is a finding. Changed metadata includes policy, support files,
-   input digest and outer manifest; generator script changes only if separately approved.
+   input digest and outer manifest. The proposed Stage 2 vendor bootstrap changes the full
+   script fingerprint and needs exact approval/generation; the embedded oracle is unchanged.
 6. Test actual new-policy positive currentness, relevant changes, unknown policies, stripped
    policy/inventory substitution and producer-disabled committed consumption in a fresh
    checkout at the exact implementation. Existing adoption identity checks must catch a

@@ -1,0 +1,93 @@
+{
+  "status": "Stage 2 author proposal evidence; no finding closed, no live installation or lifecycle",
+  "stage1_commit": "184d2c2b08c28a01673be143b086ef223ba6706a",
+  "stage1_tree": "6f74542bf5fc85997e044a135293db95297e3e20",
+  "integrated_main": "d7b00b8a2203da440c9e797b8166f9a47289e468",
+  "review_report_sha256": "550fe94a69e8a9ae53071ebc0928a55af0a3c1d1f88020119e6211b3ac55c820",
+  "prior_patch_sha256": "97d0ec302606838a7055ec3d43ce1d3b759e8e015ecb796eed154ce4b0915e55",
+  "patch_path": "docs/reviews/U3-B-artifact-dependency-audit-v1/repair.patch",
+  "patch_sha256": "4c73d73d1c7ec1e1453e7ef7ccf1bd3de55238a4469069dcaa75e89bc764fa81",
+  "patch_source_scope": [
+    "scripts/__init__.py",
+    "scripts/vendor_rk.py",
+    "scripts/u2_inputs.py",
+    "scripts/u2_import_guard.py",
+    "scripts/u2_support.py",
+    "tests/unit/test_u2_support_policy.py"
+  ],
+  "source_scope_note": "only UNAPPLIED diff; embedded ORACLE_PROGRAM AST literal unchanged from Stage 1; full vendor script fingerprint intentionally changes prospectively",
+  "support_inventory": {
+    "old": 97,
+    "stage1_proposed": 52,
+    "stage2_proposed": 56,
+    "retained": 39,
+    "removed": 58,
+    "added": 17
+  },
+  "environment": "existing B .venv Python 3.12.14; no install/sync; WSL author checks, no native CI or performance credit",
+  "import_paths": "env -u PYTHONPATH -u MYPYPATH for all credited test/static invocations; explicit pytest -c pyproject.toml --rootdir . in private export; origin assertion checks export modules. Child direct commands replace ambient paths with their private root/src:root/contract. Import-linter editable B src/contract subjects checked byte-identical to export.",
+  "source_safety": "per-case tmp roots copied from scoped support files and required input/artifact data; public loader root plumbing explicit; audit hook refuses actual checkout source/data writes (interpreter caches excluded); real-source write-open test passes by refusing it. Live source Git diff empty; reviewer receipts unchanged.",
+  "sequential_execution": true,
+  "runs": {
+    "tests_first_stage1_patch": "28 failed, 44 passed, 1 skipped in 24.03 s: 16 accepted loader shadows, 8 fresh vendor shadow-body failures, scripts inventory gap and 3 stronger-diagnostic mismatches",
+    "first_guard_collection": "guard omitted existing contract/__init__.py; collection refused. Reserved name added and initializer bytes subsequently bound; no weaker general allowance",
+    "initial_guard": "72 passed, 1 skipped in 21.22 s",
+    "source_audit_and_initializers": "74 passed, 1 skipped in 25.10 s",
+    "both_entrypoints_plus_vendor_regression": "91 passed, 1 skipped in 29.81 s",
+    "guard_removed": "32 failed, 53 deselected in 14.39 s on final patch code",
+    "loader_call_removed": "4 failed, 81 deselected in 2.05 s on final patch code",
+    "restored": "82 passed, 1 skipped in 27.05 s",
+    "final_focused": "135 passed, 1 skipped, 8 deselected in 34.69 s; includes two bootstrap refusal controls",
+    "readiness": "current text and independent rational counterexamples pass; existing fixed decode/prefill each expose head/embed=16 and layers/kv=32 with zero compute, count totals match literals",
+    "prose_discrimination": "B-F2/B-F4/B-F7 each reject Stage 1 prose and removal of their correction; six expected assertion failures in memory",
+    "ruff": "passed after 3 scratch style fixes and one author-checker import-spacing fix",
+    "mypy_production_scripts": "80 source files passed",
+    "mypy_contract_tests": "31 source files passed",
+    "imports": "2 kept, 0 broken; 101 files, 600 dependencies",
+    "live_strict_vendor": "passed; unchanged source/artifact pair",
+    "direct_controls": "fresh isolated origins asserted; vendor --help and --check --historical pass, input-tool --help passes; vendor strict --check refuses input support inventory changed as expected, not migration success",
+    "earlier_focused": "133 passed, 1 skipped, 8 deselected in 33.08 s after extending source write protection to all source/data trees",
+    "bootstrap_tests_first": "1 failed, 1 passed, 83 deselected in 0.69 s: old Python version needed explicit refusal; fixed before final run",
+    "earlier_guard_removed": "32 failed, 51 deselected in 12.39 s; guard function returned before validation; public/fresh-command controls discriminate",
+    "final_fault_restored": "38 passed, 47 deselected in 14.22 s; both source files restored byte-for-byte"
+  },
+  "fault_interpretation": "With guard removed, complete scripts binding still detects scripts inventory drift after import, but cannot prevent shadow execution in fresh commands. Other unknown-root loader attacks can be accepted. Do not equate all 32 failures with successful strict loading.",
+  "commands": {
+    "tool_prefix": "env -u PYTHONPATH -u MYPYPATH /home/jjaff/AI-infra-simulation/rk-uarch-u3-b/.venv/bin/",
+    "pytest_prefix": "python -B -m pytest -c pyproject.toml --rootdir .",
+    "tests_first_and_restored": "-q -rs tests/unit/test_u2_support_policy.py",
+    "guard_fault": "-q --tb=no tests/unit/test_u2_support_policy.py -k \"public_load_transitive_shadow or fresh_direct_shadow\"",
+    "loader_fault": "-q --tb=no tests/unit/test_u2_support_policy.py -k public_load_new_policy_drift_refuses",
+    "final_focused": "-q -rs tests/unit/test_u2_support_policy.py tests/unit/test_vendor_script_entry.py contract/tests/test_u_p2_review.py -k \"not f2_default and not f5 and not f6 and not f7_environment_record and not f8\" --require-vendor",
+    "statics": [
+      "ruff check .",
+      "mypy src contract/uarch_contract scripts",
+      "mypy --no-explicit-package-bases contract/tests",
+      "lint-imports"
+    ],
+    "readiness": "python -B docs/reviews/U3-B-stage2-v1/check_readiness.py PRIVATE_EXPORT CURRENT_SUPPLEMENT_README",
+    "live_strict": "python scripts/vendor_rk.py --check",
+    "final_fault_restored": "-q --tb=line tests/unit/test_u2_support_policy.py -k \"public_load_transitive_shadow or fresh_direct_shadow or public_load_new_policy_drift_refuses or guard_bootstrap\""
+  },
+  "skip": "real policy-marked human adoption positive absent; strict CI remains unconditional and still refuses old artifact under proposed source",
+  "deselections": "bounded explicit name selections; final eight excluded existing contract cases are not passed or waived",
+  "not_run": [
+    "full suite",
+    "hosted Linux/native CI",
+    "nightly",
+    "input staging",
+    "oracle",
+    "generation/adoption",
+    "new analytic corpus/report regeneration",
+    "native implementation/build",
+    "Stage 3 adjudication"
+  ],
+  "pending": [
+    "coordinator/Stage 3 review",
+    "exact bootstrap/policy/migration human decision",
+    "A review reconciliation for component bounds, CI assignment/pins and queue checkpoints",
+    "exact DMA/clock human replacements",
+    "actual M import/initializer/data audit",
+    "actual new-policy two-run human generation, complete candidate audits, adoption, strict positive and integrated full checks"
+  ]
+}
