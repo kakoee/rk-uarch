@@ -1,0 +1,90 @@
+{
+  "status": "proposal; unapplied in live clone; no generation/adoption",
+  "baseline_commit": "30812dfc322b742b81521e350d7d5b541221ca0d",
+  "baseline_tree": "263bc341917fe9902d4ca7de46be70f36f61d638",
+  "adopted_manifest_sha256": "1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a",
+  "input_manifest_sha256": "27c6238d42e57dc4f2b1baf0c8846c11f1eec2968176dcefcdc463beb64bc80f",
+  "patch_sha256": "bb15bd236938c659b3c07b8be03121aaa5f41ee339560ba150a7cb4cec8391f8",
+  "trace_scope": "strict committed-fixture consumption with run_oracle, collect_snapshot and prepare_inputs denied; not a generation trace",
+  "local_imported_modules": [
+    "contract/uarch_contract/__init__.py",
+    "contract/uarch_contract/assumptions.py",
+    "contract/uarch_contract/common.py",
+    "contract/uarch_contract/comparison.py",
+    "contract/uarch_contract/derivation.py",
+    "contract/uarch_contract/errors.py",
+    "contract/uarch_contract/evidence.py",
+    "contract/uarch_contract/exports.py",
+    "contract/uarch_contract/fidelity.py",
+    "contract/uarch_contract/hardware.py",
+    "contract/uarch_contract/hashing.py",
+    "contract/uarch_contract/model_card.py",
+    "contract/uarch_contract/model_shape.py",
+    "contract/uarch_contract/operators.py",
+    "contract/uarch_contract/precision.py",
+    "contract/uarch_contract/prepared.py",
+    "contract/uarch_contract/registry.py",
+    "contract/uarch_contract/report_context.py",
+    "contract/uarch_contract/request.py",
+    "contract/uarch_contract/sourced.py",
+    "contract/uarch_contract/table.py",
+    "scripts/__init__.py",
+    "scripts/u2_inputs.py",
+    "scripts/vendor_rk.py",
+    "src/rkuarch/__init__.py",
+    "src/rkuarch/engines/__init__.py",
+    "src/rkuarch/engines/protocol.py",
+    "src/rkuarch/hw/__init__.py",
+    "src/rkuarch/hw/derive.py",
+    "src/rkuarch/hw/export.py"
+  ],
+  "scratch_tests": {
+    "initial": "expected collection error: proposed module absent",
+    "first_implementation": "20 passed, 2 setup failures from leftover empty shadow-test directory; cleanup fixed",
+    "final": "30 passed in 4.43 s",
+    "enforcement_disabled": "9 failed, 21 deselected in 0.92 s (expected)",
+    "restored": "9 passed, 21 deselected in 2.48 s",
+    "existing_integrity_environment": "14 passed, 36 deselected in 0.58 s",
+    "final_changes": "Explicit checkout-root forwarding; actual query/formula/serializer mutants; three frozen-input substitution controls. Earlier 27-case pass superseded by this 30-case result.",
+    "replay_selection": "3 passed, 65 deselected in 3.55 s"
+  },
+  "live_controls": {
+    "strict_vendor": "passed",
+    "strict_consumption_generation_denied": "passed",
+    "replay_selection": "3 passed, 65 deselected in 5.22 s"
+  },
+  "scratch_checks": {
+    "ruff": "passed",
+    "mypy_src_contract_scripts": "79 files passed",
+    "mypy_contract_tests": "31 files passed",
+    "import_contracts": "2 kept, 0 broken",
+    "strict_vendor": "expected refusal: input support inventory changed"
+  },
+  "migration_actual_run": false,
+  "oracle_executed": false,
+  "full_suite_executed": false,
+  "remaining": "new-policy end-to-end generation/current artifact success requires separately authorized human migration; no metadata substitution was used to fake it",
+  "commands": {
+    "scratch_environment": "B .venv/bin/python with PYTHONPATH=.:src:contract in disposable export of baseline; no sync/install",
+    "scratch_policy_tests": "python -m pytest -q tests/unit/test_u2_support_policy.py",
+    "scratch_fault": "Save scripts.u2_support.verify; replace only it with lambda expected, **kwargs: None; pytest.main(['-q', 'tests/unit/test_u2_support_policy.py', '-k', 'relevant_bytes_refuse or missing_inventory_entry']); require exit 1; restore in finally.",
+    "scratch_restored": "python -m pytest -q tests/unit/test_u2_support_policy.py -k 'relevant_bytes_refuse or missing_inventory_entry'",
+    "scratch_legacy": "python -m pytest -q contract/tests/test_u_p2_review.py -k 'f3_metadata or f3_program or f4_strict or f7_environment_tampering or f7_ci_runtime' --require-vendor",
+    "scratch_statics": [
+      "ruff check .",
+      "mypy src contract/uarch_contract scripts",
+      "mypy --no-explicit-package-bases contract/tests",
+      "lint-imports"
+    ],
+    "live_replay": "uv run --no-sync pytest -q tests/rotary_v2/test_boundary.py tests/rotary_v2/test_routing.py -k 'literal_full_counts_and_replay_without_producers or legacy_byte_identity_and_dispatch'",
+    "strict_live": "uv run --no-sync python scripts/vendor_rk.py --check",
+    "strict_scratch": "PYTHONPATH=.:src:contract B/.venv/bin/python scripts/vendor_rk.py --check (expected exit 1; no historical substitution)",
+    "read_trace": "sys.addaudithook(open); deny vendor.run_oracle/collect_snapshot and u2_inputs.prepare_inputs; check_contract_pin, check_manifest, check_snapshot_inputs, check_generator(current=True); retain repository-local imported module names only",
+    "patch_check": "git apply --check docs/reviews/U3-B-artifact-dependency-audit-v1/repair.patch"
+  },
+  "environment": {
+    "python": "Python 3.12.14",
+    "existing_locked_environment": true,
+    "host_performance_claim": false
+  }
+}

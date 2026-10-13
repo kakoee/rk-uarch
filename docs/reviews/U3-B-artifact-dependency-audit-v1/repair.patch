@@ -1,0 +1,394 @@
+--- a/scripts/u2_inputs.py
++++ b/scripts/u2_inputs.py
+@@ -119,9 +119,10 @@
+         files["historical-source/" + name] = data
+         if name.startswith("model_shapes/"):
+             files[name] = data
+-    files["support-files.json"] = vendor.canonical(
+-        {str(p.relative_to(ROOT)): vendor.digest(p.read_bytes()) for p in support_files()}
+-    )
++    from scripts import u2_support
++
++    files["support-policy.json"] = vendor.canonical(u2_support.POLICY)
++    files["support-files.json"] = vendor.canonical(u2_support.inventory(root=ROOT))
+     files["PIN"] = (vendor.PIN + "\n").encode()
+     files["ADOPTED-MANIFEST-SHA256"] = (ADOPTED_MANIFEST + "\n").encode()
+     manifest = "".join(
+@@ -164,7 +165,21 @@
+         raise ValueError("input pin")
+     if (directory / "ADOPTED-MANIFEST-SHA256").read_text().strip() != ADOPTED_MANIFEST:
+         raise ValueError("input adopted identity")
+-    if check_support:
++    support_policy = None
++    if "support-policy.json" in named:
++        from scripts import u2_support
++
++        support_policy = strict_json_loads((directory / "support-policy.json").read_bytes())
++        if support_policy != u2_support.POLICY:
++            raise ValueError("unrecognized input support policy")
++    if check_support and support_policy is not None:
++        u2_support.verify(
++            strict_json_loads((directory / "support-files.json").read_bytes()),
++            policy=support_policy,
++            root=ROOT,
++        )
++    elif check_support:
++        # Historical unversioned inventories retain the complete original rule.
+         support = strict_json_loads((directory / "support-files.json").read_bytes())
+         if set(support) != {p.relative_to(ROOT).as_posix() for p in support_files()}:
+             raise ValueError("input support inventory changed")
+--- /dev/null
++++ b/scripts/u2_support.py
+@@ -0,0 +1,141 @@
++"""Proposed generation-support policy; review/migration required before installation.
++
++A conservative static import closure plus explicitly reviewed non-import inputs.
++Not a sandbox or a proof against arbitrary Python obfuscation. Function-local and
++TYPE_CHECKING imports count; package initializers count. No plugin discovery.
++"""
++
++from __future__ import annotations
++
++import ast
++import hashlib
++import sys
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++POLICY = {"format": "uarch-input-support/2", "selection": "generator-imports-and-data/1"}
++ENTRYPOINTS = ("scripts/u2_inputs.py", "scripts/vendor_rk.py", "scripts/u2_support.py")
++LOCAL_PREFIXES = ("rkuarch", "uarch_contract", "scripts")
++EXTERNAL = frozenset(sys.stdlib_module_names) | {"pydantic", "yaml"}
++DYNAMIC = {"importlib", "runpy", "pkgutil", "ctypes"}
++DATA = (
++    "pyproject.toml",
++    "uv.lock",
++    "hw/designs/npu-l4.yaml",
++    "contract/tests/fixtures/u2_b/component-precisions.json",
++    "contract/tests/fixtures/u2_b/asic_placeholder-execution.json",
++    "contract/tests/fixtures/u2_b/nvidia_h100_sxm-execution.json",
++)
++
++
++def safe(path: Path, root: Path) -> Path:
++    if not path.is_relative_to(root):
++        raise ValueError("support path outside root")
++    if any(p.is_symlink() for p in (path, *path.parents)):
++        raise ValueError("support symlink: " + str(path))
++    if not path.is_file():
++        raise ValueError("support file missing: " + str(path))
++    return path
++
++
++def support_files(*, root: Path = ROOT) -> tuple[Path, ...]:
++    search = (root, root / "src", root / "contract")
++    # Script entry execution also places scripts/ on sys.path. Never let an
++    # unrelated new local file replace a reviewed external dependency.
++    shadow_roots = (*search, root / "scripts")
++    queue = [root / name for name in ENTRYPOINTS]
++    seen: set[Path] = set()
++
++    def resolve(name: str) -> list[Path]:
++        matches = []
++        for base in search:
++            p = base.joinpath(*name.split("."))
++            for candidate in (p.with_suffix(".py"), p / "__init__.py"):
++                if candidate.exists() or candidate.is_symlink():
++                    matches.append(safe(candidate, root))
++        if len(matches) > 1:
++            raise ValueError("ambiguous support import: " + name)
++        return matches
++
++    def dependency(name: str) -> None:
++        top = name.split(".")[0]
++        if top in DYNAMIC:
++            raise ValueError("unreviewed dynamic dependency: " + name)
++        if top in LOCAL_PREFIXES:
++            matches = resolve(name)
++            if not matches:
++                raise ValueError("unresolved support import: " + name)
++            queue.extend(matches)
++            for n in range(1, len(name.split("."))):
++                queue.extend(resolve(".".join(name.split(".")[:n])))
++        else:
++            if top not in EXTERNAL:
++                raise ValueError("unreviewed external dependency: " + name)
++            for base in shadow_roots:
++                for candidate in (base / (top + ".py"), base / top):
++                    if candidate.exists() or candidate.is_symlink():
++                        raise ValueError("external import shadow: " + str(candidate))
++
++    while queue:
++        path = safe(queue.pop(), root)
++        if path in seen:
++            continue
++        seen.add(path)
++        base = next(b for b in reversed(search) if path.is_relative_to(b))
++        package = list(path.relative_to(base).parts[:-1])
++        for node in ast.walk(ast.parse(path.read_text())):
++            if isinstance(node, ast.Call):
++                called = node.func.id if isinstance(node.func, ast.Name) else ""
++                if called in {"eval", "exec", "__import__"}:
++                    raise ValueError("unreviewed dynamic dependency call: " + called)
++            if isinstance(node, ast.Import):
++                for alias in node.names:
++                    dependency(alias.name)
++            if isinstance(node, ast.ImportFrom):
++                parts = package[: len(package) - node.level + 1] if node.level else []
++                parts += node.module.split(".") if node.module else []
++                name = ".".join(parts)
++                # from package import module: include module when present, but
++                # importing a value does not invent a same-named module.
++                if name:
++                    dependency(name)
++                for alias in node.names:
++                    child = name + "." + alias.name
++                    if name.split(".")[0] in LOCAL_PREFIXES and resolve(child):
++                        dependency(child)
++    paths = seen | {safe(root / name, root) for name in DATA}
++    # These are precisely the staging-read families, not broad source inventories.
++    for directory, patterns in (
++        (root / "contract/tests/fixtures/u2_b/a2-export", ("*.json", "*.yaml", "PIN")),
++        (root / "contract/fixtures/model_shapes", ("*.json",)),
++    ):
++        for pattern in patterns:
++            for path in directory.glob(pattern):
++                paths.add(safe(path, root))
++    from scripts.vendor_rk import HISTORICAL_MANIFEST_SHA256, PIN
++
++    provenance = root / "contract/provenance" / ("rk-sim@" + PIN) / HISTORICAL_MANIFEST_SHA256
++    for path in provenance.rglob("*"):
++        if path.is_symlink():
++            raise ValueError("support symlink: " + str(path))
++        if path.is_file():
++            paths.add(safe(path, root))
++    return tuple(sorted(paths))
++
++
++def inventory(*, root: Path = ROOT) -> dict[str, str]:
++    return {
++        str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
++        for p in support_files(root=root)
++    }
++
++
++def verify(expected: dict[str, str], *, policy: object = POLICY, root: Path = ROOT) -> None:
++    if policy != POLICY:
++        raise ValueError("unrecognized input support policy")
++    actual = inventory(root=root)
++    if set(actual) != set(expected):
++        raise ValueError("input support inventory changed")
++    for name, digest in expected.items():
++        if actual[name] != digest:
++            raise ValueError("input support bytes changed: " + name)
+--- /dev/null
++++ b/tests/unit/test_u2_support_policy.py
+@@ -0,0 +1,208 @@
++"""Prospective support-policy controls; no oracle or candidate generation."""
++
++import pytest
++
++from scripts import u2_support as policy
++
++
++def test_valid_inventory_includes_initializers_and_stage_data():
++    names = policy.inventory()
++    assert "contract/uarch_contract/__init__.py" in names
++    assert "src/rkuarch/hw/derive.py" in names
++    assert "contract/tests/fixtures/u2_b/a2-export/npu-l4.binding.json" in names
++    assert "src/rkuarch/report/render.py" not in names
++    policy.verify(names)
++
++
++@pytest.mark.parametrize(
++    "name",
++    [
++        "scripts/vendor_rk.py",
++        "src/rkuarch/hw/derive.py",
++        "contract/uarch_contract/hashing.py",
++        "contract/uarch_contract/__init__.py",
++        "hw/designs/npu-l4.yaml",
++        "uv.lock",
++        "pyproject.toml",
++        "contract/tests/fixtures/u2_b/component-precisions.json",
++    ],
++)
++def test_relevant_bytes_refuse(name):
++    expected = policy.inventory()
++    p = policy.ROOT / name
++    original = p.read_bytes()
++    try:
++        if name == "src/rkuarch/hw/derive.py":
++            assert b"2 * cores * rate.value" in original
++            changed = original.replace(b"2 * cores * rate.value", b"3 * cores * rate.value")
++        elif name == "contract/uarch_contract/hashing.py":
++            assert b"sort_keys=True" in original
++            changed = original.replace(b"sort_keys=True", b"sort_keys=False")
++        elif name == "scripts/vendor_rk.py":
++            assert b"for b in (1, 8, 32)" in original
++            changed = original.replace(b"for b in (1, 8, 32)", b"for b in (1, 8, 16)")
++        else:
++            changed = original + b"\n# dependency audit fault\n"
++        p.write_bytes(changed)
++        with pytest.raises(ValueError, match="support bytes changed"):
++            policy.verify(expected)
++    finally:
++        p.write_bytes(original)
++    policy.verify(expected)
++
++
++@pytest.mark.parametrize(
++    "name",
++    [
++        "src/rkuarch/report/readiness_unrelated.py",
++        "src/rkuarch/engines/native/readiness_unrelated.py",
++        "contract/uarch_contract/mapped_future_audit.py",
++    ],
++)
++def test_unimported_addition_does_not_change_policy(name):
++    expected = policy.inventory()
++    p = policy.ROOT / name
++    p.parent.mkdir(parents=True, exist_ok=True)
++    assert not p.exists()
++    try:
++        p.write_text("VALUE = 1\n")
++        policy.verify(expected)
++    finally:
++        p.unlink()
++
++
++def test_unrelated_existing_edit():
++    expected = policy.inventory()
++    p = policy.ROOT / "src/rkuarch/cli.py"
++    original = p.read_bytes()
++    try:
++        p.write_bytes(original + b"\n# unrelated CLI documentation\n")
++        policy.verify(expected)
++    finally:
++        p.write_bytes(original)
++
++
++def test_new_local_import_cannot_evade_inventory():
++    expected = policy.inventory()
++    p = policy.ROOT / "src/rkuarch/hw/derive.py"
++    added = p.with_name("audit_new_formula.py")
++    original = p.read_bytes()
++    assert not added.exists()
++    try:
++        added.write_text("VALUE = 1\n")
++        p.write_bytes(original + b"\nfrom .audit_new_formula import VALUE\n")
++        assert str(added.relative_to(policy.ROOT)) in policy.inventory()
++        with pytest.raises(ValueError, match="support inventory changed"):
++            policy.verify(expected)
++    finally:
++        p.write_bytes(original)
++        added.unlink()
++
++
++@pytest.mark.parametrize(
++    "statement",
++    [
++        "import importlib\nimportlib.import_module('new_dependency')\n",
++        "__import__('new_dependency')\n",
++        "exec('import new_dependency')\n",
++    ],
++)
++def test_dynamic_edges_require_review(statement):
++    p = policy.ROOT / "src/rkuarch/hw/derive.py"
++    original = p.read_bytes()
++    try:
++        p.write_bytes(original + statement.encode())
++        with pytest.raises(ValueError, match="dynamic dependency"):
++            policy.inventory()
++    finally:
++        p.write_bytes(original)
++
++
++@pytest.mark.parametrize("name", ["yaml.py", "src/pydantic/__init__.py", "scripts/json.py"])
++def test_external_module_shadow_refuses(name):
++    p = policy.ROOT / name
++    existed = p.parent.exists()
++    p.parent.mkdir(parents=True, exist_ok=True)
++    assert not p.exists()
++    try:
++        p.write_text("# shadow\n")
++        with pytest.raises(ValueError, match="external import shadow"):
++            policy.inventory()
++    finally:
++        p.unlink()
++        if not existed:
++            p.parent.rmdir()
++
++
++def test_missing_inventory_entry_and_substituted_hash():
++    expected = policy.inventory()
++    del expected["src/rkuarch/hw/derive.py"]
++    with pytest.raises(ValueError, match="support inventory changed"):
++        policy.verify(expected)
++    expected = policy.inventory()
++    expected["src/rkuarch/hw/derive.py"] = "0" * 64
++    with pytest.raises(ValueError, match="support bytes changed"):
++        policy.verify(expected)
++
++
++def test_additional_stage_data_and_symlink_refuse(tmp_path):
++    expected = policy.inventory()
++    p = policy.ROOT / "contract/tests/fixtures/u2_b/a2-export/audit-extra.json"
++    try:
++        p.write_text("{}")
++        with pytest.raises(ValueError, match="support inventory changed"):
++            policy.verify(expected)
++        p.unlink()
++        p.symlink_to(tmp_path / "absent")
++        with pytest.raises(ValueError, match="symlink"):
++            policy.inventory()
++    finally:
++        p.unlink(missing_ok=True)
++
++
++def test_legacy_integrity_survives_but_currentness_requires_migration():
++    from scripts import u2_inputs as ui
++    from scripts import vendor_rk as vendor
++
++    vendor.check_manifest(ui.ADOPTED)
++    vendor.check_generator(ui.ADOPTED, current=False)
++    vendor.check_snapshot_inputs(ui.ADOPTED)
++    with pytest.raises(ValueError, match="support inventory changed"):
++        vendor.check_generator(ui.ADOPTED)
++
++
++@pytest.mark.parametrize(
++    "value",
++    [
++        {},
++        {"format": "unknown"},
++        {**policy.POLICY, "ignore": ["changed-file"]},
++        {**policy.POLICY, "selection": "trust-output-equality"},
++    ],
++)
++def test_policy_substitution_refuses(value):
++    with pytest.raises(ValueError, match="support policy"):
++        policy.verify({}, policy=value)
++
++
++@pytest.mark.parametrize("member", ["PIN", "component-precisions.json", "support-files.json"])
++def test_frozen_input_substitution_refuses_without_rehash(tmp_path, member):
++    import shutil
++
++    from scripts import u2_inputs as ui
++    from scripts import vendor_rk as vendor
++
++    replica = tmp_path / "artifact-control"
++    shutil.copytree(ui.ADOPTED, replica)
++    frozen = replica / "u2-inputs"
++    identity = vendor.digest((frozen / "SHA256SUMS").read_bytes())
++    vendor.check_manifest(replica)
++    # Structural control only; the unchanged artifact needs policy migration.
++    ui.load_inputs(frozen, identity, check_support=False)
++    path = frozen / member
++    path.chmod(0o644)
++    path.write_bytes(path.read_bytes() + b"\nsubstitution\n")
++    with pytest.raises(ValueError):
++        vendor.check_manifest(replica)
++    with pytest.raises(ValueError, match="input bytes changed"):
++        ui.load_inputs(frozen, identity, check_support=False)
