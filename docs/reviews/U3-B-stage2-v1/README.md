@@ -138,3 +138,13 @@ published Stage 2 `43ab3e0`. The response's publication note records aligned sha
 remaining coordinator decisions and revised E4/profile/M dependencies. Incoming changes
 are documentation-only; no full suite was repeated. Exact final publication commit is
 returned in the author handoff.
+
+## Coordinated shared-input addendum
+
+The subsequent [A-F1/F2/F3/F10 input](shared-inputs.md) supplies B's proposed variant
+catalogue/rationales, independent E4 arithmetic against published A `43ab3e0`, and observation
+volume/validation-cost estimates. Its executed-check section separates new worksheet/static
+checks from all retained repair evidence above. The patch digest, historic reports and
+B-F1–B-F8 dispositions are unchanged; no repair or native implementation is installed.
+Exact M/carrier/signing, human semantics/fixtures, CI assignment and budget decisions remain
+for coordinator/Javid. Same reviewer Stage 3 follows reconciliation, not author closure.
