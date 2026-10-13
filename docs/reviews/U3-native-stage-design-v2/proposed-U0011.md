@@ -23,7 +23,7 @@ Deliver **M / K1 / K2 / B / R / T**:
   accepted semantics and exact toolchain/dependency/license decisions. It may overlap M.
   Private fixtures are not another public workload format or public admission evidence.
 - K2 wires approved public JSON/subprocess/result boundaries after installed mapped carriers,
-  M fixtures and verified K1. Repeat kernel acceptance and faults publicly; private results
+  M fixed-delay carriers/fixtures/import and verified K1; the component mapper is first required at B. Repeat kernel acceptance and faults publicly; private results
   cannot discharge this requirement. No subsystem model claim at K1/K2.
 - B implements and verifies the component scope below after K2. Its at-most-C1 results
   cannot claim a decoder layer, model prediction or full product table.
@@ -40,14 +40,19 @@ laws or mapping choices require prospective review and identity/version changes.
 
 ## Bounded model scope and refusals
 
-B admits only npu-l4 hash
+Production B admits only npu-l4 hash
 `sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9`, frequency ratio 1,
 BF16 operands/output with FP32 accumulation, TP1/rank0, 1–16 component q_projection GEMMs,
 1≤M≤1024 and 1≤K,N≤256, contiguous layouts, repeat 1, WS ≤256-row tiles, no K split.
 Explicit DMA/unicast/barriers and double-buffer placements use FIFO-ready arbitration;
 shared resources serialize and independent DMA/compute/cores may overlap. Imported mapped
 work runs unchanged after validation. Cold HBM and separately labeled resident test
-initialization are distinct; the latter cannot become a table row or steady prediction.
+initialization are distinct; interface.md's checkpoint/invocation/profile matrix binds
+all synthetic clocks/hardware/state to a frozen NativeTestProfile and verification-only
+job/result identity. Test variants are proposed-design stipulations with rationales,
+registered to refuse normal prepare/table/product reports. B retains fixed-delay test
+regressions with null subsystem fidelity. Production whitelist/ratio remain unchanged. Resident and other test results cannot
+become product table rows or steady predictions.
 
 Compute 1 / NoC 0 / DRAM 0, exact sync, layer_reuse=false, at most C1. This spec has no shared
 SRAM; do not imply absent shared SRAM on future hardware that declares it. SRAM bank
@@ -56,10 +61,13 @@ represented. Emit exact unrepresented paths/null diagnostics. DMA request limits
 channel/core-port bandwidth accounting remain required even at level 0.
 
 Retain verification E3's explicit WS staging+32-cycle overhead+fill/steady/drain+output
-law and E4's NoC infinite-bandwidth hop delay, fixed DRAM latency/refresh-derated channel
-cap, request striping and credit-until-commit/ack lifecycle. These are model assumptions,
+law and E4's NoC infinite-bandwidth named-domain next_edge hop delay, fixed DRAM latency and
+refresh-derated rational channel service (ceil-to-ps only, no DRAM edge alignment),
+request striping and credit-until-commit/ack lifecycle. E4 defines all crossings,
+receiving-mechanism alignment attribution, unlimited credit-bounded issue per edge,
+compute-only job overhead and the five-read refresh discriminator. These are model assumptions,
 not physical measurements. Coefficient/vector throughput is not inferred from BF16 matrix
-rates. Refuse full legacy/v2 models, non-q_projection operators, rotary/KV/fused attention,
+rates. Production refuses full legacy/v2 models, non-q_projection operators, rotary/KV/fused attention,
 other precision/rank/hardware, steady state, K spill, multicast, invalid shapes/placements/
 closure, padding or unsupported fidelity. Interface R01–R21 are mandatory controls.
 
@@ -84,8 +92,9 @@ resource intervals and causal critical path. Useful versus issued/padded/cast wo
 payload versus transaction bytes remain distinct. Expected coverage is a separate ledger.
 Conservation is final=initial+issued−completed per boundary/direction/unit; compute operand
 reuse is not conserved DMA bytes. Queue area uses clipped residence intervals including
-initial/terminal members. Nonempty stable-window Little's law retains 1%; zero flow has
-null residence. Utilization uses busy interval union. Attribution includes causal resource
+initial/terminal members. Finite-window observations are required at B; stationary Little's law retains 1% at
+first claim (normally U6 or earlier reliance) after frozen population/window/boundary
+premises; zero flow has null residence. Utilization uses busy interval union. Attribution includes causal resource
 predecessors, partitions duration exactly and is not a physical explanation of error.
 
 Three fresh-process and debug/release runs yield identical canonical results at each
@@ -106,10 +115,11 @@ No unsafe, SIMD/GPU/MPI, compiler/search or threading at these stages. No link r
 are invented at NoC 0. Later lookahead is spec-derived, not assumed one cycle; exact
 conservative sync precedes approximation. Ramulator/U9 remain separate work.
 
-Adopt interface.md's proposed zero-delay milestone closure only after explicit semantic
-review: canonical ready-DAG processing at the same time, no earlier-phase completion
-inserted behind issue and no exclusive interval for zero duration. Zero-hop transfers
-add no invented delay, cyclic dependencies refuse. Verify literal and fault controls.
+Adopt interface.md's exact owner-grant rule for zero-duration jobs: join the owner FIFO,
+complete inline only after grant, preserve deterministic phase2 zero-transition closure.
+Busy-owner literal completes at5000 ps; owner-bypass fault gives3000. Zero-hop nonaliasing
+same-core unicast is admitted with no NoC delay/alignment; actual DMA still pays port
+service. Cyclic dependencies refuse. These semantic corrections require human review.
 
 K1 acceptance is U-P11a 1/1a/2/3/5 internally; K2 executes all applicable acceptance cases
 publicly including protocol 4/6. B/R/T require their applicable independent literal counts,
@@ -129,7 +139,7 @@ native roofline checks and U-P9/U-P15 baselines. C1's historical 22/24 clock cel
 proposed deterministic-anchor remedy are aggregate-only. Independent native component-clock
 tests and any separately approved true-premise per_op domain do not inherit that remedy
 or its evidence; the existing per_op whole-query reciprocal premise remains invalid with
-memory-only embedding. Unrelated report completion does not gate K1; required checks must
+the two memory-only operators head/embed and layers/kv. Unrelated report completion does not gate K1; required checks must
 pass before reliance. Never replace them with optional L2.
 
 ## Reference readiness, product and qualification
@@ -141,7 +151,9 @@ replay/independent faults and attribution used by G4 precede freeze. A GEMM-only
 cannot close G3a. Unrepresentable/unmeasurable required work returns a target/scope/contract
 decision, never fabricated parameters or silent removal. U-P9 remains prediction-only.
 
-U6 qualifies expanded npu-m256 representative execution/diagnostics and integrated
+Delivery.md names Q6-C/D/W representative inputs and a separately schedulable shared W
+operator package: W can feed R/U6/T independently of TPU and is charged once. U6 qualifies
+expanded npu-m256 representative execution/diagnostics and integrated
 regressions, not another kernel or full C1 table. R/G3a or successful G4 is not required
 for independent qualification. T preserves the npu-m256/70B/FP8/tp8 demo and all consumer
 coverage/error/worker/public-pipeline requirements. BF16/npu-l4/tp1/second-policy work
@@ -165,12 +177,16 @@ a pin-only decision before coding. Real Linux CI executes fmt/clippy -D warnings
 and debug/release tests with B-pinned tools; no empty workspace/no-op job proves readiness.
 
 Accept performance workload/host/time/RSS budgets separately before measuring. Proposed
-K2/B envelope only: ≤5 s/512 MiB for ≤4096 fixed-delay jobs/16384 edges or B≤16 maximum
-component ops, one thread/worker, exact cold/resident fixtures, on a separately accepted
+K2/B envelope only: ≤5 s/512 MiB for ≤256 fixed-delay jobs/1024 edges or B one cold/resident E3 C1 tile
+(576 cold requests), plus separate E4 bursts≤33 requests, one thread/worker, exact cold/resident fixtures, on a separately accepted
 controlled Linux allocation. Delivery defines all-in invocation, warm-host+seven-run
-maximum/RSS and U0012 noise calibration. This is a planning proposal, not allocation or
-measurement. V1's later 60/120/300 s and 672-point ceilings are withdrawn; R/U6/T need exact
-new consumer budgets before performance work. No inherited 200-second fork ceiling.
+maximum/RSS and U0012 noise calibration. This is a planning proposal, not allocation or measurement. Interface.md accounts for
+mandatory observation volume; the small performance profile caps65536 records/16MiB
+encoded observations without dropping required data. Full B admission is unchanged and
+requires its own resource budget before performance work. V1's later 60/120/300 s and 672-point ceilings are withdrawn; R/U6/T need exact
+new consumer budgets before performance work. The later prospective U0011-Q addendum defined in delivery.md
+supplies U9's representative single-point trigger; the small fixture ceiling does not.
+No inherited 200-second fork ceiling.
 
 Record G5-correctness, G5-performance and G5-automation separately. Only correctness gates
 ready U7/G6/G3b/U10 with their own tests. Full G5 requires all three. Controlled-host
@@ -184,3 +200,11 @@ the same published commit remain prospective sprint correctness-closure requirem
 STUB, unknown error, unverified energy and null unmodeled quantities persist. This record
 claims no implementation, schema installation, native run, performance result, artifact
 refresh/adoption, G2/G3a/G3b/G5 acceptance, independent verdict, badge or sprint closure.
+
+Stage 2 schema decisions also include explicit prepared-op/1 component version, unchanged
+strict Counts/ExtCounts plus separate issued-work/traffic carriers, closure-before-stage
+validation order, the complete hardware leaf ledger and native-owners/1 enumeration in
+interface.md. Delivery.md supplies exact proposed DMA/clock prompt clarifications for
+Javid; current prompts are not changed by this proposal. B must re-derive the revised E4
+and freeze variant/corpus identities; author arithmetic does not supply B's independent
+review or the two human-worked fixtures. Stage 3 remains the same reviewer's adjudication.
