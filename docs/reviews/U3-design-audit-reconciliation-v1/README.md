@@ -105,3 +105,45 @@ merely to make migration green. See [B follow-up](lane-B-followup.txt).
 
 Do not ask Javid to approve all remaining U3/U4/U7 work as one bundle. The user-facing
 next action is the two bounded author follow-ups, not another plan amendment.
+
+
+## Correction recheck at 184d2c2 — 2026-10-12
+
+Review target `184d2c2b08c28a01673be143b086ef223ba6706a`, tree
+`6f74542bf5fc85997e044a135293db95297e3e20`. Received A correction `c17cb9c`/
+handoff `5c81915` and B correction `184d2c2` by normal fast-forward. The earlier
+reconciliation remains historical. The scoped coordinator corrections are resolved;
+the proposals are ready for independent review, not accepted for implementation,
+installation, migration or G2 closure.
+
+| Item | Coordinator recheck |
+| --- | --- |
+| A-C1 | Verification, proposed U0011 and summaries distinguish aggregate 22/24, native component-clock checks and a future true-premise per_op domain |
+| M consultation | A identifies prospective imports, initializers, shared carriers/export and data reads; B classifies their consequences. This is design consultation, not an audit of unimplemented M code |
+| B-C1 | Four public-loader attacks fail when only its verification call is removed; valid/legacy controls remain passing |
+| B-C2 | Pinned U1 integrity/currentness is separate from synthetic legacy U2 dispatch and the current-adoption positive; a real new-policy adoption must pass strict validation |
+
+Checks executed here:
+
+- Corrected patch SHA256 `97d0ec302606838a7055ec3d43ce1d3b759e8e015ecb796eed154ce4b0915e55`
+  verified; proposed production hunks byte-identical to the prior patch. Applied only
+  to a private archive of the exact target, never live.
+- A checker: eight files, 36 links, two JSON projections and arithmetic passed.
+- Corrected policy and vendor-entry selection: **53 passed, 1 skipped**.
+- Remove only the new-policy loader invocation: **4 failed, 40 passed, 1 skipped**;
+  the four drift attacks failed with `DID NOT RAISE ValueError`.
+- Restored loader: **44 passed, 1 skipped**. The first coordinator wrapper overcounted
+  duplicate pytest diagnostic text and stopped after source restoration in `finally`;
+  the restored selection was then run separately. This was a wrapper assertion, not a
+  proposal-test failure.
+- Live strict vendor currentness passed. No full suite, new static-suite rerun, native
+  execution, generation/adoption or hosted CI result is claimed by this recheck.
+
+The single skip is real human-generated/adopted new-policy positive currentness. It
+remains an open migration exit; synthetic controls do not supply provenance or adoption.
+
+Next: use the [fresh independent review prompt](independent-review.txt). Review the
+actual model/interface choices and dependency policy, not just correction receipts.
+Retain A/B sessions for author responses. Javid's stage/U0011/schema-plan decision,
+separate policy/migration decision, toolchain closure and later exact protected
+installation remain separate. No further author correction is requested at this point.
