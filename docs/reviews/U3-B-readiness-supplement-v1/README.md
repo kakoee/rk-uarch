@@ -175,8 +175,9 @@ coordinator review of the combined decision set.
 
 ## Stage 2 readiness corrections and row-level supersession (2026-10-12)
 
-Author proposals responding to B-F2–B-F7; shared choices await coordinator reconciliation
-with A's pending review. Accepted U0023 governs the supersession rows themselves. The
+Author proposals responding to B-F2–B-F7; shared choices await coordinator reconciliation.
+A's Stage 2 response at `43ab3e0` is now received; see the
+[publication note](../U3-lane-B-response.md#publication-integration-as-stage-2-response-received). Accepted U0023 governs the supersession rows themselves. The
 [v1 package](../U3-B-verification-readiness-v1/README.md) remains immutable history.
 
 | Historical row | Current replacement / first consumer |

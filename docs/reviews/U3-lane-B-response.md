@@ -46,3 +46,33 @@ migration. The live unchanged source/artifact pair remains current.
 Coordinator reconciles all shared/deferred rows and exact patch/text scope before B's
 reviewer returns for Stage 3. Javid decides policy and installation separately. Stop here;
 no G2, human acceptance or sprint closure is requested by these author results.
+
+
+## Publication integration: A's Stage 2 response received
+
+B correction commit: `349bb91f771352fbabee5a5be2e223bef2ea21fa`. Pre-push fetch found
+A's `98640e22173ab334d4f98e2306d7286d07c96e64` and
+`43ab3e0809b58f7691396161c591c83726bb778d`; normal merge
+`ff41537441a4a37f5ac135074f6ba76c022a3583` preserves all ten incoming documentation files.
+No source, tests, locks or protected carriers changed, so the private execution binding
+and unapplied patch applicability remain valid; no suite result is relabelled as native
+execution or an integrated full-suite rerun.
+
+Read the published A author response, shared delivery/verification decisions and extended
+M dependency note. A now aligns both memory-only operators/base-clock premise, independent
+component bounds, CI timing/ownership, and V21/V24 finite versus stationary checks.
+H-DMA/H-CLOCK quotes match B's proposed replacements after whitespace normalization,
+including the half-open endpoint-state sentence. The availability dependency is resolved;
+B-F3/F5/F6 remain DEFERRED for coordinator disposition and their exact semantic/tool/fixture
+prerequisites. A proposes counting B's 6–10 CI hours and A's 1–2 consultation hours inside
+existing K1 allocations, not charging twice; allocation acceptance remains with coordinator.
+No A-owned prose or evidence was edited by B.
+
+A's revised E4, test-profile/variant catalogue, observation record accounting and human
+fixtures require separately assigned B derivations/checks before the dependent corpus or
+performance freeze; they were not executed in this bounded response. Its proposed M
+registry/profile/hardware/case-manifest reads add explicit future audit inputs. Under B's
+unaccepted guard, new top-level import names require review; reached initializers/imports,
+all scripts Python and consumed non-import data must bind. Recompute actual M dependencies
+and add their public-load drift tests when its exact patch exists; neither 52 nor 56 is a
+promised M inventory. Stop for coordinator reconciliation before Stage 3.

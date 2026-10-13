@@ -130,3 +130,11 @@ None occurred here. No full-suite, hosted Linux/native job, nightly or performan
 
 Stop for coordinator reconciliation before reviewer Stage 3. These author dispositions
 close no finding and imply no installation, human policy, G2 or sprint acceptance.
+
+
+Publication integration: author correction `349bb91f771352fbabee5a5be2e223bef2ea21fa`
+was followed by normal merge `ff41537441a4a37f5ac135074f6ba76c022a3583`, preserving A's
+published Stage 2 `43ab3e0`. The response's publication note records aligned shared text,
+remaining coordinator decisions and revised E4/profile/M dependencies. Incoming changes
+are documentation-only; no full suite was repeated. Exact final publication commit is
+returned in the author handoff.
