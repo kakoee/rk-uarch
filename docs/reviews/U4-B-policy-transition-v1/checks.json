@@ -1,0 +1,74 @@
+{
+  "base_commit": "f58e07828fa7a953b06800b227b948d7e9e71a88",
+  "environment": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+  "runs": [
+    {
+      "export": "pristine",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-c",
+        "import sys; sys.path[:0]=['.', 'src', 'contract']; from scripts import vendor_rk; vendor_rk.main()",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log": "pristine-0.log"
+    },
+    {
+      "export": "pristine",
+      "files_checked": 1685,
+      "bytes_and_mtime_unchanged": true
+    },
+    {
+      "export": "repair",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-c",
+        "import sys; sys.path[:0]=['.', 'src', 'contract']; from scripts import vendor_rk; vendor_rk.main()",
+        "--check"
+      ],
+      "exit_code": 1,
+      "log": "repair-0.log"
+    },
+    {
+      "export": "repair",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-c",
+        "pyproject.toml",
+        "--rootdir",
+        ".",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-policy-transition-v1/scratch/test-tmp",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py",
+        "tests/unit/test_vendor_script_entry.py"
+      ],
+      "exit_code": 0,
+      "log": "repair-1.log"
+    },
+    {
+      "export": "repair",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-c",
+        "import sys,json; sys.path[:0]=['.', 'src', 'contract']; from scripts import u2_support as p,u2_inputs as u,vendor_rk as v; import rkuarch.hw.derive as d,uarch_contract as c; print(json.dumps({'origins':[m.__file__ for m in (p,u,v,d,c)],'closure':p.inventory()},sort_keys=True))"
+      ],
+      "exit_code": 0,
+      "log": "repair-2.log"
+    },
+    {
+      "export": "repair",
+      "files_checked": 1688,
+      "bytes_and_mtime_unchanged": true
+    }
+  ]
+}

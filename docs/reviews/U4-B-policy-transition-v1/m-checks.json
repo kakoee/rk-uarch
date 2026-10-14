@@ -1,0 +1,52 @@
+{
+  "peer_commit": "bad9a125d82bbf723675465c9291fb37fa82f799",
+  "patch_sha256": "3e47b970de619b013b8d46d754e9451c604d010b2763e5a0cfce9ff9d755a63b",
+  "files_checked": 1711,
+  "bytes_and_mtime_unchanged": true,
+  "runs": [
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-c",
+        "pyproject.toml",
+        "--rootdir",
+        ".",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-policy-transition-v1/scratch/m-test-tmp",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py",
+        "tests/unit/test_vendor_script_entry.py",
+        "contract/tests/mapped/test_admission.py"
+      ],
+      "exit_code": 0,
+      "log": "m-0.log"
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-c",
+        "import sys,json; sys.path[:0]=['.', 'src', 'contract']; from scripts import u2_support as p,u2_inputs as u,vendor_rk as v; import uarch_contract.mapped as m; print(json.dumps({'origins':[x.__file__ for x in (p,u,v,m)], 'closure':p.inventory(), 'legacy_count':len(u.support_files()), 'oracle_sha256':v.digest(v.ORACLE_PROGRAM.encode()), 'vendor_script_sha256':v.digest(open(v.__file__,'rb').read())},sort_keys=True))"
+      ],
+      "exit_code": 0,
+      "log": "m-1.log"
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-c",
+        "import sys; sys.path[:0]=['.', 'src', 'contract']; from scripts import vendor_rk; vendor_rk.main()",
+        "--check"
+      ],
+      "exit_code": 1,
+      "log": "m-2.log"
+    }
+  ]
+}
