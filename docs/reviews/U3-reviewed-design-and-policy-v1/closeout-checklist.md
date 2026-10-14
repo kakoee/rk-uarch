@@ -1,4 +1,10 @@
-# Remaining U3 closeout steps
+# U3 closeout checklist — historical preparation and current status
+
+Current status: [U3-closeout-v1 accepted](../U3-closeout-acceptance.json) after
+[publication and same-commit validation](../U3-published-validation-v1/README.md) of `390ec9a`.
+The preparation checklist below is retained as its original record. Its commit, publication
+and validation actions are completed; final closeout record publication and tagging remain
+separate. [Current dispositions](../U3-closeout.md) are authoritative for status. U4 is not authorized.
 
 Authority: execution-plan U3 and G2, §5 per-sprint checklist, U0023 and U-REVIEW.
 Javid's design/policy decision is [recorded](acceptance.md); U4 is not authorized.

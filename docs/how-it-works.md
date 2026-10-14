@@ -11,12 +11,13 @@ the five reviewed documentation postimages in
 [closeout review.json](reviews/U3-closeout-documents-v1/review.json), whose
 [patch](reviews/U3-closeout-documents-v1/closeout.patch) has SHA256
 `2b0bc1934020e1d0da2d21ab3514d26c1595a780d3d539b300f79a05286d9416`.
-Those installed postimages were verified during this refresh; the package's original
-“installation pending” text is historical. This is a proposal for that exact combination,
-not an already published `u03-end` narrative. The coordinator must bind the final publication
-identity before closure. [Javid's acceptance](reviews/U3-reviewed-design-and-policy-v1/acceptance.md)
-is for design and prospective dependency policy at closeout only; **U4 is not authorized**.
-[Closeout](reviews/U3-closeout.md) retains the publication and validation exits.
+Those postimages and this narrative were published in
+`390ec9aa06eef33da6274eb28ae6ca1c3ae3d623`; the package’s original installation-pending
+text remains historical. [Published validation](reviews/U3-published-validation-v1/README.md)
+records the fresh GitHub clone and hosted CI on that exact revision.
+[Javid’s technical acceptance](reviews/U3-closeout-acceptance.json) records U3 design/technical
+closeout with the limitations below. Final record publication and `u03-end` tagging remain
+separate; **U4 is not authorized**. [Closeout](reviews/U3-closeout.md) records the remaining steps.
 
 ## Inputs, scope and arithmetic
 

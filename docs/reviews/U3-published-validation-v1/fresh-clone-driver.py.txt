@@ -1,0 +1,49 @@
+from pathlib import Path
+import hashlib,json,os,platform,subprocess,tempfile,time
+from xml.etree import ElementTree
+
+commit='390ec9aa06eef33da6274eb28ae6ca1c3ae3d623'
+repo_url='https://github.com/kakoee/rk-uarch.git'
+base=Path(tempfile.mkdtemp(prefix='u3-published-verification-'))
+root=base/'repo'; logs=base/'logs';logs.mkdir()
+Path('/tmp/u3-published-verification-root').write_text(str(base))
+env=dict(os.environ)
+for key in ('PYTHONPATH','MYPYPATH','VIRTUAL_ENV','PARAMS','UARCH_HUMAN','UV_PROJECT_ENVIRONMENT','UV_WORKING_DIRECTORY','GIT_DIR','GIT_WORK_TREE','GIT_INDEX_FILE'):
+ env.pop(key,None)
+env['PYTHONDONTWRITEBYTECODE']='1'
+results={}
+def run(label,argv,cwd=root):
+ print('START',label,flush=True);start=time.monotonic()
+ with (logs/(label+'.log')).open('w') as f:
+  proc=subprocess.run(argv,cwd=cwd,env=env,stdout=f,stderr=subprocess.STDOUT)
+ result={'argv':argv,'cwd':str(cwd),'exit':proc.returncode,'seconds':round(time.monotonic()-start,3),'log':str(logs/(label+'.log'))}
+ results[label]=result
+ print('END',label,proc.returncode,round(time.monotonic()-start,2),(logs/(label+'.log')).read_text()[-1100:],flush=True)
+ (base/'progress.json').write_text(json.dumps(results,indent=2)+'\n')
+ if proc.returncode:raise SystemExit('FAILED '+label)
+def git(*argv):return subprocess.check_output(['git',*argv],cwd=root,env=env,text=True).strip()
+run('github-clone',['git','clone','--no-checkout',repo_url,str(root)],base)
+run('checkout',['git','checkout','--detach',commit])
+assert git('rev-parse','HEAD')==commit
+assert git('rev-parse','HEAD^{tree}')=='a8dbdba71af3b43390bfa5e9fc98784d474211af'
+assert not git('status','--porcelain')
+assert not git('diff','7afba9b16d954fd46684711764cb3718170e53aa','HEAD','--','src','contract','scripts','validation','tests','.github','pyproject.toml','uv.lock')
+run('locked-sync',['uv','sync','--frozen','--extra','dev','--python','3.12'])
+run('environment',['uv','run','--frozen','python','-B','-c',"import sys,platform,json,importlib.metadata as m; print(json.dumps({'python':sys.version,'executable':sys.executable,'platform':platform.platform(),'packages':{d.metadata['Name']:d.version for d in m.distributions()}},indent=2))"])
+run('module-origins',['uv','run','--frozen','python','-B','-c',"from pathlib import Path; import rkuarch, uarch_contract; root=Path.cwd(); modules=[rkuarch,uarch_contract]; print([(m.__name__,m.__file__) for m in modules]); assert all(Path(m.__file__).resolve().is_relative_to(root) for m in modules)"])
+run('lint',['uv','run','--frozen','ruff','check','.'])
+run('typecheck-production',['uv','run','--frozen','mypy','src','contract/uarch_contract','scripts'])
+run('typecheck-contract-tests',['uv','run','--frozen','mypy','--no-explicit-package-bases','contract/tests'])
+run('imports',['uv','run','--frozen','lint-imports'])
+run('strict-vendor',['uv','run','--frozen','python','scripts/vendor_rk.py','--check'])
+run('schemas',['uv','run','--frozen','python','-m','uarch_contract.generate','--check'])
+run('full-suite',['uv','run','--frozen','pytest','-q','--junitxml='+str(base/'full-suite.xml')])
+run('contract-required-vendor',['uv','run','--frozen','python','-m','pytest','-q','-rs','contract/tests','--require-vendor'])
+run('licences',['uv','run','--frozen','python','-m','pytest','-q','tests/unit/test_third_party.py'])
+assert git('rev-parse','HEAD')==commit
+assert not git('status','--porcelain'),git('status','--porcelain')
+xml=ElementTree.parse(base/'full-suite.xml')
+noops={n:len([p for p in (root/d).glob(g) if p.is_file()]) for n,d,g in [('golden','tests/golden/expected','*.json'),('determinism','tests/golden/scenarios','*.yaml'),('native','native/crates','**/*.rs'),('patch-apply','third_party/patches','*.patch'),('performance','validation/perf','*.json'),('ordering','validation/L3_silicon','**/predictions/*')]}
+receipt={'scope':'fresh clone directly from GitHub and fresh locked virtual environment, exact published commit','commit':commit,'tree':git('rev-parse','HEAD^{tree}'),'clone_url':repo_url,'clone_root':str(root),'environment':json.loads((logs/'environment.log').read_text()),'uv_lock_sha256':hashlib.sha256((root/'uv.lock').read_bytes()).hexdigest(),'commands':results,'full_suite':[x.attrib for x in xml.iter('testsuite')],'skips':[{'case':x.get('classname')+'::'+x.get('name'),'reason':x.find('skipped').get('message')} for x in xml.iter('testcase') if x.find('skipped') is not None],'conditional_CI_input_counts':noops,'git_status_clean':True,'baseline_runtime_config_tests_identical':True,'hosted_CI':'separate receipt required','tag_closure_U4':False}
+(base/'fresh-clone-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print('COMPLETE',json.dumps(receipt['full_suite']),str(base),flush=True)

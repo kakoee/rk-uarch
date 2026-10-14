@@ -1,0 +1,396 @@
+{
+  "scope": "fresh clone directly from GitHub and fresh locked virtual environment, exact published commit",
+  "commit": "390ec9aa06eef33da6274eb28ae6ca1c3ae3d623",
+  "tree": "a8dbdba71af3b43390bfa5e9fc98784d474211af",
+  "clone_url": "https://github.com/kakoee/rk-uarch.git",
+  "clone_root": "/tmp/u3-published-verification-5v2fn5hu/repo",
+  "environment": {
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "executable": "/tmp/u3-published-verification-5v2fn5hu/repo/.venv/bin/python3",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "packages": {
+      "sortedcontainers": "2.4.0",
+      "types-PyYAML": "6.0.12.20260906",
+      "annotated-doc": "0.0.5",
+      "markdown-it-py": "4.2.0",
+      "rich": "15.0.0",
+      "MarkupSafe": "3.0.3",
+      "pytest": "9.1.1",
+      "typing_extensions": "4.16.0",
+      "numpy": "2.5.3",
+      "annotated-types": "0.8.0",
+      "coverage": "7.16.2",
+      "Pygments": "2.21.0",
+      "import-linter": "2.15",
+      "iniconfig": "2.3.0",
+      "click": "8.5.0",
+      "grimp": "3.17",
+      "Jinja2": "3.1.6",
+      "librt": "0.16.0",
+      "typer": "0.27.2",
+      "mdurl": "0.1.2",
+      "typing-inspection": "0.4.4",
+      "mypy_extensions": "1.1.0",
+      "ruff": "0.16.9",
+      "ast_serialize": "0.11.2",
+      "pytest-cov": "7.1.0",
+      "packaging": "26.3",
+      "hypothesis": "6.168.3",
+      "pluggy": "1.6.0",
+      "pathspec": "1.1.1",
+      "pydantic": "2.13.5",
+      "pydantic_core": "2.46.5",
+      "PyYAML": "6.0.3",
+      "mypy": "2.3.1",
+      "shellingham": "1.5.4",
+      "rk-uarch": "0.0.1"
+    }
+  },
+  "uv_lock_sha256": "b6152bd0a0f81e910a69fd5d9d2c1523a0698fe53d57aa06e5a545f0ba30cbab",
+  "commands": {
+    "github-clone": {
+      "argv": [
+        "git",
+        "clone",
+        "--no-checkout",
+        "https://github.com/kakoee/rk-uarch.git",
+        "/tmp/u3-published-verification-5v2fn5hu/repo"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu",
+      "exit": 0,
+      "seconds": 2.103,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/github-clone.log"
+    },
+    "checkout": {
+      "argv": [
+        "git",
+        "checkout",
+        "--detach",
+        "390ec9aa06eef33da6274eb28ae6ca1c3ae3d623"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.315,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/checkout.log"
+    },
+    "locked-sync": {
+      "argv": [
+        "uv",
+        "sync",
+        "--frozen",
+        "--extra",
+        "dev",
+        "--python",
+        "3.12"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.958,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/locked-sync.log"
+    },
+    "environment": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-c",
+        "import sys,platform,json,importlib.metadata as m; print(json.dumps({'python':sys.version,'executable':sys.executable,'platform':platform.platform(),'packages':{d.metadata['Name']:d.version for d in m.distributions()}},indent=2))"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.161,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/environment.log"
+    },
+    "module-origins": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-c",
+        "from pathlib import Path; import rkuarch, uarch_contract; root=Path.cwd(); modules=[rkuarch,uarch_contract]; print([(m.__name__,m.__file__) for m in modules]); assert all(Path(m.__file__).resolve().is_relative_to(root) for m in modules)"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.469,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/module-origins.log"
+    },
+    "lint": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "ruff",
+        "check",
+        "."
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.061,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/lint.log"
+    },
+    "typecheck-production": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "mypy",
+        "src",
+        "contract/uarch_contract",
+        "scripts"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 4.225,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/typecheck-production.log"
+    },
+    "typecheck-contract-tests": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "mypy",
+        "--no-explicit-package-bases",
+        "contract/tests"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 3.947,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/typecheck-contract-tests.log"
+    },
+    "imports": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "lint-imports"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.409,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/imports.log"
+    },
+    "strict-vendor": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "python",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.819,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/strict-vendor.log"
+    },
+    "schemas": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "python",
+        "-m",
+        "uarch_contract.generate",
+        "--check"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.553,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/schemas.log"
+    },
+    "full-suite": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "pytest",
+        "-q",
+        "--junitxml=/tmp/u3-published-verification-5v2fn5hu/full-suite.xml"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 1276.909,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/full-suite.log"
+    },
+    "contract-required-vendor": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "python",
+        "-m",
+        "pytest",
+        "-q",
+        "-rs",
+        "contract/tests",
+        "--require-vendor"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 12.34,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/contract-required-vendor.log"
+    },
+    "licences": {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/unit/test_third_party.py"
+      ],
+      "cwd": "/tmp/u3-published-verification-5v2fn5hu/repo",
+      "exit": 0,
+      "seconds": 0.792,
+      "log": "/tmp/u3-published-verification-5v2fn5hu/logs/licences.log"
+    }
+  },
+  "full_suite": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "29",
+      "tests": "1730",
+      "time": "1275.509",
+      "timestamp": "2026-10-13T21:40:57.917763-07:00",
+      "hostname": "ElfinKidsLaptop"
+    }
+  ],
+  "skips": [
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[executed_mac_conservation-aggregate]",
+      "reason": "analytic/aggregate: executed_mac_conservation: U2 reports shape-derived matrix_ops, not executed MAC telemetry"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[executed_mac_conservation-per_op]",
+      "reason": "analytic/per_op: executed_mac_conservation: U2 reports shape-derived matrix_ops, not executed MAC telemetry"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[dma_conservation-aggregate]",
+      "reason": "analytic/aggregate: dma_conservation: No DMA traffic/compute-consumption boundary observations in U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[dma_conservation-per_op]",
+      "reason": "analytic/per_op: dma_conservation: No DMA traffic/compute-consumption boundary observations in U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[window_utilisation-aggregate]",
+      "reason": "analytic/aggregate: window_utilisation: No resource busy windows; analytic busy_time_ps is null"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[window_utilisation-per_op]",
+      "reason": "analytic/per_op: window_utilisation: No resource busy windows; analytic busy_time_ps is null"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[little_law-aggregate]",
+      "reason": "analytic/aggregate: little_law: No queues, occupancy, arrivals or residence times in U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[little_law-per_op]",
+      "reason": "analytic/per_op: little_law: No queues, occupancy, arrivals or residence times in U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[causality-aggregate]",
+      "reason": "analytic/aggregate: causality: EngineResult.trace is None; dependency validation is not timed causality"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[causality-per_op]",
+      "reason": "analytic/per_op: causality: EngineResult.trace is None; dependency validation is not timed causality"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[sram_placement-aggregate]",
+      "reason": "analytic/aggregate: sram_placement: No placement or per-event SRAM occupancy in analytic_ops"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[sram_placement-per_op]",
+      "reason": "analytic/per_op: sram_placement: No placement or per-event SRAM occupancy in analytic_ops"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[energy_conservation-aggregate]",
+      "reason": "analytic/aggregate: energy_conservation: No energy observation in EngineResult; energy remains unverified"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[energy_conservation-per_op]",
+      "reason": "analytic/per_op: energy_conservation: No energy observation in EngineResult; energy remains unverified"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[noc_sram_bandwidth-aggregate]",
+      "reason": "analytic/aggregate: noc_sram_bandwidth: NoC and SRAM bandwidth are unrepresented by U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[noc_sram_bandwidth-per_op]",
+      "reason": "analytic/per_op: noc_sram_bandwidth: NoC and SRAM bandwidth are unrepresented by U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[core_permutation-aggregate]",
+      "reason": "analytic/aggregate: core_permutation: No core IDs or mapping placement in analytic_ops"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[core_permutation-per_op]",
+      "reason": "analytic/per_op: core_permutation: No core IDs or mapping placement in analytic_ops"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[idle_core-aggregate]",
+      "reason": "analytic/aggregate: idle_core: No mapped idle-core set; all spec cores contribute to resolved peak"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[idle_core-per_op]",
+      "reason": "analytic/per_op: idle_core: No mapped idle-core set; all spec cores contribute to resolved peak"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[unused_stipulation-aggregate]",
+      "reason": "analytic/aggregate: unused_stipulation: Deferred: generated reference fixtures contain only stub claims"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[unused_stipulation-per_op]",
+      "reason": "analytic/per_op: unused_stipulation: Deferred: generated reference fixtures contain only stub claims"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[latency_monotonicity-aggregate]",
+      "reason": "analytic/aggregate: latency_monotonicity: Router/DRAM/job/barrier latency is unrepresented by U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[latency_monotonicity-per_op]",
+      "reason": "analytic/per_op: latency_monotonicity: Router/DRAM/job/barrier latency is unrepresented by U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[dma_outstanding-aggregate]",
+      "reason": "analytic/aggregate: dma_outstanding: DMA max_outstanding is unrepresented by U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[dma_outstanding-per_op]",
+      "reason": "analytic/per_op: dma_outstanding: DMA max_outstanding is unrepresented by U-C0"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[cold_steady-aggregate]",
+      "reason": "analytic/aggregate: cold_steady: stateless_roofline models neither cold startup nor steady-state history"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_unobservable_or_deferred_relation[cold_steady-per_op]",
+      "reason": "analytic/per_op: cold_steady: stateless_roofline models neither cold startup nor steady-state history"
+    },
+    {
+      "case": "validation.L0_invariants.test_analytic_capabilities::test_per_op_exact_clock_precondition",
+      "reason": "analytic/per_op: memory-only embedding violates whole-query compute-bound premise"
+    }
+  ],
+  "conditional_CI_input_counts": {
+    "golden": 0,
+    "determinism": 0,
+    "native": 0,
+    "patch-apply": 0,
+    "performance": 0,
+    "ordering": 0
+  },
+  "git_status_clean": true,
+  "baseline_runtime_config_tests_identical": true,
+  "hosted_CI": "separate receipt required",
+  "tag_closure_U4": false
+}

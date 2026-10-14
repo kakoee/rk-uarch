@@ -1,7 +1,9 @@
-# U3 closeout — design accepted, publication exits pending
+# U3 closeout — technical closeout accepted, final records and tag pending
 
-**Status: closeout preparation; U3 not yet tagged or declared closed.** Javid accepted
-both design and prospective artifact-policy decisions for U3 closeout only. [Approval](U3-reviewed-design-and-policy-v1/acceptance.md)
+**Status: U3 technical closeout accepted by Javid; final record publication and `u03-end` remain pending.**
+[Technical acceptance](U3-closeout-acceptance.json) binds published commit
+`390ec9aa06eef33da6274eb28ae6ca1c3ae3d623` and its same-commit fresh-clone and hosted CI checks.
+The earlier [design/policy approval](U3-reviewed-design-and-policy-v1/acceptance.md)
 explicitly excludes U4 authorization. No native implementation, exact mapped schema
 installation, artifact-policy code installation or migration is part of this closeout.
 
@@ -29,7 +31,7 @@ delta at 7afba9b. See [exact identities](U3-reviewed-design-and-policy-v1/review
 and [bounded receipts](U3-independent-review-B-bootstrap-recheck-v1/receipts.json).
 Those verdicts are preserved on their actual targets, not relabelled as final CI results.
 Javid's design/policy acceptance is separate; prospective U0011/U0002 records and synchronized
-shared semantics are prepared in [the documentation package](U3-closeout-documents-v1/README.md).
+shared semantics were published in `390ec9a`; [the documentation package](U3-closeout-documents-v1/README.md) preserves the exact original proposal.
 
 ## G2 disposition and U4 boundary
 
@@ -42,21 +44,27 @@ shared semantics are prepared in [the documentation package](U3-closeout-documen
 | Reference/product readiness, ownership, effort | R before U5, shared W usable independently, T full tables in U7; unknown reference fields/precision/product decisions remain explicit. No reference access or silicon measurement claimed |
 | Artifact-dependency policy | Prospective route selected; current installed U0002/source/adopted pair remains authoritative. Actual M closure audit and code/lifecycle transition require separate authorization |
 
-G2/U3 final closure will be recorded only after the remaining applicable sprint publication
-exits and human closure decision. Later native execution, full tables, performance/nightly,
+G2 design readiness and U3 technical closeout are accepted by the separate human decision.
+Final record publication and tagging remain separate. Later native execution, full tables, performance/nightly,
 silicon, schema/toolchain work and artifact migration are not silently pulled into U3.
 
-## Remaining publication exits
+## Publication and finalization
 
 | Exit | Status |
 | --- | --- |
-| Exact normative documentation installation | Five exact human-installed postimages verified; protected commit pending |
-| Durable review/evidence publication | Exact commit selection prepared; immutable reports and evidence preserved, transient caches/original probe programs excluded. Local commit/publication pending |
-| Fresh how-it-works refresh | Fresh session completed; exact proposal installed as docs/how-it-works.md. [Handoff](U3-final-documentation-refresh/handoff.md) and [reconciliation](U3-final-local-checkpoint-v1/documentation-reconciliation.json); 342 focused checks executed by that session |
-| Final integrated checks | Precommit 1,701 passed, 29 skipped, zero failures/errors; required static/currentness/schema/import checks pass. [Exact scope](U3-final-local-checkpoint-v1/README.md). Published-revision gate remains pending |
-| Main publication | Pending; commit and push remain separate |
-| Fresh hosted and local clone, identical published revision | Pending under U0023; include strict vendor, applicable tests/types/lint/imports/schema and classify CI no-ops explicitly |
-| Human closeout and u03-end | Pending; no tag or closure claimed |
+| Normative documentation and durable review evidence | Exact 140-path human checkpoint committed and published as `390ec9a`; original review targets and reviewer bytes preserved |
+| Fresh how-it-works refresh | Installed and published in `390ec9a`; [original handoff](U3-final-documentation-refresh/handoff.md) records 342 focused checks. The present status edit binds the publication and technical acceptance |
+| Precommit integrated checks | 1,701 passed, 29 skipped; [original scope](U3-final-local-checkpoint-v1/README.md) preserved |
+| Fresh GitHub clone on ElfinKidsLaptop WSL2 | On `390ec9a`: 1,701 passed, 29 skipped, zero failures/errors; required lint, types, imports, schema and strict currentness passed. [Executed evidence](U3-published-validation-v1/fresh-clone-receipt.json) |
+| Hosted Ubuntu CI on the identical commit | [Run 38512473386](https://github.com/kakoee/rk-uarch/actions/runs/38512473386) passed: 1,691 passed, 29 skipped, 10 deselected; contract 681 and licence 2 checks overlap. [No-op classification](U3-published-validation-v1/ci-summary.json) |
+| Human technical closeout | `U3-closeout-v1` accepted by Javid; [exact scope](U3-closeout-acceptance.json) |
+| Final record commit/publication and human `u03-end` | Pending separately; U4 and cleanup are not authorized |
+
+The final documentation checkpoint preserves the validated implementation, tests, configuration,
+schemas and artifact bytes. Its runtime evidence is inherited from `390ec9a`, not a claimed new
+execution. Before tagging, verify that identity, check the changed documentation, publish the
+approved final record commit, and obtain hosted CI on that final commit. Any implementation or
+support change instead requires appropriate renewed validation and artifact lifecycle checks.
 
 No test result is inferred from an empty native/golden/performance/ordering job. Current
 source/artifact strict verification must pass; new-policy migration is not needed merely

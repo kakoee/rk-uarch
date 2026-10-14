@@ -41,10 +41,10 @@ have distinct host requirements. The older notes and §7 estimates are historica
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | Reconcile U-P5 under U0023; prepare exact component/schema and toolchain decisions, independent checks and reference feasibility. No blanket runtime release |
+| **Next** | Publish the accepted U3 final closeout records and verify/tag the approved main revision. U4 needs separate authorization |
 | **U1 done** | Published `u01-end` at `1e9e794a84c5173812c23a1cf2fc04b85e6f6831` |
 | **U2 done** | Accepted closeout and `u02-end` at `79bc1f0`; approved cleanup preserved the evidence archive and branch history |
-| **U3 closeout pending** | Both lane response reviews and B O1/O2 recheck accepted; Javid accepted the detailed design and prospective dependency policy for closeout only. See [approval](reviews/U3-reviewed-design-and-policy-v1/acceptance.md) and [closeout](reviews/U3-closeout.md). B reports retain partial/not_run outcomes. Final documentation, same-commit validation and human tag remain pending; U4 is not authorized |
+| **U3 technical closeout accepted** | Javid accepted U3-closeout-v1 on published `390ec9a`, after fresh GitHub-clone and same-commit hosted CI checks passed. See [acceptance](reviews/U3-closeout-acceptance.json) and [closeout](reviews/U3-closeout.md). B reports retain partial/not_run outcomes; the native engine remains a design. Final record publication and human tag remain pending; U4 is not authorized |
 | **Not started** | U4–U11 |
 | **Runner pending** | Registration and executed manual nightly remain unverified. Not a correctness-development prerequisite under U0023; controlled-host performance and G5 nightly qualification remain pending |
 
