@@ -1,0 +1,15 @@
+[graph]
+targets = ["x86_64-unknown-linux-gnu"]
+all-features = false
+[licenses]
+allow = ["MIT", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "Apache-2.0 WITH LLVM-exception"]
+confidence-threshold = 0.93
+[bans]
+multiple-versions = "deny"
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+
+# Only the unpublished first-party workspace; every registry dependency is checked.
+[licenses.private]
+ignore = true
