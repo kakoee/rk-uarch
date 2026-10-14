@@ -1,0 +1,163 @@
+{
+  "scope": "Separate O1/O2 proposal follow-up; accepted Stage 3 B-F1–B-F8 and A verdicts unchanged; no installation or migration",
+  "date": "2026-10-13",
+  "bindings": {
+    "base_commit": "40fab28bc73ed1f7898a0950979607cfd0368c12",
+    "before_patch_sha256": "4c73d73d1c7ec1e1453e7ef7ccf1bd3de55238a4469069dcaa75e89bc764fa81",
+    "pristine_strict": {
+      "exit": 0,
+      "stdout": "snapshot manifest, matrix and current compatibility verified: /tmp/u3-b-o12-baseline-ji4sbyxa/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963\n",
+      "stderr": ""
+    },
+    "inventory": {
+      "before_count": 56,
+      "after_count": 56,
+      "added": [],
+      "removed": [],
+      "changed_bound_bytes": {
+        "scripts/u2_inputs.py": {
+          "before": "56a4695055dbb1498787c9bdc7824980ee236e058d6daedb992808340be1b9bb",
+          "after": "eb68cb3d6e09dae9ff7310c65d767d30785df838e347d3389d531250493a44ff"
+        },
+        "scripts/vendor_rk.py": {
+          "before": "e18e6fce2dfdaca3cd6a3fd39af9e148797be1c575677c3adaf9128b14e5ae51",
+          "after": "b82ae570dee99466389d609051425c501022d1ebf2efb03a2bc67a27a27c1b76"
+        }
+      }
+    },
+    "oracle_program_sha256": "bca579505e96e3f105d4442e7b6c52c3cbe87316edde3ea896692abceb90993b",
+    "changed_source_files": {
+      "scripts/vendor_rk.py": {
+        "before": "e18e6fce2dfdaca3cd6a3fd39af9e148797be1c575677c3adaf9128b14e5ae51",
+        "after": "b82ae570dee99466389d609051425c501022d1ebf2efb03a2bc67a27a27c1b76"
+      },
+      "scripts/u2_inputs.py": {
+        "before": "56a4695055dbb1498787c9bdc7824980ee236e058d6daedb992808340be1b9bb",
+        "after": "eb68cb3d6e09dae9ff7310c65d767d30785df838e347d3389d531250493a44ff"
+      },
+      "tests/unit/test_u2_support_policy.py": {
+        "before": "9f4cb28f5cbb064bb207a02e712aa47577c785b93c6496531589db6fe98acab6",
+        "after": "65c26ac3cb0aa1ad29a7f22e2763eafec09c71015e64e08f7753a2f8c0ce7120"
+      }
+    },
+    "unchanged_historical_artifact_files": 55,
+    "patched_strict": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "vendor-rk: input support inventory changed\n"
+    },
+    "after_patch_sha256": "c238574b284ebecb6f0f1253922ce01af87259f0187aad38bcda628757e8fe6b",
+    "delta_sha256": "eac5a0e20d01a2a6a2987665825a731da2b636517a4f342a1c4a1bbfc785426e"
+  },
+  "read_only_coordinator_receipt_sha256": {
+    "U3-lane-B-review.md": "39799be3a0849aaa1f005b8fde471965965ffa7d252dadaced49198f649ab454",
+    "U3-independent-review-B-stage3-v1/receipts.json": "c5dc710060fd2ad76ad22ab5ba9aaf0bef254af6978ba8d6d998884c17177c8a",
+    "U3-stage3-coordination-v1/B-verdict-receipt.md": "a4541b66561664928547b1a9c77e6cb8edbea28fb303bb35a9b4e55f08649aaf",
+    "U3-stage3-coordination-v1/B-future-observation.json": "2f8e098f9d3c16834cabad1f561b37291e03b8035e5d44da73436df3eff401f3"
+  },
+  "environment": {
+    "python": "Python 3.12.14",
+    "interpreter": "/home/jjaff/AI-infra-simulation/rk-uarch-u3-b/.venv/bin/python",
+    "ambient": "PYTHONPATH/MYPYPATH removed in every credited run; UARCH_HUMAN never set, explicitly removed by regression/static orchestrators; PYTHONDONTWRITEBYTECODE=1; pytest explicit -c pyproject.toml --rootdir . -p no:cacheprovider",
+    "direct_children": "PYTHONPATH replaced by each isolated root/src:root/contract; -B for new direct/module/library controls",
+    "origins": "Export ui/policy/vendor/guard/derive/uarch_contract asserted within the credited pytest selection; fresh library controls assert exact script paths; no environment installation"
+  },
+  "pytest_command_prefix": "python -B -m pytest -c pyproject.toml --rootdir . -p no:cacheprovider -q --tb=short",
+  "tests_first": {
+    "o1_o2": "6 failed, 8 passed, 85 deselected: four direct module/package shadows printed marker; two root-file probes DID NOT RAISE; all in temporary roots",
+    "annotations": "1 failed, 99 deselected: old Inputs annotation is ForwardRef; changed evaluation is explicitly tested, not hidden",
+    "initial_restored": "16 passed, 84 deselected"
+  },
+  "executed": {
+    "bounded-normal": {
+      "args": [
+        "tests/unit/test_u2_support_policy.py",
+        "tests/unit/test_vendor_script_entry.py",
+        "contract/tests/test_u_p2_review.py",
+        "-k",
+        "not f2_default and not f5 and not f6 and not f7_environment_record and not f8",
+        "--require-vendor"
+      ],
+      "exit": 0,
+      "summary": "150 passed, 1 skipped, 8 deselected in 37.57s",
+      "unchanged_bytes_and_mtimes_files": 1516
+    },
+    "o1-revert": {
+      "args": [
+        "tests/unit/test_u2_support_policy.py",
+        "-k",
+        "future_shadow"
+      ],
+      "exit": 1,
+      "summary": "4 failed, 8 passed, 88 deselected in 4.23s"
+    },
+    "o2-revert": {
+      "args": [
+        "tests/unit/test_u2_support_policy.py",
+        "-k",
+        "root_file_write"
+      ],
+      "exit": 1,
+      "summary": "2 failed, 98 deselected in 0.32s"
+    },
+    "loader-revert": {
+      "args": [
+        "tests/unit/test_u2_support_policy.py",
+        "-k",
+        "public_load_new_policy_drift_refuses"
+      ],
+      "exit": 1,
+      "summary": "4 failed, 96 deselected in 2.22s"
+    },
+    "restored": {
+      "args": [
+        "tests/unit/test_u2_support_policy.py",
+        "-k",
+        "future_shadow or root_file_write or entry_annotations or public_load_new_policy_drift_refuses or public_load_transitive_shadow or fresh_direct_shadow or import_origins or real_source_write_guard"
+      ],
+      "exit": 0,
+      "summary": "53 passed, 47 deselected in 17.44s",
+      "unchanged_bytes_and_mtimes_files": 1516
+    }
+  },
+  "statics": {
+    "ruff check .": {
+      "exit": 0,
+      "output": "All checks passed!\n"
+    },
+    "mypy src contract/uarch_contract scripts": {
+      "exit": 0,
+      "output": "Success: no issues found in 80 source files\n"
+    },
+    "mypy --no-explicit-package-bases contract/tests": {
+      "exit": 0,
+      "output": "Success: no issues found in 31 source files\n"
+    },
+    "lint-imports": {
+      "exit": 0,
+      "output": "\n╔══╗─────────▶╔╗ ╔╗      ╔╗◀───┐\n╚╣╠╝◀─────┐  ╔╝╚╗║║────▶╔╝╚╗   │\n ║║   ╔══╦══╦╩╗╔╝║║  ╔╦═╩╗╔╝╔═╦══╗\n ║║╔══╣╔╗║╔╗║╔╣║ ║║ ╔╬╣╔╗║║ ║│║╔═╝\n╔╣╠╣║║║╚╝║╚╝║║║╚╗║╚═╝║║║║║╚╗║═╣║\n╚══╩╩╩╣╔═╩══╩╝╚═╝╚═══╩╩╝╚╩═╩╩═╩╝\n  └──▶║║                    ▲ \n      ╚╝────────────────────┘\n\n\n---------\nContracts\n---------\n\nAnalyzed 101 files, 600 dependencies.\n-------------------------------------\n\nrk-uarch never imports rk-sim KEPT\nthe contract imports nothing from the harness KEPT\n\nContracts: 2 kept, 0 broken.\n"
+    }
+  },
+  "format_followup": "Ruff first found one extra blank between imports. Removed it; import-origin test 1 passed/99 deselected, final statics all passed. No semantic/fault-site/expectation changes. Bounded 150/1/8 and restored 53/47 were before this whitespace-only correction; not relabelled as reruns.",
+  "skip": "Real new-policy human generation/adoption positive absent; historical authentication passed, strict currentness under proposal still refuses. Synthetic rehashed input controls confer no adoption provenance.",
+  "deselection": "Same bounded selection as prior response: f2_default (1), f5 matrix inventory (4), f6 Git index/ignored-path controls (3). The f7_environment_record and f8 substrings match no collected cases. These unchanged tests are outside O1/O2 and not claimed passed; full integrated migration regression remains later.",
+  "not_run": [
+    "full suite",
+    "hosted/native CI",
+    "nightly",
+    "input staging",
+    "producer/oracle execution",
+    "generation/adoption",
+    "native execution",
+    "host contact or performance measurement"
+  ],
+  "same_reviewer_recheck": [
+    "Exact old/new patch identity and three-file delta",
+    "O1 direct marker prevention plus valid direct/module/library and annotation behavior",
+    "O2 new/existing root-file denial and allowed temp writes",
+    "Normal byte/mtime isolation, existing shadow/public-loader/origin controls",
+    "Sequential O1/O2/loader-call revert and exact restore",
+    "Currentness distinction, fingerprints, unchanged embedded oracle and migration prerequisites"
+  ],
+  "patch_format": "Empty context lines normalized to the existing proposal style; avoids diff-artifact whitespace diagnostics, with identical applied source. Full apply/reverse and delta reverse checks passed."
+}

@@ -1,0 +1,167 @@
+--- a/scripts/vendor_rk.py
++++ b/scripts/vendor_rk.py
+@@ -3,8 +3,6 @@
+ The subprocess bridge invokes the pinned project's own loader, accelerator adapter,
+ iteration_cost and IterationCounts. No workload arithmetic is implemented here.
+ """
+-
+-from __future__ import annotations
+
+ import os
+ import sys
+@@ -845,7 +843,7 @@
+     *,
+     require_full: bool = True,
+     provenance_root: Path | None = None,
+-) -> tuple[ComponentPrecision, ...]:
++) -> "tuple[ComponentPrecision, ...]":
+     """Validate explicit shared bindings; this is not real pinned bridge verification.
+
+     Full mode requires the exact accepted seven-pair inventory. Partial mode serves
+--- a/scripts/u2_inputs.py
++++ b/scripts/u2_inputs.py
+@@ -2,8 +2,6 @@
+
+ The files are existing shared carriers plus a tooling inventory, not a new runtime schema.
+ """
+-
+-from __future__ import annotations
+
+ import os
+ import sys
+--- a/tests/unit/test_u2_support_policy.py
++++ b/tests/unit/test_u2_support_policy.py
+@@ -4,6 +4,7 @@
+ import shutil
+ import subprocess
+ import sys
++from contextlib import contextmanager
+ from pathlib import Path
+
+ import pytest
+@@ -15,11 +16,11 @@
+ REAL_ROOT = Path(__file__).resolve().parents[2]
+
+
+-@pytest.fixture(autouse=True)
+-def deny_source_writes():
++@contextmanager
++def source_write_denial(root):
+     """Enforce read-only real source during each test, not post-hoc restoration."""
+     active = [True]
+-    protected = [REAL_ROOT / p for p in ("src", "scripts", "contract", "hw", "tests",
++    protected = [root / p for p in ("src", "scripts", "contract", "hw", "tests",
+                                          "validation", "docs", "native", "measure",
+                                          "third_party", "containers", "pyproject.toml", "uv.lock")]
+
+@@ -41,12 +42,21 @@
+                 resolved = Path(os.fsdecode(path)).resolve()
+                 if "__pycache__" in resolved.parts:
+                     continue  # Interpreter cache is not source/data.
+-                if any(resolved == p or resolved.is_relative_to(p) for p in protected):
++                if (resolved.parent == root
++                        or any(resolved == p or resolved.is_relative_to(p) for p in protected)):
+                     raise PermissionError("test attempted write to real source root")
+
+     sys.addaudithook(audit)
+-    yield
+-    active[0] = False
++    try:
++        yield
++    finally:
++        active[0] = False
++
++
++@pytest.fixture(autouse=True)
++def deny_source_writes():
++    with source_write_denial(REAL_ROOT):
++        yield
+
+
+ def test_real_source_write_guard():
+@@ -80,8 +90,9 @@
+     import uarch_contract
+
+     import rkuarch.hw.derive as derive
+-
+-    for module in (ui, policy, vendor, derive, uarch_contract):
++    from scripts import u2_import_guard
++
++    for module in (ui, policy, vendor, u2_import_guard, derive, uarch_contract):
+         assert Path(module.__file__).resolve().is_relative_to(REAL_ROOT)
+     assert "PYTHONPATH" not in os.environ and "MYPYPATH" not in os.environ
+     policy.verify(policy.inventory(root=REAL_ROOT), root=REAL_ROOT)
+@@ -573,3 +584,73 @@
+             __spec__=SimpleNamespace(origin="untrusted.py")))
+     with pytest.raises(ValueError, match="^unsupported import-guard bootstrap$"):
+         guard.check_import_roots(str(isolated_root))
++
++
++@pytest.mark.parametrize("exists", [False, True])
++def test_root_file_write_denied_before_mutation(tmp_path, exists):
++    # Deliberate denial probes use a throwaway root, never the checkout being tested.
++    root = tmp_path / "guarded-root"
++    root.mkdir()
++    path = root / "root-file.py"
++    if exists:
++        path.write_bytes(b"ORIGINAL = 1\n")
++    before = (path.read_bytes(), path.stat().st_mtime_ns) if exists else None
++    with source_write_denial(root):
++        with pytest.raises(PermissionError, match="^test attempted write to real source root$"):
++            path.write_bytes(b"MUTATED = 1\n")
++        if exists:
++            assert (path.read_bytes(), path.stat().st_mtime_ns) == before
++        else:
++            assert not path.exists()
++        # Normal temporary roots and read-only access must remain usable.
++        other = tmp_path / "allowed-private-file"
++        other.write_text("allowed")
++        assert other.read_text() == "allowed"
++        other.unlink()
++
++
++@pytest.mark.parametrize("entry", ["vendor_rk", "u2_inputs"])
++@pytest.mark.parametrize("form", ["direct", "module", "library"])
++@pytest.mark.parametrize("kind", ["module", "package"])
++def test_future_shadow_never_executes(isolated_root, entry, form, kind):
++    if form == "direct":
++        args = ["scripts/" + entry + ".py", "--help"]
++    elif form == "module":
++        args = ["-m", "scripts." + entry, "--help"]
++    else:
++        args = ["-c", "from pathlib import Path; from scripts import " + entry + " as m; "
++                "assert Path(m.__file__).resolve() == Path.cwd() / 'scripts' / '"
++                + entry + ".py'; print('O1_LIBRARY_ORIGIN_VERIFIED')"]
++
++    def invoke():
++        return subprocess.run(
++            [sys.executable, "-B", *args], cwd=isolated_root,
++            env=direct_environment(isolated_root), text=True, capture_output=True, check=False,
++        )
++
++    valid = invoke()
++    assert valid.returncode == 0, valid.stderr
++    assert ("O1_LIBRARY_ORIGIN_VERIFIED" if form == "library" else "usage:") in valid.stdout
++    shadow = isolated_root / "scripts" / (
++        "__future__.py" if kind == "module" else "__future__/__init__.py")
++    shadow.parent.mkdir(exist_ok=True)
++    shadow.write_text("import sys\nprint('O1_FUTURE_BODY_EXECUTED', file=sys.stderr)\n"
++                      "annotations = None\n")
++    result = invoke()
++    assert "O1_FUTURE_BODY_EXECUTED" not in result.stdout + result.stderr
++    assert result.returncode != 0
++    assert "unreviewed import name: scripts/__future__" in result.stderr
++
++
++def test_entry_annotations_resolve_without_future_bootstrap():
++    from typing import get_type_hints
++
++    from uarch_contract.exports import ComponentPrecision
++
++    assert ui.Inputs.__annotations__["entries"] == tuple[ComponentPrecision, ...]
++    assert get_type_hints(ui.load_inputs)["return"] is ui.Inputs
++    assert vendor.validate_u2_component_inputs.__annotations__["return"] == (
++        "tuple[ComponentPrecision, ...]")
++    assert get_type_hints(vendor.validate_u2_component_inputs,
++                          localns={"ComponentPrecision": ComponentPrecision})["return"] == (
++        tuple[ComponentPrecision, ...])
