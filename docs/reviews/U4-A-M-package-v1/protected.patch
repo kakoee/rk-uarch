@@ -29313,10 +29313,10 @@ index 0000000..5f3db4b
 +}
 diff --git a/contract/tests/mapped/test_admission.py b/contract/tests/mapped/test_admission.py
 new file mode 100644
-index 0000000..85c84d6
+index 0000000..4699a88
 --- /dev/null
 +++ b/contract/tests/mapped/test_admission.py
-@@ -0,0 +1,642 @@
+@@ -0,0 +1,694 @@
 +"""M schema/admission controls only; no fabricated native execution result."""
 +
 +import copy
@@ -29958,6 +29958,58 @@ index 0000000..85c84d6
 +                "route_id": "r",
 +                "multicast": 0,
 +            }
++        )
++
++
++def test_frozen_nonempty_clock_setup_positive_and_rehashed_refusal() -> None:
++    from uarch_contract.mapped import validate_job
++
++    j = load("kernel-job")
++    j["clock_setup"] = [{"job_id": "a", "domain": "core", "start_ps": 0, "n_cycles": 3}]
++    j["profile"]["entries"][0]["clock_setup_hash"] = content_hash(j["clock_setup"])
++    rehash(j["profile"], "profile_hash")
++    anchor = j["profile"]["profile_hash"]  # explicit test-host authority, not caller trust
++    j["admission"]["profile_hash"] = anchor
++    j["workload_closure"]["admission"]["profile_hash"] = anchor
++    rehash(j["workload_closure"], "bundle_hash")
++    j["bundle_hash"] = j["workload_closure"]["bundle_hash"]
++    rehash(j, "job_hash")
++    parsed = MappedEngineJob.model_validate(j)
++    assert validate_job(
++        j,
++        invocation="test",
++        checkpoint="K2",
++        expected_engine=parsed.engine,
++        trusted_registry_hash=j["registry"]["registry_hash"],
++        trusted_profile_hash=anchor,
++    )
++    j["clock_setup"][0]["n_cycles"] = 4
++    rehash(j, "job_hash")
++    with pytest.raises(ValueError, match="TestProfileMismatch.*clock setup"):
++        validate_job(
++            j,
++            invocation="test",
++            checkpoint="K2",
++            expected_engine=parsed.engine,
++            trusted_registry_hash=j["registry"]["registry_hash"],
++            trusted_profile_hash=anchor,
++        )
++    # Rehashing the caller's profile too cannot replace the independently held anchor.
++    j["profile"]["entries"][0]["clock_setup_hash"] = content_hash(j["clock_setup"])
++    rehash(j["profile"], "profile_hash")
++    j["admission"]["profile_hash"] = j["profile"]["profile_hash"]
++    j["workload_closure"]["admission"]["profile_hash"] = j["profile"]["profile_hash"]
++    rehash(j["workload_closure"], "bundle_hash")
++    j["bundle_hash"] = j["workload_closure"]["bundle_hash"]
++    rehash(j, "job_hash")
++    with pytest.raises(ValueError, match="TestProfileMismatch"):
++        validate_job(
++            j,
++            invocation="test",
++            checkpoint="K2",
++            expected_engine=parsed.engine,
++            trusted_registry_hash=j["registry"]["registry_hash"],
++            trusted_profile_hash=anchor,
 +        )
 diff --git a/contract/uarch_contract/generate_mapped.py b/contract/uarch_contract/generate_mapped.py
 new file mode 100644

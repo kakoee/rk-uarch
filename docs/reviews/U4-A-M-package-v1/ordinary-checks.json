@@ -1,0 +1,28 @@
+{
+  "base": "058d7a39c3d755d62c2063fdba2e50bfa6e91898",
+  "scope": "live Lane A clone; proposed protected patch unapplied",
+  "python": "CPython 3.12.14, existing locked scratch environment; live contract/src/root first in PYTHONPATH",
+  "checks": [
+    {
+      "command": "python -m pytest -p no:cacheprovider -q tests/unit/test_prompt_sync.py tests/unit/test_ci_scope.py",
+      "exit": 0,
+      "result": "30 passed"
+    },
+    {
+      "command": "ruff check --exclude '.u4-a-*' .",
+      "exit": 0,
+      "result": "All checks passed"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    },
+    {
+      "command": "python scripts/vendor_rk.py --check",
+      "exit": 0,
+      "result": "snapshot manifest, matrix and current compatibility verified",
+      "import_origin": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/contract/uarch_contract/__init__.py"
+    }
+  ],
+  "limitations": "No hosted CI result or native execution inferred."
+}

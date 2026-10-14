@@ -63,3 +63,13 @@ budgets. K2/B/R estimates remain in the accepted delivery plan until implementat
 new evidence. If current broad enforcement is retained, preserve its additional three
 M/K2/B human lifecycle allowances (18–36 total hours across A/B/human plus waits); these are
 planning allowances, not a guarantee that exactly three cycles suffice.
+
+Coordinator `058d7a3` arrived before A's final publication and is preserved in main ancestry.
+Its lane-A-note.md is addressed by the final package. The bounded follow-up after
+`7c166f7a680fa015303bbbcaf925b84546f9ba28` changes **only the proposed test module**, not
+carrier/schema/fixture bytes or imports: a nonempty ClockSetup control is admitted with
+an independently held test-host profile anchor; altered n_cycles with a new job hash
+refuses; rehashing the caller's profile/bundle/job as well still refuses against that
+original host anchor. This supplies the explicit positive and rehashed refusal requested
+by the note without claiming human approval or executing native clocks. The final fresh
+export uses the coordinator's `058d7a3` base; receipts and patch digest are refreshed.

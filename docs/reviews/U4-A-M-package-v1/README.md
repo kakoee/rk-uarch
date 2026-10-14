@@ -3,7 +3,7 @@
 **Proposed protected patch; not installed.** Authoring base
 `f58e07828fa7a953b06800b227b948d7e9e71a88`; published u03-end target
 `6d39a234a14855c86ca54b795501a0b0b2618d7b` verified as ancestor. The final disposable
-validation base includes B through `dd75b7c860ed57ec1f03c9705378cbde467a6d4e`.
+validation base includes B through `058d7a3` (coordinator reconciliation after B dd75b7c).
 Early audit checkpoint: `bad9a125d82bbf723675465c9291fb37fa82f799`.
 
 [protected.patch](protected.patch) is the installable Git diff: **26 additive files**,
@@ -42,7 +42,7 @@ policy audit; Javid exact protected acceptance and human lifecycle. No B package
 No source policy repair, generation/adoption, public mapper, kernel, benchmark, full table,
 reference prediction/measurement, server change or sprint closure is delivered here.
 
-Final observed local result: **251 tests passed** (64 M controls plus 187 legacy controls),
+Final observed local result: **252 tests passed** (65 M controls plus 187 legacy controls),
 both mypy commands passed (80 source files / 32 contract-test files), all three schema
 freshness checks passed, and both import contracts were kept. The separate live-main
 prompt/CI-classifier check passed30 tests; repository lint and strict vendor currentness
