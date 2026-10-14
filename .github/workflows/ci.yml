@@ -4,7 +4,18 @@ on:
   pull_request:
 
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.classify.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - id: classify
+        run: python3 .github/ci_scope.py
+
   python:
+    needs: scope
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,10 +29,16 @@ jobs:
           uv run mypy --no-explicit-package-bases contract/tests
       - name: imports
         run: uv run lint-imports
+      - name: documentation checks
+        if: needs.scope.outputs.docs_only == 'true'
+        run: uv run pytest -q tests/unit/test_prompt_sync.py tests/unit/test_ci_scope.py
       - name: tests (fails on an empty suite, by design)
+        if: needs.scope.outputs.docs_only != 'true'
         run: uv run pytest -q -m "not nightly and not silicon and not native and not golden and not determinism"
 
   golden:
+    needs: scope
+    if: needs.scope.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +50,8 @@ jobs:
           else echo "nothing yet: no expected files"; fi
 
   determinism:
+    needs: scope
+    if: needs.scope.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,6 +91,8 @@ jobs:
           else echo "nothing yet: no patches"; fi
 
   native:
+    needs: scope
+    if: needs.scope.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -85,6 +106,8 @@ jobs:
           else echo "nothing yet: no native sources"; fi
 
   perf:
+    needs: scope
+    if: needs.scope.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,6 +119,8 @@ jobs:
           else echo "nothing yet: no perf baselines"; fi
 
   ordering:
+    needs: scope
+    if: needs.scope.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
