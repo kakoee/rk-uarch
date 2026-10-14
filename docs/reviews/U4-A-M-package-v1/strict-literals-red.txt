@@ -1,0 +1,15 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_literal_integer_and_boolean_types_are_not_interchangeable ________
+
+    def test_literal_integer_and_boolean_types_are_not_interchangeable() -> None:
+        from uarch_contract.mapped import Buffer, ComponentScope, NocTransfer
+        scope=load('component')['scope'];scope['repeat']=True
+>       with pytest.raises(ValueError):ComponentScope.model_validate(scope)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+contract/tests/mapped/test_admission.py:620: Failed
+=========================== short test summary info ============================
+FAILED contract/tests/mapped/test_admission.py::test_literal_integer_and_boolean_types_are_not_interchangeable
+1 failed, 63 deselected in 0.30s

@@ -1,0 +1,161 @@
+{
+  "base": "dd75b7c860ed57ec1f03c9705378cbde467a6d4e",
+  "patch_sha256": "b9830b7e5d6d7f48bb28b3fc2754bc066d8496003cb0ec7b5178dd914a48367f",
+  "checks": [
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-c",
+        "import uarch_contract,rkuarch; print(uarch_contract.__file__); print(rkuarch.__file__)"
+      ],
+      "exit": 0,
+      "output": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-validation-cavnn8ft/contract/uarch_contract/__init__.py\n/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-validation-cavnn8ft/src/rkuarch/__init__.py\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "contract/tests/mapped",
+        "contract/tests/test_rotary_v2.py",
+        "tests/rotary_v2",
+        "tests/unit/test_u2_a_prepared.py"
+      ],
+      "exit": 0,
+      "output": "........................................................................ [ 28%]\n........................................................................ [ 57%]\n........................................................................ [ 86%]\n...................................                                      [100%]\n251 passed in 70.33s (0:01:10)\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate_mapped",
+        "--check"
+      ],
+      "exit": 0,
+      "output": "Mapped schemas are fresh.\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate",
+        "--check"
+      ],
+      "exit": 0,
+      "output": "Contract schemas are fresh.\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate_rotary_v2",
+        "--check"
+      ],
+      "exit": 0,
+      "output": "Rotary-v2 schemas are fresh.\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "mypy",
+        "src",
+        "contract/uarch_contract",
+        "scripts"
+      ],
+      "exit": 0,
+      "output": "Success: no issues found in 80 source files\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "mypy",
+        "--no-explicit-package-bases",
+        "contract/tests"
+      ],
+      "exit": 0,
+      "output": "Success: no issues found in 32 source files\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "contract/uarch_contract/mapped.py",
+        "contract/uarch_contract/generate_mapped.py",
+        "contract/tests/mapped"
+      ],
+      "exit": 0,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/lint-imports",
+        "--no-cache"
+      ],
+      "exit": 0,
+      "output": "\n\u2554\u2550\u2550\u2557\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25b6\u2554\u2557 \u2554\u2557      \u2554\u2557\u25c0\u2500\u2500\u2500\u2510\n\u255a\u2563\u2560\u255d\u25c0\u2500\u2500\u2500\u2500\u2500\u2510  \u2554\u255d\u255a\u2557\u2551\u2551\u2500\u2500\u2500\u2500\u25b6\u2554\u255d\u255a\u2557   \u2502\n \u2551\u2551   \u2554\u2550\u2550\u2566\u2550\u2550\u2566\u2569\u2557\u2554\u255d\u2551\u2551  \u2554\u2566\u2550\u2569\u2557\u2554\u255d\u2554\u2550\u2566\u2550\u2550\u2557\n \u2551\u2551\u2554\u2550\u2550\u2563\u2554\u2557\u2551\u2554\u2557\u2551\u2554\u2563\u2551 \u2551\u2551 \u2554\u256c\u2563\u2554\u2557\u2551\u2551 \u2551\u2502\u2551\u2554\u2550\u255d\n\u2554\u2563\u2560\u2563\u2551\u2551\u2551\u255a\u255d\u2551\u255a\u255d\u2551\u2551\u2551\u255a\u2557\u2551\u255a\u2550\u255d\u2551\u2551\u2551\u2551\u2551\u255a\u2557\u2551\u2550\u2563\u2551\n\u255a\u2550\u2550\u2569\u2569\u2569\u2563\u2554\u2550\u2569\u2550\u2550\u2569\u255d\u255a\u2550\u255d\u255a\u2550\u2550\u2550\u2569\u2569\u255d\u255a\u2569\u2550\u2569\u2569\u2550\u2569\u255d\n  \u2514\u2500\u2500\u25b6\u2551\u2551                    \u25b2 \n      \u255a\u255d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\n\n---------\nContracts\n---------\n\nAnalyzed 103 files, 617 dependencies.\n-------------------------------------\n\nrk-uarch never imports rk-sim KEPT\nthe contract imports nothing from the harness KEPT\n\nContracts: 2 kept, 0 broken.\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "exit": 1,
+      "output": "vendor-rk: input support inventory changed\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "contract/tests/mapped",
+        "-k",
+        "rehashed_refusals and (R04 or R09)"
+      ],
+      "exit": 0,
+      "output": "..                                                                       [100%]\n2 passed, 62 deselected in 0.31s\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "contract/tests/mapped",
+        "-k",
+        "rehashed_refusals and (R04 or R09)"
+      ],
+      "exit": 1,
+      "output": "FF                                                                       [100%]\n=================================== FAILURES ===================================\n_________ test_rehashed_refusals[R04-path0-fp16-UnsupportedPrecision] __________\n\nrid = 'R04', path = ('scope', 'ops', 0, 'spec', 'operands', 'X', ...)\nvalue = 'fp16', error = 'UnsupportedPrecision'\n\n    @pytest.mark.parametrize(\n        (\"rid\", \"path\", \"value\", \"error\"),\n        [\n            (\n                \"R04\",\n                (\"scope\", \"ops\", 0, \"spec\", \"operands\", \"X\", \"dtype\"),\n                \"fp16\",\n                \"UnsupportedPrecision\",\n            ),\n            (\"R05\", (\"rank\", \"tp\"), 8, \"UnsupportedRankScope\"),\n            (\"R06\", (\"scope\", \"ops\", 0, \"spec\", \"operator\"), \"normalization\", \"UnsupportedOperator\"),\n            (\"R07\", (\"points\", 0, \"initial_state\"), \"steady\", \"UnsupportedInitialState\"),\n            (\"R08\", (\"scope\", \"ops\", 0, \"spec\", \"dimensions\", \"K\"), 257, \"UnsupportedShape\"),\n            (\"R09\", (\"mapping_policy\", \"name\"), \"unknown\", \"UnsupportedMapping\"),\n            (\n                \"R10\",\n                (\"points\", 0, \"task_graph\", \"buffers\", 6, \"offset_bytes\"),\n                16777216,\n                \"SramCapacityExceeded\",\n            ),\n            (\"R11\", (\"points\", 0, \"task_graph\", \"jobs\", 2, \"core_id\"), 4, \"InvalidResource\"),\n            (\n                \"R12\",\n                (\"points\", 0, \"task_graph\", \"dependencies\", 0, \"before\"),\n                \"missing\",\n                \"InvalidDependency\",\n            ),\n            (\"R13\", (\"hardware_spec_hash\",), \"sha256:\" + \"0\" * 64, \"HardwareMismatch\"),\n            (\"R19\", (\"scope\", \"ops\", 0, \"work_repeat\"), 2, \"UnsupportedCapability\"),\n            (\"R21\", (\"points\", 0, \"frequency_ratio\"), 0, \"greater than\"),\n        ],\n    )\n    def test_rehashed_refusals(rid: Any, path: Any, value: Any, error: Any) -> None:\n        b = load(\"component\")\n        cursor = b\n        for key in path[:-1]:\n            cursor = cursor[key]\n        cursor[path[-1]] = value\n        seal(b)\n>       with pytest.raises(ValueError, match=error):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE ValueError\n\ncontract/tests/mapped/test_admission.py:127: Failed\n_________ test_rehashed_refusals[R09-path5-unknown-UnsupportedMapping] _________\n\nrid = 'R09', path = ('mapping_policy', 'name'), value = 'unknown'\nerror = 'UnsupportedMapping'\n\n    @pytest.mark.parametrize(\n        (\"rid\", \"path\", \"value\", \"error\"),\n        [\n            (\n                \"R04\",\n                (\"scope\", \"ops\", 0, \"spec\", \"operands\", \"X\", \"dtype\"),\n                \"fp16\",\n                \"UnsupportedPrecision\",\n            ),\n            (\"R05\", (\"rank\", \"tp\"), 8, \"UnsupportedRankScope\"),\n            (\"R06\", (\"scope\", \"ops\", 0, \"spec\", \"operator\"), \"normalization\", \"UnsupportedOperator\"),\n            (\"R07\", (\"points\", 0, \"initial_state\"), \"steady\", \"UnsupportedInitialState\"),\n            (\"R08\", (\"scope\", \"ops\", 0, \"spec\", \"dimensions\", \"K\"), 257, \"UnsupportedShape\"),\n            (\"R09\", (\"mapping_policy\", \"name\"), \"unknown\", \"UnsupportedMapping\"),\n            (\n                \"R10\",\n                (\"points\", 0, \"task_graph\", \"buffers\", 6, \"offset_bytes\"),\n                16777216,\n                \"SramCapacityExceeded\",\n            ),\n            (\"R11\", (\"points\", 0, \"task_graph\", \"jobs\", 2, \"core_id\"), 4, \"InvalidResource\"),\n            (\n                \"R12\",\n                (\"points\", 0, \"task_graph\", \"dependencies\", 0, \"before\"),\n                \"missing\",\n                \"InvalidDependency\",\n            ),\n            (\"R13\", (\"hardware_spec_hash\",), \"sha256:\" + \"0\" * 64, \"HardwareMismatch\"),\n            (\"R19\", (\"scope\", \"ops\", 0, \"work_repeat\"), 2, \"UnsupportedCapability\"),\n            (\"R21\", (\"points\", 0, \"frequency_ratio\"), 0, \"greater than\"),\n        ],\n    )\n    def test_rehashed_refusals(rid: Any, path: Any, value: Any, error: Any) -> None:\n        b = load(\"component\")\n        cursor = b\n        for key in path[:-1]:\n            cursor = cursor[key]\n        cursor[path[-1]] = value\n        seal(b)\n>       with pytest.raises(ValueError, match=error):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE ValueError\n\ncontract/tests/mapped/test_admission.py:127: Failed\n=========================== short test summary info ============================\nFAILED contract/tests/mapped/test_admission.py::test_rehashed_refusals[R04-path0-fp16-UnsupportedPrecision]\nFAILED contract/tests/mapped/test_admission.py::test_rehashed_refusals[R09-path5-unknown-UnsupportedMapping]\n2 failed, 62 deselected in 0.33s\n"
+    },
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-a-work/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        "-q",
+        "contract/tests/mapped",
+        "-k",
+        "rehashed_refusals and (R04 or R09)"
+      ],
+      "exit": 0,
+      "output": "..                                                                       [100%]\n2 passed, 62 deselected in 0.31s\n"
+    }
+  ],
+  "classification": "schema/prototype and legacy compatibility; no native execution",
+  "export_removed": true
+}

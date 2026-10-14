@@ -39,3 +39,29 @@ Any later common helper, root re-export, schema registration, dispatch edit, reg
 hardware fixture or environment read must update this inventory and B's audit before use.
 The future test-spec path is B-owned `hw/designs/test-fixtures/`; none is installed here.
 Registry/profile expectations are proposal input identity, not proof of human approval.
+
+## Final delta from bad9a12, for B's dd75b7c audit follow-up
+
+The final patch is additive at **26 paths**, enumerated in package.json. `mapped.py` now
+also imports `.assumptions.AssumptionSet`; this is an existing retained module. It embeds
+strict mapped assumptions and original source assumptions, adds canonical owner enumeration,
+explicit slot/lifetime joins, rational leaf projection, strict native numeric wrappers,
+external host trust anchors and the profile's `clock_setup_hash`. No new reverse import
+from nominal roots, initializer edit, production file read or dynamic import is added.
+`MappedAssumptions.json` is the twelfth generated root. Final fixtures additionally include
+component-job, resident/resident-profile, transport/transport-profile and canonical-vectors;
+there are eleven fixture files in total. All fixtures remain in the same separate family.
+
+The proposed tests now use **runpy** to read the existing literal
+`contract/tests/rotary_v2_cases.py`, which reads existing
+`contract/tests/fixtures/u2/independent-bundle.json`; they also read that v1 input directly.
+This is a concrete test-only dynamic read, not a production mapped-module import and not
+an oracle producer. Canonical vectors are read from the new fixture directory. Tests read
+all eleven named mapped inputs as applicable. No fixture/hardware/profile registry is
+silently installed or searched for; the trusted loader authority mechanism remains the
+explicit acceptance choice in decisions.md.
+
+B's observed early M+repair 56-entry closure is its pinned result, not proof for this final
+delta. B should re-run its exact public support controls against this final patch and
+reconcile the extra assumptions edge/test reads. The normal broad U0002 policy still
+refuses a patched export; no policy transition is installed here.

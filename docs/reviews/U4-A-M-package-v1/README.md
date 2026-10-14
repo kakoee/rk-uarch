@@ -1,26 +1,49 @@
-# U4 A — exact M proposal, revision 1
+# U4 Lane A — exact M package
 
-Status: early bounded checkpoint for B's dependency audit; **not accepted or installed**.
-Base: `f58e078` (U4 kickoff); published `u03-end` target
-`6d39a234a14855c86ca54b795501a0b0b2618d7b` is an ancestor. All changes below exist only
-in [protected.patch](protected.patch), validated in a disposable Git export. Live protected
-files, oracle, artifact policy and engine remain unchanged. Git is the delivery mechanism.
+**Proposed protected patch; not installed.** Authoring base
+`f58e07828fa7a953b06800b227b948d7e9e71a88`; published u03-end target
+`6d39a234a14855c86ca54b795501a0b0b2618d7b` verified as ancestor. The final disposable
+validation base includes B through `dd75b7c860ed57ec1f03c9705378cbde467a6d4e`.
+Early audit checkpoint: `bad9a125d82bbf723675465c9291fb37fa82f799`.
 
-The patch adds strict mapped bundle/point/TaskGraph/job/result, profile/registry, hardware
-projection, count/traffic and observation carriers, a dedicated schema generator, five
-input fixtures and admission tests. See [inventory.md](inventory.md) for B's concrete edges.
-No native result fixture exists: a parser shape is not a completed behavioral case. The
-input job's engine hashes are explicitly labeled unbuilt schema placeholders and must not
-be used as an implementation receipt or frozen qualifying profile.
+[protected.patch](protected.patch) is the installable Git diff: **26 additive files**,
+including two Python modules, twelve generated schema roots, eleven input/canonical
+fixtures and one test module. [package.json](package.json) binds exact paths, digests and
+fixture identities. No legacy carrier/schema/initializer/analytic implementation or live
+protected file is changed. [inventory.md](inventory.md) names actual and planned import,
+initializer, re-export and data-read edges. It predicts no future support-file count.
 
-At this early checkpoint: 22 schema/prototype input tests pass; carrier mypy and focused
-ruff pass. [tests-first.txt](tests-first.txt) records the initial missing-module failure
-before implementation. Rehashed mutations exercise semantic checks, separately from stale
-hash tests. R02/R03 full-model wrapping controls, richer closure/resource attacks, complete
-legacy controls and result-observation laws are still being completed. This checkpoint is
-usable for import/data auditing, not a claim that all M acceptance cases are finished.
+The proposal covers mapped preparation/TaskGraph, native job/result shape, strict unions,
+full embedded hardware/assumption/source identities, NativeTestProfile/registry, host
+trust anchors and the accepted checkpoint/invocation matrix. Inputs cover K2 fixed delay,
+B cold component, B resident component and B transport. Component mapping first serves B.
+The job's explicitly unbuilt engine/model/build hashes are schema placeholders; they are
+not frozen qualifying implementation identities. **There is no completed native result
+fixture or behavioral pass.**
 
-Exact choices needing review include the hardware leaf projection, observation record keys,
-job assumptions carrier, approval/signing mechanism and registry trust/bootstrap. These will
-be disposed explicitly before the final handoff. B owns independent expected values/corpus
-and CI; A owns carrier/model law; Javid owns protected acceptance and human lifecycle.
+[decisions.md](decisions.md) states exact encoding choices, the smallest protected decision,
+installation order and next M task. [refusals.md](refusals.md) separates R01–R21 structural/
+prototype coverage from future runtime tests. [peer-reconciliation.md](peer-reconciliation.md)
+reconciles B's three published packages and the final delta from its early audit.
+
+Validation is reproducible with [validate.py](validate.py): Git archive the chosen base,
+apply/check the patch inside a disposable nested Git export, assert import origins and
+remove the export afterward. [validation.json](validation.json) retains commands, outputs,
+passing checks and expected failures. Tests were written before implementation;
+[tests-first.txt](tests-first.txt) records the initial absent-module failure and
+[strict-literals-red.txt](strict-literals-red.txt) a later targeted pre-fix rejection failure.
+The completed check includes old/new schema freshness, both mypy commands, focused lint,
+import contracts, legacy v1/v2 replay and structural input tests. Strict vendor currentness
+correctly refuses the patched export under live U0002. The enforcement-off R04/R09 control
+fails with DID NOT RAISE, and original/restored controls pass. None is native execution.
+
+Ownership: A carrier/model law; B independent expected values, CI, report eligibility and
+policy audit; Javid exact protected acceptance and human lifecycle. No B package is edited.
+No source policy repair, generation/adoption, public mapper, kernel, benchmark, full table,
+reference prediction/measurement, server change or sprint closure is delivered here.
+
+Final observed local result: **251 tests passed** (64 M controls plus 187 legacy controls),
+both mypy commands passed (80 source files / 32 contract-test files), all three schema
+freshness checks passed, and both import contracts were kept. The separate live-main
+prompt/CI-classifier check passed30 tests; repository lint and strict vendor currentness
+passed. No hosted CI result was awaited or inferred.
