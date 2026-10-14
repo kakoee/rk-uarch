@@ -1,0 +1,52 @@
+# Proposal: replace only jobs.native after the exact pin/licence and installation decision.
+# Unsubstituted __A_*__ tokens deliberately make this non-installable.
+native:
+  needs: scope
+  if: needs.scope.outputs.docs_only != 'true'
+  runs-on: ubuntu-24.04
+  container:
+    image: __A_LINUX_AMD64_IMAGE_AT_SHA256__
+  defaults:
+    run:
+      shell: bash
+  env:
+    CARGO_NET_OFFLINE: 'true'
+    RUSTUP_TOOLCHAIN: __A_EXACT_RUST_RELEASE__
+    RUST_BACKTRACE: '1'
+  steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - name: Verify immutable tool and input pins before building
+      run: |
+        set -euo pipefail
+        cd native
+        sha256sum --check __A_RELATIVE_CHECKSUM_FILE__
+        rustc -vV > rustc.actual
+        cargo -V > cargo.actual
+        cargo fmt --version > rustfmt.actual
+        cargo clippy --version > clippy.actual
+        cargo deny --version > deny.actual
+        diff -u __A_RUSTC_VERSION_RECEIPT__ rustc.actual
+        diff -u __A_CARGO_VERSION_RECEIPT__ cargo.actual
+        diff -u __A_RUSTFMT_VERSION_RECEIPT__ rustfmt.actual
+        diff -u __A_CLIPPY_VERSION_RECEIPT__ clippy.actual
+        diff -u __A_DENY_VERSION_RECEIPT__ deny.actual
+        cargo metadata --locked --offline --format-version 1 > metadata.actual.json
+        python3 ../docs/reviews/U4-B-native-ci-v1/ci_guard.py source "$PWD" metadata.actual.json
+    - name: Format, clippy and exact licence policy
+      run: |
+        set -euo pipefail
+        cd native
+        cargo fmt --all -- --check
+        cargo clippy --locked --offline --workspace --all-targets --all-features -- -D warnings
+        cargo deny --locked --offline --all-features --config __A_DENY_CONFIG__ check licenses bans sources
+    - name: Nonempty frozen native suite in debug and release
+      run: |
+        set -euo pipefail
+        cd native
+        for mode in debug release; do
+          flags=()
+          if [ "$mode" = release ]; then flags+=(--release); fi
+          cargo test --locked --offline --workspace --all-targets --all-features "${flags[@]}" -- --list > "$mode.list"
+          cargo test --locked --offline --workspace --all-targets --all-features "${flags[@]}" -- --nocapture 2>&1 | tee "$mode.tests"
+          python3 ../docs/reviews/U4-B-native-ci-v1/ci_guard.py tests "$mode.list" "$mode.tests" __A_REQUIRED_NATIVE_TEST_NAMES_JSON__
+        done
