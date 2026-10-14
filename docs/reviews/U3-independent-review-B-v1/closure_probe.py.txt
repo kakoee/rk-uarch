@@ -1,0 +1,37 @@
+"""Reviewer probe: independent static (modulefinder) closure vs B's proposed inventory.
+
+Usage: python -I closure_probe.py <export-root> <support-delta.json>
+Static only; imports nothing from the export.
+"""
+
+import json
+import modulefinder
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+delta = json.loads(Path(sys.argv[2]).read_text())
+proposed = set(delta["retained"]) | set(delta["added"])
+
+path = [str(root), str(root / "src"), str(root / "contract")] + [
+    p for p in sys.path if "site-packages" not in p and p
+]
+finder = modulefinder.ModuleFinder(path=path)
+entries = ["scripts/u2_inputs.py", "scripts/vendor_rk.py"]
+if (root / "scripts/u2_support.py").exists():
+    entries.append("scripts/u2_support.py")
+local = set()
+for entry in entries:
+    finder.run_script(str(root / entry))
+for name, mod in finder.modules.items():
+    f = getattr(mod, "__file__", None)
+    if f and Path(f).resolve().is_relative_to(root):
+        local.add(Path(f).resolve().relative_to(root).as_posix())
+local |= set(entries)
+py_proposed = {p for p in proposed if p.endswith(".py")}
+print("modulefinder local .py:", len(local))
+print("proposed .py:", len(py_proposed))
+print("in modulefinder, not proposed:", sorted(local - py_proposed))
+print("proposed, not in modulefinder:", sorted(py_proposed - local))
+bad = {k: sorted(v) for k, v in finder.badmodules.items() if k.split(".")[0] in ("rkuarch", "uarch_contract", "scripts")}
+print("unresolved local names:", bad)

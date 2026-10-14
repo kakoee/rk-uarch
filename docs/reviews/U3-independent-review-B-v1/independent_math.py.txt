@@ -1,0 +1,105 @@
+"""Reviewer re-derivation of B's stated answers from parameterized formulas (not B's expressions)."""
+
+from fractions import Fraction as F
+from math import ceil
+
+
+def rope(B, S, Hq, Hkv, D, R, L, act_bytes, casts, coef_rows, coef_bytes=4,
+         per_head_coef=False, drop_tail=False, repeat_applied=1):
+    M = B * S
+    rot = {"q": M * Hq * R, "k": M * Hkv * R}
+    ops_per_scalar = 3 + (2 if casts else 0)
+    vec = sum(rot.values()) * ops_per_scalar * L * repeat_applied
+    coef_per_node = M * 2 * (R // 2) * coef_bytes  # cos+sin, R/2 frequencies each
+    heads = {"q": Hq, "k": Hkv}
+    width = R if drop_tail else D
+    reads = writes = 0
+    for n in ("q", "k"):
+        act = M * heads[n] * D * act_bytes
+        reads += act + coef_per_node * (heads[n] if per_head_coef else 1)
+        writes += M * heads[n] * width * act_bytes
+    alloc = coef_rows * (R // 2) * 2 * coef_bytes
+    return vec, reads * L, writes * L, alloc
+
+
+base = dict(B=2, S=2, Hq=3, Hkv=1, D=6, R=4, L=3, act_bytes=2, casts=True, coef_rows=17)
+checks = {
+    "prefill base (960,960,576,272)": (rope(**base), (960, 960, 576, 272)),
+    "R=2 (480,768,576,136)": (rope(**{**base, "R": 2}), (480, 768, 576, 136)),
+    "FP32 (576,1536,1152,272)": (rope(**{**base, "act_bytes": 4, "casts": False}), (576, 1536, 1152, 272)),
+    "omitted casts -> 576 vec": (rope(**{**base, "casts": False})[0], 576),
+    "per-head coefficient reread -> 1344 reads": (rope(**{**base, "per_head_coef": True})[1], 1344),
+    "dropped tail -> 384 writes": (rope(**{**base, "drop_tail": True})[2], 384),
+    "repeat applied twice -> 2880": (rope(**{**base, "repeat_applied": 3})[0], 2880),
+    "Hkv->Hq K vectors 720": (base["B"] * base["S"] * 3 * 4 * 5 * 3, 720),
+    "decode C=17/33 (480,480,288)": (rope(**{**base, "S": 1})[:3], (480, 480, 288)),
+}
+# A's E5 cross-lane consistency (one layer, B=1,S=1,Hq=2,Hkv=1,D=4,R=4).
+e5 = dict(B=1, S=1, Hq=2, Hkv=1, D=4, R=4, L=1, act_bytes=2, casts=True, coef_rows=17)
+checks["A E5 (60,56,24)"] = (rope(**e5)[:3], (60, 56, 24))
+checks["A E5 x2 repeats (120,112,48)"] = (rope(**{**e5, "L": 2})[:3], (120, 112, 48))
+checks["A E5 R=2 (30,40,24)"] = (rope(**{**e5, "R": 2})[:3], (30, 40, 24))
+checks["A E5 prefill B2S3 (360,336,144)"] = (rope(**{**e5, "B": 2, "S": 3})[:3], (360, 336, 144))
+checks["A E5 FP32 (36,80,48)"] = (rope(**{**e5, "act_bytes": 4, "casts": False})[:3], (36, 80, 48))
+
+# Roofline: GEMM M=2,K=3,N=4 BF16.
+Mm, Kk, Nn = 2, 3, 4
+ops = 2 * Mm * Kk * Nn
+rd, wr = 2 * (Mm * Kk + Kk * Nn), 2 * Mm * Nn
+checks["GEMM ops/reads/writes"] = ((ops, rd, wr), (48, 36, 16))
+checks["GEMM 13/6.5/13 ns"] = ((max(F(ops, 12), F(rd + wr, 4)), max(F(ops, 12), F(rd + wr, 8)),
+                               max(F(ops, 24), F(rd + wr, 4))), (13, F(13, 2), 13))
+c, m = (8, 0), (2, 6)
+agg = lambda c, m: max(sum(c), sum(m))  # noqa: E731
+per = lambda c, m: sum(max(a, b) for a, b in zip(c, m))  # noqa: E731
+checks["agg/per_op and 2x clock"] = ((agg(c, m), per(c, m), agg((4, 0), m), per((4, 0), m)), (8, 14, 8, 10))
+
+
+# Clock edges at 1.2 GHz, exact rational ceil; build-spec next_edge(t, n) = t_{k+n}.
+def t(k, f=1_200_000_000):
+    return ceil(F(k * 10**12, f))
+
+
+def next_edge(tp, n, f=1_200_000_000):
+    k = 0
+    while t(k, f) < tp:
+        k += 1
+    k_formula = 0 if tp == 0 else (tp - 1) * f // 10**12 + 1  # A's integer-only index
+    assert k == k_formula
+    return t(k + n, f)
+
+
+checks["edges 0..4"] = ([t(k) for k in range(5)], [0, 834, 1667, 2500, 3334])
+checks["next_edge(834,0),(835,0),(835,2),(0,3)"] = (
+    (next_edge(834, 0), next_edge(835, 0), next_edge(835, 2), next_edge(0, 3)), (834, 1667, 3334, 2500))
+checks["edge 1e9"] = (t(10**9), 833_333_333_334)
+
+
+# Finite-window queue: clipped residence integral vs naive departures-only lambda*W.
+jobs = [(0, 4), (2, 6)]
+
+
+def area(a, b):
+    return sum(max(0, min(e, b) - max(s, a)) for s, e in jobs)
+
+
+checks["queue [0,8): area 8, L=1, lambda*W=1"] = (
+    (area(0, 8), F(area(0, 8), 8), F(len(jobs), 8) * F(sum(e - s for s, e in jobs), len(jobs))), (8, 1, 1))
+dep = [(s, e) for s, e in jobs if 1 <= e < 5]
+checks["queue [1,5): L=3/2 vs naive 1"] = (
+    (F(area(1, 5), 4), F(len(dep), 4) * F(sum(e - s for s, e in dep), len(dep))), (F(3, 2), 1))
+checks["DMA inflight 32+128-64"] = (32 + 128 - 64, 96)
+checks["latency-bound DMA 16/8, 8 req 32/64 ns"] = (
+    (min(64, F(2 * 64, 8)), min(64, F(64, 8)), ceil(F(8, 2)) * 8, 8 * 8), (16, 8, 32, 64))
+checks["transfer 10/13/6 ns"] = ((2 * 3 + F(64, 16), 3 * 3 + F(64, 16), 2 * 1 + F(64, 16)), (10, 13, 6))
+checks["refresh 90"] = (100 * (1 - F(1, 10)), 90)
+fr = [1_000_000 + i * 1_999_000_000 // 23 for i in range(24)]
+checks["C1 anchors distinct/endpoints/in-range"] = (
+    (len(set(fr)), fr[0], fr[-1], all(1 <= 1 + i <= 64 and 1 <= 64 - i <= 64 for i in range(24))),
+    (24, 1_000_000, 2_000_000_000, True))
+checks["C1 budgets 96+96<=240; mutant 96+96<=240"] = ((24 * 2 * 2 * 2, 24 * 2 * 2 * 2), (192, 192))
+
+bad = {k: v for k, v in checks.items() if v[0] != v[1]}
+for k, (got, want) in checks.items():
+    print(("OK  " if got == want else "BAD ") + k, got)
+print("ALL MATCH" if not bad else f"MISMATCHES: {sorted(bad)}")

@@ -1,0 +1,53 @@
+"""Bounded revert of ONLY the A-F9 correction in a scratch copy of the target export.
+
+Run: python3 -I revert_af9.py <scratch-copy-root> <full|delivery|u0011>
+Each edit must match exactly once (else abort). Edits restore the Stage 1 state of the
+A-F9 text only: the 184d2c2 delivery had no U9 budget record, and its U0011 paragraph had
+no U0011-Q sentence. A-F10's edits in the same U0011 paragraph are left in place.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+root, mode = Path(sys.argv[1]), sys.argv[2]
+pkg = root / "docs/reviews/U3-native-stage-design-v2"
+
+EDITS = {
+    "delivery": [
+        ("delivery.md",
+         "## Stage 2 prospective U9 budget record (A-F9)\n",
+         "## Stage 2 B CI assignment and shared prompt decisions\n",
+         "section"),
+    ],
+    "u0011": [
+        ("proposed-U0011.md",
+         "new consumer budgets before performance work. The later prospective U0011-Q addendum defined in delivery.md\n"
+         "supplies U9's representative single-point trigger; the small fixture ceiling does not.\n",
+         "new consumer budgets before performance work.\n",
+         "replace"),
+    ],
+    "summaries": [
+        ("README.md", "names U6 inputs/U0011-Q and narrows", "names U6 inputs and narrows", "replace"),
+        ("decisions.md", "(A-F9) later U0011-Q budget record; ", "", "replace"),
+    ],
+}
+groups = {"full": ["delivery", "u0011", "summaries"], "delivery": ["delivery"], "u0011": ["u0011"]}[mode]
+
+for group in groups:
+    for name, old, new, kind in EDITS[group]:
+        path = pkg / name
+        text = path.read_text()
+        if kind == "section":
+            assert text.count(old) == 1 and text.count(new) == 1, (name, "section anchors")
+            start, end = text.index(old), text.index(new)
+            assert start < end
+            removed = text[start:end]
+            text = text[:start] + text[end:]
+        else:
+            assert text.count(old) == 1, (name, old[:60])
+            removed = old
+            text = text.replace(old, new)
+        path.write_text(text)
+        print(f"REVERTED {mode}:{group} {name}: removed {len(removed.splitlines())} line(s), {len(removed)} chars")

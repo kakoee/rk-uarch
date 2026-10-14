@@ -663,8 +663,8 @@ time; it does not start a compiler or rk-uarch during an rk-sim simulation.
 
 | Rung | Establishes | Examples | Badge it supports |
 |---|---|---|---|
-| L0 invariants | No self-contradiction | MAC and byte conservation; utilisation ≤ 1; Little's law ≤ 1%; causality; byte-identical reruns; per-core SRAM occupancy ≤ capacity; attribution sums to duration; energy = Σ counts × coefficients + static × duration | none |
-| L0m metamorphic | Relations without an answer key | Bandwidth ×2 never slower; any latency ×2 never faster; fewer outstanding requests never faster; `cold` never faster than `steady`; clock ×k → compute-bound ÷k; monotone in batch and context; symmetry; idle-core invariance | none |
+| L0 invariants | No self-contradiction | MAC counts and per-boundary transfer inventory; utilisation ≤ 1; finite-window queue conservation, stationary Little's law ≤ 1% with valid premises; causality; byte-identical reruns; per-core SRAM occupancy ≤ capacity; attribution sums to duration; energy = Σ counts × coefficients + static × duration | none |
+| L0m metamorphic | Relations without an answer key | Bandwidth ×2 never slower; any latency ×2 never faster; fewer outstanding requests never faster; `cold` never faster than `steady`; analytic T/k ≤ T' ≤ T with fixed work/rates; exact clock equality only under declared dominance; monotone in batch and context; symmetry; idle-core invariance | none |
 | L1 analytical limits | Closed forms where exact | Transfer = hops × latency + serialisation; streaming = peak derated for refresh ±5% (levels 0–1; level 2 ≤ derated peak, efficiency recorded); latency-bound stream = outstanding × request size ÷ round trip ±5%; resident GEMM pipeline formula for the declared dataflow; **C2 ≥ own U-C0 roofline**; two hand-computed fixtures | none |
 | L2 differential | Same abstraction as independent models | BookSim2, Ramulator 2, SCALE-Sim v3 (per declared dataflow), Gemmini RTL (optional), tt-npe; optional matched component comparisons; Timeloop mapping reference (optional, recorded, never used to change a policy); per-access energy references, one per coefficient family (deferred until after U8). A comparison of a sub-model with the same code (a native DRAM bridge using Ramulator 2, against the same Ramulator 2) is refused as not independent | none: "verified", not "validated" |
 | L3 same-class silicon | How far the method misses on a real chip | TPU v5e (large-core), Blackhole p100a (mesh); predictions committed before results, with ordering enforced by git; device-side time only; each benchmark tagged `matched` or `compiler-chosen` mapping; compiler-reported FLOPs and bytes checked against the workload graph (workload fidelity); device counters, where the chip exposes them, checked against the row diagnostics (diagnostic fidelity) | `estimated`, scoped |
@@ -676,6 +676,15 @@ time; it does not start a compiler or rk-uarch during an rk-sim simulation.
 - Mapping error is not model error. `matched` and `compiler-chosen` benchmarks are separate
   ledger classes, and every gate verdict states which group it read (F12).
 - Duration evidence never validates energy (F11).
+
+U0011 records the U3-approved component design and verification semantics. DMA inventory
+uses actual boundary/direction/unit observations, including requests crossing the window;
+operand reuse/new outputs are not a conserved transfer inventory. The exact DMA and
+analytic clock requirements in U-P6 below are synchronized with its standalone prompt.
+Finite-window checks belong to represented B mechanisms; stationary Little's law needs
+its declared first-claim premises. Independent component bounds do not require a new
+analytic component API. U4 authorization, exact schemas/toolchains and performance budgets
+remain separate. The U0002 prospective addendum leaves current enforcement installed.
 
 ### 2.8 The native engine
 
@@ -2403,6 +2412,10 @@ checks pass before reliance; unrelated report completion does not block K1. Keep
 outcomes, missing coverage and U0006 reductions. Do not blanket-pause C1–C5, lower case
 counts or call unobservable mechanisms verified. Native checks follow admitted mechanisms.
 Provide the dependency disposition before a revised execution selection is authorized.
+U0011 records the accepted U3 design/shared semantics, not permission to start U4. At B use
+independent component bounds; no full-model analytic job masquerades as a component API.
+B owns real Linux CI preparation before K1 evidence, once U4 and exact tool/license pins
+are authorized. Current artifact enforcement stays active until a separately approved migration.
 
 TASK: the rungs that establish that the simulator does not contradict itself, and relations
 that must hold even though nobody knows the right answer. They run against ANY engine through
@@ -2411,10 +2424,23 @@ them once.
 
 1. validation/L0_invariants/ — per engine run:
    - MACs executed == MACs in the operator graph (from the workload graph, not re-derived);
-   - DMA bytes moved in == bytes consumed by compute plus bytes written back;
+   - For each represented DMA boundary, direction and declared byte unit,
+     freeze the request population and half-open observation window [t0,t1). With no cancellation
+     or loss, verify `in_flight_end = in_flight_start + issued_bytes - completed_bytes` from actual
+     issue/completion observations, including requests crossing either boundary. Start/end state
+     is immediately before events at t0/t1 respectively. Payload versus
+     transaction/padding bytes, multicast duplication, partial completion, cancellation and
+     retry semantics require explicit ledger terms before the applicable check. Verify local
+     resident capacity separately from distinct allocation/lifetime/alias observations. Compute
+     operand consumption is not a conserved transfer-byte inventory: reuse and newly produced
+     outputs forbid a general `DMA in = compute consumed + written back` identity. Missing
+     required observations leave the represented stage unverified; analytic absence remains
+     unsupported and cannot produce a positive check.;
    - no resource utilisation > 1 over any window;
-   - Little's law within 1% on every queue the engine reports (mean occupancy vs arrival
-     rate × mean residence);
+   - finite-window membership, clipped residence and conservation for represented queues
+     at B, including initial/terminal members; stationary Little's law within 1% at its
+     first qualifying claim (normally U6 or earlier reliance), with frozen population,
+     window, boundary/censoring and nonzero-flow premises; missing observations never pass;
    - causality: no event or interval begins before the one it depends on (for engines that
      emit traces);
    - byte-identical reruns;
@@ -2426,8 +2452,16 @@ them once.
      null.
 2. validation/L0m_metamorphic/ — relations over PAIRS of runs:
    - doubling any bandwidth (DRAM, NoC link, SRAM port) never increases duration;
-   - scaling every core-domain clock by k scales a compute-bound query's duration by 1/k
-     within 1%, and changes a DRAM-bound one by less than k;
+   - For k>1, compare f with k*f using identical admitted resolved work,
+     precision, assumptions and all non-compute rates, including fixed DRAM bandwidth; validate
+     both transformed hardware inputs. For the analytic max/sum model require `T/k <= T' <= T`.
+     Exact `T'=T/k` needs aggregate compute dominance at the faster clock, or compute dominance
+     for every op at that clock in per_op mode. Exact `T'=T` needs aggregate memory dominance at
+     the base/slower clock, or memory dominance for every op at that clock in per_op mode.
+     State speedup as T/T', with positive durations: strict speedup <k requires a strictly
+     binding fixed memory term at the faster clock (a tie alone is insufficient). Mixed-bound
+     and memory-only-op domains cannot inherit exact reciprocal scaling by tolerance. Preserve
+     all failures, unsupported premises, budgets and historical reason codes.;
    - decode duration is non-decreasing in batch and in context;
    - permuting core ids on a symmetric topology (torus, or mesh with a symmetric mapping)
      leaves duration unchanged;

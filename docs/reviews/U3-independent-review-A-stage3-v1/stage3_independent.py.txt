@@ -1,0 +1,235 @@
+"""Lane A Stage 3 reviewer probe: judge whether each applied A-F1..A-F10 correction is
+substantively present, using derivations independent of the author's f1-f10 helpers.
+
+Run: <venv-python> -I -B stage3_independent.py <export-root>
+Read-only. Imports only strict existing carriers from <export-root> (origin asserted).
+Proposal-text and arithmetic checks only; never a native execution or regression result.
+Prints one PASS/FAIL line per finding and exits 1 if any fails.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import sys
+from fractions import Fraction as F
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+sys.path[:0] = [str(root / "contract"), str(root / "src")]
+import yaml  # noqa: E402
+
+import uarch_contract  # noqa: E402
+from uarch_contract.hardware import HardwareSpec, sourced_leaves  # noqa: E402
+from uarch_contract.prepared import PreparedOp  # noqa: E402
+from uarch_contract.table import Counts, ExtCounts  # noqa: E402
+
+assert Path(uarch_contract.__file__).resolve().is_relative_to(root), uarch_contract.__file__
+pkg = root / "docs/reviews/U3-native-stage-design-v2"
+I, V, D, U = ((pkg / n).read_text() for n in ("interface.md", "verification.md", "delivery.md", "proposed-U0011.md"))
+PLAN = (root / "docs/execution-plan.md").read_text()
+PS = 10**12
+
+
+def ne(f: int, t: int, n: int = 0) -> int:
+    """E2's integer first-edge formula (verified against the search definition at Stage 1)."""
+    k = 0 if t == 0 else (t - 1) * f // PS + 1
+    return -(-(k + n) * PS // f)
+
+
+CAP = F(PS) * F(71, 78) / 8
+SVC = F(256) * PS / CAP
+
+
+def lifecycle(core: int, noc: int, dram: int, write: bool, ordinal: int) -> list[list[int]]:
+    """Reviewer reading of revised verification.md:101-127, one 256 B request, 2 hops each way."""
+    issue = ne(core, 0, 0)
+    port = [ne(core, issue, 0), ne(core, ne(core, issue, 0), 1)] if write else []
+    leave = port[1] if write else issue
+    req = [ne(noc, leave, 0), ne(noc, leave, 4)]
+    lat = [ne(dram, req[1], 0), ne(dram, req[1], 48)]
+    s = F(lat[1]) + (ordinal - 1) * SVC  # same-burst FIFO: S = max(L, previous exact F)
+    f = s + SVC
+    chan = [-(-s.numerator // s.denominator), -(-f.numerator // f.denominator)]
+    resp = [ne(noc, chan[1], 0), ne(noc, chan[1], 4)]
+    end = [ne(core, resp[1], 0), ne(core, resp[1], 0) if write else ne(core, ne(core, resp[1], 0), 1)]
+    return [[issue], port, req, lat, chan, resp, end]
+
+
+def cells(row: str) -> list[list[int]]:
+    return [[int(x) for x in re.findall(r"\d+", c)] for c in row.strip().strip("|").split("|")[1:]]
+
+
+results: dict[str, str] = {}
+
+
+def check(name: str):
+    def wrap(fn):
+        try:
+            fn()
+            results[name] = "PASS"
+        except Exception as exc:  # noqa: BLE001 - report the failing assertion
+            results[name] = f"FAIL {type(exc).__name__}: {str(exc)[:160]}"
+        return fn
+    return wrap
+
+
+@check("A-F1")
+def _f1():
+    sec = I.split("## Stage 2 exact admission proposal (A-F1)", 1)[1].split("\n## ", 1)[0]
+    rows = [r for r in sec.splitlines() if r.startswith("| B |") or r.startswith("| K2 |")]
+    prod = [r for r in rows if "| production |" in r and r.startswith("| B |")]
+    assert len(prod) == 1 and "npu-l4" in prod[0] and "ratio1" in prod[0] and "component / cold" in prod[0]
+    for scope in ("component / cold or fixture_resident", "transport_fixture", "kernel_fixture"):
+        assert any(r.startswith("| B | test |") and scope in r for r in rows), scope
+    assert any(r.startswith("| K2 | production |") and "UnsupportedCheckpointScope" in r for r in rows)
+    # Each Stage 1 A-F1 casualty needs an admissible variant family.
+    needs = {"V08 one-credit/caps1-2": "max_outstanding1/2/32", "E3 half accumulator": "accumulator\n131072",
+             "clock relation": "core frequency ratios {1,2}", "latency monotonicity": "latency×1/×2",
+             "BW monotonicity": "operand/\nDMA rates×1/×2", "idle core": "one unused column"}
+    for need, text in needs.items():
+        assert text in sec, need
+    for code in ("TestProfileMismatch", "TestVariantNotAdmitted", "TestOnlyHardware", "TestOnlyScope", "AdmissionMismatch"):
+        assert code in sec, code
+    assert "never a sourced\nchip claim" in sec and "proposed-design stipulation with a rationale" in sec
+    assert "R17/R18 govern production only" in sec
+
+
+@check("A-F2")
+def _f2():
+    rows = [r for r in V.splitlines() if re.match(r"\| (read|write)\d", r)]
+    clocks = {"1/1/1": (10**9, 10**9, 10**9), "1/1.2/1": (10**9, 1_200_000_000, 10**9),
+              "0.8/1.2/0.9": (800_000_000, 1_200_000_000, 900_000_000)}
+    assert len(rows) == 7, len(rows)
+    for r in rows:
+        case = r.split("|")[1]
+        kind, clk = re.match(r"\s*(read|write)\d.*\(([\d./]+)\)", case).groups()
+        ordinal = 2 if "read2" in case else 1
+        want = lifecycle(*clocks[clk], kind == "write", ordinal)
+        assert cells(r) == want, (case, cells(r), want)
+    assert ne(10**9, 54250, 4) == 59000, "old 58250 reading must be excluded by the law"
+    flat = " ".join(V.split())  # prose wraps; compare whitespace-normalized text
+    assert "do not align channel completion to a DRAM edge" in flat, "DRAM-edge rule"
+    assert "noc[0,4000), memory[4000,54250), noc[54250,59000), memory[59000,60000)" in flat, "attribution partition"
+    assert 4000 + (54250 - 4000) + (59000 - 54250) + (60000 - 59000) == 60000
+
+
+@check("A-F3")
+def _f3():
+    def burst(svc):
+        out, port_free = [], 0
+        for j in range(1, 6):
+            fin = F(52000) + j * svc
+            resp = ne(10**9, -(-fin.numerator // fin.denominator), 4)
+            start = ne(10**9, max(resp, port_free), 0)
+            port_free = ne(10**9, start, 1)
+            out.append(port_free)
+        return out
+    good, bad = burst(SVC), burst(F(2048))
+    assert good == [60000, 62000, 64000, 66000, 69000] and bad == [60000, 62000, 64000, 66000, 68000]
+    assert str(good).replace(" ", "") in V and str(bad).replace(" ", "") in V
+    assert "54250 versus54048" in V and 52000 + 2048 == 54048
+    assert all(((1536 + 2048 * j) // 256) % 8 == 6 for j in range(33))
+    assert "no separate finite issue-rate cap" in V and "Only compute jobs pay job_overhead_cycles" in V
+    assert "V13 B | E4 five-read refresh discriminator69000 vs68000" in V
+
+
+@check("A-F4")
+def _f4():
+    # a(owner0,3000) || p(owner1,1000); z(owner0,0) after p; c(owner1,2000) after z.
+    grant = max(1000, 3000)
+    assert grant + 2000 == 5000 and max(3000, 1000 + 2000) == 3000
+    assert "**after owner grant**" in I and "c ends at **5000 ps**" in I and "Bypassing the owner makes 3000 and must fail" in I
+    assert "No NoC cycle or alignment is charged for\nh=0" in I and "nonaliasing" in I
+    assert "zero-duration" in U.lower() or "owner grant" in U
+
+
+@check("A-F5")
+def _f5():
+    blocks = re.findall(r"```json\n(.*?)\n```", I, re.S)
+    op, proj = json.loads(blocks[0]), json.loads(blocks[1])
+    PreparedOp.model_validate(dict(id="g0", depends_on=[], padding=[], replication=[], fusion="none",
+                                   kv_access=None, weight_copies=1, work_repeat=1, embedding_local_tokens=None,
+                                   operand_access={"X": "read", "W": "read", "Y": "write"}, spec=op))
+    Counts.model_validate(proj["counts"])
+    ExtCounts.model_validate(proj["ext_counts"])
+    assert proj["work_counts"]["completed_mac_count"] == 16 * 256 * 256
+    assert proj["counts"]["matrix_ops"] == 2 * proj["work_counts"]["completed_mac_count"]
+    m, k, n = 3, 5, 7
+    assert (m * k * n, 2 * (m * k + k * n), 2 * m * n, 2 * 256, 256) == (105, 100, 42, 512, 256)
+    assert "completed_mac_count105" in I and "transactions512/256" in I
+    assert "Counts memory_read/write_bytes\nare completed HBM **payload**" in I
+    assert "operator_version=prepared-op/1" in I and "InvalidOperatorSchema" in I
+    assert I.index("then validate all content hashes and nested closure") < I.index("followed\nby invocation/profile")
+
+
+@check("A-F6")
+def _f6():
+    sec = I.split("## B hardware representation ledger", 1)[1].split("## Literal component", 1)[0]
+
+    def expand(p):
+        m = re.search(r"\{([^{}]+)\}", p)
+        if m:
+            return [y for alt in m[1].split(",") for y in expand(p[:m.start()] + alt + p[m.end():])]
+        return [p.replace("[i]", f"[{j}]") for j in range(4)] if "[i]" in p else [p]
+
+    listed = [x for r in sec.splitlines() if r.startswith("| ") and not r.startswith("| Paths") and not r.startswith("| ---")
+              for part in r.split("|")[1].strip().split("; ") for x in expand(part)]
+    spec = HardwareSpec.model_validate(yaml.safe_load((root / "hw/designs/npu-l4.yaml").read_bytes()))
+    actual = {p for p, _ in sourced_leaves(spec)}
+    assert len(listed) == len(set(listed)) == 59 and set(listed) == actual, sorted(set(listed) ^ actual)
+    region = 16777216 // 32
+    assert region == 524288 and 524288 // region == 1 and 147456 // region == 0
+    assert "bank=floor(offset_bytes/bank_region_bytes)" in sec and "InvalidBank" in sec
+    assert "owner_enumeration=native-owners/1" in sec
+
+
+@check("A-F7")
+def _f7():
+    k2 = next(r for r in D.splitlines() if r.startswith("| K2 /"))
+    b = next(r for r in D.splitlines() if r.startswith("| B /"))
+    assert "mapper/import" not in k2.split("Component mapper/import is required before B, not K2")[0].split("|")[3]
+    assert "M component mapper/import" in b
+    assert "fixed-delay" in U and "mapper" in U
+
+
+@check("A-F8")
+def _f8():
+    def row(label):
+        r = next(x for x in D.splitlines() if x.startswith("| " + label))
+        return [tuple(int(v) for v in c.strip().split("–")) for c in r.split("|")[2:5]]
+    w, r_, t = row("W shared"), row("R-specific"), row("T U7")
+    tot = lambda rows: (sum(a for a, _ in rows), sum(b for _, b in rows))  # noqa: E731
+    assert tot(w) == (76, 124) and tot(r_) == (44, 76)
+    assert (tot(w)[0] + tot(r_)[0], tot(w)[1] + tot(r_)[1]) == (120, 200)
+    wt = [(a[0] + b[0], a[1] + b[1]) for a, b in zip(w, t)]
+    assert tot(wt) == (184, 312) and wt == [(100, 168), (64, 112), (20, 32)]
+    assert "W+T totals **184–312**" in D and "(A100–168, B64–112, review20–32)" in D
+    for q in ("| Q6-C |", "| Q6-D |", "| Q6-W |"):
+        assert q in D
+
+
+@check("A-F9")
+def _f9():
+    sec = D.split("## Stage 2 prospective U9 budget record (A-F9)", 1)[1].split("\n## ", 1)[0]
+    quoted = re.search(r"replace execution-plan U9's phrase\n“([^”]+)”", sec).group(1)
+    assert quoted in PLAN.replace("\n", " "), "quoted phrase must match live execution-plan U9 text"
+    assert "small K2/B diagnostic fixture is not that trigger" in sec and "both routes still require G6 and full G5" in sec
+    assert "No numeric threshold is accepted here or live text edited" in sec
+    assert "U0011-Q addendum defined in delivery.md\nsupplies U9's representative single-point trigger" in U
+
+
+@check("A-F10")
+def _f10():
+    tile_req = (2 * 256 * 256 * 3) // 256
+    assert 16 * 4 * tile_req == 98304 and (8192 + 131072 + 8192) // 256 == 576
+    assert "K2 up to256 fixed-delay jobs/1024 edges" in I and "planning ≤18432" in I and 576 * 32 == 18432
+    assert "No records may be dropped\nto fit it" in I and "Maximum production B scope is unchanged" in D
+    assert "≤256 fixed-delay jobs/1024 edges" in U
+
+
+for name in sorted(results, key=lambda s: int(s.split("F")[1])):
+    print(name, results[name])
+bad = [k for k, v in results.items() if v != "PASS"]
+print("independent-stage3 failures:", bad)
+sys.exit(1 if bad else 0)

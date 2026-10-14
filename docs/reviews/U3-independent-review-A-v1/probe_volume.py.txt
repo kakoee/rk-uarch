@@ -1,0 +1,38 @@
+"""Lane A review probe: lower-bound size of mandatory B observations at the largest admitted
+component input, versus the proposed 5 s / 512 MiB all-in invocation envelope.
+
+Standard library only. Reviewer estimate from interface.md field lists; not a measurement.
+Lower bound: counts only one `dma` and one `transfers` record per 256-byte request plus
+two queue_membership records (credit inflight + channel service); omits events, jobs,
+allocations, resource_intervals, critical_path, core-port waits and all identity fields.
+"""
+
+from __future__ import annotations
+
+import json
+
+ops, M, K, N, cores, request = 16, 1024, 256, 256, 4, 256
+rows_per_core = M // cores
+per_tile_bytes = 2 * rows_per_core * K + 2 * K * N + 2 * rows_per_core * N  # X + replicated W + Y
+requests = ops * cores * (per_tile_bytes // request)
+print("B-MAX-REQUESTS", requests, "payload_bytes", ops * cores * per_tile_bytes)
+
+ps = 10**10  # realistic 11-digit picosecond values
+dma = {
+    "request_id": "op15.t3.x.r00511", "job_id": "op15.t3.dma.x", "dma_engine_id": 15,
+    "direction": "read", "source_buffer_id": "hbm.op15.x", "destination_buffer_id": "c3.s1.x",
+    "payload_bytes": 256, "transaction_bytes": 256, "credit_acquire_ps": ps, "issue_ps": ps,
+    "complete_ps": ps, "credit_release_ps": ps, "route_id": "c3-ch7",
+}
+transfer = {
+    "request_id": "op15.t3.x.r00511", "boundary_id": "hbm-to-sram.c3", "direction": "read",
+    "payload_bytes": 256, "transaction_bytes": 256, "enter_ps": ps, "leave_ps": ps,
+}
+queue = {
+    "queue_id": "dram.ch7.service", "item_id": "op15.t3.x.r00511", "population": "service",
+    "enter_ps": ps, "leave_ps": ps, "owner_id": 1234, "clock_domain": "dram",
+}
+sizes = [len(json.dumps(r, sort_keys=True, separators=(",", ":"))) + 1 for r in (dma, transfer, queue, queue)]
+records = 4 * requests
+lower_bound_bytes = requests * sum(sizes)
+print("RECORD-BYTES", sizes, "LOWER-BOUND-RECORDS", records, "LOWER-BOUND-MiB", round(lower_bound_bytes / 2**20, 1))

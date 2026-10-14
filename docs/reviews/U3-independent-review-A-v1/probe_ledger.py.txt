@@ -1,0 +1,76 @@
+"""Lane A review probe: classify every npu-l4 leaf against interface.md's B hardware ledger
+and check the resident projection against the existing count carriers.
+
+Run with: <venv-python> -I probe_ledger.py <export-root>. Read-only; export imports asserted.
+The classification table below is the reviewer's reading of interface.md lines 33-39,
+48-58 and 110-124 plus verification.md E3/E4; it is not author text.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+sys.path[:0] = [str(root / "src"), str(root / "contract"), str(root)]
+
+import yaml  # noqa: E402
+
+import uarch_contract  # noqa: E402
+from uarch_contract.hardware import HardwareSpec, sourced_leaves  # noqa: E402
+from uarch_contract.table import Counts, ExtCounts  # noqa: E402
+
+assert Path(uarch_contract.__file__).resolve().is_relative_to(root)
+
+spec = HardwareSpec.model_validate(yaml.safe_load((root / "hw/designs/npu-l4.yaml").read_bytes()))
+leaves = [path for path, _ in sourced_leaves(spec)]
+
+used_by_laws = [
+    r"clock_domains\.(core|noc|dram)\.freq_hz",
+    r"cores\.grid\.(rows|cols)",
+    r"cores\.core_type\.matrix_engine\.array\.(rows|cols)",
+    r"cores\.core_type\.matrix_engine\.accumulator_bytes",
+    r"cores\.core_type\.matrix_engine\.operand_bytes_per_cycle",
+    r"cores\.core_type\.sram\.bytes",
+    r"cores\.core_type\.dma\.(engines|bytes_per_cycle|max_outstanding|request_bytes)",
+    r"cores\.core_type\.job_overhead_cycles",
+    r"sync\.barrier_latency_cycles",
+    r"nocs\[0\]\.router_latency_cycles",
+    r"memory\.interleave\.granularity_bytes",
+    r"memory\.dram\.(channels|bw_bytes_per_s)",
+    r"memory\.dram\.timing\.t_(rcd|rp|cl|rfc|refi)_cycles",
+    r"formats\.bf16\.accumulate_bytes",
+]
+listed_unrepresented = [
+    r"cores\.core_type\.sram\.(banks|bytes_per_cycle_per_bank)",
+    r"nocs\[0\]\.(link_bytes_per_cycle|virtual_channels|buffer_flits)",
+    r"memory\.controllers\[\d\]\.(read_queue_depth|write_queue_depth|noc_credits)",
+    r"memory\.dram\.organization\.(ranks|bank_groups|banks_per_group|row_bytes)",
+    r"cores\.core_type\.vector_engine\.ops_per_cycle",
+    r"energy\..*",
+    r"static_power_w",
+    r"tdp_w",
+]
+
+
+def match(path: str, patterns: list[str]) -> bool:
+    return any(re.fullmatch(p, path) for p in patterns)
+
+
+unclassified = [p for p in leaves if not match(p, used_by_laws) and not match(p, listed_unrepresented)]
+print("LEAVES", len(leaves))
+print("UNCLASSIFIED", unclassified)
+
+# Resident C1 projection from interface.md versus existing count carriers.
+body = (root / "docs/reviews/U3-native-stage-design-v2/interface.md").read_text()
+projection = json.loads(re.findall(r"```json\n(.*?)\n```", body, re.S)[1])
+for name, model, data in (("counts", Counts, projection["counts"]), ("ext_counts", ExtCounts, projection["ext_counts"])):
+    try:
+        model.model_validate(data)
+        print("PROJECTION", name, "valid against existing carrier")
+    except Exception as exc:
+        kinds = sorted({e["type"] + ":" + ".".join(map(str, e["loc"])) for e in exc.errors()})  # type: ignore[attr-defined]
+        print("PROJECTION", name, "refused by existing carrier", kinds)
+print("EXISTING-EXTCOUNTS-FIELDS", sorted(ExtCounts.model_fields))

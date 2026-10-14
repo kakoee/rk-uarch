@@ -1,0 +1,109 @@
+{
+  "kind": "author-proposal-arithmetic-only",
+  "no_refresh_completion_ps": [
+    60000,
+    62000,
+    64000,
+    66000,
+    68000
+  ],
+  "refresh_completion_ps": [
+    60000,
+    62000,
+    64000,
+    66000,
+    69000
+  ],
+  "timing_rows_ps": {
+    "read-1g": [
+      4000,
+      4000,
+      52000,
+      54250,
+      55000,
+      59000,
+      59000,
+      60000
+    ],
+    "read-noc1.2": [
+      3334,
+      4000,
+      52000,
+      54250,
+      55000,
+      58334,
+      59000,
+      60000
+    ],
+    "read-three-domains": [
+      3334,
+      3334,
+      56667,
+      58917,
+      59167,
+      62500,
+      62500,
+      63750
+    ],
+    "read2-same-burst": [
+      54250,
+      56500,
+      61000,
+      62000
+    ],
+    "write-1g": [
+      5000,
+      5000,
+      53000,
+      55250,
+      56000,
+      60000,
+      60000,
+      60000
+    ],
+    "write-noc1.2": [
+      5000,
+      5000,
+      53000,
+      55250,
+      55834,
+      59167,
+      60000,
+      60000
+    ],
+    "write-three-domains": [
+      5000,
+      5556,
+      58889,
+      61139,
+      61667,
+      65000,
+      65000,
+      65000
+    ]
+  },
+  "volume_estimates": {
+    "c1-cold": {
+      "minimum_request_records": 2304,
+      "planning_request_records": 18432,
+      "request_bytes_at_256_B_per_record": 4718592,
+      "request_bytes_at_512_B_per_record": 9437184,
+      "requests": 576
+    },
+    "e4-33": {
+      "minimum_request_records": 132,
+      "planning_request_records": 1056,
+      "request_bytes_at_256_B_per_record": 270336,
+      "request_bytes_at_512_B_per_record": 540672,
+      "requests": 33
+    },
+    "max-b": {
+      "minimum_request_records": 393216,
+      "planning_request_records": 3145728,
+      "request_bytes_at_256_B_per_record": 805306368,
+      "request_bytes_at_512_B_per_record": 1610612736,
+      "requests": 98304
+    }
+  }
+}
+PASS: fixed examples and arithmetic fault distinctions; no native execution

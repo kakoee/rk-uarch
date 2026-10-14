@@ -284,3 +284,75 @@ numerical validation. The nominal test-only candidate is the compatibility subje
 work instead has independent correctness tests and complete discrepancies; an aggregate
 compatibility pass is not physical parity. Preserve all fixtures/refusals and A-F12 before
 calls. Actual npu-l4 refresh follows the existing human generation/adoption lifecycle.
+
+
+## U3 prospective dependency-policy decision — implementation pending
+
+Accepted by Javid (@jjaffari), 2026-10-13, **for U3 closeout only**; see the
+[approval record](../reviews/U3-reviewed-design-and-policy-v1/acceptance.md).
+This prospective choice does not replace currently installed enforcement or reinterpret
+historical acceptance. The complete existing enumerator and adopted source/artifact pair
+remain required until a separately authorized, tested transition is installed and adopted.
+No U4 work, installation, generation or adoption is authorized here.
+
+The exact selected repair is the [reviewed proposal](../reviews/U3-B-artifact-dependency-audit-v1/repair.patch)
+at `7afba9b16d954fd46684711764cb3718170e53aa`, SHA256
+`c238574b284ebecb6f0f1253922ce01af87259f0187aad38bcda628757e8fe6b`.
+Its [O1/O2 follow-up](../reviews/U3-B-U0002-bootstrap-followup-v1/README.md) discloses
+removal of pre-guard future imports, equivalent resolved type hints with changed raw
+annotation storage, root-write test defence, bootstrap limits and migration consequences.
+The current proposed inventory is 97→56; actual M imports/initializers/data must be audited
+before protected M installation. Neither count is a future exclusion quota.
+
+The selected prospective policy is:
+
+Keep immutable generation provenance, artifact integrity and current compatibility as
+distinct obligations. Preserve all published oracle artifacts and their recorded complete
+support inventories without rewriting their metadata or interpreting historical integrity
+as currentness. An unversioned support inventory continues to use the existing complete
+enumerator and full current-script/environment checks.
+
+For separately human-generated and adopted input sets carrying the exact
+`uarch-input-support/2` / `generator-imports-and-data/1` tooling policy, current support
+comprises the conservative local import closure of the reviewed staging/generator/verifier
+roots, including package initializers and function-local imports, the policy implementation
+itself, all Python files below scripts/, explicitly reserved top-level module files and
+existing reserved-namespace initializers, and reviewed non-import inputs. Under the actual
+ROOT, scripts/, src/ and contract/ search roots, refuse any new importable top-level module
+or namespace name outside the explicit reviewed local names/types. This covers names used
+by transitive imports as well as direct ones; it is not a direct-import-only guarantee.
+Adding a new top-level local name requires policy/source review. Nested unrelated consumer
+files and non-importable prose may remain unbound, unless reached or explicitly included.
+Run the name guard before non-bootstrap imports in direct staging/vendor entry points and
+package initialization, and again during strict support inventory verification. Its proposed
+bootstrap requires normal CPython >=3.12 with builtin sys and frozen os; other bootstraps
+refuse. Trusted startup/environment and no concurrent source race remain premises, not a
+sandbox against malicious interpreter hooks or arbitrary reflection. Bind existing reserved
+namespace initializers so adding/changing one cannot evade the inventory.
+Compare exact inventory and file bytes;
+reject unknown policy, unresolved/dynamic dependency forms outside the reviewed mechanism,
+ambiguous or shadowed imports, symlinks, missing/extra dependencies and content drift.
+Introducing dependencies requires their inclusion and review, not unchanged output values.
+
+Retain the complete vendor_rk script fingerprint, embedded oracle-program fingerprint,
+clean upstream pin and source capture, locks and recorded environment policy, explicit
+precision/PARAMS/model/source attribution, exact frozen-input/outer-copy joins, coverage,
+real refusals and current adoption identity. No exclusions based on whether a file is
+named report, CLI, schema or native. Imported files remain relevant regardless of label.
+Consumer code that does not contribute to generation or verification may change without
+regenerating a nominal oracle under the reviewed policy; its tests, implementation/result
+bindings and review obligations still apply. Oracle equality is not physical correctness.
+
+Only Javid's separately reviewed human lifecycle may create/adopt a new-policy artifact.
+Freeze the exact approved code, policy, upstream and full input set; generate twice in
+separate processes, check created then verified-identical, audit complete before/after
+semantics and provenance, and adopt the complete candidate in a separate human decision.
+CI consumes only committed adopted artifacts; it never generates, adopts, fabricates
+environment records or substitutes historical checks for current compatibility.
+
+The [exact migration sequence](../reviews/U3-B-artifact-dependency-audit-v1/migration.md)
+remains future work requiring separate releases. Preserve full nominal coverage and refusals,
+legacy dispatch and immutable artifacts. Changed generator fingerprints must bind the real
+future human generation; passing synthetic tests cannot replace it. A documentation-only
+U3 closeout uses the current valid source/artifact pair and requires no regeneration.
+No runtime currentness waiver, new policy-marked artifact or completed migration is claimed.

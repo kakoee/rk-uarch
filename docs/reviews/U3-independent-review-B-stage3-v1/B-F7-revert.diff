@@ -1,0 +1,42 @@
+--- /tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/811ea922-d92f-4ee3-93b4-e8edb3626d5f/scratchpad/s3/probes/supplement.saved	2026-10-13 16:28:19.188677033 -0700
++++ /tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/811ea922-d92f-4ee3-93b4-e8edb3626d5f/scratchpad/s3/pristine/docs/reviews/U3-B-readiness-supplement-v1/README.md	2026-10-13 16:28:50.126235616 -0700
+@@ -223,39 +223,9 @@
+ checkpoint and its distinction from V24. Missing mandatory B observations refuse credit;
+ no required stationary case is silently skipped merely because the premise was not frozen.
+ 
+-## Exact proposed prompt replacements — human decisions pending (B-F7)
+-
+-These replace the named requirements only after an exact human decision. Live U-P6 and
+-build-spec remain unchanged. They do not create native observation fields.
+-
+-**DMA replacement:** “For each represented DMA boundary, direction and declared byte unit,
+-freeze the request population and half-open observation window [t0,t1). With no cancellation
+-or loss, verify `in_flight_end = in_flight_start + issued_bytes - completed_bytes` from actual
+-issue/completion observations, including requests crossing either boundary. Start/end state
+-is immediately before events at t0/t1 respectively. Payload versus
+-transaction/padding bytes, multicast duplication, partial completion, cancellation and
+-retry semantics require explicit ledger terms before the applicable check. Verify local
+-resident capacity separately from distinct allocation/lifetime/alias observations. Compute
+-operand consumption is not a conserved transfer-byte inventory: reuse and newly produced
+-outputs forbid a general `DMA in = compute consumed + written back` identity. Missing
+-required observations leave the represented stage unverified; analytic absence remains
+-unsupported and cannot produce a positive check.”
+-
+-**Clock replacement:** “For k>1, compare f with k*f using identical admitted resolved work,
+-precision, assumptions and all non-compute rates, including fixed DRAM bandwidth; validate
+-both transformed hardware inputs. For the analytic max/sum model require `T/k <= T' <= T`.
+-Exact `T'=T/k` needs aggregate compute dominance at the faster clock, or compute dominance
+-for every op at that clock in per_op mode. Exact `T'=T` needs aggregate memory dominance at
+-the base/slower clock, or memory dominance for every op at that clock in per_op mode.
+-State speedup as T/T', with positive durations: strict speedup <k requires a strictly
+-binding fixed memory term at the faster clock (a tie alone is insufficient). Mixed-bound
+-and memory-only-op domains cannot inherit exact reciprocal scaling by tolerance. Preserve
+-all failures, unsupported premises, budgets and historical reason codes.”
+ 
+ | Human/shared decision | Exact dependency and discriminating acceptance check |
+ | --- | --- |
+-| H-DMA: replace U-P6's DMA identity with the DMA replacement above and align build-spec | Javid's exact text decision after A/coordinator semantics reconciliation; actual issue/completion/boundary and allocation observations. Missing completion, duplicated direction, omitted initial flight and aliased allocation mutants must fail. Reuse/output-production counterexamples refute the old identity. |
+-| H-CLOCK: replace “changes … less than k” with the clock replacement above and align build-spec | Javid's exact relation/premise decision; independently authenticated fixed counts/rates in both modes. Wrong bandwidth scaling, faster-clock-only dominance and tie/strict-inequality counterexamples discriminate. C1 anchors, C2 fixtures and any per_op domain still need separate authorization. |
+ | S-COMPONENT: independent component bounds at B | A's review and coordinator cross-lane reconciliation; exact public component cases and conventions; dropped work/incorrect rate/TP projection must fail. No new analytic API. |
+ | S-CI: B Linux CI ownership/effort/pins | Coordinator assignment and exact human tool/license decision, A targets/corpus; missing-source/no-op jobs, wrong tool pins, missing debug/release and deliberate test failure must refuse credit. |
+ | S-QUEUE: finite-window B versus stationary first-claim checks | A/coordinator align V21/V24; freeze population/window/boundaries, then test omitted initial/final residents and censoring. Stationary ≤1% remains required at first claim. |

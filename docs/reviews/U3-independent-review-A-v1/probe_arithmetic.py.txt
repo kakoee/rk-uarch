@@ -1,0 +1,231 @@
+"""Lane A independent review probe: re-derive U3 v2 E1-E5 examples and test ambiguity.
+
+Standard library only; no repository import, engine, producer or generator.
+This is reviewer arithmetic under the proposal's stated laws, not native execution.
+Each "ALT-" line computes a second reading of the same prose to show whether the
+prose is exact enough to fix canonical observation bytes.
+"""
+
+from __future__ import annotations
+
+import math
+import random
+from fractions import Fraction as F
+
+PS = 10**12
+
+
+def edge(freq_hz: int, k: int) -> int:
+    """Build-spec section 2.8: t_k = ceil(k * 10^12 / freq_hz)."""
+    return -(-k * PS // freq_hz)
+
+
+def first_edge_index(freq_hz: int, t_ps: int) -> int:
+    """Definition by search: smallest k with edge(k) >= t."""
+    k = (t_ps * freq_hz) // PS
+    while k > 0 and edge(freq_hz, k - 1) >= t_ps:
+        k -= 1
+    while edge(freq_hz, k) < t_ps:
+        k += 1
+    return k
+
+
+def next_edge(freq_hz: int, t_ps: int, n: int) -> int:
+    return edge(freq_hz, first_edge_index(freq_hz, t_ps) + n)
+
+
+def proposal_index(freq_hz: int, t_ps: int) -> int:
+    """verification.md E2 integer formula."""
+    return 0 if t_ps == 0 else (t_ps - 1) * freq_hz // PS + 1
+
+
+# ---------------------------------------------------------------- E1
+order = sorted([(1000, 0, 2, 9), (1000, 1, 0, 2), (1000, 0, 1, 8), (1000, 0, 1, 7)])
+print("E1-TIE-ORDER", [e[3] for e in order])
+a, b, c = 3000, 5000, 2000
+print("E1-MAKESPAN", max(a, b) + c, "SERIAL-OWNER0", a + b + c, "DROP-DEP", max(a, b, c))
+
+# ---------------------------------------------------------------- E2
+f12 = 1_200_000_000
+print("E2-EDGES", [edge(f12, k) for k in range(5)])
+print(
+    "E2-NEXT",
+    next_edge(f12, 0, 3),
+    next_edge(f12, 834, 0),
+    next_edge(f12, 835, 0),
+    next_edge(f12, 835, 1),
+    next_edge(f12, 0, 10**9),
+    "ROUNDED-833",
+    833 * 10**9,
+)
+rng = random.Random(20261012)
+mismatch = 0
+for _ in range(200_000):
+    f = rng.randrange(1, 5_000_000_001)
+    t = rng.randrange(0, 10**15)
+    if proposal_index(f, t) != first_edge_index(f, t):
+        mismatch += 1
+for f in (1, 999_999_999, 1_000_000_000, f12, 4_999_999_999):
+    for t in range(0, 3000):
+        if proposal_index(f, t) != first_edge_index(f, t):
+            mismatch += 1
+print("E2-INDEX-FORMULA-MISMATCHES", mismatch)
+inv = all(0 <= edge(f, k) * f - k * PS < f for f, k in ((f12, 10**9), (7, 3), (3_000_000_001, 12345)))
+print("E2-V04-INVARIANT", inv)
+
+
+# ---------------------------------------------------------------- E3
+def ws_cycles(m: int, k: int, n: int) -> tuple[int, int, int, int]:
+    x, w, y = 2 * m * k, 2 * k * n, 2 * m * n
+    stage = -(-(x + w) // 1024)
+    wave = 255 + m + 255
+    out = -(-y // 1024)
+    return 32 + stage + wave + out, stage, wave, out
+
+
+for name, (m, k, n) in {"C1": (16, 256, 256), "C2": (3, 5, 7)}.items():
+    total, stage, wave, out = ws_cycles(m, k, n)
+    print(
+        f"E3-{name}",
+        dict(total=total, stage=stage, wave=wave, out=out, useful=2 * m * k * n, issued=2 * m * 256 * 256,
+             sram_rd=2 * m * k + 2 * k * n, sram_wr=2 * m * n, acc=4 * m * n),
+    )
+c3a, c3b = ws_cycles(256, 256, 256)[0], ws_cycles(1, 256, 256)[0]
+print("E3-C3", c3a, c3b, "makespan_ps", max(c3a, c3b) * 1000, "one_core_ps", (c3a + c3b) * 1000,
+      "useful", 2 * 257 * 256 * 256, "read", 2 * 257 * 256 + 2 * 2 * 256 * 256, "write", 2 * 257 * 256)
+print("E3-C1-COLD-REQUESTS", (8192 + 131072) // 256, 8192 // 256,
+      "slot", 8192 + 131072 + 8192, "two_slots", 2 * (8192 + 131072 + 8192))
+
+# ---------------------------------------------------------------- E4
+GHZ = 1_000_000_000
+cap = F(10**12) * (1 - F(350, 3900)) / 8
+svc = F(256) * PS / cap
+print("E4-CHANNEL", cap, svc, float(svc), "chip_cap", cap * 8 == F(10**12) * F(71, 78))
+
+
+def read_2hop(n_same_channel: int, f_core: int, f_noc: int, f_dram: int, reading: str) -> list[int]:
+    """Completion times of n reads issued at t=0 to one 2-hop channel (4 NoC cycles each way).
+
+    reading="doc": hop delay added as fixed ps (4 * period), channel finish ceil-to-ps.
+    reading="next_edge": every cycle count converted via next_edge in its own domain,
+                         channel finish ceil-to-ps (bandwidth service is not in cycles).
+    reading="next_edge+dram_edge": as next_edge, and channel completion aligned up to a DRAM edge.
+    """
+    out = []
+    for i in range(1, n_same_channel + 1):
+        if reading == "doc":
+            arrive = 4 * PS // f_noc  # exact here only because PS/f_noc is integral in the cases used
+        else:
+            arrive = next_edge(f_noc, 0, 4)
+        lat_end = next_edge(f_dram, arrive, 48)
+        chan = math.ceil(lat_end + i * svc)
+        if reading == "next_edge+dram_edge":
+            chan = next_edge(f_dram, chan, 0)
+        if reading == "doc":
+            resp = chan + 4 * PS // f_noc
+        else:
+            resp = next_edge(f_noc, chan, 4)
+        core_edge = next_edge(f_core, resp, 0)
+        out.append((chan, resp, next_edge(f_core, core_edge, 1)))
+    return out
+
+
+for reading in ("doc", "next_edge", "next_edge+dram_edge"):
+    print("E4-READ-1GHZ", reading, read_2hop(2, GHZ, GHZ, GHZ, reading))
+# Synthetic profile (the proposal's own E2 clock fixture frequency): NoC at 1.2 GHz is not
+# admissible at B, so this only shows the prose would need to choose before such a test.
+# The doc reading's hop is 4 * 833.33 ps; use the exact rational and ceil once, the most
+# favourable fixed-ps reading.
+def read_2hop_noc12(reading: str) -> int:
+    if reading == "doc":
+        arrive = math.ceil(F(4 * PS, f12))
+    else:
+        arrive = next_edge(f12, 0, 4)
+    lat_end = next_edge(GHZ, arrive, 48)
+    chan = math.ceil(lat_end + svc)
+    resp = math.ceil(chan + F(4 * PS, f12)) if reading == "doc" else next_edge(f12, chan, 4)
+    return next_edge(GHZ, next_edge(GHZ, resp, 0), 1)
+
+
+print("E4-READ-NOC1.2GHZ", {r: read_2hop_noc12(r) for r in ("doc", "next_edge")})
+
+# Placement dependence of the 33-request "first completion at 60000 ps" statement on core (0,0).
+hops = {0: 0, 1: 0, 2: 1, 3: 1, 4: 1, 5: 1, 6: 2, 7: 2}  # channel -> controller attach distance
+first = {}
+for ch, h in hops.items():
+    arrive = h * 2 * 1000
+    chan = math.ceil(next_edge(GHZ, arrive, 48) + svc)
+    first[ch] = next_edge(GHZ, next_edge(GHZ, chan + h * 2 * 1000, 0), 1)
+print("E4-FIRST-COMPLETION-BY-CHANNEL", first)
+print("E4-LOW-LOAD-STREAM", F(256, 60000) * PS, float(F(256, 60000) * PS))
+print("E4-BARRIER", next_edge(GHZ, 62000, 32))
+
+
+# ---------------------------------------------------------------- zero-delay convention
+def zero_delay(reading: str) -> int:
+    """owner0: a=3000 ready 0. owner1: p=1000 ready 0. z: 0 ps on owner0, after p.
+    c: 2000 ps on owner1, after z.  'inline' completes z at readiness; 'owner' waits for owner0."""
+    p_end = 1000
+    z_end = p_end if reading == "inline" else max(p_end, 3000)
+    return max(3000, z_end + 2000)
+
+
+print("ZERO-DELAY-OWNED", {r: zero_delay(r) for r in ("inline", "owner")}, "V26-LITERAL", 0 + 0 + 3000)
+
+# ---------------------------------------------------------------- queue / conservation
+area = lambda lo, hi: sum(max(0, min(d, hi) - max(a_, lo)) for a_, d in ((0, 4000), (2000, 6000)))
+print("QUEUE-AREA", area(0, 8000), area(1000, 5000), "drop-initial", area(1000, 5000) - (4000 - 1000))
+print("CONSERVATION", 32 + 128 - 64)
+
+# ---------------------------------------------------------------- E5 (U0022 3E + 2E casts)
+def rope(M, Hq, Hkv, D, R, w, casts):
+    vec = (3 + (2 if casts else 0)) * M * (Hq + Hkv) * R
+    rd = w * M * (Hq + Hkv) * D + 8 * M * R
+    wr = w * M * (Hq + Hkv) * D
+    return vec, rd, wr
+
+
+print("E5-DECODE-R4", rope(1, 2, 1, 4, 4, 2, True), "R2", rope(1, 2, 1, 4, 2, 2, True),
+      "FP32", rope(1, 2, 1, 4, 4, 4, False), "PREFILL6", rope(6, 2, 1, 4, 4, 2, True))
+print("E5-B-PARTIAL-TAIL-3L", tuple(3 * v for v in rope(4, 3, 1, 6, 4, 2, True)),
+      "no-casts", 3 * rope(4, 3, 1, 6, 4, 2, False)[0])
+print("E5-KV", 2 * 17 * 4 * 2, 2 * 32 * 4 * 2, 2 * 1 * 4 * 2, "fused", 2 * 2 * 17 * 4, 2 * 2 * 2 * 17 * 4)
+
+
+def rot(x, cos, sin, pairs):
+    y = list(x)
+    for j, (i0, i1) in enumerate(pairs):
+        a_, b_ = x[i0], x[i1]
+        y[i0], y[i1] = a_ * cos[j] - b_ * sin[j], a_ * sin[j] + b_ * cos[j]
+    return y
+
+
+print("E5-PAIRING", rot([1, 2, 3, 4], [0, 1], [1, 0], [(0, 1), (2, 3)]),
+      rot([1, 2, 3, 4], [0, 1], [1, 0], [(0, 2), (1, 3)]))
+
+# ---------------------------------------------------------------- fault / restored controls
+# Each mutant changes one law term; the restored value is the line above it.
+rounded = lambda k: 833 * k  # noqa: E731  rounded-period mutant
+print("FAULT-E2-ROUNDED-PERIOD", rounded(10**9), "!= restored", edge(f12, 10**9), rounded(10**9) != edge(f12, 10**9))
+floor_edge = lambda k: k * PS // f12  # noqa: E731  early (floored) edge mutant
+print("FAULT-E2-FLOOR-EDGE", floor_edge(1), "!= restored", edge(f12, 1), floor_edge(1) != edge(f12, 1))
+no_refresh = F(256) * PS / (F(10**12) / 8)
+t_fault = next_edge(GHZ, next_edge(GHZ, math.ceil(52000 + no_refresh) + 4000, 0), 1)
+print("FAULT-E4-NO-REFRESH", t_fault, "vs restored 60000 (masked at one request)",
+      "two-request", next_edge(GHZ, next_edge(GHZ, math.ceil(52000 + 2 * no_refresh) + 4000, 0), 1), "vs 62000")
+times_eight = F(256) * PS / (F(10**12) * F(71, 78))
+print("FAULT-E4-CHIP-BW-PER-CHANNEL", math.ceil(52000 + times_eight), "vs restored channel finish 54250")
+print("FAULT-E3-NO-OVERHEAD", ws_cycles(16, 256, 256)[0] - 32, "vs 702;",
+      "FAULT-E3-PADDED-USEFUL", 2 * 3 * 256 * 256, "vs 210")
+
+
+# Smallest same-channel burst (2-hop, t=0 issue, ample credits) whose final DMA completion
+# times differ between the derated law and the omitted-refresh mutant. Port service is one
+# core cycle per response; responses here are >= 2 ns apart, so the port never queues.
+def burst_completions(service):
+    return [next_edge(GHZ, next_edge(GHZ, math.ceil(52000 + i * service) + 4000, 0), 1) for i in range(1, 41)]
+
+
+good, mutant = burst_completions(svc), burst_completions(no_refresh)
+first_diff = next(i + 1 for i, (g, m) in enumerate(zip(good, mutant)) if g != m)
+print("FAULT-E4-NO-REFRESH-FIRST-DISCRIMINATING-REQUEST", first_diff, good[first_diff - 1], mutant[first_diff - 1])

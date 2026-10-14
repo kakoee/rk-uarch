@@ -1,0 +1,228 @@
+## environment
+utc: 2026-10-13T23:13:23Z  uname: Linux 6.6.87.2-microsoft-standard-WSL2
+target: a7f4acb12d4bd4adf29668a9707440738aa44f09 tree: 13252ba86aca34487f650460a6291eab1b98f502
+stage1: 184d2c2b08c28a01673be143b086ef223ba6706a tree: 6f74542bf5fc85997e044a135293db95297e3e20
+live HEAD: 40fab28bc73ed1f7898a0950979607cfd0368c12
+venv: Python 3.12.14; PYTHONPATH=[unset] MYPYPATH=[unset]
+non-doc paths changed 184d2c2b08c28a01673be143b086ef223ba6706a..a7f4acb12d4bd4adf29668a9707440738aa44f09: 0
+
+## import origin in target export
+/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/1f7bc51a-fa41-4543-9411-c7961c170ca5/scratchpad/stage3/run/target/contract/uarch_contract/__init__.py
+/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/1f7bc51a-fa41-4543-9411-c7961c170ca5/scratchpad/stage3/run/target/src/rkuarch/__init__.py
+
+## extract author blocks verbatim from target
+0a9c35a2661aee48b9bae8d95b3ccd7cfffb572b71220170df6d2d15dd061ba4  a_stage2_block.py
+286cfc333047fb9762982872078a80b88bfc180fa9ced425dbf1e2b14d284193  a_package_checker.py
+
+## author f1-f10 on target (expect 10 PASS + shared PASS)
+A-F1: PASS (proposal check only)
+A-F2: PASS (proposal check only)
+A-F3: PASS (proposal check only)
+A-F4: PASS (proposal check only)
+A-F5: PASS (proposal check only)
+A-F6: PASS (proposal check only)
+A-F7: PASS (proposal check only)
+A-F8: PASS (proposal check only)
+A-F9: PASS (proposal check only)
+A-F10: PASS (proposal check only)
+document source: working tree failures: []
+shared DMA/clock/first-use proposals: PASS (no engine call)
+exit=0
+
+## author f1-f10 on Stage 1 export (expect 10 FAIL; whole-old run, NOT the random revert)
+A-F1: FAIL AssertionError: 
+A-F2: FAIL AssertionError: 
+A-F3: FAIL AssertionError: 
+A-F4: FAIL AssertionError: 
+A-F5: FAIL ValidationError: 2 validation errors for ExtCounts
+noc_flit_hop_count
+  Field required [type=missing, input_value={'sram_read_bytes': 13926...ed_matrix_ops': 2097152}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/missing
+issued_matrix_ops
+  Extra inputs are not permitted [type=extra_forbidden, input_value=2097152, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden
+A-F6: FAIL AssertionError: 
+A-F7: FAIL AssertionError: 
+A-F8: FAIL AssertionError: 
+A-F9: FAIL AssertionError: 
+A-F10: FAIL AssertionError: 
+document source: working tree failures: ['A-F1', 'A-F2', 'A-F3', 'A-F4', 'A-F5', 'A-F6', 'A-F7', 'A-F8', 'A-F9', 'A-F10']
+exit=1
+
+## author package checker on target
+PASS: 8 Markdown files, 39 local links, 2 JSON projections; independent arithmetic/effort assertions passed.
+exit=0
+
+## reviewer independent sufficiency probe: target (expect all PASS), Stage 1 (expect all FAIL)
+A-F1 PASS
+A-F2 PASS
+A-F3 PASS
+A-F4 PASS
+A-F5 PASS
+A-F6 PASS
+A-F7 PASS
+A-F8 PASS
+A-F9 PASS
+A-F10 PASS
+independent-stage3 failures: []
+exit=0
+independent-stage3 failures: ['A-F1', 'A-F2', 'A-F3', 'A-F4', 'A-F5', 'A-F6', 'A-F7', 'A-F8', 'A-F9', 'A-F10']
+exit=0
+
+## random selection (drawn before this run)
+2026-10-13T23:01:34.961827+00:00 SystemRandom().randint(1,10) over APPLIED A-F1..A-F10 -> 9 -> A-F9
+
+## bounded revert of A-F9 only (full A-F9 scope)
+REVERTED full:delivery delivery.md: removed 20 line(s), 1444 chars
+REVERTED full:u0011 proposed-U0011.md: removed 2 line(s), 195 chars
+REVERTED full:summaries README.md: removed 1 line(s), 35 chars
+REVERTED full:summaries decisions.md: removed 1 line(s), 36 chars
+--- exact reverted scope (diff target -> revert copy):
+diff -ru target/docs/reviews/U3-native-stage-design-v2/README.md revert/docs/reviews/U3-native-stage-design-v2/README.md
+--- target/docs/reviews/U3-native-stage-design-v2/README.md	2026-10-12 22:32:24.000000000 -0700
++++ revert/docs/reviews/U3-native-stage-design-v2/README.md	2026-10-13 16:13:25.525420168 -0700
+@@ -102,6 +102,6 @@
+ zero jobs, count versions/validation order, all hardware leaves and owner/bank IDs.
+ Verification E4 now uses named-domain edges for every cycle leg, rational channel service
+ and a five-read refresh fault. Delivery corrects K2 prerequisites, separates reusable W
+-operator effort from TPU-specific R, names U6 inputs/U0011-Q and narrows only the proposed
++operator effort from TPU-specific R, names U6 inputs and narrows only the proposed
+ small performance fixture. Historical v1 and published evidence are unchanged. These are
+ unaccepted author corrections; the same reviewer returns after coordinator reconciliation.
+diff -ru target/docs/reviews/U3-native-stage-design-v2/decisions.md revert/docs/reviews/U3-native-stage-design-v2/decisions.md
+--- target/docs/reviews/U3-native-stage-design-v2/decisions.md	2026-10-12 22:32:24.000000000 -0700
++++ revert/docs/reviews/U3-native-stage-design-v2/decisions.md	2026-10-13 16:13:25.525420168 -0700
+@@ -83,7 +83,7 @@
+ (A-F4) owner-granted zero closure/zero-hop admission; (A-F5/F6) version/count roots,
+ validation order, capacity/field ledger and bank/owner enumeration; (A-F7) fixed-delay M
+ boundary before K2, component mapper before B; (A-F8) independently schedulable W and
+-Q6-C/D/W scope/effort; (A-F9) later U0011-Q budget record; (A-F10) small performance-fixture
++Q6-C/D/W scope/effort; (A-F10) small performance-fixture
+ caps with retained full B correctness scope. No numeric performance evidence exists.
+ B supplies/re-derives variants and exact corpus identities, with two human L1 fixtures.
+ 
+diff -ru target/docs/reviews/U3-native-stage-design-v2/delivery.md revert/docs/reviews/U3-native-stage-design-v2/delivery.md
+--- target/docs/reviews/U3-native-stage-design-v2/delivery.md	2026-10-12 22:32:24.000000000 -0700
++++ revert/docs/reviews/U3-native-stage-design-v2/delivery.md	2026-10-13 16:13:25.525420168 -0700
+@@ -237,26 +237,6 @@
+ start independently of W/R; G5-correctness for this declared scope requires all three.
+ If any field is unrepresentable, return a scope decision rather than dropping the point.
+ 
+-## Stage 2 prospective U9 budget record (A-F9)
+-
+-Name the later human decision **U0011-Q: U6/U7 representative single-point budgets**,
+-an addendum to U0011, not a new installed ADR number. Before U-P11c/U-P13d measurements,
+-A supplies exact qualification/scale workload hashes, hardware/model/observation mode,
+-single-thread/worker configuration and all-in wall/RSS limits; B supplies U0012 noise and
+-regression controls. Javid accepts the exact addendum and controlled allocation before
+-measurement. The observed breach of **that** accepted single-point wall-clock budget is
+-the budget-based U9 trigger; the small K2/B diagnostic fixture is not that trigger. If
+-U0011-Q is absent, that route to U9 remains unavailable, not waived. The separate recorded
+-founders' experiment decision remains; both routes still require G6 and full G5.
+-
+-Exact proposed plan/prompt clarification, unapplied: replace execution-plan U9's phrase
+-“ADR U0011's single-point wall-clock budget (measured in U-P11c and U-P13d)” with
+-“the prospectively accepted U0011-Q representative single-point wall-clock budget, with
+-its exact workload/host/observation scope (measured in U-P11c and U-P13d; the K2/B small
+-fixture ceiling does not supply this trigger)”. Add the same sentence to U-P11c item5:
+-“Before measurement, name the accepted U0011-Q workload and budget revision used for the
+-budget-based U9 trigger.” No numeric threshold is accepted here or live text edited.
+-
+ ## Stage 2 B CI assignment and shared prompt decisions
+ 
+ A retains B ownership of .github/workflows: exact tool-pin realization and real hosted
+diff -ru target/docs/reviews/U3-native-stage-design-v2/proposed-U0011.md revert/docs/reviews/U3-native-stage-design-v2/proposed-U0011.md
+--- target/docs/reviews/U3-native-stage-design-v2/proposed-U0011.md	2026-10-12 22:32:24.000000000 -0700
++++ revert/docs/reviews/U3-native-stage-design-v2/proposed-U0011.md	2026-10-13 16:13:25.525420168 -0700
+@@ -184,8 +184,7 @@
+ mandatory observation volume; the small performance profile caps65536 records/16MiB
+ encoded observations without dropping required data. Full B admission is unchanged and
+ requires its own resource budget before performance work. V1's later 60/120/300 s and 672-point ceilings are withdrawn; R/U6/T need exact
+-new consumer budgets before performance work. The later prospective U0011-Q addendum defined in delivery.md
+-supplies U9's representative single-point trigger; the small fixture ceiling does not.
++new consumer budgets before performance work.
+ No inherited 200-second fork ceiling.
+ 
+ Record G5-correctness, G5-performance and G5-automation separately. Only correctness gates
+--- author f1-f10 on revert copy (expect only A-F9 FAIL)
+A-F1: PASS (proposal check only)
+A-F2: PASS (proposal check only)
+A-F3: PASS (proposal check only)
+A-F4: PASS (proposal check only)
+A-F5: PASS (proposal check only)
+A-F6: PASS (proposal check only)
+A-F7: PASS (proposal check only)
+A-F8: PASS (proposal check only)
+A-F9: FAIL AssertionError: 
+A-F10: PASS (proposal check only)
+document source: working tree failures: ['A-F9']
+exit=1
+--- which f9 assertion fails
+f9 assertion FAILS :: 'U0011-Q' in d
+f9 assertion FAILS :: 'U0011-Q' in u
+f9 assertion FAILS :: 'the small K2/B diagnostic fixture is not that trigger' in d
+f9 assertion FAILS :: 'both routes still require G6 and full G5' in d
+--- independent probe on revert copy (expect only A-F9 FAIL)
+A-F1 PASS
+A-F2 PASS
+A-F3 PASS
+A-F4 PASS
+A-F5 PASS
+A-F6 PASS
+A-F7 PASS
+A-F8 PASS
+A-F9 FAIL IndexError: list index out of range
+A-F10 PASS
+independent-stage3 failures: ['A-F9']
+exit=1
+
+## partial A-F9 revert: delivery only (each half must be caught)
+REVERTED delivery:delivery delivery.md: removed 20 line(s), 1444 chars
+A-F9: FAIL AssertionError: 
+document source: working tree failures: ['A-F9']
+f9 assertion FAILS :: 'U0011-Q' in d
+f9 assertion holds :: 'U0011-Q' in u
+f9 assertion FAILS :: 'the small K2/B diagnostic fixture is not that trigger' in d
+f9 assertion FAILS :: 'both routes still require G6 and full G5' in d
+
+## partial A-F9 revert: u0011 only (each half must be caught)
+REVERTED u0011:u0011 proposed-U0011.md: removed 2 line(s), 195 chars
+A-F9: FAIL AssertionError: 
+document source: working tree failures: ['A-F9']
+f9 assertion holds :: 'U0011-Q' in d
+f9 assertion FAILS :: 'U0011-Q' in u
+f9 assertion holds :: 'the small K2/B diagnostic fixture is not that trigger' in d
+f9 assertion holds :: 'both routes still require G6 and full G5' in d
+
+## restore (fresh copy of target) and rerun
+restored copy identical to target export
+A-F1: PASS (proposal check only)
+A-F2: PASS (proposal check only)
+A-F3: PASS (proposal check only)
+A-F4: PASS (proposal check only)
+A-F5: PASS (proposal check only)
+A-F6: PASS (proposal check only)
+A-F7: PASS (proposal check only)
+A-F8: PASS (proposal check only)
+A-F9: PASS (proposal check only)
+A-F10: PASS (proposal check only)
+document source: working tree failures: []
+shared DMA/clock/first-use proposals: PASS (no engine call)
+exit=0
+f9 assertion holds :: 'U0011-Q' in d
+f9 assertion holds :: 'U0011-Q' in u
+f9 assertion holds :: 'the small K2/B diagnostic fixture is not that trigger' in d
+f9 assertion holds :: 'both routes still require G6 and full G5' in d
+
+## bounded doc-consistency pytest on target (explicit config/root)
+4 passed in 0.14s
+
+## preservation hashes (live, read-only)
+b69965a70dc4262141c2d52b877cb9ce253566c1aba3bbf5d64e8e198e774233  docs/reviews/U3-lane-A-review.md
+6281f18695e9db92f1c4c7b261d128a666025f7b143677e019805032c115ffcc  docs/reviews/U3-independent-review-A-v1/README.md
+91551a5b5c4c8ba05242aa72ce94d1a3c9df7d9bc36cf72bcd80f69aa2b6f064  docs/reviews/U3-independent-review-A-v1/probe_arithmetic.py
+8b0052d2603364bc4d8816a4f0e4097556337a6a1054314bd15334cc9e6d1f66  docs/reviews/U3-independent-review-A-v1/probe_contract.py
+bd8e994e221bbee1e6b93e0495a1b246db7fb5d450675b584d07f4552eedab99  docs/reviews/U3-independent-review-A-v1/probe_ledger.py
+c61cf8f0787a88d069ac6884d1c6eea5d2deeebd9d0e5d5f9e839a60f90dfdbe  docs/reviews/U3-independent-review-A-v1/probe_volume.py
+695c003314d6f6dff1439c4d5714bbb6d722ff01fc3da34194e1fe1b616e0fea  docs/reviews/U3-independent-review-A-v1/run_all.log
+3f9727632a959b2ade4b609ed53eff012fbe898e07cff233b0d62dd19f242b98  docs/reviews/U3-independent-review-A-v1/run_all.sh

@@ -1,0 +1,66 @@
+"""Reviewer O2 probe: immediate-root write denial of the proposed test hook (defence in depth).
+
+Run with the export's -c pyproject.toml --rootdir. Every deliberate write targets a
+throwaway root under tmp_path, never the export or any live checkout.
+"""
+
+import importlib.util
+import os
+from pathlib import Path
+
+import pytest
+
+ROOT = Path.cwd().resolve()
+spec = importlib.util.spec_from_file_location(
+    "reviewer_policy_tests", ROOT / "tests/unit/test_u2_support_policy.py")
+policy_tests = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(policy_tests)
+assert Path(policy_tests.__file__).resolve().is_relative_to(ROOT)
+DENIED = "^test attempted write to real source root$"
+
+
+def state(p):
+    return (p.read_bytes(), p.stat().st_mtime_ns) if p.exists() else None
+
+
+def test_root_level_denials_before_mutation(tmp_path):
+    root = (tmp_path / "throwaway-root").resolve()
+    (root / "src").mkdir(parents=True)
+    existing = root / "existing.py"
+    existing.write_bytes(b"ORIGINAL = 1\n")
+    nested = root / "src" / "data.json"
+    nested.write_text("{}")
+    outside = tmp_path / "outside.txt"
+    outside.write_text("move me")
+    before = state(existing), state(nested)
+    with policy_tests.source_write_denial(root):
+        attempts = {
+            "create_absent": lambda: (root / "absent.py").write_bytes(b"X = 1\n"),
+            "overwrite_existing": lambda: existing.write_bytes(b"MUTATED = 1\n"),
+            "append_existing": lambda: existing.open("a").write("# x\n"),
+            "remove_existing": lambda: os.remove(existing),
+            "rename_into_root": lambda: os.rename(outside, root / "moved.py"),
+            "mkdir_at_root": lambda: os.mkdir(root / "typing_extensions"),
+            "chmod_existing": lambda: os.chmod(existing, 0o600),
+            "symlink_at_root": lambda: os.symlink(outside, root / "annotated_types.py"),
+            "nested_protected_write": lambda: nested.write_text("[]"),
+        }
+        refused = {}
+        for name, attempt in attempts.items():
+            with pytest.raises(PermissionError, match=DENIED):
+                attempt()
+            refused[name] = True
+        # Allowed during the hook: private writes elsewhere and read-only access.
+        other = tmp_path / "allowed" / "private.txt"
+        other.parent.mkdir()
+        other.write_text("ok")
+        other.unlink()
+        assert existing.read_bytes() == b"ORIGINAL = 1\n"
+        assert nested.read_text() == "{}"
+    assert (state(existing), state(nested)) == before
+    assert not (root / "absent.py").exists() and not (root / "moved.py").exists()
+    assert not (root / "typing_extensions").exists()
+    assert not os.path.lexists(root / "annotated_types.py")
+    assert outside.read_text() == "move me"
+    assert sorted(p.name for p in root.iterdir()) == ["existing.py", "src"]
+    print("O2_REFUSED", sorted(refused))

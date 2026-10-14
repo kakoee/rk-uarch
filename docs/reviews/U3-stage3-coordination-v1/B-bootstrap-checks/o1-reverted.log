@@ -1,0 +1,60 @@
+FF....FF....                                                             [100%]
+=================================== FAILURES ===================================
+__________ test_future_shadow_never_executes[module-direct-vendor_rk] __________
+tests/unit/test_u2_support_policy.py:640: in test_future_shadow_never_executes
+    assert "O1_FUTURE_BODY_EXECUTED" not in result.stdout + result.stderr
+E   assert 'O1_FUTURE_BODY_EXECUTED' not in 'O1_FUTURE_B...uture__.py\n'
+E     
+E     'O1_FUTURE_BODY_EXECUTED' is contained here:
+E       O1_FUTURE_BODY_EXECUTED
+E       Traceback (most recent call last):
+E         File "/tmp/pytest-of-jjaff/pytest-771/test_future_shadow_never_execu0/isolated-source/scripts/vendor_rk.py", line 16, in <module>
+E           from scripts import u2_import_guard  # noqa: E402
+E           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show
+__________ test_future_shadow_never_executes[module-direct-u2_inputs] __________
+tests/unit/test_u2_support_policy.py:640: in test_future_shadow_never_executes
+    assert "O1_FUTURE_BODY_EXECUTED" not in result.stdout + result.stderr
+E   assert 'O1_FUTURE_BODY_EXECUTED' not in 'O1_FUTURE_B...uture__.py\n'
+E     
+E     'O1_FUTURE_BODY_EXECUTED' is contained here:
+E       O1_FUTURE_BODY_EXECUTED
+E       Traceback (most recent call last):
+E         File "/tmp/pytest-of-jjaff/pytest-771/test_future_shadow_never_execu1/isolated-source/scripts/u2_inputs.py", line 14, in <module>
+E           from scripts import u2_import_guard  # noqa: E402
+E           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show
+_________ test_future_shadow_never_executes[package-direct-vendor_rk] __________
+tests/unit/test_u2_support_policy.py:640: in test_future_shadow_never_executes
+    assert "O1_FUTURE_BODY_EXECUTED" not in result.stdout + result.stderr
+E   assert 'O1_FUTURE_BODY_EXECUTED' not in 'O1_FUTURE_B...__future__\n'
+E     
+E     'O1_FUTURE_BODY_EXECUTED' is contained here:
+E       O1_FUTURE_BODY_EXECUTED
+E       Traceback (most recent call last):
+E         File "/tmp/pytest-of-jjaff/pytest-771/test_future_shadow_never_execu6/isolated-source/scripts/vendor_rk.py", line 16, in <module>
+E           from scripts import u2_import_guard  # noqa: E402
+E           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show
+_________ test_future_shadow_never_executes[package-direct-u2_inputs] __________
+tests/unit/test_u2_support_policy.py:640: in test_future_shadow_never_executes
+    assert "O1_FUTURE_BODY_EXECUTED" not in result.stdout + result.stderr
+E   assert 'O1_FUTURE_BODY_EXECUTED' not in 'O1_FUTURE_B...__future__\n'
+E     
+E     'O1_FUTURE_BODY_EXECUTED' is contained here:
+E       O1_FUTURE_BODY_EXECUTED
+E       Traceback (most recent call last):
+E         File "/tmp/pytest-of-jjaff/pytest-771/test_future_shadow_never_execu7/isolated-source/scripts/u2_inputs.py", line 14, in <module>
+E           from scripts import u2_import_guard  # noqa: E402
+E           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED tests/unit/test_u2_support_policy.py::test_future_shadow_never_executes[module-direct-vendor_rk]
+FAILED tests/unit/test_u2_support_policy.py::test_future_shadow_never_executes[module-direct-u2_inputs]
+FAILED tests/unit/test_u2_support_policy.py::test_future_shadow_never_executes[package-direct-vendor_rk]
+FAILED tests/unit/test_u2_support_policy.py::test_future_shadow_never_executes[package-direct-u2_inputs]
+4 failed, 8 passed, 88 deselected in 4.76s

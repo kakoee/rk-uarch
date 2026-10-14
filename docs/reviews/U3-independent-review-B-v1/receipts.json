@@ -1,0 +1,46 @@
+{
+  "status": "independent Stage 1 review probes for U3 lane B; private exports only; no live edit, generation, adoption, oracle or install",
+  "date": "2026-10-12",
+  "target_commit": "184d2c2b08c28a01673be143b086ef223ba6706a",
+  "target_tree": "6f74542bf5fc85997e044a135293db95297e3e20",
+  "live_head_at_review": "d7b00b8a2203da440c9e797b8166f9a47289e468 (docs-only descendants of target; live worktree clean before and after)",
+  "corrected_patch_sha256": "97d0ec302606838a7055ec3d43ce1d3b759e8e015ecb796eed154ce4b0915e55",
+  "historical_patch_sha256": "bb15bd236938c659b3c07b8be03121aaa5f41ee339560ba150a7cb4cec8391f8",
+  "exports": {
+    "pristine": "git archive of target into session scratchpad; unpatched",
+    "patched": "git archive of target with corrected patch applied (git apply --check then apply)",
+    "historical": "git archive of target with a602683's historical patch applied"
+  },
+  "environment": {
+    "interpreter": "existing live-clone .venv, Python 3.12.14, no install/sync",
+    "tools": "pytest 9.1.1, ruff 0.16.9, mypy 2.3.1, import-linter 2.15, pydantic 2.13.5, hypothesis 6.168.3",
+    "host": "WSL2 Linux 6.6.87.2; no performance claim",
+    "ambient": "PYTHONPATH and MYPYPATH unset in the session and removed with env -u for every test/static command",
+    "import_origin": "test_import_origin.py asserted export-resident rkuarch/uarch_contract/scripts in every credited pytest run; the .venv editable .pth points at the live clone"
+  },
+  "invalid_run_discarded": "One probe run passed only out-of-tree test files to pytest; no ini was found, pythonpath was not applied and rkuarch/uarch_contract resolved from the live editable install (origin probe failed). Its results are not credited. Re-run with -c <export>/pyproject.toml --rootdir <export>. Live worktree verified clean afterwards.",
+  "runs": {
+    "corrected_policy_tests_with_origin_probe": "45 passed, 1 skipped (44 policy + origin probe; skip = real new-policy adoption positive)",
+    "loader_verify_call_replaced_by_pass": "4 failed, 40 passed, 1 skipped; failures exactly test_public_load_new_policy_drift_refuses[bound_bytes|missing_entry|wrong_hash|new_dependency], each DID NOT RAISE ValueError",
+    "restored_exact_loader_bytes": "sha256 f25ce49d... restored; 44 passed, 1 skipped; patched-tree hash 87a14d13... identical before fault and after restore",
+    "historical_patch_tests": "30 passed; same loader-call fault 30 passed; restored 30 passed (coordinator B-C1 reproduced); loader/helper bytes identical to corrected patch",
+    "modulefinder_static_closure": "31 local .py == the 31 proposed .py entries (30 + helper); no unresolved local names",
+    "helper_inventory_vs_delta": "52 == retained(39)+added(13) exactly; pristine old rule == retained+removed == 97",
+    "runtime_trace_pristine": "strict consumption with run_oracle/collect_snapshot/prepare_inputs denied: passed; 30 local modules; env keys HOME, PYDANTIC_DISABLE_PLUGINS, PYTHONTZPATH, PYTHONUSERBASE, _PYTHON_PROJECT_BASE, _PYTHON_SYSCONFIGDATA_NAME",
+    "runtime_trace_patched": "refused: input support inventory changed (expected migration refusal); 30 local modules",
+    "cli_strict_check": "pristine export exit 0 (current compatibility verified); patched export exit 1 'input support inventory changed'",
+    "reviewer_boundaries": "5 passed: origin; policy-strip downgrade refuses under strict and loads integrity-only; legacy inventory relabelled with policy refuses; transitive shadows scripts/typing_extensions.py and scripts/annotated_types.py are NOT inventoried, strict public load accepts, old rule would add them, and vendor_rk.py --check executes them",
+    "static_ci_form_patched": "ruff passed; mypy src contract/uarch_contract scripts 79 files; mypy --no-explicit-package-bases contract/tests 31 files; lint-imports 2 kept 0 broken (101 files, 600 deps; resolves editable live src/contract, byte-identical to target: git diff 184d2c2 HEAD -- src contract empty, worktree clean)",
+    "worked_examples_block_verbatim": "Arithmetic assertions passed (block sha256 315775ab...)",
+    "independent_math": "28/28 reviewer re-derivations match B (and A E5 cross-lane values)",
+    "premise_probe": "two memory-only ops (head/embed, layers/kv) in both points; C1 anchors compute-dominant at faster clock and exact T'=T/k; per_op exact law at bw=1e18 worst deviation 1.43e-8 > 1e-9; C2 bw=1000 anchors: every op memory-dominant at base clock, aggregate and per_op T'=T",
+    "historical_reports": "analytic.aggregate_clock/1:aggregate:d4-bf16-v1 not_run INCOMPLETE_OR_UNDER_BUDGET: SR-C1 22 valid/24 bodies (96 discovery + 88 candidate calls), original 21; L0m.per_op_exact_clock per_op skip MEMORY_ONLY_EMBEDDING"
+  },
+  "not_run": [
+    "full suite, hosted CI, native build/test, nightly, performance",
+    "prepare_inputs staging, oracle, generation, adoption, upstream checkout",
+    "historical report validator/replay/regeneration",
+    "live strict check (pristine export used instead; source identical)",
+    "consumer-conformance tests (proposal only; none exist)"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "status": "bounded O1/O2 proposal-delta recheck by the same lane B reviewer; private exports and throwaway copies only; no live install, staging, producers/oracle, generation/adoption, native execution or host measurement",
+  "date": "2026-10-13",
+  "target_commit": "7afba9b16d954fd46684711764cb3718170e53aa",
+  "target_tree": "a6bd46821714dc698de927c8f2142dfb21877ede",
+  "predecessor": "40fab28bc73ed1f7898a0950979607cfd0368c12",
+  "old_full_patch_sha256": "4c73d73d1c7ec1e1453e7ef7ccf1bd3de55238a4469069dcaa75e89bc764fa81",
+  "new_full_patch_sha256": "c238574b284ebecb6f0f1253922ce01af87259f0187aad38bcda628757e8fe6b",
+  "delta_sha256": "eac5a0e20d01a2a6a2987665825a731da2b636517a4f342a1c4a1bbfc785426e",
+  "report_prefix_sha256_before_append": "39799be3a0849aaa1f005b8fde471965965ffa7d252dadaced49198f649ab454 (37,472 bytes)",
+  "commit_scope": "40fab28..7afba9b touches only docs/reviews (follow-up README/evidence/delta and repair.patch); no source/tests/locks",
+  "environment": "existing live-clone .venv CPython 3.12.14; env -u PYTHONPATH -u MYPYPATH -u UARCH_HUMAN PYTHONDONTWRITEBYTECODE=1; python -B -m pytest -c pyproject.toml --rootdir . -p no:cacheprovider; child processes env -i with explicit export src:contract",
+  "executed": {
+    "composition": "export + old full patch + delta == export + new full patch (diff -rq whole trees identical); six files: __init__ fdad3370, vendor_rk b82ae570, u2_inputs eb68cb3d, guard e445f683 (unchanged), support b55d2f40 (unchanged), tests 65c26ac3",
+    "normal_selection": "151 passed (150 author + 1 reviewer origin probe), 1 skipped, 8 deselected on final bytes; origins export-resident incl. u2_import_guard; all 1,519 export files identical sha256+mtime_ns before/after; no __pycache__ created",
+    "o1_fixed": "o1_probe 12 cases (vendor_rk/u2_inputs x direct/module/library x file/package --help or import): valid controls 12/12 incl. private library origins; shadow body ran 0/12 (sentinel file and stderr marker absent); guard refusal + nonzero exit 12/12",
+    "o1_reintroduced_future_scratch": "O1-reintroduce.diff (two leading future statements only, throwaway copy): body ran 4/12 = direct x {file,package} x both entries, each refused only afterwards (exit 1); module/library still prevented; author test -k future_shadow 4 failed / 8 passed / 88 deselected on the same four direct cases",
+    "o1_restored": "entry scripts restored to b82ae570/eb68cb3d; probe body ran 0/12; author test 12 passed",
+    "annotations": "36 annotated objects (109 annotations): get_type_hints identical old vs new for all; raw storage old 102/109 strings + 7 Inputs ForwardRef objects, new 1/109 string (quoted validate_u2_component_inputs return); Inputs.entries ForwardRef -> tuple[ComponentPrecision, ...]; no eager uarch_contract import after importing vendor_rk (old and new); only the new test reads raw annotations in repo code",
+    "eager_annotation_scan": "113 runtime-evaluated annotation sites (vendor_rk 88, u2_inputs 25, all nesting depths) reference only module globals/builtins; TYPE_CHECKING-only ComponentPrecision appears only in the quoted return",
+    "o2_probe": "throwaway root: create-absent, overwrite, append, remove, rename-into-root, mkdir, chmod, symlink and nested protected write all PermissionError before mutation; bytes/mtime/listing unchanged; private temp writes and protected reads allowed; author root_file_write 2 passed",
+    "o2_predicate_removed_scratch": "O2-predicate-removal.diff (throwaway copy): author tests 2 failed DID NOT RAISE PermissionError + reviewer probe 1 failed; writes only under pytest tmp roots",
+    "o2_restored": "test file restored to 65c26ac3; 3 passed",
+    "stage3_isolation_revert_rerun": "throwaway copy, isolated_root -> REAL_ROOT: 74 failed, 25 passed, 1 skipped; zero files created/changed (Stage 3 run created root typing_extensions.py/annotated_types.py)",
+    "loader_fault_scratch": "load_inputs verify call -> pass in throwaway copy: 4 failed DID NOT RAISE (bound_bytes, missing_entry, wrong_hash, new_dependency); restored eb68cb3d",
+    "restored_53": "author restored selection on final bytes in export: 53 passed, 47 deselected; export sha256+mtime_ns identical, and identical to first snapshot (all faults in throwaway copies)",
+    "consequences": "inventory 56 -> 56 same paths; changed digests only vendor_rk and u2_inputs (disclosed values); ORACLE_PROGRAM sha bca57950... identical pristine/old/new and equal to adopted GENERATOR; whole vendor script pristine/adopted 787d30d5..., old e18e6fce..., new b82ae570... (differs from adopted); 55 vendor/provenance files identical",
+    "statics": "ruff passed; mypy 80 and 31 files; mypy on the two changed scripts 2 files; lint-imports 2 kept 0 broken (live editable src/contract identical to target)",
+    "strict_cli": "pristine exit 0; proposal exit 1 'vendor-rk: input support inventory changed' (expected; not migration success)"
+  },
+  "inherited_not_reexecuted": [
+    "author tests-first 6/8/85 and annotation 1/99 runs",
+    "author 150/1/8 and 53/47 counts (made before a whitespace-only test edit); coordinator 150/1/8, 4, 2, 53 counts",
+    "author full-patch reverse/apply checks beyond the composition above"
+  ],
+  "not_run": ["full suite", "hosted/native CI", "nightly", "input staging", "producers/oracle", "generation/adoption", "native execution", "host/performance measurement"]
+}

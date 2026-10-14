@@ -1,0 +1,66 @@
+"""Reviewer probe: every runtime-evaluated annotation site in the two changed entry scripts.
+
+Usage: python -I -B eager_annotation_scan.py <export-root>
+Without `from __future__ import annotations`, annotations on function parameters/returns
+(at any nesting depth, evaluated when the def executes) and module/class-level AnnAssign
+are evaluated eagerly; local-variable AnnAssign inside function bodies is never evaluated.
+Reports names that are not module globals/builtins, or are TYPE_CHECKING-only.
+"""
+
+import ast
+import builtins
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+sys.path[:0] = [str(root), str(root / "src"), str(root / "contract")]
+import scripts.u2_inputs as ui  # noqa: E402
+import scripts.vendor_rk as vendor  # noqa: E402
+
+problems = []
+for mod in (vendor, ui):
+    path = Path(mod.__file__).resolve()
+    assert path.is_relative_to(root)
+    tree = ast.parse(path.read_text())
+    type_checking_only = set()
+    for node in tree.body:
+        if isinstance(node, ast.If) and getattr(node.test, "id", None) == "TYPE_CHECKING":
+            for sub in ast.walk(node):
+                if isinstance(sub, (ast.Import, ast.ImportFrom)):
+                    type_checking_only.update(a.asname or a.name.split(".")[0] for a in sub.names)
+    sites = 0
+
+    def names(expr):
+        if isinstance(expr, ast.Constant) and isinstance(expr.value, str):
+            return set()  # quoted: not evaluated eagerly
+        return {n.id for n in ast.walk(expr) if isinstance(n, ast.Name)}
+
+    def visit(node, scope, depth):
+        global sites
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                a = child.args
+                exprs = [x.annotation for x in (*a.posonlyargs, *a.args, *a.kwonlyargs,
+                                                 *(v for v in (a.vararg, a.kwarg) if v))
+                         if x.annotation is not None]
+                if child.returns is not None:
+                    exprs.append(child.returns)
+                for e in exprs:
+                    sites += 1
+                    for n in names(e):
+                        if n in type_checking_only or not (hasattr(mod, n) or hasattr(builtins, n)):
+                            problems.append((mod.__name__, child.name, depth, n))
+                visit(child, "function", depth + 1)
+            elif isinstance(child, ast.ClassDef):
+                visit(child, "class", depth + 1)
+            elif isinstance(child, ast.AnnAssign) and scope in ("module", "class"):
+                sites += 1
+                for n in names(child.annotation):
+                    if n in type_checking_only or not (hasattr(mod, n) or hasattr(builtins, n)):
+                        problems.append((mod.__name__, "<annassign>", depth, n))
+            else:
+                visit(child, scope, depth)
+
+    visit(tree, "module", 0)
+    print(mod.__name__, "eager annotation sites:", sites, "TYPE_CHECKING-only:", sorted(type_checking_only))
+print("PROBLEMS:", problems)

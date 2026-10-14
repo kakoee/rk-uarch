@@ -1,0 +1,25 @@
+{
+  "scope": "coordinator harmless-marker reproduction; private patched export, --help only",
+  "target": "40fab28bc73ed1f7898a0950979607cfd0368c12",
+  "patch": "4c73d73d1c7ec1e1453e7ef7ccf1bd3de55238a4469069dcaa75e89bc764fa81",
+  "results": [
+    {
+      "entry": "vendor_rk.py",
+      "control_exit": 0,
+      "shadow_exit": 1,
+      "body_executed": true,
+      "guard_refused": true,
+      "stderr": "COORDINATOR_FUTURE_BODY_EXECUTED\nTraceback (most recent call last):\n  File \"/tmp/u3-b-stage2-coordinator-hjyjaof2/export/scripts/vendor_rk.py\", line 16, in <module>\n    from scripts import u2_import_guard  # noqa: E402\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/u3-b-stage2-coordinator-hjyjaof2/export/scripts/__init__.py\", line 5, in <module>\n    check_import_roots()\n  File \"/tmp/u3-b-stage2-coordinator-hjyjaof2/export/scripts/u2_import_guard.py\", line 58, in check_import_roots\n    raise ValueError(\"unreviewed import name: \" + os.path.relpath(path, root))\nValueError: unreviewed import name: scripts/__future__.py\n",
+      "restored_exit": 0
+    },
+    {
+      "entry": "u2_inputs.py",
+      "control_exit": 0,
+      "shadow_exit": 1,
+      "body_executed": true,
+      "guard_refused": true,
+      "stderr": "COORDINATOR_FUTURE_BODY_EXECUTED\nTraceback (most recent call last):\n  File \"/tmp/u3-b-stage2-coordinator-hjyjaof2/export/scripts/u2_inputs.py\", line 14, in <module>\n    from scripts import u2_import_guard  # noqa: E402\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/u3-b-stage2-coordinator-hjyjaof2/export/scripts/__init__.py\", line 5, in <module>\n    check_import_roots()\n  File \"/tmp/u3-b-stage2-coordinator-hjyjaof2/export/scripts/u2_import_guard.py\", line 58, in check_import_roots\n    raise ValueError(\"unreviewed import name: \" + os.path.relpath(path, root))\nValueError: unreviewed import name: scripts/__future__.py\n",
+      "restored_exit": 0
+    }
+  ]
+}

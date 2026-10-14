@@ -1,0 +1,58 @@
+"""Reviewer probe: inventory, whole-script fingerprint and embedded-oracle consequences.
+
+Usage: python -I -B consequence_probe.py <pristine> <old-proposal> <new-proposal>
+Static reads plus the support helper's own inventory in each proposal export (no producer).
+"""
+
+import ast
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+pristine, old, new = (Path(a).resolve() for a in sys.argv[1:4])
+sha = lambda b: hashlib.sha256(b).hexdigest()  # noqa: E731
+
+
+def oracle_sha(root):
+    tree = ast.parse((root / "scripts/vendor_rk.py").read_text())
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "ORACLE_PROGRAM" for t in node.targets
+        ):
+            return sha(node.value.value.encode())
+    raise SystemExit("ORACLE_PROGRAM not found")
+
+
+def inventory(root):
+    code = ("import sys, json; sys.path[:0]=[sys.argv[1], sys.argv[1]+'/src', sys.argv[1]+'/contract'];"
+            "from pathlib import Path; from scripts import u2_support as s;"
+            "assert Path(s.__file__).resolve().is_relative_to(Path(sys.argv[1]));"
+            "print(json.dumps(s.inventory(root=Path(sys.argv[1]))))")
+    out = subprocess.run([sys.executable, "-I", "-B", "-c", code, str(root)],
+                         capture_output=True, text=True, check=True).stdout
+    return json.loads(out)
+
+
+inv_old, inv_new = inventory(old), inventory(new)
+gen = json.loads((pristine / "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/GENERATOR.json").read_text())
+hist = lambda r: {p.relative_to(r).as_posix(): sha(p.read_bytes())  # noqa: E731
+                  for d in ("contract/vendor", "contract/provenance") for p in (r / d).rglob("*") if p.is_file()}
+h_pristine, h_new = hist(pristine), hist(new)
+result = {
+    "inventory_old_count": len(inv_old), "inventory_new_count": len(inv_new),
+    "inventory_same_paths": set(inv_old) == set(inv_new),
+    "changed_digests": {k: [inv_old[k], inv_new[k]] for k in sorted(inv_old) if inv_old.get(k) != inv_new.get(k)},
+    "oracle_program_sha256": {"pristine": oracle_sha(pristine), "old": oracle_sha(old), "new": oracle_sha(new)},
+    "vendor_script_sha256": {"pristine": sha((pristine / "scripts/vendor_rk.py").read_bytes()),
+                             "old": sha((old / "scripts/vendor_rk.py").read_bytes()),
+                             "new": sha((new / "scripts/vendor_rk.py").read_bytes())},
+    "adopted_generator_script_sha256": gen["script_sha256"],
+    "adopted_generator_oracle_program_sha256": gen["oracle_program_sha256"],
+    "historical_vendor_provenance_files": len(h_pristine),
+    "historical_files_identical": h_pristine == h_new,
+}
+result["new_vendor_matches_adopted_fingerprint"] = (
+    result["vendor_script_sha256"]["new"] == gen["script_sha256"])
+print(json.dumps(result, indent=1, sort_keys=True))

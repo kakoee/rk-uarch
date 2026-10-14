@@ -1,0 +1,108 @@
+"""Bounded read/replay documentation probe; no oracle, review, or adoption producer."""
+import argparse
+import gzip
+import hashlib
+import importlib.metadata
+import json
+import os
+from pathlib import Path
+import platform
+import runpy
+import subprocess
+import sys
+import tempfile
+import tomllib
+from collections import Counter
+
+import yaml
+from uarch_contract.fidelity import FidelityDetail
+from uarch_contract.hardware import HardwareSpec, sourced_leaves
+from uarch_contract.hashing import canonical_json, content_hash
+from rkuarch.provenance.badge import badge_for
+from rkuarch.table.capture_v2 import capture, replay
+from rkuarch.workload.prepared_v2 import physical_assumptions, validate_execution_bundle
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--output', type=Path, required=True)
+args = parser.parse_args()
+root = Path.cwd()
+work = Path(tempfile.mkdtemp(prefix='u3-doc-evidence-'))
+env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1', PYTHONPATH=f'{root}:{root}/src:{root}/contract')
+summary = {'scope': 'local documentation reproduction, not final publication validation', 'bulk_output_root': str(work)}
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def command(label, argv):
+    p = subprocess.run(argv, env=env, capture_output=True, text=True)
+    (work / (label + '.log')).write_text(p.stdout + p.stderr)
+    record = {'argv': argv, 'returncode': p.returncode, 'output': p.stdout + p.stderr}
+    summary.setdefault('commands', {})[label] = record
+    return p
+
+head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+assert head == '7afba9b16d954fd46684711764cb3718170e53aa'
+summary['implementation_commit'] = head
+p = command('documentation-postimages', [sys.executable, '-B', 'docs/reviews/U3-closeout-documents-v1/human-install.py', '--verify', '--expected-head', head, '--patch-sha256', '2b0bc1934020e1d0da2d21ab3514d26c1595a780d3d539b300f79a05286d9416'])
+assert p.returncode == 0
+summary['reviewed_documentation'] = json.loads(Path('docs/reviews/U3-closeout-documents-v1/review.json').read_text())
+summary['reviewed_documentation']['observed_status'] = 'all five installed postimages verified; package status text is historical'
+lock = tomllib.loads(Path('uv.lock').read_text())
+installed = {d.metadata['Name'].lower().replace('_', '-'): d.version for d in importlib.metadata.distributions()}
+mismatches = []
+for package in lock['package']:
+    key = package['name'].lower().replace('_', '-')
+    if key in installed and installed[key] != package['version']:
+        mismatches.append([key, package['version'], installed[key]])
+assert not mismatches
+summary['environment'] = {'python': platform.python_version(), 'executable': sys.executable, 'uv_lock_sha256': digest(Path('uv.lock')), 'installed_packages': installed, 'installed_lock_version_mismatches': mismatches, 'note': 'existing environment reused; absent optional lock packages are not installed'}
+summary['hardware'] = {}
+for name in ('npu-l4', 'npu-m256'):
+    h = HardwareSpec.model_validate(yaml.safe_load(Path(f'hw/designs/{name}.yaml').read_text()))
+    leaves = tuple(v for _, v in sourced_leaves(h))
+    summary['hardware'][name] = {'hardware_hash': content_hash(h), 'design_status': h.design_status, 'stipulations': sum(v.kind == 'stipulation' for v in leaves), 'grid': [h.cores.grid.rows.value, h.cores.grid.cols.value], 'formats': list(h.formats), 'composite': FidelityDetail(compute=0, noc=0, dram=0, sync='exact', layer_reuse=True).conservative_composite(), 'badge': badge_for(leaves, (), design_status=h.design_status).badge}
+p = command('strict-vendor', [sys.executable, '-B', 'scripts/vendor_rk.py', '--check'])
+assert p.returncode == 0
+vendor = next(Path('contract/vendor').glob('rk-sim@*'))
+summary['current_artifact'] = {rel: digest(vendor / rel) for rel in ('MANIFEST.json', 'u2-inputs/SHA256SUMS', 'u2-inputs/support-files.json')}
+summary['current_artifact']['support_count'] = len(json.loads((vendor / 'u2-inputs/support-files.json').read_text()))
+# Installed contract literals: existing example constructor, not a new workload/coefficient producer.
+# Replace only the example's declared test-only assumptions with active execution assumptions,
+# exactly as the installed runtime regression does; retain synthetic input provenance.
+cases = runpy.run_path('contract/tests/rotary_v2_cases.py')
+summary['v2_literal_sources'] = {p: digest(Path(p)) for p in ('contract/tests/rotary_v2_cases.py', 'contract/tests/fixtures/u2/independent-bundle.json')}
+summary['v2'] = []
+for mode in ('aggregate', 'per_op'):
+    b = cases['examples'](mode)['bundle']
+    assumptions = physical_assumptions()
+    b['intent']['assumptions_hash'] = assumptions.assumptions_hash
+    cases['rehash'](b)
+    bundle = validate_execution_bundle(b)
+    c = capture(bundle, assumptions=assumptions)
+    assert replay(bundle, c.request, c.jobs, c.results, assumptions=assumptions) == c
+    d = work / mode
+    d.mkdir()
+    for name, obj in [('bundle', bundle), ('assumptions', assumptions), ('request', c.request)]:
+        (d / (name + '.json')).write_text(canonical_json(obj) + '\n')
+    for i, (job, result) in enumerate(zip(c.jobs, c.results, strict=True)):
+        (d / f'job-{i}.json').write_text(canonical_json(job) + '\n')
+        (d / f'result-{i}.json').write_text(canonical_json(result) + '\n')
+        argv = [sys.executable, '-B', '-m', 'rkuarch.engines.analytic.dispatch', '--bundle', str(d / 'bundle.json'), '--assumptions', str(d / 'assumptions.json')]
+        p = subprocess.run(argv, input=canonical_json(job), env=env, capture_output=True, text=True)
+        assert p.returncode == 0, p.stderr
+        assert p.stdout == canonical_json(result) + '\n'
+        row = {'mode': mode, 'point': job.point.query.model_dump(mode='json'), 'bundle_hash': bundle.bundle_hash, 'job_hash': job.job_hash, 'result_hash': result.result_hash, 'result_content_hash': content_hash(result), 'engine': job.engine.model_dump(mode='json'), 'counts': result.counts.model_dump(mode='json'), 'duration_s': result.duration_ps / 1e12, 'u_c0_s': result.u_c0_duration_ps / 1e12, 'fidelity_detail': job.fidelity_detail.model_dump(mode='json'), 'stdin_command': argv, 'stdin_file': str(d / f'job-{i}.json'), 'result_file_sha256': digest(d / f'result-{i}.json')}
+        summary['v2'].append(row)
+    summary['v2_input_conditions'] = {'model': bundle.intent.model.model_dump(mode='json'), 'rank': bundle.rank.model_dump(mode='json'), 'precision': bundle.intent.precision.model_dump(mode='json'), 'position_encoding': bundle.intent.position_encoding.model_dump(mode='json'), 'hardware_hash': content_hash(bundle.hardware_spec), 'stipulations': sum(v.kind == 'stipulation' for _, v in sourced_leaves(bundle.hardware_spec)), 'initial_state': bundle.intent.initial_state, 'head_dim': bundle.intent.model.head_dim, 'frequency_ratios': [p.frequency_ratio for p in bundle.points], 'hardware_design_status': bundle.hardware_spec.design_status, 'hardware_provenance_counts': dict(Counter(str(v.provenance.value) for _, v in sourced_leaves(bundle.hardware_spec))), 'badge': badge_for(tuple(v for _, v in sourced_leaves(bundle.hardware_spec)), (), design_status=bundle.hardware_spec.design_status).badge}
+summary['reports'] = {}
+for name, expected in [('L0', '694682267f0d8d6fe30f150815313e1a00a36c35e565ac54ad2e9eea5d92b7e7'), ('L0m', '2a57c5033aaf748087320cdad56ffd7f1a8a5a47118afaf3feb3f63baab79c84')]:
+    base = Path('docs/reviews/U3-B-SR-C1/execution')
+    raw = gzip.decompress((base / f'{name}-report.json.gz').read_bytes())
+    assert hashlib.sha256(raw).hexdigest() == expected
+    report = json.loads(raw)
+    path = work / f'{name}-report.json'
+    path.write_bytes(raw)
+    p = command(name + '-validate', [sys.executable, '-B', '-m', 'validation.reporting.analytic_report', 'validate', '--report', str(path), '--expected-plan', str(base / f'{name}-plan.json'), '--expected-corpus', str(base / f'{name}-corpus.json'), '--expected-implementation', '85a5ad29820bc1c8638d844e192c6e4d778c107b'])
+    summary['reports'][name] = {'raw_sha256': expected, 'reduction': report['reduction'], 'implementation': report['implementation_git_commit'], 'relation_outcomes': dict(Counter(r['status'] for r in report['relations'])), 'clock_cells': [r for r in report['relations'] if 'aggregate_clock' in str(r.get('cell_id', ''))], 'validation_returncode': p.returncode}
+args.output.write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
+print(json.dumps(summary, indent=2, sort_keys=True))

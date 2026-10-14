@@ -1,0 +1,23 @@
+"""Stage 3 reviewer probe: every relevant module must come from the private export (cwd)."""
+
+import os
+import sys
+from pathlib import Path
+
+
+def test_stage3_import_origins():
+    root = Path.cwd().resolve()
+    import rkuarch.hw.derive
+    import uarch_contract
+    import scripts.u2_import_guard
+    import scripts.u2_inputs
+    import scripts.u2_support
+    import scripts.vendor_rk
+
+    mods = [rkuarch.hw.derive, uarch_contract, scripts.u2_import_guard, scripts.u2_inputs,
+            scripts.u2_support, scripts.vendor_rk]
+    for m in mods:
+        assert Path(m.__file__).resolve().is_relative_to(root), (m.__name__, m.__file__)
+    assert "PYTHONPATH" not in os.environ and "MYPYPATH" not in os.environ
+    print("STAGE3-ORIGIN", root.name, [str(Path(m.__file__).resolve().relative_to(root)) for m in mods])
+    print("STAGE3-SYSPATH-HEAD", [Path(p).name for p in sys.path[:3]])

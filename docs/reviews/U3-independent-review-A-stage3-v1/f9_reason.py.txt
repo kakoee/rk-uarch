@@ -1,0 +1,20 @@
+"""Evaluate the author's f9 assertions one at a time (text copied verbatim from
+U3-A-stage2-proposal-checks.md f9) to show WHICH assertion fails after a bounded revert.
+
+Run: python3 -I f9_reason.py <root>
+"""
+
+import sys
+from pathlib import Path
+
+pkg = Path(sys.argv[1]) / "docs/reviews/U3-native-stage-design-v2"
+d = (pkg / "delivery.md").read_text()
+u = (pkg / "proposed-U0011.md").read_text()
+assertions = [
+    ("'U0011-Q' in d", "U0011-Q" in d),
+    ("'U0011-Q' in u", "U0011-Q" in u),
+    ("'the small K2/B diagnostic fixture is not that trigger' in d", "the small K2/B diagnostic fixture is not that trigger" in d),
+    ("'both routes still require G6 and full G5' in d", "both routes still require G6 and full G5" in d),
+]
+for text, ok in assertions:
+    print("f9 assertion", "holds" if ok else "FAILS", "::", text)

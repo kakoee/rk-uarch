@@ -1,0 +1,24 @@
+"""Reviewer probe: assert runtime imports resolve to the current working export."""
+
+import os
+import sys
+from pathlib import Path
+
+
+def test_imports_come_from_export():
+    root = Path.cwd().resolve()
+    import rkuarch.hw.derive
+    import uarch_contract
+    import scripts.u2_inputs
+    import scripts.vendor_rk
+
+    mods = [rkuarch.hw.derive, uarch_contract, scripts.u2_inputs, scripts.vendor_rk]
+    if (root / "scripts/u2_support.py").exists():
+        import scripts.u2_support
+
+        mods.append(scripts.u2_support)
+    for m in mods:
+        assert Path(m.__file__).resolve().is_relative_to(root), (m.__name__, m.__file__)
+    print("ORIGIN", root, [str(Path(m.__file__).relative_to(root)) for m in mods])
+    print("PYTHONPATH", os.environ.get("PYTHONPATH"), "MYPYPATH", os.environ.get("MYPYPATH"))
+    print("SYSPATH_HEAD", sys.path[:4])

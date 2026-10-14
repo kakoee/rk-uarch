@@ -1,0 +1,12 @@
+--- probes/policy-test.saved	2026-10-13 19:49:35.276468370 -0700
++++ o2copy/tests/unit/test_u2_support_policy.py	2026-10-13 19:49:35.287999960 -0700
+@@ -42,8 +42,7 @@
+                 resolved = Path(os.fsdecode(path)).resolve()
+                 if "__pycache__" in resolved.parts:
+                     continue  # Interpreter cache is not source/data.
+-                if (resolved.parent == root
+-                        or any(resolved == p or resolved.is_relative_to(p) for p in protected)):
++                if (any(resolved == p or resolved.is_relative_to(p) for p in protected)):
+                     raise PermissionError("test attempted write to real source root")
+ 
+     sys.addaudithook(audit)

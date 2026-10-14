@@ -1,0 +1,46 @@
+{
+  "status": "U-REVIEW Stage 3 adjudication probes for lane B; private exports only; no live install, staging, oracle, generation, adoption or native execution",
+  "date": "2026-10-13",
+  "target_commit": "40fab28bc73ed1f7898a0950979607cfd0368c12",
+  "target_tree": "4f7c6ca6a8af0c9a6b76768c8f497a035686a62d",
+  "stage1_target": "184d2c2b08c28a01673be143b086ef223ba6706a",
+  "patch_sha256": "4c73d73d1c7ec1e1453e7ef7ccf1bd3de55238a4469069dcaa75e89bc764fa81",
+  "source_scope_since_stage1": "git diff 184d2c2 40fab28 -- src contract scripts tests validation pyproject.toml uv.lock hw Makefile .github: empty",
+  "report_prefix_sha256": "550fe94a69e8a9ae53071ebc0928a55af0a3c1d1f88020119e6211b3ac55c820",
+  "applied_file_sha256": {
+    "scripts/__init__.py": "fdad33702d259a475f3c6613827c3da6f02d5694b9e94764d2bce5295439fcaf",
+    "scripts/vendor_rk.py": "e18e6fce2dfdaca3cd6a3fd39af9e148797be1c575677c3adaf9128b14e5ae51",
+    "scripts/u2_inputs.py": "56a4695055dbb1498787c9bdc7824980ee236e058d6daedb992808340be1b9bb",
+    "scripts/u2_import_guard.py": "e445f68364c284e7751f0a6a8f14d508fb5f2d9bb846e43c4f0881b2b26ee615",
+    "scripts/u2_support.py": "b55d2f408199ee6ae6cd2e74346f49e986a953e2b7b1adb0109d8cb40d47d641",
+    "tests/unit/test_u2_support_policy.py": "9f4cb28f5cbb064bb207a02e712aa47577c785b93c6496531589db6fe98acab6"
+  },
+  "environment": {
+    "interpreter": "existing live-clone .venv Python 3.12.14; pytest 9.1.1, ruff 0.16.9, mypy 2.3.1, import-linter 2.15; no install/sync",
+    "ambient": "PYTHONPATH/MYPYPATH unset in session and removed with env -u for every credited pytest/static run",
+    "pytest_form": "python -B -m pytest -c pyproject.toml --rootdir . -p no:cacheprovider, cwd = private patched export",
+    "origin": "test_stage3_origin.py (this directory) ran in the credited suite invocation and asserted export-resident rkuarch, uarch_contract, scripts.u2_import_guard/u2_inputs/u2_support/vendor_rk; the patch's own origin test also passed. Direct CLI runs used env -i with explicit export src:contract and printed origin checks."
+  },
+  "executed": {
+    "exact_author_selection_plus_origin_probe": "136 passed, 1 skipped, 8 deselected (= 135 author + 1 reviewer origin probe); skip = real policy-marked human adoption absent; 8 deselected contract cases not credited",
+    "b_f8_isolation": "1516 export files: mtime_ns and sha256 identical before/after the 136-test run (no file added, removed, modified or re-touched)",
+    "random_selection": "secrets.choice over APPLIED [B-F1,B-F2,B-F4,B-F7,B-F8] -> B-F7 (random-selection.txt)",
+    "b_f7_revert": "removed supplement lines 226-253 and 257-258 only (B-F7-revert.diff); check_readiness.py exit 1 AssertionError ('B-F7', '**DMA replacement:**') after B-F2/B-F4 passed; exact blob b94a4cded73fb4c3c3a821441e61d2dbe715e899 restored; exit 0 pass",
+    "prose_discrimination_all_three": "check_text on Stage 1 supplement fails B-F2 on `head/embed` (16 bytes), B-F4 on v1 native-checklist “Stage scope and refusal”, B-F7 on **DMA replacement:**; target text passes all three",
+    "b_f1_guard_fault": "inserted single `return` after check_import_roots docstring: 32 failed, 53 deselected. Public 16: 12 DID NOT RAISE (roots ., src, contract) + 4 late 'input support inventory changed' (scripts root, complete scripts binding after import). Fresh direct 16: all lacked guard refusal and all captured stderr contained SHADOW_BODY_MUST_NOT_EXECUTE (body executed). Guard bytes restored to e445f683...",
+    "b_c1_loader_fault": "replaced only load_inputs u2_support.verify(...) with pass: 4 failed, 81 deselected, all DID NOT RAISE (bound_bytes, missing_entry, new_dependency, wrong_hash); loader bytes restored to 56a46950...",
+    "restored_fault_selection": "38 passed, 47 deselected; whole-export sha256 identical to pre-fault (only the two deliberately faulted files show new mtimes)",
+    "b_f8_isolation_revert_scratch_copy": "separate throwaway copy: isolated_root -> REAL_ROOT; 39 failed, 27 passed, 1 skipped, 18 errors; 38 PermissionError 'test attempted write to real source root' before mutation; no existing file modified/touched; two NEW root-level files (typing_extensions.py, annotated_types.py) were created because the hook protects named trees plus pyproject/uv.lock, not new repository-root files",
+    "pre_guard_future_probe_scratch_copy": "throwaway copy, --help only: scripts/__future__.py body executed before the guard for both vendor_rk.py and u2_inputs.py (from __future__ import annotations precedes check_import_roots; __future__ not preloaded at startup), then refused 'unreviewed import name: scripts/__future__.py'; control without the file prints usage",
+    "readiness_and_shared_math": "check_readiness.py and check_shared_math.py pass on unmodified target (arithmetic/prose/existing fixture only; not native execution)",
+    "statics_patched_export": "ruff passed; mypy 80 and 31 files; lint-imports 2 kept 0 broken (resolves live editable src/contract; git diff 40fab28 -- src contract empty)",
+    "strict_cli": "pristine export exit 0 (current pair verifies); patched export exit 1 'input support inventory changed' (migration not green)"
+  },
+  "inherited_not_reexecuted": [
+    "author tests-first 28 failed/44 passed/1 skipped on Stage 1 mechanism",
+    "author/coordinator receipts beyond those listed under executed",
+    "live strict vendor check (pristine export used; identical source)",
+    "A-lane worksheets and E4 derivations beyond running check_shared_math.py"
+  ],
+  "not_run": ["full suite", "hosted/native CI", "nightly", "performance", "input staging", "oracle", "generation", "adoption", "native build"]
+}

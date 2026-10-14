@@ -1,0 +1,497 @@
+--- a/docs/build-spec.md
++++ b/docs/build-spec.md
+@@ -663,8 +663,8 @@
+ 
+ | Rung | Establishes | Examples | Badge it supports |
+ |---|---|---|---|
+-| L0 invariants | No self-contradiction | MAC and byte conservation; utilisation ≤ 1; Little's law ≤ 1%; causality; byte-identical reruns; per-core SRAM occupancy ≤ capacity; attribution sums to duration; energy = Σ counts × coefficients + static × duration | none |
+-| L0m metamorphic | Relations without an answer key | Bandwidth ×2 never slower; any latency ×2 never faster; fewer outstanding requests never faster; `cold` never faster than `steady`; clock ×k → compute-bound ÷k; monotone in batch and context; symmetry; idle-core invariance | none |
++| L0 invariants | No self-contradiction | MAC counts and per-boundary transfer inventory; utilisation ≤ 1; finite-window queue conservation, stationary Little's law ≤ 1% with valid premises; causality; byte-identical reruns; per-core SRAM occupancy ≤ capacity; attribution sums to duration; energy = Σ counts × coefficients + static × duration | none |
++| L0m metamorphic | Relations without an answer key | Bandwidth ×2 never slower; any latency ×2 never faster; fewer outstanding requests never faster; `cold` never faster than `steady`; analytic T/k ≤ T' ≤ T with fixed work/rates; exact clock equality only under declared dominance; monotone in batch and context; symmetry; idle-core invariance | none |
+ | L1 analytical limits | Closed forms where exact | Transfer = hops × latency + serialisation; streaming = peak derated for refresh ±5% (levels 0–1; level 2 ≤ derated peak, efficiency recorded); latency-bound stream = outstanding × request size ÷ round trip ±5%; resident GEMM pipeline formula for the declared dataflow; **C2 ≥ own U-C0 roofline**; two hand-computed fixtures | none |
+ | L2 differential | Same abstraction as independent models | BookSim2, Ramulator 2, SCALE-Sim v3 (per declared dataflow), Gemmini RTL (optional), tt-npe; optional matched component comparisons; Timeloop mapping reference (optional, recorded, never used to change a policy); per-access energy references, one per coefficient family (deferred until after U8). A comparison of a sub-model with the same code (a native DRAM bridge using Ramulator 2, against the same Ramulator 2) is refused as not independent | none: "verified", not "validated" |
+ | L3 same-class silicon | How far the method misses on a real chip | TPU v5e (large-core), Blackhole p100a (mesh); predictions committed before results, with ordering enforced by git; device-side time only; each benchmark tagged `matched` or `compiler-chosen` mapping; compiler-reported FLOPs and bytes checked against the workload graph (workload fidelity); device counters, where the chip exposes them, checked against the row diagnostics (diagnostic fidelity) | `estimated`, scoped |
+@@ -676,6 +676,15 @@
+ - Mapping error is not model error. `matched` and `compiler-chosen` benchmarks are separate
+   ledger classes, and every gate verdict states which group it read (F12).
+ - Duration evidence never validates energy (F11).
++
++U0011 records the U3-approved component design and verification semantics. DMA inventory
++uses actual boundary/direction/unit observations, including requests crossing the window;
++operand reuse/new outputs are not a conserved transfer inventory. The exact DMA and
++analytic clock requirements in U-P6 below are synchronized with its standalone prompt.
++Finite-window checks belong to represented B mechanisms; stationary Little's law needs
++its declared first-claim premises. Independent component bounds do not require a new
++analytic component API. U4 authorization, exact schemas/toolchains and performance budgets
++remain separate. The U0002 prospective addendum leaves current enforcement installed.
+ 
+ ### 2.8 The native engine
+ 
+@@ -2403,6 +2412,10 @@
+ outcomes, missing coverage and U0006 reductions. Do not blanket-pause C1–C5, lower case
+ counts or call unobservable mechanisms verified. Native checks follow admitted mechanisms.
+ Provide the dependency disposition before a revised execution selection is authorized.
++U0011 records the accepted U3 design/shared semantics, not permission to start U4. At B use
++independent component bounds; no full-model analytic job masquerades as a component API.
++B owns real Linux CI preparation before K1 evidence, once U4 and exact tool/license pins
++are authorized. Current artifact enforcement stays active until a separately approved migration.
+ 
+ TASK: the rungs that establish that the simulator does not contradict itself, and relations
+ that must hold even though nobody knows the right answer. They run against ANY engine through
+@@ -2411,10 +2424,23 @@
+ 
+ 1. validation/L0_invariants/ — per engine run:
+    - MACs executed == MACs in the operator graph (from the workload graph, not re-derived);
+-   - DMA bytes moved in == bytes consumed by compute plus bytes written back;
++   - For each represented DMA boundary, direction and declared byte unit,
++     freeze the request population and half-open observation window [t0,t1). With no cancellation
++     or loss, verify `in_flight_end = in_flight_start + issued_bytes - completed_bytes` from actual
++     issue/completion observations, including requests crossing either boundary. Start/end state
++     is immediately before events at t0/t1 respectively. Payload versus
++     transaction/padding bytes, multicast duplication, partial completion, cancellation and
++     retry semantics require explicit ledger terms before the applicable check. Verify local
++     resident capacity separately from distinct allocation/lifetime/alias observations. Compute
++     operand consumption is not a conserved transfer-byte inventory: reuse and newly produced
++     outputs forbid a general `DMA in = compute consumed + written back` identity. Missing
++     required observations leave the represented stage unverified; analytic absence remains
++     unsupported and cannot produce a positive check.;
+    - no resource utilisation > 1 over any window;
+-   - Little's law within 1% on every queue the engine reports (mean occupancy vs arrival
+-     rate × mean residence);
++   - finite-window membership, clipped residence and conservation for represented queues
++     at B, including initial/terminal members; stationary Little's law within 1% at its
++     first qualifying claim (normally U6 or earlier reliance), with frozen population,
++     window, boundary/censoring and nonzero-flow premises; missing observations never pass;
+    - causality: no event or interval begins before the one it depends on (for engines that
+      emit traces);
+    - byte-identical reruns;
+@@ -2426,8 +2452,16 @@
+      null.
+ 2. validation/L0m_metamorphic/ — relations over PAIRS of runs:
+    - doubling any bandwidth (DRAM, NoC link, SRAM port) never increases duration;
+-   - scaling every core-domain clock by k scales a compute-bound query's duration by 1/k
+-     within 1%, and changes a DRAM-bound one by less than k;
++   - For k>1, compare f with k*f using identical admitted resolved work,
++     precision, assumptions and all non-compute rates, including fixed DRAM bandwidth; validate
++     both transformed hardware inputs. For the analytic max/sum model require `T/k <= T' <= T`.
++     Exact `T'=T/k` needs aggregate compute dominance at the faster clock, or compute dominance
++     for every op at that clock in per_op mode. Exact `T'=T` needs aggregate memory dominance at
++     the base/slower clock, or memory dominance for every op at that clock in per_op mode.
++     State speedup as T/T', with positive durations: strict speedup <k requires a strictly
++     binding fixed memory term at the faster clock (a tie alone is insufficient). Mixed-bound
++     and memory-only-op domains cannot inherit exact reciprocal scaling by tolerance. Preserve
++     all failures, unsupported premises, budgets and historical reason codes.;
+    - decode duration is non-decreasing in batch and in context;
+    - permuting core ids on a symmetric topology (torus, or mesh with a symmetric mapping)
+      leaves duration unchanged;
+--- a/docs/decisions/U0002-the-vendored-snapshot-and-parity-discipline.md
++++ b/docs/decisions/U0002-the-vendored-snapshot-and-parity-discipline.md
+@@ -284,3 +284,75 @@
+ work instead has independent correctness tests and complete discrepancies; an aggregate
+ compatibility pass is not physical parity. Preserve all fixtures/refusals and A-F12 before
+ calls. Actual npu-l4 refresh follows the existing human generation/adoption lifecycle.
++
++
++## U3 prospective dependency-policy decision — implementation pending
++
++Accepted by Javid (@jjaffari), 2026-10-13, **for U3 closeout only**; see the
++[approval record](../reviews/U3-reviewed-design-and-policy-v1/acceptance.md).
++This prospective choice does not replace currently installed enforcement or reinterpret
++historical acceptance. The complete existing enumerator and adopted source/artifact pair
++remain required until a separately authorized, tested transition is installed and adopted.
++No U4 work, installation, generation or adoption is authorized here.
++
++The exact selected repair is the [reviewed proposal](../reviews/U3-B-artifact-dependency-audit-v1/repair.patch)
++at `7afba9b16d954fd46684711764cb3718170e53aa`, SHA256
++`c238574b284ebecb6f0f1253922ce01af87259f0187aad38bcda628757e8fe6b`.
++Its [O1/O2 follow-up](../reviews/U3-B-U0002-bootstrap-followup-v1/README.md) discloses
++removal of pre-guard future imports, equivalent resolved type hints with changed raw
++annotation storage, root-write test defence, bootstrap limits and migration consequences.
++The current proposed inventory is 97→56; actual M imports/initializers/data must be audited
++before protected M installation. Neither count is a future exclusion quota.
++
++The selected prospective policy is:
++
++Keep immutable generation provenance, artifact integrity and current compatibility as
++distinct obligations. Preserve all published oracle artifacts and their recorded complete
++support inventories without rewriting their metadata or interpreting historical integrity
++as currentness. An unversioned support inventory continues to use the existing complete
++enumerator and full current-script/environment checks.
++
++For separately human-generated and adopted input sets carrying the exact
++`uarch-input-support/2` / `generator-imports-and-data/1` tooling policy, current support
++comprises the conservative local import closure of the reviewed staging/generator/verifier
++roots, including package initializers and function-local imports, the policy implementation
++itself, all Python files below scripts/, explicitly reserved top-level module files and
++existing reserved-namespace initializers, and reviewed non-import inputs. Under the actual
++ROOT, scripts/, src/ and contract/ search roots, refuse any new importable top-level module
++or namespace name outside the explicit reviewed local names/types. This covers names used
++by transitive imports as well as direct ones; it is not a direct-import-only guarantee.
++Adding a new top-level local name requires policy/source review. Nested unrelated consumer
++files and non-importable prose may remain unbound, unless reached or explicitly included.
++Run the name guard before non-bootstrap imports in direct staging/vendor entry points and
++package initialization, and again during strict support inventory verification. Its proposed
++bootstrap requires normal CPython >=3.12 with builtin sys and frozen os; other bootstraps
++refuse. Trusted startup/environment and no concurrent source race remain premises, not a
++sandbox against malicious interpreter hooks or arbitrary reflection. Bind existing reserved
++namespace initializers so adding/changing one cannot evade the inventory.
++Compare exact inventory and file bytes;
++reject unknown policy, unresolved/dynamic dependency forms outside the reviewed mechanism,
++ambiguous or shadowed imports, symlinks, missing/extra dependencies and content drift.
++Introducing dependencies requires their inclusion and review, not unchanged output values.
++
++Retain the complete vendor_rk script fingerprint, embedded oracle-program fingerprint,
++clean upstream pin and source capture, locks and recorded environment policy, explicit
++precision/PARAMS/model/source attribution, exact frozen-input/outer-copy joins, coverage,
++real refusals and current adoption identity. No exclusions based on whether a file is
++named report, CLI, schema or native. Imported files remain relevant regardless of label.
++Consumer code that does not contribute to generation or verification may change without
++regenerating a nominal oracle under the reviewed policy; its tests, implementation/result
++bindings and review obligations still apply. Oracle equality is not physical correctness.
++
++Only Javid's separately reviewed human lifecycle may create/adopt a new-policy artifact.
++Freeze the exact approved code, policy, upstream and full input set; generate twice in
++separate processes, check created then verified-identical, audit complete before/after
++semantics and provenance, and adopt the complete candidate in a separate human decision.
++CI consumes only committed adopted artifacts; it never generates, adopts, fabricates
++environment records or substitutes historical checks for current compatibility.
++
++The [exact migration sequence](../reviews/U3-B-artifact-dependency-audit-v1/migration.md)
++remains future work requiring separate releases. Preserve full nominal coverage and refusals,
++legacy dispatch and immutable artifacts. Changed generator fingerprints must bind the real
++future human generation; passing synthetic tests cannot replace it. A documentation-only
++U3 closeout uses the current valid source/artifact pair and requires no regeneration.
++No runtime currentness waiver, new policy-marked artifact or completed migration is claimed.
+--- /dev/null
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -0,0 +1,226 @@
++# U0011 — Progressive native core: bounded component stage and qualification
++
++**Status: design/semantic scope accepted by Javid (@jjaffari), 2026-10-13,
++for U3 closeout only.** This record takes effect upon human installation.
++[Exact approval and exclusions](../reviews/U3-reviewed-design-and-policy-v1/acceptance.md)
++bind the reviewed proposal at `7afba9b16d954fd46684711764cb3718170e53aa`.
++U4 preparation and implementation require separate authorization. No installation of
++mapped carriers or artifact-policy code, no generation/adoption, no native execution,
++and no G2/U3 closure is granted by recording this design.
++
++The accepted scope is D1 of the [decision packet](../reviews/U3-reviewed-design-and-policy-v1/next-decision.md),
++including H-DMA/H-CLOCK and S-COMPONENT/S-CI/S-QUEUE. Outstanding decisions below stay open:
++exact schema/fixture/corpus bytes, immutable toolchain and licence approval, human L1
++working, reference/product inputs, and all numeric performance/host/noise budgets.
++The 5 s/512 MiB and record/size figures remain proposals, not accepted limits.
++Estimates and ownership are planning allocations, not release of U4 tasks.
++
++The attachments below are normative design inputs at the reviewed revision; their
++original proposal/evidence text is preserved. This acceptance scope governs any retained
++“proposed” or “requires human review” wording about the accepted design. It does not
++turn an unresolved concrete implementation, budget or installation into an approval.
++
++## Decision
++
++Develop the one Rust timing simulator progressively, retaining Python analytic U-C0,
++preparation/mapping and product layers. Rust executes resolved TaskGraphs without model
++construction, sharding, hidden remapping or coefficient generation. Functional tensor
++execution is outside scope. Observed work comes from completed jobs, not expected totals.
++
++Deliver **M / K1 / K2 / B / R / T**:
++
++- M prepares the mapped schema/fixtures for human installation, then the approved component
++  mapper/export/import. U0023's dependency audit/policy decision precedes protected install;
++  if repair is not ready, Javid explicitly retains current U0002 enforcement and budgets
++  M/K2/B adoption cycles. No implicit exclusions, stale acceptance or automatic adoption.
++- K1 implements internal fixed-delay time/events/resources with private unit fixtures after
++  accepted semantics and exact toolchain/dependency/license decisions. It may overlap M.
++  Private fixtures are not another public workload format or public admission evidence.
++- K2 wires approved public JSON/subprocess/result boundaries after installed mapped carriers,
++  M fixed-delay carriers/fixtures/import and verified K1; the component mapper is first required at B. Repeat kernel acceptance and faults publicly; private results
++  cannot discharge this requirement. No subsystem model claim at K1/K2.
++- B implements and verifies the component scope below after K2. Its at-most-C1 results
++  cannot claim a decoder layer, model prediction or full product table.
++- R extends actual U5 reference-suite admission and independent verification before G3a and
++  U-P9 freeze. No full table, FP8 or second-policy prerequisite unless the suite needs it.
++- T produces the first full consumed product tables in U7/G3b after G5-correctness and its
++  exact input/model decisions; G6 is additionally required for C2 and U10. G4/G7 success
++  and G5-performance/automation completion are not product-table prerequisites.
++
++The normative design attachments are [interface](../reviews/U3-native-stage-design-v2/interface.md),
++[verification](../reviews/U3-native-stage-design-v2/verification.md),
++[delivery](../reviews/U3-native-stage-design-v2/delivery.md) and
++[decision boundaries](../reviews/U3-native-stage-design-v2/decisions.md), pinned by the
++[exact acceptance inputs](../reviews/U3-reviewed-design-and-policy-v1/decision-inputs.json). V1 is historical, not a competing delivery schedule. Changes to accepted model
++laws or mapping choices require prospective review and identity/version changes.
++
++## Bounded model scope and refusals
++
++Production B admits only npu-l4 hash
++`sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9`, frequency ratio 1,
++BF16 operands/output with FP32 accumulation, TP1/rank0, 1–16 component q_projection GEMMs,
++1≤M≤1024 and 1≤K,N≤256, contiguous layouts, repeat 1, WS ≤256-row tiles, no K split.
++Explicit DMA/unicast/barriers and double-buffer placements use FIFO-ready arbitration;
++shared resources serialize and independent DMA/compute/cores may overlap. Imported mapped
++work runs unchanged after validation. Cold HBM and separately labeled resident test
++initialization are distinct; interface.md's checkpoint/invocation/profile matrix binds
++all synthetic clocks/hardware/state to a frozen NativeTestProfile and verification-only
++job/result identity. Test variants are proposed-design stipulations with rationales,
++registered to refuse normal prepare/table/product reports. B retains fixed-delay test
++regressions with null subsystem fidelity. Production whitelist/ratio remain unchanged. Resident and other test results cannot
++become product table rows or steady predictions.
++
++Compute 1 / NoC 0 / DRAM 0, exact sync, layer_reuse=false, at most C1. This spec has no shared
++SRAM; do not imply absent shared SRAM on future hardware that declares it. SRAM bank
++conflicts, NoC link/VC contention, DRAM row/physical queue behavior and energy are not
++represented. Emit exact unrepresented paths/null diagnostics. DMA request limits and
++channel/core-port bandwidth accounting remain required even at level 0.
++
++Retain verification E3's explicit WS staging+32-cycle overhead+fill/steady/drain+output
++law and E4's NoC infinite-bandwidth named-domain next_edge hop delay, fixed DRAM latency and
++refresh-derated rational channel service (ceil-to-ps only, no DRAM edge alignment),
++request striping and credit-until-commit/ack lifecycle. E4 defines all crossings,
++receiving-mechanism alignment attribution, unlimited credit-bounded issue per edge,
++compute-only job overhead and the five-read refresh discriminator. These are model assumptions,
++not physical measurements. Coefficient/vector throughput is not inferred from BF16 matrix
++rates. Production refuses full legacy/v2 models, non-q_projection operators, rotary/KV/fused attention,
++other precision/rank/hardware, steady state, K spill, multicast, invalid shapes/placements/
++closure, padding or unsupported fidelity. Interface R01–R21 are mandatory controls.
++
++## Input, observation and replay contract
++
++Propose additive `uarch-prepared/3`, `uarch-taskgraph/1`, `uarch-engine/3` with strict tagged
++scope/jobs, complete semantic/placement/assumption/hardware identities and no hash cycle.
++Reuse OpSpec/PreparedOp(v2), rank, producer, KV and rotary vocabulary; old analytic roots
++remain strict/unchanged. Native refuses analytic jobs and refuses full v1/v2 work until
++explicitly admitted. Reserved version names and installable exact schema/fixture patch
++require human review before installation/K2. This prose does not install a carrier.
++
++R/T preserve authenticated coefficients, positions, Q/new-K FP32 arithmetic and casts,
++full-tail transfers/coefficient traffic, rotated-before-store append, local KV replication,
++complete group repeats/head/tail and fused paged attention. No hidden coefficient defaults,
++score DMA, second TP division or dropped work. U0022 FP8/ragged gaps require separate
++semantic decisions before their consumer runs; BF16-only cannot meet the FP8 demo.
++
++Mandatory `uarch-native-observations/1` proposal records dispatched events, completed jobs,
++DMA/control-volume issue/completion, allocation lifetimes, represented queue membership,
++resource intervals and causal critical path. Useful versus issued/padded/cast work and
++payload versus transaction bytes remain distinct. Expected coverage is a separate ledger.
++Conservation is final=initial+issued−completed per boundary/direction/unit; compute operand
++reuse is not conserved DMA bytes. Queue area uses clipped residence intervals including
++initial/terminal members. Finite-window observations are required at B; stationary Little's law retains 1% at
++first claim (normally U6 or earlier reliance) after frozen population/window/boundary
++premises; zero flow has null residence. Utilization uses busy interval union. Attribution includes causal resource
++predecessors, partitions duration exactly and is not a physical explanation of error.
++
++Three fresh-process and debug/release runs yield identical canonical results at each
++admitted native stage. Implementation/model/compiler/lock/assumptions/input identities
++bind results; executable/image/build-profile/host time/RSS belong in operational receipts.
++Saved mapped replay disables all workload/mapping/coefficient producers. Trace changes
++only its declared trace field; numeric projections match with trace on/off and full bytes
++match within each setting. Table workers 1/8 and repeated table bytes are T; batch workers
++1/N apply where delivered. No hidden reconstruction or filename-only identity.
++
++## Kernel semantics and verification
++
++Follow build-spec §2.8: single thread; u64 picoseconds and exact checked u128 edge arithmetic;
++next_edge is the sole cycle conversion; 32-byte events ordered by (t_ps,phase,target,seq),
++schedule-time sequence; arena/free list, two-level 4096-slot wheel with heap overflow,
++single resource ownership, CSR topology/declared routes and ordered output collections.
++No unsafe, SIMD/GPU/MPI, compiler/search or threading at these stages. No link reservations
++are invented at NoC 0. Later lookahead is spec-derived, not assumed one cycle; exact
++conservative sync precedes approximation. Ramulator/U9 remain separate work.
++
++Adopt interface.md's exact owner-grant rule for zero-duration jobs: join the owner FIFO,
++complete inline only after grant, preserve deterministic phase2 zero-transition closure.
++Busy-owner literal completes at5000 ps; owner-bypass fault gives3000. Zero-hop nonaliasing
++same-core unicast is admitted with no NoC delay/alignment; actual DMA still pays port
++service. Cyclic dependencies refuse. These semantic corrections require human review.
++
++K1 acceptance is U-P11a 1/1a/2/3/5 internally; K2 executes all applicable acceptance cases
++publicly including protocol 4/6. B/R/T require their applicable independent literal counts,
++transfers, edges, limits, conservation, capacities/credits, causality, serialization and
++positive overlap, replay and fault/restored-control matrix in verification.md. At least
++two U-P8 fixtures need committed human working, including latency-bound DMA; author agent
++calculations do not discharge this or independent review. Required observations cannot be
++postponed to optional tracing. Overflow/refusal tests differ from numerical mutant kills.
++
++U0006 governs: preserve every invocation/discovery/shrink/control/error and exact identities;
++freeze cases/premises/budgets before two qualifying replays. Applicable counterexamples or
++surviving required mutants fail; otherwise missing/empty/skipped/incomplete/under-budget
++coverage is not_run. Only complete nonempty passing applicable coverage passes. B owns
++independent corpus/reductions, A supplies mechanisms, coordinator reconciles disagreements.
++Analytic C1–C5 and remaining cells have first-consumer deadlines in verification.md, including
++native roofline checks and U-P9/U-P15 baselines. C1's historical 22/24 clock cell and
++proposed deterministic-anchor remedy are aggregate-only. Independent native component-clock
++tests and any separately approved true-premise per_op domain do not inherit that remedy
++or its evidence; the existing per_op whole-query reciprocal premise remains invalid with
++the two memory-only operators head/embed and layers/kv. Unrelated report completion does not gate K1; required checks must
++pass before reliance. Never replace them with optional L2.
++
++## Reference readiness, product and qualification
++
++R sources usable TPU representation and explicit unknowns with B, resolves exact formats/
++operators/transport/benchmark carriers and measurement granularity, and admits the signed
++≥24-benchmark six-class U-P9 suite. Complete applicable RoPE/casts/KV work, steady/priming,
++replay/independent faults and attribution used by G4 precede freeze. A GEMM-only executor
++cannot close G3a. Unrepresentable/unmeasurable required work returns a target/scope/contract
++decision, never fabricated parameters or silent removal. U-P9 remains prediction-only.
++
++Delivery.md names Q6-C/D/W representative inputs and a separately schedulable shared W
++operator package: W can feed R/U6/T independently of TPU and is charged once. U6 qualifies
++expanded npu-m256 representative execution/diagnostics and integrated
++regressions, not another kernel or full C1 table. R/G3a or successful G4 is not required
++for independent qualification. T preserves the npu-m256/70B/FP8/tp8 demo and all consumer
++coverage/error/worker/public-pipeline requirements. BF16/npu-l4/tp1/second-policy work
++requires its declared consumer, including U-P14; no automatic npu-l4 or 32×32 grid.
++U10 requires G6+G3b and rk-sim's separately accepted C2-only boundary.
++
++Blackhole: U-P16 S sourcing → U-P15a admission/tests → U-P15 freeze → U-P16 M measurement.
++U5/G4 and U8/G7 thresholds, frozen-before-measured ordering and evidence scopes remain.
++No pilot, hardware spend or measurement is authorized by this record. Optional component
++references need prospective matched scope/criteria, pins and implementation-overlap review;
++same-code is integration, unavailable/unmatched stays explicit, observed disagreements
++persist. No complete fork requirement, second Python engine or fork-speed target returns.
++
++## Environment, budgets and independent gate outcomes
++
++Before K1, accept exact Rust release/commit/checksums, target, compiler components,
++Cargo.lock/transitive features/licenses, cargo-deny version, base image digest and OS tool
++inventory/recipe. Initial direct dependencies: serde/serde_json and dev proptest only;
++no blanket license exception. Immutable values are unresolved in this proposal and require
++a pin-only decision before coding. Real Linux CI executes fmt/clippy -D warnings, license
++and debug/release tests with B-pinned tools; no empty workspace/no-op job proves readiness.
++
++Accept performance workload/host/time/RSS budgets separately before measuring. Proposed
++K2/B envelope only: ≤5 s/512 MiB for ≤256 fixed-delay jobs/1024 edges or B one cold/resident E3 C1 tile
++(576 cold requests), plus separate E4 bursts≤33 requests, one thread/worker, exact cold/resident fixtures, on a separately accepted
++controlled Linux allocation. Delivery defines all-in invocation, warm-host+seven-run
++maximum/RSS and U0012 noise calibration. This is a planning proposal, not allocation or measurement. Interface.md accounts for
++mandatory observation volume; the small performance profile caps65536 records/16MiB
++encoded observations without dropping required data. Full B admission is unchanged and
++requires its own resource budget before performance work. V1's later 60/120/300 s and 672-point ceilings are withdrawn; R/U6/T need exact
++new consumer budgets before performance work. The later prospective U0011-Q addendum defined in delivery.md
++supplies U9's representative single-point trigger; the small fixture ceiling does not.
++No inherited 200-second fork ceiling.
++
++Record G5-correctness, G5-performance and G5-automation separately. Only correctness gates
++ready U7/G6/G3b/U10 with their own tests. Full G5 requires all three. Controlled-host
++performance evidence AND executed applicable self-hosted nightly gate full G5, U9 entry,
++any simulator-performance claim and final closure. Missing either leaves diagnostic host
++observations provisional; it does not prohibit otherwise ready correctness/product work.
++Before nightly exists, required correctness selections execute explicitly on approved
++Linux. No WSL performance claim. Fresh hosted checkout and separate fresh local clone at
++the same published commit remain prospective sprint correctness-closure requirements.
++
++STUB, unknown error, unverified energy and null unmodeled quantities persist. This record
++claims no implementation, schema installation, native run, performance result, artifact
++refresh/adoption, G2/G3a/G3b/G5 acceptance, independent verdict, badge or sprint closure.
++
++Stage 2 schema decisions also include explicit prepared-op/1 component version, unchanged
++strict Counts/ExtCounts plus separate issued-work/traffic carriers, closure-before-stage
++validation order, the complete hardware leaf ledger and native-owners/1 enumeration in
++interface.md. Delivery.md supplies exact proposed DMA/clock prompt clarifications for
++Javid; current prompts are not changed by this proposal. B must re-derive the revised E4
++and freeze variant/corpus identities; author arithmetic does not supply B's independent
++review or the two human-worked fixtures. Stage 3 remains the same reviewer's adjudication.
+--- a/docs/execution-plan.md
++++ b/docs/execution-plan.md
+@@ -44,7 +44,7 @@
+ | **Next** | Reconcile U-P5 under U0023; prepare exact component/schema and toolchain decisions, independent checks and reference feasibility. No blanket runtime release |
+ | **U1 done** | Published `u01-end` at `1e9e794a84c5173812c23a1cf2fc04b85e6f6831` |
+ | **U2 done** | Accepted closeout and `u02-end` at `79bc1f0`; approved cleanup preserved the evidence archive and branch history |
+-| **U3 in progress** | Accepted U0006/U0022, published RoPE runtime/adoption/activation; CI on `456215c` passed. Source-only feasibility published at `42fc341`. B reports remain partial/not_run; no native/fork run, G2 or U3 closure claimed |
++| **U3 closeout pending** | Both lane response reviews and B O1/O2 recheck accepted; Javid accepted the detailed design and prospective dependency policy for closeout only. See [approval](reviews/U3-reviewed-design-and-policy-v1/acceptance.md) and [closeout](reviews/U3-closeout.md). B reports retain partial/not_run outcomes. Final documentation, same-commit validation and human tag remain pending; U4 is not authorized |
+ | **Not started** | U4–U11 |
+ | **Runner pending** | Registration and executed manual nightly remain unverified. Not a correctness-development prerequisite under U0023; controlled-host performance and G5 nightly qualification remain pending |
+ 
+@@ -217,7 +217,7 @@
+ | **Lane B** | U-P6: record each analytic obligation's first consumer; independent native expectations; reference sourcing/measurement feasibility and a bounded test-only consumer-conformance proposal |
+ | **Joint exit** | G2 design accepted, outstanding implementation/evidence explicit; independent review and human closure remain required |
+ | **Prerequisites** | Accepted semantics and toolchain before K1; exact schema before K2. Unrelated analytic reporting and runner registration do not block internal kernel work |
+-| **Not claimed** | No native accuracy, completed schema installation or blanket acceptance of A's proposed U0011 |
++| **Accepted boundary** | U0011 records the approved design scope; exact schema installation, toolchain/licence pins, numeric performance budgets and U4 authorization remain separate. No native accuracy or completed implementation claimed |
+ 
+ ### U4 · Bounded native engine and silicon readiness
+ 
+@@ -289,7 +289,7 @@
+ | **Lane B** | Pre-registered error-vs-quantum experiment at a credit-backpressured boundary; published curve; the enforcement rule → **U-P18** |
+ | **Joint exit criterion** | **Gate G8**: exact mode byte-identical at 1, 2, 4 and 8 threads · the curve published with its verdict in the first sentence · a lax result outside a covering curve reports C1 |
+ | **Effort** | A 125 · B 61 |
+-| **Depends on** | G6, full G5 (including controlled-host performance and executed self-hosted nightly), and a recorded need: the native engine breaches ADR U0011's single-point wall-clock budget (measured in U-P11c and U-P13d), or both founders record in an ADR that they want the synchronisation experiment (the funded plan's G1) regardless. Without either, U9 is deferred until after U11, which does not depend on it |
++| **Depends on** | G6, full G5 (including controlled-host performance and executed self-hosted nightly), and a recorded need: the native engine breaches the prospective U0011-Q representative single-point wall-clock budget, once separately accepted and measured in U-P11c/U-P13d (the small K2/B diagnostic ceiling is not this trigger), or both founders record in an ADR that they want the synchronisation experiment (the funded plan's G1) regardless. Without either, U9 is deferred until after U11, which does not depend on it |
+ | **Not in this sprint** | Optimistic sync, SIMD, GPU, MPI |
+ 
+ ### U10 · Integration into rk-sim
+@@ -352,6 +352,15 @@
+   report completion does not block kernel development;
+ - reference feasibility and later product decisions scheduled, ownership and revised effort
+   recorded. A proposal is not a runtime pass or blanket approval of all its details.
++
++U3 closeout records the accepted design, first-consumer deadlines and explicit pending
++implementation/evidence. Exact toolchain/licence approval is required before K1 and exact
++protected schema installation before K2; neither is a claim that those U4 tasks ran in U3.
++U0011's shared decisions assign B independent component bounds (no new analytic component
++API), real Linux CI preparation before K1 credit, and finite-window checks at B versus
++stationary Little's law at first qualifying claim. U-P6/build-spec hold the exact approved
++DMA/clock statements. The prospective U0002 policy is selected; its code/migration remain
++uninstalled and separately authorized. U4 is not released by U3 decision recording.
+ 
+ **G3a · Silicon-suite readiness (U4b).** Gates U5 prediction freeze, not product tables:
+ - usable sourced TPU reference, explicit unknowns and structural assumptions, representability
+--- a/docs/prompts/U-P6-L0-invariants-and-L0m-metamorphic.md
++++ b/docs/prompts/U-P6-L0-invariants-and-L0m-metamorphic.md
+@@ -20,6 +20,10 @@
+ outcomes, missing coverage and U0006 reductions. Do not blanket-pause C1–C5, lower case
+ counts or call unobservable mechanisms verified. Native checks follow admitted mechanisms.
+ Provide the dependency disposition before a revised execution selection is authorized.
++U0011 records the accepted U3 design/shared semantics, not permission to start U4. At B use
++independent component bounds; no full-model analytic job masquerades as a component API.
++B owns real Linux CI preparation before K1 evidence, once U4 and exact tool/license pins
++are authorized. Current artifact enforcement stays active until a separately approved migration.
+ 
+ TASK: the rungs that establish that the simulator does not contradict itself, and relations
+ that must hold even though nobody knows the right answer. They run against ANY engine through
+@@ -28,10 +32,23 @@
+ 
+ 1. validation/L0_invariants/ — per engine run:
+    - MACs executed == MACs in the operator graph (from the workload graph, not re-derived);
+-   - DMA bytes moved in == bytes consumed by compute plus bytes written back;
++   - For each represented DMA boundary, direction and declared byte unit,
++     freeze the request population and half-open observation window [t0,t1). With no cancellation
++     or loss, verify `in_flight_end = in_flight_start + issued_bytes - completed_bytes` from actual
++     issue/completion observations, including requests crossing either boundary. Start/end state
++     is immediately before events at t0/t1 respectively. Payload versus
++     transaction/padding bytes, multicast duplication, partial completion, cancellation and
++     retry semantics require explicit ledger terms before the applicable check. Verify local
++     resident capacity separately from distinct allocation/lifetime/alias observations. Compute
++     operand consumption is not a conserved transfer-byte inventory: reuse and newly produced
++     outputs forbid a general `DMA in = compute consumed + written back` identity. Missing
++     required observations leave the represented stage unverified; analytic absence remains
++     unsupported and cannot produce a positive check.;
+    - no resource utilisation > 1 over any window;
+-   - Little's law within 1% on every queue the engine reports (mean occupancy vs arrival
+-     rate × mean residence);
++   - finite-window membership, clipped residence and conservation for represented queues
++     at B, including initial/terminal members; stationary Little's law within 1% at its
++     first qualifying claim (normally U6 or earlier reliance), with frozen population,
++     window, boundary/censoring and nonzero-flow premises; missing observations never pass;
+    - causality: no event or interval begins before the one it depends on (for engines that
+      emit traces);
+    - byte-identical reruns;
+@@ -43,8 +60,16 @@
+      null.
+ 2. validation/L0m_metamorphic/ — relations over PAIRS of runs:
+    - doubling any bandwidth (DRAM, NoC link, SRAM port) never increases duration;
+-   - scaling every core-domain clock by k scales a compute-bound query's duration by 1/k
+-     within 1%, and changes a DRAM-bound one by less than k;
++   - For k>1, compare f with k*f using identical admitted resolved work,
++     precision, assumptions and all non-compute rates, including fixed DRAM bandwidth; validate
++     both transformed hardware inputs. For the analytic max/sum model require `T/k <= T' <= T`.
++     Exact `T'=T/k` needs aggregate compute dominance at the faster clock, or compute dominance
++     for every op at that clock in per_op mode. Exact `T'=T` needs aggregate memory dominance at
++     the base/slower clock, or memory dominance for every op at that clock in per_op mode.
++     State speedup as T/T', with positive durations: strict speedup <k requires a strictly
++     binding fixed memory term at the faster clock (a tie alone is insufficient). Mixed-bound
++     and memory-only-op domains cannot inherit exact reciprocal scaling by tolerance. Preserve
++     all failures, unsupported premises, budgets and historical reason codes.;
+    - decode duration is non-decreasing in batch and in context;
+    - permuting core ids on a symmetric topology (torus, or mesh with a symmetric mapping)
+      leaves duration unchanged;

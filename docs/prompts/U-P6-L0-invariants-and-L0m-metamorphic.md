@@ -20,6 +20,10 @@ checks pass before reliance; unrelated report completion does not block K1. Keep
 outcomes, missing coverage and U0006 reductions. Do not blanket-pause C1–C5, lower case
 counts or call unobservable mechanisms verified. Native checks follow admitted mechanisms.
 Provide the dependency disposition before a revised execution selection is authorized.
+U0011 records the accepted U3 design/shared semantics, not permission to start U4. At B use
+independent component bounds; no full-model analytic job masquerades as a component API.
+B owns real Linux CI preparation before K1 evidence, once U4 and exact tool/license pins
+are authorized. Current artifact enforcement stays active until a separately approved migration.
 
 TASK: the rungs that establish that the simulator does not contradict itself, and relations
 that must hold even though nobody knows the right answer. They run against ANY engine through
@@ -28,10 +32,23 @@ them once.
 
 1. validation/L0_invariants/ — per engine run:
    - MACs executed == MACs in the operator graph (from the workload graph, not re-derived);
-   - DMA bytes moved in == bytes consumed by compute plus bytes written back;
+   - For each represented DMA boundary, direction and declared byte unit,
+     freeze the request population and half-open observation window [t0,t1). With no cancellation
+     or loss, verify `in_flight_end = in_flight_start + issued_bytes - completed_bytes` from actual
+     issue/completion observations, including requests crossing either boundary. Start/end state
+     is immediately before events at t0/t1 respectively. Payload versus
+     transaction/padding bytes, multicast duplication, partial completion, cancellation and
+     retry semantics require explicit ledger terms before the applicable check. Verify local
+     resident capacity separately from distinct allocation/lifetime/alias observations. Compute
+     operand consumption is not a conserved transfer-byte inventory: reuse and newly produced
+     outputs forbid a general `DMA in = compute consumed + written back` identity. Missing
+     required observations leave the represented stage unverified; analytic absence remains
+     unsupported and cannot produce a positive check.;
    - no resource utilisation > 1 over any window;
-   - Little's law within 1% on every queue the engine reports (mean occupancy vs arrival
-     rate × mean residence);
+   - finite-window membership, clipped residence and conservation for represented queues
+     at B, including initial/terminal members; stationary Little's law within 1% at its
+     first qualifying claim (normally U6 or earlier reliance), with frozen population,
+     window, boundary/censoring and nonzero-flow premises; missing observations never pass;
    - causality: no event or interval begins before the one it depends on (for engines that
      emit traces);
    - byte-identical reruns;
@@ -43,8 +60,16 @@ them once.
      null.
 2. validation/L0m_metamorphic/ — relations over PAIRS of runs:
    - doubling any bandwidth (DRAM, NoC link, SRAM port) never increases duration;
-   - scaling every core-domain clock by k scales a compute-bound query's duration by 1/k
-     within 1%, and changes a DRAM-bound one by less than k;
+   - For k>1, compare f with k*f using identical admitted resolved work,
+     precision, assumptions and all non-compute rates, including fixed DRAM bandwidth; validate
+     both transformed hardware inputs. For the analytic max/sum model require `T/k <= T' <= T`.
+     Exact `T'=T/k` needs aggregate compute dominance at the faster clock, or compute dominance
+     for every op at that clock in per_op mode. Exact `T'=T` needs aggregate memory dominance at
+     the base/slower clock, or memory dominance for every op at that clock in per_op mode.
+     State speedup as T/T', with positive durations: strict speedup <k requires a strictly
+     binding fixed memory term at the faster clock (a tie alone is insufficient). Mixed-bound
+     and memory-only-op domains cannot inherit exact reciprocal scaling by tolerance. Preserve
+     all failures, unsupported premises, budgets and historical reason codes.;
    - decode duration is non-decreasing in batch and in context;
    - permuting core ids on a symmetric topology (torus, or mesh with a symmetric mapping)
      leaves duration unchanged;

@@ -1,0 +1,29 @@
+{
+  "only_read_only_preflight_or_refusal_tests": true,
+  "results": [
+    {
+      "check": "check",
+      "exit": 0,
+      "stdout": "Preflight passed: exact five-file documentation amendment; no runtime/support edits.\nCHECK ONLY: no installation, staging, commit or push.\n",
+      "stderr": ""
+    },
+    {
+      "check": "wrong-digest",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "STOP: supplied patch digest differs from reviewed package\n"
+    },
+    {
+      "check": "wrong-head",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "STOP: HEAD changed; reconcile before installation\n"
+    },
+    {
+      "check": "nonhuman-apply",
+      "exit": 1,
+      "stdout": "Preflight passed: exact five-file documentation amendment; no runtime/support edits.\n",
+      "stderr": "STOP: human must invoke with UARCH_HUMAN=1; nothing installed\n"
+    }
+  ]
+}

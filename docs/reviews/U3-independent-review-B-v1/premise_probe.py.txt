@@ -1,0 +1,101 @@
+"""Reviewer probe: clock-relation premises on the committed d4 BF16 fixture.
+
+Usage: python -I -B premise_probe.py <export-root>
+Per-op COUNTS are read from the engine's per_op records (the L0 fixed_counts literal
+key independently pins their totals); all TIMING here is recomputed with exact
+Fractions from those counts and the hardware leaves, never from engine timing fields.
+"""
+
+import json
+import sys
+from fractions import Fraction as F
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+sys.path[:0] = [str(root), str(root / "src"), str(root / "contract")]
+
+from rkuarch.engines.analytic.core import run_analytic  # noqa: E402
+from validation.analytic_checks import COUNTS, FIELDS  # noqa: E402
+from validation.strategies import FIXTURE, fixed_bundle, jobs  # noqa: E402
+
+assert Path(FIXTURE).resolve().is_relative_to(root)
+raw = json.loads(Path(FIXTURE).read_text())["hardware_spec"]
+cores = raw["cores"]["grid"]["rows"]["value"] * raw["cores"]["grid"]["cols"]["value"]
+print("fixture cores", cores, "freq", raw["clock_domains"]["core"]["freq_hz"]["value"])
+
+ops = {}
+for mode in ("aggregate",):
+    bundle = fixed_bundle(mode)
+    for job in jobs(bundle):
+        r = run_analytic(job)
+        phase = job.point.query.phase
+        assert tuple(getattr(r.counts, f) for f in FIELDS) == COUNTS[phase]
+        ops[phase] = [
+            (o.id, o.counts.matrix_ops, o.counts.vector_ops,
+             o.counts.memory_read_bytes + o.counts.memory_write_bytes)
+            for o in r.per_op
+        ]
+for phase, rows in ops.items():
+    print(phase, "ops:", [(i, m, v, b) for i, m, v, b in rows])
+    print(phase, "memory-only ops (m=v=0,b>0):", [i for i, m, v, b in rows if m == v == 0 and b])
+    print(phase, "compute-only ops (b=0):", [i for i, m, v, b in rows if b == 0 and (m or v)])
+
+
+def times(rows, f, macs, vec, bw):
+    mp, vp = F(2 * cores * macs * f), F(cores * vec * f)
+    return [(F(m) / mp + F(v) / vp, F(b) / F(bw)) for _, m, v, b in rows]
+
+
+def agg(t):
+    return max(sum(c for c, _ in t), sum(m for _, m in t))
+
+
+def per_op(t):
+    return sum(max(c, m) for c, m in t)
+
+
+anchors = [
+    (1_000_000 + i * 1_999_000_000 // 23, 1 + i, 64 - i, 2 + i % 3) for i in range(24)
+]
+assert len({a[0] for a in anchors}) == 24
+# C1: aggregate compute dominance at the FASTER frequency, bw=1e18, both points.
+c1 = all(
+    sum(c for c, _ in times(rows, f * k, macs, vec, 10**18))
+    > sum(m for _, m in times(rows, f * k, macs, vec, 10**18))
+    for f, macs, vec, k in anchors for rows in ops.values()
+)
+c1_exact = all(
+    agg(times(rows, f * k, macs, vec, 10**18)) * k == agg(times(rows, f, macs, vec, 10**18))
+    for f, macs, vec, k in anchors for rows in ops.values()
+)
+print("C1 anchors: compute-dominant at faster clock, both points:", c1, "| exact T'=T/k:", c1_exact)
+# per_op exact reciprocal law at bw=1e18 (existing skipped cell): worst relative deviation.
+worst = max(
+    abs(per_op(times(rows, f * k, macs, vec, 10**18)) * k
+        / per_op(times(rows, f, macs, vec, 10**18)) - 1)
+    for f, macs, vec, k in anchors for rows in ops.values()
+)
+print("per_op T'*k/T - 1 worst over anchors at bw=1e18:", float(worst), "(tolerance 1e-9)")
+# C2: bw=1000 with C1 anchors. Aggregate memory-dominant at base clock => T'=T; per_op needs
+# EVERY op memory-dominant at base clock.
+c2_agg = all(
+    agg(times(rows, f * k, macs, vec, 1000)) == agg(times(rows, f, macs, vec, 1000))
+    for f, macs, vec, k in anchors for rows in ops.values()
+)
+c2_every = all(
+    m >= c for f, macs, vec, k in anchors for rows in ops.values()
+    for c, m in times(rows, f, macs, vec, 1000)
+)
+c2_perop = all(
+    per_op(times(rows, f * k, macs, vec, 1000)) == per_op(times(rows, f, macs, vec, 1000))
+    for f, macs, vec, k in anchors for rows in ops.values()
+)
+print("C2 anchors bw=1000: aggregate T'=T:", c2_agg, "| every op memory-dominant:", c2_every,
+      "| per_op T'=T:", c2_perop)
+# C3: bw=1e9 with C1 anchors: record which bound applies (not asserted by B).
+dom = {
+    "compute" if sum(c for c, _ in t) > sum(m for _, m in t) else "memory"
+    for f, macs, vec, k in anchors for rows in ops.values()
+    for t in [times(rows, f, macs, vec, 10**9)]
+}
+print("C3 anchors bw=1e9 aggregate bound classes present:", sorted(dom))

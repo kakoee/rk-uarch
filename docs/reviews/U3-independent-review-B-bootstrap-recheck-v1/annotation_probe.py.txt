@@ -1,0 +1,42 @@
+"""Reviewer probe: raw vs resolved annotations of the two entry modules in one export.
+
+Usage: python -I -B annotation_probe.py <export-root>   (prints one JSON object)
+"""
+
+import inspect
+import json
+import sys
+import typing
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+sys.path[:0] = [str(root), str(root / "src"), str(root / "contract")]
+
+import scripts.vendor_rk as vendor  # noqa: E402
+
+eager_contract_after_vendor = "uarch_contract" in sys.modules
+import scripts.u2_inputs as ui  # noqa: E402
+from uarch_contract.exports import ComponentPrecision  # noqa: E402
+
+for m in (vendor, ui):
+    assert Path(m.__file__).resolve().is_relative_to(root), m.__file__
+
+out = {"root": root.name, "eager_contract_after_vendor_import": eager_contract_after_vendor,
+       "raw": {}, "resolved": {}, "unresolved": []}
+for mod in (vendor, ui):
+    for name, obj in sorted(vars(mod).items()):
+        if getattr(obj, "__module__", None) != mod.__name__:
+            continue
+        if not (inspect.isfunction(obj) or inspect.isclass(obj)):
+            continue
+        ann = getattr(obj, "__annotations__", {}) if inspect.isfunction(obj) else obj.__dict__.get("__annotations__", {})
+        if not ann:
+            continue
+        key = mod.__name__.split(".")[-1] + "." + name
+        out["raw"][key] = {k: (v if isinstance(v, str) else "<object> " + repr(v)) for k, v in ann.items()}
+        try:
+            hints = typing.get_type_hints(obj, localns={"ComponentPrecision": ComponentPrecision})
+            out["resolved"][key] = {k: repr(v) for k, v in hints.items()}
+        except Exception as exc:  # recorded, not hidden
+            out["unresolved"].append([key, type(exc).__name__, str(exc)])
+print(json.dumps(out, sort_keys=True))

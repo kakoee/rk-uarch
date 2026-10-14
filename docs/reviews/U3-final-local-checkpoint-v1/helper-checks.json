@@ -1,0 +1,34 @@
+{
+  "scope": "private disposable clone; no commits or human flag; real index empty after each invocation",
+  "helper_sha256": "383d020a330aa2f9860d5554a49763986245d8000a93a4ab3e9a0bae3c7365ae",
+  "checks": {
+    "valid-check": {
+      "exit": 0,
+      "output": "{\n  \"preflight\": \"passed\",\n  \"parent\": \"7afba9b16d954fd46684711764cb3718170e53aa\",\n  \"paths\": 3,\n  \"tree\": \"fd1372aaea484a2b367e092efe47881e6ec3091d\",\n  \"message\": \"docs(u3): record accepted design, policy and closeout evidence\",\n  \"real_index_unchanged\": true\n}\nCHECK ONLY: no real staging, commit, push or tag.\n"
+    },
+    "wrong-digest": {
+      "exit": 1,
+      "output": "STOP: selection identity mismatch\n"
+    },
+    "nonhuman-commit": {
+      "exit": 1,
+      "output": "{\n  \"preflight\": \"passed\",\n  \"parent\": \"7afba9b16d954fd46684711764cb3718170e53aa\",\n  \"paths\": 3,\n  \"tree\": \"fd1372aaea484a2b367e092efe47881e6ec3091d\",\n  \"message\": \"docs(u3): record accepted design, policy and closeout evidence\",\n  \"real_index_unchanged\": true\n}\nSTOP: human must invoke with UARCH_HUMAN=1; nothing staged\n"
+    },
+    "changed-selected-bytes": {
+      "exit": 1,
+      "output": "STOP: bytes changed: docs/how-it-works.md\n"
+    },
+    "changed-file-mode": {
+      "exit": 1,
+      "output": "STOP: file mode changed: docs/how-it-works.md\n"
+    },
+    "wrong-branch": {
+      "exit": 1,
+      "output": "STOP: branch or parent changed; reconcile first\n"
+    },
+    "changed-hook": {
+      "exit": 1,
+      "output": "STOP: normal pre-commit hook missing or changed\n"
+    }
+  }
+}

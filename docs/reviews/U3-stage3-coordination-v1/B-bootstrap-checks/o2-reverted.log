@@ -1,0 +1,16 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+______________ test_root_file_write_denied_before_mutation[False] ______________
+tests/unit/test_u2_support_policy.py:599: in test_root_file_write_denied_before_mutation
+    with pytest.raises(PermissionError, match="^test attempted write to real source root$"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE PermissionError
+______________ test_root_file_write_denied_before_mutation[True] _______________
+tests/unit/test_u2_support_policy.py:599: in test_root_file_write_denied_before_mutation
+    with pytest.raises(PermissionError, match="^test attempted write to real source root$"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE PermissionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_u2_support_policy.py::test_root_file_write_denied_before_mutation[False]
+FAILED tests/unit/test_u2_support_policy.py::test_root_file_write_denied_before_mutation[True]
+2 failed, 98 deselected in 1.19s

@@ -1,0 +1,103 @@
+"""Lane A independent review probe: existing-carrier facts used by the U3 v2 proposal.
+
+Run with: <venv-python> -I probe_contract.py <export-root>
+Imports come only from the private git-archive export of 184d2c2 (asserted below).
+Reads files; writes nothing; runs no engine, producer, generator or adoption.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+sys.path[:0] = [str(root / "src"), str(root / "contract"), str(root)]
+
+import yaml  # noqa: E402
+
+import rkuarch  # noqa: E402
+import uarch_contract  # noqa: E402
+from uarch_contract.hashing import spec_hash  # noqa: E402
+from uarch_contract.operators import OpSpec  # noqa: E402
+from uarch_contract.prepared import PreparedOp  # noqa: E402
+from uarch_contract.rotary_v2 import PreparedOpV2  # noqa: E402
+
+for module in (rkuarch, uarch_contract):
+    assert Path(module.__file__).resolve().is_relative_to(root), module.__file__
+print("IMPORT-ORIGIN", Path(rkuarch.__file__).relative_to(root), Path(uarch_contract.__file__).relative_to(root))
+
+# 1. Claimed retained npu-l4 canonical identity.
+spec = yaml.safe_load((root / "hw/designs/npu-l4.yaml").read_bytes())
+digest = spec_hash(spec)
+claimed = "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9"
+print("NPU-L4-HASH", digest, "MATCH" if digest == claimed else "MISMATCH")
+
+# 2. Literal C1 OpSpec from interface.md validates against the existing carrier.
+body = (root / "docs/reviews/U3-native-stage-design-v2/interface.md").read_text()
+literal = body.split("```json\n", 1)[1].split("\n```", 1)[0]
+op = OpSpec.model_validate(json.loads(literal))
+print("C1-OPSPEC", op.operator.value, dict(op.dimensions))
+
+# 3. The PreparedOp field list in interface.md is complete for the v1 carrier.
+prepared = {
+    "id": "g0",
+    "depends_on": [],
+    "padding": [],
+    "replication": [],
+    "fusion": "none",
+    "kv_access": None,
+    "weight_copies": 1,
+    "work_repeat": 1,
+    "embedding_local_tokens": None,
+    "operand_access": {"X": "read", "W": "read", "Y": "write"},
+    "spec": json.loads(literal),
+}
+PreparedOp.model_validate(prepared)
+print("C1-PREPAREDOP-V1", "valid", sorted(PreparedOp.model_fields))
+print("PREPAREDOP-V2-FIELDS", sorted(PreparedOpV2.model_fields))
+
+# 4. R06 mutation: rotary_embedding through the v1 component carrier.
+mutated = json.loads(literal)
+mutated["operator"] = "rotary_embedding"
+try:
+    OpSpec.model_validate(mutated)
+    print("R06-ROTARY-V1", "accepted")
+except Exception as exc:  # pydantic ValidationError; the class name is the observation
+    print("R06-ROTARY-V1", "schema-refusal", type(exc).__name__)
+
+# 4b. Fault/restored controls: the checks above must discriminate.
+import copy  # noqa: E402
+
+faulted = copy.deepcopy(spec)
+faulted["nocs"][0]["router_latency_cycles"]["value"] = 1.0
+print("FAULT-HW-HASH", "detected" if spec_hash(faulted) != claimed else "MISSED",
+      "RESTORED", spec_hash(copy.deepcopy(spec)) == claimed)
+bad = json.loads(literal)
+bad["reduction_axes"] = ["Z"]
+try:
+    OpSpec.model_validate(bad)
+    print("FAULT-OPSPEC-UNDEFINED-AXIS", "MISSED")
+except Exception as exc:
+    print("FAULT-OPSPEC-UNDEFINED-AXIS", "refused", type(exc).__name__,
+          "RESTORED", OpSpec.model_validate(json.loads(literal)).operator.value)
+
+# 5. Existing hardware fields the proposed E3/E4 laws read.
+cores = spec["cores"]["core_type"]
+dram = spec["memory"]["dram"]
+print(
+    "HW-FIELDS",
+    {
+        "freq_hz": {d: v["freq_hz"]["value"] for d, v in spec["clock_domains"].items()},
+        "router_latency_cycles": spec["nocs"][0]["router_latency_cycles"]["value"],
+        "trcd_trp_tcl": [dram["timing"][k]["value"] for k in ("t_rcd_cycles", "t_rp_cycles", "t_cl_cycles")],
+        "trfc_trefi": [dram["timing"][k]["value"] for k in ("t_rfc_cycles", "t_refi_cycles")],
+        "dma": {k: cores["dma"][k]["value"] for k in cores["dma"]},
+        "operand_bytes_per_cycle": cores["matrix_engine"]["operand_bytes_per_cycle"]["value"],
+        "operand_buffer_bytes": cores["matrix_engine"]["operand_buffer_bytes"]["value"],
+        "accumulator_bytes": cores["matrix_engine"]["accumulator_bytes"]["value"],
+        "controllers_attach": [c["attach"] for c in spec["memory"]["controllers"]],
+        "vector_ops_per_cycle": cores["vector_engine"]["ops_per_cycle"]["value"],
+        "shared_sram": spec["shared_sram"],
+    },
+)

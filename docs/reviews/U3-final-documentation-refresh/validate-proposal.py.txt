@@ -1,0 +1,106 @@
+"""Check proposal links/numeric quotes, create patch and verify pre-existing file preservation."""
+import difflib
+import hashlib
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+from xml.etree import ElementTree
+
+root = Path.cwd()
+out = root / 'docs/reviews/U3-final-documentation-refresh'
+proposal = out / 'proposed-how-it-works.md'
+s = proposal.read_text()
+e = json.loads(Path('/tmp/u3-doc-evidence.json').read_text())
+v = json.loads(Path('/tmp/u3-doc-v1-summary.json').read_text())
+result = {'scope': 'proposal checks; not final published validation'}
+links = re.findall(r'\[[^\]]+\]\(([^)]+)\)', s)
+missing = []
+for link in links:
+    assert not link.startswith(('http:', 'https:')), 'local-only probe'
+    path = (root / 'docs' / link.split('#')[0]).resolve()
+    if not path.exists():
+        missing.append(link)
+assert not missing, missing
+result['local_links'] = {'count': len(links), 'missing': missing, 'base': 'docs/how-it-works.md (intended installation location)'}
+# Every output number quoted in the narrative is checked here against actual calls or saved evidence.
+assert v['row']['duration_s'] == v['row']['u_c0_duration_s'] == 0.015038327296
+assert v['row']['batch'] == 1 and v['row']['total_context_tokens'] == 128
+assert v['row']['frequency_ratio'] == 1
+assert v['table_hash'] in s and v['row_content_hash'] in s
+assert e['hardware']['npu-l4']['stipulations'] == 59
+assert e['hardware']['npu-m256']['stipulations'] == 67
+assert e['hardware']['npu-l4']['grid'] == [2, 2]
+assert e['hardware']['npu-m256']['grid'] == [16, 16]
+assert [h['composite'] for h in e['hardware'].values()] == ['C0', 'C0']
+assert [h['badge'] for h in e['hardware'].values()] == ['stub', 'stub']
+for row, duration in zip(e['v2'][::2], (0.000001664, 0.000001972), strict=True):
+    assert row['point'] == {'batch': 1, 'phase': 'decode', 'total_context_tokens': 17}
+    assert row['counts'] == dict(matrix_ops=1184, vector_ops=632, memory_read_bytes=1352, memory_write_bytes=312)
+    assert row['duration_s'] == duration and row['u_c0_s'] == 0.000001664
+    assert row['result_hash'] in s and row['engine']['implementation_hash'] in s
+c = e['v2_input_conditions']
+assert c['stipulations'] == 0 and c['badge'] == 'stub'
+assert c['head_dim'] == 2 and c['frequency_ratios'] == [1, 1]
+assert c['model']['n_layers'] == 2 and c['model']['n_heads'] == 2 and c['model']['kv_heads'] == 1
+assert c['rank']['tp'] == 1 and c['rank']['rank_index'] == 0
+assert c['position_encoding']['rotary_dim'] == 2 and c['position_encoding']['pairing'] == 'adjacent'
+assert c['precision'] == dict(compute='bf16', kv_cache='bf16')
+assert c['initial_state'] == 'steady'
+assert e['reports']['L0']['relation_outcomes'] == {'pass': 14, 'skip': 14}
+assert e['reports']['L0m']['relation_outcomes'] == {'pass': 9, 'skip': 13, 'not_run': 5}
+clock = e['reports']['L0m']['clock_cells'][0]
+plan = json.loads(Path('docs/reviews/U3-B-SR-C1/execution/L0m-plan.json').read_text())
+assert next(c for c in plan['cells'] if c['cell_id'] == clock['cell_id'])['budget']['required_valid_examples'] == 24
+assert clock['actual']['valid_examples'] == 22 and clock['actual']['observed_body_entries'] == 24
+for name in ('L0', 'L0m'):
+    assert e['reports'][name]['raw_sha256'] in s
+    assert e['reports'][name]['reduction']['coverage'] == 'partial'
+    assert e['reports'][name]['reduction']['outcome'] == 'not_run'
+    cmd = e['commands'][name + '-validate']
+    assert cmd['returncode'] == 1 and 'Implementation bytes changed' in cmd['output']
+assert e['current_artifact']['support_count'] == 97
+for name in ('MANIFEST.json', 'u2-inputs/SHA256SUMS'):
+    assert e['current_artifact'][name] in s
+assert not [p for p in (root / 'tests/golden').glob('expected/*') if p.name != '.keep']
+assert 'members = []' in (root / 'native/Cargo.toml').read_text()
+# All literal sha256 values in prose must be found in fresh evidence, the verified package,
+# or the preserved v1 core byte hash. No hashes are merely copied from old narrative prose.
+core = hashlib.sha256((root / 'src/rkuarch/engines/analytic/core.py').read_bytes()).hexdigest()
+hashes = re.findall(r'(?<![0-9a-f])[0-9a-f]{64}(?![0-9a-f])', s)
+known = json.dumps(e) + json.dumps(v) + core
+assert all(h in known for h in hashes)
+result['numeric_checks'] = 'all quoted table/result/inventory/report values and hashes matched; model-law constants pinned by cited existing tests'
+patch = ''.join(difflib.unified_diff((root / 'docs/how-it-works.md').read_text().splitlines(keepends=True), s.splitlines(keepends=True), fromfile='a/docs/how-it-works.md', tofile='b/docs/how-it-works.md', n=0))
+(out / 'how-it-works.patch').write_text(patch)
+p = subprocess.run(['git', 'apply', '--check', '--unidiff-zero', str(out / 'how-it-works.patch')], capture_output=True, text=True)
+assert p.returncode == 0, p.stderr
+result['patch_check'] = {'argv': ['git', 'apply', '--check', '--unidiff-zero', 'docs/reviews/U3-final-documentation-refresh/how-it-works.patch'], 'returncode': p.returncode, 'output': p.stdout + p.stderr}
+# Check actual patch postimage in a disposable file tree, never install into the workspace.
+import tempfile
+scratch = Path(tempfile.mkdtemp(prefix='u3-doc-patch-'))
+(scratch / 'docs').mkdir()
+(scratch / 'docs/how-it-works.md').write_bytes((root / 'docs/how-it-works.md').read_bytes())
+p = subprocess.run(['git', 'apply', '--unidiff-zero', '--whitespace=error', str(out / 'how-it-works.patch')], cwd=scratch, capture_output=True, text=True)
+assert p.returncode == 0, p.stderr
+assert (scratch / 'docs/how-it-works.md').read_bytes() == proposal.read_bytes()
+result['patch_postimage_equal'] = True
+base_path = Path('/tmp/u3-doc-refresh-before.json')
+before = json.loads(base_path.read_text())
+changed = [p for p, h in before['files'].items() if not (root / p).is_file() or hashlib.sha256((root / p).read_bytes()).hexdigest() != h]
+assert not changed, changed
+assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == before['head']
+index = Path(subprocess.check_output(['git', 'rev-parse', '--git-path', 'index'], text=True).strip())
+assert hashlib.sha256(index.read_bytes()).hexdigest() == before['index_sha256']
+now = set(subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard']).decode().strip('\0').split('\0'))
+added = sorted(now - before['files'].keys())
+assert all(p.startswith('docs/reviews/U3-final-documentation-refresh/') for p in added), added
+result['preservation'] = {'preexisting_files_checked': len(before['files']), 'changed': changed, 'head': before['head'], 'index_sha256': before['index_sha256'], 'baseline_inventory_sha256': hashlib.sha256(base_path.read_bytes()).hexdigest(), 'original_status': before['status'], 'new_paths': added, 'note': 'baseline inventory kept in /tmp; no broad source snapshot published'}
+result['focused_tests'] = {}
+for name in ('focused', 'report-tests'):
+    path = Path('/tmp/u3-doc-' + name + '.xml')
+    result['focused_tests'][name] = [x.attrib for x in ElementTree.parse(path).iter('testsuite')]
+result['file_hashes'] = {name: hashlib.sha256((out / name).read_bytes()).hexdigest() for name in ('proposed-how-it-works.md', 'how-it-works.patch', 'reproduce-v1.py.txt', 'check-evidence.py.txt', 'validate-proposal.py.txt')}
+(out / 'proposal-checks.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+print(json.dumps(result, indent=2, sort_keys=True))

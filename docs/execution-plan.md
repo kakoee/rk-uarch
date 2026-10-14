@@ -44,7 +44,7 @@ have distinct host requirements. The older notes and §7 estimates are historica
 | **Next** | Reconcile U-P5 under U0023; prepare exact component/schema and toolchain decisions, independent checks and reference feasibility. No blanket runtime release |
 | **U1 done** | Published `u01-end` at `1e9e794a84c5173812c23a1cf2fc04b85e6f6831` |
 | **U2 done** | Accepted closeout and `u02-end` at `79bc1f0`; approved cleanup preserved the evidence archive and branch history |
-| **U3 in progress** | Accepted U0006/U0022, published RoPE runtime/adoption/activation; CI on `456215c` passed. Source-only feasibility published at `42fc341`. B reports remain partial/not_run; no native/fork run, G2 or U3 closure claimed |
+| **U3 closeout pending** | Both lane response reviews and B O1/O2 recheck accepted; Javid accepted the detailed design and prospective dependency policy for closeout only. See [approval](reviews/U3-reviewed-design-and-policy-v1/acceptance.md) and [closeout](reviews/U3-closeout.md). B reports retain partial/not_run outcomes. Final documentation, same-commit validation and human tag remain pending; U4 is not authorized |
 | **Not started** | U4–U11 |
 | **Runner pending** | Registration and executed manual nightly remain unverified. Not a correctness-development prerequisite under U0023; controlled-host performance and G5 nightly qualification remain pending |
 
@@ -217,7 +217,7 @@ Internal mechanics and independent derivations may overlap M; public protocol wi
 | **Lane B** | U-P6: record each analytic obligation's first consumer; independent native expectations; reference sourcing/measurement feasibility and a bounded test-only consumer-conformance proposal |
 | **Joint exit** | G2 design accepted, outstanding implementation/evidence explicit; independent review and human closure remain required |
 | **Prerequisites** | Accepted semantics and toolchain before K1; exact schema before K2. Unrelated analytic reporting and runner registration do not block internal kernel work |
-| **Not claimed** | No native accuracy, completed schema installation or blanket acceptance of A's proposed U0011 |
+| **Accepted boundary** | U0011 records the approved design scope; exact schema installation, toolchain/licence pins, numeric performance budgets and U4 authorization remain separate. No native accuracy or completed implementation claimed |
 
 ### U4 · Bounded native engine and silicon readiness
 
@@ -289,7 +289,7 @@ Internal mechanics and independent derivations may overlap M; public protocol wi
 | **Lane B** | Pre-registered error-vs-quantum experiment at a credit-backpressured boundary; published curve; the enforcement rule → **U-P18** |
 | **Joint exit criterion** | **Gate G8**: exact mode byte-identical at 1, 2, 4 and 8 threads · the curve published with its verdict in the first sentence · a lax result outside a covering curve reports C1 |
 | **Effort** | A 125 · B 61 |
-| **Depends on** | G6, full G5 (including controlled-host performance and executed self-hosted nightly), and a recorded need: the native engine breaches ADR U0011's single-point wall-clock budget (measured in U-P11c and U-P13d), or both founders record in an ADR that they want the synchronisation experiment (the funded plan's G1) regardless. Without either, U9 is deferred until after U11, which does not depend on it |
+| **Depends on** | G6, full G5 (including controlled-host performance and executed self-hosted nightly), and a recorded need: the native engine breaches the prospective U0011-Q representative single-point wall-clock budget, once separately accepted and measured in U-P11c/U-P13d (the small K2/B diagnostic ceiling is not this trigger), or both founders record in an ADR that they want the synchronisation experiment (the funded plan's G1) regardless. Without either, U9 is deferred until after U11, which does not depend on it |
 | **Not in this sprint** | Optimistic sync, SIMD, GPU, MPI |
 
 ### U10 · Integration into rk-sim
@@ -352,6 +352,15 @@ This is part of U2's exit, not a new claim of accuracy or a dependency on rk-sim
   report completion does not block kernel development;
 - reference feasibility and later product decisions scheduled, ownership and revised effort
   recorded. A proposal is not a runtime pass or blanket approval of all its details.
+
+U3 closeout records the accepted design, first-consumer deadlines and explicit pending
+implementation/evidence. Exact toolchain/licence approval is required before K1 and exact
+protected schema installation before K2; neither is a claim that those U4 tasks ran in U3.
+U0011's shared decisions assign B independent component bounds (no new analytic component
+API), real Linux CI preparation before K1 credit, and finite-window checks at B versus
+stationary Little's law at first qualifying claim. U-P6/build-spec hold the exact approved
+DMA/clock statements. The prospective U0002 policy is selected; its code/migration remain
+uninstalled and separately authorized. U4 is not released by U3 decision recording.
 
 **G3a · Silicon-suite readiness (U4b).** Gates U5 prediction freeze, not product tables:
 - usable sourced TPU reference, explicit unknowns and structural assumptions, representability

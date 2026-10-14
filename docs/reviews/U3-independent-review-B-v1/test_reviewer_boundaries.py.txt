@@ -1,0 +1,98 @@
+"""Reviewer probes (U3 lane B Stage 1). Run ONLY inside a private patched export.
+
+SYNTHETIC: rehashed carrier copies; no GENERATOR metadata, provenance or adoption.
+Producers/oracle are denied. Every source/tree mutation is restored in `finally`.
+"""
+
+import json
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+from scripts import u2_inputs as ui
+from scripts import u2_support as policy
+from scripts import vendor_rk as vendor
+
+
+@pytest.fixture
+def synthetic(tmp_path, monkeypatch):
+    def forbidden(*a, **k):
+        pytest.fail("reviewer probe must not run a producer")
+
+    for module, name in ((ui, "prepare_inputs"), (vendor, "run_oracle"), (vendor, "collect_snapshot")):
+        monkeypatch.setattr(module, name, forbidden)
+    frozen = tmp_path / "reviewer-synthetic-rehashed-not-adoption"
+    shutil.copytree(ui.ADOPTED / "u2-inputs", frozen)
+    for p in frozen.rglob("*"):
+        if p.is_file():
+            p.chmod(0o644)
+    (frozen / "support-policy.json").write_bytes(vendor.canonical(policy.POLICY))
+    (frozen / "support-files.json").write_bytes(vendor.canonical(policy.inventory()))
+    return frozen
+
+
+def rehash(frozen):
+    files = {p.relative_to(frozen).as_posix(): p for p in frozen.rglob("*") if p.is_file()}
+    files.pop("SHA256SUMS")
+    manifest = "".join(
+        vendor.digest(p.read_bytes()) + "  " + n + "\n" for n, p in sorted(files.items())
+    ).encode()
+    (frozen / "SHA256SUMS").write_bytes(manifest)
+    return vendor.digest(manifest)
+
+
+def test_policy_strip_downgrade_refuses_under_strict(synthetic):
+    """Delete only support-policy.json from a new-policy input set and rehash."""
+    ident = rehash(synthetic)
+    assert ui.load_inputs(synthetic, ident).entries  # valid synthetic control
+    (synthetic / "support-policy.json").unlink()
+    ident = rehash(synthetic)
+    # Integrity-only still loads; strict falls to the complete legacy rule and refuses.
+    assert ui.load_inputs(synthetic, ident, check_support=False).entries
+    with pytest.raises(ValueError, match="^input support inventory changed$"):
+        ui.load_inputs(synthetic, ident, check_support=True)
+
+
+def test_policy_marker_without_inventory_change_cannot_upgrade_legacy(synthetic):
+    """Legacy complete inventory relabelled with the new policy marker must refuse."""
+    legacy = {
+        p.relative_to(ui.ROOT).as_posix(): vendor.digest(p.read_bytes()) for p in ui.support_files()
+    }
+    (synthetic / "support-files.json").write_bytes(vendor.canonical(legacy))
+    ident = rehash(synthetic)
+    with pytest.raises(ValueError, match="^input support inventory changed$"):
+        ui.load_inputs(synthetic, ident, check_support=True)
+
+
+@pytest.mark.parametrize("name", ["scripts/typing_extensions.py", "scripts/annotated_types.py"])
+def test_transitive_external_shadow_is_not_inventoried(synthetic, name):
+    """A new local file shadowing a dependency of pydantic (not a direct closure import)."""
+    ident = rehash(synthetic)
+    before = policy.inventory()
+    old_before = {p.relative_to(ui.ROOT).as_posix() for p in ui.support_files()}
+    shadow = policy.ROOT / name
+    assert not shadow.exists()
+    try:
+        shadow.write_text("raise ImportError('REVIEWER-SHADOW-EXECUTED ' + __file__)\n")
+        # New policy: inventory unchanged and strict public load accepts.
+        assert policy.inventory() == before
+        assert ui.load_inputs(synthetic, ident, check_support=True).entries
+        # Old complete rule would have changed its inventory (scripts/**/*.py).
+        old_after = {p.relative_to(ui.ROOT).as_posix() for p in ui.support_files()}
+        assert old_after - old_before == {name}
+        # The documented verification CLI imports it before any policy decision.
+        proc = subprocess.run(
+            [sys.executable, "scripts/vendor_rk.py", "--check"],
+            cwd=policy.ROOT,
+            capture_output=True,
+            text=True,
+            env={"PATH": "/usr/bin:/bin", "PYTHONPATH": f"{policy.ROOT}/src:{policy.ROOT}/contract"},
+        )
+        print("CLI exit", proc.returncode, "|", (proc.stdout + proc.stderr).strip().splitlines()[-1])
+        assert "REVIEWER-SHADOW-EXECUTED" in proc.stdout + proc.stderr
+    finally:
+        shadow.unlink(missing_ok=True)
+    assert policy.inventory() == before

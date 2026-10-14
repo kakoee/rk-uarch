@@ -1,0 +1,74 @@
+"""Reviewer probe: runtime trace of strict committed-artifact consumption.
+
+Usage (cwd anywhere): python -I trace_probe.py <export-root>
+Producers/oracle are replaced by rejecting sentinels before any check runs.
+Records repository-local opened files, imported local modules and environment keys.
+"""
+
+import json
+import os
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+sys.path[:0] = [str(root), str(root / "src"), str(root / "contract")]
+opened: set[str] = set()
+env_keys: set[str] = set()
+
+
+def hook(event, args):
+    if event == "open" and args and isinstance(args[0], (str, bytes, os.PathLike)):
+        p = Path(os.fsdecode(args[0]))
+        try:
+            p = p.resolve()
+        except OSError:
+            return
+        if p.is_relative_to(root):
+            opened.add(p.relative_to(root).as_posix())
+
+
+_orig_getitem = os._Environ.__getitem__
+
+
+def _getitem(self, key):
+    env_keys.add(key if isinstance(key, str) else repr(key))
+    return _orig_getitem(self, key)
+
+
+os._Environ.__getitem__ = _getitem
+sys.addaudithook(hook)
+
+from scripts import u2_inputs as ui  # noqa: E402
+from scripts import vendor_rk as vendor  # noqa: E402
+
+
+def deny(*a, **k):
+    raise AssertionError("producer/oracle denied by reviewer probe")
+
+
+vendor.run_oracle = vendor.collect_snapshot = ui.prepare_inputs = deny
+outcome = "passed"
+try:
+    vendor.check_contract_pin(vendor.ROOT)
+    vendor.check_manifest(ui.ADOPTED)
+    vendor.check_snapshot_inputs(ui.ADOPTED)
+    vendor.check_generator(ui.ADOPTED, current=True)
+except ValueError as exc:
+    outcome = "refused: " + str(exc)
+local_modules = sorted(
+    Path(m.__file__).resolve().relative_to(root).as_posix()
+    for m in list(sys.modules.values())
+    if getattr(m, "__file__", None) and Path(m.__file__).resolve().is_relative_to(root)
+)
+non_artifact_reads = sorted(
+    p for p in opened if not p.startswith("contract/vendor/") and not p.endswith(".pyc")
+)
+print(json.dumps(
+    {
+        "outcome": outcome,
+        "local_modules": local_modules,
+        "non_vendor_opened": non_artifact_reads,
+        "env_keys_read": sorted(env_keys),
+    },
+    indent=1,
+))

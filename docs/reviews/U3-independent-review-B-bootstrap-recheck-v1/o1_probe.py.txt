@@ -1,0 +1,81 @@
+"""Reviewer O1 probe: does a scripts/__future__ shadow body EXECUTE in fresh processes?
+
+Usage: python -I o1_probe.py <throwaway-export-root> <sentinel-dir>
+Run ONLY against a throwaway copy. Only --help / import actions; no staging or producers.
+Body execution is detected by a sentinel FILE written by the shadow body (independent of
+stdout/stderr capture) and by a stderr marker. Prints one JSON line per case.
+"""
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+sentinels = Path(sys.argv[2]).resolve()
+sentinels.mkdir(parents=True, exist_ok=True)
+env = {
+    "PATH": "/usr/bin:/bin",
+    "HOME": os.environ.get("HOME", "/tmp"),
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": f"{root / 'src'}:{root / 'contract'}",
+}
+
+
+def argv(entry, form):
+    if form == "direct":
+        return ["scripts/" + entry + ".py", "--help"]
+    if form == "module":
+        return ["-m", "scripts." + entry, "--help"]
+    return ["-c", "from pathlib import Path; from scripts import " + entry + " as m; "
+            "assert Path(m.__file__).resolve() == Path.cwd() / 'scripts' / '" + entry
+            + ".py'; import rkuarch, uarch_contract; "
+            "assert all(Path(x.__file__).resolve().is_relative_to(Path.cwd()) "
+            "for x in (rkuarch, uarch_contract)); print('LIBRARY_ORIGIN_OK')"]
+
+
+def run(entry, form):
+    return subprocess.run([sys.executable, "-B", *argv(entry, form)], cwd=root, env=env,
+                          text=True, capture_output=True, check=False)
+
+
+results = []
+for entry in ("vendor_rk", "u2_inputs"):
+    for form in ("direct", "module", "library"):
+        for kind in ("file", "package"):
+            valid = run(entry, form)
+            sentinel = sentinels / f"{entry}-{form}-{kind}.ran"
+            sentinel.unlink(missing_ok=True)
+            shadow = root / "scripts" / ("__future__.py" if kind == "file" else "__future__/__init__.py")
+            shadow.parent.mkdir(exist_ok=True)
+            shadow.write_text(
+                "import sys\n"
+                f"open({str(sentinel)!r}, 'w').write('ran')\n"
+                "print('REVIEWER_O1_BODY_RAN', file=sys.stderr)\n"
+                "annotations = None\n"
+            )
+            try:
+                r = run(entry, form)
+            finally:
+                if kind == "file":
+                    shadow.unlink()
+                else:
+                    shutil.rmtree(shadow.parent)
+            out = r.stdout + r.stderr
+            results.append({
+                "entry": entry, "form": form, "kind": kind,
+                "valid_exit": valid.returncode,
+                "valid_ok": ("LIBRARY_ORIGIN_OK" if form == "library" else "usage:") in valid.stdout,
+                "shadow_exit": r.returncode,
+                "body_ran_sentinel": sentinel.exists(),
+                "body_ran_marker": "REVIEWER_O1_BODY_RAN" in out,
+                "guard_refusal": "unreviewed import name: scripts/__future__" in r.stderr,
+            })
+for row in results:
+    print(json.dumps(row))
+ran = sum(r["body_ran_sentinel"] or r["body_ran_marker"] for r in results)
+print(f"SUMMARY cases={len(results)} body_ran={ran} "
+      f"valid_ok={sum(r['valid_ok'] and r['valid_exit'] == 0 for r in results)} "
+      f"refused={sum(r['guard_refusal'] and r['shadow_exit'] != 0 for r in results)}")

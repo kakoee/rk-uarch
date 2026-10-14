@@ -1,0 +1,536 @@
+{
+  "bulk_output_root": "/tmp/u3-doc-evidence-pjsiwv0h",
+  "commands": {
+    "L0-validate": {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "validation.reporting.analytic_report",
+        "validate",
+        "--report",
+        "/tmp/u3-doc-evidence-pjsiwv0h/L0-report.json",
+        "--expected-plan",
+        "docs/reviews/U3-B-SR-C1/execution/L0-plan.json",
+        "--expected-corpus",
+        "docs/reviews/U3-B-SR-C1/execution/L0-corpus.json",
+        "--expected-implementation",
+        "85a5ad29820bc1c8638d844e192c6e4d778c107b"
+      ],
+      "output": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 1626, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 1615, in main\n    result = validate_report(\n             ^^^^^^^^^^^^^^^^\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 1340, in validate_report\n    check_implementation(expected_implementation, actual=True)\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 123, in check_implementation\n    require(not git(\"diff\", commit, \"--\", *BOUND_PATHS), \"Implementation bytes changed\")\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 102, in require\n    raise ValueError(message)\nValueError: Implementation bytes changed\n",
+      "returncode": 1
+    },
+    "L0m-validate": {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "validation.reporting.analytic_report",
+        "validate",
+        "--report",
+        "/tmp/u3-doc-evidence-pjsiwv0h/L0m-report.json",
+        "--expected-plan",
+        "docs/reviews/U3-B-SR-C1/execution/L0m-plan.json",
+        "--expected-corpus",
+        "docs/reviews/U3-B-SR-C1/execution/L0m-corpus.json",
+        "--expected-implementation",
+        "85a5ad29820bc1c8638d844e192c6e4d778c107b"
+      ],
+      "output": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 1626, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 1615, in main\n    result = validate_report(\n             ^^^^^^^^^^^^^^^^\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 1340, in validate_report\n    check_implementation(expected_implementation, actual=True)\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 123, in check_implementation\n    require(not git(\"diff\", commit, \"--\", *BOUND_PATHS), \"Implementation bytes changed\")\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch/validation/reporting/analytic_report.py\", line 102, in require\n    raise ValueError(message)\nValueError: Implementation bytes changed\n",
+      "returncode": 1
+    },
+    "documentation-postimages": {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "docs/reviews/U3-closeout-documents-v1/human-install.py",
+        "--verify",
+        "--expected-head",
+        "7afba9b16d954fd46684711764cb3718170e53aa",
+        "--patch-sha256",
+        "2b0bc1934020e1d0da2d21ab3514d26c1595a780d3d539b300f79a05286d9416"
+      ],
+      "output": "Verified exact five installed documentation files; no action performed.\n",
+      "returncode": 0
+    },
+    "strict-vendor": {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "output": "snapshot manifest, matrix and current compatibility verified: /home/jjaff/AI-infra-simulation/rk-uarch/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963\n",
+      "returncode": 0
+    }
+  },
+  "current_artifact": {
+    "MANIFEST.json": "1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a",
+    "support_count": 97,
+    "u2-inputs/SHA256SUMS": "27c6238d42e57dc4f2b1baf0c8846c11f1eec2968176dcefcdc463beb64bc80f",
+    "u2-inputs/support-files.json": "dc5d3a7e9f7e2b6ed1c0ed9131d0b7ffa03bcd259d3a3714fa60ed4bdb97f004"
+  },
+  "environment": {
+    "executable": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "installed_lock_version_mismatches": [],
+    "installed_packages": {
+      "annotated-doc": "0.0.5",
+      "annotated-types": "0.8.0",
+      "ast-serialize": "0.11.2",
+      "click": "8.5.0",
+      "coverage": "7.16.2",
+      "grimp": "3.17",
+      "hypothesis": "6.168.3",
+      "import-linter": "2.15",
+      "iniconfig": "2.3.0",
+      "jinja2": "3.1.6",
+      "librt": "0.16.0",
+      "markdown-it-py": "4.2.0",
+      "markupsafe": "3.0.3",
+      "mdurl": "0.1.2",
+      "mypy": "2.3.1",
+      "mypy-extensions": "1.1.0",
+      "numpy": "2.5.3",
+      "packaging": "26.3",
+      "pathspec": "1.1.1",
+      "pluggy": "1.6.0",
+      "pydantic": "2.13.5",
+      "pydantic-core": "2.46.5",
+      "pygments": "2.21.0",
+      "pytest": "9.1.1",
+      "pytest-cov": "7.1.0",
+      "pyyaml": "6.0.3",
+      "rich": "15.0.0",
+      "rk-uarch": "0.0.1",
+      "ruff": "0.16.9",
+      "shellingham": "1.5.4",
+      "sortedcontainers": "2.4.0",
+      "typer": "0.27.2",
+      "types-pyyaml": "6.0.12.20260906",
+      "typing-extensions": "4.16.0",
+      "typing-inspection": "0.4.4"
+    },
+    "note": "existing environment reused; absent optional lock packages are not installed",
+    "python": "3.12.14",
+    "uv_lock_sha256": "b6152bd0a0f81e910a69fd5d9d2c1523a0698fe53d57aa06e5a545f0ba30cbab"
+  },
+  "hardware": {
+    "npu-l4": {
+      "badge": "stub",
+      "composite": "C0",
+      "design_status": "proposed",
+      "formats": [
+        "bf16"
+      ],
+      "grid": [
+        2.0,
+        2.0
+      ],
+      "hardware_hash": "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9",
+      "stipulations": 59
+    },
+    "npu-m256": {
+      "badge": "stub",
+      "composite": "C0",
+      "design_status": "proposed",
+      "formats": [
+        "bf16",
+        "fp8"
+      ],
+      "grid": [
+        16.0,
+        16.0
+      ],
+      "hardware_hash": "sha256:187c1d7dab1051e8f096caeb826ac8cc242a496ff68b5d47097519a959c9189b",
+      "stipulations": 67
+    }
+  },
+  "implementation_commit": "7afba9b16d954fd46684711764cb3718170e53aa",
+  "report_binding_changed_paths": [
+    "contract/schema/rotary-v2/CharacterizationRequestV3.json",
+    "contract/schema/rotary-v2/OpGroupV2.json",
+    "contract/schema/rotary-v2/PreparedBundleV2.json",
+    "contract/schema/rotary-v2/PreparedGraphV2.json",
+    "contract/schema/rotary-v2/PreparedOpV2.json",
+    "contract/schema/rotary-v2/PreparedPointV2.json",
+    "contract/schema/rotary-v2/RequestIntentV3.json",
+    "contract/schema/rotary-v2/RotaryBinding.json",
+    "contract/schema/rotary-v2/RotaryCoefficients.json",
+    "contract/schema/rotary-v2/RotaryEncoding.json",
+    "contract/schema/rotary-v2/RotaryOpSpec.json",
+    "contract/tests/rotary_v2_cases.py",
+    "contract/tests/test_rotary_v2.py",
+    "contract/tests/test_rotary_v2_runtime_pending.py",
+    "contract/tests/test_u2_historical_snapshot.py",
+    "contract/uarch_contract/generate_rotary_v2.py",
+    "contract/uarch_contract/rotary_v2.py",
+    "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/MANIFEST.json",
+    "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/u2-inputs/SHA256SUMS",
+    "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/u2-inputs/support-files.json",
+    "src/rkuarch/engines/analytic/dispatch.py",
+    "src/rkuarch/engines/analytic/identity_v2.py",
+    "src/rkuarch/engines/analytic/rotary_v2.py",
+    "src/rkuarch/engines/protocol_v2.py",
+    "src/rkuarch/engines/schema/v2/EngineIdentityV2.json",
+    "src/rkuarch/engines/schema/v2/EngineJobV2.json",
+    "src/rkuarch/engines/schema/v2/EngineResultV2.json",
+    "src/rkuarch/engines/schema/v2/ModelIdentityV2.json",
+    "src/rkuarch/table/capture_v2.py",
+    "src/rkuarch/workload/capacity_v2.py",
+    "src/rkuarch/workload/prepared_v2.py",
+    "src/rkuarch/workload/producer_v2.py",
+    "validation/reporting/test_analytic_report.py"
+  ],
+  "reports": {
+    "L0": {
+      "clock_cells": [],
+      "implementation": "85a5ad29820bc1c8638d844e192c6e4d778c107b",
+      "raw_sha256": "694682267f0d8d6fe30f150815313e1a00a36c35e565ac54ad2e9eea5d92b7e7",
+      "reduction": {
+        "coverage": "partial",
+        "outcome": "not_run",
+        "purpose_outcomes": {
+          "counts": "not_run",
+          "diagnostics": "not_run",
+          "duration": "passed",
+          "energy": "not_run"
+        }
+      },
+      "relation_outcomes": {
+        "pass": 14,
+        "skip": 14
+      },
+      "validation_returncode": 1
+    },
+    "L0m": {
+      "clock_cells": [
+        {
+          "actual": {
+            "engine_evaluations": {
+              "candidate": 88,
+              "discovery": 96,
+              "mutant": 0
+            },
+            "executed_shrink_calls": null,
+            "internal_draws": null,
+            "internal_rejections": null,
+            "observed_body_entries": 24,
+            "valid_examples": 22
+          },
+          "applicability": "applicable",
+          "cell_id": "analytic.aggregate_clock/1:aggregate:d4-bf16-v1",
+          "premise_results": [
+            {
+              "id": "domain",
+              "observation_pointers": [],
+              "reason": null,
+              "state": "true"
+            }
+          ],
+          "reason": "INCOMPLETE_OR_UNDER_BUDGET",
+          "status": "not_run"
+        }
+      ],
+      "implementation": "85a5ad29820bc1c8638d844e192c6e4d778c107b",
+      "raw_sha256": "2a57c5033aaf748087320cdad56ffd7f1a8a5a47118afaf3feb3f63baab79c84",
+      "reduction": {
+        "coverage": "partial",
+        "outcome": "not_run",
+        "purpose_outcomes": {
+          "duration": "not_run"
+        }
+      },
+      "relation_outcomes": {
+        "not_run": 5,
+        "pass": 9,
+        "skip": 13
+      },
+      "validation_returncode": 1
+    }
+  },
+  "reviewed_documentation": {
+    "approval": "U3 closeout only; U4 excluded",
+    "baseline_commit": "7afba9b16d954fd46684711764cb3718170e53aa",
+    "observed_status": "all five installed postimages verified; package status text is historical",
+    "patch_sha256": "2b0bc1934020e1d0da2d21ab3514d26c1595a780d3d539b300f79a05286d9416",
+    "paths": [
+      {
+        "after_sha256": "2abf7454e6495f849f5a55bdaf3723c9fdbb045e6464d1f80112d8a1c554fb7f",
+        "before_sha256": "6cd5f06f0fac675caace722a3d3b01f1ce64ac46ccff9f3576eae04d4c0f0b3d",
+        "path": "docs/build-spec.md"
+      },
+      {
+        "after_sha256": "4f904507383c7e22b8e14eda2424bc7c716597d1846b7d878353a84de1b5a31f",
+        "before_sha256": "21731b05e3c24c6e80522658cc92c2d8f07d2d6d38402d41f4685cc94f61c840",
+        "path": "docs/decisions/U0002-the-vendored-snapshot-and-parity-discipline.md"
+      },
+      {
+        "after_sha256": "de9efa167268b97075b521d59c3bdbb9e92e3ed5dd6ddb111caad2a65d843364",
+        "before_sha256": null,
+        "path": "docs/decisions/U0011-the-native-engine-core.md"
+      },
+      {
+        "after_sha256": "afeec8e6b2e930ba26dc9c4ac3c221cfa85c76b7d9b067fa95d02f232ab36a93",
+        "before_sha256": "7487ea3e954450594e15b37696146936c2a7d605ba9ab3d955dc7322f2df21f0",
+        "path": "docs/execution-plan.md"
+      },
+      {
+        "after_sha256": "8ca3647e67f4bd8a7d9df85248a2b98bab5391413f2e49f2431b900bcf31be3b",
+        "before_sha256": "03e64e0f2ca0904b88911c08b0da31a0d5ce12f2f91eeab0d78982a4dd1596e1",
+        "path": "docs/prompts/U-P6-L0-invariants-and-L0m-metamorphic.md"
+      }
+    ],
+    "status": "prepared; live protected installation not performed"
+  },
+  "scope": "local documentation reproduction, not final publication validation",
+  "v2": [
+    {
+      "bundle_hash": "sha256:25bb48c7c6db3ecbb88d883d268849114084047b66c7317a1bf70eb2051c7f71",
+      "counts": {
+        "matrix_ops": 1184.0,
+        "memory_read_bytes": 1352.0,
+        "memory_write_bytes": 312.0,
+        "vector_ops": 632.0
+      },
+      "duration_s": 1.664e-06,
+      "engine": {
+        "implementation_hash": "sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6",
+        "model": {
+          "implementation_hash": "sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6",
+          "name": "physical-resolved",
+          "version": "2"
+        },
+        "name": "analytic",
+        "version": "resolved-ops/2"
+      },
+      "fidelity_detail": {
+        "compute": 0,
+        "dram": 0,
+        "layer_reuse": true,
+        "noc": 0,
+        "sync": "exact"
+      },
+      "job_hash": "sha256:6bd7e1c6241ab0dcbd046bf07df7292bc935e4abc367c3e3fc40905015a4d2da",
+      "mode": "aggregate",
+      "point": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 17
+      },
+      "result_content_hash": "sha256:5f599d3c019934cca66bcab7fc7cc27a13b02b97bc49e17a45115455adf42d1a",
+      "result_file_sha256": "fb79c3dc82c9a2ce641ef8e05cbd2fb8db5fd29ab5c209bfd46b1ec76d3ebdfe",
+      "result_hash": "sha256:e64c51900d4650458a40b8a8fc37fd34001f460d50f5edd87066e3b23ad2267d",
+      "stdin_command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "rkuarch.engines.analytic.dispatch",
+        "--bundle",
+        "/tmp/u3-doc-evidence-pjsiwv0h/aggregate/bundle.json",
+        "--assumptions",
+        "/tmp/u3-doc-evidence-pjsiwv0h/aggregate/assumptions.json"
+      ],
+      "stdin_file": "/tmp/u3-doc-evidence-pjsiwv0h/aggregate/job-0.json",
+      "u_c0_s": 1.664e-06
+    },
+    {
+      "bundle_hash": "sha256:25bb48c7c6db3ecbb88d883d268849114084047b66c7317a1bf70eb2051c7f71",
+      "counts": {
+        "matrix_ops": 672.0,
+        "memory_read_bytes": 1096.0,
+        "memory_write_bytes": 312.0,
+        "vector_ops": 312.0
+      },
+      "duration_s": 1.408e-06,
+      "engine": {
+        "implementation_hash": "sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6",
+        "model": {
+          "implementation_hash": "sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6",
+          "name": "physical-resolved",
+          "version": "2"
+        },
+        "name": "analytic",
+        "version": "resolved-ops/2"
+      },
+      "fidelity_detail": {
+        "compute": 0,
+        "dram": 0,
+        "layer_reuse": true,
+        "noc": 0,
+        "sync": "exact"
+      },
+      "job_hash": "sha256:f0f64d3024120248cdb96a7426d775260090329cf9a62078a2506428ff975559",
+      "mode": "aggregate",
+      "point": {
+        "n_prompts": 1,
+        "phase": "prefill",
+        "prompt_tokens": 1
+      },
+      "result_content_hash": "sha256:dac6dc74b94d4b7f3264b708247cdf8a1618bdb66a545e760573fd2145677dbc",
+      "result_file_sha256": "1fa669660a6f02ad0bafa3233fc05024cbc37d64b952a6376497073809c4b201",
+      "result_hash": "sha256:971ef423b0be54de4e5d99f81b22f972928714190b2ef4e1f0b5d9ad1bb82c7e",
+      "stdin_command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "rkuarch.engines.analytic.dispatch",
+        "--bundle",
+        "/tmp/u3-doc-evidence-pjsiwv0h/aggregate/bundle.json",
+        "--assumptions",
+        "/tmp/u3-doc-evidence-pjsiwv0h/aggregate/assumptions.json"
+      ],
+      "stdin_file": "/tmp/u3-doc-evidence-pjsiwv0h/aggregate/job-1.json",
+      "u_c0_s": 1.408e-06
+    },
+    {
+      "bundle_hash": "sha256:bb646ce8ae149c2533f90db5912f323349259f752669163cdc4ff7564e4e981e",
+      "counts": {
+        "matrix_ops": 1184.0,
+        "memory_read_bytes": 1352.0,
+        "memory_write_bytes": 312.0,
+        "vector_ops": 632.0
+      },
+      "duration_s": 1.972e-06,
+      "engine": {
+        "implementation_hash": "sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6",
+        "model": {
+          "implementation_hash": "sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6",
+          "name": "physical-resolved",
+          "version": "2"
+        },
+        "name": "analytic",
+        "version": "resolved-ops/2"
+      },
+      "fidelity_detail": {
+        "compute": 0,
+        "dram": 0,
+        "layer_reuse": true,
+        "noc": 0,
+        "sync": "exact"
+      },
+      "job_hash": "sha256:2d5269b751d69cbefc58791e37e65428fb2a5d677d7f50b842032b003d0bee72",
+      "mode": "per_op",
+      "point": {
+        "batch": 1,
+        "phase": "decode",
+        "total_context_tokens": 17
+      },
+      "result_content_hash": "sha256:17f99a11fb414316836f970b35aa86dfe5f6dce0b0d453c1c985cf0d67e4a4ef",
+      "result_file_sha256": "af8d0bbfd39e853953d9daa14bcad39233870aef73e51ba18fff0edd36b6a48d",
+      "result_hash": "sha256:7ff7c22f2ff8de71cfd96f89811d33ee706f0b4630ae155c99f416b56268982f",
+      "stdin_command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "rkuarch.engines.analytic.dispatch",
+        "--bundle",
+        "/tmp/u3-doc-evidence-pjsiwv0h/per_op/bundle.json",
+        "--assumptions",
+        "/tmp/u3-doc-evidence-pjsiwv0h/per_op/assumptions.json"
+      ],
+      "stdin_file": "/tmp/u3-doc-evidence-pjsiwv0h/per_op/job-0.json",
+      "u_c0_s": 1.664e-06
+    },
+    {
+      "bundle_hash": "sha256:bb646ce8ae149c2533f90db5912f323349259f752669163cdc4ff7564e4e981e",
+      "counts": {
+        "matrix_ops": 672.0,
+        "memory_read_bytes": 1096.0,
+        "memory_write_bytes": 312.0,
+        "vector_ops": 312.0
+      },
+      "duration_s": 1.408e-06,
+      "engine": {
+        "implementation_hash": "sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6",
+        "model": {
+          "implementation_hash": "sha256:c5420668fb3db8781168f4b8b9495a28474f001356cff10f1df9915158f8cdf6",
+          "name": "physical-resolved",
+          "version": "2"
+        },
+        "name": "analytic",
+        "version": "resolved-ops/2"
+      },
+      "fidelity_detail": {
+        "compute": 0,
+        "dram": 0,
+        "layer_reuse": true,
+        "noc": 0,
+        "sync": "exact"
+      },
+      "job_hash": "sha256:d3be86a237bc230d4d29895a6c210647b537aa5e5f6e3377b0516919a10dc51f",
+      "mode": "per_op",
+      "point": {
+        "n_prompts": 1,
+        "phase": "prefill",
+        "prompt_tokens": 1
+      },
+      "result_content_hash": "sha256:c0093cc8aeb8578b09be1b67dba4c238ba2903ebc2f7eadc61d98b86bea82968",
+      "result_file_sha256": "0961f08ffdf35fc11f23de732d23e911b2b908ba7e100847b86716b221f911cb",
+      "result_hash": "sha256:971b169ad43911e9ba33f96a352c9ee570c03a26736d233901e178ab35242e5c",
+      "stdin_command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "rkuarch.engines.analytic.dispatch",
+        "--bundle",
+        "/tmp/u3-doc-evidence-pjsiwv0h/per_op/bundle.json",
+        "--assumptions",
+        "/tmp/u3-doc-evidence-pjsiwv0h/per_op/assumptions.json"
+      ],
+      "stdin_file": "/tmp/u3-doc-evidence-pjsiwv0h/per_op/job-1.json",
+      "u_c0_s": 1.408e-06
+    }
+  ],
+  "v2_input_conditions": {
+    "badge": "stub",
+    "frequency_ratios": [
+      1.0,
+      1.0
+    ],
+    "hardware_design_status": "reference",
+    "hardware_hash": "sha256:cb268745ae183e43995c881ea75ac7a659849e890a234f7f89911dbb7514c180",
+    "hardware_provenance_counts": {
+      "stub": 49
+    },
+    "head_dim": 2,
+    "initial_state": "steady",
+    "model": {
+      "active_params": 372,
+      "d_model": 4,
+      "experts_per_token": 0,
+      "kv_heads": 1,
+      "n_experts": 0,
+      "n_heads": 2,
+      "n_layers": 2,
+      "name": "synthetic-d4",
+      "total_params": 372
+    },
+    "position_encoding": {
+      "cache_key_state": "rotated-before-store",
+      "coefficients_hash": "sha256:179f392a9a3e9dd3a768e9194492f993e329cc3cfd4293b78423eaee80553915",
+      "kind": "rope-precomputed/1",
+      "numeric_policy": "fp32-separate-round-rne/1",
+      "pairing": "adjacent",
+      "position_policy": "zero-origin-contiguous/1",
+      "rotary_dim": 2
+    },
+    "precision": {
+      "compute": "bf16",
+      "kv_cache": "bf16"
+    },
+    "rank": {
+      "collectives": "excluded",
+      "equivalent_ranks": [
+        0
+      ],
+      "kind": "balanced_tp_representative",
+      "rank_index": 0,
+      "tp": 1
+    },
+    "stipulations": 0
+  },
+  "v2_literal_sources": {
+    "contract/tests/fixtures/u2/independent-bundle.json": "fd84bde497b35274e89f1558498e0289463b07b8dbc56a3eea9c2ce8fb472cf5",
+    "contract/tests/rotary_v2_cases.py": "07ecac2f7bd48be52b5e9eb9b98397cc78418d71b15cee55b7cd0b571a596a4a"
+  }
+}

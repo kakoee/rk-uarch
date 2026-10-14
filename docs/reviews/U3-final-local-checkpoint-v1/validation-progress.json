@@ -1,0 +1,115 @@
+{
+  "ruff": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+      "check",
+      "."
+    ],
+    "exit": 0,
+    "seconds": 0.038,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/ruff.log"
+  },
+  "mypy-production": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+      "src",
+      "contract/uarch_contract",
+      "scripts"
+    ],
+    "exit": 0,
+    "seconds": 4.965,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/mypy-production.log"
+  },
+  "mypy-contract-tests": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+      "--no-explicit-package-bases",
+      "contract/tests"
+    ],
+    "exit": 0,
+    "seconds": 4.291,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/mypy-contract-tests.log"
+  },
+  "import-origin": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-B",
+      "-c",
+      "from pathlib import Path; import rkuarch, uarch_contract; import validation.reporting.analytic_report as a; root=Path.cwd(); modules=[rkuarch,uarch_contract,a]; print([(m.__name__,m.__file__) for m in modules]); assert all(Path(m.__file__).resolve().is_relative_to(root) for m in modules)"
+    ],
+    "exit": 0,
+    "seconds": 0.504,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/import-origin.log"
+  },
+  "imports": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/lint-imports"
+    ],
+    "exit": 0,
+    "seconds": 0.296,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/imports.log"
+  },
+  "vendor-currentness": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-B",
+      "scripts/vendor_rk.py",
+      "--check"
+    ],
+    "exit": 0,
+    "seconds": 0.668,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/vendor-currentness.log"
+  },
+  "schema-freshness": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-B",
+      "-m",
+      "uarch_contract.generate",
+      "--check"
+    ],
+    "exit": 0,
+    "seconds": 0.457,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/schema-freshness.log"
+  },
+  "full-suite": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-c",
+      "pyproject.toml",
+      "--rootdir",
+      ".",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "--junitxml=/tmp/u3-final-checks-6p0a6kra/full-suite.xml"
+    ],
+    "exit": 0,
+    "seconds": 1251.741,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/full-suite.log"
+  },
+  "contract-required-vendor": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-c",
+      "pyproject.toml",
+      "--rootdir",
+      ".",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "-rs",
+      "contract/tests",
+      "--require-vendor"
+    ],
+    "exit": 0,
+    "seconds": 12.617,
+    "log": "docs/reviews/U3-final-local-checkpoint-v1/checks/contract-required-vendor.log"
+  }
+}

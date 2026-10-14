@@ -1,0 +1,89 @@
+## environment
+date: 2026-10-13T04:52:37Z
+target: 184d2c2b08c28a01673be143b086ef223ba6706a tree: 6f74542bf5fc85997e044a135293db95297e3e20
+live HEAD: d7b00b8a2203da440c9e797b8166f9a47289e468 (not the review target)
+uname: Linux 6.6.87.2-microsoft-standard-WSL2
+venv python: Python 3.12.14; system python3: Python 3.12.3
+ruff: ruff 0.16.9; mypy: mypy 2.3.1 (compiled: yes)
+PYTHONPATH=[unset] MYPYPATH=[unset]
+export: fresh git archive of target
+
+## import origin (runtime imports resolve to the export, not the editable live clone)
+/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/1f7bc51a-fa41-4543-9411-c7961c170ca5/scratchpad/export-fresh/src/rkuarch/__init__.py
+/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/1f7bc51a-fa41-4543-9411-c7961c170ca5/scratchpad/export-fresh/contract/uarch_contract/__init__.py
+
+## A's checks.md block (extracted verbatim, run from export root with python3 -I)
+1f5949a354a3697fa2527f1544aad94f1a8c4b2abd5b110a4044653272ba355f
+PASS: 8 Markdown files, 36 local links, 2 JSON projections; independent arithmetic/effort assertions passed.
+exit=0
+
+## probe_contract (venv python -I, export imports asserted)
+IMPORT-ORIGIN src/rkuarch/__init__.py contract/uarch_contract/__init__.py
+NPU-L4-HASH sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9 MATCH
+C1-OPSPEC q_projection {'M': 16, 'K': 256, 'N': 256}
+C1-PREPAREDOP-V1 valid ['depends_on', 'embedding_local_tokens', 'fusion', 'id', 'kv_access', 'operand_access', 'padding', 'replication', 'spec', 'weight_copies', 'work_repeat']
+PREPAREDOP-V2-FIELDS ['depends_on', 'embedding_local_tokens', 'fusion', 'id', 'kv_access', 'operand_access', 'padding', 'replication', 'rotary', 'spec', 'weight_copies', 'work_repeat']
+R06-ROTARY-V1 schema-refusal ValidationError
+FAULT-HW-HASH detected RESTORED True
+FAULT-OPSPEC-UNDEFINED-AXIS refused ValidationError RESTORED q_projection
+HW-FIELDS {'freq_hz': {'core': 1000000000.0, 'noc': 1000000000.0, 'dram': 1000000000.0}, 'router_latency_cycles': 2.0, 'trcd_trp_tcl': [16.0, 16.0, 16.0], 'trfc_trefi': [350.0, 3900.0], 'dma': {'engines': 4.0, 'bytes_per_cycle': 256.0, 'max_outstanding': 32.0, 'request_bytes': 256.0}, 'operand_bytes_per_cycle': 1024.0, 'operand_buffer_bytes': 1048576.0, 'accumulator_bytes': 262144.0, 'controllers_attach': [[0, 0], [0, 1], [1, 0], [1, 1]], 'vector_ops_per_cycle': 256.0, 'shared_sram': None}
+exit=0
+
+## probe_ledger (venv python -I, export imports asserted)
+LEAVES 59
+UNCLASSIFIED ['cores.core_type.matrix_engine.macs_per_cycle.bf16', 'cores.core_type.matrix_engine.operand_buffer_bytes', 'memory.dram.capacity_bytes', 'formats.bf16.block_scale_bytes']
+PROJECTION counts valid against existing carrier
+PROJECTION ext_counts refused by existing carrier ['extra_forbidden:issued_matrix_ops', 'missing:noc_flit_hop_count']
+EXISTING-EXTCOUNTS-FIELDS ['noc_flit_hop_count', 'sram_read_bytes', 'sram_write_bytes']
+exit=0
+
+## probe_arithmetic (stdlib only)
+E1-TIE-ORDER [7, 8, 9, 2]
+E1-MAKESPAN 7000 SERIAL-OWNER0 10000 DROP-DEP 5000
+E2-EDGES [0, 834, 1667, 2500, 3334]
+E2-NEXT 2500 834 1667 2500 833333333334 ROUNDED-833 833000000000
+E2-INDEX-FORMULA-MISMATCHES 0
+E2-V04-INVARIANT True
+E3-C1 {'total': 702, 'stage': 136, 'wave': 526, 'out': 8, 'useful': 2097152, 'issued': 2097152, 'sram_rd': 139264, 'sram_wr': 8192, 'acc': 16384}
+E3-C2 {'total': 547, 'stage': 1, 'wave': 513, 'out': 1, 'useful': 210, 'issued': 393216, 'sram_rd': 100, 'sram_wr': 42, 'acc': 84}
+E3-C3 1182 673 makespan_ps 1182000 one_core_ps 1855000 useful 33685504 read 393728 write 131584
+E3-C1-COLD-REQUESTS 544 32 slot 147456 two_slots 294912
+E4-CHANNEL 4437500000000/39 159744/71 2249.9154929577467 chip_cap True
+E4-READ-1GHZ doc [(54250, 58250, 60000), (56500, 60500, 62000)]
+E4-READ-1GHZ next_edge [(54250, 59000, 60000), (56500, 61000, 62000)]
+E4-READ-1GHZ next_edge+dram_edge [(55000, 59000, 60000), (57000, 61000, 62000)]
+E4-READ-NOC1.2GHZ {'doc': 59000, 'next_edge': 60000}
+E4-FIRST-COMPLETION-BY-CHANNEL {0: 52000, 1: 52000, 2: 56000, 3: 56000, 4: 56000, 5: 56000, 6: 60000, 7: 60000}
+E4-LOW-LOAD-STREAM 12800000000/3 4266666666.6666665
+E4-BARRIER 94000
+ZERO-DELAY-OWNED {'inline': 3000, 'owner': 5000} V26-LITERAL 3000
+QUEUE-AREA 8000 6000 drop-initial 3000
+CONSERVATION 96
+E5-DECODE-R4 (60, 56, 24) R2 (30, 40, 24) FP32 (36, 80, 48) PREFILL6 (360, 336, 144)
+E5-B-PARTIAL-TAIL-3L (960, 960, 576) no-casts 576
+E5-KV 272 512 16 fused 272 544
+E5-PAIRING [-2, 1, 3, 4] [-3, 2, 1, 4]
+FAULT-E2-ROUNDED-PERIOD 833000000000 != restored 833333333334 True
+FAULT-E2-FLOOR-EDGE 833 != restored 834 True
+FAULT-E4-NO-REFRESH 60000 vs restored 60000 (masked at one request) two-request 62000 vs 62000
+FAULT-E4-CHIP-BW-PER-CHANNEL 52282 vs restored channel finish 54250
+FAULT-E3-NO-OVERHEAD 670 vs 702; FAULT-E3-PADDED-USEFUL 393216 vs 210
+FAULT-E4-NO-REFRESH-FIRST-DISCRIMINATING-REQUEST 5 69000 68000
+exit=0
+
+## probe_volume (stdlib only)
+B-MAX-REQUESTS 98304 payload_bytes 25165824
+RECORD-BYTES [340, 174, 168, 168] LOWER-BOUND-RECORDS 393216 LOWER-BOUND-MiB 79.7
+exit=0
+
+## CI-form static checks on the export (no install; ambient paths unset)
+All checks passed!
+ruff exit=0
+Success: no issues found in 78 source files
+Success: no issues found in 31 source files
+
+## bounded doc-consistency test on the export
+4 passed in 0.08s
+
+## B patch identity (not applied; B's suite not rerun by Lane A)
+97d0ec302606838a7055ec3d43ce1d3b759e8e015ecb796eed154ce4b0915e55
