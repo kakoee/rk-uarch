@@ -1,6 +1,10 @@
-# U3 closeout — technical closeout accepted, final records and tag pending
+# U3 closeout — completed and tagged
 
-**Status: U3 technical closeout accepted by Javid; final record publication and `u03-end` remain pending.**
+**Status: U3 closed.** Human `u03-end` was published and verified at
+`6d39a234a14855c86ca54b795501a0b0b2618d7b`; annotated tag object
+`e029adcedb82cfe192f8e700a3b5ffc20db92b47`. Final records were published in `c1e3b23`,
+and the separate CI improvement in `6d39a23`; both exact hosted runs passed.
+[Subsequent U4 authorization](U4-kickoff-v1/README.md) is separate from this closure.
 [Technical acceptance](U3-closeout-acceptance.json) binds published commit
 `390ec9aa06eef33da6274eb28ae6ca1c3ae3d623` and its same-commit fresh-clone and hosted CI checks.
 The earlier [design/policy approval](U3-reviewed-design-and-policy-v1/acceptance.md)
@@ -45,7 +49,7 @@ shared semantics were published in `390ec9a`; [the documentation package](U3-clo
 | Artifact-dependency policy | Prospective route selected; current installed U0002/source/adopted pair remains authoritative. Actual M closure audit and code/lifecycle transition require separate authorization |
 
 G2 design readiness and U3 technical closeout are accepted by the separate human decision.
-Final record publication and tagging remain separate. Later native execution, full tables, performance/nightly,
+Final record publication and the human tag are verified. Later native execution, full tables, performance/nightly,
 silicon, schema/toolchain work and artifact migration are not silently pulled into U3.
 
 ## Publication and finalization
@@ -58,13 +62,14 @@ silicon, schema/toolchain work and artifact migration are not silently pulled in
 | Fresh GitHub clone on ElfinKidsLaptop WSL2 | On `390ec9a`: 1,701 passed, 29 skipped, zero failures/errors; required lint, types, imports, schema and strict currentness passed. [Executed evidence](U3-published-validation-v1/fresh-clone-receipt.json) |
 | Hosted Ubuntu CI on the identical commit | [Run 38512473386](https://github.com/kakoee/rk-uarch/actions/runs/38512473386) passed: 1,691 passed, 29 skipped, 10 deselected; contract 681 and licence 2 checks overlap. [No-op classification](U3-published-validation-v1/ci-summary.json) |
 | Human technical closeout | `U3-closeout-v1` accepted by Javid; [exact scope](U3-closeout-acceptance.json) |
-| Final record commit/publication and human `u03-end` | Pending separately; U4 and cleanup are not authorized |
+| Final record commit/publication and human `u03-end` | Completed: records `c1e3b23`, separate CI improvement and tag target `6d39a23`; [final CI](https://github.com/kakoee/rk-uarch/actions/runs/38578691552) passed. Cleanup remains separate; subsequent U4 release is recorded in its own kickoff |
 
-The final documentation checkpoint preserves the validated implementation, tests, configuration,
+The final documentation checkpoint `c1e3b23` preserves the validated implementation, tests, configuration,
 schemas and artifact bytes. Its runtime evidence is inherited from `390ec9a`, not a claimed new
-execution. Before tagging, verify that identity, check the changed documentation, publish the
-approved final record commit, and obtain hosted CI on that final commit. Any implementation or
-support change instead requires appropriate renewed validation and artifact lifecycle checks.
+execution. That identity, changed-document checks, publication and final-commit hosted CI
+were verified before tagging. The subsequent CI-only change also passed hosted CI; it did
+not alter production or adopted artifacts. Future implementation/support changes require
+appropriate renewed validation and artifact lifecycle checks.
 
 No test result is inferred from an empty native/golden/performance/ordering job. Current
 source/artifact strict verification must pass; new-policy migration is not needed merely

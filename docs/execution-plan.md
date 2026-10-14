@@ -41,11 +41,12 @@ have distinct host requirements. The older notes and §7 estimates are historica
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | Publish the accepted U3 final closeout records and verify/tag the approved main revision. U4 needs separate authorization |
+| **Next** | U4 first checkpoint: A exact M/schema and K1 toolchain package; B independent fixtures, Linux CI and artifact-policy transition. [Kickoff](reviews/U4-kickoff-v1/README.md) |
 | **U1 done** | Published `u01-end` at `1e9e794a84c5173812c23a1cf2fc04b85e6f6831` |
 | **U2 done** | Accepted closeout and `u02-end` at `79bc1f0`; approved cleanup preserved the evidence archive and branch history |
-| **U3 technical closeout accepted** | Javid accepted U3-closeout-v1 on published `390ec9a`, after fresh GitHub-clone and same-commit hosted CI checks passed. See [acceptance](reviews/U3-closeout-acceptance.json) and [closeout](reviews/U3-closeout.md). B reports retain partial/not_run outcomes; the native engine remains a design. Final record publication and human tag remain pending; U4 is not authorized |
-| **Not started** | U4–U11 |
+| **U3 done** | Human `u03-end` at `6d39a234a14855c86ca54b795501a0b0b2618d7b`, published and verified; final CI passed. [Closeout](reviews/U3-closeout.md). Historical incomplete report outcomes remain explicit |
+| **U4 started** | Authorized by Javid on 2026-10-14; fresh A/B sessions begin the exact prerequisite packages. No native implementation or G3a pass yet; exact protected/tool/licence/lifecycle decisions remain separate |
+| **Not started** | U5–U11 |
 | **Runner pending** | Registration and executed manual nightly remain unverified. Not a correctness-development prerequisite under U0023; controlled-host performance and G5 nightly qualification remain pending |
 
 Update this block and `docs/how-it-works.md` at every sprint boundary.
@@ -80,7 +81,7 @@ explains each transfer and validation step.
 Current [U2 closeout evidence](reviews/U2-closeout.md) supersedes earlier pending-status
 notes below without rewriting them. U2 is not G2: under U0005, G2 is U3's native-stage design/readiness decision.
 
-**U3 Git workflow, requested by Javid:** A and B use separate working folders against
+**U3/U4 Git workflow, requested by Javid:** A and B use separate working folders against
 main, each committing and pushing to main, synchronizing and resolving conflicts as needed.
 Before pushing, fetch the current remote main and integrate it; use ordinary fast-forward
 pushes and rebase only unpublished local commits. Never force-push shared main or rewrite

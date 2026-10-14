@@ -16,8 +16,12 @@ Those postimages and this narrative were published in
 text remains historical. [Published validation](reviews/U3-published-validation-v1/README.md)
 records the fresh GitHub clone and hosted CI on that exact revision.
 [Javid’s technical acceptance](reviews/U3-closeout-acceptance.json) records U3 design/technical
-closeout with the limitations below. Final record publication and `u03-end` tagging remain
-separate; **U4 is not authorized**. [Closeout](reviews/U3-closeout.md) records the remaining steps.
+closeout with the limitations below. U3 is closed with human tag `u03-end` at
+`6d39a234a14855c86ca54b795501a0b0b2618d7b`. Javid subsequently authorized
+[U4 kickoff](reviews/U4-kickoff-v1/README.md): exact M and toolchain packages, independent
+verification inputs, CI and policy-transition preparation. Native implementation is still
+not delivered; exact first-use approvals remain separate. [U3 closeout](reviews/U3-closeout.md)
+preserves the validation scope.
 
 ## Inputs, scope and arithmetic
 
