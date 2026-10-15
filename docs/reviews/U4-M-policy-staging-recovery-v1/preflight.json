@@ -1,0 +1,39 @@
+{
+  "package_commit": "816584e2b49876d21246c2435af5d72673e56889",
+  "checks": [
+    {
+      "name": "read-only recovery preflight",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "docs/reviews/U4-M-policy-staging-recovery-v1/human-stage.py",
+        "--package-commit",
+        "816584e2b49876d21246c2435af5d72673e56889",
+        "--check-only"
+      ],
+      "exit": 0,
+      "output": "{\"preflight\": \"passed\", \"source_commit\": \"0cf24d91eeca5cc45182eb6fb03202677fd97dcb\", \"support_entries\": 56, \"staging_executed\": false}\n"
+    },
+    {
+      "name": "no human flag refusal",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "docs/reviews/U4-M-policy-staging-recovery-v1/human-stage.py",
+        "--package-commit",
+        "816584e2b49876d21246c2435af5d72673e56889",
+        "--stage",
+        "--authorization-commit",
+        "28fd452f33f8b24ba8796451bd1e758b4c885aa6"
+      ],
+      "exit": 1,
+      "output": "STOP: human approval/flag required\n"
+    }
+  ],
+  "real_guard_tests": "4 passed in 2.22s",
+  "source_clean": true,
+  "source_commit": "0cf24d91eeca5cc45182eb6fb03202677fd97dcb",
+  "staging_and_oracle_executed": false
+}
