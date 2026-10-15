@@ -1,0 +1,128 @@
+{
+  "status": "proposal only; native executions inherited; require fresh installed-source campaign",
+  "subject": "subject.json",
+  "A_fault_anchor_sha256": "ae59bcdd4f933ad148e42f1c8953ef3923343c3da6c71b92fbe7378601a649e1",
+  "faults": [
+    {
+      "name": "F1-ready-xor",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": "wheel.schedule(0, 1, j.owner, Kind::TaskReady, i as u32)?;",
+      "after": "wheel.schedule(0, 1, j.owner ^ 1, Kind::TaskReady, i as u32)?;",
+      "test": "tests::busy_owner_zero_grant_is_5000_not_3000",
+      "diagnostic": "owner"
+    },
+    {
+      "name": "F1-ready-zero",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": "wheel.schedule(0, 1, j.owner, Kind::TaskReady, i as u32)?;",
+      "after": "wheel.schedule(0, 1, 0, Kind::TaskReady, i as u32)?;",
+      "test": "tests::busy_owner_zero_grant_is_5000_not_3000",
+      "diagnostic": "owner"
+    },
+    {
+      "name": "F1-ready-missing",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": "wheel.schedule(0, 1, j.owner, Kind::TaskReady, i as u32)?;",
+      "after": "wheel.schedule(0, 1, u32::MAX, Kind::TaskReady, i as u32)?;",
+      "test": "tests::busy_owner_zero_grant_is_5000_not_3000",
+      "diagnostic": "owner"
+    },
+    {
+      "name": "F1-successor-queued",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": ".schedule(t_ps, 1, target, Kind::DependencyReady, i as u32)?;",
+      "after": ".schedule(t_ps, 1, target ^ 1, Kind::DependencyReady, i as u32)?;",
+      "test": "tests::busy_owner_zero_grant_is_5000_not_3000",
+      "diagnostic": "owner"
+    },
+    {
+      "name": "F1-successor-inline",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": ".inline_event(target, Kind::DependencyReady, i as u32)?;",
+      "after": ".inline_event(target ^ 1, Kind::DependencyReady, i as u32)?;",
+      "test": "tests::busy_owner_zero_grant_is_5000_not_3000",
+      "diagnostic": "owner"
+    },
+    {
+      "name": "F1-grant",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": ".inline_event(o as u32, Kind::OwnerGrant, i as u32)?;",
+      "after": ".inline_event((o as u32) ^ 1, Kind::OwnerGrant, i as u32)?;",
+      "test": "tests::busy_owner_zero_grant_is_5000_not_3000",
+      "diagnostic": "owner"
+    },
+    {
+      "name": "F1-zero-completion",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": ".inline_event(event.target, Kind::ComputeDone, i as u32)?;",
+      "after": ".inline_event(event.target ^ 1, Kind::ComputeDone, i as u32)?;",
+      "test": "tests::busy_owner_zero_grant_is_5000_not_3000",
+      "diagnostic": "owner"
+    },
+    {
+      "name": "F2-reverse-grants",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": "(0..self.owners.active.len()).find",
+      "after": "(0..self.owners.active.len()).rev().find",
+      "test": "stage2_tests::lowest_owner_zero_closure_has_literal_110ps_path",
+      "diagnostic": "111"
+    },
+    {
+      "name": "F3-zero-phase-regression",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": "if end_ps == event.t_ps {",
+      "after": "if end_ps == event.t_ps && false {",
+      "test": "simulation::stage2_routing_tests::inline_zero_closure_blocks_retroactive_phase_zero",
+      "diagnostic": "PastEvent"
+    },
+    {
+      "name": "F3-time-only-guard",
+      "path": "native/crates/uarch-engine/src/event.rs",
+      "original_sha256": "ecf53cfcefaff17987e3476a3c647216e91e04a438644a7659fef2a65ac5231c",
+      "before": "        if t_ps < self.now_ps\n            || (t_ps == self.now_ps && phase < self.phase_floor)\n            || self\n                .last_key\n                .is_some_and(|key| (t_ps, phase, target, self.seq) < key)\n        {",
+      "after": "        if t_ps < self.now_ps {",
+      "test": "stage2_tests::same_timestamp_regression_refuses_but_forward_insertions_work",
+      "diagnostic": "Ok(1)"
+    },
+    {
+      "name": "F4-drop-resource",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "472698e658e4741516b0aa98ea94095bb4ed1cda0aa656b5ead2bdc32fa52191",
+      "before": "predecessors.push(self.jobs[p].id);",
+      "after": "let _ = self.jobs[p].id;",
+      "test": "stage2_tests::private_predecessor_list_is_explicitly_noncausal",
+      "diagnostic": "Number(2)"
+    }
+  ],
+  "modes": [
+    "debug",
+    "release"
+  ],
+  "per_fault_sequence": [
+    "baseline pass",
+    "exit 101 with named diagnostic",
+    "restored pass using fresh target"
+  ],
+  "replay_drift": "replay-mutation.proposed.json",
+  "existing_generic_controls": [
+    "missing source",
+    "compiler failure",
+    "runtime failure",
+    "empty selection",
+    "ignored selection",
+    "filtered selection",
+    "missing offline cache",
+    "unavailable toolchain",
+    "unexcepted Unicode policy"
+  ],
+  "old_controller_limit": "controls.py -> replay_control.py hard-codes the historical replay-mutation.json. Do not run unchanged against Stage 2; use the explicit proposed control recipe in controls.md."
+}

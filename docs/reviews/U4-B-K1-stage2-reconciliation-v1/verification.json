@@ -1,0 +1,96 @@
+{
+  "starting_B_head": "eb99399b96b1271a097aa9f635510f84622bf8dc",
+  "base_commit": "9b1408437b6dc08d9b77848f5fffe56c0cf1db72",
+  "proposal_tree": "6d5263e13e43a5dfb44d8addf93cc47cc814a0ac",
+  "native_execution": "unavailable; inherited A evidence only",
+  "checks": [
+    "debug inventory refuses old19",
+    "debug inventory refuses missing",
+    "debug inventory refuses duplicate",
+    "debug inventory refuses extra",
+    "release inventory refuses old19",
+    "release inventory refuses missing",
+    "release inventory refuses duplicate",
+    "release inventory refuses extra"
+  ],
+  "chain_controls": [
+    {
+      "fault": "missing-first",
+      "refused": "unreviewed or missing numbered patch"
+    },
+    {
+      "fault": "missing-second",
+      "refused": "unreviewed or missing numbered patch"
+    },
+    {
+      "fault": "extra",
+      "refused": "unreviewed or missing numbered patch"
+    },
+    {
+      "fault": "reordered",
+      "refused": "register patch identity mismatch"
+    },
+    {
+      "fault": "tampered-first",
+      "refused": "register patch identity mismatch"
+    },
+    {
+      "fault": "tampered-second",
+      "refused": "register patch identity mismatch"
+    },
+    {
+      "fault": "disconnected",
+      "refused": "disconnected patch chain"
+    }
+  ],
+  "reverse_forward": [
+    {
+      "reverse": true,
+      "patch": "third_party/patches/0002-u4-k1-linkage-roles.patch",
+      "sha256": "d29c089c1e0f19486ba45b64039845d251555690d896adede03a662eff249095"
+    },
+    {
+      "reverse": true,
+      "patch": "third_party/patches/0001-u4-k1-register.patch",
+      "sha256": "db517dc73f92d65df28cf255cc962d49c7504ac2f77a50db5be7971752a85dae"
+    },
+    {
+      "reverse": false,
+      "patch": "third_party/patches/0001-u4-k1-register.patch",
+      "sha256": "d29c089c1e0f19486ba45b64039845d251555690d896adede03a662eff249095"
+    },
+    {
+      "reverse": false,
+      "patch": "third_party/patches/0002-u4-k1-linkage-roles.patch",
+      "sha256": "526fdbafb688479826b33d544f591e728f1ef69655aec044154f384570f949ad"
+    }
+  ],
+  "wrong_reverse_and_forward_order_refused": true,
+  "python_command": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "-c",
+    "/tmp/u4-b-k1-stage2-b9mnlhur/source/pyproject.toml",
+    "--rootdir=/tmp/u4-b-k1-stage2-b9mnlhur/source",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp=/tmp/u4-b-k1-stage2-b9mnlhur/pytest",
+    "-q",
+    "/tmp/u4-b-k1-stage2-b9mnlhur/source/tests/unit/test_third_party.py",
+    "/tmp/u4-b-k1-stage2-b9mnlhur/source/tests/unit/test_third_party_patch_check.py",
+    "/tmp/u4-b-k1-stage2-b9mnlhur/source/native/test_register_linkage.py::test_native_readme_describes_delivered_boundary"
+  ],
+  "python_exit": 0,
+  "source_isolation_files": 1962,
+  "source_bytes_mtimes_unchanged": true,
+  "inherited_names_per_mode": 28,
+  "inherited_replay_runs": 6,
+  "inherited_replay_sha256": "4490d63cd5b49bac327ded1661df7802356f541e003391666963965809f2a62a",
+  "inherited_fault_runs": 66,
+  "original_first_record_sha256": "50b7545173b41140ea896ff46a562babd913083b73f76113503cfeb05a407e8f",
+  "original_first_patch_sha256": "c7ddd4456180a0338afd20908dac12275ad648505aef0abd690a9b953b70834e",
+  "A_package_files_unchanged": 134,
+  "scratch_removed": true
+}
