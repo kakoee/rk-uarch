@@ -1,0 +1,73 @@
+diff --git a/tests/unit/test_u2_b_tooling_binding.py b/tests/unit/test_u2_b_tooling_binding.py
+index f11f4ad55caaf8c1c48801dcd2c4acc82d533044..a9e71bd1638fd765df291f05868d92d126431abb 100644
+--- a/tests/unit/test_u2_b_tooling_binding.py
++++ b/tests/unit/test_u2_b_tooling_binding.py
+@@ -171,7 +171,32 @@ def test_same_candidate_survives_adoption_and_fresh_layout(candidate, tmp_path,
+         )
+     fresh = tmp_path / "fresh-layout"
+     shutil.copytree(repo, fresh)
++    # Generator support is sufficient for the strict support-only checks above.
++    # This separate consumer probe imports these modules solely to deny producers.
++    # Copy their import closure from the same source; never add it to support-files.
++    consumer_sources = (
++        "contract/tests/nominal_candidate.py",
++        "src/rkuarch/engines/analytic/__init__.py",
++        "src/rkuarch/engines/analytic/core.py",
++        "src/rkuarch/table/__init__.py",
++        "src/rkuarch/table/artifacts.py",
++        "src/rkuarch/table/build.py",
++        "src/rkuarch/table/time_units.py",
++        "src/rkuarch/workload/__init__.py",
++        "src/rkuarch/workload/characterize.py",
++        "src/rkuarch/workload/deviations.py",
++        "src/rkuarch/workload/prepare.py",
++        "src/rkuarch/workload/prepared.py",
++    )
++    for name in consumer_sources:
++        target = fresh / name
++        target.parent.mkdir(parents=True, exist_ok=True)
++        shutil.copyfile(ui.ROOT / name, target)
+     code = """
++import sys
++from pathlib import Path
++root = Path.cwd().resolve()
++sys.path[:0] = [str(root), str(root / "contract"), str(root / "src")]
+ from unittest.mock import patch
+ from scripts import u2_inputs as ui
+ from scripts import vendor_rk as vr
+@@ -180,10 +205,10 @@ import rkuarch.workload.prepared as prepared
+ from contract.tests import nominal_candidate as nominal
+ from rkuarch.table import build
+ from rkuarch.engines.analytic import core
+-from pathlib import Path
+-assert ui.ROOT == vr.ROOT == Path.cwd()
+-assert Path(ui.__file__).is_relative_to(Path.cwd())
+-assert Path(producer.__file__).is_relative_to(Path.cwd())
++assert ui.ROOT == vr.ROOT == root
++for name, module in tuple(sys.modules.items()):
++    if name.split(".")[0] in {"scripts", "rkuarch", "uarch_contract", "contract"}:
++        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name
+ 
+ def denied(*a, **k): raise AssertionError("oracle/producer forbidden")
+ with (patch.object(vr, "run_oracle", denied), patch.object(producer, "prepare", denied),
+@@ -198,13 +223,18 @@ with (patch.object(vr, "run_oracle", denied), patch.object(producer, "prepare",
+ print("same candidate accepted from fresh committed-required layout; no old checkout")
+ """
+     result = subprocess.run(
+-        [sys.executable, "-B", "-c", code],
++        [sys.executable, "-I", "-B", "-c", code],
+         cwd=fresh,
+-        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONPATH": ".:contract:src"},
++        env={
++            **{k: v for k, v in os.environ.items() if k not in {"PYTHONPATH", "MYPYPATH"}},
++            "PYTHONDONTWRITEBYTECODE": "1",
++        },
+         capture_output=True,
+         text=True,
+     )
+     assert result.returncode == 0, result.stderr
++    for name in consumer_sources:
++        assert (fresh / name).read_bytes() == (ui.ROOT / name).read_bytes()
+     assert {
+         p.relative_to(adopted): p.read_bytes() for p in adopted.rglob("*") if p.is_file()
+     } == original

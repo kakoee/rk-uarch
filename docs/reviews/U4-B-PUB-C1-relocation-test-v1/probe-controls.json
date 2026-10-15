@@ -1,0 +1,149 @@
+{
+  "test_patch_source_sha256": "41acad3e368de53a5f1cf4a433adf4a20956c2d33e1160dc14119b1f3ad1f74a",
+  "code_extracted_from": "test_same_candidate_survives_adoption_and_fresh_layout code literal",
+  "fresh_fixture": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+  "files_unchanged": 117,
+  "source_and_candidate_bytes_mtimes_preserved": true,
+  "records": [
+    {
+      "name": "probe-positive",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 0,
+      "diagnostic": "same candidate accepted",
+      "raw_log_sha256": "626609775d41c96f06a90759512c255c0f92ad3e377919cfe1e1a7acd1d9894c"
+    },
+    {
+      "name": "probe-denied-vr-run_oracle",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    vr.run_oracle()\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 1,
+      "diagnostic": "AssertionError: oracle/producer forbidden",
+      "raw_log_sha256": "70e6dc2ec4d562f8d607a8a3831d3abe3c29da513a2476e51029df697d01bace"
+    },
+    {
+      "name": "probe-denied-producer-prepare",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    producer.prepare()\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 1,
+      "diagnostic": "AssertionError: oracle/producer forbidden",
+      "raw_log_sha256": "70e6dc2ec4d562f8d607a8a3831d3abe3c29da513a2476e51029df697d01bace"
+    },
+    {
+      "name": "probe-denied-prepared-execute_prepared_point",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    prepared.execute_prepared_point()\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 1,
+      "diagnostic": "AssertionError: oracle/producer forbidden",
+      "raw_log_sha256": "70e6dc2ec4d562f8d607a8a3831d3abe3c29da513a2476e51029df697d01bace"
+    },
+    {
+      "name": "probe-denied-nominal-evaluate_nominal",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    nominal.evaluate_nominal()\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 1,
+      "diagnostic": "AssertionError: oracle/producer forbidden",
+      "raw_log_sha256": "70e6dc2ec4d562f8d607a8a3831d3abe3c29da513a2476e51029df697d01bace"
+    },
+    {
+      "name": "probe-denied-build-capture",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    build.capture()\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 1,
+      "diagnostic": "AssertionError: oracle/producer forbidden",
+      "raw_log_sha256": "70e6dc2ec4d562f8d607a8a3831d3abe3c29da513a2476e51029df697d01bace"
+    },
+    {
+      "name": "probe-denied-core-run_analytic",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    core.run_analytic()\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 1,
+      "diagnostic": "AssertionError: oracle/producer forbidden",
+      "raw_log_sha256": "70e6dc2ec4d562f8d607a8a3831d3abe3c29da513a2476e51029df697d01bace"
+    },
+    {
+      "name": "probe-foreign-origin",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nproducer.__file__ = str(root.parent / \"foreign-source.py\")\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 1,
+      "diagnostic": "AssertionError: rkuarch.workload.prepare",
+      "raw_log_sha256": "d32e72a61241b08909c9ac4a1346c1aadf083ead3451a6cfc945e49437b53f7a"
+    },
+    {
+      "name": "probe-missing-consumer",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 1,
+      "diagnostic": "ModuleNotFoundError",
+      "raw_log_sha256": "698b67d874149a66f8113f3ed06a5f3aa8f855ed5d8d36a6b168b960a3312cf2"
+    },
+    {
+      "name": "probe-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nroot = Path.cwd().resolve()\nsys.path[:0] = [str(root), str(root / \"contract\"), str(root / \"src\")]\nfrom unittest.mock import patch\nfrom scripts import u2_inputs as ui\nfrom scripts import vendor_rk as vr\nimport rkuarch.workload.prepare as producer\nimport rkuarch.workload.prepared as prepared\nfrom contract.tests import nominal_candidate as nominal\nfrom rkuarch.table import build\nfrom rkuarch.engines.analytic import core\nassert ui.ROOT == vr.ROOT == root\nfor name, module in tuple(sys.modules.items()):\n    if name.split(\".\")[0] in {\"scripts\", \"rkuarch\", \"uarch_contract\", \"contract\"}:\n        assert module.__file__ and Path(module.__file__).resolve().is_relative_to(root), name\n\ndef denied(*a, **k): raise AssertionError(\"oracle/producer forbidden\")\nwith (patch.object(vr, \"run_oracle\", denied), patch.object(producer, \"prepare\", denied),\n      patch.object(prepared, \"execute_prepared_point\", denied),\n      patch.object(nominal, \"evaluate_nominal\", denied),\n      patch.object(build, \"capture\", denied), patch.object(core, \"run_analytic\", denied)):\n    vr.check_manifest(ui.ADOPTED)\n    vr.check_snapshot_inputs(ui.ADOPTED)\n    vr.check_generator(ui.ADOPTED)\n    frozen = ui.ADOPTED / \"u2-inputs\"\n    ui.load_inputs(frozen, vr.digest((frozen / \"SHA256SUMS\").read_bytes()))\nprint(\"same candidate accepted from fresh committed-required layout; no old checkout\")\n"
+      ],
+      "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/corrected/test_same_candidate_survives_acurrent/fresh-layout",
+      "exit": 0,
+      "diagnostic": "same candidate accepted",
+      "raw_log_sha256": "626609775d41c96f06a90759512c255c0f92ad3e377919cfe1e1a7acd1d9894c"
+    }
+  ]
+}

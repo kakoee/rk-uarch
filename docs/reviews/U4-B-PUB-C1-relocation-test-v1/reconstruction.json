@@ -1,0 +1,86 @@
+{
+  "starting_B_head": "3d78ee8f6de22a8b3cb6031cb2d4eabbae820a5a",
+  "integrated_B_head": "65ddf0cc969bd82ea1f70b12fa2120ab333e90be",
+  "work": "/tmp/u4-b-pub-c1-5jdx9bjr",
+  "preview_tree": "02cff99854337d59086861086f562119940d6e6c",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "clone",
+        "--no-hardlinks",
+        "--no-checkout",
+        "/tmp/u4-publication-preview-dp7l4j5e/source",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Cloning into '/tmp/u4-b-pub-c1-5jdx9bjr/source'...\ndone.\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+        "checkout",
+        "--detach",
+        "a6802a344f9f068fef7f1c63fbb72acec876dfc4"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "HEAD is now at a6802a3 docs(u4): verify exact human commit preflight and refusals\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+        "fetch",
+        "--no-tags",
+        "/tmp/u4-publication-preview-dp7l4j5e/source",
+        "5e774682a7abdc21aa0bac6a8f738e66c852d3e5"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "From /tmp/u4-publication-preview-dp7l4j5e/source\n * branch            5e774682a7abdc21aa0bac6a8f738e66c852d3e5 -> FETCH_HEAD\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+        "rev-parse",
+        "5e774682^"
+      ],
+      "exit": 0,
+      "stdout": "0cf24d91eeca5cc45182eb6fb03202677fd97dcb\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+        "merge",
+        "--no-commit",
+        "--no-ff",
+        "5e774682a7abdc21aa0bac6a8f738e66c852d3e5"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Automatic merge went well; stopped before committing as requested\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+        "write-tree"
+      ],
+      "exit": 0,
+      "stdout": "02cff99854337d59086861086f562119940d6e6c\n",
+      "stderr": ""
+    }
+  ],
+  "human_history_in_B": false
+}

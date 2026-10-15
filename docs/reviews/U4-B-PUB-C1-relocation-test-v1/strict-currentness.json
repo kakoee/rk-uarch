@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "import sys,json,hashlib\nfrom pathlib import Path\nroot=Path.cwd().resolve();sys.path[:0]=[str(root),str(root/'src'),str(root/'contract')]\nfrom scripts import u2_inputs as ui,vendor_rk as vr,u2_support as policy\nassert ui.ROOT==vr.ROOT==root\nassert Path(ui.__file__).resolve().is_relative_to(root) and Path(vr.__file__).resolve().is_relative_to(root)\nsupport=json.loads((ui.ADOPTED/'u2-inputs/support-files.json').read_bytes())\ncurrent=policy.inventory(root=root)\npolicy.verify(current,root=root)\nassert current==support and len(support)==56\nprint('PRIVATE_CURRENT_SUPPORT='+json.dumps({'count':len(support),'ui':ui.__file__,'vendor':vr.__file__,'support_sha256':hashlib.sha256((ui.ADOPTED/'u2-inputs/support-files.json').read_bytes()).hexdigest()},sort_keys=True),flush=True)\nsys.argv=['vendor-rk','--check'];vr.main()\n"
+  ],
+  "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+  "exit": 0,
+  "raw_sha256": "8274789cffcf9b521fb16b5cd4b3e7ebe6f1a416893a6142080597c371640a89",
+  "initial_launcher_failure": "Used legacy u2_inputs.support_files() for selected-policy comparison. Corrected to u2_support.inventory/verify; no production or test-patch change."
+}

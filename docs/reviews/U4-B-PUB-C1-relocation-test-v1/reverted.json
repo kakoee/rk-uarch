@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "import sys,json\nfrom pathlib import Path\nroot=Path.cwd().resolve()\nsys.path[:0]=[str(root),str(root/'src'),str(root/'contract')]\nfrom scripts import u2_inputs as ui, vendor_rk as vr\nfrom rkuarch.workload import prepare,prepared\nfrom rkuarch.engines.analytic import core\nfrom rkuarch.table import build\nfrom contract.tests import nominal_candidate\norigins={n:str(Path(m.__file__).resolve()) for n,m in list(sys.modules.items()) if n.split('.')[0] in {'scripts','contract','rkuarch','uarch_contract'} and getattr(m,'__file__',None)}\nassert origins and all(Path(p).is_relative_to(root) for p in origins.values()),origins\nassert ui.ROOT==vr.ROOT==root\nprint('PRIVATE_ORIGINS='+json.dumps(origins,sort_keys=True),flush=True)\nimport pytest\nsys.exit(pytest.main(sys.argv[1:]))\n",
+    "-c",
+    "/tmp/u4-b-pub-c1-5jdx9bjr/source/pyproject.toml",
+    "--rootdir=/tmp/u4-b-pub-c1-5jdx9bjr/source",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp=/tmp/u4-b-pub-c1-5jdx9bjr/reverted",
+    "-q",
+    "tests/unit/test_u2_b_tooling_binding.py::test_same_candidate_survives_adoption_and_fresh_layout"
+  ],
+  "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+  "exit": 1,
+  "source_files_unchanged": 2112,
+  "source_bytes_mtimes_unchanged": true,
+  "raw_log_sha256": "fbe99487e1d2487ca7d11637b57b751ac15f8490ecb5a7def455266c99b14ae8",
+  "log_normalization": "trailing whitespace only",
+  "unset": [
+    "PYTHONPATH",
+    "MYPYPATH",
+    "VIRTUAL_ENV",
+    "UARCH_HUMAN"
+  ]
+}

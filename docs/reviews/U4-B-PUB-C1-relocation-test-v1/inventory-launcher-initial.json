@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "import sys,json,hashlib\nfrom pathlib import Path\nroot=Path.cwd().resolve();sys.path[:0]=[str(root),str(root/'src'),str(root/'contract')]\nfrom scripts import u2_inputs as ui,vendor_rk as vr\nassert ui.ROOT==vr.ROOT==root\nassert Path(ui.__file__).resolve().is_relative_to(root) and Path(vr.__file__).resolve().is_relative_to(root)\nsupport=json.loads((ui.ADOPTED/'u2-inputs/support-files.json').read_bytes())\ncurrent={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in ui.support_files()}\nassert current==support and len(support)==56\nprint('PRIVATE_CURRENT_SUPPORT='+json.dumps({'count':len(support),'ui':ui.__file__,'vendor':vr.__file__,'support_sha256':hashlib.sha256((ui.ADOPTED/'u2-inputs/support-files.json').read_bytes()).hexdigest()},sort_keys=True),flush=True)\nsys.argv=['vendor-rk','--check'];vr.main()\n"
+  ],
+  "cwd": "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+  "exit": 1,
+  "raw_sha256": "50e76f596f645535e3cc13736cd4f15e5acd7ea094dc0f7bc59a3e4de0e00c65"
+}
