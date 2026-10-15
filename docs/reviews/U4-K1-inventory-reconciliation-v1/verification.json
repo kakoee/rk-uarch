@@ -1,0 +1,22 @@
+{
+  "proposal_commit": "c41499458307836484efdeb587a6c8bd4c5c910f",
+  "patch_sha256": "4b807f41653a33e1a7e29ed840ce0f55e4d3313da10c91791142bf2a781c070d",
+  "coordinator_checks": {
+    "audit": "passed; runpy audit() only, no proposal outputs rewritten",
+    "guard_tests": {
+      "command": "env -u PYTHONPATH -u MYPYPATH -u VIRTUAL_ENV -u UARCH_HUMAN .venv/bin/python -I -B -m pytest -c pyproject.toml --rootdir=. -p no:cacheprovider --basetemp=/tmp/u4-coordinator-k1-inventory-guards -q docs/reviews/U4-B-K1-installed-inventory-v1/test_guards.py",
+      "passed": 35,
+      "seconds": 0.23
+    },
+    "patch": "exact two postimages; reverse and forward passed in private repository",
+    "ruff": "passed on B proposal directory",
+    "whitespace": "passed",
+    "remote_main": "c41499458307836484efdeb587a6c8bd4c5c910f"
+  },
+  "scratch": "/tmp/u4-k1-inventory-review-yffs9lfi",
+  "native_rerun": false,
+  "full_suite_rerun": false,
+  "ci_polled": false,
+  "live_replacement": false,
+  "K2_authorized": false
+}
