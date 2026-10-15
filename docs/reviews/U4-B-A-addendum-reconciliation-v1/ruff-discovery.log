@@ -1,0 +1,71 @@
+E402 Module level import not at top of file
+  --> /tmp/u4-b-a-addendum/package/audit_source.py:16:1
+   |
+14 |     str(root / "docs/reviews/U4-B-K2-first-use-v1"),
+15 | ]
+16 | from peer_audit import closure
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+17 | from uarch_contract.hashing import content_hash
+18 | from uarch_contract.mapped import NativeEngineIdentity
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> /tmp/u4-b-a-addendum/package/audit_source.py:17:1
+   |
+15 | ]
+16 | from peer_audit import closure
+17 | from uarch_contract.hashing import content_hash
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+18 | from uarch_contract.mapped import NativeEngineIdentity
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> /tmp/u4-b-a-addendum/package/audit_source.py:18:1
+   |
+16 | from peer_audit import closure
+17 | from uarch_contract.hashing import content_hash
+18 | from uarch_contract.mapped import NativeEngineIdentity
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+19 |
+20 | from rkuarch.workload.mapped import load_fixed_delay_job
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> /tmp/u4-b-a-addendum/package/audit_source.py:20:1
+   |
+18 | from uarch_contract.mapped import NativeEngineIdentity
+19 |
+20 | from rkuarch.workload.mapped import load_fixed_delay_job
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+21 |
+22 | origins = {}
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> /tmp/u4-b-a-addendum/package/audit_source.py:55:1
+   |
+53 | load_fixed_delay_job(saved, **anchors)
+54 | assert reads == [str(saved)]
+55 | from scripts import u2_support, vendor_rk
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+56 |
+57 | support = u2_support.inventory(root=root)
+   |
+help: Move module level imports to top of file
+
+E501 Line too long (162 > 100)
+   --> /tmp/u4-b-a-addendum/package/run_review.py:167:101
+    |
+165 | …
+166 | …
+167 | …erate; assert generate(check=True)==[]; print("Mapped schemas fresh; private origins checked.")',
+    |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+168 | …
+169 | …
+    |
+
+Found 6 errors.

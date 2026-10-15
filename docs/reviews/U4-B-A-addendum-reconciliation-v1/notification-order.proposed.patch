@@ -1,0 +1,29 @@
+--- a/contract/uarch_contract/mapped.py
++++ b/contract/uarch_contract/mapped.py
+@@ -1318,6 +1318,26 @@
+         for d in job.mapped_point.task_graph.dependencies
+     ]
+     require(sorted(dependency_events) == sorted(expected_notifications), "IncompleteObservations")
++    # Match each observed notification to an earlier completion in its indistinguishable
++    # (target, time, phase) group. Equal counts alone permit notify-before-complete traces.
++    for target, timestamp, phase in sorted(set(expected_notifications)):
++        completed = sorted(
++            completion_order[d.before]
++            for d in job.mapped_point.task_graph.dependencies
++            if (d.after, jobs[d.before].end_ps, 2 if by_completion[d.before].phase == 2 else 1)
++            == (target, timestamp, phase)
++        )
++        notified = sorted(
++            e.observation_ordinal
++            for e in events
++            if e.kind == "DEPENDENCY_READY"
++            and (e.job_id, e.t_ps, e.phase) == (target, timestamp, phase)
++        )
++        require(
++            all(a < b for a, b in zip(completed, notified, strict=True)),
++            "IncompleteObservations",
++            "dependency notification precedes completion",
++        )
+     root_events = [(e.job_id, e.t_ps, e.phase) for e in events if e.kind == "TASK_READY"]
+     nonroots = {d.after for d in job.mapped_point.task_graph.dependencies}
+     require(

@@ -1,0 +1,38 @@
+{
+  "commands": [
+    {
+      "name": "candidate-metadata",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import sys; from pathlib import Path; r=Path('/tmp/u4-b-a-addendum/proposed'); sys.path[:0]=[str(r),str(r/\"src\"),str(r/\"contract\")]; import pytest; raise SystemExit(pytest.main(['-q', '-c', '/tmp/u4-b-a-addendum/proposed/pyproject.toml', '--rootdir=/tmp/u4-b-a-addendum/proposed', '-p', 'no:cacheprovider', '--basetemp=/tmp/u4-b-a-addendum/pytest-candidate-metadata', '/tmp/u4-b-a-addendum/proposed/docs/reviews/U4-A-K2-semantic-construction-v1/test_construction.py']))"
+      ],
+      "cwd": "/tmp/u4-b-a-addendum/proposed",
+      "exit": 0,
+      "log_sha256": "fa8e3e1f0a4b084326a7027307e5cc3a94f799f9733ea598c3b878fa3c70f37c"
+    },
+    {
+      "name": "final-owned-ruff",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "--no-cache",
+        "/tmp/u4-b-a-addendum/package"
+      ],
+      "cwd": "/tmp/u4-b-a-addendum/proposed",
+      "exit": 0,
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    }
+  ],
+  "preparation_reproduction_command": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "/tmp/u4-b-a-addendum/package/prepare_review.py",
+    "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b",
+    "/tmp/u4-b-a-addendum-reproduction"
+  ],
+  "preparation_exit": 0
+}
