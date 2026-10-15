@@ -1,0 +1,42 @@
+# U4 K1 — same independent reviewer, Stage 3 response adjudication
+
+Return to the original K1 Stage 1 reviewer session. Review, do not author fixes or install.
+Follow U-REVIEW's Stage 3 criteria for each original K1-F1 through K1-F5, including the
+required random revert and intended failure/restoration evidence. No self-adjudication.
+
+Exact base: 9b1408437b6dc08d9b77848f5fffe56c0cf1db72.
+A response/package: docs/reviews/U4-A-K1-stage2-v1/ in the coordinator checkout.
+Primary patch SHA256: 9897cb1407d26412bcea76e8e8a5a353c508b4d0ce5ca236efa8fb6b66cabfad.
+Separate proposed B guard SHA256: 7bf806d04280f0ac66e37bfe0d292207e9a17b6e615b952a868ccb4e8afcc57e.
+Apply those two patches in that order to a PRIVATE base export. Exact combined tree:
+6d5263e13e43a5dfb44d8addf93cc47cc814a0ac (12 paths). Coordinator identity.json binds response.
+Verify every primary postimage and the preserved Stage 1 report hash. Do not review moving
+main or frozen A's M/policy installation. No patch is live; B-owned reconciliation remains
+separate. If B produces revised bytes, stop and obtain a new exact review binding.
+
+Explicit issues to adjudicate:
+- F1: actual dispatched target authority on EVERY state mutation, including inline grants,
+  zero completion and queued/inline successor delivery; no owner-as-own-target tautology.
+- F2: literal timing discriminator, not mere determinism.
+- F3: total ordering of queued events vs the accepted canonical inline zero closure. The
+  old random wheel probe now inserts a retroactive key and fails with PastEvent. Determine
+  whether that is the correct new refusal; do not weaken assertions without explaining
+  the changed input precondition. Test forward same-time controls and unsupported phases.
+- F4: author chose the allowed neutral predecessor-list rename/definition, not causal
+  attribution. The mechanically renamed old causal probe still fails. Adjudicate that
+  explicit alternative; no public critical-path accuracy follows from this private list.
+- F5: actual library scope and linkage roles; B patch-chain guard is proposed only.
+
+Check all 28 tests in both modes and fresh-process replay when the exact accepted local
+image is available. New replay bytes differ from historical bytes; verify unchanged timing
+and the disclosed observation/field/sequence changes. Obtain actual Cargo metadata for the
+manual linkage check; the environment variable K1_METADATA is required. Coordinator has
+not rerun native tests because Docker is currently unavailable; author results are inherited.
+If the environment prevents required checks, report the limitation, never grant unexecuted
+acceptance or substitute unapproved tooling. U0024 deferrals remain in force.
+
+Preserve all earlier reviewer bytes, append the scoped response verdict to your report,
+and write new probes/evidence to a new directory. Record executed vs inherited checks.
+No live file/index changes, protected installation, adoption, K1/G3a/U4 closure, K2 release,
+registry/server work or CI polling. Return findings to coordinator and A; B retains ownership
+of guard/inventory reconciliation even if the exact proposed software is acceptable.
