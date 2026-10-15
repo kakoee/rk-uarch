@@ -1,0 +1,68 @@
+
+running 28 tests
+test simulation::stage2_routing_tests::queued_unsupported_simulation_phase_returns_error ... ok
+test simulation::stage2_routing_tests::inline_zero_closure_blocks_retroactive_phase_zero ... ok
+test simulation::stage2_routing_tests::successor_grant_and_zero_handlers_refuse_foreign_targets ... ok
+test stage2_tests::same_timestamp_regression_refuses_but_forward_insertions_work ... ok
+test simulation::stage2_routing_tests::readiness_wrong_or_missing_target_refuses_in_engine ... ok
+test tests::arena_reuses_freed_slots_and_refuses_double_free ... ok
+test stage2_tests::unsupported_wheel_phase_refuses ... ok
+test tests::clock_literals_and_fractional_edges ... ok
+test tests::clock_refuses_invalid_frequency_and_overflow ... ok
+test stage2_tests::actual_dispatch_targets_and_inline_kinds_are_observed ... ok
+test tests::csr_mesh_torus_routes_and_multiple_nocs ... ok
+test stage2_tests::private_predecessor_list_is_explicitly_noncausal ... ok
+test stage2_tests::lowest_owner_zero_closure_has_literal_110ps_path ... ok
+test tests::wheel_levels_overflow_promotion_and_past_refusal ... ok
+test tests::graph_refuses_duplicates_missing_edges_cycles_owners_domains ... ok
+test tests::event_layout_and_tie_order ... ok
+test tests::rounded_edges_never_early ... ok
+test tests::critical_path_overlap_and_fifo_serialization ... ok
+test tests::busy_owner_zero_grant_is_5000_not_3000 ... ok
+test tests::resolved_domains_and_zero_cycles_at_fractional_start ... ok
+test tests::owner_foreign_mutation_is_refused ... ok
+test tests::zero_closure_is_canonical_and_completes_once ... ok
+test tests::cycle_delay_uses_resolved_domain_without_drift ... ok
+test tests::readiness_is_fifo_and_simultaneous_completions_join_by_id ... ok
+test tests::wheel_reuses_arena_after_warmup ... ok
+test tests::canonical_replay_private_bytes ... ok
+test tests::wheel_matches_sorted_reference ... ok
+test tests::wheel_interleaved_scheduling_matches_reference ... ok
+
+successes:
+
+---- tests::canonical_replay_private_bytes stdout ----
+UARCH_K1_REPLAY_V1={"duration_ps":5000,"completed_jobs":4,"jobs":[{"job_id":0,"owner":0,"ready_ps":0,"start_ps":0,"end_ps":3000,"dependency_resource_predecessors":[]},{"job_id":1,"owner":1,"ready_ps":0,"start_ps":0,"end_ps":1000,"dependency_resource_predecessors":[]},{"job_id":2,"owner":0,"ready_ps":1000,"start_ps":3000,"end_ps":3000,"dependency_resource_predecessors":[0,1]},{"job_id":3,"owner":1,"ready_ps":3000,"start_ps":3000,"end_ps":5000,"dependency_resource_predecessors":[1,2]}],"intervals":[{"owner":0,"job_id":0,"start_ps":0,"end_ps":3000},{"owner":1,"job_id":1,"start_ps":0,"end_ps":1000},{"owner":1,"job_id":3,"start_ps":3000,"end_ps":5000}],"records":[{"ordinal":0,"t_ps":0,"phase":1,"owner":0,"job_id":0,"action":"Dispatch","event_seq":0,"event_target":0,"event_kind":0,"inline":false},{"ordinal":1,"t_ps":0,"phase":1,"owner":0,"job_id":0,"action":"Ready","event_seq":0,"event_target":0,"event_kind":0,"inline":false},{"ordinal":2,"t_ps":0,"phase":1,"owner":1,"job_id":1,"action":"Dispatch","event_seq":1,"event_target":1,"event_kind":0,"inline":false},{"ordinal":3,"t_ps":0,"phase":1,"owner":1,"job_id":1,"action":"Ready","event_seq":1,"event_target":1,"event_kind":0,"inline":false},{"ordinal":4,"t_ps":0,"phase":2,"owner":0,"job_id":0,"action":"Dispatch","event_seq":2,"event_target":0,"event_kind":14,"inline":true},{"ordinal":5,"t_ps":0,"phase":2,"owner":0,"job_id":0,"action":"Grant","event_seq":2,"event_target":0,"event_kind":14,"inline":true},{"ordinal":6,"t_ps":0,"phase":2,"owner":1,"job_id":1,"action":"Dispatch","event_seq":4,"event_target":1,"event_kind":14,"inline":true},{"ordinal":7,"t_ps":0,"phase":2,"owner":1,"job_id":1,"action":"Grant","event_seq":4,"event_target":1,"event_kind":14,"inline":true},{"ordinal":8,"t_ps":1000,"phase":0,"owner":1,"job_id":1,"action":"Dispatch","event_seq":5,"event_target":1,"event_kind":1,"inline":false},{"ordinal":9,"t_ps":1000,"phase":0,"owner":1,"job_id":1,"action":"Complete","event_seq":5,"event_target":1,"event_kind":1,"inline":false},{"ordinal":10,"t_ps":1000,"phase":1,"owner":0,"job_id":2,"action":"Dispatch","event_seq":6,"event_target":0,"event_kind":13,"inline":false},{"ordinal":11,"t_ps":1000,"phase":1,"owner":0,"job_id":2,"action":"Ready","event_seq":6,"event_target":0,"event_kind":13,"inline":false},{"ordinal":12,"t_ps":3000,"phase":0,"owner":0,"job_id":0,"action":"Dispatch","event_seq":3,"event_target":0,"event_kind":1,"inline":false},{"ordinal":13,"t_ps":3000,"phase":0,"owner":0,"job_id":0,"action":"Complete","event_seq":3,"event_target":0,"event_kind":1,"inline":false},{"ordinal":14,"t_ps":3000,"phase":2,"owner":0,"job_id":2,"action":"Dispatch","event_seq":7,"event_target":0,"event_kind":14,"inline":true},{"ordinal":15,"t_ps":3000,"phase":2,"owner":0,"job_id":2,"action":"Grant","event_seq":7,"event_target":0,"event_kind":14,"inline":true},{"ordinal":16,"t_ps":3000,"phase":2,"owner":0,"job_id":2,"action":"Dispatch","event_seq":8,"event_target":0,"event_kind":1,"inline":true},{"ordinal":17,"t_ps":3000,"phase":2,"owner":0,"job_id":2,"action":"Complete","event_seq":8,"event_target":0,"event_kind":1,"inline":true},{"ordinal":18,"t_ps":3000,"phase":2,"owner":1,"job_id":3,"action":"Dispatch","event_seq":9,"event_target":1,"event_kind":13,"inline":true},{"ordinal":19,"t_ps":3000,"phase":2,"owner":1,"job_id":3,"action":"Ready","event_seq":9,"event_target":1,"event_kind":13,"inline":true},{"ordinal":20,"t_ps":3000,"phase":2,"owner":1,"job_id":3,"action":"Dispatch","event_seq":10,"event_target":1,"event_kind":14,"inline":true},{"ordinal":21,"t_ps":3000,"phase":2,"owner":1,"job_id":3,"action":"Grant","event_seq":10,"event_target":1,"event_kind":14,"inline":true},{"ordinal":22,"t_ps":5000,"phase":0,"owner":1,"job_id":3,"action":"Dispatch","event_seq":11,"event_target":1,"event_kind":1,"inline":false},{"ordinal":23,"t_ps":5000,"phase":0,"owner":1,"job_id":3,"action":"Complete","event_seq":11,"event_target":1,"event_kind":1,"inline":false}]}
+
+
+successes:
+    simulation::stage2_routing_tests::inline_zero_closure_blocks_retroactive_phase_zero
+    simulation::stage2_routing_tests::queued_unsupported_simulation_phase_returns_error
+    simulation::stage2_routing_tests::readiness_wrong_or_missing_target_refuses_in_engine
+    simulation::stage2_routing_tests::successor_grant_and_zero_handlers_refuse_foreign_targets
+    stage2_tests::actual_dispatch_targets_and_inline_kinds_are_observed
+    stage2_tests::lowest_owner_zero_closure_has_literal_110ps_path
+    stage2_tests::private_predecessor_list_is_explicitly_noncausal
+    stage2_tests::same_timestamp_regression_refuses_but_forward_insertions_work
+    stage2_tests::unsupported_wheel_phase_refuses
+    tests::arena_reuses_freed_slots_and_refuses_double_free
+    tests::busy_owner_zero_grant_is_5000_not_3000
+    tests::canonical_replay_private_bytes
+    tests::clock_literals_and_fractional_edges
+    tests::clock_refuses_invalid_frequency_and_overflow
+    tests::critical_path_overlap_and_fifo_serialization
+    tests::csr_mesh_torus_routes_and_multiple_nocs
+    tests::cycle_delay_uses_resolved_domain_without_drift
+    tests::event_layout_and_tie_order
+    tests::graph_refuses_duplicates_missing_edges_cycles_owners_domains
+    tests::owner_foreign_mutation_is_refused
+    tests::readiness_is_fifo_and_simultaneous_completions_join_by_id
+    tests::resolved_domains_and_zero_cycles_at_fractional_start
+    tests::rounded_edges_never_early
+    tests::wheel_interleaved_scheduling_matches_reference
+    tests::wheel_levels_overflow_promotion_and_past_refusal
+    tests::wheel_matches_sorted_reference
+    tests::wheel_reuses_arena_after_warmup
+    tests::zero_closure_is_canonical_and_completes_once
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
