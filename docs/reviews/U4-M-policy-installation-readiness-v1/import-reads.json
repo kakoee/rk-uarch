@@ -1,0 +1,80 @@
+{
+  "contract/tests/mapped/test_admission.py": {
+    "imports": [
+      "import copy",
+      "import json",
+      "from pathlib import Path",
+      "from typing import Any",
+      "import pytest",
+      "from uarch_contract.hashing import content_hash, strict_json_loads",
+      "from uarch_contract.mapped import MappedBundle, MappedEngineJob, MappedEngineResult, NativeTestProfile, NativeTestRegistry, TaskGraph, validate_result",
+      "from uarch_contract.mapped import admit as contract_admit",
+      "from rkuarch.engines.protocol import EngineJob",
+      "from rkuarch.engines.protocol_v2 import EngineJobV2",
+      "from uarch_contract.generate_mapped import generate",
+      "import runpy",
+      "from uarch_contract.mapped import Observations, TrafficCounts, WorkCounts",
+      "from uarch_contract.mapped import validate_job",
+      "from uarch_contract.hashing import canonical_json, sha256",
+      "from uarch_contract.mapped import NativeCounts, NativeFidelity",
+      "from uarch_contract.mapped import Buffer, ComponentScope, NocTransfer",
+      "from uarch_contract.mapped import validate_job"
+    ],
+    "read_or_dynamic_calls": [
+      "runpy.run_path(str(FIXTURES.parents[1] / 'tests/rotary_v2_cases.py'))",
+      "(FIXTURES / (name + '.json')).read_text()",
+      "target.read_text()",
+      "(FIXTURES.parents[1] / 'tests/fixtures/u2/independent-bundle.json').read_text()",
+      "(FIXTURES.parents[1] / 'tests/fixtures/u2/independent-bundle.json').read_text()"
+    ],
+    "sha256": "552241b0159530ae11630a0f2631a08dd9a0af3cace7cd6e23fadc0bbf670aed"
+  },
+  "contract/tests/rotary_v2_cases.py": {
+    "imports": [
+      "from __future__ import annotations",
+      "import json",
+      "from copy import deepcopy",
+      "from pathlib import Path",
+      "from typing import Any, cast",
+      "from uarch_contract.hashing import content_hash, sha256"
+    ],
+    "read_or_dynamic_calls": [
+      "(FIXTURES / name).read_text()",
+      "Path(__file__).read_bytes()"
+    ],
+    "sha256": "07ecac2f7bd48be52b5e9eb9b98397cc78418d71b15cee55b7cd0b571a596a4a"
+  },
+  "contract/uarch_contract/generate_mapped.py": {
+    "imports": [
+      "from __future__ import annotations",
+      "import argparse",
+      "import json",
+      "from pathlib import Path",
+      "from .mapped import SCHEMA_ROOTS"
+    ],
+    "read_or_dynamic_calls": [
+      "p.read_text()",
+      "output.glob('*.json')"
+    ],
+    "sha256": "6333407c900e7a4a1afa4f6df6e1b7ac3fabeb91e1d8588e38a8260f1ccbe81b"
+  },
+  "contract/uarch_contract/mapped.py": {
+    "imports": [
+      "from __future__ import annotations",
+      "from fractions import Fraction",
+      "from typing import Annotated, Any, Literal",
+      "from pydantic import Field, StrictBool, StrictInt, StrictStr, model_validator",
+      "from .assumptions import AssumptionSet",
+      "from .common import FrozenModel, Hash, JsonFloat, NonEmpty",
+      "from .hardware import HardwareSpec",
+      "from .hashing import content_hash, spec_hash, verify_identity",
+      "from .prepared import PreparedBundle, PreparedOp, Producer, Query, RankScope, validate_prepared_op",
+      "from .rotary_v2 import PreparedBundleV2",
+      "from .table import Counts, ExtCounts",
+      "from math import gcd",
+      "from math import gcd"
+    ],
+    "read_or_dynamic_calls": [],
+    "sha256": "3b7587633f70e14ec2a195f80539f6c9cf74975938214f57df67d8441da39829"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "cause": "Calling the Python API ignored sys.argv and used default caching. Corrected to sys.exit(lint_imports(no_cache=True,no_logo=True)).",
+  "diagnostic_reproduction": {
+    "added": [
+      ".import_linter_cache/.gitignore",
+      ".import_linter_cache/8b6874f90c6963ed247a7f1815d725158907ff7d.data.json",
+      ".import_linter_cache/CACHEDIR.TAG",
+      ".import_linter_cache/rkuarch.meta.json",
+      ".import_linter_cache/uarch_contract.meta.json"
+    ],
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-B",
+      "-c",
+      "import sys;sys.path[:0]=['.','src','contract'];from importlinter.cli import lint_imports;sys.argv=['lint-imports','--no-cache'];lint_imports()"
+    ],
+    "changed_existing": [],
+    "exit": 0
+  },
+  "initial_full_audit_isolation": "failed; original disposable export was removed, per-path delta not captured then",
+  "native_or_oracle_operation": false
+}
