@@ -1,0 +1,74 @@
+{
+  "source_commit": "4f3be8fab5fea1a030b72d5047677016f261eb5e",
+  "support_count": 56,
+  "support_inventory_hash": "sha256:676b12509606b7a519d9597dc406f8fe66d141af4c86425a5baf3a2e3825358a",
+  "strict_currentness": "passed",
+  "origins": {
+    "uarch_contract.common": "contract/uarch_contract/common.py",
+    "uarch_contract.errors": "contract/uarch_contract/errors.py",
+    "uarch_contract.precision": "contract/uarch_contract/precision.py",
+    "uarch_contract.sourced": "contract/uarch_contract/sourced.py",
+    "uarch_contract.hardware": "contract/uarch_contract/hardware.py",
+    "uarch_contract.fidelity": "contract/uarch_contract/fidelity.py",
+    "uarch_contract.model_card": "contract/uarch_contract/model_card.py",
+    "uarch_contract.model_shape": "contract/uarch_contract/model_shape.py",
+    "uarch_contract.operators": "contract/uarch_contract/operators.py",
+    "uarch_contract.request": "contract/uarch_contract/request.py",
+    "uarch_contract.prepared": "contract/uarch_contract/prepared.py",
+    "uarch_contract.table": "contract/uarch_contract/table.py",
+    "uarch_contract.assumptions": "contract/uarch_contract/assumptions.py",
+    "uarch_contract.evidence": "contract/uarch_contract/evidence.py",
+    "uarch_contract.exports": "contract/uarch_contract/exports.py",
+    "uarch_contract.comparison": "contract/uarch_contract/comparison.py",
+    "uarch_contract.derivation": "contract/uarch_contract/derivation.py",
+    "uarch_contract.registry": "contract/uarch_contract/registry.py",
+    "uarch_contract.hashing": "contract/uarch_contract/hashing.py",
+    "uarch_contract.report_context": "contract/uarch_contract/report_context.py",
+    "uarch_contract": "contract/uarch_contract/__init__.py",
+    "uarch_contract.rotary_v2": "contract/uarch_contract/rotary_v2.py",
+    "uarch_contract.mapped": "contract/uarch_contract/mapped.py",
+    "scripts.u2_import_guard": "scripts/u2_import_guard.py",
+    "scripts": "scripts/__init__.py",
+    "scripts.u2_support": "scripts/u2_support.py",
+    "scripts.vendor_rk": "scripts/vendor_rk.py",
+    "rkuarch": "src/rkuarch/__init__.py",
+    "rkuarch.hw": "src/rkuarch/hw/__init__.py",
+    "rkuarch.engines": "src/rkuarch/engines/__init__.py",
+    "rkuarch.engines.protocol": "src/rkuarch/engines/protocol.py",
+    "rkuarch.hw.derive": "src/rkuarch/hw/derive.py",
+    "rkuarch.hw.export": "src/rkuarch/hw/export.py",
+    "scripts.u2_inputs": "scripts/u2_inputs.py"
+  },
+  "mapped_imports": [
+    "from __future__ import annotations",
+    "from fractions import Fraction",
+    "from typing import Annotated, Any, Literal",
+    "from pydantic import Field, StrictBool, StrictInt, StrictStr, model_validator",
+    "from .assumptions import AssumptionSet",
+    "from .common import FrozenModel, Hash, JsonFloat, NonEmpty",
+    "from .hardware import HardwareSpec",
+    "from .hashing import content_hash, spec_hash, verify_identity",
+    "from .prepared import PreparedBundle, PreparedOp, Producer, Query, RankScope, validate_prepared_op",
+    "from .rotary_v2 import PreparedBundleV2",
+    "from .table import Counts, ExtCounts",
+    "from math import gcd",
+    "from math import gcd"
+  ],
+  "mapped_sha256": "3b7587633f70e14ec2a195f80539f6c9cf74975938214f57df67d8441da39829",
+  "selected_policy_sha256": "b55d2f408199ee6ae6cd2e74346f49e986a953e2b7b1adb0109d8cb40d47d641",
+  "unrelated_mapped_mutation": "unchanged inventory",
+  "initializer_reachability_control": {
+    "refusal": "input support inventory changed",
+    "delta": {
+      "added": [
+        "contract/uarch_contract/mapped.py",
+        "contract/uarch_contract/rotary_v2.py"
+      ],
+      "removed": [],
+      "changed": [
+        "contract/uarch_contract/__init__.py"
+      ]
+    }
+  },
+  "native_loader": "placeholder at pinned source; actual loader audit pending"
+}

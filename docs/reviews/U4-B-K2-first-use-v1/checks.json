@@ -1,0 +1,81 @@
+{
+  "source_commit": "4f3be8fab5fea1a030b72d5047677016f261eb5e",
+  "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+  "commands": [
+    {
+      "name": "host-inputs",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import sys; from pathlib import Path; r=Path('/tmp/u4-b-k2-first-use/source'); sys.path[:0]=['/tmp/u4-b-k2-first-use/source/docs/reviews/U4-B-K2-first-use-v1',str(r),str(r/\"src\"),str(r/\"contract\")]; import pytest; raise SystemExit(pytest.main(['-q', '-c', '/tmp/u4-b-k2-first-use/source/pyproject.toml', '--rootdir=/tmp/u4-b-k2-first-use/source', '-p', 'no:cacheprovider', '--basetemp=/tmp/u4-b-k2-first-use/final-pytest', '/tmp/u4-b-k2-first-use/source/docs/reviews/U4-B-K2-first-use-v1/test_inputs.py']))"
+      ],
+      "cwd": "/tmp/u4-b-k2-first-use/source",
+      "exit_code": 0,
+      "seconds": 189.184,
+      "raw_log_sha256": "351a67aa4a2109db300e929afe28474d92bcab125f701d523eaa04dda3e69b76"
+    },
+    {
+      "name": "regressions",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import sys; from pathlib import Path; r=Path('/tmp/u4-b-k2-first-use/source'); sys.path[:0]=['/tmp/u4-b-k2-first-use/source/docs/reviews/U4-B-K2-first-use-v1',str(r),str(r/\"src\"),str(r/\"contract\")]; import pytest; raise SystemExit(pytest.main(['-q', '-c', '/tmp/u4-b-k2-first-use/source/pyproject.toml', '--rootdir=/tmp/u4-b-k2-first-use/source', '-p', 'no:cacheprovider', '--basetemp=/tmp/u4-b-k2-first-use/regression-pytest', 'contract/tests/mapped', 'tests/unit/test_u2_support_policy.py', 'tests/unit/test_u2_b_tooling_binding.py', 'contract/tests/test_u2_resource_isolation.py', 'tests/unit/test_prompt_sync.py', 'tests/unit/test_ci_scope.py']))"
+      ],
+      "cwd": "/tmp/u4-b-k2-first-use/source",
+      "exit_code": 0,
+      "seconds": 52.187,
+      "raw_log_sha256": "d33630e693a8d6544e161e724ed0f3e2d7a4adbafc02636c7ca3cd0c95603735"
+    },
+    {
+      "name": "currentness",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/tmp/u4-b-k2-first-use/source/scripts/vendor_rk.py",
+        "--check"
+      ],
+      "cwd": "/tmp/u4-b-k2-first-use/source",
+      "exit_code": 0,
+      "seconds": 0.464,
+      "raw_log_sha256": "62869ab45a75f405b9b50e1aa4dd1d0e2b742be6368d9a274a4d75c28322ff54"
+    },
+    {
+      "name": "mapped-schema",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import sys; from pathlib import Path; r=Path('/tmp/u4-b-k2-first-use/source'); sys.path[:0]=['/tmp/u4-b-k2-first-use/source/docs/reviews/U4-B-K2-first-use-v1',str(r),str(r/\"src\"),str(r/\"contract\")]; import runpy; sys.argv=[\"generate_mapped\",\"--check\"]; runpy.run_module(\"uarch_contract.generate_mapped\",run_name=\"__main__\")"
+      ],
+      "cwd": "/tmp/u4-b-k2-first-use/source",
+      "exit_code": 0,
+      "seconds": 0.32,
+      "raw_log_sha256": "18de146832ee1e32a203f4f3ad4fe3f08e4d96a3b4bf4e23197afe553f34a164"
+    },
+    {
+      "name": "ruff",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "--no-cache",
+        "/tmp/u4-b-k2-first-use/source/docs/reviews/U4-B-K2-first-use-v1"
+      ],
+      "cwd": "/tmp/u4-b-k2-first-use/source",
+      "exit_code": 0,
+      "seconds": 0.011,
+      "raw_log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    }
+  ],
+  "preservation": {
+    "files": 2443,
+    "added": [],
+    "removed": [],
+    "bytes_or_mtimes_changed": []
+  }
+}
