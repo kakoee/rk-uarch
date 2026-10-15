@@ -1,0 +1,35 @@
+{
+  "subject": "ab7d9e0ab81be02a7294d18aeab8bca5591cfda6",
+  "adr_sha256": "f452e2263b9e64a837e0a9fccaae73c7a5b01bd601a5f7cee141e06a7ca23a8f",
+  "checks": [
+    {
+      "argv": [
+        "docker",
+        "version"
+      ],
+      "exit": 1,
+      "log": "availability-0.log"
+    },
+    {
+      "argv": [
+        "docker",
+        "context",
+        "show"
+      ],
+      "exit": 1,
+      "log": "availability-1.log"
+    },
+    {
+      "argv": [
+        "docker.exe",
+        "version"
+      ],
+      "exit": 1,
+      "log": "availability-2.log"
+    }
+  ],
+  "native_sources": [],
+  "final_image": null,
+  "cache_verified": false,
+  "native_execution": false
+}
