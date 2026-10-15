@@ -1,16 +1,21 @@
-# PROPOSAL: replaces only jobs.native after release; all other CI jobs/classifier unchanged.
+# UNINSTALLED: replace only jobs.native after private access/digest verification.
 native:
   needs: scope
-  if: needs.scope.outputs.docs_only != 'true'
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.scope.outputs.docs_only != 'true'
+  environment: native-k1-private
   runs-on: ubuntu-24.04
   permissions:
     contents: read
   steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        persist-credentials: false
     - name: Real pinned native correctness, guarded from the hosted runner
       env:
-        NATIVE_IMAGE: __POST_ACCEPTANCE_FINAL_BUILDER_REPOSITORY_AT_SHA256__
-        K1_TEST_PLAN: __POST_IMPLEMENTATION_REVIEWED_K1_TEST_PLAN_PATH__
+        NATIVE_IMAGE: __OBSERVED_PRIVATE_GHCR_REPOSITORY_AT_SHA256__
+        K1_TEST_PLAN: .github/native-k1-tests.json
+        K1_GHCR_USER: kakoee
+        K1_GHCR_READ_TOKEN: ${{ secrets.K1_GHCR_READ_TOKEN }}
       shell: bash
       run: |
         set -euo pipefail
@@ -28,7 +33,11 @@ native:
             for path in sorted(Path(directory).iterdir()):
                 if path.is_file():
                     print(str(path), flush=True)
-                    print(path.read_text(), flush=True)
+                    if path.suffix == ".bin":
+                        import hashlib
+                        print("sha256=" + hashlib.sha256(path.read_bytes()).hexdigest(), flush=True)
+                    else:
+                        print(path.read_text(), flush=True)
         else:
             print("No native receipt directory: pre-run setup failed or native job was skipped.")
         PYRECEIPTS

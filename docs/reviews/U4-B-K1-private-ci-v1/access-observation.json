@@ -1,0 +1,80 @@
+{
+  "observed_at_utc": "2026-10-15T04:08:24.772060+00:00",
+  "publication_authorized": true,
+  "owner_involvement_arranged_by": "Javid",
+  "registry_push_attempted": false,
+  "environment_mutation_attempted": false,
+  "live_workflow_changed": false,
+  "probes": [
+    {
+      "argv": [
+        "gh",
+        "api",
+        "repos/kakoee/rk-uarch",
+        "--jq",
+        "{private,permissions,owner:{login:.owner.login,type:.owner.type}}"
+      ],
+      "exit": 0,
+      "stdout": "{\"owner\":{\"login\":\"kakoee\",\"type\":\"User\"},\"permissions\":{\"admin\":false,\"maintain\":false,\"pull\":true,\"push\":true,\"triage\":true},\"private\":false}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "repos/kakoee/rk-uarch/environments/native-k1-private"
+      ],
+      "exit": 1,
+      "stdout": "{\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/deployments/environments#get-an-environment\",\"status\":\"404\"}",
+      "stderr": "gh: Not Found (HTTP 404)\n"
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "repos/kakoee/rk-uarch/environments/native-k1-private/secrets",
+        "--jq",
+        "{total_count,secrets:[.secrets[].name]}"
+      ],
+      "exit": 1,
+      "stdout": "{\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/reference/actions#list-environment-secrets\",\"status\":\"404\"}",
+      "stderr": "gh: Not Found (HTTP 404)\n"
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "users/kakoee/packages/container/rk-uarch-k1-builder"
+      ],
+      "exit": 1,
+      "stdout": "{\"message\":\"Package not found.\",\"documentation_url\":\"https://docs.github.com/rest/packages/packages#get-a-package-for-a-user\",\"status\":\"404\"}",
+      "stderr": "gh: Package not found. (HTTP 404)\n"
+    },
+    {
+      "argv": [
+        "docker",
+        "image",
+        "inspect",
+        "rk-uarch-k1-builder:u4-b-e9f69f414983",
+        "--format",
+        "{{.Id}} {{json .RepoDigests}} {{.Os}}/{{.Architecture}} {{json .Config.Labels}}"
+      ],
+      "exit": 0,
+      "stdout": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523 [\"rk-uarch-k1-builder@sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523\"] linux/amd64 {\"org.opencontainers.image.source\":\"https://github.com/rust-lang/docker-rust\"}\n",
+      "stderr": ""
+    }
+  ],
+  "available_github_auth": {
+    "account": "jjaffari",
+    "kind": "OAuth",
+    "scopes": [
+      "gist",
+      "read:org",
+      "repo",
+      "workflow"
+    ],
+    "packages_credential_available": false,
+    "repository_admin": false
+  },
+  "interpretation": "404 responses do not establish private resource absence. Owner authentication/admin access and separate package PATs are required."
+}

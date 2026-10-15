@@ -1,5 +1,10 @@
 # U4 B K1 environment and CI handoff
 
+**Subsequent authorization:** private publication and the exact main-only access proposal
+are approved. The [owner handoff](../U4-B-K1-private-ci-v1/owner-handoff.md) supersedes
+the pending-approval wording below; actual owner credentials/access and publication remain
+pending. The image and historical execution receipts are unchanged.
+
 **The exact accepted image is built and locally verified.** Real component/cache checks,
 19 tests in each mode, six fresh-process replays, native faults/restorations and the corrected
 CI script/host guards pass. Hosted access and native CI installation remain pending separate

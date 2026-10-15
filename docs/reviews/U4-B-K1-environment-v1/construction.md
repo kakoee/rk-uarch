@@ -1,5 +1,10 @@
 # Exact constructed image and remaining access action
 
+**Subsequent authorization:** private publication and the exact main-only access proposal
+are approved. The [owner handoff](../U4-B-K1-private-ci-v1/owner-handoff.md) supersedes
+the pending-approval wording below; actual owner credentials/access and publication remain
+pending. The image and historical execution receipts are unchanged.
+
 The human release and five native installation hashes pass. `construct.py build` exported
 published A subject 892b9ee00c485718082e8ea9a765578cbd64d684 into a new disposable directory,
 then composed A's exact accepted Dockerfile plus B's unchanged offline-cache fragment.

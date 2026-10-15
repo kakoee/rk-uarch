@@ -26,6 +26,8 @@ def plan():
         "all_features": True,
         "workspace_targets": [{"name": "synthetic", "kind": ["lib"]}],
         "test_names": ["synthetic::control"],
+        "replay_test": "synthetic::control",
+        "replay_output_env": "UARCH_K1_REPLAY_OUT",
     }
 
 
@@ -42,6 +44,8 @@ def test_retained_tool_package_consistency():
         ("all_features", False),
         ("tool_package_commit", "unapproved"),
         ("target", "host"),
+        ("replay_test", "absent"),
+        ("replay_output_env", "WRONG_SINK"),
     ],
 )
 def test_missing_selection_mode_and_pin_refuse(key, value):
@@ -115,9 +119,13 @@ def test_workflow_guards_outside_container():
     data = yaml.safe_load((PACKAGE / "native-job.yml.in").read_text())["native"]
     assert "container" not in data
     assert data["needs"] == "scope"
-    assert data["if"] == "needs.scope.outputs.docs_only != 'true'"
+    assert data["if"] == (
+        "github.event_name == 'push' && github.ref == 'refs/heads/main' && "
+        "needs.scope.outputs.docs_only != 'true'"
+    )
+    assert data["environment"] == "native-k1-private"
     assert data["steps"][-1]["if"] == "always()"
-    assert "__POST_ACCEPTANCE_FINAL_BUILDER_" in json.dumps(data)
+    assert "__OBSERVED_PRIVATE_GHCR_" in json.dumps(data)
     host = (PACKAGE / "native-host.sh").read_text()
     assert host.index("run_container inspect\n") < host.index('ci_host_guard.py" metadata')
     assert host.index('ci_host_guard.py" metadata') < host.index("run_container checks\n")
@@ -173,6 +181,7 @@ def test_results_require_both_modes_exact_tools_and_nonempty_passes(tmp_path):
         (receipts / (mode + "-tests.log")).write_text(
             "test synthetic::control ... ok\ntest result: ok. 1 passed; 0 failed; 0 ignored;\n"
         )
+    write_replays(receipts)
     guard.validate_results(ROOT, receipts, plan())
     target = receipts / "release-tests.exit"
     target.write_text("7\n")
@@ -185,3 +194,49 @@ def test_results_require_both_modes_exact_tools_and_nonempty_passes(tmp_path):
     (receipts / "rustc.log").write_text("host rustc, wrong installation\n")
     with pytest.raises(ValueError, match="wrong container tool"):
         guard.validate_results(ROOT, receipts, plan())
+
+
+def write_replays(receipts):
+    for mode in ("debug", "release"):
+        (receipts / f"replay-{mode}-list.exit").write_text("0\n")
+        (receipts / f"replay-{mode}-list.log").write_text("synthetic::control: test\n")
+        for number in range(3):
+            name = f"replay-{mode}-{number}"
+            (receipts / (name + ".exit")).write_text("0\n")
+            (receipts / (name + ".log")).write_text(
+                "test synthetic::control ... ok\n"
+                "test result: ok. 1 passed; 0 failed; 0 ignored;\n"
+            )
+            (receipts / (name + ".bin")).write_bytes(b"synthetic payload\x00")
+
+
+@pytest.mark.parametrize("fault", ["empty", "different", "missing", "failed", "ignored"])
+def test_replay_refusals(tmp_path, fault):
+    write_replays(tmp_path)
+    guard.validate_replays(ROOT, tmp_path, plan())
+    last = tmp_path / "replay-release-2.bin"
+    if fault == "empty":
+        for path in tmp_path.glob("*.bin"):
+            path.write_bytes(b"")
+    elif fault == "different":
+        last.write_bytes(b"changed")
+    elif fault == "missing":
+        last.unlink()
+    elif fault == "failed":
+        last.with_suffix(".exit").write_text("7\n")
+    else:
+        last.with_suffix(".log").write_text(
+            "test synthetic::control ... ignored\n"
+            "test result: ok. 0 passed; 0 failed; 1 ignored;\n"
+        )
+    with pytest.raises((ValueError, FileNotFoundError)):
+        guard.validate_replays(ROOT, tmp_path, plan())
+
+
+def test_discovery_can_precede_replay_selection_but_ci_cannot():
+    discovered = plan()
+    del discovered["replay_test"]
+    del discovered["replay_output_env"]
+    guard.validate_plan(discovered)
+    with pytest.raises(ValueError, match="replay selection"):
+        guard.validate_replay_plan(discovered)

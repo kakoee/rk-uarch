@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PROPOSAL ONLY. No container/image execution is authorized by publishing this file.
+# Uninstalled CI template. Private publication/access is approved; credentials remain required.
 set -euo pipefail
 root=${GITHUB_WORKSPACE:?}
 package="$root/docs/reviews/U4-B-final-reconciliation-v1"
@@ -18,7 +18,10 @@ git -C "$root" rev-parse HEAD > "$receipts/checkout.sha"
 test -z "$(git -C "$root" status --porcelain --untracked-files=all)"
 python3 "$package/ci_host_guard.py" preflight "$root" "$root/$K1_TEST_PLAN"
 docker version > "$receipts/docker-version.txt"
-docker pull --platform linux/amd64 "$NATIVE_IMAGE" > "$receipts/pull.log" 2>&1
+bash "$root/docs/reviews/U4-B-K1-private-ci-v1/private-pull.sh" "$NATIVE_IMAGE" "$receipts"
+unset K1_GHCR_READ_TOKEN
+replay_test=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["replay_test"])' \
+  "$root/$K1_TEST_PLAN")
 docker image inspect "$NATIVE_IMAGE" > "$receipts/image-inspect.json"
 python3 "$package/ci_host_guard.py" image "$receipts/image-inspect.json" "$NATIVE_IMAGE"
 run_container() {
@@ -28,7 +31,7 @@ run_container() {
     --mount "type=bind,src=$root,dst=$root,readonly" \
     --mount "type=bind,src=$receipts,dst=/receipts" \
     --tmpfs /tmp --tmpfs /target:exec --workdir "$root/native" \
-    --entrypoint /bin/bash "$NATIVE_IMAGE" "$package/native-container.sh" "$root" "$stage" \
+    --entrypoint /bin/bash "$NATIVE_IMAGE" "$package/native-container.sh" "$root" "$stage" "$replay_test" \
     > "$receipts/$stage-container.log" 2>&1 || rc=$?
   printf '%s\n' "$rc" > "$receipts/$stage-container.exit"
   return "$rc"

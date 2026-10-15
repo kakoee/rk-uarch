@@ -3,6 +3,7 @@
 set -euo pipefail
 root=$1
 stage=$2
+replay_test=${3:-tests::canonical_replay_private_bytes}
 receipts=/receipts
 package="$root/docs/reviews/U4-A-toolchain-v1"
 cd "$root/native"
@@ -10,6 +11,7 @@ export CARGO_HOME=/usr/local/cargo
 export RUSTUP_HOME=/usr/local/rustup
 export RUSTUP_TOOLCHAIN=1.99.0-x86_64-unknown-linux-gnu
 export CARGO_NET_OFFLINE=true
+export RUSTUP_AUTO_INSTALL=0
 export CARGO_TARGET_DIR=/target
 run_log() {
   local name=$1
@@ -55,6 +57,18 @@ elif [ "$stage" = checks ]; then
       --target x86_64-unknown-linux-gnu "${flags[@]}" -- --list
     run_log "$mode-tests" cargo test --locked --offline --workspace --all-targets --all-features \
       --target x86_64-unknown-linux-gnu "${flags[@]}" -- --show-output
+    run_log "replay-$mode-list" cargo test --locked --offline --workspace --all-targets \
+      --all-features --target x86_64-unknown-linux-gnu "${flags[@]}" -- \
+      "$replay_test" --exact --list
+    for number in 0 1 2; do
+      name="replay-$mode-$number"
+      # Refuse stale payloads: every invocation is a fresh process with a new file sink.
+      test ! -e "$receipts/$name.bin"
+      run_log "$name" env "UARCH_K1_REPLAY_OUT=$receipts/$name.bin" \
+        cargo test --locked --offline --workspace --all-targets --all-features \
+        --target x86_64-unknown-linux-gnu "${flags[@]}" -- "$replay_test" --exact --show-output
+      test -s "$receipts/$name.bin"
+    done
   done
 else
   echo "unknown container stage" >&2

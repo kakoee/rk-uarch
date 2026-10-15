@@ -130,6 +130,19 @@ def validate_plan(plan):
         isinstance(plan.get("workspace_targets"), list) and bool(plan["workspace_targets"]),
         "empty target inventory",
     )
+    # Discovery observes names before selecting A's replay test. CI requires it separately.
+    if "replay_test" in plan or "replay_output_env" in plan:
+        validate_replay_plan(plan)
+    return plan
+
+
+def validate_replay_plan(plan):
+    require(
+        isinstance(plan.get("replay_test"), str)
+        and plan["test_names"].count(plan["replay_test"]) == 1
+        and plan.get("replay_output_env") == "UARCH_K1_REPLAY_OUT",
+        "replay selection/sink mismatch",
+    )
     return plan
 
 
@@ -178,6 +191,7 @@ def validate_metadata(root, metadata, plan, closure):
 
 
 def validate_results(root, receipts, plan):
+    validate_replay_plan(plan)
     guards = runpy.run_path(str(root / "docs/reviews/U4-B-native-ci-v1/ci_guard.py"))
     commands = [
         "inspect-container",
@@ -215,6 +229,27 @@ def validate_results(root, receipts, plan):
             plan["test_names"],
         )
 
+    validate_replays(root, receipts, plan)
+
+
+def validate_replays(root, receipts, plan):
+    guards = runpy.run_path(str(root / "docs/reviews/U4-B-native-ci-v1/ci_guard.py"))
+    payloads = []
+    for mode in plan["modes"]:
+        listing = receipts / ("replay-" + mode + "-list")
+        require(listing.with_suffix(".exit").read_text().strip() == "0", "replay list failed")
+        for number in range(3):
+            name = f"replay-{mode}-{number}"
+            require((receipts / (name + ".exit")).read_text().strip() == "0", "replay failed")
+            guards["check_tests"](
+                listing.with_suffix(".log").read_text(),
+                (receipts / (name + ".log")).read_text(),
+                [plan["replay_test"]],
+            )
+            payloads.append((receipts / (name + ".bin")).read_bytes())
+    require(len(payloads) == 6 and bool(payloads[0]), "empty replay payload")
+    require(all(data == payloads[0] for data in payloads), "replay bytes differ")
+
 
 def main():
     mode, *args = sys.argv[1:]
@@ -222,7 +257,7 @@ def main():
         print("verified external locked crates:", len(validate_package(Path(args[0]))))
     elif mode == "preflight":
         validate_package(Path(args[0]))
-        validate_plan(json.loads(Path(args[1]).read_text()))
+        validate_replay_plan(validate_plan(json.loads(Path(args[1]).read_text())))
     elif mode == "image":
         validate_image(json.loads(Path(args[0]).read_text()), args[1])
     elif mode in ("metadata", "metadata-target"):
