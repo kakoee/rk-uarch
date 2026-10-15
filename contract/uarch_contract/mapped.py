@@ -663,6 +663,8 @@ class NativeFidelity(FrozenModel):
 
 
 class ClockSetup(FrozenModel):
+    """Proposed earliest release; cycles run from actual owner grant."""
+
     job_id: NonEmpty
     domain: Literal["core", "noc", "dram"]
     start_ps: U64
@@ -761,6 +763,13 @@ class MappedEngineJob(FrozenModel):
                 {x.job_id for x in self.clock_setup} <= {j.id for j in p.task_graph.jobs},
                 "InvalidResource",
             )
+            for setup in self.clock_setup:
+                declared = next(j for j in p.task_graph.jobs if j.id == setup.job_id)
+                require(
+                    isinstance(declared, FixedDelay) and declared.duration_ps == 0,
+                    "UnsupportedScope",
+                    "clock setup exclusively controls service",
+                )
         else:
             require(
                 self.owners == canonical_owners(b.hardware_spec, p.task_graph), "InvalidResource"
@@ -839,6 +848,9 @@ class EventObservation(FrozenModel):
         "BARRIER_RELEASE",
         "STAT_SAMPLE",
         "END",
+        "DEPENDENCY_READY",
+        "OWNER_GRANT",
+        "TASK_RELEASE",
     ]
     job_id: NonEmpty | None
 
@@ -850,6 +862,7 @@ class JobObservation(FrozenModel):
     repeat_index: U64 | None
     tile_origin: Tile | None
     tile_extents: Extent | None
+    release_ps: U64
     ready_ps: U64
     start_ps: U64
     end_ps: U64
@@ -906,7 +919,7 @@ class QueueObservation(FrozenModel):
     enter_ps: U64
     leave_ps: U64 | None
     owner_id: U64
-    clock_domain: Literal["core", "noc", "dram"]
+    clock_domain: Literal["core", "noc", "dram"] | None
 
 
 class TimeRatio(RationalValue):
@@ -930,12 +943,46 @@ class ResourceInterval(FrozenModel):
 
 
 class CriticalInterval(FrozenModel):
+    kind: Literal["service", "release_idle"]
     start_ps: U64
     end_ps: U64
     cause_job_id: NonEmpty
     predecessor_id: NonEmpty | None
-    limiting_resource_id: U64
+    limiting_resource_id: U64 | None
     category: Literal["compute", "memory", "noc", "sync", "overhead"]
+
+    @model_validator(mode="after")
+    def interval_kind(self) -> CriticalInterval:
+        require(self.end_ps > self.start_ps, "AttributionMismatch")
+        if self.kind == "release_idle":
+            require(
+                self.start_ps == 0
+                and self.predecessor_id is None
+                and self.limiting_resource_id is None
+                and self.category == "overhead",
+                "AttributionMismatch",
+            )
+        else:
+            require(self.limiting_resource_id is not None, "InvalidResource")
+        return self
+
+
+class ClockObservation(FrozenModel):
+    job_id: NonEmpty
+    domain: Literal["core", "noc", "dram"]
+    grant_ps: U64
+    n_cycles: U64
+    raw_edge_outcome: Literal["success", "TimeOverflow"]
+    aligned_start_ps: U64 | None
+    completion_ps: U64
+
+    @model_validator(mode="after")
+    def alignment_outcome(self) -> ClockObservation:
+        require(
+            (self.raw_edge_outcome == "success") == (self.aligned_start_ps is not None),
+            "IncompleteObservations",
+        )
+        return self
 
 
 class Observed[T](FrozenModel):
@@ -952,6 +999,7 @@ class Observations(FrozenModel):
     format: Literal["uarch-native-observations/1"]
     events: Observed[EventObservation]
     jobs: Observed[JobObservation]
+    clocks: Annotated[Observed[ClockObservation] | Unrepresented, Field(discriminator="status")]
     dma: Annotated[Observed[DmaObservation] | Unrepresented, Field(discriminator="status")]
     transfers: Annotated[
         Observed[TransferObservation] | Unrepresented, Field(discriminator="status")
@@ -1124,7 +1172,11 @@ def validate_result(value: object, job: MappedEngineJob) -> MappedEngineResult:
             interval.start_ps == cursor
             and interval.end_ps >= cursor
             and interval.cause_job_id in ids
-            and interval.limiting_resource_id in owner_ids,
+            and (
+                interval.limiting_resource_id in owner_ids
+                if interval.kind == "service"
+                else interval.limiting_resource_id is None
+            ),
             "AttributionMismatch",
         )
         category_totals[interval.category] += interval.end_ps - interval.start_ps
@@ -1167,7 +1219,295 @@ def validate_result(value: object, job: MappedEngineJob) -> MappedEngineResult:
         require(
             all(x.issue_ps <= x.complete_ps <= r.duration_ps for x in dma), "IncompleteObservations"
         )
+    if job.state_model == "fixed_delay/1":
+        validate_fixed_delay_observations(r, job)
+    else:
+        require(
+            all(x.kind == "service" for x in r.observations.critical_path.records),
+            "AttributionMismatch",
+        )
+        assert isinstance(r.observations.queue_membership, Observed)
+        require(
+            all(x.clock_domain is not None for x in r.observations.queue_membership.records),
+            "IncompleteObservations",
+        )
     return r
+
+
+def validate_fixed_delay_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
+    """Proposed structural/causal consistency checks, not evidence of real execution."""
+    obs = r.observations
+    require(
+        all(
+            getattr(obs, section).status == "unrepresented"
+            for section in ("dma", "transfers", "allocations")
+        ),
+        "IncompleteObservations",
+    )
+    jobs = {x.job_id: x for x in obs.jobs.records}
+    setup = {x.job_id: x for x in job.clock_setup}
+    require(isinstance(obs.clocks, Observed), "IncompleteObservations")
+    assert isinstance(obs.clocks, Observed)
+    ordered(obs.clocks.records, lambda x: x.job_id, "IncompleteObservations")
+    require(tuple(x.job_id for x in obs.clocks.records) == tuple(setup), "IncompleteObservations")
+    for c in obs.clocks.records:
+        s, j = setup[c.job_id], jobs[c.job_id]
+        freq = getattr(job.freq_hz, s.domain)
+        # Validate measured fields independently; never construct a run or input duration.
+        k = 0 if j.start_ps == 0 else ((j.start_ps - 1) * freq) // 10**12 + 1
+        aligned = (k * 10**12 + freq - 1) // freq
+        require(
+            (c.domain, c.grant_ps, c.n_cycles, c.completion_ps)
+            == (s.domain, j.start_ps, s.n_cycles, j.end_ps),
+            "IncompleteObservations",
+        )
+        require(
+            (c.raw_edge_outcome, c.aligned_start_ps)
+            == (("success", aligned) if aligned <= 2**64 - 1 else ("TimeOverflow", None)),
+            "IncompleteObservations",
+        )
+        end = j.start_ps if s.n_cycles == 0 else ((k + s.n_cycles) * 10**12 + freq - 1) // freq
+        require(j.end_ps == end, "IncompleteObservations")
+    for declared in job.mapped_point.task_graph.jobs:
+        assert isinstance(declared, FixedDelay)
+        j = jobs[declared.id]
+        require(
+            j.owner_id == declared.owner_id
+            and (j.op_id, j.group_id, j.repeat_index, j.tile_origin, j.tile_extents)
+            == (None, None, None, None, None)
+            and (j.useful_matrix_ops, j.issued_matrix_ops, j.vector_arithmetic_ops, j.cast_ops)
+            == (0, 0, 0, 0),
+            "IncompleteObservations",
+        )
+        if declared.id not in setup:
+            require(j.end_ps == j.start_ps + declared.duration_ps, "IncompleteObservations")
+    require(
+        1 <= r.simulator_metrics.max_live_events <= r.simulator_metrics.event_count,
+        "IncompleteObservations",
+    )
+    events = obs.events.records
+    require(
+        tuple(e.observation_ordinal for e in events) == tuple(range(len(events))),
+        "IncompleteObservations",
+    )
+    require(len({e.event_seq for e in events}) == len(events), "IncompleteObservations")
+    allowed = {"TASK_READY", "DEPENDENCY_READY", "TASK_RELEASE", "OWNER_GRANT", "COMPUTE_DONE"}
+    require(all(e.kind in allowed and e.job_id in jobs for e in events), "IncompleteObservations")
+    require(
+        all(e.job_id is not None and e.target_id == jobs[e.job_id].owner_id for e in events),
+        "InvalidResource",
+    )
+    scheduled_keys = [(e.t_ps, e.phase, e.target_id, e.event_seq) for e in events if e.phase < 2]
+    require(scheduled_keys == sorted(scheduled_keys), "IncompleteObservations")
+    grants = [e for e in events if e.kind == "OWNER_GRANT"]
+    completes = [e for e in events if e.kind == "COMPUTE_DONE"]
+    require(
+        sorted(e.job_id for e in grants if e.job_id is not None) == sorted(jobs)
+        and sorted(e.job_id for e in completes if e.job_id is not None) == sorted(jobs),
+        "IncompleteObservations",
+    )
+    completion_order = {e.job_id: e.observation_ordinal for e in completes}
+    grant_order = {e.job_id: e.observation_ordinal for e in grants}
+    require(all(grant_order[key] < completion_order[key] for key in jobs), "IncompleteObservations")
+    by_completion = {e.job_id: e for e in completes}
+    dependency_events = [
+        (e.job_id, e.t_ps, e.phase) for e in events if e.kind == "DEPENDENCY_READY"
+    ]
+    expected_notifications = [
+        (d.after, jobs[d.before].end_ps, 2 if by_completion[d.before].phase == 2 else 1)
+        for d in job.mapped_point.task_graph.dependencies
+    ]
+    require(sorted(dependency_events) == sorted(expected_notifications), "IncompleteObservations")
+    # Match each observed notification to an earlier completion in its indistinguishable
+    # (target, time, phase) group. Equal counts alone permit notify-before-complete traces.
+    for target, timestamp, phase in sorted(set(expected_notifications)):
+        completed = sorted(
+            completion_order[d.before]
+            for d in job.mapped_point.task_graph.dependencies
+            if (d.after, jobs[d.before].end_ps, 2 if by_completion[d.before].phase == 2 else 1)
+            == (target, timestamp, phase)
+        )
+        notified = sorted(
+            e.observation_ordinal
+            for e in events
+            if e.kind == "DEPENDENCY_READY"
+            and (e.job_id, e.t_ps, e.phase) == (target, timestamp, phase)
+        )
+        require(
+            all(a < b for a, b in zip(completed, notified, strict=True)),
+            "IncompleteObservations",
+            "dependency notification precedes completion",
+        )
+    root_events = [(e.job_id, e.t_ps, e.phase) for e in events if e.kind == "TASK_READY"]
+    nonroots = {d.after for d in job.mapped_point.task_graph.dependencies}
+    require(
+        sorted(root_events)
+        == sorted(
+            (key, 0, 1)
+            for key in jobs
+            if key not in nonroots and (key not in setup or setup[key].start_ps == 0)
+        ),
+        "IncompleteObservations",
+    )
+    for e in (*grants, *completes):
+        require(e.job_id in jobs, "IncompleteObservations")
+        assert e.job_id is not None
+        j = jobs[e.job_id]
+        require(e.target_id == j.owner_id, "InvalidResource")
+        require(
+            e.t_ps == (j.start_ps if e.kind == "OWNER_GRANT" else j.end_ps),
+            "IncompleteObservations",
+        )
+        require(
+            e.phase == (2 if e.kind == "OWNER_GRANT" or j.start_ps == j.end_ps else 0),
+            "IncompleteObservations",
+        )
+    releases = [e for e in events if e.kind == "TASK_RELEASE"]
+    require(
+        sorted((e.job_id, e.t_ps) for e in releases if e.job_id is not None)
+        == sorted((s.job_id, s.start_ps) for s in setup.values() if s.start_ps > 0),
+        "IncompleteObservations",
+    )
+    require(
+        all(
+            e.phase == 1 and e.job_id in jobs and e.target_id == jobs[e.job_id].owner_id
+            for e in releases
+        ),
+        "InvalidResource",
+    )
+    readiness = {}
+    for key, j in jobs.items():
+        enabling = [
+            e
+            for e in events
+            if e.job_id == key
+            and e.t_ps == j.ready_ps
+            and e.kind in ("TASK_READY", "DEPENDENCY_READY", "TASK_RELEASE")
+        ]
+        require(bool(enabling), "IncompleteObservations")
+        readiness[key] = max(enabling, key=lambda e: e.observation_ordinal)
+    granted: set[str] = set()
+    previous: dict[int, str] = {}
+    chosen: dict[str, str | None] = {}
+    for e in grants:
+        assert e.job_id is not None
+        j = jobs[e.job_id]
+        eligible = [
+            key
+            for key in jobs
+            if key not in granted
+            and jobs[key].owner_id == j.owner_id
+            and readiness[key].observation_ordinal < e.observation_ordinal
+        ]
+        require(
+            bool(eligible)
+            and min(
+                eligible,
+                key=lambda key: (
+                    jobs[key].ready_ps,
+                    0 if readiness[key].phase == 1 else readiness[key].observation_ordinal,
+                    key,
+                ),
+            )
+            == j.job_id,
+            "IncompleteObservations",
+            "FIFO ready/phase closure",
+        )
+        granted.add(j.job_id)
+        deps = [x.before for x in job.mapped_point.task_graph.dependencies if x.after == j.job_id]
+        release = setup[j.job_id].start_ps if j.job_id in setup else 0
+        require(
+            j.release_ps == release
+            and j.ready_ps == max([release, *(jobs[d].end_ps for d in deps)]),
+            "IncompleteObservations",
+        )
+        candidates = set(deps)
+        if j.owner_id in previous:
+            prior = previous[j.owner_id]
+            require(jobs[prior].end_ps <= j.start_ps, "IncompleteObservations")
+            candidates.add(prior)
+        tight = sorted(d for d in candidates if jobs[d].end_ps == j.start_ps)
+        require(
+            all(completion_order[d] < e.observation_ordinal for d in candidates),
+            "IncompleteObservations",
+        )
+        require(j.blocking_predecessor_ids == tuple(tight), "AttributionMismatch")
+        require(
+            j.start_ps == max([j.ready_ps, *(jobs[d].end_ps for d in candidates)]),
+            "IncompleteObservations",
+        )
+        chosen[j.job_id] = tight[0] if tight else None
+        previous[j.owner_id] = j.job_id
+    expected: list[tuple[str, int, int, str, str | None, int | None]] = []
+    cursor_job = min(jobs, key=lambda key: (-jobs[key].end_ps, key, jobs[key].owner_id))
+    require(jobs[cursor_job].end_ps == r.duration_ps, "IncompleteExecution")
+    seen: set[str] = set()
+    while True:
+        require(cursor_job not in seen, "AttributionMismatch")
+        seen.add(cursor_job)
+        j = jobs[cursor_job]
+        pred = chosen[cursor_job]
+        if j.start_ps < j.end_ps:
+            expected.append(("service", j.start_ps, j.end_ps, j.job_id, pred, j.owner_id))
+        if pred is None:
+            require(j.start_ps == j.release_ps, "AttributionMismatch")
+            if j.release_ps > 0:
+                expected.append(("release_idle", 0, j.release_ps, j.job_id, None, None))
+            break
+        cursor_job = pred
+    expected.reverse()
+    require(
+        [
+            (x.kind, x.start_ps, x.end_ps, x.cause_job_id, x.predecessor_id, x.limiting_resource_id)
+            for x in obs.critical_path.records
+        ]
+        == expected,
+        "AttributionMismatch",
+    )
+    require(all(x.category == "overhead" for x in obs.critical_path.records), "AttributionMismatch")
+    require(isinstance(obs.queue_membership, Observed), "IncompleteObservations")
+    assert isinstance(obs.queue_membership, Observed)
+    queues = [
+        (f"owner:{j.owner_id}:{p}", j.job_id, p, a, b, j.owner_id, None)
+        for j in jobs.values()
+        for p, a, b in (("waiting", j.ready_ps, j.start_ps), ("service", j.start_ps, j.end_ps))
+    ]
+    require(
+        [
+            (
+                q.queue_id,
+                q.item_id,
+                q.population,
+                q.enter_ps,
+                q.leave_ps,
+                q.owner_id,
+                q.clock_domain,
+            )
+            for q in obs.queue_membership.records
+        ]
+        == sorted(queues),
+        "IncompleteObservations",
+    )
+    require(
+        [(i.owner_id, i.job_id, i.start_ps, i.end_ps) for i in obs.resource_intervals.records]
+        == sorted(
+            (j.owner_id, j.job_id, j.start_ps, j.end_ps)
+            for j in jobs.values()
+            if j.start_ps < j.end_ps
+        ),
+        "IncompleteObservations",
+    )
+    require(
+        all(
+            i.activity == "fixed_delay"
+            and i.limiting_resource_id == i.owner_id
+            and i.service_start_ps_ratio is None
+            and i.service_end_ps_ratio is None
+            for i in obs.resource_intervals.records
+        ),
+        "IncompleteObservations",
+    )
+    require(r.simulator_metrics.event_count == len(events), "IncompleteObservations")
 
 
 def admit(

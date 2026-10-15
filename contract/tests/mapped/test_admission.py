@@ -646,6 +646,13 @@ def test_frozen_nonempty_clock_setup_positive_and_rehashed_refusal() -> None:
     from uarch_contract.mapped import validate_job
 
     j = load("kernel-job")
+    j["mapped_point"]["task_graph"]["jobs"][0]["duration_ps"] = 0
+    rehash(j["mapped_point"]["task_graph"], "graph_hash")
+    rehash(j["mapped_point"], "payload_hash")
+    j["point_hash"] = j["mapped_point"]["payload_hash"]
+    j["workload_closure"]["points"] = [copy.deepcopy(j["mapped_point"])]
+    j["profile"]["entries"][0]["graph_hash"] = j["mapped_point"]["task_graph"]["graph_hash"]
+    j["profile"]["entries"][0]["point_hash"] = j["point_hash"]
     j["clock_setup"] = [{"job_id": "a", "domain": "core", "start_ps": 0, "n_cycles": 3}]
     j["profile"]["entries"][0]["clock_setup_hash"] = content_hash(j["clock_setup"])
     rehash(j["profile"], "profile_hash")
