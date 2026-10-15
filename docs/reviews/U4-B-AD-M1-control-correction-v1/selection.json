@@ -1,0 +1,32 @@
+{
+  "status": "UNAPPLIED; coordinator reconciliation required",
+  "source_commit": "0cf24d91eeca5cc45182eb6fb03202677fd97dcb",
+  "patch_sha256": "c86a85823ecffae979ef0dc096986e1727dc87f0f250ddcb8fe2b146cc5be8cc",
+  "application": [
+    "git",
+    "apply",
+    "--unidiff-zero",
+    "test-control.patch"
+  ],
+  "selection": [
+    {
+      "path": "tests/unit/test_u2_support_policy.py",
+      "before_sha256": "65c26ac3cb0aa1ad29a7f22e2763eafec09c71015e64e08f7753a2f8c0ce7120",
+      "after_sha256": "9b7922b2c21646e50c87fe8427cc943de842f4abf957502dc773d49913542b14"
+    }
+  ],
+  "existing_definitions_changed": [
+    "test_fresh_direct_valid_controls"
+  ],
+  "existing_definitions_preserved": 35,
+  "added_definitions": [
+    "assert_direct_matches_strict",
+    "strict_library_outcome",
+    "test_direct_strict_comparison_rejects_wrong_cli",
+    "test_direct_strict_refusal_controls",
+    "test_strict_library_import_failure_is_not_a_refusal"
+  ],
+  "real_adoption_gate_body_sha256_unchanged": "6eaef4f9336cc1a6954adfe4e25b6556164275580afa7b87f9aa7adcd58483b7",
+  "source_write_guard_body_sha256_unchanged": "73d32aeb13fb9bf8b5cbd8f58980ff3b9990f217e07676af13294836bfdcfe2f",
+  "coordinator_join": "One additional test path; prospective nine-path placement becomes ten paths if otherwise unchanged; no approval granted."
+}

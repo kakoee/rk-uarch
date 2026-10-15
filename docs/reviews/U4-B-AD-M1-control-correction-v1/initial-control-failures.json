@@ -1,0 +1,54 @@
+{
+  "result": "4 failed, 303 passed, 1 deselected in 212.38s",
+  "patch_sha256": "33ba5b8f5bb3720ad0080ad906d1065e6ec6e801893aa61312cb6016b5490924",
+  "source_commit": "0cf24d91eeca5cc45182eb6fb03202677fd97dcb",
+  "candidate_manifest_sha256": "b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc",
+  "live_preservation": {
+    "A_tracked_files_bytes_mtimes": 2022,
+    "saved_generation_files_bytes_mtimes": 61,
+    "A_head_unchanged": true,
+    "unchanged": true
+  },
+  "diagnosis": [
+    "New top-level scripts module hit import-name guard before strict currentness.",
+    "Three artifact-member mutations needed chmod on their own read-only temporary copies."
+  ],
+  "resolution": [
+    "Use additional selected data file to reach support inventory refusal.",
+    "chmod only the isolated temporary schema.json before intentional mutation."
+  ],
+  "baseline_corrected_reverted_restored_exits": [
+    1,
+    0,
+    1,
+    0
+  ],
+  "failed_checks": {
+    "label": "affected-selection",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nimport pytest\nsys.exit(pytest.main(sys.argv[1:]))",
+      "-c",
+      "/tmp/u4-b-ad-m1-verify-oaxwbh1m/source/pyproject.toml",
+      "--rootdir=/tmp/u4-b-ad-m1-verify-oaxwbh1m/source",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection",
+      "-q",
+      "-rs",
+      "tests/unit/test_u2_support_policy.py",
+      "contract/tests/test_u2_historical_snapshot.py",
+      "tests/integration/test_u2_b_r202_public.py",
+      "tests/unit/test_u2_b_stage2_reference.py",
+      "contract/tests/mapped/test_admission.py",
+      "--deselect=contract/tests/test_u2_historical_snapshot.py::test_historical_guard_refuses_current_canonical_before_candidate"
+    ],
+    "cwd": "/tmp/u4-b-ad-m1-verify-oaxwbh1m/source",
+    "exit": 1,
+    "expected_exit": 0
+  },
+  "log_normalization": "Trailing terminal whitespace removed; diagnostic content unchanged."
+}
