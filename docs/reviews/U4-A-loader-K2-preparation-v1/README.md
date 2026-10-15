@@ -73,7 +73,9 @@ are not a claim that this library can authenticate who supplied them.
   for exact proposed pins/licences/checksums. No install, lock/feature change or substitute
   hash. Prospective resolved closure/image approval and canonical float parity stay open.
 
-B/coordinator should consume the published commit containing these APIs and candidate
+B/coordinator should consume published `f213317ec61622c91e74c9f42e95578e80432588`; see
+[published-coordination.md](published-coordination.md) for exact API and fixture joins.
+Consume these APIs and candidate
 joins, then return published finite fixture/profile/registry candidates and dependency
 findings. No untracked peer file is an input. This package does not claim B agreement.
 Qualifying first use still needs actual profile/registry acceptance, semantic reconciliation,
@@ -89,3 +91,9 @@ controls at `63ca8be`, inventory installed at `1351d29`, recorded at `d9d51ca`.
 No native rerun was required or performed. Historical proposal paragraphs are not current
 release records. No remote CI was requested, run or polled. U0024 deferral remains in force;
 independent review, public K2 qualification, performance and final closure remain separate.
+
+Executed final evidence: 1938 passed, 29 skipped, 10 deselected in 861.03s (0:14:21); fresh committed export
+179 passed, including all 43 final loader tests. See [validation.json](validation.json)
+for exact collection scope, origins, currentness and preservation checks. Both CI-form
+mypy commands ran with PYTHONPATH/MYPYPATH unset; lint/import contracts and all three
+schema checks passed. The 29 analytic skips are retained limitations, not native passes.

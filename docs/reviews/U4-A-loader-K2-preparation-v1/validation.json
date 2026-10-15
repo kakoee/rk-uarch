@@ -1,0 +1,65 @@
+{
+  "cargo_lock_or_feature_changes": [],
+  "focused": {
+    "exit_code": 0,
+    "summary": "108 passed in 2.90s"
+  },
+  "fresh_command_bootstrap": "python -I -B; sys.path prepend export root, src, contract",
+  "fresh_export": "/tmp/u4-a-loader-check.6GMKJ4",
+  "fresh_python_executable": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+  "fresh_tests": {
+    "args": [
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=/tmp/u4-a-loader-pytest",
+      "tests/unit/test_u4_a_mapped_loader.py",
+      "contract/tests/mapped",
+      "tests/integration/test_u2_a_replay.py",
+      "tests/rotary_v2/test_boundary.py"
+    ],
+    "exit_code": 0,
+    "summary": "179 passed in 51.15s"
+  },
+  "full_python_suite": {
+    "command": "uv run --no-sync pytest -q -m 'not nightly and not silicon and not native'",
+    "exit_code": 0,
+    "log_sha256": "7a09a40eb0199b596b4ab507c0eb1cb0a1917bb5f02b4d924c115beac20c976d",
+    "scope_note": "Collection preceded the addition of the new three-process replay test. Production loader bytes are unchanged; all final 43 loader tests also passed in the subsequent focused and fresh-export runs.",
+    "skips": "29 explicit analytic unobservable/deferred relation and invalid-premise controls; not native/loader passes",
+    "summary": "1938 passed, 29 skipped, 10 deselected in 861.03s (0:14:21)"
+  },
+  "implementation_commit": "f213317ec61622c91e74c9f42e95578e80432588",
+  "inventories_equal": true,
+  "loader_local_import_files": 26,
+  "native_runs": 0,
+  "new_dependencies_installed": [],
+  "notes": [
+    "Full suite complete; no failures. See collection scope note.",
+    "Normal pre-commit hook is installed and was not bypassed.",
+    "Sandbox bubblewrap failed before execution; approved escalated commands used for author clone."
+  ],
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "proposal_event_patch_apply_check": {
+    "applied": false,
+    "exit_code": 0
+  },
+  "proposal_tests": {
+    "executed": false,
+    "ruff_passes": true,
+    "syntax_compiles": true
+  },
+  "protected_k1_and_peer_input_diff_from_baseline": [],
+  "publication": {
+    "implementation_commit": "f213317ec61622c91e74c9f42e95578e80432588",
+    "push_succeeded": true,
+    "remote_head_readback": "f213317ec61622c91e74c9f42e95578e80432588"
+  },
+  "selected_generation_support_files": 56,
+  "strict_vendor_author_clone": {
+    "exit_code": 0
+  },
+  "strict_vendor_fresh_export": {
+    "exit_code": 0
+  }
+}
