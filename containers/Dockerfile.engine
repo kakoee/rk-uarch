@@ -1,6 +1,9 @@
-# Base only. U-P5 adds the pinned fork, BookSim 2 and Ramulator 2; U-P11a adds the Rust
-# toolchain and the native build (cmake stays: the fork, BookSim 2 and Ramulator 2 need it).
-FROM ubuntu:24.04
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential cmake git ca-certificates python3 && rm -rf /var/lib/apt/lists/*
+FROM --platform=linux/amd64 docker.io/library/rust@sha256:ba81bc3eaa4422af576c0262515d96b0111a628a6ccc2c86557cf55c9a4bbee0
+# Exact OS package closure is inherited from this immutable image; no apt update.
+ADD --checksum=sha256:9fc3a87d3d4f6e5e2bd87e6fb8779b7a95831f533cb8cc8ae1304a797c648733 https://static.rust-lang.org/dist/2026-10-01/rustfmt-1.99.0-x86_64-unknown-linux-gnu.tar.gz /tmp/rustfmt.tar.gz
+RUN mkdir /tmp/rustfmt && tar -xzf /tmp/rustfmt.tar.gz -C /tmp/rustfmt --strip-components=1 && /tmp/rustfmt/install.sh --prefix=/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu --disable-ldconfig && rm -rf /tmp/rustfmt /tmp/rustfmt.tar.gz
+ADD --checksum=sha256:4b3b972738f6b8e0e55065e273a972cc25fccf53629b4308eec67d6a66a8cf4a https://static.rust-lang.org/dist/2026-10-01/clippy-1.99.0-x86_64-unknown-linux-gnu.tar.gz /tmp/clippy.tar.gz
+RUN mkdir /tmp/clippy && tar -xzf /tmp/clippy.tar.gz -C /tmp/clippy --strip-components=1 && /tmp/clippy/install.sh --prefix=/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu --disable-ldconfig && rm -rf /tmp/clippy /tmp/clippy.tar.gz
+ADD --checksum=sha256:9f12ed4c49936e09b48bf862b595cde2fe64fcbd9d74dfacac6131ca824c8d5f https://github.com/EmbarkStudios/cargo-deny/releases/download/0.20.2/cargo-deny-0.20.2-x86_64-unknown-linux-musl.tar.gz /tmp/cargo-deny.tar.gz
+RUN mkdir /tmp/deny && tar -xzf /tmp/cargo-deny.tar.gz -C /tmp/deny --strip-components=1 && cp /tmp/deny/cargo-deny /usr/local/cargo/bin/cargo-deny && rm -rf /tmp/deny /tmp/cargo-deny.tar.gz
 WORKDIR /opt/uarch

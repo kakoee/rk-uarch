@@ -1,0 +1,687 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded rand_xorshift v0.5.0
+  Downloaded memchr v2.8.3
+  Downloaded unarray v0.1.4
+  Downloaded cfg-if v1.0.5
+  Downloaded core_detect v1.0.0
+  Downloaded cpufeatures v0.3.1
+  Downloaded itoa v1.0.18
+  Downloaded zmij v1.0.23
+  Downloaded autocfg v1.5.1
+  Downloaded quote v1.0.47
+  Downloaded rand_core v0.10.1
+  Downloaded unicode-ident v1.0.27
+  Downloaded serde_derive v1.0.229
+  Downloaded bitflags v2.13.2
+  Downloaded chacha20 v0.10.2
+  Downloaded getrandom v0.4.3
+  Downloaded num-traits v0.2.19
+  Downloaded proc-macro2 v1.0.107
+  Downloaded serde_core v1.0.229
+  Downloaded serde v1.0.229
+  Downloaded rand v0.10.3
+  Downloaded serde_json v1.0.154
+  Downloaded proptest v1.12.0
+  Downloaded syn v3.0.9
+  Downloaded regex-syntax v0.8.11
+  Downloaded libc v0.2.190
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling rand_core v0.10.1
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.190
+   Compiling zmij v1.0.23
+   Compiling autocfg v1.5.1
+   Compiling cfg-if v1.0.5
+   Compiling getrandom v0.4.3
+   Compiling serde_json v1.0.154
+   Compiling serde v1.0.229
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling cpufeatures v0.3.1
+   Compiling core_detect v1.0.0
+   Compiling bitflags v2.13.2
+   Compiling unarray v0.1.4
+   Compiling rand_xorshift v0.5.0
+   Compiling chacha20 v0.10.2
+   Compiling regex-syntax v0.8.11
+   Compiling num-traits v0.2.19
+   Compiling syn v3.0.9
+   Compiling rand v0.10.3
+   Compiling proptest v1.12.0
+   Compiling serde_derive v1.0.229
+   Compiling uarch-engine v0.0.1 (/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/native/crates/uarch-engine)
+error[E0425]: cannot find type `Delay` in this scope
+ --> crates/uarch-engine/src/tests.rs:5:39
+  |
+5 | fn job(id: u32, owner: u32, duration: Delay, deps: &[u32]) -> Job {
+  |                                       ^^^^^ not found in this scope
+
+error[E0425]: cannot find type `Job` in this scope
+ --> crates/uarch-engine/src/tests.rs:5:63
+  |
+5 | fn job(id: u32, owner: u32, duration: Delay, deps: &[u32]) -> Job {
+  |                                                               ^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `Job` in this scope
+ --> crates/uarch-engine/src/tests.rs:6:5
+  |
+6 |     Job { id, owner, duration, dependencies: deps.to_vec() }
+  |     ^^^ not found in this scope
+
+error[E0425]: cannot find type `Delay` in this scope
+ --> crates/uarch-engine/src/tests.rs:8:22
+  |
+8 | fn ps(value: u64) -> Delay { Delay::Picoseconds(value) }
+  |                      ^^^^^ not found in this scope
+
+error[E0425]: cannot find type `Job` in this scope
+ --> crates/uarch-engine/src/tests.rs:9:23
+  |
+9 | fn busy_zero() -> Vec<Job> {
+  |                       ^^^ not found in this scope
+  |
+help: you might be missing a type parameter
+  |
+9 | fn busy_zero<Job>() -> Vec<Job> {
+  |             +++++
+
+error[E0425]: cannot find type `Job` in this scope
+  --> crates/uarch-engine/src/tests.rs:13:18
+   |
+13 | fn run(jobs: Vec<Job>) -> Result<Outcome, Error> {
+   |                  ^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+13 | fn run<Job>(jobs: Vec<Job>) -> Result<Outcome, Error> {
+   |       +++++
+
+error[E0425]: cannot find type `Outcome` in this scope
+  --> crates/uarch-engine/src/tests.rs:13:34
+   |
+13 | fn run(jobs: Vec<Job>) -> Result<Outcome, Error> {
+   |                                  ^^^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+13 | fn run<Outcome>(jobs: Vec<Job>) -> Result<Outcome, Error> {
+   |       +++++++++
+
+error[E0425]: cannot find type `Error` in this scope
+  --> crates/uarch-engine/src/tests.rs:13:43
+   |
+13 | fn run(jobs: Vec<Job>) -> Result<Outcome, Error> {
+   |                                           ^^^^^ not found in this scope
+   |
+help: consider importing one of these items
+   |
+ 2 + use std::error::Error;
+   |
+ 2 + use std::fmt::Error;
+   |
+ 2 + use std::io::Error;
+   |
+ 2 + use core::error::Error;
+   |
+   = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+  --> crates/uarch-engine/src/tests.rs:29:38
+   |
+29 |     assert_eq!(next_edge(0,0,0), Err(Error::InvalidClock));
+   |                                      ^^^^^ use of undeclared type `Error`
+   |
+help: consider importing one of these items
+   |
+ 2 + use std::error::Error;
+   |
+ 2 + use std::fmt::Error;
+   |
+ 2 + use std::io::Error;
+   |
+ 2 + use core::error::Error;
+   |
+   = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+  --> crates/uarch-engine/src/tests.rs:30:45
+   |
+30 |     assert_eq!(next_edge(1,u64::MAX,1), Err(Error::TimeOverflow));
+   |                                             ^^^^^ use of undeclared type `Error`
+   |
+help: consider importing one of these items
+   |
+ 2 + use std::error::Error;
+   |
+ 2 + use std::fmt::Error;
+   |
+ 2 + use std::io::Error;
+   |
+ 2 + use core::error::Error;
+   |
+   = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+  --> crates/uarch-engine/src/tests.rs:31:45
+   |
+31 |     assert_eq!(next_edge(1,0,u64::MAX), Err(Error::TimeOverflow));
+   |                                             ^^^^^ use of undeclared type `Error`
+   |
+help: consider importing one of these items
+   |
+ 2 + use std::error::Error;
+   |
+ 2 + use std::fmt::Error;
+   |
+ 2 + use std::io::Error;
+   |
+ 2 + use core::error::Error;
+   |
+   = and 1 other candidate
+
+error[E0425]: cannot find type `Event` in this scope
+  --> crates/uarch-engine/src/tests.rs:35:36
+   |
+35 |     assert_eq!(std::mem::size_of::<Event>(),32);
+   |                                    ^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+34 | fn event_layout_and_tie_order<Event>() {
+   |                              +++++++
+
+error[E0433]: cannot find type `Error` in this scope
+  --> crates/uarch-engine/src/tests.rs:61:56
+   |
+61 |     assert_eq!(w.schedule(0,0,0,Kind::TaskReady,0),Err(Error::PastEvent));
+   |                                                        ^^^^^ use of undeclared type `Error`
+   |
+help: consider importing one of these items
+   |
+ 2 + use std::error::Error;
+   |
+ 2 + use std::fmt::Error;
+   |
+ 2 + use std::io::Error;
+   |
+ 2 + use core::error::Error;
+   |
+   = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+  --> crates/uarch-engine/src/tests.rs:77:44
+   |
+77 |     else { assert_eq!(outcome.unwrap(),Err(Error::ForeignOwner)); }
+   |                                            ^^^^^ use of undeclared type `Error`
+   |
+help: consider importing one of these items
+   |
+ 2 + use std::error::Error;
+   |
+ 2 + use std::fmt::Error;
+   |
+ 2 + use std::io::Error;
+   |
+ 2 + use core::error::Error;
+   |
+   = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:117:54
+    |
+117 |         (vec![job(0,0,ps(0),&[]),job(0,0,ps(0),&[])],Error::DuplicateJob),
+    |                                                      ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:118:36
+    |
+118 |         (vec![job(0,0,ps(0),&[1])],Error::MissingDependency),
+    |                                    ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:119:36
+    |
+119 |         (vec![job(0,0,ps(0),&[0])],Error::DependencyCycle),
+    |                                    ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:120:56
+    |
+120 |         (vec![job(0,0,ps(0),&[1]),job(1,1,ps(0),&[0])],Error::DependencyCycle),
+    |                                                        ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:121:57
+    |
+121 |         (vec![job(0,0,ps(0),&[]),job(1,1,ps(0),&[0,0])],Error::DuplicateDependency),
+    |                                                         ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:122:35
+    |
+122 |         (vec![job(0,2,ps(0),&[])],Error::InvalidOwner),
+    |                                   ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:123:64
+    |
+123 |         (vec![job(0,0,Delay::Cycles{domain:1,n_cycles:1},&[])],Error::InvalidClock),
+    |                                                                ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:125:63
+    |
+125 |     assert_eq!(Simulation::new(vec![0],1,vec![]).unwrap_err(),Error::InvalidClock);
+    |                                                               ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:126:86
+    |
+126 |     assert_eq!(run(vec![job(0,0,ps(u64::MAX),&[]),job(1,0,ps(1),&[0])]).unwrap_err(),Error::TimeOverflow);
+    |                                                                                      ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:152:59
+    |
+152 |         assert_eq!(topology.route(topology.nodes(),0),Err(Error::InvalidRoute));
+    |                                                           ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+error[E0433]: cannot find type `Error` in this scope
+   --> crates/uarch-engine/src/tests.rs:154:74
+    |
+154 |     assert_eq!(Topology::new(0,1,false,Direction::Positive).unwrap_err(),Error::InvalidRoute);
+    |                                                                          ^^^^^ use of undeclared type `Error`
+    |
+help: consider importing one of these items
+    |
+  2 + use std::error::Error;
+    |
+  2 + use std::fmt::Error;
+    |
+  2 + use std::io::Error;
+    |
+  2 + use core::error::Error;
+    |
+    = and 1 other candidate
+
+warning: unused import: `super::*`
+ --> crates/uarch-engine/src/tests.rs:2:5
+  |
+2 | use super::*;
+  |     ^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0433]: cannot find type `Delay` in this scope
+ --> crates/uarch-engine/src/tests.rs:8:30
+  |
+8 | fn ps(value: u64) -> Delay { Delay::Picoseconds(value) }
+  |                              ^^^^^ use of undeclared type `Delay`
+
+error[E0433]: cannot find type `Simulation` in this scope
+  --> crates/uarch-engine/src/tests.rs:14:5
+   |
+14 |     Simulation::new(vec![1_200_000_000], 2, jobs)?.run()
+   |     ^^^^^^^^^^ use of undeclared type `Simulation`
+
+error[E0425]: cannot find function `next_edge` in this scope
+  --> crates/uarch-engine/src/tests.rs:19:16
+   |
+19 |     assert_eq!(next_edge(1_200_000_000, 0, 3), Ok(2500));
+   |                ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `next_edge` in this scope
+  --> crates/uarch-engine/src/tests.rs:20:16
+   |
+20 |     assert_eq!(next_edge(1_200_000_000, 0, 1_000_000_000), Ok(833_333_333_334));
+   |                ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `next_edge` in this scope
+  --> crates/uarch-engine/src/tests.rs:23:20
+   |
+23 |         assert_eq!(next_edge(1_200_000_000,t,n), Ok(expected));
+   |                    ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `next_edge` in this scope
+  --> crates/uarch-engine/src/tests.rs:25:16
+   |
+25 |     assert_eq!(next_edge(2_000_000_000_000, 1, 1), Ok(2));
+   |                ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `next_edge` in this scope
+  --> crates/uarch-engine/src/tests.rs:29:16
+   |
+29 |     assert_eq!(next_edge(0,0,0), Err(Error::InvalidClock));
+   |                ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `next_edge` in this scope
+  --> crates/uarch-engine/src/tests.rs:30:16
+   |
+30 |     assert_eq!(next_edge(1,u64::MAX,1), Err(Error::TimeOverflow));
+   |                ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `next_edge` in this scope
+  --> crates/uarch-engine/src/tests.rs:31:16
+   |
+31 |     assert_eq!(next_edge(1,0,u64::MAX), Err(Error::TimeOverflow));
+   |                ^^^^^^^^^ not found in this scope
+
+error[E0433]: cannot find type `Wheel` in this scope
+  --> crates/uarch-engine/src/tests.rs:36:17
+   |
+36 |     let mut w = Wheel::new(1_000_000_000).unwrap();
+   |                 ^^^^^ use of undeclared type `Wheel`
+
+error[E0433]: cannot find type `Kind` in this scope
+  --> crates/uarch-engine/src/tests.rs:38:36
+   |
+38 |         w.schedule(10,phase,target,Kind::TaskReady,0).unwrap();
+   |                                    ^^^^ use of undeclared type `Kind`
+
+error[E0433]: cannot find type `Arena` in this scope
+  --> crates/uarch-engine/src/tests.rs:45:17
+   |
+45 |     let mut a = Arena::default();
+   |                 ^^^^^ use of undeclared type `Arena`
+
+error[E0433]: cannot find type `Event` in this scope
+  --> crates/uarch-engine/src/tests.rs:46:13
+   |
+46 |     let e = Event::new(0,0,0,Kind::TaskReady,0,0);
+   |             ^^^^^ use of undeclared type `Event`
+
+error[E0433]: cannot find type `Kind` in this scope
+  --> crates/uarch-engine/src/tests.rs:46:30
+   |
+46 |     let e = Event::new(0,0,0,Kind::TaskReady,0,0);
+   |                              ^^^^ use of undeclared type `Kind`
+
+error[E0433]: cannot find type `Wheel` in this scope
+  --> crates/uarch-engine/src/tests.rs:55:15
+   |
+55 |     let mut w=Wheel::new(1_000_000_000_000).unwrap();
+   |               ^^^^^ use of undeclared type `Wheel`
+
+error[E0433]: cannot find type `Kind` in this scope
+  --> crates/uarch-engine/src/tests.rs:56:69
+   |
+56 |     for t in [16_777_216,4096,4095,0,16_777_215] { w.schedule(t,0,0,Kind::TaskReady,0).unwrap(); }
+   |                                                                     ^^^^ use of undeclared type `Kind`
+
+error[E0433]: cannot find type `Kind` in this scope
+  --> crates/uarch-engine/src/tests.rs:61:33
+   |
+61 |     assert_eq!(w.schedule(0,0,0,Kind::TaskReady,0),Err(Error::PastEvent));
+   |                                 ^^^^ use of undeclared type `Kind`
+
+error[E0433]: cannot find type `Kind` in this scope
+  --> crates/uarch-engine/src/tests.rs:63:29
+   |
+63 |     w.schedule(u64::MAX,0,0,Kind::End,0).unwrap();
+   |                             ^^^^ use of undeclared type `Kind`
+
+error[E0433]: cannot find type `Wheel` in this scope
+  --> crates/uarch-engine/src/tests.rs:68:15
+   |
+68 |     let mut w=Wheel::new(1).unwrap();
+   |               ^^^^^ use of undeclared type `Wheel`
+
+error[E0433]: cannot find type `Kind` in this scope
+  --> crates/uarch-engine/src/tests.rs:69:40
+   |
+69 |     for t in 0..100 { w.schedule(t,0,0,Kind::TaskReady,0).unwrap(); assert_eq!(w.pop().unwrap().t_ps,t); }
+   |                                        ^^^^ use of undeclared type `Kind`
+
+error[E0433]: cannot find type `Owners` in this scope
+  --> crates/uarch-engine/src/tests.rs:74:20
+   |
+74 |     let mut owners=Owners::new(2);
+   |                    ^^^^^^ use of undeclared type `Owners`
+
+error[E0433]: cannot find type `Action` in this scope
+  --> crates/uarch-engine/src/tests.rs:88:62
+   |
+88 |     assert!(r.records.iter().any(|e|e.job_id==2 && e.action==Action::Complete && e.phase==2));
+   |                                                              ^^^^^^ use of undeclared type `Action`
+   |
+help: an enum with a similar name exists
+   |
+88 -     assert!(r.records.iter().any(|e|e.job_id==2 && e.action==Action::Complete && e.phase==2));
+88 +     assert!(r.records.iter().any(|e|e.job_id==2 && e.action==Option::Complete && e.phase==2));
+   |
+
+error[E0433]: cannot find type `Action` in this scope
+   --> crates/uarch-engine/src/tests.rs:104:53
+    |
+104 |     assert_eq!(r.records.iter().filter(|r|r.action==Action::Complete).count(),3);
+    |                                                     ^^^^^^ use of undeclared type `Action`
+    |
+help: an enum with a similar name exists
+    |
+104 -     assert_eq!(r.records.iter().filter(|r|r.action==Action::Complete).count(),3);
+104 +     assert_eq!(r.records.iter().filter(|r|r.action==Option::Complete).count(),3);
+    |
+
+error[E0433]: cannot find type `Simulation` in this scope
+   --> crates/uarch-engine/src/tests.rs:125:16
+    |
+125 |     assert_eq!(Simulation::new(vec![0],1,vec![]).unwrap_err(),Error::InvalidClock);
+    |                ^^^^^^^^^^ use of undeclared type `Simulation`
+
+error[E0433]: cannot find type `Topology` in this scope
+   --> crates/uarch-engine/src/tests.rs:139:14
+    |
+139 |     let mesh=Topology::new(3,2,false,Direction::Positive).unwrap();
+    |              ^^^^^^^^ use of undeclared type `Topology`
+
+error[E0433]: cannot find type `Direction` in this scope
+   --> crates/uarch-engine/src/tests.rs:139:38
+    |
+139 |     let mesh=Topology::new(3,2,false,Direction::Positive).unwrap();
+    |                                      ^^^^^^^^^ use of undeclared type `Direction`
+
+error[E0433]: cannot find type `Topology` in this scope
+   --> crates/uarch-engine/src/tests.rs:142:15
+    |
+142 |     let torus=Topology::new(4,2,true,Direction::Positive).unwrap();
+    |               ^^^^^^^^ use of undeclared type `Topology`
+
+error[E0433]: cannot find type `Direction` in this scope
+   --> crates/uarch-engine/src/tests.rs:142:38
+    |
+142 |     let torus=Topology::new(4,2,true,Direction::Positive).unwrap();
+    |                                      ^^^^^^^^^ use of undeclared type `Direction`
+
+error[E0433]: cannot find type `Topology` in this scope
+   --> crates/uarch-engine/src/tests.rs:143:17
+    |
+143 |     let reverse=Topology::new(4,2,true,Direction::Negative).unwrap();
+    |                 ^^^^^^^^ use of undeclared type `Topology`
+
+error[E0433]: cannot find type `Direction` in this scope
+   --> crates/uarch-engine/src/tests.rs:143:40
+    |
+143 |     let reverse=Topology::new(4,2,true,Direction::Negative).unwrap();
+    |                                        ^^^^^^^^^ use of undeclared type `Direction`
+
+error[E0433]: cannot find type `Topology` in this scope
+   --> crates/uarch-engine/src/tests.rs:154:16
+    |
+154 |     assert_eq!(Topology::new(0,1,false,Direction::Positive).unwrap_err(),Error::InvalidRoute);
+    |                ^^^^^^^^ use of undeclared type `Topology`
+
+error[E0433]: cannot find type `Direction` in this scope
+   --> crates/uarch-engine/src/tests.rs:154:40
+    |
+154 |     assert_eq!(Topology::new(0,1,false,Direction::Positive).unwrap_err(),Error::InvalidRoute);
+    |                                        ^^^^^^^^^ use of undeclared type `Direction`
+
+error[E0425]: cannot find function `next_edge` in this scope
+   --> crates/uarch-engine/src/tests.rs:159:15
+    |
+159 |         let t=next_edge(freq_hz,0,k).unwrap();
+    |               ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `next_edge` in this scope
+   --> crates/uarch-engine/src/tests.rs:162:25
+    |
+162 |         prop_assert_eq!(next_edge(freq_hz,t,0).unwrap(),t);
+    |                         ^^^^^^^^^ not found in this scope
+
+error[E0433]: cannot find type `Wheel` in this scope
+   --> crates/uarch-engine/src/tests.rs:166:19
+    |
+166 |         let mut w=Wheel::new(1_000_000_000_000).unwrap();
+    |                   ^^^^^ use of undeclared type `Wheel`
+
+error[E0433]: cannot find type `Kind` in this scope
+   --> crates/uarch-engine/src/tests.rs:169:39
+    |
+169 |             w.schedule(t,phase,target,Kind::TaskReady,0).unwrap(); reference.push((t,phase,target,seq as u64));
+    |                                       ^^^^ use of undeclared type `Kind`
+
+error[E0433]: cannot find type `Delay` in this scope
+   --> crates/uarch-engine/src/tests.rs:111:49
+    |
+111 |     let r=run(vec![job(0,0,ps(835),&[]),job(1,0,Delay::Cycles{domain:0,n_cycles:1},&[0])]).unwrap();
+    |                                                 ^^^^^ use of undeclared type `Delay`
+
+error[E0433]: cannot find type `Delay` in this scope
+   --> crates/uarch-engine/src/tests.rs:109:28
+    |
+109 |     let r=run(vec![job(0,0,Delay::Cycles{domain:0,n_cycles:1_000_000_000},&[])]).unwrap();
+    |                            ^^^^^ use of undeclared type `Delay`
+
+error[E0433]: cannot find type `Delay` in this scope
+   --> crates/uarch-engine/src/tests.rs:123:23
+    |
+123 |         (vec![job(0,0,Delay::Cycles{domain:1,n_cycles:1},&[])],Error::InvalidClock),
+    |                       ^^^^^ use of undeclared type `Delay`
+
+Some errors have detailed explanations: E0422, E0425, E0433.
+For more information about an error, try `rustc --explain E0422`.
+warning: `uarch-engine` (lib test) generated 1 warning
+error: could not compile `uarch-engine` (lib test) due to 64 previous errors; 1 warning emitted
