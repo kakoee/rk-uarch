@@ -1,0 +1,62 @@
+{
+  "format": "uarch-k1-controls/1",
+  "source_commit": "fb7ba4a75d17650d91c2d2532460ccc1c16b5808",
+  "source_tree": "4c0a63945d0c793347a7791f5ba1183f4e8bd90e",
+  "inventory_path": ".github/native-k1-tests.json",
+  "inventory_sha256": "e2a7bf61a71dce69485765a76759d4add7bbe5ada11ddd3a0b179742c253be46",
+  "historical_inventory": {
+    "record_commit": "fb7ba4a75d17650d91c2d2532460ccc1c16b5808",
+    "path": ".github/native-k1-tests.json",
+    "sha256": "81a62eec7f1d51f2f97298fbcb5b8508c8ca55272ad5547d7ad3feae383a03d1",
+    "tested_source_commit": "892b9ee00c485718082e8ea9a765578cbd64d684",
+    "test_names_per_mode": 19
+  },
+  "subject": {
+    "path": "docs/reviews/U4-K1-publication-v1/subject.json",
+    "sha256": "675a6904fb643a7f7add49775db4a1043c4359adeceff952a78cd0a1dff7aa14"
+  },
+  "metadata_binding": {
+    "path": "docs/reviews/U4-K1-publication-v1/metadata-binding.json",
+    "sha256": "72dfe4391a89e6d3bc1d4522a5e14b0ec8fbb87e0709ece3f48bd28da681b643"
+  },
+  "replay": {
+    "test": "tests::canonical_replay_private_bytes",
+    "prefix": "UARCH_K1_REPLAY_V1=",
+    "output_env": "UARCH_K1_REPLAY_OUT",
+    "canonical_payload_sha256": "4490d63cd5b49bac327ded1661df7802356f541e003391666963965809f2a62a",
+    "mutation": {
+      "path": "docs/reviews/U4-B-K1-stage2-reconciliation-v1/replay-mutation.proposed.json",
+      "sha256": "c8d766a57b9df1f3d8a240a9fa8ddbc764d1d69d0ca07c780e1b1dca6e638838"
+    }
+  },
+  "semantic_faults": {
+    "path": "docs/reviews/U4-B-K1-stage2-reconciliation-v1/faults.proposed.json",
+    "sha256": "46e3a3c10463def91f8c5d012eea4fa962627d6c240a50ec789659c03f93fe6f",
+    "field": "faults",
+    "diagnostics": "literal"
+  },
+  "fault_evidence": {
+    "source_commit": "63ca8bec5a4ac1d7dcf87290a5cf080c846de66d",
+    "source_tree": "894dc89858e65a2bf3929bd1a43e856df9827b4d",
+    "binding": {
+      "path": "docs/reviews/U4-K1-installed-verification-v1/fault-installed-source.json",
+      "sha256": "3f2afec271c87c733e7fa1213140b9505f6b86f30a2f8d473869b017a181a6a1"
+    },
+    "completion": {
+      "path": "docs/reviews/U4-K1-installed-verification-v1/fault-completion.json",
+      "sha256": "c8422223b73deefe66e3795ff85aca4c4c8a3bbeaab77a330653834b66199f3b"
+    },
+    "commands": {
+      "path": "docs/reviews/U4-K1-installed-verification-v1/fault-command-receipts.json",
+      "sha256": "03b7128ba1a9d649f06d91369b92fcccef19fa37a01fb999a686ac337ab3eff4"
+    },
+    "F5": {
+      "path": "docs/reviews/U4-K1-installed-verification-v1/F5-controls.json",
+      "sha256": "1ab8f16a99ed3f1571d226c2e4edd8800fe3292ee8dbb175448fc485e0677a08"
+    },
+    "reuse_basis": "All native/dependency bytes identical; only non-review delta is approved AST-identical KI-C1 Python test wrapping.",
+    "new_fault_run_on_final_source": false
+  },
+  "hosted_ci_pending": true,
+  "remote_qualification": false
+}
