@@ -1,0 +1,125 @@
+{
+  "proposal_commit": "54225115bcf6954c5a8c8204b2219542ff30c6c7",
+  "source_commit": "418d6972f6bc367d648b811227b0e97829a8b292",
+  "historical_package_tree": "a4eef68f26daed1c839589399a7a142ceb20aedc",
+  "candidate_sha256": "11dfc73d945ab66d0a031c87f8f9d3019635516eeb2f81abc2b7a24e3cecb50c",
+  "command": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1/run_checks.py",
+    "/tmp/u4-b-semantic-review-uar1tx0k/source",
+    "/tmp/u4-b-semantic-review-uar1tx0k/receipts"
+  ],
+  "exit": 0,
+  "native_execution": false,
+  "disposition": "B supplement ready for exact A addendum join; no additional B correction requested",
+  "checks": {
+    "source_commit": "418d6972f6bc367d648b811227b0e97829a8b292",
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "environment_unset": [
+      "PYTHONPATH",
+      "MYPYPATH",
+      "VIRTUAL_ENV",
+      "UARCH_HUMAN"
+    ],
+    "commands": [
+      {
+        "name": "host-tests",
+        "command": [
+          "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+          "-I",
+          "-B",
+          "-c",
+          "import sys; from pathlib import Path; r=Path('/tmp/u4-b-semantic-review-uar1tx0k/source'); sys.path[:0]=['/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1',str(r),str(r/\"src\"),str(r/\"contract\")]; import pytest; raise SystemExit(pytest.main(['-q', '-c', '/tmp/u4-b-semantic-review-uar1tx0k/source/pyproject.toml', '--rootdir=/tmp/u4-b-semantic-review-uar1tx0k/source', '-p', 'no:cacheprovider', '--basetemp=/tmp/u4-b-semantic-review-uar1tx0k/receipts/pytest', '/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_literals.py', '/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_boundary.py', '/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_membership.py', 'contract/tests/mapped', 'contract/tests/test_u2_resource_isolation.py']))"
+        ],
+        "cwd": "/tmp/u4-b-semantic-review-uar1tx0k/source",
+        "exit_code": 0,
+        "seconds": 2.005,
+        "log_sha256": "469b84eb57949137d44f0bfc87b4b4bd4c134bb1cf2dee24972b67682aa083ab"
+      },
+      {
+        "name": "source-audit",
+        "command": [
+          "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+          "-I",
+          "-B",
+          "/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1/audit.py",
+          "/tmp/u4-b-semantic-review-uar1tx0k/source",
+          "/tmp/u4-b-semantic-review-uar1tx0k/receipts/audit.json"
+        ],
+        "cwd": "/tmp/u4-b-semantic-review-uar1tx0k/source",
+        "exit_code": 0,
+        "seconds": 0.843,
+        "log_sha256": "5af7159c4f233d6cec6b5f7a3c40a4b7cb14c3963959b39e98f375bdb4297450"
+      },
+      {
+        "name": "currentness",
+        "command": [
+          "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+          "-I",
+          "-B",
+          "/tmp/u4-b-semantic-review-uar1tx0k/source/scripts/vendor_rk.py",
+          "--check"
+        ],
+        "cwd": "/tmp/u4-b-semantic-review-uar1tx0k/source",
+        "exit_code": 0,
+        "seconds": 0.474,
+        "log_sha256": "e19f84022b812188c3858effdbc340c7fec836e425aaa410d6cae3b4a43fc02b"
+      },
+      {
+        "name": "schema",
+        "command": [
+          "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+          "-I",
+          "-B",
+          "-c",
+          "import sys; from pathlib import Path; r=Path('/tmp/u4-b-semantic-review-uar1tx0k/source'); sys.path[:0]=['/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1',str(r),str(r/\"src\"),str(r/\"contract\")]; import runpy; sys.argv=[\"generate_mapped\",\"--check\"]; runpy.run_module(\"uarch_contract.generate_mapped\",run_name=\"__main__\")"
+        ],
+        "cwd": "/tmp/u4-b-semantic-review-uar1tx0k/source",
+        "exit_code": 0,
+        "seconds": 0.318,
+        "log_sha256": "18de146832ee1e32a203f4f3ad4fe3f08e4d96a3b4bf4e23197afe553f34a164"
+      },
+      {
+        "name": "ruff",
+        "command": [
+          "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+          "check",
+          "--no-cache",
+          "--config",
+          "/tmp/u4-b-semantic-review-uar1tx0k/source/pyproject.toml",
+          "/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1"
+        ],
+        "cwd": "/tmp/u4-b-semantic-review-uar1tx0k/source",
+        "exit_code": 0,
+        "seconds": 0.058,
+        "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      }
+    ],
+    "preservation": {
+      "files": 2493,
+      "added": [],
+      "removed": [],
+      "bytes_or_mtimes_changed": []
+    },
+    "native_executed": false
+  },
+  "independent_arithmetic": {
+    "witnesses": 17,
+    "method": "independent integer edge formula; readiness/end/duration/owner occupancy and critical partition arithmetic checked from finite literals",
+    "scheduler_or_native_execution": false,
+    "source_of_inputs": "/tmp/u4-b-semantic-review-uar1tx0k/proposal/docs/reviews/U4-B-K2-semantic-reconciliation-v1/literals.py",
+    "status": "passed"
+  },
+  "pending": [
+    "A completed published semantic/schema/ADR delta",
+    "A constrained dependency construction plan and manifest/host-record schemas",
+    "joint public/private coverage mapping",
+    "human semantic/construction/first-use decisions"
+  ],
+  "protected_changes": false,
+  "K2_release": false,
+  "independent_review_verdict": false,
+  "CI_polled": false
+}
