@@ -1,0 +1,67 @@
+{
+  "helper_sha256": "f0237e1c7bd91409a58654e690e9252533b365276b4d8e4c9f12560754d246f9",
+  "checks": [
+    {
+      "name": "exact-ten-path-preflight",
+      "status": "passed"
+    },
+    {
+      "name": "short-commit",
+      "status": "refused",
+      "reason": "STOP: full helper commit required"
+    },
+    {
+      "name": "missing-commit",
+      "status": "refused",
+      "reason": "STOP: fatal: Not a valid commit name 0000000000000000000000000000000000000000"
+    },
+    {
+      "name": "wrong-branch",
+      "status": "refused",
+      "reason": "STOP: main required"
+    },
+    {
+      "name": "selected-postimage-drift",
+      "status": "refused",
+      "reason": "STOP: after: contract/schema/mapped/MappedEngineJob.json"
+    },
+    {
+      "name": "unrelated-tracked-change",
+      "status": "refused",
+      "reason": "STOP: unexpected tracked changes"
+    },
+    {
+      "name": "nonempty-index",
+      "status": "refused",
+      "reason": "STOP: real index must be empty"
+    },
+    {
+      "name": "acceptance-drift",
+      "status": "refused",
+      "reason": "STOP: helper package drift: docs/reviews/U4-K2-approved-local-checkpoint-v1/acceptance.json"
+    },
+    {
+      "name": "missing-required-hook-calls",
+      "status": "refused",
+      "reason": "STOP: required hooks missing"
+    },
+    {
+      "name": "selected-symlink",
+      "status": "refused",
+      "reason": "STOP: symlink in selected path: contract/tests/mapped/test_k2_semantic_completion.py"
+    },
+    {
+      "name": "unrelated-untracked-preserved",
+      "status": "passed"
+    },
+    {
+      "name": "human-only-command-refusal",
+      "status": "refused",
+      "reason": "STOP: human invocation required"
+    }
+  ],
+  "work": "/tmp/u4-k2-commit-guards-clsegse3",
+  "scope": "private clone preflight and guard checks only; no protected commit; no UARCH_HUMAN set",
+  "real_worktree_mutated": false,
+  "source_tests": "Inherited exact-byte 124/schema/currentness results; not rerun"
+}
