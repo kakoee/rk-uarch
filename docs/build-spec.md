@@ -2954,7 +2954,11 @@ PHASES AND PREREQUISITES (name the phase in the handoff):
   Run acceptance 1/1a/2/3/5 at the internal boundary, with canonical internal result bytes.
   K1 may overlap M; no public schema claim or production mapped admission follows.
 - K2: additionally require human-installed mapped carriers/U0011 boundary and M's fixtures.
-  Implement items 9–10 and execute every acceptance case at the public subprocess boundary.
+  Implement items 9–10 and execute every representable acceptance case at the public
+  subprocess boundary, including all raw clock obligations through observations.clocks.
+  Retain all 100 arbitrary Wheel/Arena schedules and sequence/insertion controls privately;
+  repeat their representable owner/order laws and reached fault controls publicly.
+  This explicit exception creates no event-injection input or public credit for private tests.
   Existing analytic carriers are not a mapped native protocol. Stop after the named phase.
 - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
@@ -3013,6 +3017,18 @@ jobs; no subsystem models yet. U-P11b adds the bounded model stage.
    OUTPUT: Rust randomises their iteration order. Use BTreeMap or sorted Vecs.
 8. A fixed-delay executor: a TaskGraph whose jobs are fixed delays (no models yet),
    dependencies resolved by events, so the kernel runs end to end before any model exists.
+K2 FIRST-USE CLOCK/OBSERVATION AMENDMENT (requires separate human installation):
+ClockSetup.start_ps is earliest release; ready=max(release, dependency completions),
+grant additionally waits for owner FIFO. Clocked fixed-delay duration_ps must be0.
+Positive cycles use next_edge(domain, actual grant, n); zero cycles complete at grant.
+Public observations.clocks must expose the actual raw next_edge(domain,grant,0) call
+separately: at1.2GHz/grant835 it reports1667 even when the owned zero job ends835.
+A raw alignment overflow is an explicit diagnostic and does not alter zero-job service.
+Retain direct raw primitive tests; they are not public subprocess tests. Public K06/K07
+coverage checks raw alignment observations AND owned completion through real execution.
+Release/causal/queue/idle/all-zero conventions follow the K2 semantic completion in U0011.
+No event-injection input format, Python-computed duration or hidden delay job is permitted.
+
 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
    parser, using the approved mapped protocol. First test the execution boundary directly;
    the complete consumer table path follows in U7 under U-P7 T.

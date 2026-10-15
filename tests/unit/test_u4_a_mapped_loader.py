@@ -232,7 +232,7 @@ def test_full_caller_rehash_cannot_replace_host_anchor(
             "n_cycles": 3,
         }
     ]
-    raw["mapped_point"]["task_graph"]["jobs"][0]["duration_ps"] += 1
+    raw["mapped_point"]["task_graph"]["jobs"][0]["duration_ps"] = 0
     seal(raw)
     entry = raw["profile"]["entries"][0]
     entry.update(

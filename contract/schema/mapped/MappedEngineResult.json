@@ -213,6 +213,76 @@
       "title": "BusyTime",
       "type": "object"
     },
+    "ClockObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "aligned_start_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Aligned Start Ps"
+        },
+        "completion_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Completion Ps",
+          "type": "integer"
+        },
+        "domain": {
+          "enum": [
+            "core",
+            "noc",
+            "dram"
+          ],
+          "title": "Domain",
+          "type": "string"
+        },
+        "grant_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Grant Ps",
+          "type": "integer"
+        },
+        "job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "n_cycles": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "N Cycles",
+          "type": "integer"
+        },
+        "raw_edge_outcome": {
+          "enum": [
+            "success",
+            "TimeOverflow"
+          ],
+          "title": "Raw Edge Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "domain",
+        "grant_ps",
+        "n_cycles",
+        "raw_edge_outcome",
+        "aligned_start_ps",
+        "completion_ps"
+      ],
+      "title": "ClockObservation",
+      "type": "object"
+    },
     "CriticalInterval": {
       "additionalProperties": false,
       "properties": {
@@ -239,11 +309,26 @@
           "title": "End Ps",
           "type": "integer"
         },
+        "kind": {
+          "enum": [
+            "service",
+            "release_idle"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
         "limiting_resource_id": {
-          "maximum": 18446744073709551615,
-          "minimum": 0,
-          "title": "Limiting Resource Id",
-          "type": "integer"
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Limiting Resource Id"
         },
         "predecessor_id": {
           "anyOf": [
@@ -266,6 +351,7 @@
         }
       },
       "required": [
+        "kind",
         "start_ps",
         "end_ps",
         "cause_job_id",
@@ -436,7 +522,10 @@
             "SYNC_ARRIVE",
             "BARRIER_RELEASE",
             "STAT_SAMPLE",
-            "END"
+            "END",
+            "DEPENDENCY_READY",
+            "OWNER_GRANT",
+            "TASK_RELEASE"
           ],
           "title": "Kind",
           "type": "string"
@@ -582,6 +671,12 @@
           "title": "Ready Ps",
           "type": "integer"
         },
+        "release_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Release Ps",
+          "type": "integer"
+        },
         "repeat_index": {
           "anyOf": [
             {
@@ -641,6 +736,7 @@
         "repeat_index",
         "tile_origin",
         "tile_extents",
+        "release_ps",
         "ready_ps",
         "start_ps",
         "end_ps",
@@ -980,6 +1076,24 @@
           ],
           "title": "Allocations"
         },
+        "clocks": {
+          "discriminator": {
+            "mapping": {
+              "observed": "#/$defs/Observed_ClockObservation_",
+              "unrepresented": "#/$defs/Unrepresented"
+            },
+            "propertyName": "status"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Observed_ClockObservation_"
+            },
+            {
+              "$ref": "#/$defs/Unrepresented"
+            }
+          ],
+          "title": "Clocks"
+        },
         "critical_path": {
           "$ref": "#/$defs/Observed_CriticalInterval_"
         },
@@ -1056,6 +1170,7 @@
         "format",
         "events",
         "jobs",
+        "clocks",
         "dma",
         "transfers",
         "allocations",
@@ -1087,6 +1202,29 @@
         "records"
       ],
       "title": "Observed[AllocationObservation]",
+      "type": "object"
+    },
+    "Observed_ClockObservation_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/ClockObservation"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[ClockObservation]",
       "type": "object"
     },
     "Observed_CriticalInterval_": {
@@ -1309,13 +1447,20 @@
       "additionalProperties": false,
       "properties": {
         "clock_domain": {
-          "enum": [
-            "core",
-            "noc",
-            "dram"
+          "anyOf": [
+            {
+              "enum": [
+                "core",
+                "noc",
+                "dram"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Clock Domain",
-          "type": "string"
+          "title": "Clock Domain"
         },
         "enter_ps": {
           "maximum": 18446744073709551615,
