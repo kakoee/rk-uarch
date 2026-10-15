@@ -1,5 +1,9 @@
 # U4 B native Linux CI proposal
 
+**Follow-up:** the concrete replacement template and host/container placement are in
+[final CI reconciliation](../U4-B-final-reconciliation-v1/ci-reconciliation.md).
+This first-checkpoint proposal and its original checks remain historical.
+
 Status: concrete job template and tested nonempty guards, **not installed or native-ready**.
 At starting main `f58e07828fa7a953b06800b227b948d7e9e71a88`, native/Cargo.toml has
 members=[]; no native tests ran. A's immutable pin package was not yet published.

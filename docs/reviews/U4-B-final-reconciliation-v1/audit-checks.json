@@ -1,0 +1,50 @@
+{
+  "source_bytes_and_mtimes_unchanged": true,
+  "files_compared": 1797,
+  "checks": [
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-c",
+        "pyproject.toml",
+        "--rootdir",
+        ".",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-final-reconciliation-v1/scratch/pytest",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py",
+        "tests/unit/test_vendor_script_entry.py",
+        "contract/tests/mapped"
+      ],
+      "exit": 0,
+      "log": "audit-0.log"
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-c",
+        "import sys,json;sys.path[:0]=['.','src','contract'];from scripts import u2_support as p,u2_inputs as u,vendor_rk as v;import uarch_contract.mapped as m,uarch_contract.assumptions as a;print(json.dumps({'origins':[x.__file__ for x in (p,u,v,m,a)],'closure':p.inventory(),'broad_count':len(u.support_files()),'oracle_sha256':v.digest(v.ORACLE_PROGRAM.encode())},sort_keys=True))"
+      ],
+      "exit": 0,
+      "log": "audit-1.log"
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-c",
+        "import sys;sys.path[:0]=['.','src','contract'];from scripts import vendor_rk;vendor_rk.main()",
+        "--check"
+      ],
+      "exit": 1,
+      "log": "audit-2.log"
+    }
+  ]
+}

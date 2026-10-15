@@ -1,0 +1,8 @@
+# Append to A's exact Dockerfile.engine.proposed after pin/licence and environment release.
+# Use repository root as build context; native/ must contain the real installed K1 crate.
+# This is not a runnable image or a replacement for its final digest.
+ENV RUSTUP_TOOLCHAIN=1.99.0-x86_64-unknown-linux-gnu
+COPY native/ /opt/cache-seed/native/
+COPY docs/reviews/U4-A-toolchain-v1/native-inputs.sha256 /opt/cache-seed/native-inputs.sha256
+RUN cd /opt/cache-seed/native && sha256sum -c ../native-inputs.sha256 && cargo fetch --locked && rm -rf /opt/cache-seed
+ENV CARGO_NET_OFFLINE=true

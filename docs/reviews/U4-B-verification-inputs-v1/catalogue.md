@@ -1,5 +1,9 @@
 # Proposed finite case catalogue — B-inputs/1
 
+**Bounded correction:** [final D02/D14 SRAM inputs and trust joins](../U4-B-final-reconciliation-v1/fixtures.md)
+supersede those two rows' common cold initialization and incomplete external-start binding.
+Other selections and historical arithmetic remain unchanged.
+
 This freezes proposed selections, not executable NativeTestProfile bytes or a complete
 V01–V28 corpus. Every row is planned native coverage, even when its arithmetic is checked.
 Normative semantics: accepted U3 design-v2 interface and verification E1–E4/V01–V28.

@@ -1,5 +1,8 @@
 # U4 B concrete policy transition preparation
 
+**Final follow-up:** [final M dependency audit](../U4-B-final-reconciliation-v1/dependency-audit.md)
+recomputes the closure against 111b24b. All early receipts below retain their original scope.
+
 Status: reviewed repair carried forward unchanged, actual first M patch audited in scratch;
 **no live policy installation, input staging, oracle generation or adoption**.
 D2's policy choice is already accepted. This package asks for release of a concrete future
