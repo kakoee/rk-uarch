@@ -1,0 +1,58 @@
+{
+  "format": "uarch-k1-ci-tests/1",
+  "checkpoint": "K1",
+  "tool_package_commit": "83a9a14fd76a00b7858ddd140cc0e0589f80a267",
+  "target": "x86_64-unknown-linux-gnu",
+  "modes": [
+    "debug",
+    "release"
+  ],
+  "all_features": true,
+  "workspace_targets": [
+    {
+      "name": "uarch_engine",
+      "kind": [
+        "lib"
+      ]
+    }
+  ],
+  "test_names": [
+    "simulation::stage2_routing_tests::inline_zero_closure_blocks_retroactive_phase_zero",
+    "simulation::stage2_routing_tests::queued_unsupported_simulation_phase_returns_error",
+    "simulation::stage2_routing_tests::readiness_wrong_or_missing_target_refuses_in_engine",
+    "simulation::stage2_routing_tests::successor_grant_and_zero_handlers_refuse_foreign_targets",
+    "stage2_tests::actual_dispatch_targets_and_inline_kinds_are_observed",
+    "stage2_tests::lowest_owner_zero_closure_has_literal_110ps_path",
+    "stage2_tests::private_predecessor_list_is_explicitly_noncausal",
+    "stage2_tests::same_timestamp_regression_refuses_but_forward_insertions_work",
+    "stage2_tests::unsupported_wheel_phase_refuses",
+    "tests::arena_reuses_freed_slots_and_refuses_double_free",
+    "tests::busy_owner_zero_grant_is_5000_not_3000",
+    "tests::canonical_replay_private_bytes",
+    "tests::clock_literals_and_fractional_edges",
+    "tests::clock_refuses_invalid_frequency_and_overflow",
+    "tests::critical_path_overlap_and_fifo_serialization",
+    "tests::csr_mesh_torus_routes_and_multiple_nocs",
+    "tests::cycle_delay_uses_resolved_domain_without_drift",
+    "tests::event_layout_and_tie_order",
+    "tests::graph_refuses_duplicates_missing_edges_cycles_owners_domains",
+    "tests::owner_foreign_mutation_is_refused",
+    "tests::readiness_is_fifo_and_simultaneous_completions_join_by_id",
+    "tests::resolved_domains_and_zero_cycles_at_fractional_start",
+    "tests::rounded_edges_never_early",
+    "tests::wheel_interleaved_scheduling_matches_reference",
+    "tests::wheel_levels_overflow_promotion_and_past_refusal",
+    "tests::wheel_matches_sorted_reference",
+    "tests::wheel_reuses_arena_after_warmup",
+    "tests::zero_closure_is_canonical_and_completes_once"
+  ],
+  "source_commit": "63ca8bec5a4ac1d7dcf87290a5cf080c846de66d",
+  "source_tree": "894dc89858e65a2bf3929bd1a43e856df9827b4d",
+  "replay_test": "tests::canonical_replay_private_bytes",
+  "replay_output_env": "UARCH_K1_REPLAY_OUT",
+  "image_id": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+  "image_validation_pending": false,
+  "hosted_ci_pending": true,
+  "evidence_environment": "exact local image; host Python",
+  "canonical_payload_sha256": "4490d63cd5b49bac327ded1661df7802356f541e003391666963965809f2a62a"
+}
