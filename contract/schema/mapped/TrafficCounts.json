@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "uarch-native-traffic-counts/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "read_payload_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Read Payload Bytes",
+      "type": "integer"
+    },
+    "read_transaction_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Read Transaction Bytes",
+      "type": "integer"
+    },
+    "unicast_payload_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Unicast Payload Bytes",
+      "type": "integer"
+    },
+    "write_payload_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Write Payload Bytes",
+      "type": "integer"
+    },
+    "write_transaction_bytes": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Write Transaction Bytes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "format",
+    "read_payload_bytes",
+    "write_payload_bytes",
+    "read_transaction_bytes",
+    "write_transaction_bytes",
+    "unicast_payload_bytes"
+  ],
+  "title": "TrafficCounts",
+  "type": "object"
+}

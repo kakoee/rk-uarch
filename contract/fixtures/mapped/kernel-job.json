@@ -1,0 +1,3506 @@
+{
+  "admission": {
+    "case_id": "E1-input",
+    "checkpoint": "K2",
+    "eligibility": "verification_only",
+    "invocation": "test",
+    "profile_hash": "sha256:842543e9ec21b98a61c92076fc4b2119b4ed661355f8960ec846fb304cd39584"
+  },
+  "assumptions": {
+    "arbitration": "fifo-ready/1",
+    "assumptions_hash": "sha256:53defdf4c304d46931b443cc86bf5ff2a36ff703d2c52aba319c3a97df0e0956",
+    "bank_placement": "contiguous-equal-regions/1",
+    "compute": "ws-stage-overhead-wave-drain/1",
+    "format": "uarch-mapped-assumptions/1",
+    "hbm_addressing": "stripe256-channel8-controller-pairs/1",
+    "limitations": [
+      "schema-only inputs; not runtime evidence",
+      "STUB; unknown accuracy; unverified energy"
+    ],
+    "owner_enumeration": "native-owners/1",
+    "semantics_revision": "U0011-stage2/1",
+    "transport": "E4-named-edges-rational-service/2"
+  },
+  "assumptions_hash": "sha256:53defdf4c304d46931b443cc86bf5ff2a36ff703d2c52aba319c3a97df0e0956",
+  "bundle_hash": "sha256:4a1446b6a5f967736374e74cc1e0cbeb37af7c5eaccb16a84c3735fbea01ea04",
+  "clock_setup": [],
+  "engine": {
+    "compiler_lock_hash": "sha256:8c1a06c0379d776bed5323da4f517a9d7d8a4cc7cef08ac65553940f1ee0ac23",
+    "implementation_hash": "sha256:b9f7c89966f3f9100bdd09425fb473b83c77a43dfac37180654db3ab9ddcf2b8",
+    "model": {
+      "implementation_hash": "sha256:a85cc2cf58a9db4c0431a7acb587eb185cb359cfbdb9ec4b7a6066c9a6fd467c",
+      "name": "fixed-delay",
+      "version": "1"
+    },
+    "name": "native",
+    "version": "native-stage/1"
+  },
+  "fidelity_detail": null,
+  "freq_hz": {
+    "core": 1000000000,
+    "dram": 1000000000,
+    "noc": 1000000000
+  },
+  "frequency_ratio": 1.0,
+  "hardware": {
+    "format": "uarch-resolved-hardware/1",
+    "hardware_spec_hash": "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9",
+    "leaves": [
+      {
+        "path": "/clock_domains/core/freq_hz/date",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/core/freq_hz/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/clock_domains/core/freq_hz/provenance",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/core/freq_hz/rationale",
+        "value": "B1 hardware proposal, pending Javid: core target clock; no fitted efficiency; a design input, not a measured claim."
+      },
+      {
+        "path": "/clock_domains/core/freq_hz/source",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/core/freq_hz/unit",
+        "value": "Hz"
+      },
+      {
+        "path": "/clock_domains/core/freq_hz/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1000000000
+        }
+      },
+      {
+        "path": "/clock_domains/core/scales_with_core",
+        "value": true
+      },
+      {
+        "path": "/clock_domains/dram/freq_hz/date",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/dram/freq_hz/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/clock_domains/dram/freq_hz/provenance",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/dram/freq_hz/rationale",
+        "value": "B1 hardware proposal, pending Javid: dram target clock; no fitted efficiency; a design input, not a measured claim."
+      },
+      {
+        "path": "/clock_domains/dram/freq_hz/source",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/dram/freq_hz/unit",
+        "value": "Hz"
+      },
+      {
+        "path": "/clock_domains/dram/freq_hz/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1000000000
+        }
+      },
+      {
+        "path": "/clock_domains/dram/scales_with_core",
+        "value": false
+      },
+      {
+        "path": "/clock_domains/noc/freq_hz/date",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/noc/freq_hz/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/clock_domains/noc/freq_hz/provenance",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/noc/freq_hz/rationale",
+        "value": "B1 hardware proposal, pending Javid: noc target clock; no fitted efficiency; a design input, not a measured claim."
+      },
+      {
+        "path": "/clock_domains/noc/freq_hz/source",
+        "value": null
+      },
+      {
+        "path": "/clock_domains/noc/freq_hz/unit",
+        "value": "Hz"
+      },
+      {
+        "path": "/clock_domains/noc/freq_hz/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1000000000
+        }
+      },
+      {
+        "path": "/clock_domains/noc/scales_with_core",
+        "value": false
+      },
+      {
+        "path": "/cores/core_type/dma/bytes_per_cycle/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/bytes_per_cycle/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/dma/bytes_per_cycle/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/bytes_per_cycle/rationale",
+        "value": "B1 hardware proposal, pending Javid: aggregate per-core DMA delivery; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/dma/bytes_per_cycle/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/bytes_per_cycle/unit",
+        "value": "byte/cycle"
+      },
+      {
+        "path": "/cores/core_type/dma/bytes_per_cycle/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 256
+        }
+      },
+      {
+        "path": "/cores/core_type/dma/engines/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/engines/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/dma/engines/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/engines/rationale",
+        "value": "B1 hardware proposal, pending Javid: DMA issue engines; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/dma/engines/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/engines/unit",
+        "value": "count"
+      },
+      {
+        "path": "/cores/core_type/dma/engines/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 4
+        }
+      },
+      {
+        "path": "/cores/core_type/dma/max_outstanding/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/max_outstanding/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/dma/max_outstanding/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/max_outstanding/rationale",
+        "value": "B1 hardware proposal, pending Javid: DMA outstanding limit; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/dma/max_outstanding/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/max_outstanding/unit",
+        "value": "count"
+      },
+      {
+        "path": "/cores/core_type/dma/max_outstanding/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/cores/core_type/dma/request_bytes/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/request_bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/dma/request_bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/request_bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: DMA request granularity; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/dma/request_bytes/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/dma/request_bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/cores/core_type/dma/request_bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 256
+        }
+      },
+      {
+        "path": "/cores/core_type/job_overhead_cycles/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/job_overhead_cycles/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/job_overhead_cycles/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/job_overhead_cycles/rationale",
+        "value": "B1 hardware proposal, pending Javid: core-domain job issue overhead; U-C0 unrepresented; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/job_overhead_cycles/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/job_overhead_cycles/unit",
+        "value": "cycle"
+      },
+      {
+        "path": "/cores/core_type/job_overhead_cycles/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/accumulator_bytes/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/accumulator_bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/accumulator_bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/accumulator_bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: FP32 partial-sum storage; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/accumulator_bytes/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/accumulator_bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/accumulator_bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 262144
+        }
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/cols/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/cols/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/cols/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/cols/rationale",
+        "value": "B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/cols/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/cols/unit",
+        "value": "count"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/cols/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 256
+        }
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/rows/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/rows/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/rows/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/rows/rationale",
+        "value": "B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/rows/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/rows/unit",
+        "value": "count"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/array/rows/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 256
+        }
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/dataflows/0",
+        "value": "weight_stationary"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/macs_per_cycle/bf16/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/macs_per_cycle/bf16/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/macs_per_cycle/bf16/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/macs_per_cycle/bf16/rationale",
+        "value": "B1 hardware proposal, pending Javid: dense throughput per core; no sparsity multiplier; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/macs_per_cycle/bf16/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/macs_per_cycle/bf16/unit",
+        "value": "MAC/cycle"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/macs_per_cycle/bf16/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 65536
+        }
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_buffer_bytes/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_buffer_bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_buffer_bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_buffer_bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: array operand staging budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_buffer_bytes/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_buffer_bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_buffer_bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1048576
+        }
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_bytes_per_cycle/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_bytes_per_cycle/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_bytes_per_cycle/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_bytes_per_cycle/rationale",
+        "value": "B1 hardware proposal, pending Javid: core-domain operand delivery; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_bytes_per_cycle/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_bytes_per_cycle/unit",
+        "value": "byte/cycle"
+      },
+      {
+        "path": "/cores/core_type/matrix_engine/operand_bytes_per_cycle/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1024
+        }
+      },
+      {
+        "path": "/cores/core_type/sram/banks/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/banks/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/sram/banks/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/banks/rationale",
+        "value": "B1 hardware proposal, pending Javid: local SRAM banking; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/sram/banks/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/banks/unit",
+        "value": "count"
+      },
+      {
+        "path": "/cores/core_type/sram/banks/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/cores/core_type/sram/bytes/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/sram/bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: paired SRAM choice with 1.0 pJ/byte; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/sram/bytes/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/cores/core_type/sram/bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 16777216
+        }
+      },
+      {
+        "path": "/cores/core_type/sram/bytes_per_cycle_per_bank/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/bytes_per_cycle_per_bank/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/sram/bytes_per_cycle_per_bank/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/bytes_per_cycle_per_bank/rationale",
+        "value": "B1 hardware proposal, pending Javid: local SRAM bank bandwidth; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/sram/bytes_per_cycle_per_bank/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/sram/bytes_per_cycle_per_bank/unit",
+        "value": "byte/cycle"
+      },
+      {
+        "path": "/cores/core_type/sram/bytes_per_cycle_per_bank/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/cores/core_type/vector_engine/ops_per_cycle/date",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/vector_engine/ops_per_cycle/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/core_type/vector_engine/ops_per_cycle/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/vector_engine/ops_per_cycle/rationale",
+        "value": "B1 hardware proposal, pending Javid: abstract scalar vector rate, not transcendental validation; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/core_type/vector_engine/ops_per_cycle/source",
+        "value": null
+      },
+      {
+        "path": "/cores/core_type/vector_engine/ops_per_cycle/unit",
+        "value": "op/cycle"
+      },
+      {
+        "path": "/cores/core_type/vector_engine/ops_per_cycle/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 256
+        }
+      },
+      {
+        "path": "/cores/grid/cols/date",
+        "value": null
+      },
+      {
+        "path": "/cores/grid/cols/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/grid/cols/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/grid/cols/rationale",
+        "value": "B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/grid/cols/source",
+        "value": null
+      },
+      {
+        "path": "/cores/grid/cols/unit",
+        "value": "count"
+      },
+      {
+        "path": "/cores/grid/cols/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 2
+        }
+      },
+      {
+        "path": "/cores/grid/rows/date",
+        "value": null
+      },
+      {
+        "path": "/cores/grid/rows/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/cores/grid/rows/provenance",
+        "value": null
+      },
+      {
+        "path": "/cores/grid/rows/rationale",
+        "value": "B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim."
+      },
+      {
+        "path": "/cores/grid/rows/source",
+        "value": null
+      },
+      {
+        "path": "/cores/grid/rows/unit",
+        "value": "count"
+      },
+      {
+        "path": "/cores/grid/rows/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 2
+        }
+      },
+      {
+        "path": "/design_status",
+        "value": "proposed"
+      },
+      {
+        "path": "/energy/pj_per_byte/dram/date",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/dram/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/energy/pj_per_byte/dram/provenance",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/dram/rationale",
+        "value": "B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim."
+      },
+      {
+        "path": "/energy/pj_per_byte/dram/source",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/dram/unit",
+        "value": "pJ/byte"
+      },
+      {
+        "path": "/energy/pj_per_byte/dram/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 20
+        }
+      },
+      {
+        "path": "/energy/pj_per_byte/noc_hop/date",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/noc_hop/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/energy/pj_per_byte/noc_hop/provenance",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/noc_hop/rationale",
+        "value": "B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim."
+      },
+      {
+        "path": "/energy/pj_per_byte/noc_hop/source",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/noc_hop/unit",
+        "value": "pJ/byte"
+      },
+      {
+        "path": "/energy/pj_per_byte/noc_hop/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 2
+        }
+      },
+      {
+        "path": "/energy/pj_per_byte/sram/date",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/sram/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/energy/pj_per_byte/sram/provenance",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/sram/rationale",
+        "value": "B1 hardware proposal, pending Javid: SRAM pair 16777216 bytes/1.0 pJ per byte; a design input, not a measured claim."
+      },
+      {
+        "path": "/energy/pj_per_byte/sram/source",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_byte/sram/unit",
+        "value": "pJ/byte"
+      },
+      {
+        "path": "/energy/pj_per_byte/sram/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1
+        }
+      },
+      {
+        "path": "/energy/pj_per_mac/bf16/date",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_mac/bf16/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/energy/pj_per_mac/bf16/provenance",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_mac/bf16/rationale",
+        "value": "B1 hardware proposal, pending Javid: co-design energy assumption, no validation; a design input, not a measured claim."
+      },
+      {
+        "path": "/energy/pj_per_mac/bf16/source",
+        "value": null
+      },
+      {
+        "path": "/energy/pj_per_mac/bf16/unit",
+        "value": "pJ/MAC"
+      },
+      {
+        "path": "/energy/pj_per_mac/bf16/value",
+        "value": {
+          "denominator": 5,
+          "numerator": 2
+        }
+      },
+      {
+        "path": "/energy/voltage_ratio/1.0/date",
+        "value": null
+      },
+      {
+        "path": "/energy/voltage_ratio/1.0/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/energy/voltage_ratio/1.0/provenance",
+        "value": null
+      },
+      {
+        "path": "/energy/voltage_ratio/1.0/rationale",
+        "value": "B1 hardware proposal, pending Javid: base voltage normalization only; nonbase energy unknown; a design input, not a measured claim."
+      },
+      {
+        "path": "/energy/voltage_ratio/1.0/source",
+        "value": null
+      },
+      {
+        "path": "/energy/voltage_ratio/1.0/unit",
+        "value": "ratio"
+      },
+      {
+        "path": "/energy/voltage_ratio/1.0/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1
+        }
+      },
+      {
+        "path": "/formats/bf16/accumulate_bytes/date",
+        "value": null
+      },
+      {
+        "path": "/formats/bf16/accumulate_bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/formats/bf16/accumulate_bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/formats/bf16/accumulate_bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: FP32 accumulation; a design input, not a measured claim."
+      },
+      {
+        "path": "/formats/bf16/accumulate_bytes/source",
+        "value": null
+      },
+      {
+        "path": "/formats/bf16/accumulate_bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/formats/bf16/accumulate_bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 4
+        }
+      },
+      {
+        "path": "/formats/bf16/block_scale_bytes/date",
+        "value": null
+      },
+      {
+        "path": "/formats/bf16/block_scale_bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/formats/bf16/block_scale_bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/formats/bf16/block_scale_bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: plain format with no block-scale payload; a design input, not a measured claim."
+      },
+      {
+        "path": "/formats/bf16/block_scale_bytes/source",
+        "value": null
+      },
+      {
+        "path": "/formats/bf16/block_scale_bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/formats/bf16/block_scale_bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 0
+        }
+      },
+      {
+        "path": "/formats/bf16/bytes",
+        "value": {
+          "denominator": 1,
+          "numerator": 2
+        }
+      },
+      {
+        "path": "/id",
+        "value": "npu-l4"
+      },
+      {
+        "path": "/memory/controllers/0/attach/0",
+        "value": 0
+      },
+      {
+        "path": "/memory/controllers/0/attach/1",
+        "value": 0
+      },
+      {
+        "path": "/memory/controllers/0/noc_credits/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/noc_credits/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/0/noc_credits/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/noc_credits/rationale",
+        "value": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/0/noc_credits/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/noc_credits/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/0/noc_credits/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/0/page_policy",
+        "value": "open"
+      },
+      {
+        "path": "/memory/controllers/0/read_queue_depth/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/read_queue_depth/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/0/read_queue_depth/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/read_queue_depth/rationale",
+        "value": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/0/read_queue_depth/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/read_queue_depth/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/0/read_queue_depth/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/0/scheduler",
+        "value": "fr_fcfs"
+      },
+      {
+        "path": "/memory/controllers/0/write_queue_depth/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/write_queue_depth/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/0/write_queue_depth/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/write_queue_depth/rationale",
+        "value": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/0/write_queue_depth/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/0/write_queue_depth/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/0/write_queue_depth/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/1/attach/0",
+        "value": 0
+      },
+      {
+        "path": "/memory/controllers/1/attach/1",
+        "value": 1
+      },
+      {
+        "path": "/memory/controllers/1/noc_credits/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/noc_credits/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/1/noc_credits/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/noc_credits/rationale",
+        "value": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/1/noc_credits/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/noc_credits/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/1/noc_credits/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/1/page_policy",
+        "value": "open"
+      },
+      {
+        "path": "/memory/controllers/1/read_queue_depth/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/read_queue_depth/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/1/read_queue_depth/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/read_queue_depth/rationale",
+        "value": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/1/read_queue_depth/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/read_queue_depth/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/1/read_queue_depth/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/1/scheduler",
+        "value": "fr_fcfs"
+      },
+      {
+        "path": "/memory/controllers/1/write_queue_depth/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/write_queue_depth/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/1/write_queue_depth/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/write_queue_depth/rationale",
+        "value": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/1/write_queue_depth/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/1/write_queue_depth/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/1/write_queue_depth/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/2/attach/0",
+        "value": 1
+      },
+      {
+        "path": "/memory/controllers/2/attach/1",
+        "value": 0
+      },
+      {
+        "path": "/memory/controllers/2/noc_credits/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/noc_credits/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/2/noc_credits/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/noc_credits/rationale",
+        "value": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/2/noc_credits/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/noc_credits/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/2/noc_credits/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/2/page_policy",
+        "value": "open"
+      },
+      {
+        "path": "/memory/controllers/2/read_queue_depth/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/read_queue_depth/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/2/read_queue_depth/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/read_queue_depth/rationale",
+        "value": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/2/read_queue_depth/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/read_queue_depth/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/2/read_queue_depth/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/2/scheduler",
+        "value": "fr_fcfs"
+      },
+      {
+        "path": "/memory/controllers/2/write_queue_depth/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/write_queue_depth/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/2/write_queue_depth/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/write_queue_depth/rationale",
+        "value": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/2/write_queue_depth/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/2/write_queue_depth/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/2/write_queue_depth/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/3/attach/0",
+        "value": 1
+      },
+      {
+        "path": "/memory/controllers/3/attach/1",
+        "value": 1
+      },
+      {
+        "path": "/memory/controllers/3/noc_credits/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/noc_credits/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/3/noc_credits/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/noc_credits/rationale",
+        "value": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/3/noc_credits/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/noc_credits/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/3/noc_credits/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/3/page_policy",
+        "value": "open"
+      },
+      {
+        "path": "/memory/controllers/3/read_queue_depth/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/read_queue_depth/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/3/read_queue_depth/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/read_queue_depth/rationale",
+        "value": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/3/read_queue_depth/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/read_queue_depth/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/3/read_queue_depth/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/controllers/3/scheduler",
+        "value": "fr_fcfs"
+      },
+      {
+        "path": "/memory/controllers/3/write_queue_depth/date",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/write_queue_depth/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/controllers/3/write_queue_depth/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/write_queue_depth/rationale",
+        "value": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/controllers/3/write_queue_depth/source",
+        "value": null
+      },
+      {
+        "path": "/memory/controllers/3/write_queue_depth/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/controllers/3/write_queue_depth/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/memory/dram/bw_bytes_per_s/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/bw_bytes_per_s/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/bw_bytes_per_s/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/bw_bytes_per_s/rationale",
+        "value": "B1 hardware proposal, pending Javid: total chip bandwidth; never multiply again by channels; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/bw_bytes_per_s/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/bw_bytes_per_s/unit",
+        "value": "byte/s"
+      },
+      {
+        "path": "/memory/dram/bw_bytes_per_s/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1000000000000
+        }
+      },
+      {
+        "path": "/memory/dram/capacity_bytes/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/capacity_bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/capacity_bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/capacity_bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: decimal 32 GB capacity; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/capacity_bytes/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/capacity_bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/memory/dram/capacity_bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32000000000
+        }
+      },
+      {
+        "path": "/memory/dram/channels/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/channels/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/channels/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/channels/rationale",
+        "value": "B1 hardware proposal, pending Javid: logical DRAM channels; two per listed controller; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/channels/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/channels/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/dram/channels/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 8
+        }
+      },
+      {
+        "path": "/memory/dram/organization/bank_groups/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/bank_groups/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/organization/bank_groups/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/bank_groups/rationale",
+        "value": "B1 hardware proposal, pending Javid: bank groups per rank; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/organization/bank_groups/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/bank_groups/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/dram/organization/bank_groups/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 4
+        }
+      },
+      {
+        "path": "/memory/dram/organization/banks_per_group/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/banks_per_group/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/organization/banks_per_group/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/banks_per_group/rationale",
+        "value": "B1 hardware proposal, pending Javid: banks per bank group; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/organization/banks_per_group/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/banks_per_group/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/dram/organization/banks_per_group/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 4
+        }
+      },
+      {
+        "path": "/memory/dram/organization/ranks/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/ranks/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/organization/ranks/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/ranks/rationale",
+        "value": "B1 hardware proposal, pending Javid: ranks per logical channel; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/organization/ranks/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/ranks/unit",
+        "value": "count"
+      },
+      {
+        "path": "/memory/dram/organization/ranks/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 1
+        }
+      },
+      {
+        "path": "/memory/dram/organization/row_bytes/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/row_bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/organization/row_bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/row_bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: row payload bytes; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/organization/row_bytes/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/organization/row_bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/memory/dram/organization/row_bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 2048
+        }
+      },
+      {
+        "path": "/memory/dram/standard",
+        "value": "hbm2e"
+      },
+      {
+        "path": "/memory/dram/timing/t_cl_cycles/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_cl_cycles/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/timing/t_cl_cycles/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_cl_cycles/rationale",
+        "value": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/timing/t_cl_cycles/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_cl_cycles/unit",
+        "value": "cycle"
+      },
+      {
+        "path": "/memory/dram/timing/t_cl_cycles/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 16
+        }
+      },
+      {
+        "path": "/memory/dram/timing/t_rcd_cycles/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rcd_cycles/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/timing/t_rcd_cycles/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rcd_cycles/rationale",
+        "value": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/timing/t_rcd_cycles/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rcd_cycles/unit",
+        "value": "cycle"
+      },
+      {
+        "path": "/memory/dram/timing/t_rcd_cycles/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 16
+        }
+      },
+      {
+        "path": "/memory/dram/timing/t_refi_cycles/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_refi_cycles/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/timing/t_refi_cycles/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_refi_cycles/rationale",
+        "value": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/timing/t_refi_cycles/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_refi_cycles/unit",
+        "value": "cycle"
+      },
+      {
+        "path": "/memory/dram/timing/t_refi_cycles/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 3900
+        }
+      },
+      {
+        "path": "/memory/dram/timing/t_rfc_cycles/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rfc_cycles/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/timing/t_rfc_cycles/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rfc_cycles/rationale",
+        "value": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/timing/t_rfc_cycles/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rfc_cycles/unit",
+        "value": "cycle"
+      },
+      {
+        "path": "/memory/dram/timing/t_rfc_cycles/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 350
+        }
+      },
+      {
+        "path": "/memory/dram/timing/t_rp_cycles/date",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rp_cycles/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/dram/timing/t_rp_cycles/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rp_cycles/rationale",
+        "value": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/dram/timing/t_rp_cycles/source",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing/t_rp_cycles/unit",
+        "value": "cycle"
+      },
+      {
+        "path": "/memory/dram/timing/t_rp_cycles/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 16
+        }
+      },
+      {
+        "path": "/memory/dram/timing_preset",
+        "value": null
+      },
+      {
+        "path": "/memory/dram/timing_source",
+        "value": "direct"
+      },
+      {
+        "path": "/memory/interleave/granularity_bytes/date",
+        "value": null
+      },
+      {
+        "path": "/memory/interleave/granularity_bytes/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/memory/interleave/granularity_bytes/provenance",
+        "value": null
+      },
+      {
+        "path": "/memory/interleave/granularity_bytes/rationale",
+        "value": "B1 hardware proposal, pending Javid: address interleave granularity; a design input, not a measured claim."
+      },
+      {
+        "path": "/memory/interleave/granularity_bytes/source",
+        "value": null
+      },
+      {
+        "path": "/memory/interleave/granularity_bytes/unit",
+        "value": "byte"
+      },
+      {
+        "path": "/memory/interleave/granularity_bytes/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 256
+        }
+      },
+      {
+        "path": "/memory/interleave/scheme",
+        "value": "round_robin"
+      },
+      {
+        "path": "/nocs/0/buffer_flits/date",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/buffer_flits/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/nocs/0/buffer_flits/provenance",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/buffer_flits/rationale",
+        "value": "B1 hardware proposal, pending Javid: NoC input buffering; a design input, not a measured claim."
+      },
+      {
+        "path": "/nocs/0/buffer_flits/source",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/buffer_flits/unit",
+        "value": "count"
+      },
+      {
+        "path": "/nocs/0/buffer_flits/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 8
+        }
+      },
+      {
+        "path": "/nocs/0/direction",
+        "value": "bidirectional"
+      },
+      {
+        "path": "/nocs/0/link_bytes_per_cycle/date",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/link_bytes_per_cycle/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/nocs/0/link_bytes_per_cycle/provenance",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/link_bytes_per_cycle/rationale",
+        "value": "B1 hardware proposal, pending Javid: NoC link width; a design input, not a measured claim."
+      },
+      {
+        "path": "/nocs/0/link_bytes_per_cycle/source",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/link_bytes_per_cycle/unit",
+        "value": "byte/cycle"
+      },
+      {
+        "path": "/nocs/0/link_bytes_per_cycle/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 64
+        }
+      },
+      {
+        "path": "/nocs/0/router_latency_cycles/date",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/router_latency_cycles/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/nocs/0/router_latency_cycles/provenance",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/router_latency_cycles/rationale",
+        "value": "B1 hardware proposal, pending Javid: NoC router pipeline; a design input, not a measured claim."
+      },
+      {
+        "path": "/nocs/0/router_latency_cycles/source",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/router_latency_cycles/unit",
+        "value": "cycle"
+      },
+      {
+        "path": "/nocs/0/router_latency_cycles/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 2
+        }
+      },
+      {
+        "path": "/nocs/0/topology",
+        "value": "mesh"
+      },
+      {
+        "path": "/nocs/0/virtual_channels/date",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/virtual_channels/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/nocs/0/virtual_channels/provenance",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/virtual_channels/rationale",
+        "value": "B1 hardware proposal, pending Javid: NoC virtual channels; a design input, not a measured claim."
+      },
+      {
+        "path": "/nocs/0/virtual_channels/source",
+        "value": null
+      },
+      {
+        "path": "/nocs/0/virtual_channels/unit",
+        "value": "count"
+      },
+      {
+        "path": "/nocs/0/virtual_channels/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 4
+        }
+      },
+      {
+        "path": "/shared_sram",
+        "value": null
+      },
+      {
+        "path": "/static_power_w/date",
+        "value": null
+      },
+      {
+        "path": "/static_power_w/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/static_power_w/provenance",
+        "value": null
+      },
+      {
+        "path": "/static_power_w/rationale",
+        "value": "B1 hardware proposal, pending Javid: chip static power budget; no energy model in U2; a design input, not a measured claim."
+      },
+      {
+        "path": "/static_power_w/source",
+        "value": null
+      },
+      {
+        "path": "/static_power_w/unit",
+        "value": "W"
+      },
+      {
+        "path": "/static_power_w/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 40
+        }
+      },
+      {
+        "path": "/sync/barrier_latency_cycles/date",
+        "value": null
+      },
+      {
+        "path": "/sync/barrier_latency_cycles/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/sync/barrier_latency_cycles/provenance",
+        "value": null
+      },
+      {
+        "path": "/sync/barrier_latency_cycles/rationale",
+        "value": "B1 hardware proposal, pending Javid: NoC-domain barrier latency; U-C0 unrepresented; a design input, not a measured claim."
+      },
+      {
+        "path": "/sync/barrier_latency_cycles/source",
+        "value": null
+      },
+      {
+        "path": "/sync/barrier_latency_cycles/unit",
+        "value": "cycle"
+      },
+      {
+        "path": "/sync/barrier_latency_cycles/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 32
+        }
+      },
+      {
+        "path": "/sync/mechanism",
+        "value": "hardware_barrier"
+      },
+      {
+        "path": "/tdp_w/date",
+        "value": null
+      },
+      {
+        "path": "/tdp_w/kind",
+        "value": "stipulation"
+      },
+      {
+        "path": "/tdp_w/provenance",
+        "value": null
+      },
+      {
+        "path": "/tdp_w/rationale",
+        "value": "B1 hardware proposal, pending Javid: chip design power budget, not board power measurement; a design input, not a measured claim."
+      },
+      {
+        "path": "/tdp_w/source",
+        "value": null
+      },
+      {
+        "path": "/tdp_w/unit",
+        "value": "W"
+      },
+      {
+        "path": "/tdp_w/value",
+        "value": {
+          "denominator": 1,
+          "numerator": 300
+        }
+      }
+    ]
+  },
+  "hardware_spec_hash": "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9",
+  "initial_state": "fixture_cold",
+  "job_hash": "sha256:47bbe71c8356c034d1d1b599fe586489a66fe9ce0ddb6ae3cde99f17328d80a3",
+  "mapped_point": {
+    "frequency_ratio": 1.0,
+    "identity": {
+      "fixture_id": "E1-input",
+      "kind": "fixture"
+    },
+    "initial_state": "fixture_cold",
+    "payload_hash": "sha256:3a6a4d450ff2e3f0fe5688ec6d1dd6a07467843f0cfab5840110f91e20d667de",
+    "point_id": "e1-input",
+    "priming_iterations": 0,
+    "task_graph": {
+      "arbitration": "fifo-ready/1",
+      "buffers": [],
+      "coverage": [],
+      "dependencies": [
+        {
+          "after": "c",
+          "before": "a"
+        },
+        {
+          "after": "c",
+          "before": "b"
+        }
+      ],
+      "format": "uarch-taskgraph/1",
+      "graph_hash": "sha256:6d8c371a4863af025f829ebd3325e385f89625579ba633cb993c66c1ca12e15c",
+      "jobs": [
+        {
+          "duration_ps": 3000,
+          "id": "a",
+          "kind": "fixed_delay",
+          "owner_id": 0
+        },
+        {
+          "duration_ps": 5000,
+          "id": "b",
+          "kind": "fixed_delay",
+          "owner_id": 1
+        },
+        {
+          "duration_ps": 2000,
+          "id": "c",
+          "kind": "fixed_delay",
+          "owner_id": 0
+        }
+      ],
+      "routes": []
+    }
+  },
+  "owner_enumeration": "native-owners/1",
+  "owners": [
+    {
+      "owner_id": 0,
+      "resource": "fixture0"
+    },
+    {
+      "owner_id": 1,
+      "resource": "fixture1"
+    }
+  ],
+  "point_hash": "sha256:3a6a4d450ff2e3f0fe5688ec6d1dd6a07467843f0cfab5840110f91e20d667de",
+  "precision": null,
+  "priming_iterations": 0,
+  "profile": {
+    "entries": [
+      {
+        "allowed_job_kinds": [
+          "fixed_delay"
+        ],
+        "case_id": "E1-input",
+        "case_selection_revision": "A-schema-input/1",
+        "checkpoint": "K2",
+        "clock_setup_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "expected_outcome": "success",
+        "freq_hz": {
+          "core": 1000000000,
+          "dram": 1000000000,
+          "noc": 1000000000
+        },
+        "frequency_ratio": 1.0,
+        "graph_hash": "sha256:6d8c371a4863af025f829ebd3325e385f89625579ba633cb993c66c1ca12e15c",
+        "hardware_spec": {
+          "clock_domains": {
+            "core": {
+              "freq_hz": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: core target clock; no fitted efficiency; a design input, not a measured claim.",
+                "source": null,
+                "unit": "Hz",
+                "value": 1000000000.0
+              },
+              "scales_with_core": true
+            },
+            "dram": {
+              "freq_hz": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: dram target clock; no fitted efficiency; a design input, not a measured claim.",
+                "source": null,
+                "unit": "Hz",
+                "value": 1000000000.0
+              },
+              "scales_with_core": false
+            },
+            "noc": {
+              "freq_hz": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: noc target clock; no fitted efficiency; a design input, not a measured claim.",
+                "source": null,
+                "unit": "Hz",
+                "value": 1000000000.0
+              },
+              "scales_with_core": false
+            }
+          },
+          "cores": {
+            "core_type": {
+              "dma": {
+                "bytes_per_cycle": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: aggregate per-core DMA delivery; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "byte/cycle",
+                  "value": 256.0
+                },
+                "engines": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: DMA issue engines; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 4.0
+                },
+                "max_outstanding": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: DMA outstanding limit; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "request_bytes": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: DMA request granularity; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "byte",
+                  "value": 256.0
+                }
+              },
+              "job_overhead_cycles": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: core-domain job issue overhead; U-C0 unrepresented; a design input, not a measured claim.",
+                "source": null,
+                "unit": "cycle",
+                "value": 32.0
+              },
+              "matrix_engine": {
+                "accumulator_bytes": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: FP32 partial-sum storage; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "byte",
+                  "value": 262144.0
+                },
+                "array": {
+                  "cols": {
+                    "date": null,
+                    "kind": "stipulation",
+                    "provenance": null,
+                    "rationale": "B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim.",
+                    "source": null,
+                    "unit": "count",
+                    "value": 256.0
+                  },
+                  "rows": {
+                    "date": null,
+                    "kind": "stipulation",
+                    "provenance": null,
+                    "rationale": "B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim.",
+                    "source": null,
+                    "unit": "count",
+                    "value": 256.0
+                  }
+                },
+                "dataflows": [
+                  "weight_stationary"
+                ],
+                "macs_per_cycle": {
+                  "bf16": {
+                    "date": null,
+                    "kind": "stipulation",
+                    "provenance": null,
+                    "rationale": "B1 hardware proposal, pending Javid: dense throughput per core; no sparsity multiplier; a design input, not a measured claim.",
+                    "source": null,
+                    "unit": "MAC/cycle",
+                    "value": 65536.0
+                  }
+                },
+                "operand_buffer_bytes": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: array operand staging budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "byte",
+                  "value": 1048576.0
+                },
+                "operand_bytes_per_cycle": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: core-domain operand delivery; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "byte/cycle",
+                  "value": 1024.0
+                }
+              },
+              "sram": {
+                "banks": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: local SRAM banking; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "bytes": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: paired SRAM choice with 1.0 pJ/byte; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "byte",
+                  "value": 16777216.0
+                },
+                "bytes_per_cycle_per_bank": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: local SRAM bank bandwidth; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "byte/cycle",
+                  "value": 32.0
+                }
+              },
+              "vector_engine": {
+                "ops_per_cycle": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: abstract scalar vector rate, not transcendental validation; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "op/cycle",
+                  "value": 256.0
+                }
+              }
+            },
+            "grid": {
+              "cols": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim.",
+                "source": null,
+                "unit": "count",
+                "value": 2.0
+              },
+              "rows": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim.",
+                "source": null,
+                "unit": "count",
+                "value": 2.0
+              }
+            }
+          },
+          "design_status": "proposed",
+          "energy": {
+            "pj_per_byte": {
+              "dram": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.",
+                "source": null,
+                "unit": "pJ/byte",
+                "value": 20.0
+              },
+              "noc_hop": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.",
+                "source": null,
+                "unit": "pJ/byte",
+                "value": 2.0
+              },
+              "sram": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: SRAM pair 16777216 bytes/1.0 pJ per byte; a design input, not a measured claim.",
+                "source": null,
+                "unit": "pJ/byte",
+                "value": 1.0
+              }
+            },
+            "pj_per_mac": {
+              "bf16": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: co-design energy assumption, no validation; a design input, not a measured claim.",
+                "source": null,
+                "unit": "pJ/MAC",
+                "value": 0.4
+              }
+            },
+            "voltage_ratio": {
+              "1.0": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: base voltage normalization only; nonbase energy unknown; a design input, not a measured claim.",
+                "source": null,
+                "unit": "ratio",
+                "value": 1.0
+              }
+            }
+          },
+          "formats": {
+            "bf16": {
+              "accumulate_bytes": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: FP32 accumulation; a design input, not a measured claim.",
+                "source": null,
+                "unit": "byte",
+                "value": 4.0
+              },
+              "block_scale_bytes": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: plain format with no block-scale payload; a design input, not a measured claim.",
+                "source": null,
+                "unit": "byte",
+                "value": 0.0
+              },
+              "bytes": 2.0
+            }
+          },
+          "id": "npu-l4",
+          "memory": {
+            "controllers": [
+              {
+                "attach": [
+                  0,
+                  0
+                ],
+                "noc_credits": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "page_policy": "open",
+                "read_queue_depth": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "scheduler": "fr_fcfs",
+                "write_queue_depth": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                }
+              },
+              {
+                "attach": [
+                  0,
+                  1
+                ],
+                "noc_credits": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "page_policy": "open",
+                "read_queue_depth": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "scheduler": "fr_fcfs",
+                "write_queue_depth": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                }
+              },
+              {
+                "attach": [
+                  1,
+                  0
+                ],
+                "noc_credits": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "page_policy": "open",
+                "read_queue_depth": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "scheduler": "fr_fcfs",
+                "write_queue_depth": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                }
+              },
+              {
+                "attach": [
+                  1,
+                  1
+                ],
+                "noc_credits": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "page_policy": "open",
+                "read_queue_depth": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                },
+                "scheduler": "fr_fcfs",
+                "write_queue_depth": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 32.0
+                }
+              }
+            ],
+            "dram": {
+              "bw_bytes_per_s": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: total chip bandwidth; never multiply again by channels; a design input, not a measured claim.",
+                "source": null,
+                "unit": "byte/s",
+                "value": 1000000000000.0
+              },
+              "capacity_bytes": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: decimal 32 GB capacity; a design input, not a measured claim.",
+                "source": null,
+                "unit": "byte",
+                "value": 32000000000.0
+              },
+              "channels": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: logical DRAM channels; two per listed controller; a design input, not a measured claim.",
+                "source": null,
+                "unit": "count",
+                "value": 8.0
+              },
+              "organization": {
+                "bank_groups": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: bank groups per rank; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 4.0
+                },
+                "banks_per_group": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: banks per bank group; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 4.0
+                },
+                "ranks": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: ranks per logical channel; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "count",
+                  "value": 1.0
+                },
+                "row_bytes": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: row payload bytes; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "byte",
+                  "value": 2048.0
+                }
+              },
+              "standard": "hbm2e",
+              "timing": {
+                "t_cl_cycles": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "cycle",
+                  "value": 16.0
+                },
+                "t_rcd_cycles": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "cycle",
+                  "value": 16.0
+                },
+                "t_refi_cycles": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "cycle",
+                  "value": 3900.0
+                },
+                "t_rfc_cycles": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "cycle",
+                  "value": 350.0
+                },
+                "t_rp_cycles": {
+                  "date": null,
+                  "kind": "stipulation",
+                  "provenance": null,
+                  "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+                  "source": null,
+                  "unit": "cycle",
+                  "value": 16.0
+                }
+              },
+              "timing_preset": null,
+              "timing_source": "direct"
+            },
+            "interleave": {
+              "granularity_bytes": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: address interleave granularity; a design input, not a measured claim.",
+                "source": null,
+                "unit": "byte",
+                "value": 256.0
+              },
+              "scheme": "round_robin"
+            }
+          },
+          "nocs": [
+            {
+              "buffer_flits": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: NoC input buffering; a design input, not a measured claim.",
+                "source": null,
+                "unit": "count",
+                "value": 8.0
+              },
+              "direction": "bidirectional",
+              "link_bytes_per_cycle": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: NoC link width; a design input, not a measured claim.",
+                "source": null,
+                "unit": "byte/cycle",
+                "value": 64.0
+              },
+              "router_latency_cycles": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: NoC router pipeline; a design input, not a measured claim.",
+                "source": null,
+                "unit": "cycle",
+                "value": 2.0
+              },
+              "topology": "mesh",
+              "virtual_channels": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: NoC virtual channels; a design input, not a measured claim.",
+                "source": null,
+                "unit": "count",
+                "value": 4.0
+              }
+            }
+          ],
+          "shared_sram": null,
+          "static_power_w": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: chip static power budget; no energy model in U2; a design input, not a measured claim.",
+            "source": null,
+            "unit": "W",
+            "value": 40.0
+          },
+          "sync": {
+            "barrier_latency_cycles": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: NoC-domain barrier latency; U-C0 unrepresented; a design input, not a measured claim.",
+              "source": null,
+              "unit": "cycle",
+              "value": 32.0
+            },
+            "mechanism": "hardware_barrier"
+          },
+          "tdp_w": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: chip design power budget, not board power measurement; a design input, not a measured claim.",
+            "source": null,
+            "unit": "W",
+            "value": 300.0
+          }
+        },
+        "hardware_spec_hash": "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9",
+        "initial_state": "fixture_cold",
+        "point_hash": "sha256:3a6a4d450ff2e3f0fe5688ec6d1dd6a07467843f0cfab5840110f91e20d667de",
+        "priming_iterations": 0,
+        "scope": "kernel_fixture",
+        "seed": 0
+      }
+    ],
+    "format": "uarch-native-test-profile/1",
+    "owner": "Lane A schema prototype; B corpus freeze pending",
+    "profile_hash": "sha256:842543e9ec21b98a61c92076fc4b2119b4ed661355f8960ec846fb304cd39584",
+    "semantics_revision": "U0011-stage2/1"
+  },
+  "protocol": "uarch-engine/3",
+  "rank": {
+    "collectives": "excluded",
+    "equivalent_ranks": [
+      0
+    ],
+    "kind": "balanced_tp_representative",
+    "rank_index": 0,
+    "tp": 1
+  },
+  "registry": {
+    "format": "uarch-native-test-registry/1",
+    "registry_hash": "sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2",
+    "semantics_revision": "U0011-stage2/1",
+    "test_only_specs": []
+  },
+  "request_hash": null,
+  "seed": 0,
+  "state_model": "fixed_delay/1",
+  "workload_closure": {
+    "admission": {
+      "case_id": "E1-input",
+      "checkpoint": "K2",
+      "eligibility": "verification_only",
+      "invocation": "test",
+      "profile_hash": "sha256:842543e9ec21b98a61c92076fc4b2119b4ed661355f8960ec846fb304cd39584"
+    },
+    "assumptions": {
+      "arbitration": "fifo-ready/1",
+      "assumptions_hash": "sha256:53defdf4c304d46931b443cc86bf5ff2a36ff703d2c52aba319c3a97df0e0956",
+      "bank_placement": "contiguous-equal-regions/1",
+      "compute": "ws-stage-overhead-wave-drain/1",
+      "format": "uarch-mapped-assumptions/1",
+      "hbm_addressing": "stripe256-channel8-controller-pairs/1",
+      "limitations": [
+        "schema-only inputs; not runtime evidence",
+        "STUB; unknown accuracy; unverified energy"
+      ],
+      "owner_enumeration": "native-owners/1",
+      "semantics_revision": "U0011-stage2/1",
+      "transport": "E4-named-edges-rational-service/2"
+    },
+    "assumptions_hash": "sha256:53defdf4c304d46931b443cc86bf5ff2a36ff703d2c52aba319c3a97df0e0956",
+    "bundle_hash": "sha256:4a1446b6a5f967736374e74cc1e0cbeb37af7c5eaccb16a84c3735fbea01ea04",
+    "format": "uarch-prepared/3",
+    "hardware_spec": {
+      "clock_domains": {
+        "core": {
+          "freq_hz": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: core target clock; no fitted efficiency; a design input, not a measured claim.",
+            "source": null,
+            "unit": "Hz",
+            "value": 1000000000.0
+          },
+          "scales_with_core": true
+        },
+        "dram": {
+          "freq_hz": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: dram target clock; no fitted efficiency; a design input, not a measured claim.",
+            "source": null,
+            "unit": "Hz",
+            "value": 1000000000.0
+          },
+          "scales_with_core": false
+        },
+        "noc": {
+          "freq_hz": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: noc target clock; no fitted efficiency; a design input, not a measured claim.",
+            "source": null,
+            "unit": "Hz",
+            "value": 1000000000.0
+          },
+          "scales_with_core": false
+        }
+      },
+      "cores": {
+        "core_type": {
+          "dma": {
+            "bytes_per_cycle": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: aggregate per-core DMA delivery; a design input, not a measured claim.",
+              "source": null,
+              "unit": "byte/cycle",
+              "value": 256.0
+            },
+            "engines": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: DMA issue engines; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 4.0
+            },
+            "max_outstanding": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: DMA outstanding limit; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "request_bytes": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: DMA request granularity; a design input, not a measured claim.",
+              "source": null,
+              "unit": "byte",
+              "value": 256.0
+            }
+          },
+          "job_overhead_cycles": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: core-domain job issue overhead; U-C0 unrepresented; a design input, not a measured claim.",
+            "source": null,
+            "unit": "cycle",
+            "value": 32.0
+          },
+          "matrix_engine": {
+            "accumulator_bytes": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: FP32 partial-sum storage; a design input, not a measured claim.",
+              "source": null,
+              "unit": "byte",
+              "value": 262144.0
+            },
+            "array": {
+              "cols": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim.",
+                "source": null,
+                "unit": "count",
+                "value": 256.0
+              },
+              "rows": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim.",
+                "source": null,
+                "unit": "count",
+                "value": 256.0
+              }
+            },
+            "dataflows": [
+              "weight_stationary"
+            ],
+            "macs_per_cycle": {
+              "bf16": {
+                "date": null,
+                "kind": "stipulation",
+                "provenance": null,
+                "rationale": "B1 hardware proposal, pending Javid: dense throughput per core; no sparsity multiplier; a design input, not a measured claim.",
+                "source": null,
+                "unit": "MAC/cycle",
+                "value": 65536.0
+              }
+            },
+            "operand_buffer_bytes": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: array operand staging budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "byte",
+              "value": 1048576.0
+            },
+            "operand_bytes_per_cycle": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: core-domain operand delivery; a design input, not a measured claim.",
+              "source": null,
+              "unit": "byte/cycle",
+              "value": 1024.0
+            }
+          },
+          "sram": {
+            "banks": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: local SRAM banking; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "bytes": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: paired SRAM choice with 1.0 pJ/byte; a design input, not a measured claim.",
+              "source": null,
+              "unit": "byte",
+              "value": 16777216.0
+            },
+            "bytes_per_cycle_per_bank": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: local SRAM bank bandwidth; a design input, not a measured claim.",
+              "source": null,
+              "unit": "byte/cycle",
+              "value": 32.0
+            }
+          },
+          "vector_engine": {
+            "ops_per_cycle": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: abstract scalar vector rate, not transcendental validation; a design input, not a measured claim.",
+              "source": null,
+              "unit": "op/cycle",
+              "value": 256.0
+            }
+          }
+        },
+        "grid": {
+          "cols": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim.",
+            "source": null,
+            "unit": "count",
+            "value": 2.0
+          },
+          "rows": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim.",
+            "source": null,
+            "unit": "count",
+            "value": 2.0
+          }
+        }
+      },
+      "design_status": "proposed",
+      "energy": {
+        "pj_per_byte": {
+          "dram": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.",
+            "source": null,
+            "unit": "pJ/byte",
+            "value": 20.0
+          },
+          "noc_hop": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.",
+            "source": null,
+            "unit": "pJ/byte",
+            "value": 2.0
+          },
+          "sram": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: SRAM pair 16777216 bytes/1.0 pJ per byte; a design input, not a measured claim.",
+            "source": null,
+            "unit": "pJ/byte",
+            "value": 1.0
+          }
+        },
+        "pj_per_mac": {
+          "bf16": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: co-design energy assumption, no validation; a design input, not a measured claim.",
+            "source": null,
+            "unit": "pJ/MAC",
+            "value": 0.4
+          }
+        },
+        "voltage_ratio": {
+          "1.0": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: base voltage normalization only; nonbase energy unknown; a design input, not a measured claim.",
+            "source": null,
+            "unit": "ratio",
+            "value": 1.0
+          }
+        }
+      },
+      "formats": {
+        "bf16": {
+          "accumulate_bytes": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: FP32 accumulation; a design input, not a measured claim.",
+            "source": null,
+            "unit": "byte",
+            "value": 4.0
+          },
+          "block_scale_bytes": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: plain format with no block-scale payload; a design input, not a measured claim.",
+            "source": null,
+            "unit": "byte",
+            "value": 0.0
+          },
+          "bytes": 2.0
+        }
+      },
+      "id": "npu-l4",
+      "memory": {
+        "controllers": [
+          {
+            "attach": [
+              0,
+              0
+            ],
+            "noc_credits": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "page_policy": "open",
+            "read_queue_depth": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "scheduler": "fr_fcfs",
+            "write_queue_depth": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            }
+          },
+          {
+            "attach": [
+              0,
+              1
+            ],
+            "noc_credits": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "page_policy": "open",
+            "read_queue_depth": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "scheduler": "fr_fcfs",
+            "write_queue_depth": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            }
+          },
+          {
+            "attach": [
+              1,
+              0
+            ],
+            "noc_credits": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "page_policy": "open",
+            "read_queue_depth": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "scheduler": "fr_fcfs",
+            "write_queue_depth": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            }
+          },
+          {
+            "attach": [
+              1,
+              1
+            ],
+            "noc_credits": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "page_policy": "open",
+            "read_queue_depth": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            },
+            "scheduler": "fr_fcfs",
+            "write_queue_depth": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 32.0
+            }
+          }
+        ],
+        "dram": {
+          "bw_bytes_per_s": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: total chip bandwidth; never multiply again by channels; a design input, not a measured claim.",
+            "source": null,
+            "unit": "byte/s",
+            "value": 1000000000000.0
+          },
+          "capacity_bytes": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: decimal 32 GB capacity; a design input, not a measured claim.",
+            "source": null,
+            "unit": "byte",
+            "value": 32000000000.0
+          },
+          "channels": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: logical DRAM channels; two per listed controller; a design input, not a measured claim.",
+            "source": null,
+            "unit": "count",
+            "value": 8.0
+          },
+          "organization": {
+            "bank_groups": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: bank groups per rank; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 4.0
+            },
+            "banks_per_group": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: banks per bank group; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 4.0
+            },
+            "ranks": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: ranks per logical channel; a design input, not a measured claim.",
+              "source": null,
+              "unit": "count",
+              "value": 1.0
+            },
+            "row_bytes": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: row payload bytes; a design input, not a measured claim.",
+              "source": null,
+              "unit": "byte",
+              "value": 2048.0
+            }
+          },
+          "standard": "hbm2e",
+          "timing": {
+            "t_cl_cycles": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+              "source": null,
+              "unit": "cycle",
+              "value": 16.0
+            },
+            "t_rcd_cycles": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+              "source": null,
+              "unit": "cycle",
+              "value": 16.0
+            },
+            "t_refi_cycles": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+              "source": null,
+              "unit": "cycle",
+              "value": 3900.0
+            },
+            "t_rfc_cycles": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+              "source": null,
+              "unit": "cycle",
+              "value": 350.0
+            },
+            "t_rp_cycles": {
+              "date": null,
+              "kind": "stipulation",
+              "provenance": null,
+              "rationale": "B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.",
+              "source": null,
+              "unit": "cycle",
+              "value": 16.0
+            }
+          },
+          "timing_preset": null,
+          "timing_source": "direct"
+        },
+        "interleave": {
+          "granularity_bytes": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: address interleave granularity; a design input, not a measured claim.",
+            "source": null,
+            "unit": "byte",
+            "value": 256.0
+          },
+          "scheme": "round_robin"
+        }
+      },
+      "nocs": [
+        {
+          "buffer_flits": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: NoC input buffering; a design input, not a measured claim.",
+            "source": null,
+            "unit": "count",
+            "value": 8.0
+          },
+          "direction": "bidirectional",
+          "link_bytes_per_cycle": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: NoC link width; a design input, not a measured claim.",
+            "source": null,
+            "unit": "byte/cycle",
+            "value": 64.0
+          },
+          "router_latency_cycles": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: NoC router pipeline; a design input, not a measured claim.",
+            "source": null,
+            "unit": "cycle",
+            "value": 2.0
+          },
+          "topology": "mesh",
+          "virtual_channels": {
+            "date": null,
+            "kind": "stipulation",
+            "provenance": null,
+            "rationale": "B1 hardware proposal, pending Javid: NoC virtual channels; a design input, not a measured claim.",
+            "source": null,
+            "unit": "count",
+            "value": 4.0
+          }
+        }
+      ],
+      "shared_sram": null,
+      "static_power_w": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "B1 hardware proposal, pending Javid: chip static power budget; no energy model in U2; a design input, not a measured claim.",
+        "source": null,
+        "unit": "W",
+        "value": 40.0
+      },
+      "sync": {
+        "barrier_latency_cycles": {
+          "date": null,
+          "kind": "stipulation",
+          "provenance": null,
+          "rationale": "B1 hardware proposal, pending Javid: NoC-domain barrier latency; U-C0 unrepresented; a design input, not a measured claim.",
+          "source": null,
+          "unit": "cycle",
+          "value": 32.0
+        },
+        "mechanism": "hardware_barrier"
+      },
+      "tdp_w": {
+        "date": null,
+        "kind": "stipulation",
+        "provenance": null,
+        "rationale": "B1 hardware proposal, pending Javid: chip design power budget, not board power measurement; a design input, not a measured claim.",
+        "source": null,
+        "unit": "W",
+        "value": 300.0
+      }
+    },
+    "hardware_spec_hash": "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9",
+    "mapping_policy": {
+      "buffer_depth": 1,
+      "name": "explicit-fixed-delays",
+      "version": "1"
+    },
+    "mapping_scope": "task_graph",
+    "points": [
+      {
+        "frequency_ratio": 1.0,
+        "identity": {
+          "fixture_id": "E1-input",
+          "kind": "fixture"
+        },
+        "initial_state": "fixture_cold",
+        "payload_hash": "sha256:3a6a4d450ff2e3f0fe5688ec6d1dd6a07467843f0cfab5840110f91e20d667de",
+        "point_id": "e1-input",
+        "priming_iterations": 0,
+        "task_graph": {
+          "arbitration": "fifo-ready/1",
+          "buffers": [],
+          "coverage": [],
+          "dependencies": [
+            {
+              "after": "c",
+              "before": "a"
+            },
+            {
+              "after": "c",
+              "before": "b"
+            }
+          ],
+          "format": "uarch-taskgraph/1",
+          "graph_hash": "sha256:6d8c371a4863af025f829ebd3325e385f89625579ba633cb993c66c1ca12e15c",
+          "jobs": [
+            {
+              "duration_ps": 3000,
+              "id": "a",
+              "kind": "fixed_delay",
+              "owner_id": 0
+            },
+            {
+              "duration_ps": 5000,
+              "id": "b",
+              "kind": "fixed_delay",
+              "owner_id": 1
+            },
+            {
+              "duration_ps": 2000,
+              "id": "c",
+              "kind": "fixed_delay",
+              "owner_id": 0
+            }
+          ],
+          "routes": []
+        }
+      }
+    ],
+    "producer": {
+      "implementation_hash": "sha256:bd487ffdf5f946651b10f0706309065c47ed6b53309de7af544adb5228d7ca25",
+      "name": "A-schema-input-fixture",
+      "version": "1"
+    },
+    "rank": {
+      "collectives": "excluded",
+      "equivalent_ranks": [
+        0
+      ],
+      "kind": "balanced_tp_representative",
+      "rank_index": 0,
+      "tp": 1
+    },
+    "scope": {
+      "kind": "kernel_fixture",
+      "owner_ids": [
+        0,
+        1
+      ]
+    },
+    "source": null
+  }
+}

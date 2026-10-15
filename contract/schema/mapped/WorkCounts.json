@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cast_ops": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Cast Ops",
+      "type": "integer"
+    },
+    "completed_mac_count": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Completed Mac Count",
+      "type": "integer"
+    },
+    "format": {
+      "const": "uarch-native-work-counts/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "issued_matrix_ops": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Issued Matrix Ops",
+      "type": "integer"
+    },
+    "vector_arithmetic_ops": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Vector Arithmetic Ops",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "format",
+    "completed_mac_count",
+    "issued_matrix_ops",
+    "vector_arithmetic_ops",
+    "cast_ops"
+  ],
+  "title": "WorkCounts",
+  "type": "object"
+}

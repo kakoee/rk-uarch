@@ -1,0 +1,93 @@
+{
+  "$defs": {
+    "NumericLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RationalValue"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "path",
+        "value"
+      ],
+      "title": "NumericLeaf",
+      "type": "object"
+    },
+    "RationalValue": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "exclusiveMaximum": 340282366920938463463374607431768211456,
+          "minimum": 1,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "numerator": {
+          "exclusiveMaximum": 340282366920938463463374607431768211456,
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "title": "RationalValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Complete scalar projection; includes source metadata, never implicit numeric defaults.",
+  "properties": {
+    "format": {
+      "const": "uarch-resolved-hardware/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "hardware_spec_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Hardware Spec Hash",
+      "type": "string"
+    },
+    "leaves": {
+      "items": {
+        "$ref": "#/$defs/NumericLeaf"
+      },
+      "title": "Leaves",
+      "type": "array"
+    }
+  },
+  "required": [
+    "format",
+    "hardware_spec_hash",
+    "leaves"
+  ],
+  "title": "ResolvedMappedHardware",
+  "type": "object"
+}

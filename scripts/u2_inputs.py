@@ -3,20 +3,28 @@
 The files are existing shared carriers plus a tooling inventory, not a new runtime schema.
 """
 
-from __future__ import annotations
+import os
+import sys
 
-import argparse
-import json
-from pathlib import Path
-from typing import Any, NamedTuple
+if __name__ == "__main__" and not __package__:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import yaml
-from uarch_contract.exports import ComponentPrecision, ExecutionModelInput
-from uarch_contract.hardware import HardwareSpec
-from uarch_contract.hashing import artifact_identity, content_hash, strict_json_loads
+from scripts import u2_import_guard  # noqa: E402
 
-from rkuarch.hw.export import export_component, project_for_oracle
-from scripts import vendor_rk as vendor
+u2_import_guard.check_import_roots()
+
+import argparse  # noqa: E402
+import json  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Any, NamedTuple  # noqa: E402
+
+import yaml  # noqa: E402
+from uarch_contract.exports import ComponentPrecision, ExecutionModelInput  # noqa: E402
+from uarch_contract.hardware import HardwareSpec  # noqa: E402
+from uarch_contract.hashing import artifact_identity, content_hash, strict_json_loads  # noqa: E402
+
+from rkuarch.hw.export import export_component, project_for_oracle  # noqa: E402
+from scripts import vendor_rk as vendor  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 ADOPTED = ROOT / "contract/vendor" / ("rk-sim@" + vendor.PIN)
@@ -119,9 +127,10 @@ def prepare_inputs(destination: Path) -> str:
         files["historical-source/" + name] = data
         if name.startswith("model_shapes/"):
             files[name] = data
-    files["support-files.json"] = vendor.canonical(
-        {str(p.relative_to(ROOT)): vendor.digest(p.read_bytes()) for p in support_files()}
-    )
+    from scripts import u2_support
+
+    files["support-policy.json"] = vendor.canonical(u2_support.POLICY)
+    files["support-files.json"] = vendor.canonical(u2_support.inventory(root=ROOT))
     files["PIN"] = (vendor.PIN + "\n").encode()
     files["ADOPTED-MANIFEST-SHA256"] = (ADOPTED_MANIFEST + "\n").encode()
     manifest = "".join(
@@ -164,7 +173,21 @@ def load_inputs(directory: Path, expected_manifest: str, *, check_support: bool 
         raise ValueError("input pin")
     if (directory / "ADOPTED-MANIFEST-SHA256").read_text().strip() != ADOPTED_MANIFEST:
         raise ValueError("input adopted identity")
-    if check_support:
+    support_policy = None
+    if "support-policy.json" in named:
+        from scripts import u2_support
+
+        support_policy = strict_json_loads((directory / "support-policy.json").read_bytes())
+        if support_policy != u2_support.POLICY:
+            raise ValueError("unrecognized input support policy")
+    if check_support and support_policy is not None:
+        u2_support.verify(
+            strict_json_loads((directory / "support-files.json").read_bytes()),
+            policy=support_policy,
+            root=ROOT,
+        )
+    elif check_support:
+        # Historical unversioned inventories retain the complete original rule.
         support = strict_json_loads((directory / "support-files.json").read_bytes())
         if set(support) != {p.relative_to(ROOT).as_posix() for p in support_files()}:
             raise ValueError("input support inventory changed")

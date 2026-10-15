@@ -1,0 +1,60 @@
+{
+  "$defs": {
+    "RegistryEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "rationale": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "hardware_spec_hash",
+        "rationale"
+      ],
+      "title": "RegistryEntry",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "uarch-native-test-registry/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "registry_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Registry Hash",
+      "type": "string"
+    },
+    "semantics_revision": {
+      "const": "U0011-stage2/1",
+      "title": "Semantics Revision",
+      "type": "string"
+    },
+    "test_only_specs": {
+      "items": {
+        "$ref": "#/$defs/RegistryEntry"
+      },
+      "title": "Test Only Specs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "format",
+    "registry_hash",
+    "semantics_revision",
+    "test_only_specs"
+  ],
+  "title": "NativeTestRegistry",
+  "type": "object"
+}

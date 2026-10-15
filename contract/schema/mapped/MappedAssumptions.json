@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "arbitration": {
+      "const": "fifo-ready/1",
+      "title": "Arbitration",
+      "type": "string"
+    },
+    "assumptions_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Assumptions Hash",
+      "type": "string"
+    },
+    "bank_placement": {
+      "const": "contiguous-equal-regions/1",
+      "title": "Bank Placement",
+      "type": "string"
+    },
+    "compute": {
+      "const": "ws-stage-overhead-wave-drain/1",
+      "title": "Compute",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-mapped-assumptions/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "hbm_addressing": {
+      "const": "stripe256-channel8-controller-pairs/1",
+      "title": "Hbm Addressing",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "owner_enumeration": {
+      "const": "native-owners/1",
+      "title": "Owner Enumeration",
+      "type": "string"
+    },
+    "semantics_revision": {
+      "const": "U0011-stage2/1",
+      "title": "Semantics Revision",
+      "type": "string"
+    },
+    "transport": {
+      "const": "E4-named-edges-rational-service/2",
+      "title": "Transport",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "assumptions_hash",
+    "semantics_revision",
+    "owner_enumeration",
+    "arbitration",
+    "hbm_addressing",
+    "bank_placement",
+    "compute",
+    "transport",
+    "limitations"
+  ],
+  "title": "MappedAssumptions",
+  "type": "object"
+}

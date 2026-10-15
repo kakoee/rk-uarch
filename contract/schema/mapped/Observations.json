@@ -1,0 +1,1098 @@
+{
+  "$defs": {
+    "AllocationObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "allocate_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Allocate Ps",
+          "type": "integer"
+        },
+        "buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Buffer Id",
+          "type": "string"
+        },
+        "free_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Free Ps"
+        },
+        "initially_live": {
+          "title": "Initially Live",
+          "type": "boolean"
+        },
+        "last_consumer_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Last Consumer Ids",
+          "type": "array"
+        },
+        "offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset Bytes",
+          "type": "integer"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        },
+        "size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "space": {
+          "enum": [
+            "hbm",
+            "sram",
+            "accumulator"
+          ],
+          "title": "Space",
+          "type": "string"
+        }
+      },
+      "required": [
+        "buffer_id",
+        "space",
+        "owner_id",
+        "offset_bytes",
+        "size_bytes",
+        "allocate_ps",
+        "free_ps",
+        "initially_live",
+        "last_consumer_ids"
+      ],
+      "title": "AllocationObservation",
+      "type": "object"
+    },
+    "CriticalInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "enum": [
+            "compute",
+            "memory",
+            "noc",
+            "sync",
+            "overhead"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "cause_job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Cause Job Id",
+          "type": "string"
+        },
+        "end_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "End Ps",
+          "type": "integer"
+        },
+        "limiting_resource_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Limiting Resource Id",
+          "type": "integer"
+        },
+        "predecessor_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Predecessor Id"
+        },
+        "start_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start Ps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start_ps",
+        "end_ps",
+        "cause_job_id",
+        "predecessor_id",
+        "limiting_resource_id",
+        "category"
+      ],
+      "title": "CriticalInterval",
+      "type": "object"
+    },
+    "DmaObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "complete_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Complete Ps",
+          "type": "integer"
+        },
+        "credit_acquire_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Credit Acquire Ps"
+        },
+        "credit_release_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Credit Release Ps"
+        },
+        "destination_buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Destination Buffer Id",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "read",
+            "write",
+            "unicast"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "dma_engine_id": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dma Engine Id"
+        },
+        "issue_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Issue Ps",
+          "type": "integer"
+        },
+        "job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "payload_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "request_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "route_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Route Id",
+          "type": "string"
+        },
+        "source_buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Source Buffer Id",
+          "type": "string"
+        },
+        "transaction_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Transaction Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "request_id",
+        "job_id",
+        "dma_engine_id",
+        "direction",
+        "source_buffer_id",
+        "destination_buffer_id",
+        "payload_bytes",
+        "transaction_bytes",
+        "credit_acquire_ps",
+        "issue_ps",
+        "complete_ps",
+        "credit_release_ps",
+        "route_id"
+      ],
+      "title": "DmaObservation",
+      "type": "object"
+    },
+    "EventObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "event_seq": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Event Seq",
+          "type": "integer"
+        },
+        "job_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Job Id"
+        },
+        "kind": {
+          "enum": [
+            "TASK_READY",
+            "COMPUTE_DONE",
+            "DMA_ISSUE",
+            "DMA_DONE",
+            "NOC_HEAD",
+            "NOC_TAIL",
+            "MEM_REQ",
+            "MEM_RESP",
+            "MEM_TICK",
+            "SYNC_ARRIVE",
+            "BARRIER_RELEASE",
+            "STAT_SAMPLE",
+            "END"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "observation_ordinal": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Observation Ordinal",
+          "type": "integer"
+        },
+        "phase": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Phase",
+          "type": "integer"
+        },
+        "t_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "T Ps",
+          "type": "integer"
+        },
+        "target_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Target Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_seq",
+        "observation_ordinal",
+        "t_ps",
+        "phase",
+        "target_id",
+        "kind",
+        "job_id"
+      ],
+      "title": "EventObservation",
+      "type": "object"
+    },
+    "Extent": {
+      "additionalProperties": false,
+      "properties": {
+        "K": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "K",
+          "type": "integer"
+        },
+        "M": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "M",
+          "type": "integer"
+        },
+        "N": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "N",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "M",
+        "K",
+        "N"
+      ],
+      "title": "Extent",
+      "type": "object"
+    },
+    "JobObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_predecessor_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Blocking Predecessor Ids",
+          "type": "array"
+        },
+        "cast_ops": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Cast Ops",
+          "type": "integer"
+        },
+        "end_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "End Ps",
+          "type": "integer"
+        },
+        "group_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Group Id"
+        },
+        "issued_matrix_ops": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Issued Matrix Ops",
+          "type": "integer"
+        },
+        "job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "op_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Op Id"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        },
+        "ready_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Ready Ps",
+          "type": "integer"
+        },
+        "repeat_index": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Repeat Index"
+        },
+        "start_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start Ps",
+          "type": "integer"
+        },
+        "tile_extents": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Extent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tile_origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Tile"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "useful_matrix_ops": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Useful Matrix Ops",
+          "type": "integer"
+        },
+        "vector_arithmetic_ops": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Vector Arithmetic Ops",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "job_id",
+        "op_id",
+        "group_id",
+        "repeat_index",
+        "tile_origin",
+        "tile_extents",
+        "ready_ps",
+        "start_ps",
+        "end_ps",
+        "owner_id",
+        "blocking_predecessor_ids",
+        "useful_matrix_ops",
+        "issued_matrix_ops",
+        "vector_arithmetic_ops",
+        "cast_ops"
+      ],
+      "title": "JobObservation",
+      "type": "object"
+    },
+    "Observed_AllocationObservation_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/AllocationObservation"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[AllocationObservation]",
+      "type": "object"
+    },
+    "Observed_CriticalInterval_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/CriticalInterval"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[CriticalInterval]",
+      "type": "object"
+    },
+    "Observed_DmaObservation_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/DmaObservation"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[DmaObservation]",
+      "type": "object"
+    },
+    "Observed_EventObservation_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/EventObservation"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[EventObservation]",
+      "type": "object"
+    },
+    "Observed_JobObservation_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/JobObservation"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[JobObservation]",
+      "type": "object"
+    },
+    "Observed_QueueObservation_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/QueueObservation"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[QueueObservation]",
+      "type": "object"
+    },
+    "Observed_ResourceInterval_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/ResourceInterval"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[ResourceInterval]",
+      "type": "object"
+    },
+    "Observed_TransferObservation_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/TransferObservation"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[TransferObservation]",
+      "type": "object"
+    },
+    "QueueObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "clock_domain": {
+          "enum": [
+            "core",
+            "noc",
+            "dram"
+          ],
+          "title": "Clock Domain",
+          "type": "string"
+        },
+        "enter_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Enter Ps",
+          "type": "integer"
+        },
+        "item_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "leave_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Leave Ps"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        },
+        "population": {
+          "enum": [
+            "waiting",
+            "service",
+            "inflight"
+          ],
+          "title": "Population",
+          "type": "string"
+        },
+        "queue_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Queue Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "queue_id",
+        "item_id",
+        "population",
+        "enter_ps",
+        "leave_ps",
+        "owner_id",
+        "clock_domain"
+      ],
+      "title": "QueueObservation",
+      "type": "object"
+    },
+    "ResourceInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "activity": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Activity",
+          "type": "string"
+        },
+        "end_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "End Ps",
+          "type": "integer"
+        },
+        "job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "limiting_resource_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Limiting Resource Id",
+          "type": "integer"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        },
+        "service_end_ps_ratio": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimeRatio"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "service_start_ps_ratio": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimeRatio"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start Ps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "owner_id",
+        "job_id",
+        "start_ps",
+        "end_ps",
+        "activity",
+        "limiting_resource_id",
+        "service_start_ps_ratio",
+        "service_end_ps_ratio"
+      ],
+      "title": "ResourceInterval",
+      "type": "object"
+    },
+    "Tile": {
+      "additionalProperties": false,
+      "properties": {
+        "K": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "K",
+          "type": "integer"
+        },
+        "M": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "M",
+          "type": "integer"
+        },
+        "N": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "N",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "M",
+        "K",
+        "N"
+      ],
+      "title": "Tile",
+      "type": "object"
+    },
+    "TimeRatio": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "exclusiveMaximum": 340282366920938463463374607431768211456,
+          "minimum": 1,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "numerator": {
+          "exclusiveMaximum": 340282366920938463463374607431768211456,
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "title": "TimeRatio",
+      "type": "object"
+    },
+    "TransferObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Boundary Id",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "read",
+            "write",
+            "unicast"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "enter_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Enter Ps",
+          "type": "integer"
+        },
+        "leave_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Leave Ps",
+          "type": "integer"
+        },
+        "payload_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "request_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "transaction_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Transaction Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "request_id",
+        "boundary_id",
+        "direction",
+        "payload_bytes",
+        "transaction_bytes",
+        "enter_ps",
+        "leave_ps"
+      ],
+      "title": "TransferObservation",
+      "type": "object"
+    },
+    "Unrepresented": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Reason",
+          "type": "string"
+        },
+        "status": {
+          "const": "unrepresented",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "reason"
+      ],
+      "title": "Unrepresented",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allocations": {
+      "discriminator": {
+        "mapping": {
+          "observed": "#/$defs/Observed_AllocationObservation_",
+          "unrepresented": "#/$defs/Unrepresented"
+        },
+        "propertyName": "status"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Observed_AllocationObservation_"
+        },
+        {
+          "$ref": "#/$defs/Unrepresented"
+        }
+      ],
+      "title": "Allocations"
+    },
+    "critical_path": {
+      "$ref": "#/$defs/Observed_CriticalInterval_"
+    },
+    "dma": {
+      "discriminator": {
+        "mapping": {
+          "observed": "#/$defs/Observed_DmaObservation_",
+          "unrepresented": "#/$defs/Unrepresented"
+        },
+        "propertyName": "status"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Observed_DmaObservation_"
+        },
+        {
+          "$ref": "#/$defs/Unrepresented"
+        }
+      ],
+      "title": "Dma"
+    },
+    "events": {
+      "$ref": "#/$defs/Observed_EventObservation_"
+    },
+    "format": {
+      "const": "uarch-native-observations/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "jobs": {
+      "$ref": "#/$defs/Observed_JobObservation_"
+    },
+    "queue_membership": {
+      "discriminator": {
+        "mapping": {
+          "observed": "#/$defs/Observed_QueueObservation_",
+          "unrepresented": "#/$defs/Unrepresented"
+        },
+        "propertyName": "status"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Observed_QueueObservation_"
+        },
+        {
+          "$ref": "#/$defs/Unrepresented"
+        }
+      ],
+      "title": "Queue Membership"
+    },
+    "resource_intervals": {
+      "$ref": "#/$defs/Observed_ResourceInterval_"
+    },
+    "transfers": {
+      "discriminator": {
+        "mapping": {
+          "observed": "#/$defs/Observed_TransferObservation_",
+          "unrepresented": "#/$defs/Unrepresented"
+        },
+        "propertyName": "status"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Observed_TransferObservation_"
+        },
+        {
+          "$ref": "#/$defs/Unrepresented"
+        }
+      ],
+      "title": "Transfers"
+    }
+  },
+  "required": [
+    "format",
+    "events",
+    "jobs",
+    "dma",
+    "transfers",
+    "allocations",
+    "queue_membership",
+    "resource_intervals",
+    "critical_path"
+  ],
+  "title": "Observations",
+  "type": "object"
+}

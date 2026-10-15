@@ -1,0 +1,876 @@
+{
+  "$defs": {
+    "Barrier": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "barrier",
+          "title": "Kind",
+          "type": "string"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        },
+        "participant_job_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Participant Job Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "participant_job_ids",
+        "owner_id"
+      ],
+      "title": "Barrier",
+      "type": "object"
+    },
+    "Buffer": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Alignment Bytes",
+          "type": "integer"
+        },
+        "bank": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bank"
+        },
+        "channel_id": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Channel Id"
+        },
+        "core_id": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Core Id"
+        },
+        "final_consumer_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Final Consumer Ids",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "initial_residency": {
+          "enum": [
+            "uninitialized",
+            "preloaded"
+          ],
+          "title": "Initial Residency",
+          "type": "string"
+        },
+        "offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset Bytes",
+          "type": "integer"
+        },
+        "op_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Op Id"
+        },
+        "operand": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Operand"
+        },
+        "producer_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Producer Id"
+        },
+        "size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "slot_index": {
+          "anyOf": [
+            {
+              "enum": [
+                0,
+                1
+              ],
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Slot Index"
+        },
+        "space": {
+          "enum": [
+            "hbm",
+            "sram",
+            "accumulator"
+          ],
+          "title": "Space",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "space",
+        "size_bytes",
+        "alignment_bytes",
+        "core_id",
+        "channel_id",
+        "offset_bytes",
+        "bank",
+        "op_id",
+        "operand",
+        "slot_index",
+        "initial_residency",
+        "producer_id",
+        "final_consumer_ids"
+      ],
+      "title": "Buffer",
+      "type": "object"
+    },
+    "BufferRange": {
+      "additionalProperties": false,
+      "properties": {
+        "buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Buffer Id",
+          "type": "string"
+        },
+        "offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset Bytes",
+          "type": "integer"
+        },
+        "size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "buffer_id",
+        "offset_bytes",
+        "size_bytes"
+      ],
+      "title": "BufferRange",
+      "type": "object"
+    },
+    "Compute": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulator_buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Accumulator Buffer Id",
+          "type": "string"
+        },
+        "accumulator_dtype": {
+          "const": "fp32",
+          "title": "Accumulator Dtype",
+          "type": "string"
+        },
+        "core_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Core Id",
+          "type": "integer"
+        },
+        "dataflow": {
+          "enum": [
+            "weight_stationary",
+            "output_stationary"
+          ],
+          "title": "Dataflow",
+          "type": "string"
+        },
+        "engine": {
+          "enum": [
+            "matrix",
+            "vector"
+          ],
+          "title": "Engine",
+          "type": "string"
+        },
+        "group_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Group Id"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "compute",
+          "title": "Kind",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "operand_buffers": {
+          "patternProperties": {
+            "\\S": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operand Buffers",
+          "type": "object"
+        },
+        "operand_dtypes": {
+          "patternProperties": {
+            "\\S": {
+              "enum": [
+                "bf16",
+                "fp16",
+                "fp32",
+                "fp8",
+                "int8"
+              ],
+              "type": "string"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operand Dtypes",
+          "type": "object"
+        },
+        "physical_extents": {
+          "$ref": "#/$defs/Extent"
+        },
+        "repeat_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Repeat Index",
+          "type": "integer"
+        },
+        "tile_extents": {
+          "$ref": "#/$defs/Extent"
+        },
+        "tile_origin": {
+          "$ref": "#/$defs/Tile"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "group_id",
+        "repeat_index",
+        "core_id",
+        "engine",
+        "tile_origin",
+        "tile_extents",
+        "physical_extents",
+        "operand_buffers",
+        "operand_dtypes",
+        "accumulator_buffer_id",
+        "accumulator_dtype",
+        "dataflow"
+      ],
+      "title": "Compute",
+      "type": "object"
+    },
+    "Coverage": {
+      "additionalProperties": false,
+      "properties": {
+        "group_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Group Id"
+        },
+        "job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "repeat_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Repeat Index",
+          "type": "integer"
+        },
+        "tile_extents": {
+          "$ref": "#/$defs/Extent"
+        },
+        "tile_origin": {
+          "$ref": "#/$defs/Tile"
+        }
+      },
+      "required": [
+        "job_id",
+        "op_id",
+        "group_id",
+        "repeat_index",
+        "tile_origin",
+        "tile_extents"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "Dependency": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "After",
+          "type": "string"
+        },
+        "before": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Before",
+          "type": "string"
+        }
+      },
+      "required": [
+        "before",
+        "after"
+      ],
+      "title": "Dependency",
+      "type": "object"
+    },
+    "Dma": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/$defs/BufferRange"
+        },
+        "direction": {
+          "enum": [
+            "read",
+            "write"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "dma_engine_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Dma Engine Id",
+          "type": "integer"
+        },
+        "fragments": {
+          "items": {
+            "$ref": "#/$defs/Fragment"
+          },
+          "minItems": 1,
+          "title": "Fragments",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "dma",
+          "title": "Kind",
+          "type": "string"
+        },
+        "op_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Op Id"
+        },
+        "source": {
+          "$ref": "#/$defs/BufferRange"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "dma_engine_id",
+        "direction",
+        "source",
+        "destination",
+        "fragments"
+      ],
+      "title": "Dma",
+      "type": "object"
+    },
+    "Extent": {
+      "additionalProperties": false,
+      "properties": {
+        "K": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "K",
+          "type": "integer"
+        },
+        "M": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "M",
+          "type": "integer"
+        },
+        "N": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "N",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "M",
+        "K",
+        "N"
+      ],
+      "title": "Extent",
+      "type": "object"
+    },
+    "FixedDelay": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Duration Ps",
+          "type": "integer"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "fixed_delay",
+          "title": "Kind",
+          "type": "string"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "duration_ps",
+        "owner_id"
+      ],
+      "title": "FixedDelay",
+      "type": "object"
+    },
+    "Fragment": {
+      "additionalProperties": false,
+      "properties": {
+        "channel_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Channel Id",
+          "type": "integer"
+        },
+        "destination_offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Destination Offset Bytes",
+          "type": "integer"
+        },
+        "payload_bytes": {
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "request_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "route_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Route Id",
+          "type": "string"
+        },
+        "source_offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Source Offset Bytes",
+          "type": "integer"
+        },
+        "transaction_bytes": {
+          "const": 256,
+          "title": "Transaction Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "request_id",
+        "source_offset_bytes",
+        "destination_offset_bytes",
+        "payload_bytes",
+        "transaction_bytes",
+        "channel_id",
+        "route_id"
+      ],
+      "title": "Fragment",
+      "type": "object"
+    },
+    "NocTransfer": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/$defs/BufferRange"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "noc_transfer",
+          "title": "Kind",
+          "type": "string"
+        },
+        "multicast": {
+          "const": false,
+          "title": "Multicast",
+          "type": "boolean"
+        },
+        "op_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Op Id"
+        },
+        "payload_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "route_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Route Id",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/BufferRange"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "source",
+        "destination",
+        "payload_bytes",
+        "route_id",
+        "multicast"
+      ],
+      "title": "NocTransfer",
+      "type": "object"
+    },
+    "Route": {
+      "additionalProperties": false,
+      "properties": {
+        "core_ids": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Core Ids",
+          "type": "array"
+        },
+        "destination_core_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Destination Core Id",
+          "type": "integer"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "noc_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Noc Index",
+          "type": "integer"
+        },
+        "source_core_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Source Core Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "noc_index",
+        "source_core_id",
+        "destination_core_id",
+        "core_ids"
+      ],
+      "title": "Route",
+      "type": "object"
+    },
+    "Tile": {
+      "additionalProperties": false,
+      "properties": {
+        "K": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "K",
+          "type": "integer"
+        },
+        "M": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "M",
+          "type": "integer"
+        },
+        "N": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "N",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "M",
+        "K",
+        "N"
+      ],
+      "title": "Tile",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "arbitration": {
+      "const": "fifo-ready/1",
+      "title": "Arbitration",
+      "type": "string"
+    },
+    "buffers": {
+      "items": {
+        "$ref": "#/$defs/Buffer"
+      },
+      "title": "Buffers",
+      "type": "array"
+    },
+    "coverage": {
+      "items": {
+        "$ref": "#/$defs/Coverage"
+      },
+      "title": "Coverage",
+      "type": "array"
+    },
+    "dependencies": {
+      "items": {
+        "$ref": "#/$defs/Dependency"
+      },
+      "title": "Dependencies",
+      "type": "array"
+    },
+    "format": {
+      "const": "uarch-taskgraph/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "graph_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Graph Hash",
+      "type": "string"
+    },
+    "jobs": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "barrier": "#/$defs/Barrier",
+            "compute": "#/$defs/Compute",
+            "dma": "#/$defs/Dma",
+            "fixed_delay": "#/$defs/FixedDelay",
+            "noc_transfer": "#/$defs/NocTransfer"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/Compute"
+          },
+          {
+            "$ref": "#/$defs/Dma"
+          },
+          {
+            "$ref": "#/$defs/NocTransfer"
+          },
+          {
+            "$ref": "#/$defs/Barrier"
+          },
+          {
+            "$ref": "#/$defs/FixedDelay"
+          }
+        ]
+      },
+      "minItems": 1,
+      "title": "Jobs",
+      "type": "array"
+    },
+    "routes": {
+      "items": {
+        "$ref": "#/$defs/Route"
+      },
+      "title": "Routes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "format",
+    "graph_hash",
+    "buffers",
+    "jobs",
+    "dependencies",
+    "coverage",
+    "routes",
+    "arbitration"
+  ],
+  "title": "TaskGraph",
+  "type": "object"
+}

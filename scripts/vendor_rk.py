@@ -4,21 +4,28 @@ The subprocess bridge invokes the pinned project's own loader, accelerator adapt
 iteration_cost and IterationCounts. No workload arithmetic is implemented here.
 """
 
-from __future__ import annotations
-
-import argparse
-import ast
-import hashlib
-import json
 import os
-import re
-import shlex
-import subprocess
 import sys
-import tempfile
-import tomllib
-from pathlib import Path
-from typing import TYPE_CHECKING, Any
+
+if __name__ == "__main__" and not __package__:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Importing the package runs the conservative guard before non-bootstrap imports.
+from scripts import u2_import_guard  # noqa: E402
+
+u2_import_guard.check_import_roots()
+
+import argparse  # noqa: E402
+import ast  # noqa: E402
+import hashlib  # noqa: E402
+import json  # noqa: E402
+import re  # noqa: E402
+import shlex  # noqa: E402
+import subprocess  # noqa: E402
+import tempfile  # noqa: E402
+import tomllib  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import TYPE_CHECKING, Any  # noqa: E402
 
 if TYPE_CHECKING:
     from uarch_contract.exports import ComponentPrecision
@@ -836,7 +843,7 @@ def validate_u2_component_inputs(
     *,
     require_full: bool = True,
     provenance_root: Path | None = None,
-) -> tuple[ComponentPrecision, ...]:
+) -> "tuple[ComponentPrecision, ...]":
     """Validate explicit shared bindings; this is not real pinned bridge verification.
 
     Full mode requires the exact accepted seven-pair inventory. Partial mode serves
@@ -1053,8 +1060,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # Direct script execution exposes scripts/, not its parent package directory.
-    # Module/library invocations already resolve scripts and keep their import paths.
-    if not __package__:
-        sys.path.insert(0, str(ROOT))
     main()
