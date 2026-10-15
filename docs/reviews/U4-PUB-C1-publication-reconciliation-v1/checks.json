@@ -1,0 +1,78 @@
+{
+  "baseline": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import sys\nfrom pathlib import Path\nroot=Path.cwd().resolve()\nsys.path[:0]=[str(root),str(root/'src'),str(root/'contract')]\nfrom scripts import u2_inputs, vendor_rk\nimport rkuarch, uarch_contract\nassert u2_inputs.ROOT == vendor_rk.ROOT == root\nfor module in (u2_inputs,vendor_rk,rkuarch,uarch_contract):\n assert Path(module.__file__).resolve().is_relative_to(root)\nimport pytest\nraise SystemExit(pytest.main(sys.argv[1:]))\n",
+      "-c",
+      "/tmp/u4-pub-c1-coordinator-gb4k0iq5/source/pyproject.toml",
+      "--rootdir=/tmp/u4-pub-c1-coordinator-gb4k0iq5/source",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/unit/test_u2_b_tooling_binding.py::test_same_candidate_survives_adoption_and_fresh_layout"
+    ],
+    "exit": 1,
+    "raw_log_sha256": "3a0611e0b7f66d7646f2d3660db487ca3e8027ee08130420b085cb3b79831f56"
+  },
+  "corrected-regressions": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import sys\nfrom pathlib import Path\nroot=Path.cwd().resolve()\nsys.path[:0]=[str(root),str(root/'src'),str(root/'contract')]\nfrom scripts import u2_inputs, vendor_rk\nimport rkuarch, uarch_contract\nassert u2_inputs.ROOT == vendor_rk.ROOT == root\nfor module in (u2_inputs,vendor_rk,rkuarch,uarch_contract):\n assert Path(module.__file__).resolve().is_relative_to(root)\nimport pytest\nraise SystemExit(pytest.main(sys.argv[1:]))\n",
+      "-c",
+      "/tmp/u4-pub-c1-coordinator-gb4k0iq5/source/pyproject.toml",
+      "--rootdir=/tmp/u4-pub-c1-coordinator-gb4k0iq5/source",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/unit/test_u2_b_tooling_binding.py",
+      "tests/unit/test_u2_b_tooling.py",
+      "tests/unit/test_u2_support_policy.py",
+      "contract/tests/test_u2_historical_snapshot.py",
+      "contract/tests/test_committed_snapshot.py"
+    ],
+    "exit": 0,
+    "raw_log_sha256": "1e68049a4020490b33f0dcd8d1cb6b7582b80a2b572834aa12caadbead8f1cc9"
+  },
+  "reverted": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import sys\nfrom pathlib import Path\nroot=Path.cwd().resolve()\nsys.path[:0]=[str(root),str(root/'src'),str(root/'contract')]\nfrom scripts import u2_inputs, vendor_rk\nimport rkuarch, uarch_contract\nassert u2_inputs.ROOT == vendor_rk.ROOT == root\nfor module in (u2_inputs,vendor_rk,rkuarch,uarch_contract):\n assert Path(module.__file__).resolve().is_relative_to(root)\nimport pytest\nraise SystemExit(pytest.main(sys.argv[1:]))\n",
+      "-c",
+      "/tmp/u4-pub-c1-coordinator-gb4k0iq5/source/pyproject.toml",
+      "--rootdir=/tmp/u4-pub-c1-coordinator-gb4k0iq5/source",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/unit/test_u2_b_tooling_binding.py::test_same_candidate_survives_adoption_and_fresh_layout"
+    ],
+    "exit": 1,
+    "raw_log_sha256": "20ae8204a1119b5d023cd822acb87b38e2bc78e6e77385982e0ca7cbe7e48bbc"
+  },
+  "restored": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import sys\nfrom pathlib import Path\nroot=Path.cwd().resolve()\nsys.path[:0]=[str(root),str(root/'src'),str(root/'contract')]\nfrom scripts import u2_inputs, vendor_rk\nimport rkuarch, uarch_contract\nassert u2_inputs.ROOT == vendor_rk.ROOT == root\nfor module in (u2_inputs,vendor_rk,rkuarch,uarch_contract):\n assert Path(module.__file__).resolve().is_relative_to(root)\nimport pytest\nraise SystemExit(pytest.main(sys.argv[1:]))\n",
+      "-c",
+      "/tmp/u4-pub-c1-coordinator-gb4k0iq5/source/pyproject.toml",
+      "--rootdir=/tmp/u4-pub-c1-coordinator-gb4k0iq5/source",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/unit/test_u2_b_tooling_binding.py::test_same_candidate_survives_adoption_and_fresh_layout"
+    ],
+    "exit": 0,
+    "raw_log_sha256": "e7e3da5de6992fba59f6d20eddf6d225ead49345f58dac6e404638ea10bdf232"
+  }
+}

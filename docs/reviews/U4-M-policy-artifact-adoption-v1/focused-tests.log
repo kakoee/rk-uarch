@@ -1,0 +1,34 @@
+...............................................................F........ [ 23%]
+........................................................................ [ 47%]
+........................................................................ [ 71%]
+........................................................................ [ 95%]
+...............                                                          [100%]
+=================================== FAILURES ===================================
+_______________________ test_fresh_direct_valid_controls _______________________
+
+isolated_root = PosixPath('/tmp/pytest-of-jjaff/pytest-819/test_fresh_direct_valid_contro0/isolated-source')
+
+    def test_fresh_direct_valid_controls(isolated_root):
+        origins = subprocess.run(
+            [sys.executable, "-c", "from pathlib import Path; import scripts.vendor_rk as v; "
+             "import scripts.u2_inputs as u; import uarch_contract as c; import rkuarch as r; "
+             "assert all(Path(m.__file__).resolve().is_relative_to(Path.cwd()) "
+             "for m in (v,u,c,r)); print('isolated origins verified')"],
+            cwd=isolated_root, env=direct_environment(isolated_root),
+            text=True, capture_output=True, check=False,
+        )
+        assert origins.returncode == 0, origins.stderr
+        assert "isolated origins verified" in origins.stdout
+        for args in (("--help",), ("--check", "--historical")):
+            result = direct(isolated_root, *args)
+            assert result.returncode == 0, result.stderr
+        assert direct(isolated_root, "--help", entry="u2_inputs.py").returncode == 0
+        result = direct(isolated_root, "--check")
+>       assert result.returncode == 1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = CompletedProcess(args=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python', 'scripts/vendor_rk.py', '--check']...esh_direct_valid_contro0/isolated-source/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963\n', stderr='').returncode
+
+tests/unit/test_u2_support_policy.py:530: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_u2_support_policy.py::test_fresh_direct_valid_controls
+1 failed, 302 passed in 192.58s (0:03:12)

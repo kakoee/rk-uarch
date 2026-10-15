@@ -1,0 +1,15 @@
+{
+  "ruff": "pass",
+  "mypy_production": "pass: 82 files",
+  "mypy_contract_tests": "pass: 32 files",
+  "schema_families": "base, rotary-v2 and mapped all fresh",
+  "strict_vendor": "pass",
+  "imports": "2 kept / 0 broken on corrected invocation",
+  "initial_import_launcher": "coordinator used entry_points[0], which raises KeyError in this runtime; corrected to next(iter(...)); not a repository failure",
+  "environment": "existing coordinator Python 3.12 venv, no installs; PYTHONPATH/MYPYPATH/VIRTUAL_ENV unset; runtime imports explicitly prefixed to private preview; fresh mypy caches",
+  "hosted_CI": "not run or polled",
+  "native": "unchanged source; not rerun; no K1 review acceptance",
+  "full_CI_Python_selection": "1 failed, 1893 passed, 29 skipped, 10 deselected in 908.95 seconds; exit 1",
+  "failure": "PUB-C1: tests/unit/test_u2_b_tooling_binding.py::test_same_candidate_survives_adoption_and_fresh_layout; missing rkuarch.workload in private support-only relocation",
+  "isolated_reproduction": "same failure, 1 failed in 1.64 seconds"
+}

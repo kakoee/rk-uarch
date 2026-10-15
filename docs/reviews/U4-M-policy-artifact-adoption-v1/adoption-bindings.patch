@@ -1,0 +1,37 @@
+--- a/contract/tests/test_u2_historical_snapshot.py
++++ b/contract/tests/test_u2_historical_snapshot.py
+@@ -1 +1 @@
+-"""Separate received historical20 and current adopted48; neither is a synthetic oracle."""
++"""Separate received historical20 and current adopted49; neither is a synthetic oracle."""
+@@ -22,2 +22,2 @@
+-CURRENT_MANIFEST = "1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
+-REVIEW_SHA256 = "58f0f04b55aa228c9831cc2427f0f86a4aa3c1ae8f9327eb3660ae160323300c"
++CURRENT_MANIFEST = "b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
++REVIEW_SHA256 = "ba58478e3085b8fb7f7cb6828e94cf0ef5e0247997801b9eb26fe152043ecdbb"
+@@ -96 +96 @@
+-    review = ROOT / "tests/fixtures/u3_rope/received-adoption-review.json"
++    review = ROOT / "tests/fixtures/u4_m_policy/received-adoption-review.json"
+--- /dev/null
++++ b/tests/fixtures/u4_m_policy/received-adoption-review.json
+@@ -0,0 +1,11 @@
++{
++  "decision": "accepted",
++  "format": "uarch-evidence-review/1",
++  "independent": true,
++  "rationale": "Administrative exact-artifact adoption under U4-M-policy-artifact-adoption-v1. The human created/verified-identical pair and coordinator audit bind the complete 49-file candidate to source 0cf24d91eeca5cc45182eb6fb03202677fd97dcb and frozen input digest 368c7e44dedd8586f2957f9e27030ce61573d3b9675f2f0df27e70c111abf32a. All 1008 nominal rows and four real precision refusals are byte-identical to the prior adopted snapshot. Four metadata members change and support-policy.json is added for the accepted selected-dependency policy. This is administrative source/artifact currentness, not independent validation of predictions, physical/native/silicon parity, evidence eligibility, K1 acceptance, K2 authorization or sprint closure.",
++  "review_hash": "sha256:dd4d01973211a3777565d49ea1f71413df68240b6eaefc5df985501223730b4c",
++  "reviewed_subject_hashes": [
++    "sha256:b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
++  ],
++  "reviewer": "Javid (@jjaffari)"
++}
+--- a/tests/integration/test_u2_b_r202_public.py
++++ b/tests/integration/test_u2_b_r202_public.py
+@@ -36 +36 @@
+-MANIFEST = "sha256:1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
++MANIFEST = "sha256:b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
+--- a/tests/unit/test_u2_b_stage2_reference.py
++++ b/tests/unit/test_u2_b_stage2_reference.py
+@@ -24 +24 @@
+-CURRENT_MANIFEST = "sha256:1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
++CURRENT_MANIFEST = "sha256:b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"

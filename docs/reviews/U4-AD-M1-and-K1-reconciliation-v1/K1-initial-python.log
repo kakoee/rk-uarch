@@ -1,0 +1,28 @@
+F.........                                                               [100%]
+=================================== FAILURES ===================================
+_________________ test_linkage_matches_locked_dependency_graph _________________
+
+    def test_linkage_matches_locked_dependency_graph():
+        rows = [x.split("|") for x in (ROOT / "third_party/LICENSES.md").read_text().splitlines()
+                if x.startswith("| ")][1:]
+        actual = {r[1].strip(): r[5].strip() for r in rows}
+>       assert actual == roles()
+                         ^^^^^^^
+
+native/test_register_linkage.py:51:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+native/test_register_linkage.py:19: in roles
+    metadata = json.loads(Path(os.environ["K1_METADATA"]).read_text())
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = environ({'SHELL': '/bin/bash', 'COLORTERM': '', 'NVM_INC': '/home/jjaff/.nvm/versions/node/v20.20.0/include/node', 'WS...9.1.1', 'PYTEST_CURRENT_TEST': 'native/test_register_linkage.py::test_linkage_matches_locked_dependency_graph (call)'})
+key = 'K1_METADATA'
+
+>   ???
+E   KeyError: 'K1_METADATA'
+
+<frozen os>:714: KeyError
+=========================== short test summary info ============================
+FAILED native/test_register_linkage.py::test_linkage_matches_locked_dependency_graph
+1 failed, 9 passed in 0.18s

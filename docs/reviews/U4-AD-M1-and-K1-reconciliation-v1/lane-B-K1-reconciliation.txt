@@ -1,0 +1,33 @@
+# U4 Lane B — reconcile K1 Stage 2 guard, inventory and replay proposal
+
+AD-M1 is being reconciled separately; do not mix it with native implementation or adoption.
+Read the coordinator receipt in U4-AD-M1-and-K1-reconciliation-v1 and A's uncommitted
+package at /home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-A-K1-stage2-v1/.
+A's production patch and separate B-guard-proposal.patch are unapplied. Exact reviewed base:
+9b1408437b6dc08d9b77848f5fffe56c0cf1db72. Combined twelve-path tree:
+6d5263e13e43a5dfb44d8addf93cc47cc814a0ac.
+
+Use a private export of that base, apply the primary patch then the B guard patch, and
+verify identities against A's package and coordinator identity.json. Reconcile your
+numbered-patch guard/chain and test inventory/replay/fault controls against the actual
+corrected tests: 28 names, multiplicity one in debug/release, same replay prefix/test,
+new recorded payload hash 4490d63cd5b49bac327ded1661df7802356f541e003391666963965809f2a62a.
+Do not silently retain the 19-test freeze or call the proposal's null source_commit an
+installed-source identity. Prepare a concrete post-install inventory procedure/proposal.
+Preserve old evidence and the original first-patch identity record. Demonstrate chain
+refusal for missing/extra/reordered/tampered patches and correct reverse/forward controls.
+
+The coordinator could not execute Docker in this session. Do not install/publish/activate
+anything to compensate; use the exact accepted local image if already available. Label
+inherited Rust results separately if it is unavailable. One manual linkage test needs
+K1_METADATA from actual `cargo metadata --locked --offline` output; it is not included in
+A's delivered package. Reconstruct it with the accepted tools when available, bind source,
+lock/features/tool identity and record the exact command (do not invent graph metadata).
+Do not introduce a test dependency on an unexplained vanished /tmp file. Reconcile how
+that manual check is invoked/discovered in the actual native check path.
+
+Return bounded owned proposal/receipt on normal B main with normal integration/hooks.
+If changing A's proposed bytes, provide exact delta and reasons; a changed tree needs new
+reviewer binding. Do not overwrite A's uncommitted package or prior reviewer reports.
+No changes to frozen A, live native files, protected sources, saved candidate, artifact
+bindings, infrastructure or K2. No CI polling. Same reviewer retains Stage 3 authority.

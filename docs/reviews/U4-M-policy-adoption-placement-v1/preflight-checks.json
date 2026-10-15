@@ -1,0 +1,29 @@
+{
+  "helper_commit": "eb5e169fb0552db0214de8e7c90a188340e04d8d",
+  "checks": [
+    {
+      "control": "exact commit-pinned read-only preflight",
+      "exit": 0,
+      "output": "{\"preflight\": \"passed\", \"paths\": 10, \"candidate_files\": 49, \"source_commit\": \"0cf24d91eeca5cc45182eb6fb03202677fd97dcb\", \"placement_executed\": false}\nRead-only check complete; no live adoption, staging, commit or push."
+    },
+    {
+      "control": "missing human flag",
+      "exit": 1,
+      "output": "STOP: human placement requires UARCH_HUMAN=1"
+    },
+    {
+      "control": "invalid full pin",
+      "exit": 1,
+      "output": "STOP: fatal: Not a valid commit name 0000000000000000000000000000000000000000"
+    },
+    {
+      "control": "optimized interpreter",
+      "exit": 1,
+      "output": "STOP: assertion-bearing saved audit requires non-optimized Python"
+    }
+  ],
+  "frozen_A_clean": true,
+  "placement_output_absent": true,
+  "human_flag_never_set": true,
+  "live_placement": false
+}

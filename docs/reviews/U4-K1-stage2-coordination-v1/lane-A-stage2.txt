@@ -1,0 +1,78 @@
+# U4 Lane A — bounded K1 Stage 2 response
+
+Continue the existing K1 author session. Read CLAUDE.md, U0011, U0024 and
+ docs/prompts/U-REVIEW-adversarial-review.md. Respond to all five findings in:
+/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-K1-checkpoint-review-A-v1/README.md
+Reviewed source: 9b1408437b6dc08d9b77848f5fffe56c0cf1db72.
+Report SHA256: 6677f6550dc2c6ea9ba4df8456b7b50531083b0ae9a4d07aee6e1fb484351465.
+Read the reviewer's preserved probes/results as evidence; do not change them.
+
+IMPORTANT TEMPORARY PLACEMENT: your usual rk-uarch-u4-a clone is frozen at
+0cf24d91eeca5cc45182eb6fb03202677fd97dcb for separately approved human artifact
+generation. Do not pull, edit, stage, commit, push, create output directories in,
+or otherwise change that checkout or its environment. Prepare this response in
+a private disposable Git export of the reviewed source under /tmp, with separate
+build outputs. Do not copy a whole checkpoint tree into docs. Preserve the export
+until its bounded patch is saved and verified; an export is not Git history.
+Save only the response, exact unapplied diff (including new tests), focused
+commands/results and fault anchors under:
+/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-A-K1-stage2-v1/
+Do not change other coordinator files or any live implementation. Return for
+coordinator reconciliation before application/commit. This temporary arrangement
+protects the frozen source; normal main-based development resumes after reconciliation.
+
+Disposition every K1-F1 through K1-F5 as APPLIED IN PROPOSAL, REJECTED with evidence,
+or DEFERRED with owner, dependency and first-use boundary. Put the blocker first.
+No rejection or deferral closes a finding; the same reviewer adjudicates Stage 3.
+
+F1: implement actual event-target authority for every owner-state mutation,
+including readiness, successor notification, grants and zero-duration completion.
+Do not pass a job's owner as its own asserted event target or merely weaken the
+ownership claim. Preserve the accepted timing/zero-closure law. Tests must exercise
+the engine path, not only direct Owners calls: wrong/missing-owner routing must
+refuse rather than return success, including the readiness faults which previously
+survived. Cover debug assertion behavior and release refusal. If the accepted
+semantics cannot be preserved without changing a protected decision, present the
+exact conflict and stop that change as an unapplied decision proposal.
+
+F2: add a deterministic, hand-derived timing case that discriminates lowest-owner-
+first grant/inline-zero ordering. Reversing the order must fail a literal timing
+assertion; comparing repeat runs only with each other is insufficient.
+
+F3: reconcile event insertion with the accepted total-order/phase law. Add the
+planned phase-regression fault and an explicit same-timestamp regression refusal,
+with valid same-time controls. Check how dispatch batching and inline zero closure
+interact with the guard; do not blindly forbid valid insertions. Unsupported event
+phases must not silently hang. Explain any semantic ambiguity before choosing new
+policy. Keep changes bounded to K1, not future K2 functionality.
+
+F4: define and test the private predecessor field precisely: actual causal blockers
+or a clearly named dependency/resource-predecessor list. Do not claim causal/critical-
+path evidence for an unconditional list. Use the reviewer's idle-owner example plus
+controls; propose separately any public-carrier change (none is authorized).
+
+F5: correct the native README to describe the delivered library and actual ownership
+mechanism. Correct licence linkage classifications using the locked dependency
+ graph, distinguishing runtime, proc-macro/build and test-only crates. Follow the
+numbered third_party patch rule; no dependency, licence or toolchain substitution.
+Preserve accepted builder/lock/deny bytes and historical evidence. If a shared or
+protected path needs changing, supply a separate exact unapplied proposal.
+
+Write durable discriminating tests first. Run the complete K1 selection in debug
+and release in the already accepted local image:
+sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523
+Use offline locked dependencies, isolated scratch targets and verified import/source
+origins. Do not install tools, publish images, contact the server or activate CI.
+Record local WSL2/container evidence honestly under U0024, not Linux-hosted qualification.
+
+For each applied correction demonstrate baseline/fault/restored behavior and intended
+failure reasons. Repeat canonical payloads across fresh processes and modes. Report
+whether historical bytes remain identical; explain any intentional observation changes
+instead of rewriting history. Run fmt, clippy, licence checks and relevant Python guards.
+B owns the frozen native test inventory/replay controls: provide exact new names,
+multiplicities, replay expectations and source-hashed faults for B to reconcile; do not
+silently retain the old 19-test freeze or edit B's files.
+
+Return a bounded handoff with base identity, exact changed paths and diff, dispositions,
+executed vs inherited checks, failures and remaining decisions. No protected installation,
+input staging, generation/adoption, K2 work, K1/G3a/U4 closure or reviewer verdict.

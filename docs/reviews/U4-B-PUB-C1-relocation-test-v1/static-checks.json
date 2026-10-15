@@ -1,0 +1,35 @@
+{
+  "scope": "Only the changed test in the private preview",
+  "commands": [
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source/tests/unit/test_u2_b_tooling_binding.py"
+      ],
+      "exit": 0,
+      "stdout": "All checks passed!\n"
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "format",
+        "--check",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source/tests/unit/test_u2_b_tooling_binding.py"
+      ],
+      "exit": 0,
+      "stdout": "1 file already formatted\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/tmp/u4-b-pub-c1-5jdx9bjr/source",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "stdout": ""
+    }
+  ]
+}

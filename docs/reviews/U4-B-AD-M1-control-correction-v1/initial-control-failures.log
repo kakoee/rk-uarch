@@ -1,0 +1,144 @@
+VERIFIED_ORIGINS {"scripts.u2_inputs": "/tmp/u4-b-ad-m1-verify-oaxwbh1m/source/scripts/u2_inputs.py", "scripts.vendor_rk": "/tmp/u4-b-ad-m1-verify-oaxwbh1m/source/scripts/vendor_rk.py", "scripts.u2_support": "/tmp/u4-b-ad-m1-verify-oaxwbh1m/source/scripts/u2_support.py", "scripts.u2_import_guard": "/tmp/u4-b-ad-m1-verify-oaxwbh1m/source/scripts/u2_import_guard.py", "uarch_contract": "/tmp/u4-b-ad-m1-verify-oaxwbh1m/source/contract/uarch_contract/__init__.py", "rkuarch": "/tmp/u4-b-ad-m1-verify-oaxwbh1m/source/src/rkuarch/__init__.py"}
+................................................................FFFF.... [ 23%]
+........................................................................ [ 46%]
+........................................................................ [ 70%]
+........................................................................ [ 93%]
+...................                                                      [100%]
+=================================== FAILURES ===================================
+______________ test_direct_strict_refusal_controls[stale_source] _______________
+
+isolated_root = PosixPath('/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_refusal_con0/isolated-source')
+fault = 'stale_source'
+
+    @pytest.mark.parametrize("fault", ["stale_source", "artifact_bytes"])
+    def test_direct_strict_refusal_controls(isolated_root, fault):
+        if fault == "stale_source":
+            (isolated_root / "scripts/ad_m1_extra.py").write_text("VALUE = 1\n")
+            # The saved artifact is still intact; only its current source is stale.
+            historical = direct(isolated_root, "--check", "--historical")
+>           assert historical.returncode == 0, historical.stderr
+E           AssertionError: Traceback (most recent call last):
+E               File "/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_refusal_con0/isolated-source/scripts/vendor_rk.py", line 14, in <module>
+E                 from scripts import u2_import_guard  # noqa: E402
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               File "/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_refusal_con0/isolated-source/scripts/__init__.py", line 5, in <module>
+E                 check_import_roots()
+E               File "/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_refusal_con0/isolated-source/scripts/u2_import_guard.py", line 58, in check_import_roots
+E                 raise ValueError("unreviewed import name: " + os.path.relpath(path, root))
+E             ValueError: unreviewed import name: scripts/ad_m1_extra.py
+E
+E           assert 1 == 0
+E            +  where 1 = CompletedProcess(args=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python', 'scripts/vendor_rk.py', '--check',...nreviewed import name: " + os.path.relpath(path, root))\nValueError: unreviewed import name: scripts/ad_m1_extra.py\n').returncode
+
+tests/unit/test_u2_support_policy.py:591: AssertionError
+_____________ test_direct_strict_refusal_controls[artifact_bytes] ______________
+
+isolated_root = PosixPath('/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_refusal_con1/isolated-source')
+fault = 'artifact_bytes'
+
+    @pytest.mark.parametrize("fault", ["stale_source", "artifact_bytes"])
+    def test_direct_strict_refusal_controls(isolated_root, fault):
+        if fault == "stale_source":
+            (isolated_root / "scripts/ad_m1_extra.py").write_text("VALUE = 1\n")
+            # The saved artifact is still intact; only its current source is stale.
+            historical = direct(isolated_root, "--check", "--historical")
+            assert historical.returncode == 0, historical.stderr
+            expected = "input support inventory changed"
+        else:
+            member = isolated_root / "contract/vendor" / ("rk-sim@" + vendor.PIN) / "schema.json"
+>           member.write_bytes(member.read_bytes() + b"\nAD-M1 fault\n")
+
+tests/unit/test_u2_support_policy.py:595:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = PosixPath('/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_refusal_con1/isolated-source/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/schema.json')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       PermissionError: [Errno 13] Permission denied: '/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_refusal_con1/isolated-source/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/schema.json'
+
+/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: PermissionError
+________ test_direct_strict_comparison_rejects_wrong_cli[false_success] ________
+
+isolated_root = PosixPath('/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_comparison_0/isolated-source')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79af407cfd70>
+fault = 'false_success'
+
+    @pytest.mark.parametrize("fault", ["false_success", "wrong_reason"])
+    def test_direct_strict_comparison_rejects_wrong_cli(isolated_root, monkeypatch, fault):
+        # Keep a genuine strict-library refusal; substitute only the CLI observation.
+        member = isolated_root / "contract/vendor" / ("rk-sim@" + vendor.PIN) / "schema.json"
+>       member.write_bytes(member.read_bytes() + b"\nAD-M1 fault\n")
+
+tests/unit/test_u2_support_policy.py:604:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = PosixPath('/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_comparison_0/isolated-source/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/schema.json')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       PermissionError: [Errno 13] Permission denied: '/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_comparison_0/isolated-source/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/schema.json'
+
+/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: PermissionError
+________ test_direct_strict_comparison_rejects_wrong_cli[wrong_reason] _________
+
+isolated_root = PosixPath('/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_comparison_1/isolated-source')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79af3feac3e0>
+fault = 'wrong_reason'
+
+    @pytest.mark.parametrize("fault", ["false_success", "wrong_reason"])
+    def test_direct_strict_comparison_rejects_wrong_cli(isolated_root, monkeypatch, fault):
+        # Keep a genuine strict-library refusal; substitute only the CLI observation.
+        member = isolated_root / "contract/vendor" / ("rk-sim@" + vendor.PIN) / "schema.json"
+>       member.write_bytes(member.read_bytes() + b"\nAD-M1 fault\n")
+
+tests/unit/test_u2_support_policy.py:604:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/pathlib.py:1036: in write_bytes
+    with self.open(mode='wb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = PosixPath('/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_comparison_1/isolated-source/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/schema.json')
+mode = 'wb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       PermissionError: [Errno 13] Permission denied: '/tmp/u4-b-ad-m1-verify-oaxwbh1m/affected-selection/test_direct_strict_comparison_1/isolated-source/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963/schema.json'
+
+/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: PermissionError
+4 failed, 303 passed, 1 deselected in 212.38s (0:03:32)

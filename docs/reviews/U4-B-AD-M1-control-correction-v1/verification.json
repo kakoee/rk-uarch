@@ -1,0 +1,212 @@
+{
+  "source_commit": "0cf24d91eeca5cc45182eb6fb03202677fd97dcb",
+  "source_tree": "275bcefbe616a049aa6d0a968ff81b5728f0563d",
+  "b_starting_head": "e78a413fc83cf29d8a154274db04a94b6a770b2c",
+  "candidate_manifest_sha256": "b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc",
+  "candidate_members": 49,
+  "adoption_bindings_sha256": "ed9029f25260abd7b1db21d0bdd3229267315bf22958e447d51a49ac0ad77da4",
+  "test_patch_sha256": "c86a85823ecffae979ef0dc096986e1727dc87f0f250ddcb8fe2b146cc5be8cc",
+  "conditional_placement_only": true,
+  "live_adoption": false,
+  "checks": [
+    {
+      "label": "candidate-strict",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nv.check_contract_pin(root)\nv.check_manifest(u.ADOPTED)\nv.check_snapshot_inputs(u.ADOPTED)\nv.check_generator(u.ADOPTED, current=True)\nprint('GENUINE_STRICT_CURRENT_SUCCESS')\n"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "baseline",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nimport pytest\nsys.exit(pytest.main(sys.argv[1:]))",
+        "-c",
+        "/tmp/u4-b-ad-m1-verify-eyjfxus3/source/pyproject.toml",
+        "--rootdir=/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/u4-b-ad-m1-verify-eyjfxus3/baseline",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py::test_fresh_direct_valid_controls"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 1,
+      "expected_exit": 1
+    },
+    {
+      "label": "corrected",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nimport pytest\nsys.exit(pytest.main(sys.argv[1:]))",
+        "-c",
+        "/tmp/u4-b-ad-m1-verify-eyjfxus3/source/pyproject.toml",
+        "--rootdir=/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/u4-b-ad-m1-verify-eyjfxus3/corrected",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py::test_fresh_direct_valid_controls"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "reverted",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nimport pytest\nsys.exit(pytest.main(sys.argv[1:]))",
+        "-c",
+        "/tmp/u4-b-ad-m1-verify-eyjfxus3/source/pyproject.toml",
+        "--rootdir=/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/u4-b-ad-m1-verify-eyjfxus3/reverted",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py::test_fresh_direct_valid_controls"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 1,
+      "expected_exit": 1
+    },
+    {
+      "label": "restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nimport pytest\nsys.exit(pytest.main(sys.argv[1:]))",
+        "-c",
+        "/tmp/u4-b-ad-m1-verify-eyjfxus3/source/pyproject.toml",
+        "--rootdir=/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/u4-b-ad-m1-verify-eyjfxus3/restored",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py::test_fresh_direct_valid_controls"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "affected-selection",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nimport pytest\nsys.exit(pytest.main(sys.argv[1:]))",
+        "-c",
+        "/tmp/u4-b-ad-m1-verify-eyjfxus3/source/pyproject.toml",
+        "--rootdir=/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/u4-b-ad-m1-verify-eyjfxus3/affected-selection",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py",
+        "contract/tests/test_u2_historical_snapshot.py",
+        "tests/integration/test_u2_b_r202_public.py",
+        "tests/unit/test_u2_b_stage2_reference.py",
+        "contract/tests/mapped/test_admission.py",
+        "--deselect=contract/tests/test_u2_historical_snapshot.py::test_historical_guard_refuses_current_canonical_before_candidate"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "test-ruff",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "tests/unit/test_u2_support_policy.py"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "prior-strict-refusal",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nv.check_manifest(u.ADOPTED)\nv.check_snapshot_inputs(u.ADOPTED)\nv.check_generator(u.ADOPTED, current=False)\ntry:\n    v.check_generator(u.ADOPTED, current=True)\nexcept ValueError as exc:\n    assert str(exc) == 'input support inventory changed', str(exc)\n    print('EXPECTED_STRICT_REFUSAL: ' + str(exc))\nelse:\n    raise AssertionError('stale artifact incorrectly accepted')\n"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "prior-policy-selection",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "\nimport json, os, sys\nfrom pathlib import Path\nroot = Path.cwd()\nsys.path[:0] = [str(root), str(root / 'src'), str(root / 'contract')]\nfrom scripts import u2_inputs as u, vendor_rk as v, u2_support as p, u2_import_guard as g\nimport uarch_contract as c\nimport rkuarch as r\nassert 'PYTHONPATH' not in os.environ and 'MYPYPATH' not in os.environ\norigins = {m.__name__: str(Path(m.__file__).resolve()) for m in (u,v,p,g,c,r)}\nassert all(Path(path).is_relative_to(root) for path in origins.values())\nprint('VERIFIED_ORIGINS ' + json.dumps(origins), flush=True)\ndef forbidden(*args, **kwargs):\n    raise AssertionError('AD-M1 producer forbidden')\nu.prepare_inputs = forbidden\nv.run_oracle = v.collect_snapshot = v.publish_snapshot = forbidden\n\nimport pytest\nsys.exit(pytest.main(sys.argv[1:]))",
+        "-c",
+        "/tmp/u4-b-ad-m1-verify-eyjfxus3/source/pyproject.toml",
+        "--rootdir=/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/tmp/u4-b-ad-m1-verify-eyjfxus3/prior-policy-selection",
+        "-q",
+        "-rs",
+        "tests/unit/test_u2_support_policy.py"
+      ],
+      "cwd": "/tmp/u4-b-ad-m1-verify-eyjfxus3/source",
+      "exit": 0,
+      "expected_exit": 0
+    }
+  ],
+  "unchanged_nominal_rows": 1008,
+  "unchanged_precision_refusals": 4,
+  "test_before_sha256": "65c26ac3cb0aa1ad29a7f22e2763eafec09c71015e64e08f7753a2f8c0ce7120",
+  "test_after_sha256": "9b7922b2c21646e50c87fe8427cc943de842f4abf957502dc773d49913542b14",
+  "conditional_export_isolation": {
+    "files": 2024,
+    "only_changed_path": "tests/unit/test_u2_support_policy.py",
+    "test_patch_exact": true,
+    "all_other_bytes_and_mtimes_unchanged": true
+  },
+  "prior_export_isolation": {
+    "files": 2023,
+    "unchanged": true
+  },
+  "status": "passed; correction unapplied; live adoption still pending",
+  "live_preservation": {
+    "A_tracked_files_bytes_mtimes": 2022,
+    "saved_generation_files_bytes_mtimes": 61,
+    "A_head_unchanged": true,
+    "unchanged": true
+  }
+}

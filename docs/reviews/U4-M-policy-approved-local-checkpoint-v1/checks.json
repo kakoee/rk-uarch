@@ -1,0 +1,28 @@
+{
+  "helper_commit": "e7216223c83bfc5ee881150904d64e9adc23d684",
+  "checks": [
+    {
+      "check": "exact read-only preflight",
+      "exit": 0,
+      "output": "{\"preflight\": \"passed\", \"parent\": \"0cf24d91eeca5cc45182eb6fb03202677fd97dcb\", \"tree\": \"cc1b99e175bb848d4eba3a04e09cc3d580be870d\", \"paths\": 10, \"staged\": false, \"committed\": false, \"push\": false}"
+    },
+    {
+      "check": "missing human flag",
+      "exit": 1,
+      "output": "STOP: human commit requires UARCH_HUMAN=1"
+    },
+    {
+      "check": "invalid helper pin",
+      "exit": 1,
+      "output": "STOP: fatal: Not a valid commit name 0000000000000000000000000000000000000000"
+    },
+    {
+      "check": "optimization refused",
+      "exit": 1,
+      "output": "STOP: use reviewed interpreter with -I -B and no optimization"
+    }
+  ],
+  "human_flag_not_set": true,
+  "A_head_index_unchanged": true,
+  "commit_not_performed": true
+}

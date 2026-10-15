@@ -1,0 +1,25 @@
+ISOLATED_TEST_ORIGINS=["/tmp/u4-b-k1-native-stage2-0n8floiu/source/native/test_register_linkage.py"]
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_linkage_matches_locked_dependency_graph _________________
+
+    def test_linkage_matches_locked_dependency_graph():
+        rows = [x.split("|") for x in (ROOT / "third_party/LICENSES.md").read_text().splitlines()
+                if x.startswith("| ")][1:]
+        actual = {r[1].strip(): r[5].strip() for r in rows}
+>       assert actual == roles()
+E       AssertionError: assert {'autocfg': '...y graph', ...} == {'serde_json'...-linked', ...}
+E         
+E         Omitting 21 identical items, use -vv to show
+E         Differing items:
+E         {'serde': 'Linked (proptest closure dev-only)'} != {'serde': 'Runtime library graph'}
+E         {'serde_core': 'Linked (proptest closure dev-only)'} != {'serde_core': 'Runtime library graph'}
+E         {'zmij': 'Linked (proptest closure dev-only)'} != {'zmij': 'Runtime library graph'}
+E         {'serde_json': 'Linked (proptest closure dev-only)'} != {'serde_json': 'Runtime library graph'}...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+native/test_register_linkage.py:51: AssertionError
+=========================== short test summary info ============================
+FAILED native/test_register_linkage.py::test_linkage_matches_locked_dependency_graph
+1 failed in 0.11s

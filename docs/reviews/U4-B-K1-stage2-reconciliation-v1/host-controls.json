@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "import sys; from pathlib import Path; r=Path.cwd(); sys.path[:0]=[str(r),str(r/'src'),str(r/'contract'),str(r/'docs/reviews/U4-B-native-ci-v1')]; import ci_guard; assert Path(ci_guard.__file__).resolve()==r/'docs/reviews/U4-B-native-ci-v1/ci_guard.py'; import pytest; sys.exit(pytest.main(sys.argv[1:]))",
+    "-c",
+    "pyproject.toml",
+    "--rootdir",
+    ".",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/tmp/u4-b-k1-stage2-host-controls",
+    "-q",
+    "docs/reviews/U4-B-K1-stage2-reconciliation-v1/test_proposal.py",
+    "docs/reviews/U4-B-native-ci-v1/test_ci_guard.py",
+    "docs/reviews/U4-B-final-reconciliation-v1/test_ci_host_guard.py",
+    "docs/reviews/U4-B-K1-environment-v1/test_environment.py"
+  ],
+  "exit": 0,
+  "scope": "host Python guards; synthetic parser faults and scratch source mutations; no native execution",
+  "initial_launch": "collection failed: historical test imports ci_guard by basename. Corrected explicit sys.path to that exact directory and asserted module origin; PYTHONPATH/MYPYPATH remain unset."
+}

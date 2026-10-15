@@ -1,0 +1,65 @@
+{
+  "authorization_commit": "28fd452f33f8b24ba8796451bd1e758b4c885aa6",
+  "decision": "U4-M-policy-input-staging-v1",
+  "generation_adoption_commit_push": false,
+  "input_manifest_sha256": "368c7e44dedd8586f2957f9e27030ce61573d3b9675f2f0df27e70c111abf32a",
+  "inputs": "/home/jjaff/AI-infra-simulation/rk-uarch/tables/U4-M-policy-input-freeze-recovery-v1/inputs",
+  "matrix": {
+    "asic_placeholder.yaml": [
+      {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      {
+        "compute": "fp16",
+        "kv_cache": "fp8"
+      }
+    ],
+    "npu-l4.yaml": [
+      {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      }
+    ],
+    "nvidia_h100_sxm.yaml": [
+      {
+        "compute": "fp16",
+        "kv_cache": "fp16"
+      },
+      {
+        "compute": "fp16",
+        "kv_cache": "fp8"
+      },
+      {
+        "compute": "bf16",
+        "kv_cache": "bf16"
+      },
+      {
+        "compute": "fp8",
+        "kv_cache": "fp8"
+      }
+    ]
+  },
+  "package_commit": "816584e2b49876d21246c2435af5d72673e56889",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "policy": {
+    "format": "uarch-input-support/2",
+    "selection": "generator-imports-and-data/1"
+  },
+  "recovery": "U4-M-policy-staging-recovery-v1",
+  "source_commit": "0cf24d91eeca5cc45182eb6fb03202677fd97dcb",
+  "source_tree": "275bcefbe616a049aa6d0a968ff81b5728f0563d",
+  "staging_environment": {
+    "implementation": "CPython",
+    "packages": {
+      "PyYAML": "6.0.3",
+      "numpy": "2.5.3",
+      "pydantic": "2.13.5",
+      "pydantic-core": "2.46.5"
+    },
+    "python_version": "3.12.14"
+  },
+  "status": "staged and strictly verified; freeze acceptance pending",
+  "support_entries": 56,
+  "tracked_source_preserved": true
+}

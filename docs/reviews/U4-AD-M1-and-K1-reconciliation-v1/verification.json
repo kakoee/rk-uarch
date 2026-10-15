@@ -1,0 +1,46 @@
+{
+  "status": "AD-M1 reconciled; adoption approval pending; K1 reviewer and B reconciliation pending",
+  "adoption_tests": {
+    "passed": 313,
+    "failed": 0,
+    "skipped": 0,
+    "deselected": 1,
+    "deselected_test": "test_historical_guard_refuses_current_canonical_before_candidate (calls prepare_inputs)",
+    "producer_functions": "prepare_inputs, run_oracle, collect_snapshot, publish_snapshot disabled",
+    "import_origins": "verified inside private export",
+    "runtime_seconds": 197.17
+  },
+  "ad_m1_revert": "baseline old assertion fails on genuine success; restoration passes (logs retained)",
+  "ten_path_plan": "all postimages and exact delta independently verified",
+  "k1_available_python_checks": {
+    "passed": 12,
+    "failed": 0,
+    "includes": [
+      "patch-chain guard tests",
+      "existing licence-register tests",
+      "README delivered-boundary test"
+    ]
+  },
+  "k1_unavailable_checks": [
+    "Native debug/release/replay/faults not rerun: Docker unavailable in current WSL session",
+    "Manual Cargo graph linkage test not rerun: K1_METADATA input absent; initial launch yielded KeyError with 9 other passes"
+  ],
+  "k1_author_claims_inherited": {
+    "debug": 28,
+    "release": 28,
+    "replay_processes": 6,
+    "rust_fault_failures": 22,
+    "rust_baseline_restored_passes": 44
+  },
+  "oracle_environment": "Prior /tmp oracle venv absent. Original full environment preflight refused, not credited. Saved-source/candidate/inputs/receipts audit passed without any generation or environment reconstruction. Historical executed metadata/lock preserved.",
+  "frozen_A": {
+    "head": "0cf24d91eeca5cc45182eb6fb03202677fd97dcb",
+    "tree": "275bcefbe616a049aa6d0a968ff81b5728f0563d",
+    "tracked_index_untracked_clean": true,
+    "incident": "Fetch metadata changed by failed author pull; no source/tree change. Disclosure preserved; not reset."
+  },
+  "live_adoption": false,
+  "native_implementation_applied": false,
+  "full_suite_or_hosted_CI": false,
+  "log_normalization": "Trailing line whitespace stripped from coordinator initial K1 Python log only; failure content unchanged."
+}

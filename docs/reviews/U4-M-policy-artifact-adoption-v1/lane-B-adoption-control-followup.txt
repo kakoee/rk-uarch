@@ -1,0 +1,38 @@
+# U4 Lane B — bounded prospective-adoption control correction (AD-M1)
+
+Continue the existing B author session. Read the coordinator's
+ docs/reviews/U4-M-policy-artifact-adoption-v1/README.md and verification.json.
+Human generation succeeded; actual canonical adoption has NOT happened.
+A remains frozen at 0cf24d91eeca5cc45182eb6fb03202677fd97dcb. Do not change or pull A.
+
+In a private export of that exact source, the coordinator placed only the saved real
+49-file candidate and the exact proposed adoption-bindings.patch. Strict vendor checking
+succeeds, all nominal rows/refusals are unchanged, but your installed prospective policy
+test test_fresh_direct_valid_controls (tests/unit/test_u2_support_policy.py:514 onward)
+unconditionally expects --check to exit 1 with 'input support inventory changed'.
+That assertion describes the pre-adoption state, not the legitimate adopted state.
+
+Correct only this test assumption and add durable discriminating controls if necessary.
+Retain direct command and import-origin checks. Compare CLI outcome to genuine strict
+library validation of the SAME isolated source/artifact; do not accept an arbitrary exit
+code or mask import errors. A genuine compatible current artifact must succeed. A stale,
+mutated or otherwise invalid artifact must still refuse for the actual strict reason.
+Keep historical integrity separate from current compatibility. Never weaken production,
+change frozen source metadata, regenerate an artifact or fabricate adoption authority.
+
+Prepare/test in a private disposable export, using the coordinator's saved candidate at:
+/home/jjaff/AI-infra-simulation/rk-uarch/tables/U4-M-policy-generation-v1/candidate
+manifest b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc.
+This is conditional placement in scratch, not live adoption. Prior artifact and human
+receipts remain unchanged. Use explicit pytest config/root with PYTHONPATH and MYPYPATH
+unset; verify imports originate from that export. Tests must never modify live files.
+
+Return exact unapplied test patch, baseline/corrected/reverted/restored evidence for the
+legitimate-success case, stale/refusal controls, and affected selection results. Preserve
+existing guard tests and real-adoption skip semantics. Do not claim the live skip closed.
+
+Work from the normal B clone for owned proposal docs, integrate peer main and publish only
+the bounded handoff/unapplied patch with normal hooks. No live policy/test installation,
+protected edits, artifact placement/generation/adoption, A mutation, commit/push of its
+source, infrastructure work, native execution or K2 release. Do not wait for hosted CI.
+Coordinator reconciles this small correction with the still-unapproved adoption selection.
