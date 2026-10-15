@@ -31,7 +31,12 @@ and both import contracts passed. The suite includes M admission and trust ancho
 setup/caller-rehash refusals, policy/public-loader/bootstrap/source-isolation controls,
 legacy/rotary replay and B's corrected resident fixtures. The skip is the real new-policy
 human generation/adoption positive; it remains open. Nine installer preview/refusal controls
-also pass, and a separate read-only live-adoption positive passes.
+also pass, and a separate read-only live-adoption positive passes. The final installer,
+scope and prompt guard run passed all 39 tests. The committed helper's read-only preflight
+passed at `56d7ddcb4314ec4ecf7f7631c0b2edbe7d17a4e2`; its [receipt](installer-preflight.json)
+confirms 32 proposed paths and 56 support entries without authorizing installation. That
+commit pins the executable preparation and selection; the following receipt commit only
+adds this observed result.
 
 Live strict currentness passes with its actual adopted artifact. Combined proposed source
 correctly refuses that same stale artifact with exit 1, `input support inventory changed`.

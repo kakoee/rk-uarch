@@ -32,9 +32,27 @@ The original patch files, A manifest and required source ancestry must remain av
 | Combined strict currentness | Expected exit 1 with `input support inventory changed`; not credited as compatibility |
 | Read-only live adoption positive | 1 passed in 0.63 s; current 1,008 rows/four refusals and U3 review join |
 | Installer preview/refusals | 9 passed in 0.75 s; all patching confined to scratch; install branch never enabled |
+| Final installer/scope/prompt guards | 39 passed in 1.34 s; full-tree Ruff and diff whitespace checks pass |
+| Committed installer read-only preflight | Pass at `56d7ddcb4314ec4ecf7f7631c0b2edbe7d17a4e2`; 32 postimages / 56 support entries; no install authorization |
 | Final source isolation | All 1,987 export files and 1,958 live tracked files unchanged in bytes/mtime; empty isolation-delta.json |
 
-The exact suite names and flags appear in checks.json. Its additional controls cover all
+[installer-preflight.json](installer-preflight.json) records the exact committed helper
+check-only command, stdout and exit zero. It checked a clean main checkout at preparation
+commit `56d7ddcb4314ec4ecf7f7631c0b2edbe7d17a4e2`, verified live compatibility, built only a
+disposable proposal and stopped without installation. The receipt is added by a subsequent
+owned documentation commit; it does not change the pinned helper or selection.
+
+The final guard command was:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 /home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python -B -m pytest \
+  -c pyproject.toml --rootdir . -p no:cacheprovider \
+  --basetemp /tmp/u4-m-installer-final -q -rs \
+  docs/reviews/U4-M-policy-installation-readiness-v1/test_installation.py \
+  tests/unit/test_ci_scope.py tests/unit/test_prompt_sync.py
+```
+
+The exact suite names and flags for the full disposable audit appear in checks.json. Its additional controls cover all
 existing repair-policy/vendor entry points, final M admission, contract rotary-v2, tests/rotary_v2,
 U2 A prepared replay and B final fixture inputs. The live adoption check selected only
 `contract/tests/test_u2_historical_snapshot.py::test_current_canonical_is_exact_adopted_1008_four_real_refusals`;
