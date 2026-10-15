@@ -1,0 +1,41 @@
+error[rejected]: failed to satisfy license requirements
+   ┌─ /home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-k1-local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-ident-1.0.27/Cargo.toml:36:36
+   │
+36 │ license = "(MIT OR Apache-2.0) AND Unicode-3.0"
+   │            ────────────────────────━━━━━━━━━━━
+   │                                    │
+   │                                    rejected: license is not explicitly allowed
+   │
+   ├ Unicode-3.0 - Unicode License v3:
+   ├   - OSI approved
+   ├ unicode-ident v1.0.27
+     ├── proc-macro2 v1.0.107
+     │   ├── quote v1.0.47
+     │   │   ├── serde_derive v1.0.229
+     │   │   │   └── serde v1.0.229
+     │   │   │       └── uarch-engine v0.0.1
+     │   │   └── syn v3.0.9
+     │   │       └── serde_derive v1.0.229 (*)
+     │   ├── serde_derive v1.0.229 (*)
+     │   └── syn v3.0.9 (*)
+     └── syn v3.0.9 (*)
+
+warning[license-not-encountered]: license was not encountered
+  ┌─ /home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-toolchain-v1/deny-current.toml:5:64
+  │
+5 │ allow = ["MIT", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "Apache-2.0 WITH LLVM-exception"]
+  │                                                                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ unmatched license allowance
+
+warning[license-not-encountered]: license was not encountered
+  ┌─ /home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-toolchain-v1/deny-current.toml:5:18
+  │
+5 │ allow = ["MIT", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "Apache-2.0 WITH LLVM-exception"]
+  │                  ━━━━━━━━━━━━ unmatched license allowance
+
+warning[license-not-encountered]: license was not encountered
+  ┌─ /home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-toolchain-v1/deny-current.toml:5:34
+  │
+5 │ allow = ["MIT", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "Apache-2.0 WITH LLVM-exception"]
+  │                                  ━━━━━━━━━━━━ unmatched license allowance
+
+licenses FAILED

@@ -1,0 +1,24 @@
+   Compiling uarch-engine v0.0.1 (/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-k1-local/fault-export/native/crates/uarch-engine)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running unittests src/lib.rs (/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-k1-local/fault-target/x86_64-unknown-linux-gnu/debug/deps/uarch_engine-2d913b813d840473)
+
+running 1 test
+test tests::event_layout_and_tie_order ... FAILED
+
+failures:
+
+---- tests::event_layout_and_tie_order stdout ----
+
+thread 'tests::event_layout_and_tie_order' (2527927) panicked at crates/uarch-engine/src/tests.rs:64:5:
+assertion `left == right` failed
+  left: [(0, 3, 1), (0, 1, 2), (0, 1, 3), (1, 0, 4), (2, 1, 0)]
+ right: [(0, 1, 2), (0, 1, 3), (0, 3, 1), (1, 0, 4), (2, 1, 0)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::event_layout_and_tie_order
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

@@ -1,0 +1,32 @@
+{
+  "source_commit": "357dea8ee43ae098c284c672a44e6a6cf8482d27",
+  "faults": [
+    {
+      "name": "rounded-period",
+      "path": "native/crates/uarch-engine/src/time.rs",
+      "original_sha256": "98d27024173d6a8c9a35658773456fee8d951b5ba0b709ec7092cd98208b6ad1",
+      "before": "u64::try_from(numerator.div_ceil(freq)).map_err(|_| Error::TimeOverflow)",
+      "after": "u64::try_from(numerator / PS_PER_SECOND * (PS_PER_SECOND / freq)).map_err(|_| Error::TimeOverflow)",
+      "test": "tests::clock_literals_and_fractional_edges",
+      "diagnostic": "2499"
+    },
+    {
+      "name": "insertion-order",
+      "path": "native/crates/uarch-engine/src/event.rs",
+      "original_sha256": "31531ece364083f6b78786b01f79cc81dde76b476522a1bddf129ce0787a6695",
+      "before": "(self.t_ps, self.phase, self.target, self.seq)",
+      "after": "(self.t_ps, self.phase, self.seq as u32, u64::from(self.target))",
+      "test": "tests::event_layout_and_tie_order",
+      "diagnostic": "assertion"
+    },
+    {
+      "name": "zero-owner-bypass",
+      "path": "native/crates/uarch-engine/src/simulation.rs",
+      "original_sha256": "58b02d873cce4d6d28fb51da83484fc09b8c90b22036ee7f0e9d36ed20549fa4",
+      "before": "            let owner = self.jobs[i].owner;\n            self.owners.enqueue(owner, owner, i)?;",
+      "after": "            // FAULT ONLY: zero work bypasses owner admission at dependency readiness.\n            if matches!(self.jobs[i].duration, Delay::Picoseconds(0)) {\n                self.finished[i] = true;\n                self.observations[i].start_ps = t_ps;\n                self.observations[i].end_ps = t_ps;\n                self.outcome.completed_jobs += 1;\n                self.record(i, t_ps, phase, Action::Complete, None);\n                let mut enabled = Vec::new();\n                for &s in &self.successors[i] {\n                    self.remaining[s] -= 1;\n                    if self.remaining[s] == 0 { enabled.push(s); }\n                }\n                self.enqueue_ready(enabled, t_ps, phase)?;\n                continue;\n            }\n            let owner = self.jobs[i].owner;\n            self.owners.enqueue(owner, owner, i)?;",
+      "test": "tests::busy_owner_zero_grant_is_5000_not_3000",
+      "diagnostic": "3000"
+    }
+  ]
+}

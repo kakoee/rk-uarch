@@ -1,0 +1,436 @@
+{
+  "environment": "local WSL2; NOT accepted Linux builder/CI",
+  "source_commit": "357dea8ee43ae098c284c672a44e6a6cf8482d27",
+  "env": {
+    "RUSTUP_TOOLCHAIN": "stable",
+    "CARGO_HOME": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-k1-local/cargo",
+    "PROPTEST_RNG_SEED": "41011",
+    "PROPTEST_CASES": "256"
+  },
+  "checks": [
+    {
+      "label": "rustc",
+      "command": [
+        "rustc",
+        "-Vv"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "cargo",
+      "command": [
+        "cargo",
+        "-V"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "rustfmt",
+      "command": [
+        "rustfmt",
+        "-V"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "clippy-version",
+      "command": [
+        "cargo",
+        "clippy",
+        "-V"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "components",
+      "command": [
+        "rustup",
+        "component",
+        "list",
+        "--installed"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "host",
+      "command": [
+        "uname",
+        "-a"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "inputs",
+      "command": [
+        "sha256sum",
+        "-c",
+        "../docs/reviews/U4-A-toolchain-v1/native-inputs.sha256"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/native",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--",
+        "--check"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "debug",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "debug-list",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--",
+        "--list"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "replay-debug-0",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--lib",
+        "tests::canonical_replay_private_bytes",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "replay-debug-1",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--lib",
+        "tests::canonical_replay_private_bytes",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "replay-debug-2",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--lib",
+        "tests::canonical_replay_private_bytes",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "release",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--release"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "release-list",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--release",
+        "--",
+        "--list"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "replay-release-0",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--release",
+        "--lib",
+        "tests::canonical_replay_private_bytes",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "replay-release-1",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--release",
+        "--lib",
+        "tests::canonical_replay_private_bytes",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "replay-release-2",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "--release",
+        "--lib",
+        "tests::canonical_replay_private_bytes",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "fetch",
+      "command": [
+        "cargo",
+        "fetch",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "metadata",
+      "command": [
+        "cargo",
+        "metadata",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--format-version",
+        "1",
+        "--locked",
+        "--offline",
+        "--all-features"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "deny-version",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-k1-local/cargo-deny",
+        "--version"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "deny",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-k1-local/cargo-deny",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--config",
+        "native/deny.toml",
+        "check",
+        "licenses",
+        "bans",
+        "sources"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "deny-current-refusal",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.u4-k1-local/cargo-deny",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--config",
+        "docs/reviews/U4-A-toolchain-v1/deny-current.toml",
+        "check",
+        "licenses"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 4,
+      "expected_exit": 4
+    },
+    {
+      "label": "vendor",
+      "command": [
+        "uv",
+        "run",
+        "python",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "python-tests",
+      "command": [
+        "uv",
+        "run",
+        "pytest",
+        "-q",
+        "tests/unit/test_third_party.py",
+        "tests/unit/test_ci_scope.py",
+        "tests/unit/test_prompt_sync.py"
+      ],
+      "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+      "exit": 0,
+      "expected_exit": 0
+    }
+  ]
+}

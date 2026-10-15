@@ -1,5 +1,11 @@
 # Lane A private K1 implementation
 
+[Final handoff](handoff.md) · [actual test inventory](test-inventory.json) ·
+[semantic fault anchors](fault-anchors.json) · [local checks](local-checks.json).
+
+Implemented and locally checked; real accepted Linux execution and coordinator
+reconciliation remain pending. No K1/G3a/U4 closure is asserted.
+
 Authority: human-installed U0011 at ab7d9e0ab81be02a7294d18aeab8bca5591cfda6,
 postimage f452e2263b9e64a837e0a9fccaae73c7a5b01bd601a5f7cee141e06a7ca23a8f.
 Tool inputs are the accepted 83a9a14 package, installed byte-for-byte at its approved mappings.

@@ -1,0 +1,26 @@
+{
+  "source_commit": "357dea8ee43ae098c284c672a44e6a6cf8482d27",
+  "checks": [
+    {
+      "command": "RUSTUP_TOOLCHAIN=stable CARGO_HOME=$PWD/.u4-k1-local/cargo make native",
+      "exit": 0,
+      "log": "make-native.log"
+    },
+    {
+      "command": "uv run ruff check . --exclude .u4-k1-local",
+      "exit": 0,
+      "log": "ruff.log"
+    },
+    {
+      "command": "git apply --reverse --check third_party/patches/0001-u4-k1-register.patch",
+      "exit": 0
+    },
+    {
+      "command": "legacy ci.yml patches shell step (literal reproduction)",
+      "exit": 1,
+      "expected_refusal": true,
+      "log": "legacy-patch-job.log",
+      "resolution_owner": "B"
+    }
+  ]
+}
