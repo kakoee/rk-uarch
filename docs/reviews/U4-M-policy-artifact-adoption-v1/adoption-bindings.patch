@@ -1,53 +1,16 @@
 --- a/contract/tests/test_u2_historical_snapshot.py
 +++ b/contract/tests/test_u2_historical_snapshot.py
-@@ -1,4 +1,4 @@
+@@ -1 +1 @@
 -"""Separate received historical20 and current adopted48; neither is a synthetic oracle."""
 +"""Separate received historical20 and current adopted49; neither is a synthetic oracle."""
- 
- import hashlib
- import json
-@@ -19,8 +19,8 @@
- from tests import u2_comparison, u2_refresh
- 
- ROOT = Path(__file__).resolve().parents[2]
+@@ -22,2 +22,2 @@
 -CURRENT_MANIFEST = "1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
 -REVIEW_SHA256 = "58f0f04b55aa228c9831cc2427f0f86a4aa3c1ae8f9327eb3660ae160323300c"
 +CURRENT_MANIFEST = "b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
 +REVIEW_SHA256 = "ba58478e3085b8fb7f7cb6828e94cf0ef5e0247997801b9eb26fe152043ecdbb"
- 
- 
- def test_historical_fixture_is_complete_and_relocatable(tmp_path: Path) -> None:
-@@ -93,7 +93,7 @@
-         assert event["rk_sha"] == vr.PIN and event["execution"] == "refused"
-         assert event["exception"] == "UnsupportedPrecision"
-         assert event["boundary"] == "Accelerator.peak_op_per_s"
+@@ -96 +96 @@
 -    review = ROOT / "tests/fixtures/u3_rope/received-adoption-review.json"
 +    review = ROOT / "tests/fixtures/u4_m_policy/received-adoption-review.json"
-     assert vr.digest(review.read_bytes()) == REVIEW_SHA256
-     accepted = u2_refresh.adoption_authority(root, review, REVIEW_SHA256)
-     assert accepted.reviewed_subject_hashes == ("sha256:" + CURRENT_MANIFEST,)
---- a/tests/integration/test_u2_b_r202_public.py
-+++ b/tests/integration/test_u2_b_r202_public.py
-@@ -33,7 +33,7 @@
- 
- ROOT = Path(__file__).resolve().parents[2]
- ADOPTED = ROOT / "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
--MANIFEST = "sha256:1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
-+MANIFEST = "sha256:b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
- PRIOR_MANIFEST = "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
- PROFILES = ("retained-.55", "projection-1.0")
- CATEGORIES = (
---- a/tests/unit/test_u2_b_stage2_reference.py
-+++ b/tests/unit/test_u2_b_stage2_reference.py
-@@ -21,7 +21,7 @@
- ROOT = Path(__file__).parents[2]
- ADOPTED = ROOT / "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
- PRIOR_MANIFEST = "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
--CURRENT_MANIFEST = "sha256:1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
-+CURRENT_MANIFEST = "sha256:b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
- ZERO = "sha256:" + "0" * 64
- 
- 
 --- /dev/null
 +++ b/tests/fixtures/u4_m_policy/received-adoption-review.json
 @@ -0,0 +1,11 @@
@@ -62,3 +25,13 @@
 +  ],
 +  "reviewer": "Javid (@jjaffari)"
 +}
+--- a/tests/integration/test_u2_b_r202_public.py
++++ b/tests/integration/test_u2_b_r202_public.py
+@@ -36 +36 @@
+-MANIFEST = "sha256:1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
++MANIFEST = "sha256:b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
+--- a/tests/unit/test_u2_b_stage2_reference.py
++++ b/tests/unit/test_u2_b_stage2_reference.py
+@@ -24 +24 @@
+-CURRENT_MANIFEST = "sha256:1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
++CURRENT_MANIFEST = "sha256:b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
