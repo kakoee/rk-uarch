@@ -85,10 +85,7 @@ jobs:
       - name: licences
         run: uv run python -m pytest -q tests/unit/test_third_party.py
       - name: patches
-        run: |
-          if [ -n "$(find third_party/patches -name '*.patch' -print -quit)" ]; then
-            echo "patches exist but no apply check is wired yet; U-P5 adds it"; exit 1
-          else echo "nothing yet: no patches"; fi
+        run: uv run python .github/check_third_party_patches.py
 
   native:
     needs: scope
