@@ -96,3 +96,19 @@ Return this failure to the coordinator to reconcile the actual drift and select 
 subsequent bounded action. Nothing here widens the permitted versions or accepts this
 lock. Exact dependency acceptance, remaining C1 evidence, C2 and final binary/host authority
 remain later work. U0024 is unchanged. Stop for coordinator reconciliation.
+
+## Publication-time peer advance
+
+The evidence commit fa2d269 was made with normal hooks. Its separate push was rejected
+because main advanced to human commit 1aae27b298f3a051cc80fe94f4889da260633a0b, which installs
+the semantic candidate. These peer paths and A's new evidence paths are disjoint. The C1
+experiment and its uninstalled-preimage checks remain bound to the earlier explicit source;
+the newly observed peer installation changes neither the experiment nor its rejected lock.
+
+Automatic approval review blocked the proposed normal merge because this task says the
+candidate must remain uninstalled and forbids protected installation. No merge or protected
+change occurred in A's clone. The published checkpoint approval records human local commit
+permission and push_authorized=false; it does not itself resolve that current-task conflict.
+[Publication blocker](publication-blocker.json) records the exact refs and proposed action.
+Narrow integration permission is required before merging that already-published human work
+and pushing this evidence. This is not another C1 experiment/dependency vote or a C2 request.
