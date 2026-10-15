@@ -139,8 +139,11 @@ def test_workflow_runs_full_suite_unless_explicit_docs_result():
     assert short["if"] == "needs.scope.outputs.docs_only == 'true'"
     assert "tests/unit/test_prompt_sync.py" in short["run"]
     assert "tests/unit/test_ci_scope.py" in short["run"]
-    for name in ("golden", "determinism", "native", "perf", "ordering"):
+    for name in ("golden", "determinism", "perf", "ordering"):
         assert jobs[name]["needs"] == "scope"
         assert jobs[name]["if"] == "needs.scope.outputs.docs_only != 'true'"
+    # Explicit user deferral: native must not execute on either docs or code pushes.
+    assert jobs["native"]["needs"] == "scope"
+    assert jobs["native"]["if"] == "${{ false }}"
     for name in ("contract", "licences-and-patches"):
         assert "if" not in jobs[name]

@@ -31,3 +31,9 @@ uv run pytest -q tests/unit/test_ci_scope.py tests/unit/test_prompt_sync.py
 Hosted CI is checked by Javid asynchronously; agents need not wait for a run to finish
 unless asked. Failed checks can be brought back for a separate fix. This does not
 waive a required pass before tagging or making a validation claim.
+
+## Temporary native execution deferral
+
+Javid has deferred remote/hosted native execution. The live native job is explicitly
+skipped; this is not a native pass or K1 qualification. Other checks and the docs-only
+classifier remain active. See [scope and resumption](../docs/reviews/U4-native-CI-deferral-v1/README.md).

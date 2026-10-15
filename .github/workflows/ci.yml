@@ -89,7 +89,9 @@ jobs:
 
   native:
     needs: scope
-    if: needs.scope.outputs.docs_only != 'true'
+    # Javid deferred native remote/hosted execution; this is a skip, not qualification.
+    # Resume with the reviewed pinned job and its docs-only guard; see U4-native-CI-deferral-v1.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
