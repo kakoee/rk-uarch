@@ -24,6 +24,9 @@ stipulations it is conditional on. Detail is not accuracy.
   G5-correctness gates U7/G6/G3b/U10. Controlled-host evidence and executed self-hosted
   nightly gate full G5, U9 entry, simulator-performance claims and final closure.
 - U0002 source binding is unchanged pending a separate dependency-audit/migration proposal.
+- Temporary U0024: locally passing checks plus independent review may support interim
+  native development across sprints while remote CI is deferred. Read its exact scope;
+  no hosted pass, full G5/U9/performance qualification or final closure follows.
 - vendor rk-sim: `make vendor-rk SHA=<sha> RK=<path>` (humans only)
 
 ## Invariants (violating these = stop and ask)

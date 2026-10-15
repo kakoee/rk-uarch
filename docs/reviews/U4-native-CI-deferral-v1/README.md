@@ -50,3 +50,10 @@ because a token or machine becomes available. No global CI disablement is propos
 checks passed. Parsed workflow comparison confirms only `jobs.native.if` changes semantically;
 all other job definitions are identical to the source baseline. No runtime/native test,
 hosted CI or full-suite pass is claimed for this scheduling change.
+
+## Subsequent multi-sprint decision
+
+Human-installed [U0024](../../decisions/U0024-temporary-local-verification-and-deferred-native-ci.md)
+supersedes this note's restriction on development progression solely for missing remote
+native CI. Current local checks and independent review may support interim development
+within U0024's limits. The actual CI pause and final qualification debt remain in effect.

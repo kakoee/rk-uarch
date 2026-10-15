@@ -3,6 +3,12 @@
 _From build-spec §8. One prompt, one fresh session._
 
 ```text
+TEMPORARY U0024 EXCEPTION: read docs/decisions/U0024-temporary-local-verification-and-deferred-native-ci.md.
+During its multi-sprint deferral, passing current local checks and independent review may
+support interim development under the normal task/contract prerequisites. Record remote
+qualification pending; no local result becomes a hosted CI/nightly/performance pass.
+Full G5, U9 entry, simulator-performance claims and final project closure keep their gates.
+
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/engines/README.md, build-spec §2.5
 (the engine protocol and TaskGraph) and §2.8 (the native engine specification; it is the
 spec, not background), ADR U0005/U0023 and the accepted U0011 decisions. Build-spec §2.8

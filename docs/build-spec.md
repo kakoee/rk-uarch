@@ -1,5 +1,13 @@
 # rk-uarch — Build Spec
 
+**Temporary local-verification policy (U0024):** while remote native CI is deferred,
+passing current local suites and independent review can support interim development and
+handoffs. The exact exception and deferred runner/registry work are in
+[U0024](decisions/U0024-temporary-local-verification-and-deferred-native-ci.md).
+It supersedes only the identified remote-native development-entry/checkout requirements;
+full G5, U9 entry, performance claims and final project closure remain pending their
+required evidence. All semantic, contract, artifact and first-use requirements still apply.
+
 **What this is:** the implementation contract for `rk-uarch`, a microarchitecture-level simulator
 of one AI accelerator (a custom NPU SoC or a real reference chip). It produces characterization
 tables that rk-sim consumes as the C2 compute answer for a `compute_resource`. This document
@@ -966,6 +974,9 @@ stipulations it is conditional on. Detail is not accuracy.
   G5-correctness gates U7/G6/G3b/U10. Controlled-host evidence and executed self-hosted
   nightly gate full G5, U9 entry, simulator-performance claims and final closure.
 - U0002 source binding is unchanged pending a separate dependency-audit/migration proposal.
+- Temporary U0024: locally passing checks plus independent review may support interim
+  native development across sprints while remote CI is deferred. Read its exact scope;
+  no hosted pass, full G5/U9/performance qualification or final closure follows.
 - vendor rk-sim: `make vendor-rk SHA=<sha> RK=<path>` (humans only)
 
 ## Invariants (violating these = stop and ask)
@@ -2918,6 +2929,12 @@ table of errors by class.
 ### U-P11a · U4a · Lane A — Native engine kernel: time, events, the wheel, ownership, and the protocol
 
 ```text
+TEMPORARY U0024 EXCEPTION: read docs/decisions/U0024-temporary-local-verification-and-deferred-native-ci.md.
+During its multi-sprint deferral, passing current local checks and independent review may
+support interim development under the normal task/contract prerequisites. Record remote
+qualification pending; no local result becomes a hosted CI/nightly/performance pass.
+Full G5, U9 entry, simulator-performance claims and final project closure keep their gates.
+
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/engines/README.md, build-spec §2.5
 (the engine protocol and TaskGraph) and §2.8 (the native engine specification; it is the
 spec, not background), ADR U0005/U0023 and the accepted U0011 decisions. Build-spec §2.8
@@ -3040,6 +3057,12 @@ cycles per hop (Tenstorrent documents ~9 router-to-router on Blackhole), so it i
 ### U-P11b · U4a/U4b · Lane A — Native engine models: compute level 1, NoC and DRAM level 0, and the TaskGraph executor
 
 ```text
+TEMPORARY U0024 EXCEPTION: read docs/decisions/U0024-temporary-local-verification-and-deferred-native-ci.md.
+During its multi-sprint deferral, passing current local checks and independent review may
+support interim development under the normal task/contract prerequisites. Record remote
+qualification pending; no local result becomes a hosted CI/nightly/performance pass.
+Full G5, U9 entry, simulator-performance claims and final project closure keep their gates.
+
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, src/rkuarch/mapping/README.md, build-spec §2.4
 (the ladder and fidelity_detail), §2.5 (the TaskGraph and EngineResult) and §2.8, ADR U0011
 as U-P11a left it, and U-P11a's handoff.
@@ -3122,6 +3145,12 @@ field the native engine lists as unrepresented at these levels.
 ### U-P11c · U6 · Lane A — Native qualification, diagnostics and absolute host cost
 
 ```text
+TEMPORARY U0024 EXCEPTION: read docs/decisions/U0024-temporary-local-verification-and-deferred-native-ci.md.
+During its multi-sprint deferral, passing current local checks and independent review may
+support interim development under the normal task/contract prerequisites. Record remote
+qualification pending; no local result becomes a hosted CI/nightly/performance pass.
+Full G5, U9 entry, simulator-performance claims and final project closure keep their gates.
+
 CONTEXT TO LOAD: CLAUDE.md, native/README.md, build-spec §2.3.3, §2.5 and §2.8,
 ADR U0005/U0023/U0006/U0011, accepted bounded native handoffs, U-P8 and U-P12 results.
 
