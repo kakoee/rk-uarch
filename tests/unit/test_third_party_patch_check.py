@@ -39,7 +39,9 @@ def test_exact_patch_application_preserves_inputs(export):
     }
 
 
-@pytest.mark.parametrize("change", ["patch", "register", "extra", "missing", "base", "followup", "chain"])
+@pytest.mark.parametrize(
+    "change", ["patch", "register", "extra", "missing", "base", "followup", "chain"]
+)
 def test_patch_or_identity_drift_refuses(export, change):
     root, record = export
     if change in ("patch", "register"):
