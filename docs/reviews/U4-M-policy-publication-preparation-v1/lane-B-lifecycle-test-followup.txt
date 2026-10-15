@@ -1,0 +1,41 @@
+# U4 Lane B — bounded relocation-test reconciliation (PUB-C1)
+
+The human source/adoption commits remain local and must not be published by this task.
+Finish the existing K1 reconciliation separately; this is an additional test-only follow-up.
+
+Read this package README, identity.json and lifecycle-repro.log. The coordinator preview
+combines published main a6802a344f9f068fef7f1c63fbb72acec876dfc4 with A's human commit
+5e774682a7abdc21aa0bac6a8f738e66c852d3e5 (parent
+0cf24d91eeca5cc45182eb6fb03202677fd97dcb). Its exact tree is
+02cff99854337d59086861086f562119940d6e6c. Reconstruct in a disposable clone/export;
+confirm the source tree and private import origins. Do not merge that unpublished source
+history into your live main or modify the frozen A clone.
+
+The broad local CI Python selection finds a failure in:
+tests/unit/test_u2_b_tooling_binding.py::test_same_candidate_survives_adoption_and_fresh_layout
+The independent one-test rerun reproduces ModuleNotFoundError: rkuarch.workload.
+The fixture copies only support-files.json members into a relocated repository, but its
+subprocess imports workload, prepared, analytic, table and nominal-candidate modules to
+install producer-denial patches. Under the selected 56-file policy those consumer modules
+are deliberately not all in generator support. Strict checks before that subprocess pass.
+
+Prepare a bounded, unapplied test-only correction. Separate the generator dependency
+inventory from the extra modules needed by the producer-disabled consumer probe. Preserve
+strict currentness, exact adopted bytes before/after relocation, private source origins,
+producer/oracle prohibition and refusal controls. One possible approach is an explicit
+private test environment with the additional consumer source modules copied from the same
+pinned tree, independently of the unchanged support inventory. Do not expand support merely
+to satisfy the test, remove the test, skip the positive path, weaken the import guard, or
+silently use an editable/live checkout. If a minimal-support-only probe is retained, make its
+scope explicit and retain the full producer-disabled relocation control separately.
+
+Run the original failure, corrected passing control, reverted failure and restored pass;
+run the complete affected test module and relevant support/lifecycle regressions. Prove
+source/candidate preservation and report the unchanged selected support inventory. Do not
+run an oracle, generation/adoption, or modify production/protected files. If a production
+change turns out necessary, stop with concrete evidence rather than broadening scope.
+
+Publish only your owned proposal, exact test patch and evidence on normal main with hooks,
+merging peer documentation normally. Keep the real source/adoption history unpublished.
+No live test installation, native acceptance, K2, infrastructure change or closure. Do not
+wait for GitHub CI. Return exact pins and executed versus inherited results.

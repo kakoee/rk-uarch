@@ -1,0 +1,79 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_same_candidate_survives_adoption_and_fresh_layout ____________
+
+candidate = PosixPath('/tmp/pytest-of-jjaff/pytest-7/test_same_candidate_survives_a0/synthetic-candidate')
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-7/test_same_candidate_survives_a0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x78b698eaddf0>
+
+    def test_same_candidate_survives_adoption_and_fresh_layout(candidate, tmp_path, monkeypatch):
+        original = {
+            p.relative_to(candidate): p.read_bytes() for p in candidate.rglob("*") if p.is_file()
+        }
+        repo = tmp_path / "repository"
+        support = json.loads((candidate / "u2-inputs/support-files.json").read_bytes())
+        for name in support:
+            target = repo / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ui.ROOT / name, target)
+        adopted = repo / "contract/vendor" / ("rk-sim@" + vr.PIN)
+        shutil.copytree(candidate, adopted)
+        with monkeypatch.context() as m:
+            m.setattr(vr, "ROOT", repo)
+            m.setattr(ui, "ROOT", repo)
+            m.setattr(ui, "ADOPTED", adopted)
+            strict(adopted)
+            from tests.u2_comparison import run_historical
+
+            with pytest.raises(ValueError, match="historical adopted identity changed"):
+                run_historical(None)  # refuses before using inputs or candidate
+            ui.load_inputs(
+                adopted / "u2-inputs", vr.digest((adopted / "u2-inputs/SHA256SUMS").read_bytes())
+            )
+        fresh = tmp_path / "fresh-layout"
+        shutil.copytree(repo, fresh)
+        code = """
+    from unittest.mock import patch
+    from scripts import u2_inputs as ui
+    from scripts import vendor_rk as vr
+    import rkuarch.workload.prepare as producer
+    import rkuarch.workload.prepared as prepared
+    from contract.tests import nominal_candidate as nominal
+    from rkuarch.table import build
+    from rkuarch.engines.analytic import core
+    from pathlib import Path
+    assert ui.ROOT == vr.ROOT == Path.cwd()
+    assert Path(ui.__file__).is_relative_to(Path.cwd())
+    assert Path(producer.__file__).is_relative_to(Path.cwd())
+
+    def denied(*a, **k): raise AssertionError("oracle/producer forbidden")
+    with (patch.object(vr, "run_oracle", denied), patch.object(producer, "prepare", denied),
+          patch.object(prepared, "execute_prepared_point", denied),
+          patch.object(nominal, "evaluate_nominal", denied),
+          patch.object(build, "capture", denied), patch.object(core, "run_analytic", denied)):
+        vr.check_manifest(ui.ADOPTED)
+        vr.check_snapshot_inputs(ui.ADOPTED)
+        vr.check_generator(ui.ADOPTED)
+        frozen = ui.ADOPTED / "u2-inputs"
+        ui.load_inputs(frozen, vr.digest((frozen / "SHA256SUMS").read_bytes()))
+    print("same candidate accepted from fresh committed-required layout; no old checkout")
+    """
+        result = subprocess.run(
+            [sys.executable, "-B", "-c", code],
+            cwd=fresh,
+            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONPATH": ".:contract:src"},
+            capture_output=True,
+            text=True,
+        )
+>       assert result.returncode == 0, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 5, in <module>
+E         ModuleNotFoundError: No module named 'rkuarch.workload'
+E
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python', '-B', '-c', '\nfrom unittest.mock ...cent call last):\n  File "<string>", line 5, in <module>\nModuleNotFoundError: No module named \'rkuarch.workload\'\n').returncode
+
+tests/unit/test_u2_b_tooling_binding.py:207: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_u2_b_tooling_binding.py::test_same_candidate_survives_adoption_and_fresh_layout
+1 failed in 1.64s

@@ -11,8 +11,12 @@ Separate proposed B guard SHA256: 7bf806d04280f0ac66e37bfe0d292207e9a17b6e615b95
 Apply those two patches in that order to a PRIVATE base export. Exact combined tree:
 6d5263e13e43a5dfb44d8addf93cc47cc814a0ac (12 paths). Coordinator identity.json binds response.
 Verify every primary postimage and the preserved Stage 1 report hash. Do not review moving
-main or frozen A's M/policy installation. No patch is live; B-owned reconciliation remains
-separate. If B produces revised bytes, stop and obtain a new exact review binding.
+main or frozen A's M/policy installation. No patch is live. B reconciliation is now published at
+3d78ee8f6de22a8b3cb6031cb2d4eabbae820a5a, under
+docs/reviews/U4-B-K1-stage2-reconciliation-v1/. Read its README.md, subject.json,
+native-summary.json and native-metadata-binding.json at that commit. B confirms the
+same twelve-path tree and both unchanged patch hashes; it proposes no A-byte delta.
+If later bytes differ, stop and obtain a new exact review binding.
 
 Explicit issues to adjudicate:
 - F1: actual dispatched target authority on EVERY state mutation, including inline grants,
@@ -30,8 +34,14 @@ Explicit issues to adjudicate:
 Check all 28 tests in both modes and fresh-process replay when the exact accepted local
 image is available. New replay bytes differ from historical bytes; verify unchanged timing
 and the disclosed observation/field/sequence changes. Obtain actual Cargo metadata for the
-manual linkage check; the environment variable K1_METADATA is required. Coordinator has
-not rerun native tests because Docker is currently unavailable; author results are inherited.
+manual linkage check; the environment variable K1_METADATA is required. Docker access has been restored. Use the exact accepted local image
+sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523
+offline with private build outputs and preserved source. B independently executed 28 tests
+in each mode, six replay processes, actual Cargo metadata, 13 linkage/guard tests and all
+eleven semantic faults in both modes with restoration. Read the collector/adapter failures
+and the disclosed prefix/suffix campaign; do not describe them as one uninterrupted run.
+These are B receipts, not your reviewer executions. Coordinator has read the handoff and
+checked its identity but has not independently repeated that native campaign.
 If the environment prevents required checks, report the limitation, never grant unexecuted
 acceptance or substitute unapproved tooling. U0024 deferrals remain in force.
 
@@ -40,3 +50,7 @@ and write new probes/evidence to a new directory. Record executed vs inherited c
 No live file/index changes, protected installation, adoption, K1/G3a/U4 closure, K2 release,
 registry/server work or CI polling. Return findings to coordinator and A; B retains ownership
 of guard/inventory reconciliation even if the exact proposed software is acceptable.
+
+The separate M/policy publication preview has a relocation-test failure (PUB-C1).
+It is outside this fixed K1 review tree and is not a reason to review moving main instead.
+Keep that publication correction and the human source/adoption history out of this review.
