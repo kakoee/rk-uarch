@@ -1,0 +1,74 @@
+{
+  "package_commit": "ccf19227d06a3c520f2599729b5db31297e436ad",
+  "checks": [
+    {
+      "name": "exact read-only preflight",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-freeze-generation-v1/preflight.py",
+        "--package-commit",
+        "ccf19227d06a3c520f2599729b5db31297e436ad"
+      ],
+      "exit": 0,
+      "output": "{\n  \"input_manifest_sha256\": \"368c7e44dedd8586f2957f9e27030ce61573d3b9675f2f0df27e70c111abf32a\",\n  \"oracle_environment\": {\n    \"implementation\": \"CPython\",\n    \"packages\": {\n      \"annotated-doc\": \"0.0.5\",\n      \"annotated-types\": \"0.8.0\",\n      \"anyio\": \"4.14.2\",\n      \"click\": \"8.5.0\",\n      \"fastapi\": \"0.141.1\",\n      \"h11\": \"0.16.0\",\n      \"httptools\": \"0.8.0\",\n      \"idna\": \"3.19\",\n      \"markdown-it-py\": \"4.2.0\",\n      \"mdurl\": \"0.1.2\",\n      \"numpy\": \"2.5.2\",\n      \"pydantic\": \"2.13.5\",\n      \"pydantic-core\": \"2.46.5\",\n      \"pygments\": \"2.21.0\",\n      \"python-dotenv\": \"1.2.3\",\n      \"pyyaml\": \"6.0.3\",\n      \"rich\": \"15.0.0\",\n      \"rk-sim\": \"0.0.1\",\n      \"shellingham\": \"1.5.4\",\n      \"starlette\": \"1.6.0\",\n      \"typer\": \"0.27.2\",\n      \"typing-extensions\": \"4.16.0\",\n      \"typing-inspection\": \"0.4.4\",\n      \"uvicorn\": \"0.52.4\",\n      \"uvloop\": \"0.22.1\",\n      \"watchfiles\": \"1.2.0\",\n      \"websockets\": \"17.1\"\n    },\n    \"python_version\": \"3.12.14\",\n    \"uv_lock_sha256\": \"d984e55723326751ac3f888712f98462a525315ad4693691dbc3f2f5dc7f577c\"\n  },\n  \"source_commit\": \"0cf24d91eeca5cc45182eb6fb03202677fd97dcb\",\n  \"source_tree\": \"275bcefbe616a049aa6d0a968ff81b5728f0563d\",\n  \"status\": \"passed; no oracle executed\",\n  \"support_entries\": 56\n}\n"
+    },
+    {
+      "name": "missing human flag",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-freeze-generation-v1/human_generate.py",
+        "--package-commit",
+        "ccf19227d06a3c520f2599729b5db31297e436ad",
+        "--authorization-commit",
+        "0000000000000000000000000000000000000000"
+      ],
+      "exit": 1,
+      "output": "STOP: separately approved human generation requires UARCH_HUMAN=1\n"
+    },
+    {
+      "name": "preflight with producer and oracle disabled",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import sys,runpy;sys.path[:0]=['/home/jjaff/AI-infra-simulation/rk-uarch-u4-a', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/src', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/contract'];from scripts import u2_inputs,vendor_rk\ndef forbidden(*a,**k): raise AssertionError('producer/oracle called')\nu2_inputs.prepare_inputs=forbidden\nvendor_rk.run_oracle=forbidden\np=runpy.run_path('/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-freeze-generation-v1/preflight.py')\np['preflight']('ccf19227d06a3c520f2599729b5db31297e436ad')"
+      ],
+      "exit": 0,
+      "output": ""
+    },
+    {
+      "name": "input digest drift",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import sys,runpy;sys.path[:0]=['/home/jjaff/AI-infra-simulation/rk-uarch-u4-a', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/src', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/contract'];from scripts import u2_inputs,vendor_rk\ndef forbidden(*a,**k): raise AssertionError('producer/oracle called')\nu2_inputs.prepare_inputs=forbidden\nvendor_rk.run_oracle=forbidden\np=runpy.run_path('/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-freeze-generation-v1/preflight.py')\np['SPEC']['input_manifest_sha256']='0'*64\np['preflight']('ccf19227d06a3c520f2599729b5db31297e436ad')"
+      ],
+      "exit": 1,
+      "output": "STOP: input manifest drift\n"
+    },
+    {
+      "name": "bad package pin",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-freeze-generation-v1/preflight.py",
+        "--package-commit",
+        "0000000000000000000000000000000000000000"
+      ],
+      "exit": 1,
+      "output": "STOP: fatal: Not a valid commit name 0000000000000000000000000000000000000000\n"
+    }
+  ],
+  "source_unchanged": true,
+  "generation_output_absent": true,
+  "oracle_generation_adoption": false,
+  "limits": "Read-only and refusal controls; real generator invocations remain human-only and unexecuted."
+}
