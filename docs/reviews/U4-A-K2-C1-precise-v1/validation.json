@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "scope": "owned receipts only; original experiment source0718955; publication postimages separate",
+  "prior_host_validation_findings": [
+    {
+      "check": "ruff",
+      "result": "one overlong verifier status string; reformatted; no experiment input affected"
+    },
+    {
+      "check": "receipt verifier",
+      "result": "README linked validation.json before that generated receipt existed; create receipt then rerun"
+    },
+    {
+      "check": "git diff --cached --check",
+      "result": "raw help whitespace, deny trailing blank line and generated diff context whitespace; raw retained privately, display normalization declared"
+    }
+  ],
+  "receipt_check": {
+    "command": ".venv/bin/python docs/reviews/U4-A-K2-C1-precise-v1/verify_receipts.py",
+    "exit_code": 0,
+    "log": "evidence-check.log"
+  },
+  "lint": {
+    "command": ".venv/bin/ruff check docs/reviews/U4-A-K2-C1-precise-v1/verify_receipts.py",
+    "exit_code": 0,
+    "log": "ruff.log"
+  },
+  "no_native_tests": true,
+  "reason": "C1 permits metadata/fetch/licence checks only; no native build/probe/engine execution",
+  "staged_whitespace": {
+    "command": "git diff --cached --check",
+    "exit_code": 0
+  },
+  "staged_scope": "only docs/reviews/U4-A-K2-C1-precise-v1"
+}
