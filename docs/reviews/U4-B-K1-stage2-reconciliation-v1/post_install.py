@@ -1,7 +1,7 @@
 """PROPOSAL: collect local evidence after separately authorized source installation.
 
 No source installation, image build/pull, registry operation, CI activation or publication.
-Docker execution was unavailable during preparation: the native path is not yet validated.
+Constituent checks ran on the exact proposal. The installed-commit entry point remains pending.
 """
 
 import argparse

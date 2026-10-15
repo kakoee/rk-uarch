@@ -43,7 +43,7 @@ The original first-patch record remains byte-identical, SHA256
 Patch 0001 remains `c7ddd4456180a0338afd20908dac12275ad648505aef0abd690a9b953b70834e`.
 Neither historical evidence nor the live 19-test inventory was overwritten.
 
-## Reconciled proposal, with inherited native results
+## Reconciled proposal and retained inherited results
 
 [inventory.proposed.json](inventory.proposed.json) records **28 distinct names, multiplicity
 one in debug and release**. The old 19 names remain; nine are added. The proposal has an
@@ -68,30 +68,77 @@ updates only the source hash for B's existing release-only whitespace fault; its
 replacement and selected test are unchanged. [Control reconciliation](controls.md) explains
 which old driver assumptions must not be reused unchanged.
 
-## Missing execution prerequisite and concrete next procedure
+## Restored Docker access: newly executed local evidence
 
-[Availability](availability.json): the Docker command resolves to the Windows integration
-stub and exits 1, reporting Docker unavailable in this WSL distro. No runtime was activated,
-image pulled/built, dependency installed or infrastructure changed. The accepted local image
-remains `sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523`.
-A's Rust results and tools/image receipts are inherited. No current native qualification is
-claimed.
+The initial [Docker refusal](availability.json) is retained. After the user's access restoration,
+[actual image inspection](native-availability.json) found the exact accepted final image
+`sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523`, Linux/amd64.
+No image was pulled or built. [Native reproducer](native_check.py) exports the exact base,
+applies the same two patches, verifies the twelve-path tree, then runs the accepted tools
+with network disabled, read-only source and private outputs. This is proposal execution,
+not an installed-source identity or native qualification.
 
-The actual full `cargo metadata --locked --offline --all-features --format-version 1` output
-needed by `native/test_register_linkage.py` was not delivered and could not be reconstructed
-without the accepted runtime. `linkage-roles.json` and tree text are not substitutes for that
-resolved graph. The manual linkage test is **not newly executed** here.
+The real image checks passed tool version comparison, lock/features/registry/checksums,
+27 cached archives and notices, full 27-package versus Linux-selected 26-package discovery,
+fmt, clippy and accepted cargo-deny policy. Both full suites passed all **28 names once**;
+six fresh replay processes reproduced the exact `4490d63c…` payload. Tool versions and exact
+metadata commands are in [native-metadata-binding.json](native-metadata-binding.json).
+The raw [full graph](cargo-metadata.full.json) and [Linux graph](cargo-metadata.linux.json)
+are actual unmodified Cargo output, bound to source, lock, all-features, target and image.
 
-[Post-install procedure](post-install.md) and [proposal helper](post_install.py) generate fresh,
-retained full/target metadata, check actual source/lock/features/tool bindings, and explicitly
-invoke the otherwise-undiscovered manual test with `K1_METADATA` pointing to that run's full
-metadata receipt. They create an inventory candidate bound to a real installed commit; they
-never install an inventory or activate CI. Their native execution path remains untested until
-the exact local image is available. Pre-install refusals and Python syntax/lint were tested.
+The explicit host selection passed **13 tests**, including both functions in
+`native/test_register_linkage.py`, with `K1_METADATA` set to that run's full graph,
+PYTHONPATH/MYPYPATH unset and explicit pytest config/root. [Log](native-python-linkage.log).
+[F5 controls](linkage-controls.json) additionally ran A's exact register and README mutations
+in the first independently verified export: two intended assertion failures and four passing
+baseline/restored checks, with module origins checked and all source bytes/mtimes restored.
+Those are host Python checks over genuine native metadata, not Rust test executions.
+
+The first native run passed verification but B's new collector then expected the wrong receipt
+filename (`metadata-full.exit` instead of the existing command JSON's `exit` field).
+[Failure receipt](native-collector-initial-failure.json). The corrected collector repeated
+verification in a fresh export. The first export's successful real metadata was retained for
+F5 controls; the second export is used for the native campaign. No native source repair was
+made to accommodate the collector.
+
+
+The second run completed nine semantic faults in both modes with individual fresh-build
+restorations, then refused the tenth diagnostic: A supplies literal `Ok(1)` while the old
+B driver consumes a regex. [Exact partial campaign and refusal](native-prefix-campaign.json)
+preserve the actual intended Rust failure and successful source restoration. The owned
+adapter now escapes literal diagnostics before that unchanged consumer, and also requires
+exit101, the exact selected FAILED row, a one-failure summary and mode-specific owner
+messages. It does not change A's source, patches, anchors or literal expectations. The
+remaining two cases are run in a fresh export with `--fault-start 9`; this is an explicit
+suffix campaign, not a claim that a single uninterrupted eleven-case run passed.
+
+[Combined native summary](native-summary.json) now confirms **22 intended exit101 failures
+and 22 individual restored positives**, covering all eleven semantic cases in both modes.
+The baseline is the full 28-test suite in each mode. The generic campaign also refused
+missing source, real compiler/runtime faults, empty/ignored/filtered execution, absent offline
+cache, unavailable toolchain and the unexcepted Unicode policy. Release-only payload drift
+was refused while its Rust test passed; restoration recovered the exact expected bytes.
+All 1,962 source files passed verification isolation, and each fault campaign restored bytes
+and mtimes. [Exact suffix commands](native-commands.json), [prefix evidence](native-prefix-campaign.json),
+[cache archive checksums](native-cache-archives.stdout), [cache notices](native-cache-notices.stdout)
+and the [actual canonical payload](native-replay.canonical) are retained. No inherited native
+result is counted as one of these new runs.
+
+The proposal helpers always create or explicitly validate a private export and use metadata
+from that run. Recorded `/tmp` paths identify retained historical receipts, not a future test
+prerequisite. Recreate the graph with the accepted image for each later source identity.
+No test depends on A's missing temporary metadata file.
+
+[Post-install procedure](post-install.md) and [proposal helper](post_install.py) require a
+real separately authorized installed commit, regenerate its metadata and explicitly invoke
+the otherwise-undiscovered manual test. They produce only a reviewable inventory candidate.
+Their complete installed-commit entry point has not run: no such installation is claimed.
+The underlying image verification, discovery, metadata linkage and fault mechanisms have
+now been exercised on the exact proposal export; pre-install identity refusals also passed.
 
 **Stop for coordinator reconciliation.** Preserve this exact twelve-path binding for the
 same reviewer's Stage 3. Any later source/guard delta needs a new tree binding; this package
 proposes none to A's bytes. F1 and the disclosed F3/F4 probe disagreements remain for that
-reviewer. Installation, real post-install inventory, native re-execution, manual linkage,
-remote qualification, K2 and closure remain separate. This work did not change frozen A, live native/protected files,
-the saved candidate or artifact bindings. No hosted CI was polled.
+reviewer. Installation, real post-install inventory, remote qualification, K2 and closure
+remain separate. Frozen A, live native/protected files, the saved candidate and artifact
+bindings were untouched. No hosted CI was polled.

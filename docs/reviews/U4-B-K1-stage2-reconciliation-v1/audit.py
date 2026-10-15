@@ -68,7 +68,7 @@ def main():
         ).strip(),
         "base_commit": BASE,
         "proposal_tree": TREE,
-        "native_execution": "unavailable; inherited A evidence only",
+        "native_execution": "not performed by this audit; see separate native_check.py receipts",
         "checks": [],
     }
     with tempfile.TemporaryDirectory(prefix="u4-b-k1-stage2-") as temporary:

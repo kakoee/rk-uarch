@@ -2,7 +2,7 @@
 
 The twelve-path subject is unchanged. The following control inputs supersede the historical
 K1 inputs only for a future explicitly selected Stage 2 verification run. They do not overwrite
-old evidence, select a new live inventory or claim native results in this session.
+old evidence or select a new live inventory. The restored-image results below are new local executions.
 
 | Control | Exact reconciliation |
 | --- | --- |
@@ -12,16 +12,35 @@ old evidence, select a new live inventory or claim native results in this sessio
 | Semantic faults | Eleven current anchors in faults.proposed.json; preimage hash and unique anchor must match before mutation; exact test appears once |
 | Release-only replay drift | replay-mutation.proposed.json rebinds simulation.rs from `58b02d87…` to `472698e6…`; replacement and test are unchanged |
 | F5 host linkage fault | Needs newly captured full Cargo metadata; do not substitute roles.json, omit the test or accept a missing environment variable |
-| Historical generic failures | Preserve missing-source, compiler/runtime failure, empty/ignored/filtered selection, absent cache/toolchain, Unicode refusal and restoration controls; prior native runs are inherited |
+| Historical generic failures | Preserve missing-source, compiler/runtime failure, empty/ignored/filtered selection, absent cache/toolchain, Unicode refusal and restoration controls; now rerun on the exact proposal |
 
 B's old `controls.py` accepts explicit semantic fault data, but its final call into
-`replay_control.py` still loads the historical replay-mutation.json by its own PACKAGE path.
-It also expects older `.stdout`/`.canonical` receipt names and `verified.json`; the new
-post-install helper deliberately does not manufacture those receipts to unlock that driver.
-**Do not invoke the old driver unchanged against Stage 2.** Its hash refusal is correct.
-The source-hashed Stage 2 fault plan is ready; integrating a future native driver must consume
-these explicit inputs and the new run's genuine receipts. No native adapter is claimed tested
-while the runtime is unavailable.
+`replay_control.py` loads the historical replay-mutation.json through PACKAGE. The tested
+[native_check.py](native_check.py) calls the unchanged `construct.verify` to produce genuine
+`.stdout`/`.canonical`, metadata and verified receipts. It passes the eleven Stage 2 faults
+explicitly. For replay, it clones only the existing execute function's globals in memory,
+pointing PACKAGE at a newly written private copy of replay-mutation.proposed.json. The
+function code, mutations, failure assertions and all exported source bytes are unchanged.
+It sets seed41011/cases256 for native commands. A's diagnostic fields are literal substrings;
+the adapter applies `re.escape` when passing them to the old regex consumer. It additionally
+requires exit101, the exact selected FAILED row and one-failure summary, plus `foreign owner
+mutation` in debug or `ForeignOwner` in release for the F1 controls. The prior literal/regex
+refusal and all successful preceding cases are retained in native-prefix-campaign.json.
+No historical controller or evidence is edited.
+
+Run the owned reproducer from normal B main to check the exact unapplied proposal:
+
+```bash
+python3 -B docs/reviews/U4-B-K1-stage2-reconciliation-v1/native_check.py
+```
+
+The source remains base-plus-two-patches; this invocation never claims an installed commit.
+The separate post-install helper uses native-container.sh receipt names and still emits
+`fault_campaign_pending: true`: do not pass those different receipts to the old driver.
+For the future installed commit, `construct.verify` on that same guarded private export
+can create the driver's real predecessor receipts in a fresh receipt directory, followed by
+the same explicit-input adapter and campaign. Preserve the installed source binding and
+review that integration before declaring the installed inventory qualified.
 
 The concrete native command for each named fault is the same baseline/fault/restored selection:
 
@@ -35,7 +54,9 @@ verify source hash/one anchor; run a passing baseline; mutate only a separate di
 require exit101 and the named diagnostic from a real test failure; restore bytes and mtimes;
 use a fresh target directory for the restored positive. Require one selected test in both
 positive logs. A compiler failure or unrelated exit cannot substitute for the intended fault.
-All eleven current pairs were verified against A's saved logs; none was rerun here.
+The saved A campaign supplies 22 individual baseline/fault/restored triples. The new B
+campaign uses the full debug/release baseline suites, then 22 faults and 22 individual
+restored positives. Keep these two execution shapes distinct.
 
 For release replay drift, the source-hashed replacement appends a space only in release.
 Run the exact replay test; require its genuine test pass and a fresh file sink, then require
@@ -54,9 +75,9 @@ Complete restored debug/release positives and source isolation follow every camp
 For F5, the full actual metadata graph and its binding must already pass. In a temporary copy,
 change the register runtime classification or README binary description using A's exact saved
 fault anchors. Require the named Python test's intended assertion failure, then restore and
-pass. Without the real metadata, only the independent README check can run; this session did
-not rerun the graph-dependent F5 failure/restoration control.
+pass. Both controls now passed with newly captured real metadata; see linkage-controls.json and
+linkage_controls.py. The graph-dependent check is explicitly selected, and imported test
+modules must originate in the private export.
 
-These are execution requirements and proposal inputs, not a current failure-campaign pass or
-an independent software verdict. The same reviewer retains Stage 3 authority, including the
+These controls provide bounded proposal evidence, not an independent software verdict. The same reviewer retains Stage 3 authority, including the
 retroactive-insertion probe expectation and the private noncausal predecessor-list option.

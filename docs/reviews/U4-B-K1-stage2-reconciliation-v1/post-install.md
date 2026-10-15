@@ -78,3 +78,10 @@ container inspect stage already emits the needed graph, but no live path invokes
 Python test with it. This proposal helper joins those steps explicitly. Neither Makefile nor
 live CI is changed here. If this sequence later becomes the canonical native check entry point,
 review that separate wiring and retain docs-only classification and U0024's hosted skip.
+
+Preparation evidence after Docker restoration: native_check.py ran the exact unapplied
+proposal using genuine construct.verify receipts, while linkage_controls.py exercised both
+F5 mutations against real metadata. The installed-commit entry point above remains a proposal;
+its source identity cannot be filled from those scratch trees. The adapter in native_check.py
+also reconciles A's literal diagnostics with the historical driver's regex API. Its prefix
+and suffix campaigns are explicitly separated in the receipts.

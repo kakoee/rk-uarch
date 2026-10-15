@@ -1,0 +1,23 @@
+ISOLATED_TEST_ORIGINS=["/tmp/u4-b-k1-native-stage2-0n8floiu/source/native/test_register_linkage.py"]
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_native_readme_describes_delivered_boundary ________________
+
+    def test_native_readme_describes_delivered_boundary():
+        text = (ROOT / "native/README.md").read_text()
+>       assert "Binary: uarch-engine" not in text
+E       AssertionError: assert 'Binary: uarch-engine' not in '# native — ...d nightly.\n'
+E         
+E         'Binary: uarch-engine' is contained here:
+E           ivate K1, Binary: uarch-engine; not a public
+E           binary or EngineJob/EngineResult subprocess boundary; those remain K2.
+E           
+E           ## Rules
+E           - Time is u64 picoseconds; next_edge() is the only time↔cycle conversion. Clocks are...
+E         
+E         ...Full output truncated (45 lines hidden), use '-vv' to show
+
+native/test_register_linkage.py:56: AssertionError
+=========================== short test summary info ============================
+FAILED native/test_register_linkage.py::test_native_readme_describes_delivered_boundary
+1 failed in 0.10s
