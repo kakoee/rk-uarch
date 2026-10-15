@@ -121,7 +121,10 @@ was refused while its Rust test passed; restoration recovered the exact expected
 All 1,962 source files passed verification isolation, and each fault campaign restored bytes
 and mtimes. [Exact suffix commands](native-commands.json), [prefix evidence](native-prefix-campaign.json),
 [cache archive checksums](native-cache-archives.stdout), [cache notices](native-cache-notices.stdout)
-and the [actual canonical payload](native-replay.canonical) are retained. No inherited native
+and the [actual canonical payload](native-replay.canonical) are retained. Raw command output
+is byte-preserved, including pytest trailing whitespace and Cargo final blank lines; the
+whitespace check excludes those raw logs. Owned Python lint/format and other diff whitespace
+checks pass. No inherited native
 result is counted as one of these new runs.
 
 The proposal helpers always create or explicitly validate a private export and use metadata
