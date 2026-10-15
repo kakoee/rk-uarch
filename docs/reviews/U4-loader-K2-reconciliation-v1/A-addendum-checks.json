@@ -1,0 +1,123 @@
+{
+  "source": "1a52fa82f3aabc3eca5de4fa5597295a0fa04e27",
+  "patch_sha256": "672ac0ef827a06bdd0ae8b7f5e0cbb3c8f4ab1af7123d7fa96c36ebc1a276b41",
+  "exact_postimages": 10,
+  "commands": [
+    {
+      "name": "host",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/tmp/u4-a-k2-addendum-review-uhchkafr/run.py",
+        "/tmp/u4-a-k2-addendum-review-uhchkafr/baseline",
+        "host",
+        "/tmp/u4-a-k2-addendum-review-uhchkafr/pytest-host"
+      ],
+      "cwd": "/tmp/u4-a-k2-addendum-review-uhchkafr/baseline",
+      "exit": 0,
+      "seconds": 2.35,
+      "log_sha256": "17a376207fdcbf84dbf56365a4e12cdf48517d6064944efae67b20309e2cfda1",
+      "output": "........................................................................ [ 60%]\n...............................................                          [100%]\n119 passed in 1.85s\n"
+    },
+    {
+      "name": "proposed",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/tmp/u4-a-k2-addendum-review-uhchkafr/run.py",
+        "/tmp/u4-a-k2-addendum-review-uhchkafr/proposed",
+        "proposed",
+        "/tmp/u4-a-k2-addendum-review-uhchkafr/pytest-proposed"
+      ],
+      "cwd": "/tmp/u4-a-k2-addendum-review-uhchkafr/proposed",
+      "exit": 0,
+      "seconds": 3.13,
+      "log_sha256": "7997f53d2a737de0c84f271052a31216c39e6b4fa4540fea4b2b3e0fe3c7c47c",
+      "output": "........................................................................ [ 58%]\n...................................................                      [100%]\n123 passed in 2.76s\n"
+    },
+    {
+      "name": "schema",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/tmp/u4-a-k2-addendum-review-uhchkafr/run.py",
+        "/tmp/u4-a-k2-addendum-review-uhchkafr/proposed",
+        "schema"
+      ],
+      "cwd": "/tmp/u4-a-k2-addendum-review-uhchkafr/proposed",
+      "exit": 0,
+      "seconds": 0.29,
+      "log_sha256": "f0842103217da20217db5b3094b6deffef52590f32c1c999b470606a3c43ef15",
+      "output": "Mapped schemas fresh; origins verified.\n"
+    },
+    {
+      "name": "currentness",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "cwd": "/tmp/u4-a-k2-addendum-review-uhchkafr/proposed",
+      "exit": 0,
+      "seconds": 0.46,
+      "log_sha256": "9df750999264096be720d105c4a2c0e33adef9c7579d347598178b1a4d21f2fa",
+      "output": "snapshot manifest, matrix and current compatibility verified: /tmp/u4-a-k2-addendum-review-uhchkafr/proposed/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963\n"
+    },
+    {
+      "name": "source-types",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "src",
+        "contract/uarch_contract",
+        "scripts"
+      ],
+      "cwd": "/tmp/u4-a-k2-addendum-review-uhchkafr/proposed",
+      "exit": 0,
+      "seconds": 3.02,
+      "log_sha256": "a766815ce9137d28823902e2a13996ac5e7021d76946b008d607ddbe5fe9163c",
+      "output": "Success: no issues found in 83 source files\n"
+    },
+    {
+      "name": "contract-types",
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "--no-explicit-package-bases",
+        "contract/tests"
+      ],
+      "cwd": "/tmp/u4-a-k2-addendum-review-uhchkafr/proposed",
+      "exit": 0,
+      "seconds": 2.56,
+      "log_sha256": "81b8a767756bd649de91d7b0c104614fe1e706bce451b754a92161491825cfde",
+      "output": "Success: no issues found in 33 source files\n"
+    }
+  ],
+  "native_execution": false,
+  "live_installation": false,
+  "scope": "Coordinator proposal reconciliation; not independent adversarial acceptance or native qualification",
+  "harness_source": "import sys,pathlib,runpy\nr=pathlib.Path(sys.argv[1]);mode=sys.argv[2];p=r/'docs/reviews/U4-A-K2-semantic-construction-v1'\nsys.path[:0]=[str(r),str(r/'src'),str(r/'contract'),str(p),str(r/'docs/reviews/U4-B-K2-semantic-reconciliation-v1')]\nimport uarch_contract.mapped as m,rkuarch.workload.mapped as loader\nassert pathlib.Path(m.__file__).resolve().is_relative_to(r) and pathlib.Path(loader.__file__).resolve().is_relative_to(r)\nif mode=='schema':\n from uarch_contract.generate_mapped import generate\n assert generate(check=True)==[]\n print('Mapped schemas fresh; origins verified.')\nelse:\n import pytest\n selection=['contract/tests/mapped','tests/unit/test_u4_a_mapped_loader.py','tests/unit/test_prompt_sync.py'] if mode=='proposed' else [str(p/'test_semantics.py'),str(p/'test_records.py'),str(p/'test_construction.py'),'docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_literals.py','docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_membership.py','docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_boundary.py','tests/unit/test_u4_a_mapped_loader.py','tests/unit/test_prompt_sync.py']\n raise SystemExit(pytest.main(['-q','-c',str(r/'pyproject.toml'),'--rootdir='+str(r),'-p','no:cacheprovider','--basetemp='+sys.argv[3],*selection]))\n",
+  "additional_checks": [
+    {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "."
+      ],
+      "cwd": "/tmp/u4-a-k2-addendum-review-uhchkafr/proposed",
+      "exit": 0,
+      "output": "All checks passed!\n"
+    }
+  ],
+  "counts": {
+    "published_host_tests": 119,
+    "proposed_tests": 123,
+    "source_mypy_files": 83,
+    "contract_mypy_files": 33,
+    "note": "Selections overlap; not 242 distinct cases. No native tests."
+  },
+  "artifact_scope": "Strict currentness passed on the proposed private export. The existing ignored tables import-name refusal in the coordinator live checkout was not waived or repaired."
+}
