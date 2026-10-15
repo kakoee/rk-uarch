@@ -1,0 +1,1560 @@
+--- a/contract/schema/mapped/MappedEngineJob.json
++++ b/contract/schema/mapped/MappedEngineJob.json
+@@ -396,6 +396,7 @@
+     },
+     "ClockSetup": {
+       "additionalProperties": false,
++      "description": "Proposed earliest release; cycles run from actual owner grant.",
+       "properties": {
+         "domain": {
+           "enum": [
+--- a/contract/schema/mapped/MappedEngineResult.json
++++ b/contract/schema/mapped/MappedEngineResult.json
+@@ -213,6 +213,76 @@
+       "title": "BusyTime",
+       "type": "object"
+     },
++    "ClockObservation": {
++      "additionalProperties": false,
++      "properties": {
++        "aligned_start_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Aligned Start Ps"
++        },
++        "completion_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Completion Ps",
++          "type": "integer"
++        },
++        "domain": {
++          "enum": [
++            "core",
++            "noc",
++            "dram"
++          ],
++          "title": "Domain",
++          "type": "string"
++        },
++        "grant_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Grant Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "n_cycles": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "N Cycles",
++          "type": "integer"
++        },
++        "raw_edge_outcome": {
++          "enum": [
++            "success",
++            "TimeOverflow"
++          ],
++          "title": "Raw Edge Outcome",
++          "type": "string"
++        }
++      },
++      "required": [
++        "job_id",
++        "domain",
++        "grant_ps",
++        "n_cycles",
++        "raw_edge_outcome",
++        "aligned_start_ps",
++        "completion_ps"
++      ],
++      "title": "ClockObservation",
++      "type": "object"
++    },
+     "CriticalInterval": {
+       "additionalProperties": false,
+       "properties": {
+@@ -239,11 +309,26 @@
+           "title": "End Ps",
+           "type": "integer"
+         },
++        "kind": {
++          "enum": [
++            "service",
++            "release_idle"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
+         "limiting_resource_id": {
+-          "maximum": 18446744073709551615,
+-          "minimum": 0,
+-          "title": "Limiting Resource Id",
+-          "type": "integer"
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Limiting Resource Id"
+         },
+         "predecessor_id": {
+           "anyOf": [
+@@ -266,6 +351,7 @@
+         }
+       },
+       "required": [
++        "kind",
+         "start_ps",
+         "end_ps",
+         "cause_job_id",
+@@ -436,7 +522,10 @@
+             "SYNC_ARRIVE",
+             "BARRIER_RELEASE",
+             "STAT_SAMPLE",
+-            "END"
++            "END",
++            "DEPENDENCY_READY",
++            "OWNER_GRANT",
++            "TASK_RELEASE"
+           ],
+           "title": "Kind",
+           "type": "string"
+@@ -582,6 +671,12 @@
+           "title": "Ready Ps",
+           "type": "integer"
+         },
++        "release_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Release Ps",
++          "type": "integer"
++        },
+         "repeat_index": {
+           "anyOf": [
+             {
+@@ -641,6 +736,7 @@
+         "repeat_index",
+         "tile_origin",
+         "tile_extents",
++        "release_ps",
+         "ready_ps",
+         "start_ps",
+         "end_ps",
+@@ -980,6 +1076,24 @@
+           ],
+           "title": "Allocations"
+         },
++        "clocks": {
++          "discriminator": {
++            "mapping": {
++              "observed": "#/$defs/Observed_ClockObservation_",
++              "unrepresented": "#/$defs/Unrepresented"
++            },
++            "propertyName": "status"
++          },
++          "oneOf": [
++            {
++              "$ref": "#/$defs/Observed_ClockObservation_"
++            },
++            {
++              "$ref": "#/$defs/Unrepresented"
++            }
++          ],
++          "title": "Clocks"
++        },
+         "critical_path": {
+           "$ref": "#/$defs/Observed_CriticalInterval_"
+         },
+@@ -1056,6 +1170,7 @@
+         "format",
+         "events",
+         "jobs",
++        "clocks",
+         "dma",
+         "transfers",
+         "allocations",
+@@ -1089,6 +1204,29 @@
+       "title": "Observed[AllocationObservation]",
+       "type": "object"
+     },
++    "Observed_ClockObservation_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ClockObservation"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ClockObservation]",
++      "type": "object"
++    },
+     "Observed_CriticalInterval_": {
+       "additionalProperties": false,
+       "properties": {
+@@ -1309,13 +1447,20 @@
+       "additionalProperties": false,
+       "properties": {
+         "clock_domain": {
+-          "enum": [
+-            "core",
+-            "noc",
+-            "dram"
+-          ],
+-          "title": "Clock Domain",
+-          "type": "string"
++          "anyOf": [
++            {
++              "enum": [
++                "core",
++                "noc",
++                "dram"
++              ],
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Clock Domain"
+         },
+         "enter_ps": {
+           "maximum": 18446744073709551615,
+--- a/contract/schema/mapped/Observations.json
++++ b/contract/schema/mapped/Observations.json
+@@ -83,6 +83,76 @@
+       "title": "AllocationObservation",
+       "type": "object"
+     },
++    "ClockObservation": {
++      "additionalProperties": false,
++      "properties": {
++        "aligned_start_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Aligned Start Ps"
++        },
++        "completion_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Completion Ps",
++          "type": "integer"
++        },
++        "domain": {
++          "enum": [
++            "core",
++            "noc",
++            "dram"
++          ],
++          "title": "Domain",
++          "type": "string"
++        },
++        "grant_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Grant Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "n_cycles": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "N Cycles",
++          "type": "integer"
++        },
++        "raw_edge_outcome": {
++          "enum": [
++            "success",
++            "TimeOverflow"
++          ],
++          "title": "Raw Edge Outcome",
++          "type": "string"
++        }
++      },
++      "required": [
++        "job_id",
++        "domain",
++        "grant_ps",
++        "n_cycles",
++        "raw_edge_outcome",
++        "aligned_start_ps",
++        "completion_ps"
++      ],
++      "title": "ClockObservation",
++      "type": "object"
++    },
+     "CriticalInterval": {
+       "additionalProperties": false,
+       "properties": {
+@@ -109,11 +179,26 @@
+           "title": "End Ps",
+           "type": "integer"
+         },
++        "kind": {
++          "enum": [
++            "service",
++            "release_idle"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
+         "limiting_resource_id": {
+-          "maximum": 18446744073709551615,
+-          "minimum": 0,
+-          "title": "Limiting Resource Id",
+-          "type": "integer"
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Limiting Resource Id"
+         },
+         "predecessor_id": {
+           "anyOf": [
+@@ -136,6 +221,7 @@
+         }
+       },
+       "required": [
++        "kind",
+         "start_ps",
+         "end_ps",
+         "cause_job_id",
+@@ -306,7 +392,10 @@
+             "SYNC_ARRIVE",
+             "BARRIER_RELEASE",
+             "STAT_SAMPLE",
+-            "END"
++            "END",
++            "DEPENDENCY_READY",
++            "OWNER_GRANT",
++            "TASK_RELEASE"
+           ],
+           "title": "Kind",
+           "type": "string"
+@@ -452,6 +541,12 @@
+           "title": "Ready Ps",
+           "type": "integer"
+         },
++        "release_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Release Ps",
++          "type": "integer"
++        },
+         "repeat_index": {
+           "anyOf": [
+             {
+@@ -511,6 +606,7 @@
+         "repeat_index",
+         "tile_origin",
+         "tile_extents",
++        "release_ps",
+         "ready_ps",
+         "start_ps",
+         "end_ps",
+@@ -547,6 +643,29 @@
+       "title": "Observed[AllocationObservation]",
+       "type": "object"
+     },
++    "Observed_ClockObservation_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ClockObservation"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ClockObservation]",
++      "type": "object"
++    },
+     "Observed_CriticalInterval_": {
+       "additionalProperties": false,
+       "properties": {
+@@ -712,13 +831,20 @@
+       "additionalProperties": false,
+       "properties": {
+         "clock_domain": {
+-          "enum": [
+-            "core",
+-            "noc",
+-            "dram"
+-          ],
+-          "title": "Clock Domain",
+-          "type": "string"
++          "anyOf": [
++            {
++              "enum": [
++                "core",
++                "noc",
++                "dram"
++              ],
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Clock Domain"
+         },
+         "enter_ps": {
+           "maximum": 18446744073709551615,
+@@ -1010,6 +1136,24 @@
+       ],
+       "title": "Allocations"
+     },
++    "clocks": {
++      "discriminator": {
++        "mapping": {
++          "observed": "#/$defs/Observed_ClockObservation_",
++          "unrepresented": "#/$defs/Unrepresented"
++        },
++        "propertyName": "status"
++      },
++      "oneOf": [
++        {
++          "$ref": "#/$defs/Observed_ClockObservation_"
++        },
++        {
++          "$ref": "#/$defs/Unrepresented"
++        }
++      ],
++      "title": "Clocks"
++    },
+     "critical_path": {
+       "$ref": "#/$defs/Observed_CriticalInterval_"
+     },
+@@ -1086,6 +1230,7 @@
+     "format",
+     "events",
+     "jobs",
++    "clocks",
+     "dma",
+     "transfers",
+     "allocations",
+--- a/contract/tests/mapped/test_admission.py
++++ b/contract/tests/mapped/test_admission.py
+@@ -646,6 +646,13 @@
+     from uarch_contract.mapped import validate_job
+ 
+     j = load("kernel-job")
++    j["mapped_point"]["task_graph"]["jobs"][0]["duration_ps"] = 0
++    rehash(j["mapped_point"]["task_graph"], "graph_hash")
++    rehash(j["mapped_point"], "payload_hash")
++    j["point_hash"] = j["mapped_point"]["payload_hash"]
++    j["workload_closure"]["points"] = [copy.deepcopy(j["mapped_point"])]
++    j["profile"]["entries"][0]["graph_hash"] = j["mapped_point"]["task_graph"]["graph_hash"]
++    j["profile"]["entries"][0]["point_hash"] = j["point_hash"]
+     j["clock_setup"] = [{"job_id": "a", "domain": "core", "start_ps": 0, "n_cycles": 3}]
+     j["profile"]["entries"][0]["clock_setup_hash"] = content_hash(j["clock_setup"])
+     rehash(j["profile"], "profile_hash")
+--- /dev/null
++++ b/contract/tests/mapped/test_k2_semantic_completion.py
+@@ -0,0 +1,476 @@
++"""Synthetic subrecord/schema controls only; no completed native result fixture."""
++
++from typing import Literal, cast
++
++import pytest
++from uarch_contract.mapped import (
++    ClockObservation,
++    CriticalInterval,
++    EventObservation,
++    QueueObservation,
++)
++
++
++def test_public_raw_edge_and_owned_zero_are_distinct_fields() -> None:
++    value = dict(
++        job_id="z",
++        domain="core",
++        grant_ps=835,
++        n_cycles=0,
++        raw_edge_outcome="success",
++        aligned_start_ps=1667,
++        completion_ps=835,
++    )
++    assert ClockObservation.model_validate(value).completion_ps == 835
++    with pytest.raises(ValueError):
++        ClockObservation.model_validate(dict(value, n_cycles=True))
++    with pytest.raises(ValueError):
++        ClockObservation.model_validate(dict(value, raw_edge_outcome="TimeOverflow"))
++
++
++def test_diagnostic_overflow_is_explicit_not_zero_job_failure() -> None:
++    maximum = 2**64 - 1
++    value = ClockObservation(
++        job_id="z",
++        domain="core",
++        grant_ps=maximum,
++        n_cycles=0,
++        raw_edge_outcome="TimeOverflow",
++        aligned_start_ps=None,
++        completion_ps=maximum,
++    )
++    assert value.aligned_start_ps is None
++
++
++@pytest.mark.parametrize("kind", ["TASK_RELEASE", "DEPENDENCY_READY", "OWNER_GRANT"])
++def test_complete_public_event_vocabulary(
++    kind: Literal["TASK_RELEASE", "DEPENDENCY_READY", "OWNER_GRANT"],
++) -> None:
++    value = EventObservation(
++        event_seq=0,
++        observation_ordinal=0,
++        t_ps=835,
++        phase=2 if kind == "OWNER_GRANT" else 1,
++        target_id=0,
++        kind=kind,
++        job_id="z",
++    )
++    assert value.kind == kind
++
++
++def test_idle_is_distinct_from_resource_service() -> None:
++    idle = dict(
++        kind="release_idle",
++        start_ps=0,
++        end_ps=835,
++        cause_job_id="z",
++        predecessor_id=None,
++        limiting_resource_id=None,
++        category="overhead",
++    )
++    assert CriticalInterval.model_validate(idle).limiting_resource_id is None
++    for update in (
++        {"limiting_resource_id": 0},
++        {"predecessor_id": "p"},
++        {"category": "compute"},
++        {"start_ps": 1},
++        {"end_ps": 0},
++    ):
++        with pytest.raises(ValueError):
++            CriticalInterval.model_validate(dict(idle, **update))
++    with pytest.raises(ValueError):
++        CriticalInterval.model_validate(dict(idle, kind="service"))
++    assert CriticalInterval.model_validate(dict(idle, kind="service", limiting_resource_id=0))
++
++
++def test_non_clocked_fifo_does_not_invent_domain() -> None:
++    value = QueueObservation(
++        queue_id="owner:0:waiting",
++        item_id="z",
++        population="waiting",
++        enter_ps=835,
++        leave_ps=2000,
++        owner_id=0,
++        clock_domain=None,
++    )
++    assert value.clock_domain is None
++
++
++def test_generated_mirrors_fresh() -> None:
++    from uarch_contract.generate_mapped import generate
++
++    assert generate(check=True) == []
++
++
++@pytest.mark.parametrize("release,aligned", [(0, 0), (835, 1667)])
++def test_synthetic_accounting_subrecords_and_faults(release: int, aligned: int) -> None:
++    # Deliberately partial namespaces: cannot serialize as MappedEngineResult/native evidence.
++    import copy
++    from types import SimpleNamespace as NS
++    from typing import Any
++
++    from uarch_contract.mapped import (
++        ClockSetup,
++        FixedDelay,
++        JobObservation,
++        Observed,
++        validate_fixed_delay_observations,
++    )
++
++    setup = ClockSetup(job_id="z", domain="core", start_ps=release, n_cycles=0)
++    declared = FixedDelay(id="z", duration_ps=0, owner_id=0, kind="fixed_delay")
++    job: Any = NS(
++        clock_setup=(setup,),
++        freq_hz=NS(core=1200000000),
++        mapped_point=NS(task_graph=NS(jobs=(declared,), dependencies=())),
++    )
++    record = JobObservation(
++        job_id="z",
++        op_id=None,
++        group_id=None,
++        repeat_index=None,
++        tile_origin=None,
++        tile_extents=None,
++        release_ps=release,
++        ready_ps=release,
++        start_ps=release,
++        end_ps=release,
++        owner_id=0,
++        blocking_predecessor_ids=(),
++        useful_matrix_ops=0,
++        issued_matrix_ops=0,
++        vector_arithmetic_ops=0,
++        cast_ops=0,
++    )
++    kinds: tuple[Literal["TASK_RELEASE", "TASK_READY", "OWNER_GRANT", "COMPUTE_DONE"], ...] = (
++        "TASK_RELEASE" if release else "TASK_READY",
++        "OWNER_GRANT",
++        "COMPUTE_DONE",
++    )
++    events = tuple(
++        EventObservation(
++            event_seq=i,
++            observation_ordinal=i,
++            t_ps=release,
++            phase=1 if i == 0 else 2,
++            target_id=0,
++            kind=kind,
++            job_id="z",
++        )
++        for i, kind in enumerate(kinds)
++    )
++    clock = ClockObservation(
++        job_id="z",
++        domain="core",
++        grant_ps=release,
++        n_cycles=0,
++        raw_edge_outcome="success",
++        aligned_start_ps=aligned,
++        completion_ps=release,
++    )
++    queues = tuple(
++        QueueObservation(
++            queue_id="owner:0:" + p,
++            item_id="z",
++            population=p,
++            enter_ps=release,
++            leave_ps=release,
++            owner_id=0,
++            clock_domain=None,
++        )
++        for p in ("service", "waiting")
++    )
++    critical = (
++        (
++            CriticalInterval(
++                kind="release_idle",
++                start_ps=0,
++                end_ps=release,
++                cause_job_id="z",
++                predecessor_id=None,
++                limiting_resource_id=None,
++                category="overhead",
++            ),
++        )
++        if release
++        else ()
++    )
++    r: Any = NS(
++        duration_ps=release,
++        simulator_metrics=NS(event_count=3, max_live_events=1),
++        observations=NS(
++            dma=NS(status="unrepresented"),
++            transfers=NS(status="unrepresented"),
++            allocations=NS(status="unrepresented"),
++            jobs=NS(records=(record,)),
++            events=NS(records=events),
++            clocks=Observed[ClockObservation](status="observed", records=(clock,)),
++            queue_membership=Observed[QueueObservation](status="observed", records=queues),
++            resource_intervals=NS(records=()),
++            critical_path=NS(records=critical),
++        ),
++    )
++    validate_fixed_delay_observations(r, job)
++    for fault in ("alignment", "domain", "blocker", "critical", "dispatch", "metrics"):
++        bad = copy.deepcopy(r)
++        if fault == "alignment":
++            bad.observations.clocks = Observed[ClockObservation](
++                status="observed",
++                records=(clock.model_copy(update={"aligned_start_ps": aligned + 1}),),
++            )
++        elif fault == "domain":
++            bad.observations.queue_membership = Observed[QueueObservation](
++                status="observed",
++                records=(queues[0].model_copy(update={"clock_domain": "core"}), queues[1]),
++            )
++        elif fault == "blocker":
++            bad.observations.jobs.records = (
++                record.model_copy(update={"blocking_predecessor_ids": ("z",)}),
++            )
++        elif fault == "critical":
++            bad.observations.critical_path.records = (
++                ()
++                if release
++                else (
++                    NS(
++                        kind="service",
++                        start_ps=0,
++                        end_ps=0,
++                        cause_job_id="z",
++                        predecessor_id=None,
++                        limiting_resource_id=0,
++                        category="overhead",
++                    ),
++                )
++            )
++        elif fault == "dispatch":
++            bad.observations.events.records = events[:-1]
++        else:
++            bad.simulator_metrics.event_count = 4
++        with pytest.raises(ValueError):
++            validate_fixed_delay_observations(bad, job)
++        validate_fixed_delay_observations(r, job)  # restored structural positive, not native
++
++
++@pytest.mark.parametrize("notification_swap", [(6, 7), (9, 10)])
++def test_literal_same_time_release_dependency_inline_zero_partition(
++    notification_swap: tuple[int, int],
++) -> None:
++    """Hand-entered partial subrecords, not an executed or serializable native result."""
++    import copy
++    from types import SimpleNamespace as NS
++    from typing import Any
++
++    from uarch_contract.mapped import (
++        ClockSetup,
++        FixedDelay,
++        JobObservation,
++        Observed,
++        ResourceInterval,
++        validate_fixed_delay_observations,
++    )
++
++    # id, owner, duration, release, ready, grant, end, tight causes
++    literals = (
++        ("a", 0, 1000, 0, 0, 0, 1000, ()),
++        ("b", 0, 0, 1000, 1000, 1000, 1000, ("a",)),
++        ("c", 0, 0, 0, 1000, 1000, 1000, ("a", "b")),
++        ("d", 1, 1000, 0, 1000, 1000, 2000, ("b", "c")),
++    )
++    records = tuple(
++        JobObservation(
++            job_id=k,
++            owner_id=o,
++            release_ps=release,
++            ready_ps=ready,
++            start_ps=start,
++            end_ps=end,
++            blocking_predecessor_ids=causes,
++            op_id=None,
++            group_id=None,
++            repeat_index=None,
++            tile_origin=None,
++            tile_extents=None,
++            useful_matrix_ops=0,
++            issued_matrix_ops=0,
++            vector_arithmetic_ops=0,
++            cast_ops=0,
++        )
++        for k, o, _, release, ready, start, end, causes in literals
++    )
++    declared = tuple(
++        FixedDelay(kind="fixed_delay", id=k, owner_id=o, duration_ps=duration)
++        for k, o, duration, *_ in literals
++    )
++    deps = tuple(NS(before=a, after=b) for a, b in (("a", "c"), ("b", "d"), ("c", "d")))
++    job: Any = NS(
++        clock_setup=(ClockSetup(job_id="b", domain="core", start_ps=1000, n_cycles=0),),
++        freq_hz=NS(core=10**9),
++        mapped_point=NS(task_graph=NS(jobs=declared, dependencies=deps)),
++    )
++    # Explicit actual-dispatch ordering premise. This test supplies no scheduler.
++    dispatches = (
++        (0, 1, "a", "TASK_READY"),
++        (0, 2, "a", "OWNER_GRANT"),
++        (1000, 0, "a", "COMPUTE_DONE"),
++        (1000, 1, "b", "TASK_RELEASE"),
++        (1000, 1, "c", "DEPENDENCY_READY"),
++        (1000, 2, "b", "OWNER_GRANT"),
++        (1000, 2, "b", "COMPUTE_DONE"),
++        (1000, 2, "d", "DEPENDENCY_READY"),
++        (1000, 2, "c", "OWNER_GRANT"),
++        (1000, 2, "c", "COMPUTE_DONE"),
++        (1000, 2, "d", "DEPENDENCY_READY"),
++        (1000, 2, "d", "OWNER_GRANT"),
++        (2000, 0, "d", "COMPUTE_DONE"),
++    )
++    owners = {r.job_id: r.owner_id for r in records}
++    events = tuple(
++        EventObservation.model_validate(
++            dict(
++                event_seq=i,
++                observation_ordinal=i,
++                t_ps=t,
++                phase=p,
++                target_id=owners[k],
++                kind=kind,
++                job_id=k,
++            )
++        )
++        for i, (t, p, k, kind) in enumerate(dispatches)
++    )
++    queues = tuple(
++        sorted(
++            (
++                QueueObservation(
++                    queue_id=f"owner:{r.owner_id}:{p}",
++                    item_id=r.job_id,
++                    population=cast(Literal["waiting", "service"], p),
++                    enter_ps=a,
++                    leave_ps=b,
++                    owner_id=r.owner_id,
++                    clock_domain=None,
++                )
++                for r in records
++                for p, a, b in (
++                    ("waiting", r.ready_ps, r.start_ps),
++                    ("service", r.start_ps, r.end_ps),
++                )
++            ),
++            key=lambda q: (q.queue_id, q.item_id, q.population),
++        )
++    )
++    intervals = tuple(
++        ResourceInterval(
++            owner_id=r.owner_id,
++            job_id=r.job_id,
++            start_ps=r.start_ps,
++            end_ps=r.end_ps,
++            activity="fixed_delay",
++            limiting_resource_id=r.owner_id,
++            service_start_ps_ratio=None,
++            service_end_ps_ratio=None,
++        )
++        for r in records
++        if r.end_ps > r.start_ps
++    )
++    critical = (
++        CriticalInterval(
++            kind="service",
++            start_ps=0,
++            end_ps=1000,
++            cause_job_id="a",
++            predecessor_id=None,
++            limiting_resource_id=0,
++            category="overhead",
++        ),
++        CriticalInterval(
++            kind="service",
++            start_ps=1000,
++            end_ps=2000,
++            cause_job_id="d",
++            predecessor_id="b",
++            limiting_resource_id=1,
++            category="overhead",
++        ),
++    )
++    clock = ClockObservation(
++        job_id="b",
++        domain="core",
++        grant_ps=1000,
++        n_cycles=0,
++        raw_edge_outcome="success",
++        aligned_start_ps=1000,
++        completion_ps=1000,
++    )
++    r: Any = NS(
++        duration_ps=2000,
++        simulator_metrics=NS(event_count=13, max_live_events=2),
++        observations=NS(
++            dma=NS(status="unrepresented"),
++            transfers=NS(status="unrepresented"),
++            allocations=NS(status="unrepresented"),
++            jobs=NS(records=records),
++            events=NS(records=events),
++            clocks=Observed[ClockObservation](status="observed", records=(clock,)),
++            queue_membership=Observed[QueueObservation](status="observed", records=queues),
++            resource_intervals=NS(records=intervals),
++            critical_path=NS(records=critical),
++        ),
++    )
++    validate_fixed_delay_observations(r, job)
++    for fault in ("release_tie", "zero_bridge", "notification", "positive_phase", "fifo"):
++        bad = copy.deepcopy(r)
++        if fault == "release_tie":
++            bad.observations.jobs.records = (
++                records[0],
++                records[1].model_copy(update={"blocking_predecessor_ids": ()}),
++                records[2],
++                records[3],
++            )
++        elif fault == "zero_bridge":
++            bad.observations.critical_path.records = (
++                critical[0],
++                critical[1].model_copy(update={"predecessor_id": "a"}),
++            )
++        elif fault == "notification":
++            bad.observations.events.records = events[:7] + events[8:]
++        elif fault == "positive_phase":
++            bad.observations.events.records = events[:-1] + (
++                events[-1].model_copy(update={"phase": 2}),
++            )
++        else:
++            # A phase-1-ready c cannot jump ahead of already enqueued b on owner0.
++            changed = list(events)
++            changed[5] = events[5].model_copy(update={"job_id": "c"})
++            changed[6] = events[6].model_copy(update={"job_id": "c"})
++            changed[8] = events[8].model_copy(update={"job_id": "b"})
++            changed[9] = events[9].model_copy(update={"job_id": "b"})
++            bad.observations.events.records = tuple(changed)
++            bad.observations.jobs.records = (
++                records[0],
++                records[1].model_copy(update={"blocking_predecessor_ids": ("a", "c")}),
++                records[2].model_copy(update={"blocking_predecessor_ids": ("a",)}),
++                records[3],
++            )
++        with pytest.raises(ValueError):
++            validate_fixed_delay_observations(bad, job)
++        validate_fixed_delay_observations(r, job)
++
++    # Two indistinguishable notifications target d at time1000/phase2. Each must
++    # follow an available predecessor completion, including the second notification.
++    # Derived from B's notify-before-zero-complete counterexample; no scheduler runs.
++    bad = copy.deepcopy(r)
++    reordered = list(events)
++    completion, notification = notification_swap
++    assert reordered[completion].kind == "COMPUTE_DONE"
++    assert reordered[notification].kind == "DEPENDENCY_READY"
++    reordered[completion], reordered[notification] = (
++        reordered[notification], reordered[completion]
++    )
++    bad.observations.events.records = tuple(
++        e.model_copy(update={"observation_ordinal": i}) for i, e in enumerate(reordered)
++    )
++    with pytest.raises(ValueError, match="IncompleteObservations"):
++        validate_fixed_delay_observations(bad, job)
++    validate_fixed_delay_observations(r, job)
+--- a/contract/uarch_contract/mapped.py
++++ b/contract/uarch_contract/mapped.py
+@@ -663,6 +663,8 @@
+ 
+ 
+ class ClockSetup(FrozenModel):
++    """Proposed earliest release; cycles run from actual owner grant."""
++
+     job_id: NonEmpty
+     domain: Literal["core", "noc", "dram"]
+     start_ps: U64
+@@ -761,6 +763,13 @@
+                 {x.job_id for x in self.clock_setup} <= {j.id for j in p.task_graph.jobs},
+                 "InvalidResource",
+             )
++            for setup in self.clock_setup:
++                declared = next(j for j in p.task_graph.jobs if j.id == setup.job_id)
++                require(
++                    isinstance(declared, FixedDelay) and declared.duration_ps == 0,
++                    "UnsupportedScope",
++                    "clock setup exclusively controls service",
++                )
+         else:
+             require(
+                 self.owners == canonical_owners(b.hardware_spec, p.task_graph), "InvalidResource"
+@@ -839,6 +848,9 @@
+         "BARRIER_RELEASE",
+         "STAT_SAMPLE",
+         "END",
++        "DEPENDENCY_READY",
++        "OWNER_GRANT",
++        "TASK_RELEASE",
+     ]
+     job_id: NonEmpty | None
+ 
+@@ -850,6 +862,7 @@
+     repeat_index: U64 | None
+     tile_origin: Tile | None
+     tile_extents: Extent | None
++    release_ps: U64
+     ready_ps: U64
+     start_ps: U64
+     end_ps: U64
+@@ -906,7 +919,7 @@
+     enter_ps: U64
+     leave_ps: U64 | None
+     owner_id: U64
+-    clock_domain: Literal["core", "noc", "dram"]
++    clock_domain: Literal["core", "noc", "dram"] | None
+ 
+ 
+ class TimeRatio(RationalValue):
+@@ -930,12 +943,46 @@
+ 
+ 
+ class CriticalInterval(FrozenModel):
++    kind: Literal["service", "release_idle"]
+     start_ps: U64
+     end_ps: U64
+     cause_job_id: NonEmpty
+     predecessor_id: NonEmpty | None
+-    limiting_resource_id: U64
++    limiting_resource_id: U64 | None
+     category: Literal["compute", "memory", "noc", "sync", "overhead"]
++
++    @model_validator(mode="after")
++    def interval_kind(self) -> CriticalInterval:
++        require(self.end_ps > self.start_ps, "AttributionMismatch")
++        if self.kind == "release_idle":
++            require(
++                self.start_ps == 0
++                and self.predecessor_id is None
++                and self.limiting_resource_id is None
++                and self.category == "overhead",
++                "AttributionMismatch",
++            )
++        else:
++            require(self.limiting_resource_id is not None, "InvalidResource")
++        return self
++
++
++class ClockObservation(FrozenModel):
++    job_id: NonEmpty
++    domain: Literal["core", "noc", "dram"]
++    grant_ps: U64
++    n_cycles: U64
++    raw_edge_outcome: Literal["success", "TimeOverflow"]
++    aligned_start_ps: U64 | None
++    completion_ps: U64
++
++    @model_validator(mode="after")
++    def alignment_outcome(self) -> ClockObservation:
++        require(
++            (self.raw_edge_outcome == "success") == (self.aligned_start_ps is not None),
++            "IncompleteObservations",
++        )
++        return self
+ 
+ 
+ class Observed[T](FrozenModel):
+@@ -952,6 +999,7 @@
+     format: Literal["uarch-native-observations/1"]
+     events: Observed[EventObservation]
+     jobs: Observed[JobObservation]
++    clocks: Annotated[Observed[ClockObservation] | Unrepresented, Field(discriminator="status")]
+     dma: Annotated[Observed[DmaObservation] | Unrepresented, Field(discriminator="status")]
+     transfers: Annotated[
+         Observed[TransferObservation] | Unrepresented, Field(discriminator="status")
+@@ -1124,7 +1172,11 @@
+             interval.start_ps == cursor
+             and interval.end_ps >= cursor
+             and interval.cause_job_id in ids
+-            and interval.limiting_resource_id in owner_ids,
++            and (
++                interval.limiting_resource_id in owner_ids
++                if interval.kind == "service"
++                else interval.limiting_resource_id is None
++            ),
+             "AttributionMismatch",
+         )
+         category_totals[interval.category] += interval.end_ps - interval.start_ps
+@@ -1167,7 +1219,295 @@
+         require(
+             all(x.issue_ps <= x.complete_ps <= r.duration_ps for x in dma), "IncompleteObservations"
+         )
++    if job.state_model == "fixed_delay/1":
++        validate_fixed_delay_observations(r, job)
++    else:
++        require(
++            all(x.kind == "service" for x in r.observations.critical_path.records),
++            "AttributionMismatch",
++        )
++        assert isinstance(r.observations.queue_membership, Observed)
++        require(
++            all(x.clock_domain is not None for x in r.observations.queue_membership.records),
++            "IncompleteObservations",
++        )
+     return r
++
++
++def validate_fixed_delay_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
++    """Proposed structural/causal consistency checks, not evidence of real execution."""
++    obs = r.observations
++    require(
++        all(
++            getattr(obs, section).status == "unrepresented"
++            for section in ("dma", "transfers", "allocations")
++        ),
++        "IncompleteObservations",
++    )
++    jobs = {x.job_id: x for x in obs.jobs.records}
++    setup = {x.job_id: x for x in job.clock_setup}
++    require(isinstance(obs.clocks, Observed), "IncompleteObservations")
++    assert isinstance(obs.clocks, Observed)
++    ordered(obs.clocks.records, lambda x: x.job_id, "IncompleteObservations")
++    require(tuple(x.job_id for x in obs.clocks.records) == tuple(setup), "IncompleteObservations")
++    for c in obs.clocks.records:
++        s, j = setup[c.job_id], jobs[c.job_id]
++        freq = getattr(job.freq_hz, s.domain)
++        # Validate measured fields independently; never construct a run or input duration.
++        k = 0 if j.start_ps == 0 else ((j.start_ps - 1) * freq) // 10**12 + 1
++        aligned = (k * 10**12 + freq - 1) // freq
++        require(
++            (c.domain, c.grant_ps, c.n_cycles, c.completion_ps)
++            == (s.domain, j.start_ps, s.n_cycles, j.end_ps),
++            "IncompleteObservations",
++        )
++        require(
++            (c.raw_edge_outcome, c.aligned_start_ps)
++            == (("success", aligned) if aligned <= 2**64 - 1 else ("TimeOverflow", None)),
++            "IncompleteObservations",
++        )
++        end = j.start_ps if s.n_cycles == 0 else ((k + s.n_cycles) * 10**12 + freq - 1) // freq
++        require(j.end_ps == end, "IncompleteObservations")
++    for declared in job.mapped_point.task_graph.jobs:
++        assert isinstance(declared, FixedDelay)
++        j = jobs[declared.id]
++        require(
++            j.owner_id == declared.owner_id
++            and (j.op_id, j.group_id, j.repeat_index, j.tile_origin, j.tile_extents)
++            == (None, None, None, None, None)
++            and (j.useful_matrix_ops, j.issued_matrix_ops, j.vector_arithmetic_ops, j.cast_ops)
++            == (0, 0, 0, 0),
++            "IncompleteObservations",
++        )
++        if declared.id not in setup:
++            require(j.end_ps == j.start_ps + declared.duration_ps, "IncompleteObservations")
++    require(
++        1 <= r.simulator_metrics.max_live_events <= r.simulator_metrics.event_count,
++        "IncompleteObservations",
++    )
++    events = obs.events.records
++    require(
++        tuple(e.observation_ordinal for e in events) == tuple(range(len(events))),
++        "IncompleteObservations",
++    )
++    require(len({e.event_seq for e in events}) == len(events), "IncompleteObservations")
++    allowed = {"TASK_READY", "DEPENDENCY_READY", "TASK_RELEASE", "OWNER_GRANT", "COMPUTE_DONE"}
++    require(all(e.kind in allowed and e.job_id in jobs for e in events), "IncompleteObservations")
++    require(
++        all(e.job_id is not None and e.target_id == jobs[e.job_id].owner_id for e in events),
++        "InvalidResource",
++    )
++    scheduled_keys = [(e.t_ps, e.phase, e.target_id, e.event_seq) for e in events if e.phase < 2]
++    require(scheduled_keys == sorted(scheduled_keys), "IncompleteObservations")
++    grants = [e for e in events if e.kind == "OWNER_GRANT"]
++    completes = [e for e in events if e.kind == "COMPUTE_DONE"]
++    require(
++        sorted(e.job_id for e in grants if e.job_id is not None) == sorted(jobs)
++        and sorted(e.job_id for e in completes if e.job_id is not None) == sorted(jobs),
++        "IncompleteObservations",
++    )
++    completion_order = {e.job_id: e.observation_ordinal for e in completes}
++    grant_order = {e.job_id: e.observation_ordinal for e in grants}
++    require(all(grant_order[key] < completion_order[key] for key in jobs), "IncompleteObservations")
++    by_completion = {e.job_id: e for e in completes}
++    dependency_events = [
++        (e.job_id, e.t_ps, e.phase) for e in events if e.kind == "DEPENDENCY_READY"
++    ]
++    expected_notifications = [
++        (d.after, jobs[d.before].end_ps, 2 if by_completion[d.before].phase == 2 else 1)
++        for d in job.mapped_point.task_graph.dependencies
++    ]
++    require(sorted(dependency_events) == sorted(expected_notifications), "IncompleteObservations")
++    # Match each observed notification to an earlier completion in its indistinguishable
++    # (target, time, phase) group. Equal counts alone permit notify-before-complete traces.
++    for target, timestamp, phase in sorted(set(expected_notifications)):
++        completed = sorted(
++            completion_order[d.before]
++            for d in job.mapped_point.task_graph.dependencies
++            if (d.after, jobs[d.before].end_ps, 2 if by_completion[d.before].phase == 2 else 1)
++            == (target, timestamp, phase)
++        )
++        notified = sorted(
++            e.observation_ordinal
++            for e in events
++            if e.kind == "DEPENDENCY_READY"
++            and (e.job_id, e.t_ps, e.phase) == (target, timestamp, phase)
++        )
++        require(
++            all(a < b for a, b in zip(completed, notified, strict=True)),
++            "IncompleteObservations",
++            "dependency notification precedes completion",
++        )
++    root_events = [(e.job_id, e.t_ps, e.phase) for e in events if e.kind == "TASK_READY"]
++    nonroots = {d.after for d in job.mapped_point.task_graph.dependencies}
++    require(
++        sorted(root_events)
++        == sorted(
++            (key, 0, 1)
++            for key in jobs
++            if key not in nonroots and (key not in setup or setup[key].start_ps == 0)
++        ),
++        "IncompleteObservations",
++    )
++    for e in (*grants, *completes):
++        require(e.job_id in jobs, "IncompleteObservations")
++        assert e.job_id is not None
++        j = jobs[e.job_id]
++        require(e.target_id == j.owner_id, "InvalidResource")
++        require(
++            e.t_ps == (j.start_ps if e.kind == "OWNER_GRANT" else j.end_ps),
++            "IncompleteObservations",
++        )
++        require(
++            e.phase == (2 if e.kind == "OWNER_GRANT" or j.start_ps == j.end_ps else 0),
++            "IncompleteObservations",
++        )
++    releases = [e for e in events if e.kind == "TASK_RELEASE"]
++    require(
++        sorted((e.job_id, e.t_ps) for e in releases if e.job_id is not None)
++        == sorted((s.job_id, s.start_ps) for s in setup.values() if s.start_ps > 0),
++        "IncompleteObservations",
++    )
++    require(
++        all(
++            e.phase == 1 and e.job_id in jobs and e.target_id == jobs[e.job_id].owner_id
++            for e in releases
++        ),
++        "InvalidResource",
++    )
++    readiness = {}
++    for key, j in jobs.items():
++        enabling = [
++            e
++            for e in events
++            if e.job_id == key
++            and e.t_ps == j.ready_ps
++            and e.kind in ("TASK_READY", "DEPENDENCY_READY", "TASK_RELEASE")
++        ]
++        require(bool(enabling), "IncompleteObservations")
++        readiness[key] = max(enabling, key=lambda e: e.observation_ordinal)
++    granted: set[str] = set()
++    previous: dict[int, str] = {}
++    chosen: dict[str, str | None] = {}
++    for e in grants:
++        assert e.job_id is not None
++        j = jobs[e.job_id]
++        eligible = [
++            key
++            for key in jobs
++            if key not in granted
++            and jobs[key].owner_id == j.owner_id
++            and readiness[key].observation_ordinal < e.observation_ordinal
++        ]
++        require(
++            bool(eligible)
++            and min(
++                eligible,
++                key=lambda key: (
++                    jobs[key].ready_ps,
++                    0 if readiness[key].phase == 1 else readiness[key].observation_ordinal,
++                    key,
++                ),
++            )
++            == j.job_id,
++            "IncompleteObservations",
++            "FIFO ready/phase closure",
++        )
++        granted.add(j.job_id)
++        deps = [x.before for x in job.mapped_point.task_graph.dependencies if x.after == j.job_id]
++        release = setup[j.job_id].start_ps if j.job_id in setup else 0
++        require(
++            j.release_ps == release
++            and j.ready_ps == max([release, *(jobs[d].end_ps for d in deps)]),
++            "IncompleteObservations",
++        )
++        candidates = set(deps)
++        if j.owner_id in previous:
++            prior = previous[j.owner_id]
++            require(jobs[prior].end_ps <= j.start_ps, "IncompleteObservations")
++            candidates.add(prior)
++        tight = sorted(d for d in candidates if jobs[d].end_ps == j.start_ps)
++        require(
++            all(completion_order[d] < e.observation_ordinal for d in candidates),
++            "IncompleteObservations",
++        )
++        require(j.blocking_predecessor_ids == tuple(tight), "AttributionMismatch")
++        require(
++            j.start_ps == max([j.ready_ps, *(jobs[d].end_ps for d in candidates)]),
++            "IncompleteObservations",
++        )
++        chosen[j.job_id] = tight[0] if tight else None
++        previous[j.owner_id] = j.job_id
++    expected: list[tuple[str, int, int, str, str | None, int | None]] = []
++    cursor_job = min(jobs, key=lambda key: (-jobs[key].end_ps, key, jobs[key].owner_id))
++    require(jobs[cursor_job].end_ps == r.duration_ps, "IncompleteExecution")
++    seen: set[str] = set()
++    while True:
++        require(cursor_job not in seen, "AttributionMismatch")
++        seen.add(cursor_job)
++        j = jobs[cursor_job]
++        pred = chosen[cursor_job]
++        if j.start_ps < j.end_ps:
++            expected.append(("service", j.start_ps, j.end_ps, j.job_id, pred, j.owner_id))
++        if pred is None:
++            require(j.start_ps == j.release_ps, "AttributionMismatch")
++            if j.release_ps > 0:
++                expected.append(("release_idle", 0, j.release_ps, j.job_id, None, None))
++            break
++        cursor_job = pred
++    expected.reverse()
++    require(
++        [
++            (x.kind, x.start_ps, x.end_ps, x.cause_job_id, x.predecessor_id, x.limiting_resource_id)
++            for x in obs.critical_path.records
++        ]
++        == expected,
++        "AttributionMismatch",
++    )
++    require(all(x.category == "overhead" for x in obs.critical_path.records), "AttributionMismatch")
++    require(isinstance(obs.queue_membership, Observed), "IncompleteObservations")
++    assert isinstance(obs.queue_membership, Observed)
++    queues = [
++        (f"owner:{j.owner_id}:{p}", j.job_id, p, a, b, j.owner_id, None)
++        for j in jobs.values()
++        for p, a, b in (("waiting", j.ready_ps, j.start_ps), ("service", j.start_ps, j.end_ps))
++    ]
++    require(
++        [
++            (
++                q.queue_id,
++                q.item_id,
++                q.population,
++                q.enter_ps,
++                q.leave_ps,
++                q.owner_id,
++                q.clock_domain,
++            )
++            for q in obs.queue_membership.records
++        ]
++        == sorted(queues),
++        "IncompleteObservations",
++    )
++    require(
++        [(i.owner_id, i.job_id, i.start_ps, i.end_ps) for i in obs.resource_intervals.records]
++        == sorted(
++            (j.owner_id, j.job_id, j.start_ps, j.end_ps)
++            for j in jobs.values()
++            if j.start_ps < j.end_ps
++        ),
++        "IncompleteObservations",
++    )
++    require(
++        all(
++            i.activity == "fixed_delay"
++            and i.limiting_resource_id == i.owner_id
++            and i.service_start_ps_ratio is None
++            and i.service_end_ps_ratio is None
++            for i in obs.resource_intervals.records
++        ),
++        "IncompleteObservations",
++    )
++    require(r.simulator_metrics.event_count == len(events), "IncompleteObservations")
+ 
+ 
+ def admit(
+--- a/docs/build-spec.md
++++ b/docs/build-spec.md
+@@ -2954,7 +2954,11 @@
+   Run acceptance 1/1a/2/3/5 at the internal boundary, with canonical internal result bytes.
+   K1 may overlap M; no public schema claim or production mapped admission follows.
+ - K2: additionally require human-installed mapped carriers/U0011 boundary and M's fixtures.
+-  Implement items 9–10 and execute every acceptance case at the public subprocess boundary.
++  Implement items 9–10 and execute every representable acceptance case at the public
++  subprocess boundary, including all raw clock obligations through observations.clocks.
++  Retain all 100 arbitrary Wheel/Arena schedules and sequence/insertion controls privately;
++  repeat their representable owner/order laws and reached fault controls publicly.
++  This explicit exception creates no event-injection input or public credit for private tests.
+   Existing analytic carriers are not a mapped native protocol. Stop after the named phase.
+ - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+@@ -3013,6 +3017,18 @@
+    OUTPUT: Rust randomises their iteration order. Use BTreeMap or sorted Vecs.
+ 8. A fixed-delay executor: a TaskGraph whose jobs are fixed delays (no models yet),
+    dependencies resolved by events, so the kernel runs end to end before any model exists.
++K2 FIRST-USE CLOCK/OBSERVATION AMENDMENT (requires separate human installation):
++ClockSetup.start_ps is earliest release; ready=max(release, dependency completions),
++grant additionally waits for owner FIFO. Clocked fixed-delay duration_ps must be0.
++Positive cycles use next_edge(domain, actual grant, n); zero cycles complete at grant.
++Public observations.clocks must expose the actual raw next_edge(domain,grant,0) call
++separately: at1.2GHz/grant835 it reports1667 even when the owned zero job ends835.
++A raw alignment overflow is an explicit diagnostic and does not alter zero-job service.
++Retain direct raw primitive tests; they are not public subprocess tests. Public K06/K07
++coverage checks raw alignment observations AND owned completion through real execution.
++Release/causal/queue/idle/all-zero conventions follow the K2 semantic completion in U0011.
++No event-injection input format, Python-computed duration or hidden delay job is permitted.
++
+ 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
+    parser, using the approved mapped protocol. First test the execution boundary directly;
+    the complete consumer table path follows in U7 under U-P7 T.
+--- a/docs/decisions/U0011-the-native-engine-core.md
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -321,3 +321,72 @@
+ peer ancestry preserved. Protected-file changes still use human ownership. K2 public
+ execution, later model stages, performance claims, generation/adoption and U4 closure
+ are outside this K1 release. Actual K1 completion remains subject to verification/review.
++
++## Proposed K2 first-use semantic completion (not an implementation release)
++
++This paragraph takes effect only on separate human acceptance/installation of the exact
++U4-A-K2-semantic-construction-v1 patch and reconciled corpus. Retain uarch-engine/3 and
++uarch-native-observations/1 for their first public fixed-delay implementation; there are
++no installed completed native result fixtures to migrate. Bind the exact revised schema
++bytes and these laws in new engine/model implementation identities and the host record.
++Existing M inputs retain their identities; this does not approve old profiles for execution.
++
++ClockSetup.start_ps is the earliest release of its existing fixed-delay job. Jobs without
++ClockSetup release at0 and use their declared duration_ps. Clock-driven jobs require
++fixed_delay.duration_ps=0; n_cycles exclusively controls their owned service. Readiness
++is max(release, all dependency completions); ownership/FIFO may postpone grant further.
++For n>0, completion is next_edge(domain, actual grant, n); for n=0, completion is the
++actual grant, including non-edge grants. This preserves reviewed K1 zero ownership behavior.
++The future release mechanism is a separately reviewed K2 extension, not a change to
++historical K1 code/evidence. Python supplies neither hidden jobs nor computed durations.
++
++Release events with start_ps>0 dispatch at phase1; start0 is implicit. Complete phase0
++at time t, dispatch phase1 release/readiness/dependency notifications in event total order,
++then enqueue all newly eligible phase1 jobs per owner by canonical job ID and enter phase2.
++Phase2 owner grants and inline zero completion/notification closure preserve K1 owner
++scan and append order; no event regresses to phase0/1 at the same t. Releasing a job with
++unfinished dependencies only sets its released state. Finishing dependencies before
++release only records readiness prerequisites. Neither transition grants early or twice.
++
++Expose actual TASK_RELEASE, DEPENDENCY_READY and OWNER_GRANT dispatches. For every
++clock-driven job, observations.clocks records the raw next_edge(domain,grant,0) invocation
++outcome independently of owned completion. At1.2GHz/grant835/n0 the raw edge is1667 and
++owned completion835. An unrepresentable raw edge records TimeOverflow/null; it does not
++make an otherwise valid zero-owned job overflow. A positive-cycle completion overflow
++still refuses the job, with no completed result. The raw call is execution instrumentation,
++not Python arithmetic filled into a result. Retain direct primitive tests separately.
++
++Fixed-delay queue membership is observed, in picoseconds: one waiting [ready,grant] and
++one service [grant,end] row per job, including zero lengths; clock_domain=null because
++owner FIFO itself is not clocked. Component queue domains remain non-null. Job records
++include actual release_ps. Resource intervals contain positive owner occupancy only.
++Critical intervals distinguish service (owner required) from release_idle (owner null,
++predecessor null, overhead, [0,release]); release_idle is a causal origin offset, not
++resource occupancy or an assertion that all other owners were globally idle.
++
++Derive tight causal predecessors from actual dependency completions and the previous
++owner completion at grant, only when ending at that grant and dispatched earlier.
++Earlier owner history/dependencies are not blockers. Preserve all tight job IDs sorted;
++choose the smallest public job ID, then owner ID; job causes precede a tied release cause.
++Choose the latest-ending job, with equal ends resolved by smallest job ID then owner ID.
++Follow chosen causes through zero bridges, but emit only positive critical intervals.
++All-zero duration requires an empty critical partition and zero attribution, while actual
++dispatches, jobs, queue rows and completions remain present. Fixed-delay attribution is
++all overhead. No resource busy time is charged for release_idle; busy time remains union.
++
++The complete patch adds carrier checks, affected generated schema mirrors and synthetic
++structural tests. These are not native observations, independent acceptance or qualification.
++Public validation must additionally exercise real execution and the published fault/replay
++matrix. Protected installation, source-support lifecycle if affected, dependency/cache
++construction, K2 implementation/build and final human first-use authority remain separate.
++
++For U-P11a K2's “every acceptance case” and design-v2 verification E2's “K1 private,
++K2 public”, retain all raw clock obligations at the public boundary through the new actual
++raw-call observations. The sole proposed representation exception is arbitrary Wheel/Arena
++insertion/reuse/sequence-exhaustion probes: retain the full100 private schedules and fault
++controls, repeat all representable ordering/owner behaviors and reached timing faults
++publicly, and record residual private-only coverage explicitly. This paragraph is the
++prospective E2 clarification; the historical design-v2 package remains unchanged. No
++event-injection workload carrier is introduced, no obligation is deleted and no private
++execution is relabelled public. Without acceptance of this exception, literal all-case
++public coverage remains blocked, even after public clock instrumentation is implemented.
+--- a/docs/prompts/U-P11a-native-engine-kernel.md
++++ b/docs/prompts/U-P11a-native-engine-kernel.md
+@@ -28,7 +28,11 @@
+   Run acceptance 1/1a/2/3/5 at the internal boundary, with canonical internal result bytes.
+   K1 may overlap M; no public schema claim or production mapped admission follows.
+ - K2: additionally require human-installed mapped carriers/U0011 boundary and M's fixtures.
+-  Implement items 9–10 and execute every acceptance case at the public subprocess boundary.
++  Implement items 9–10 and execute every representable acceptance case at the public
++  subprocess boundary, including all raw clock obligations through observations.clocks.
++  Retain all 100 arbitrary Wheel/Arena schedules and sequence/insertion controls privately;
++  repeat their representable owner/order laws and reached fault controls publicly.
++  This explicit exception creates no event-injection input or public credit for private tests.
+   Existing analytic carriers are not a mapped native protocol. Stop after the named phase.
+ - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+@@ -87,6 +91,18 @@
+    OUTPUT: Rust randomises their iteration order. Use BTreeMap or sorted Vecs.
+ 8. A fixed-delay executor: a TaskGraph whose jobs are fixed delays (no models yet),
+    dependencies resolved by events, so the kernel runs end to end before any model exists.
++K2 FIRST-USE CLOCK/OBSERVATION AMENDMENT (requires separate human installation):
++ClockSetup.start_ps is earliest release; ready=max(release, dependency completions),
++grant additionally waits for owner FIFO. Clocked fixed-delay duration_ps must be0.
++Positive cycles use next_edge(domain, actual grant, n); zero cycles complete at grant.
++Public observations.clocks must expose the actual raw next_edge(domain,grant,0) call
++separately: at1.2GHz/grant835 it reports1667 even when the owned zero job ends835.
++A raw alignment overflow is an explicit diagnostic and does not alter zero-job service.
++Retain direct raw primitive tests; they are not public subprocess tests. Public K06/K07
++coverage checks raw alignment observations AND owned completion through real execution.
++Release/causal/queue/idle/all-zero conventions follow the K2 semantic completion in U0011.
++No event-injection input format, Python-computed duration or hidden delay job is permitted.
++
+ 9. src/rkuarch/engines/native/: the Python side: job writer, subprocess runner, result
+    parser, using the approved mapped protocol. First test the execution boundary directly;
+    the complete consumer table path follows in U7 under U-P7 T.
+--- a/tests/unit/test_u4_a_mapped_loader.py
++++ b/tests/unit/test_u4_a_mapped_loader.py
+@@ -232,7 +232,7 @@
+             "n_cycles": 3,
+         }
+     ]
+-    raw["mapped_point"]["task_graph"]["jobs"][0]["duration_ps"] += 1
++    raw["mapped_point"]["task_graph"]["jobs"][0]["duration_ps"] = 0
+     seal(raw)
+     entry = raw["profile"]["entries"][0]
+     entry.update(

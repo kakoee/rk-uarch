@@ -1,0 +1,36 @@
+--- a/contract/tests/mapped/test_k2_semantic_completion.py
++++ b/contract/tests/mapped/test_k2_semantic_completion.py
+@@ -252,7 +252,10 @@
+         validate_fixed_delay_observations(r, job)  # restored structural positive, not native
+ 
+ 
+-def test_literal_same_time_release_dependency_inline_zero_partition() -> None:
++@pytest.mark.parametrize("notification_swap", [(6, 7), (9, 10)])
++def test_literal_same_time_release_dependency_inline_zero_partition(
++    notification_swap: tuple[int, int],
++) -> None:
+     """Hand-entered partial subrecords, not an executed or serializable native result."""
+     import copy
+     from types import SimpleNamespace as NS
+@@ -453,3 +456,21 @@
+         with pytest.raises(ValueError):
+             validate_fixed_delay_observations(bad, job)
+         validate_fixed_delay_observations(r, job)
++
++    # Two indistinguishable notifications target d at time1000/phase2. Each must
++    # follow an available predecessor completion, including the second notification.
++    # Derived from B's notify-before-zero-complete counterexample; no scheduler runs.
++    bad = copy.deepcopy(r)
++    reordered = list(events)
++    completion, notification = notification_swap
++    assert reordered[completion].kind == "COMPUTE_DONE"
++    assert reordered[notification].kind == "DEPENDENCY_READY"
++    reordered[completion], reordered[notification] = (
++        reordered[notification], reordered[completion]
++    )
++    bad.observations.events.records = tuple(
++        e.model_copy(update={"observation_ordinal": i}) for i, e in enumerate(reordered)
++    )
++    with pytest.raises(ValueError, match="IncompleteObservations"):
++        validate_fixed_delay_observations(bad, job)
++    validate_fixed_delay_observations(r, job)
