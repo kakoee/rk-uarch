@@ -33,7 +33,7 @@ from tests import u2_comparison, u2_refresh
 
 ROOT = Path(__file__).resolve().parents[2]
 ADOPTED = ROOT / "contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
-MANIFEST = "sha256:1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
+MANIFEST = "sha256:b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
 PRIOR_MANIFEST = "sha256:f8220c9457226562040e5646835c3073acd2f58cd7631a5eb9e74632e60cc96e"
 PROFILES = ("retained-.55", "projection-1.0")
 CATEGORIES = (

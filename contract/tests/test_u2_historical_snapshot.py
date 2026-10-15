@@ -1,4 +1,4 @@
-"""Separate received historical20 and current adopted48; neither is a synthetic oracle."""
+"""Separate received historical20 and current adopted49; neither is a synthetic oracle."""
 
 import hashlib
 import json
@@ -19,8 +19,8 @@ from scripts import vendor_rk as vr
 from tests import u2_comparison, u2_refresh
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT_MANIFEST = "1873760cdbc06d9f1508ac4e515dfc0acefd7b2577a230047a38d3038098105a"
-REVIEW_SHA256 = "58f0f04b55aa228c9831cc2427f0f86a4aa3c1ae8f9327eb3660ae160323300c"
+CURRENT_MANIFEST = "b19016be07307ed987037d8a079f85af0366eab018b1132c2668394acd756bcc"
+REVIEW_SHA256 = "ba58478e3085b8fb7f7cb6828e94cf0ef5e0247997801b9eb26fe152043ecdbb"
 
 
 def test_historical_fixture_is_complete_and_relocatable(tmp_path: Path) -> None:
@@ -93,7 +93,7 @@ def test_current_canonical_is_exact_adopted_1008_four_real_refusals() -> None:
         assert event["rk_sha"] == vr.PIN and event["execution"] == "refused"
         assert event["exception"] == "UnsupportedPrecision"
         assert event["boundary"] == "Accelerator.peak_op_per_s"
-    review = ROOT / "tests/fixtures/u3_rope/received-adoption-review.json"
+    review = ROOT / "tests/fixtures/u4_m_policy/received-adoption-review.json"
     assert vr.digest(review.read_bytes()) == REVIEW_SHA256
     accepted = u2_refresh.adoption_authority(root, review, REVIEW_SHA256)
     assert accepted.reviewed_subject_hashes == ("sha256:" + CURRENT_MANIFEST,)

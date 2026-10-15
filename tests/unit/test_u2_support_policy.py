@@ -1,5 +1,6 @@
 """Prospective support-policy controls; no oracle or candidate generation."""
 
+import json
 import os
 import shutil
 import subprocess
@@ -511,6 +512,57 @@ def direct(root, *args, entry="vendor_rk.py"):
     )
 
 
+def strict_library_outcome(root):
+    # Import failures are process failures, never compatibility refusals. Load the
+    # same isolated source as the direct CLI, not this pytest process's modules.
+    result = subprocess.run(
+        [sys.executable, "-B", "-c", """
+import json
+from pathlib import Path
+from scripts import vendor_rk as v, u2_inputs as u, u2_support as p, u2_import_guard as g
+import uarch_contract as c
+import rkuarch as r
+root = Path.cwd()
+assert all(Path(m.__file__).resolve().is_relative_to(root) for m in (v, u, p, g, c, r))
+assert v.ROOT == u.ROOT == root
+artifact = root / 'contract/vendor' / ('rk-sim@' + v.PIN)
+assert u.ADOPTED == artifact
+try:
+    v.check_contract_pin(root)
+    v.check_manifest(artifact, v.PIN)
+    v.check_snapshot_inputs(artifact)
+    v.check_generator(artifact, current=True)
+except (ValueError, OSError) as exc:
+    print(json.dumps(str(exc)))
+else:
+    print('null')
+"""],
+        cwd=root, env=direct_environment(root), text=True, capture_output=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert not result.stderr, result.stderr
+    reason = json.loads(result.stdout)
+    assert reason is None or (isinstance(reason, str) and reason)
+    return reason
+
+
+def assert_direct_matches_strict(root):
+    reason = strict_library_outcome(root)
+    result = direct(root, "--check")
+    if reason is None:
+        assert result.returncode == 0, result.stderr
+        assert not result.stderr, result.stderr
+        artifact = root / "contract/vendor" / ("rk-sim@" + vendor.PIN)
+        assert result.stdout == (
+            f"snapshot manifest, matrix and current compatibility verified: {artifact}\n"
+        )
+    else:
+        assert result.returncode == 1, (result.stdout, result.stderr)
+        assert not result.stdout, result.stdout
+        assert result.stderr == f"vendor-rk: {reason}\n"
+    return reason
+
+
 def test_fresh_direct_valid_controls(isolated_root):
     origins = subprocess.run(
         [sys.executable, "-c", "from pathlib import Path; import scripts.vendor_rk as v; "
@@ -526,9 +578,48 @@ def test_fresh_direct_valid_controls(isolated_root):
         result = direct(isolated_root, *args)
         assert result.returncode == 0, result.stderr
     assert direct(isolated_root, "--help", entry="u2_inputs.py").returncode == 0
-    result = direct(isolated_root, "--check")
-    assert result.returncode == 1
-    assert result.stderr.strip() == "vendor-rk: input support inventory changed"
+    # Historical integrity above does not imply current source compatibility.
+    assert_direct_matches_strict(isolated_root)
+
+
+@pytest.mark.parametrize("fault", ["stale_source", "artifact_bytes"])
+def test_direct_strict_refusal_controls(isolated_root, fault):
+    if fault == "stale_source":
+        extra = isolated_root / "contract/tests/fixtures/u2_b/a2-export/ad-m1-extra.json"
+        extra.write_text("{}\n")
+        # The saved artifact is still intact; only its current source is stale.
+        historical = direct(isolated_root, "--check", "--historical")
+        assert historical.returncode == 0, historical.stderr
+        expected = "input support inventory changed"
+    else:
+        member = isolated_root / "contract/vendor" / ("rk-sim@" + vendor.PIN) / "schema.json"
+        member.chmod(0o644)
+        member.write_bytes(member.read_bytes() + b"\nAD-M1 fault\n")
+        expected = "MANIFEST mismatch: schema.json"
+    assert assert_direct_matches_strict(isolated_root) == expected
+
+
+@pytest.mark.parametrize("fault", ["false_success", "wrong_reason"])
+def test_direct_strict_comparison_rejects_wrong_cli(isolated_root, monkeypatch, fault):
+    # Keep a genuine strict-library refusal; substitute only the CLI observation.
+    member = isolated_root / "contract/vendor" / ("rk-sim@" + vendor.PIN) / "schema.json"
+    member.chmod(0o644)
+    member.write_bytes(member.read_bytes() + b"\nAD-M1 fault\n")
+    assert strict_library_outcome(isolated_root) == "MANIFEST mismatch: schema.json"
+    result = subprocess.CompletedProcess(
+        args=[], returncode=0 if fault == "false_success" else 1,
+        stdout="", stderr="" if fault == "false_success" else "vendor-rk: unrelated failure\n",
+    )
+    monkeypatch.setattr(sys.modules[__name__], "direct", lambda *a, **kw: result)
+    with pytest.raises(AssertionError):
+        assert_direct_matches_strict(isolated_root)
+
+
+def test_strict_library_import_failure_is_not_a_refusal(isolated_root):
+    module = isolated_root / "scripts/vendor_rk.py"
+    module.write_bytes(module.read_bytes() + b"\nraise ImportError('AD_M1_IMPORT_FAILURE')\n")
+    with pytest.raises(AssertionError, match="AD_M1_IMPORT_FAILURE"):
+        strict_library_outcome(isolated_root)
 
 
 @pytest.mark.parametrize("directory", [".", "scripts", "src", "contract"])
