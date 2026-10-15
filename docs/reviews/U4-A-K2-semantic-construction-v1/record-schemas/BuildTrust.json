@@ -1,0 +1,157 @@
+{
+  "$defs": {
+    "CaseBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "clock_setup_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Clock Setup Hash",
+          "type": "string"
+        },
+        "execution_outcome": {
+          "enum": [
+            "success",
+            "TimeOverflow"
+          ],
+          "title": "Execution Outcome",
+          "type": "string"
+        },
+        "graph_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Graph Hash",
+          "type": "string"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "point_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Point Hash",
+          "type": "string"
+        },
+        "seed": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "case_id",
+        "graph_hash",
+        "point_hash",
+        "hardware_spec_hash",
+        "clock_setup_hash",
+        "seed",
+        "execution_outcome"
+      ],
+      "title": "CaseBinding",
+      "type": "object"
+    },
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "ProfileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "cases": {
+          "items": {
+            "$ref": "#/$defs/CaseBinding"
+          },
+          "minItems": 1,
+          "title": "Cases",
+          "type": "array"
+        },
+        "file": {
+          "$ref": "#/$defs/FileBinding"
+        },
+        "profile_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Profile Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile_hash",
+        "file",
+        "cases"
+      ],
+      "title": "ProfileBinding",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "corpus_inventory": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "format": {
+      "const": "uarch-k2-build-trust/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "profiles": {
+      "items": {
+        "$ref": "#/$defs/ProfileBinding"
+      },
+      "minItems": 1,
+      "title": "Profiles",
+      "type": "array"
+    },
+    "purpose": {
+      "const": "construction-test-only",
+      "title": "Purpose",
+      "type": "string"
+    },
+    "registry_file": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "registry_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Registry Hash",
+      "type": "string"
+    },
+    "semantics_file": {
+      "$ref": "#/$defs/FileBinding"
+    }
+  },
+  "required": [
+    "format",
+    "purpose",
+    "semantics_file",
+    "registry_hash",
+    "registry_file",
+    "profiles",
+    "corpus_inventory"
+  ],
+  "title": "BuildTrust",
+  "type": "object"
+}

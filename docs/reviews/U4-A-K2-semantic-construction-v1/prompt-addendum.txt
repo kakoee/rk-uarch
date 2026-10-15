@@ -1,0 +1,11 @@
+K2 FIRST-USE CLOCK/OBSERVATION AMENDMENT (requires separate human installation):
+ClockSetup.start_ps is earliest release; ready=max(release, dependency completions),
+grant additionally waits for owner FIFO. Clocked fixed-delay duration_ps must be0.
+Positive cycles use next_edge(domain, actual grant, n); zero cycles complete at grant.
+Public observations.clocks must expose the actual raw next_edge(domain,grant,0) call
+separately: at1.2GHz/grant835 it reports1667 even when the owned zero job ends835.
+A raw alignment overflow is an explicit diagnostic and does not alter zero-job service.
+Retain direct raw primitive tests; they are not public subprocess tests. Public K06/K07
+coverage checks raw alignment observations AND owned completion through real execution.
+Release/causal/queue/idle/all-zero conventions follow the K2 semantic completion in U0011.
+No event-injection input format, Python-computed duration or hidden delay job is permitted.

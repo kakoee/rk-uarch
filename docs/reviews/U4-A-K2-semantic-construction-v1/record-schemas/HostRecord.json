@@ -1,0 +1,230 @@
+{
+  "$defs": {
+    "ApprovedExecutable": {
+      "additionalProperties": false,
+      "properties": {
+        "build_receipt": {
+          "$ref": "#/$defs/FileBinding"
+        },
+        "executable": {
+          "$ref": "#/$defs/FileBinding"
+        },
+        "mode": {
+          "enum": [
+            "debug",
+            "release"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "target": {
+          "const": "x86_64-unknown-linux-gnu",
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "executable",
+        "build_receipt",
+        "target"
+      ],
+      "title": "ApprovedExecutable",
+      "type": "object"
+    },
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "NativeEngineIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "compiler_lock_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Compiler Lock Hash",
+          "type": "string"
+        },
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/NativeModelIdentity"
+        },
+        "name": {
+          "const": "native",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "native-stage/1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash",
+        "model",
+        "compiler_lock_hash"
+      ],
+      "title": "NativeEngineIdentity",
+      "type": "object"
+    },
+    "NativeModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "fixed-delay",
+            "native-intervals"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash"
+      ],
+      "title": "NativeModelIdentity",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "build_input_file": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "build_input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Build Input Hash",
+      "type": "string"
+    },
+    "corpus_inventory": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "decision": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "executables": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ApprovedExecutable"
+        },
+        {
+          "$ref": "#/$defs/ApprovedExecutable"
+        }
+      ],
+      "title": "Executables",
+      "type": "array"
+    },
+    "expected_engine": {
+      "$ref": "#/$defs/NativeEngineIdentity"
+    },
+    "format": {
+      "const": "uarch-k2-first-use/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "independent_review": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "jobs_inventory": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "loader_read_inventory": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "model_inputs_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Model Inputs Hash",
+      "type": "string"
+    },
+    "profile_hashes": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Profile Hashes",
+      "type": "array"
+    },
+    "registry_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Registry Hash",
+      "type": "string"
+    },
+    "semantics": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "tool_inputs_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Tool Inputs Hash",
+      "type": "string"
+    },
+    "trust_file": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "trust_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Trust Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "decision",
+    "independent_review",
+    "semantics",
+    "trust_hash",
+    "trust_file",
+    "build_input_hash",
+    "build_input_file",
+    "tool_inputs_hash",
+    "model_inputs_hash",
+    "loader_read_inventory",
+    "expected_engine",
+    "executables",
+    "jobs_inventory",
+    "corpus_inventory",
+    "profile_hashes",
+    "registry_hash"
+  ],
+  "title": "HostRecord",
+  "type": "object"
+}

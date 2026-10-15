@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "acceptance_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Acceptance Commit",
+      "type": "string"
+    },
+    "format": {
+      "const": "uarch-k2-host-selector/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "record_byte_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Record Byte Hash",
+      "type": "string"
+    },
+    "record_path": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Record Path",
+      "type": "string"
+    },
+    "repository": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Repository",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "repository",
+    "acceptance_commit",
+    "record_path",
+    "record_byte_hash"
+  ],
+  "title": "HostSelector",
+  "type": "object"
+}

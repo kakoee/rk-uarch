@@ -1,0 +1,175 @@
+{
+  "$defs": {
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "NativeEngineIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "compiler_lock_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Compiler Lock Hash",
+          "type": "string"
+        },
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/NativeModelIdentity"
+        },
+        "name": {
+          "const": "native",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "native-stage/1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash",
+        "model",
+        "compiler_lock_hash"
+      ],
+      "title": "NativeEngineIdentity",
+      "type": "object"
+    },
+    "NativeModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "fixed-delay",
+            "native-intervals"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash"
+      ],
+      "title": "NativeModelIdentity",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actual_environment": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "actual_read_inventory": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "binary_origin_check": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "build_input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Build Input Hash",
+      "type": "string"
+    },
+    "build_log": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "compiler_verbose": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "engine": {
+      "$ref": "#/$defs/NativeEngineIdentity"
+    },
+    "executable": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "format": {
+      "const": "uarch-k2-build-receipt/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "generated_identity_outputs": {
+      "items": {
+        "$ref": "#/$defs/FileBinding"
+      },
+      "minItems": 1,
+      "title": "Generated Identity Outputs",
+      "type": "array"
+    },
+    "image_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Image Digest",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "debug",
+        "release"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "software_path_check": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "target": {
+      "const": "x86_64-unknown-linux-gnu",
+      "title": "Target",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "build_input_hash",
+    "engine",
+    "mode",
+    "target",
+    "executable",
+    "image_digest",
+    "generated_identity_outputs",
+    "actual_read_inventory",
+    "actual_environment",
+    "compiler_verbose",
+    "build_log",
+    "binary_origin_check",
+    "software_path_check"
+  ],
+  "title": "BuildReceipt",
+  "type": "object"
+}

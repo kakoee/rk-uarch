@@ -1,0 +1,130 @@
+[
+  {
+    "name": "prepare",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "-B",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-semantic-construction-v1/prepare_patch.py",
+      "/tmp/u4-a-k2-receipts.w_8tz0ww/proposed"
+    ],
+    "cwd": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a",
+    "exit_code": 0,
+    "seconds": 0.029,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "format-imports",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/ruff",
+      "check",
+      "--no-cache",
+      "--fix",
+      "--ignore",
+      "E501",
+      "contract/uarch_contract/mapped.py",
+      "contract/tests/mapped/test_k2_semantic_completion.py"
+    ],
+    "cwd": "/tmp/u4-a-k2-receipts.w_8tz0ww/proposed",
+    "exit_code": 0,
+    "seconds": 0.011,
+    "log_sha256": "20c69faf01790c30f3b22a2d3b8a36933a5ba2768533f92eeac66ddec80aba5c"
+  },
+  {
+    "name": "format",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/ruff",
+      "format",
+      "--no-cache",
+      "contract/uarch_contract/mapped.py",
+      "contract/tests/mapped/test_k2_semantic_completion.py"
+    ],
+    "cwd": "/tmp/u4-a-k2-receipts.w_8tz0ww/proposed",
+    "exit_code": 0,
+    "seconds": 0.011,
+    "log_sha256": "96a977f329ec3c59092d40e041a019b49dcf03ca04055e177aa0ccb8c27234df"
+  },
+  {
+    "name": "generate-proposed-mirrors",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import sys; from pathlib import Path; r=Path('/tmp/u4-a-k2-receipts.w_8tz0ww/proposed'); sys.path[:0]=[str(r),str(r/'src'),str(r/'contract'),str(r/'docs/reviews/U4-B-K2-semantic-reconciliation-v1')]; from uarch_contract.generate_mapped import generate; print(generate())"
+    ],
+    "cwd": "/tmp/u4-a-k2-receipts.w_8tz0ww/proposed",
+    "exit_code": 0,
+    "seconds": 0.332,
+    "log_sha256": "0ff7a0e3dd085f407370dac7890f6bb83e2fd3051119d86629954b7139b4e432"
+  },
+  {
+    "name": "proposed-tests",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import sys; from pathlib import Path; r=Path('/tmp/u4-a-k2-receipts.w_8tz0ww/proposed'); sys.path[:0]=[str(r),str(r/'src'),str(r/'contract'),str(r/'docs/reviews/U4-B-K2-semantic-reconciliation-v1')]; import pytest; raise SystemExit(pytest.main(['-q', '-p', 'no:cacheprovider', 'contract/tests/mapped', 'tests/unit/test_u4_a_mapped_loader.py', 'tests/unit/test_prompt_sync.py']))"
+    ],
+    "cwd": "/tmp/u4-a-k2-receipts.w_8tz0ww/proposed",
+    "exit_code": 0,
+    "seconds": 3.025,
+    "log_sha256": "fb04801150eb7f19f3eb41604b4d6f639286c0f2a9179f476653ee01dda2dd60"
+  },
+  {
+    "name": "source-types",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/mypy",
+      "src",
+      "contract/uarch_contract",
+      "scripts"
+    ],
+    "cwd": "/tmp/u4-a-k2-receipts.w_8tz0ww/proposed",
+    "exit_code": 0,
+    "seconds": 2.607,
+    "log_sha256": "a766815ce9137d28823902e2a13996ac5e7021d76946b008d607ddbe5fe9163c"
+  },
+  {
+    "name": "contract-test-types",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/mypy",
+      "--no-explicit-package-bases",
+      "contract/tests"
+    ],
+    "cwd": "/tmp/u4-a-k2-receipts.w_8tz0ww/proposed",
+    "exit_code": 0,
+    "seconds": 2.346,
+    "log_sha256": "81b8a767756bd649de91d7b0c104614fe1e706bce451b754a92161491825cfde"
+  },
+  {
+    "name": "proposed-lint",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/ruff",
+      "check",
+      "--no-cache",
+      "contract/uarch_contract/mapped.py",
+      "contract/tests/mapped/test_k2_semantic_completion.py",
+      "contract/tests/mapped/test_admission.py",
+      "tests/unit/test_u4_a_mapped_loader.py"
+    ],
+    "cwd": "/tmp/u4-a-k2-receipts.w_8tz0ww/proposed",
+    "exit_code": 0,
+    "seconds": 0.014,
+    "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "name": "baseline-host-tests",
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "-B",
+      "-c",
+      "import sys; from pathlib import Path; r=Path('/tmp/u4-a-k2-receipts.w_8tz0ww/baseline'); sys.path[:0]=[str(r),str(r/'src'),str(r/'contract'),str(r/'docs/reviews/U4-B-K2-semantic-reconciliation-v1')]; import pytest; raise SystemExit(pytest.main(['-q', '-c', '/tmp/u4-a-k2-receipts.w_8tz0ww/baseline/pyproject.toml', '--rootdir=/tmp/u4-a-k2-receipts.w_8tz0ww/baseline', '-p', 'no:cacheprovider', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-semantic-construction-v1/test_semantics.py', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-semantic-construction-v1/test_records.py', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-semantic-construction-v1/test_construction.py', 'docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_literals.py', 'docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_membership.py', 'docs/reviews/U4-B-K2-semantic-reconciliation-v1/test_boundary.py', 'tests/unit/test_u4_a_mapped_loader.py', 'tests/unit/test_prompt_sync.py']))"
+    ],
+    "cwd": "/tmp/u4-a-k2-receipts.w_8tz0ww/baseline",
+    "exit_code": 1,
+    "seconds": 2.091,
+    "log_sha256": "c73935af9d348409c8436b1e85b0c2b48ade6418129b10890a40cb43eed38570"
+  }
+]

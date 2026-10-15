@@ -1,0 +1,106 @@
+{
+  "$defs": {
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accepted_k1_pins": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "cargo_lock": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "compiler_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Compiler Commit",
+      "type": "string"
+    },
+    "crate_checksum_inventory": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "feature_graph": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "flags": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Flags",
+      "type": "array"
+    },
+    "format": {
+      "const": "uarch-k2-tool-inputs/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "full_metadata": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "image_digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Image Digest",
+      "type": "string"
+    },
+    "licence_inventory": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "linker_and_os_inventory": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "rust_release": {
+      "const": "1.99.0",
+      "title": "Rust Release",
+      "type": "string"
+    },
+    "target": {
+      "const": "x86_64-unknown-linux-gnu",
+      "title": "Target",
+      "type": "string"
+    },
+    "target_metadata": {
+      "$ref": "#/$defs/FileBinding"
+    }
+  },
+  "required": [
+    "format",
+    "accepted_k1_pins",
+    "compiler_commit",
+    "rust_release",
+    "target",
+    "image_digest",
+    "cargo_lock",
+    "full_metadata",
+    "target_metadata",
+    "feature_graph",
+    "licence_inventory",
+    "crate_checksum_inventory",
+    "linker_and_os_inventory",
+    "flags"
+  ],
+  "title": "ToolInputs",
+  "type": "object"
+}

@@ -1,0 +1,26 @@
+................F....................................................... [ 60%]
+...............................................                          [100%]
+=================================== FAILURES ===================================
+_____________ test_candidate_constraints_are_exact_retained_inputs _____________
+
+    def test_candidate_constraints_are_exact_retained_inputs():
+        plan = json.loads((PACKAGE / "construction-plan.json").read_text())
+        lock_bytes = (REPO / "native/Cargo.lock").read_bytes()
+        assert hashlib.sha256(lock_bytes).hexdigest() == plan["existing_lock_sha256"]
+        lock = tomllib.loads(lock_bytes.decode())
+        external = [
+            {k: p[k] for k in ("name", "version", "source", "checksum")}
+            for p in lock["package"]
+            if "source" in p
+        ]
+>       assert external == plan["existing_packages_must_retain"]
+E       AssertionError: assert [{'name': 'au...0d7566'}, ...] == [{'checksum':...'0.3.1'}, ...]
+E         
+E         At index 24 diff: {'name': 'unarray', 'version': '0.1.4', 'source': 'registry+https://github.com/rust-lang/crates.io-index', 'checksum': 'eaea85b334db583fe3274d12b4cd1880032beab409c0d774be044d4480ab9a94'} != {'name': 'uarch-engine', 'version': '0.0.1'}
+E         Right contains one more item: {'checksum': '29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b', 'name': 'zmij', 'source': 'registry+https://github.com/rust-lang/crates.io-index', 'version': '1.0.23'}
+E         Use -v to get more diff
+
+/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-semantic-construction-v1/test_construction.py:22: AssertionError
+=========================== short test summary info ============================
+FAILED ::test_candidate_constraints_are_exact_retained_inputs - AssertionErro...
+1 failed, 118 passed in 1.92s
