@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "name": "evidence-check",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C1-resolution-v1/verify_receipts.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.362,
+      "log_sha256": "548fc34e17b1dd7e306e19412b7aa173d4f4c35f6a7574c29499d7b646f75fc1"
+    },
+    {
+      "name": "ruff",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/ruff",
+        "check",
+        "--no-cache",
+        "."
+      ],
+      "exit_code": 0,
+      "seconds": 0.04,
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "name": "manifest-apply-check",
+      "argv": [
+        "git",
+        "apply",
+        "--check",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C1-resolution-v1/scratch-manifest.diff"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "network": false,
+  "native_execution": false,
+  "dependency_operations": false,
+  "note": "Ruff initial two line-length findings were corrected by formatting before this final pass; no resolver retry."
+}

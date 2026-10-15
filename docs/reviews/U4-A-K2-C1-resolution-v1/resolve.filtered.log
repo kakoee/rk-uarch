@@ -1,0 +1,3166 @@
+   0.027318748s DEBUG cargo::sources::registry::http_remote: invalidated index cache
+   0.027415870s DEBUG cargo::sources::registry::http_remote: loading config
+   0.027418752s DEBUG cargo::sources::registry::http_remote: checking freshness of config.json
+   0.027422918s TRACE cargo::sources::registry::http_remote: load: config.json
+    Updating crates.io index
+   0.029284237s DEBUG network::fetch: url="https://index.crates.io/config.json"
+   0.029341888s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.030359419s DEBUG network: http-debug: *   Trying 127.0.0.1:18081...
+   0.030440755s DEBUG network: http-debug: * CONNECT: no ALPN negotiated
+   0.030458135s DEBUG network: http-debug: * Establishing HTTP proxy tunnel to index.crates.io:443
+   0.030475348s DEBUG network: http-debug: > CONNECT index.crates.io:443 HTTP/1.1
+   0.030476470s DEBUG network: http-debug: > Host: index.crates.io:443
+   0.030477148s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.030477700s DEBUG network: http-debug: > Proxy-Connection: Keep-Alive
+   0.030478185s DEBUG network: http-debug: >
+   0.160114420s DEBUG network: http-debug: < HTTP/1.1 200 Connection established
+   0.160148308s DEBUG network: http-debug: <
+   0.160153955s DEBUG network: http-debug: * CONNECT phase completed for HTTP proxy
+   0.160157206s DEBUG network: http-debug: * CONNECT tunnel established, response 200
+   0.160577586s DEBUG network: http-debug: * SSL Trust Anchors:
+   0.165738815s DEBUG network: http-debug: *   CAfile: /usr/lib/ssl/cert.pem
+   0.165749682s DEBUG network: http-debug: *   CApath: /usr/lib/ssl/certs
+   0.167829990s DEBUG network: http-debug: * ALPN: curl offers h2,http/1.1
+   0.168570874s DEBUG network: http-debug: * TLSv1.3 (OUT), TLS handshake, Client hello (1):
+   0.186094983s DEBUG network: http-debug: * TLSv1.3 (IN), TLS handshake, Server hello (2):
+   0.186321335s DEBUG network: http-debug: * TLSv1.3 (IN), TLS change cipher, Change cipher spec (1):
+   0.186331305s DEBUG network: http-debug: * TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+   0.186340619s DEBUG network: http-debug: * TLSv1.3 (IN), TLS handshake, Certificate (11):
+   0.188874641s DEBUG network: http-debug: * TLSv1.3 (IN), TLS handshake, CERT verify (15):
+   0.188913055s DEBUG network: http-debug: * TLSv1.3 (IN), TLS handshake, Finished (20):
+   0.188956673s DEBUG network: http-debug: * TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+   0.188974450s DEBUG network: http-debug: * TLSv1.3 (OUT), TLS handshake, Finished (20):
+   0.189002621s DEBUG network: http-debug: * SSL connection using TLSv1.3 / TLS_AES_128_GCM_SHA256 / X25519MLKEM768 / RSASSA-PSS
+   0.189016259s DEBUG network: http-debug: * ALPN: server accepted h2
+   0.189019606s DEBUG network: http-debug: * Server certificate:
+   0.189023105s DEBUG network: http-debug: *   subject: CN=index.crates.io
+   0.189025712s DEBUG network: http-debug: *   start date: Dec  4 14:13:21 2025 GMT
+   0.189026738s DEBUG network: http-debug: *   expire date: Jan  5 14:13:20 2027 GMT
+   0.189029942s DEBUG network: http-debug: *   issuer: C=BE; O=GlobalSign nv-sa; CN=GlobalSign Atlas R3 DV TLS CA 2025 Q4
+   0.189034196s DEBUG network: http-debug: *   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+   0.189035586s DEBUG network: http-debug: *   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+   0.189036586s DEBUG network: http-debug: *   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+   0.189039857s DEBUG network: http-debug: *   subjectAltName: "index.crates.io" matches cert's "index.crates.io"
+   0.189041283s DEBUG network: http-debug: * OpenSSL verify result: 0
+   0.189042389s DEBUG network: http-debug: * SSL certificate verified via OpenSSL.
+   0.189804530s DEBUG network: http-debug: * Established connection to 127.0.0.1 (127.0.0.1 port 18081) from 127.0.0.1 port 48624
+   0.189813751s DEBUG network: http-debug: * using HTTP/2
+   0.189826125s DEBUG network: http-debug: * [HTTP/2] [1] OPENED stream for https://index.crates.io/config.json
+   0.189827632s DEBUG network: http-debug: * [HTTP/2] [1] [:method: GET]
+   0.189828494s DEBUG network: http-debug: * [HTTP/2] [1] [:scheme: https]
+   0.189829333s DEBUG network: http-debug: * [HTTP/2] [1] [:authority: index.crates.io]
+   0.189830149s DEBUG network: http-debug: * [HTTP/2] [1] [:path: /config.json]
+   0.189830814s DEBUG network: http-debug: * [HTTP/2] [1] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.189831507s DEBUG network: http-debug: * [HTTP/2] [1] [accept-encoding: deflate, gzip]
+   0.189832206s DEBUG network: http-debug: * [HTTP/2] [1] [cargo-protocol: version=1]
+   0.189832816s DEBUG network: http-debug: * [HTTP/2] [1] [accept: text/plain]
+   0.189852637s DEBUG network: http-debug: > GET /config.json HTTP/2
+   0.189855054s DEBUG network: http-debug: > Host: index.crates.io
+   0.189855600s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.189856223s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.189856700s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.189857207s DEBUG network: http-debug: > accept: text/plain
+   0.189857662s DEBUG network: http-debug: >
+   0.189858627s DEBUG network: http-debug: * Request completely sent off
+   0.189884682s DEBUG network: http-debug: * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+   0.203831245s DEBUG network: http-debug: < HTTP/2 200
+   0.203853903s DEBUG network: http-debug: < x-amz-request-id: S7KGVDSBJHSX9KJQ
+   0.203858950s DEBUG network: http-debug: < x-amz-id-2: CgY4MLty6VDgR6USabQsLcX0/Jhl02pI3DalohiuUSgNMlDixrQukTpTzmvcWNb8jR4BibVaEcqPgTH14GDI9rPySZUZHnms
+   0.203861112s DEBUG network: http-debug: < server: AmazonS3
+   0.203863154s DEBUG network: http-debug: < last-modified: Tue, 12 Mar 2024 07:31:15 GMT
+   0.203868289s DEBUG network: http-debug: < etag: "652b69f181634dbf60fc8c3ec9f776e5"
+   0.203882915s DEBUG network: http-debug: < x-amz-version-id: oJr.VPzoI2MIgYxW8Lam7ayZJlnQq_9z
+   0.203885541s DEBUG network: http-debug: < content-type: application/octet-stream
+   0.203887240s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.203888459s DEBUG network: http-debug: < accept-ranges: bytes
+   0.203889859s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:54 GMT
+   0.203891024s DEBUG network: http-debug: < via: 1.1 varnish
+   0.203892126s DEBUG network: http-debug: < age: 217
+   0.203893338s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.203895298s DEBUG network: http-debug: < x-cache: HIT
+   0.203896549s DEBUG network: http-debug: < x-cache-hits: 33
+   0.203897673s DEBUG network: http-debug: < x-timer: S1792104055.869006,VS0,VE0
+   0.203899688s DEBUG network: http-debug: < content-length: 76
+   0.203901109s DEBUG network: http-debug: <
+   0.203936519s DEBUG network: http-debug: * Connection #0 to host index.crates.io:443 left intact
+   0.204011446s TRACE cargo::sources::registry::http_remote: index file version: etag: "652b69f181634dbf60fc8c3ec9f776e5"
+   0.204061432s TRACE cargo::sources::registry::http_remote: config loaded
+   0.204606374s TRACE cargo::sources::registry::http_remote: load: se/rd/serde
+   0.204623593s DEBUG network::fetch: url="https://index.crates.io/se/rd/serde"
+   0.204639359s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.204696483s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.204704904s TRACE cargo::sources::registry::http_remote: load: se/rd/serde_json
+   0.204711638s DEBUG network::fetch: url="https://index.crates.io/se/rd/serde_json"
+   0.204720425s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.204720377s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.204736763s DEBUG network: http-debug: * [HTTP/2] [3] OPENED stream for https://index.crates.io/se/rd/serde
+   0.204738688s DEBUG network: http-debug: * [HTTP/2] [3] [:method: GET]
+   0.204739902s DEBUG network: http-debug: * [HTTP/2] [3] [:scheme: https]
+   0.204741070s DEBUG network: http-debug: * [HTTP/2] [3] [:authority: index.crates.io]
+   0.204740309s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.204742089s DEBUG network: http-debug: * [HTTP/2] [3] [:path: /se/rd/serde]
+   0.204743986s DEBUG network: http-debug: * [HTTP/2] [3] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.204743790s TRACE cargo::sources::registry::http_remote: load: sh/a2/sha2
+   0.204744926s DEBUG network: http-debug: * [HTTP/2] [3] [accept-encoding: deflate, gzip]
+   0.204746283s DEBUG network: http-debug: * [HTTP/2] [3] [cargo-protocol: version=1]
+   0.204747037s DEBUG network: http-debug: * [HTTP/2] [3] [accept: text/plain]
+   0.204747659s DEBUG network::fetch: url="https://index.crates.io/sh/a2/sha2"
+   0.204752667s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.204803129s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.204822384s TRACE cargo::sources::registry::http_remote: load: pr/op/proptest
+   0.204828871s DEBUG network::fetch: url="https://index.crates.io/pr/op/proptest"
+   0.204773654s DEBUG network: http-debug: > GET /se/rd/serde HTTP/2
+   0.204836110s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.204854534s DEBUG network: http-debug: > Host: index.crates.io
+   0.204858994s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.204860620s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.204861675s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.204862539s DEBUG network: http-debug: > accept: text/plain
+   0.204863485s DEBUG network: http-debug: >
+   0.204866366s DEBUG network: http-debug: * Request completely sent off
+   0.206977438s DEBUG network: http-debug: * Multiplexed connection found
+   0.206983225s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.206991628s DEBUG network: http-debug: * [HTTP/2] [5] OPENED stream for https://index.crates.io/se/rd/serde_json
+   0.206992842s DEBUG network: http-debug: * [HTTP/2] [5] [:method: GET]
+   0.206993615s DEBUG network: http-debug: * [HTTP/2] [5] [:scheme: https]
+   0.206994279s DEBUG network: http-debug: * [HTTP/2] [5] [:authority: index.crates.io]
+   0.206994930s DEBUG network: http-debug: * [HTTP/2] [5] [:path: /se/rd/serde_json]
+   0.206995584s DEBUG network: http-debug: * [HTTP/2] [5] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.206996258s DEBUG network: http-debug: * [HTTP/2] [5] [accept-encoding: deflate, gzip]
+   0.206996889s DEBUG network: http-debug: * [HTTP/2] [5] [cargo-protocol: version=1]
+   0.206997554s DEBUG network: http-debug: * [HTTP/2] [5] [accept: text/plain]
+   0.207012576s DEBUG network: http-debug: > GET /se/rd/serde_json HTTP/2
+   0.207013436s DEBUG network: http-debug: > Host: index.crates.io
+   0.207013886s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.207014394s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.207014846s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.207015361s DEBUG network: http-debug: > accept: text/plain
+   0.207015833s DEBUG network: http-debug: >
+   0.207016907s DEBUG network: http-debug: * Request completely sent off
+   0.207029276s DEBUG network: http-debug: * Multiplexed connection found
+   0.207031790s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.207037056s DEBUG network: http-debug: * [HTTP/2] [7] OPENED stream for https://index.crates.io/sh/a2/sha2
+   0.207037843s DEBUG network: http-debug: * [HTTP/2] [7] [:method: GET]
+   0.207038498s DEBUG network: http-debug: * [HTTP/2] [7] [:scheme: https]
+   0.207039093s DEBUG network: http-debug: * [HTTP/2] [7] [:authority: index.crates.io]
+   0.207039678s DEBUG network: http-debug: * [HTTP/2] [7] [:path: /sh/a2/sha2]
+   0.207040274s DEBUG network: http-debug: * [HTTP/2] [7] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.207040945s DEBUG network: http-debug: * [HTTP/2] [7] [accept-encoding: deflate, gzip]
+   0.207041528s DEBUG network: http-debug: * [HTTP/2] [7] [cargo-protocol: version=1]
+   0.207042103s DEBUG network: http-debug: * [HTTP/2] [7] [accept: text/plain]
+   0.207046703s DEBUG network: http-debug: > GET /sh/a2/sha2 HTTP/2
+   0.207047303s DEBUG network: http-debug: > Host: index.crates.io
+   0.207047791s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.207048347s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.207048776s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.207049330s DEBUG network: http-debug: > accept: text/plain
+   0.207049953s DEBUG network: http-debug: >
+   0.207050502s DEBUG network: http-debug: * Request completely sent off
+   0.207058539s DEBUG network: http-debug: * Multiplexed connection found
+   0.207059540s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.207069871s DEBUG network: http-debug: * [HTTP/2] [9] OPENED stream for https://index.crates.io/pr/op/proptest
+   0.207081376s DEBUG network: http-debug: * [HTTP/2] [9] [:method: GET]
+   0.207083232s DEBUG network: http-debug: * [HTTP/2] [9] [:scheme: https]
+   0.207084331s DEBUG network: http-debug: * [HTTP/2] [9] [:authority: index.crates.io]
+   0.207085305s DEBUG network: http-debug: * [HTTP/2] [9] [:path: /pr/op/proptest]
+   0.207086263s DEBUG network: http-debug: * [HTTP/2] [9] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.207087060s DEBUG network: http-debug: * [HTTP/2] [9] [accept-encoding: deflate, gzip]
+   0.207087703s DEBUG network: http-debug: * [HTTP/2] [9] [cargo-protocol: version=1]
+   0.207088325s DEBUG network: http-debug: * [HTTP/2] [9] [accept: text/plain]
+   0.207096675s DEBUG network: http-debug: > GET /pr/op/proptest HTTP/2
+   0.207097494s DEBUG network: http-debug: > Host: index.crates.io
+   0.207098128s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.207098715s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.207099210s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.207099713s DEBUG network: http-debug: > accept: text/plain
+   0.207101105s DEBUG network: http-debug: >
+   0.207101796s DEBUG network: http-debug: * Request completely sent off
+   0.217559809s DEBUG network: http-debug: < HTTP/2 200
+   0.217581921s DEBUG network: http-debug: < x-amz-request-id: ZRTW1WYD63SAW5MZ
+   0.217588121s DEBUG network: http-debug: < x-amz-id-2: 1ofTseQHfioChfnvuq7COdpsTNiDp4+bPQhQtsjUj/yGMuVD8sUKNTQTha2/waZ27nTUJnaWoolfzmM9taB1YFMhkaVBJHma
+   0.217591237s DEBUG network: http-debug: < server: AmazonS3
+   0.217593714s DEBUG network: http-debug: < last-modified: Sat, 18 Jul 2026 23:05:14 GMT
+   0.217595694s DEBUG network: http-debug: < etag: "971e1a71d7d6afbfc90a23ad91931103"
+   0.217597653s DEBUG network: http-debug: < x-amz-version-id: EdnlL4ot.2wOgoBKOjA1i_RgPE2U9VfJ
+   0.217599833s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.217603250s DEBUG network: http-debug: < content-type: text/plain
+   0.217604498s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.217605978s DEBUG network: http-debug: < accept-ranges: bytes
+   0.217607510s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:54 GMT
+   0.217608750s DEBUG network: http-debug: < via: 1.1 varnish
+   0.217610167s DEBUG network: http-debug: < age: 133
+   0.217611832s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.217613427s DEBUG network: http-debug: < x-cache: HIT
+   0.217614811s DEBUG network: http-debug: < x-cache-hits: 9
+   0.217616257s DEBUG network: http-debug: < x-timer: S1792104055.882199,VS0,VE0
+   0.217618044s DEBUG network: http-debug: < content-length: 164874
+   0.217619845s DEBUG network: http-debug: <
+   0.257156599s DEBUG network: http-debug: < HTTP/2 200
+   0.257162761s DEBUG network: http-debug: < x-amz-request-id: D3CJEM6RW8QEYGCE
+   0.257168830s DEBUG network: http-debug: < x-amz-id-2: lm763X5ihyuroZNjaQJeknlZrsqxOy41UrIp5KA+wnjOJNuxODH+86+yYlTLmxVSibDZAPW1Y0Y=
+   0.257172047s DEBUG network: http-debug: < server: AmazonS3
+   0.257175100s DEBUG network: http-debug: < last-modified: Sun, 11 Oct 2026 15:31:48 GMT
+   0.257177375s DEBUG network: http-debug: < etag: "7f59728e0b1d1dae90b81f04f402ca9f"
+   0.257179310s DEBUG network: http-debug: < x-amz-version-id: 3dV79cEYxhgb7x2szhPMuc1ONdeUh3aQ
+   0.257181244s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.257184534s DEBUG network: http-debug: < content-type: text/plain
+   0.257186045s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.257187532s DEBUG network: http-debug: < accept-ranges: bytes
+   0.257189124s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:54 GMT
+   0.257190700s DEBUG network: http-debug: < via: 1.1 varnish
+   0.257192163s DEBUG network: http-debug: < age: 385
+   0.257194046s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.257195732s DEBUG network: http-debug: < x-cache: HIT
+   0.257197412s DEBUG network: http-debug: < x-cache-hits: 9
+   0.257199281s DEBUG network: http-debug: < x-timer: S1792104055.882966,VS0,VE0
+   0.257201368s DEBUG network: http-debug: < content-length: 284026
+   0.257203817s DEBUG network: http-debug: <
+   0.257206594s DEBUG network: http-debug: < HTTP/2 200
+   0.257209014s DEBUG network: http-debug: < x-amz-request-id: 0J9DXSHZ4AG9YV06
+   0.257211898s DEBUG network: http-debug: < x-amz-id-2: GyeCSO2shqubHh+XHC/vue+H6RSGLXuZt77lMjntUoJvucCLnpi8kHI5r127G8Q9EXgEpx9fzG0EIhPUUj3UrlnDZxJwF1jr
+   0.257213993s DEBUG network: http-debug: < server: AmazonS3
+   0.257215707s DEBUG network: http-debug: < last-modified: Sat, 10 Oct 2026 18:18:07 GMT
+   0.257217484s DEBUG network: http-debug: < etag: "05ef80383cfa8cb498ce57d7903ab0f9"
+   0.257219305s DEBUG network: http-debug: < x-amz-version-id: ll_l.gm7OAGUGfaX2rrSRQbm5xJb0.Vg
+   0.257221007s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.257223030s DEBUG network: http-debug: < content-type: text/plain
+   0.257224518s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.257225942s DEBUG network: http-debug: < accept-ranges: bytes
+   0.257227504s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:54 GMT
+   0.257228977s DEBUG network: http-debug: < via: 1.1 varnish
+   0.257230277s DEBUG network: http-debug: < age: 374
+   0.257232356s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.257234075s DEBUG network: http-debug: < x-cache: HIT
+   0.257235559s DEBUG network: http-debug: < x-cache-hits: 6
+   0.257237227s DEBUG network: http-debug: < x-timer: S1792104055.894367,VS0,VE0
+   0.257238955s DEBUG network: http-debug: < content-length: 85893
+   0.257240443s DEBUG network: http-debug: <
+   0.257242270s DEBUG network: http-debug: < HTTP/2 200
+   0.257244402s DEBUG network: http-debug: < x-amz-request-id: 2MT07E9MYMFWFTA0
+   0.257246894s DEBUG network: http-debug: < x-amz-id-2: OZNatmgDWIwhxDROCcjkNfNoLKAOaeOGZEqZCAIzFhSu9Kxi13SrtZwyJDZDwNV/FaHDQU9Lwadm1RJ9/5A8OJZdigNOsxm+
+   0.257248640s DEBUG network: http-debug: < server: AmazonS3
+   0.257250753s DEBUG network: http-debug: < last-modified: Mon, 12 Oct 2026 18:58:24 GMT
+   0.257252766s DEBUG network: http-debug: < etag: "c9b8b9a2f6b3ec7339f84f37e4e7c612"
+   0.257254376s DEBUG network: http-debug: < x-amz-version-id: WDNIXVxIEy_snTsWODPlaPYf0K7BAr9y
+   0.257255897s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.257257443s DEBUG network: http-debug: < content-type: text/plain
+   0.257259463s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.257261288s DEBUG network: http-debug: < accept-ranges: bytes
+   0.257262803s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:54 GMT
+   0.257264323s DEBUG network: http-debug: < via: 1.1 varnish
+   0.257265666s DEBUG network: http-debug: < age: 250
+   0.257267633s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.257269566s DEBUG network: http-debug: < x-cache: HIT
+   0.257271006s DEBUG network: http-debug: < x-cache-hits: 25
+   0.257272755s DEBUG network: http-debug: < x-timer: S1792104055.894379,VS0,VE0
+   0.257274574s DEBUG network: http-debug: < content-length: 55370
+   0.257276011s DEBUG network: http-debug: <
+   0.262930478s TRACE cargo::sources::registry::http_remote: index file version: etag: "971e1a71d7d6afbfc90a23ad91931103"
+   0.287232089s TRACE cargo::sources::registry::http_remote: index file version: etag: "c9b8b9a2f6b3ec7339f84f37e4e7c612"
+   0.289775162s TRACE cargo::sources::registry::http_remote: index file version: etag: "05ef80383cfa8cb498ce57d7903ab0f9"
+   0.340694931s DEBUG network: http-debug: * Connection #0 to host index.crates.io:443 left intact
+   0.340758164s TRACE cargo::sources::registry::http_remote: index file version: etag: "7f59728e0b1d1dae90b81f04f402ca9f"
+   0.343573816s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.343581656s TRACE cargo::sources::registry::http_remote: load: se/rd/serde_core
+   0.343588801s DEBUG network::fetch: url="https://index.crates.io/se/rd/serde_core"
+   0.343600886s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.343624027s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.343625124s TRACE cargo::sources::registry::http_remote: load: se/rd/serde_derive
+   0.343626969s DEBUG network::fetch: url="https://index.crates.io/se/rd/serde_derive"
+   0.343630149s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.343646463s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.343647294s TRACE cargo::sources::registry::http_remote: load: it/oa/itoa
+   0.343648574s DEBUG network::fetch: url="https://index.crates.io/it/oa/itoa"
+   0.343651273s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.343660466s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.343661254s TRACE cargo::sources::registry::http_remote: load: me/mc/memchr
+   0.343662426s DEBUG network::fetch: url="https://index.crates.io/me/mc/memchr"
+   0.343665697s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.343698389s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.343734185s DEBUG network: http-debug: * [HTTP/2] [11] OPENED stream for https://index.crates.io/se/rd/serde_core
+   0.343741650s DEBUG network: http-debug: * [HTTP/2] [11] [:method: GET]
+   0.343744424s DEBUG network: http-debug: * [HTTP/2] [11] [:scheme: https]
+   0.343746551s DEBUG network: http-debug: * [HTTP/2] [11] [:authority: index.crates.io]
+   0.343748320s DEBUG network: http-debug: * [HTTP/2] [11] [:path: /se/rd/serde_core]
+   0.343750098s DEBUG network: http-debug: * [HTTP/2] [11] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.343751830s DEBUG network: http-debug: * [HTTP/2] [11] [accept-encoding: deflate, gzip]
+   0.343753557s DEBUG network: http-debug: * [HTTP/2] [11] [cargo-protocol: version=1]
+   0.343755241s DEBUG network: http-debug: * [HTTP/2] [11] [accept: text/plain]
+   0.343810607s DEBUG network: http-debug: > GET /se/rd/serde_core HTTP/2
+   0.343812805s DEBUG network: http-debug: > Host: index.crates.io
+   0.343814244s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.343815754s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.343817060s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.343818378s DEBUG network: http-debug: > accept: text/plain
+   0.343819603s DEBUG network: http-debug: >
+   0.343821818s DEBUG network: http-debug: * Request completely sent off
+   0.343861249s DEBUG network: http-debug: * Multiplexed connection found
+   0.343892450s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.343909234s DEBUG network: http-debug: * [HTTP/2] [13] OPENED stream for https://index.crates.io/se/rd/serde_derive
+   0.343911679s DEBUG network: http-debug: * [HTTP/2] [13] [:method: GET]
+   0.343913666s DEBUG network: http-debug: * [HTTP/2] [13] [:scheme: https]
+   0.343915433s DEBUG network: http-debug: * [HTTP/2] [13] [:authority: index.crates.io]
+   0.343917455s DEBUG network: http-debug: * [HTTP/2] [13] [:path: /se/rd/serde_derive]
+   0.343919355s DEBUG network: http-debug: * [HTTP/2] [13] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.343921352s DEBUG network: http-debug: * [HTTP/2] [13] [accept-encoding: deflate, gzip]
+   0.343923079s DEBUG network: http-debug: * [HTTP/2] [13] [cargo-protocol: version=1]
+   0.343924916s DEBUG network: http-debug: * [HTTP/2] [13] [accept: text/plain]
+   0.343939738s DEBUG network: http-debug: > GET /se/rd/serde_derive HTTP/2
+   0.343941788s DEBUG network: http-debug: > Host: index.crates.io
+   0.343943568s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.343945325s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.343947066s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.343948746s DEBUG network: http-debug: > accept: text/plain
+   0.343950240s DEBUG network: http-debug: >
+   0.343952042s DEBUG network: http-debug: * Request completely sent off
+   0.345813461s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.345831757s TRACE cargo::sources::registry::http_remote: load: zm/ij/zmij
+   0.345841542s DEBUG network::fetch: url="https://index.crates.io/zm/ij/zmij"
+   0.345858467s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.345917183s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.345921536s TRACE cargo::sources::registry::http_remote: load: cf/g-/cfg-if
+   0.345924874s DEBUG network::fetch: url="https://index.crates.io/cf/g-/cfg-if"
+   0.345930617s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.345952425s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.345956090s TRACE cargo::sources::registry::http_remote: load: cp/uf/cpufeatures
+   0.345958319s DEBUG network::fetch: url="https://index.crates.io/cp/uf/cpufeatures"
+   0.345964817s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.345982327s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.345983601s TRACE cargo::sources::registry::http_remote: load: di/ge/digest
+   0.345985682s DEBUG network::fetch: url="https://index.crates.io/di/ge/digest"
+   0.345994426s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346022390s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.346023883s TRACE cargo::sources::registry::http_remote: load: bi/tf/bitflags
+   0.346025884s DEBUG network::fetch: url="https://index.crates.io/bi/tf/bitflags"
+   0.346029833s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346048649s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.346050338s TRACE cargo::sources::registry::http_remote: load: ch/ac/chacha20
+   0.346052430s DEBUG network::fetch: url="https://index.crates.io/ch/ac/chacha20"
+   0.346057687s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346074551s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.346075915s TRACE cargo::sources::registry::http_remote: load: co/re/core_detect
+   0.346077895s DEBUG network::fetch: url="https://index.crates.io/co/re/core_detect"
+   0.346086189s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346102228s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.346103531s TRACE cargo::sources::registry::http_remote: load: nu/m-/num-traits
+   0.346105379s DEBUG network::fetch: url="https://index.crates.io/nu/m-/num-traits"
+   0.346108858s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346123981s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.346120326s DEBUG network: http-debug: * Multiplexed connection found
+   0.346126094s TRACE cargo::sources::registry::http_remote: load: ra/nd/rand
+   0.346133720s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.346137676s DEBUG network::fetch: url="https://index.crates.io/ra/nd/rand"
+   0.346148571s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346158633s DEBUG network: http-debug: * [HTTP/2] [15] OPENED stream for https://index.crates.io/it/oa/itoa
+   0.346163433s DEBUG network: http-debug: * [HTTP/2] [15] [:method: GET]
+   0.346165717s DEBUG network: http-debug: * [HTTP/2] [15] [:scheme: https]
+   0.346167709s DEBUG network: http-debug: * [HTTP/2] [15] [:authority: index.crates.io]
+   0.346168626s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.346169709s DEBUG network: http-debug: * [HTTP/2] [15] [:path: /it/oa/itoa]
+   0.346170490s TRACE cargo::sources::registry::http_remote: load: ra/nd/rand_xorshift
+   0.346172124s DEBUG network: http-debug: * [HTTP/2] [15] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.346173014s DEBUG network::fetch: url="https://index.crates.io/ra/nd/rand_xorshift"
+   0.346174596s DEBUG network: http-debug: * [HTTP/2] [15] [accept-encoding: deflate, gzip]
+   0.346176721s DEBUG network: http-debug: * [HTTP/2] [15] [cargo-protocol: version=1]
+   0.346178410s DEBUG network: http-debug: * [HTTP/2] [15] [accept: text/plain]
+   0.346177916s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346195530s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.346197053s TRACE cargo::sources::registry::http_remote: load: re/ge/regex-syntax
+   0.346201115s DEBUG network::fetch: url="https://index.crates.io/re/ge/regex-syntax"
+   0.346205195s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346221875s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.346223688s TRACE cargo::sources::registry::http_remote: load: un/ar/unarray
+   0.346225438s DEBUG network::fetch: url="https://index.crates.io/un/ar/unarray"
+   0.346230392s DEBUG network: http-debug: > GET /it/oa/itoa HTTP/2
+   0.346235278s DEBUG network: http-debug: > Host: index.crates.io
+   0.346229258s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.346236601s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.346239047s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.346240118s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.346241287s DEBUG network: http-debug: > accept: text/plain
+   0.346242337s DEBUG network: http-debug: >
+   0.346244077s DEBUG network: http-debug: * Request completely sent off
+   0.346270858s DEBUG network: http-debug: * Multiplexed connection found
+   0.346273454s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.346286795s DEBUG network: http-debug: * [HTTP/2] [17] OPENED stream for https://index.crates.io/me/mc/memchr
+   0.346288893s DEBUG network: http-debug: * [HTTP/2] [17] [:method: GET]
+   0.346290395s DEBUG network: http-debug: * [HTTP/2] [17] [:scheme: https]
+   0.346292042s DEBUG network: http-debug: * [HTTP/2] [17] [:authority: index.crates.io]
+   0.346293502s DEBUG network: http-debug: * [HTTP/2] [17] [:path: /me/mc/memchr]
+   0.346294933s DEBUG network: http-debug: * [HTTP/2] [17] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.346296615s DEBUG network: http-debug: * [HTTP/2] [17] [accept-encoding: deflate, gzip]
+   0.346298089s DEBUG network: http-debug: * [HTTP/2] [17] [cargo-protocol: version=1]
+   0.346299559s DEBUG network: http-debug: * [HTTP/2] [17] [accept: text/plain]
+   0.346307625s DEBUG network: http-debug: > GET /me/mc/memchr HTTP/2
+   0.346310089s DEBUG network: http-debug: > Host: index.crates.io
+   0.346311367s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.346312796s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.346313874s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.346315008s DEBUG network: http-debug: > accept: text/plain
+   0.346316032s DEBUG network: http-debug: >
+   0.346317238s DEBUG network: http-debug: * Request completely sent off
+   0.346335815s DEBUG network: http-debug: * Multiplexed connection found
+   0.346341014s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.346351168s DEBUG network: http-debug: * [HTTP/2] [19] OPENED stream for https://index.crates.io/zm/ij/zmij
+   0.346353047s DEBUG network: http-debug: * [HTTP/2] [19] [:method: GET]
+   0.346354515s DEBUG network: http-debug: * [HTTP/2] [19] [:scheme: https]
+   0.346355970s DEBUG network: http-debug: * [HTTP/2] [19] [:authority: index.crates.io]
+   0.346357498s DEBUG network: http-debug: * [HTTP/2] [19] [:path: /zm/ij/zmij]
+   0.346358990s DEBUG network: http-debug: * [HTTP/2] [19] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.346360508s DEBUG network: http-debug: * [HTTP/2] [19] [accept-encoding: deflate, gzip]
+   0.346361924s DEBUG network: http-debug: * [HTTP/2] [19] [cargo-protocol: version=1]
+   0.346363338s DEBUG network: http-debug: * [HTTP/2] [19] [accept: text/plain]
+   0.346372682s DEBUG network: http-debug: > GET /zm/ij/zmij HTTP/2
+   0.346374176s DEBUG network: http-debug: > Host: index.crates.io
+   0.346375317s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.346376620s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.346377752s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.346378935s DEBUG network: http-debug: > accept: text/plain
+   0.346379989s DEBUG network: http-debug: >
+   0.346381144s DEBUG network: http-debug: * Request completely sent off
+   0.346395631s DEBUG network: http-debug: * Multiplexed connection found
+   0.346397671s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.346405700s DEBUG network: http-debug: * [HTTP/2] [21] OPENED stream for https://index.crates.io/cf/g-/cfg-if
+   0.346407281s DEBUG network: http-debug: * [HTTP/2] [21] [:method: GET]
+   0.346408670s DEBUG network: http-debug: * [HTTP/2] [21] [:scheme: https]
+   0.346410224s DEBUG network: http-debug: * [HTTP/2] [21] [:authority: index.crates.io]
+   0.346411766s DEBUG network: http-debug: * [HTTP/2] [21] [:path: /cf/g-/cfg-if]
+   0.346413377s DEBUG network: http-debug: * [HTTP/2] [21] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.346414960s DEBUG network: http-debug: * [HTTP/2] [21] [accept-encoding: deflate, gzip]
+   0.346416501s DEBUG network: http-debug: * [HTTP/2] [21] [cargo-protocol: version=1]
+   0.346417863s DEBUG network: http-debug: * [HTTP/2] [21] [accept: text/plain]
+   0.346428824s DEBUG network: http-debug: > GET /cf/g-/cfg-if HTTP/2
+   0.346432469s DEBUG network: http-debug: > Host: index.crates.io
+   0.346433682s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.346435053s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.346436427s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.346438294s DEBUG network: http-debug: > accept: text/plain
+   0.346439883s DEBUG network: http-debug: >
+   0.346441408s DEBUG network: http-debug: * Request completely sent off
+   0.346456336s DEBUG network: http-debug: * Multiplexed connection found
+   0.346483408s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.346499200s DEBUG network: http-debug: * [HTTP/2] [23] OPENED stream for https://index.crates.io/cp/uf/cpufeatures
+   0.346502326s DEBUG network: http-debug: * [HTTP/2] [23] [:method: GET]
+   0.346504403s DEBUG network: http-debug: * [HTTP/2] [23] [:scheme: https]
+   0.346506342s DEBUG network: http-debug: * [HTTP/2] [23] [:authority: index.crates.io]
+   0.346507964s DEBUG network: http-debug: * [HTTP/2] [23] [:path: /cp/uf/cpufeatures]
+   0.346509660s DEBUG network: http-debug: * [HTTP/2] [23] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.346511421s DEBUG network: http-debug: * [HTTP/2] [23] [accept-encoding: deflate, gzip]
+   0.346512873s DEBUG network: http-debug: * [HTTP/2] [23] [cargo-protocol: version=1]
+   0.346514308s DEBUG network: http-debug: * [HTTP/2] [23] [accept: text/plain]
+   0.346547658s DEBUG network: http-debug: > GET /cp/uf/cpufeatures HTTP/2
+   0.346555066s DEBUG network: http-debug: > Host: index.crates.io
+   0.346557692s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.346559889s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.346561634s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.346562888s DEBUG network: http-debug: > accept: text/plain
+   0.346563933s DEBUG network: http-debug: >
+   0.346565678s DEBUG network: http-debug: * Request completely sent off
+   0.346594805s DEBUG network: http-debug: * Multiplexed connection found
+   0.346597304s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.346609058s DEBUG network: http-debug: * [HTTP/2] [25] OPENED stream for https://index.crates.io/di/ge/digest
+   0.346611024s DEBUG network: http-debug: * [HTTP/2] [25] [:method: GET]
+   0.346612748s DEBUG network: http-debug: * [HTTP/2] [25] [:scheme: https]
+   0.346614396s DEBUG network: http-debug: * [HTTP/2] [25] [:authority: index.crates.io]
+   0.346616117s DEBUG network: http-debug: * [HTTP/2] [25] [:path: /di/ge/digest]
+   0.346617849s DEBUG network: http-debug: * [HTTP/2] [25] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.346619421s DEBUG network: http-debug: * [HTTP/2] [25] [accept-encoding: deflate, gzip]
+   0.346621001s DEBUG network: http-debug: * [HTTP/2] [25] [cargo-protocol: version=1]
+   0.346622466s DEBUG network: http-debug: * [HTTP/2] [25] [accept: text/plain]
+   0.346634288s DEBUG network: http-debug: > GET /di/ge/digest HTTP/2
+   0.346635891s DEBUG network: http-debug: > Host: index.crates.io
+   0.346637202s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.346638460s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.346639737s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.346640974s DEBUG network: http-debug: > accept: text/plain
+   0.346642193s DEBUG network: http-debug: >
+   0.346643529s DEBUG network: http-debug: * Request completely sent off
+   0.346663742s DEBUG network: http-debug: * Multiplexed connection found
+   0.346668597s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.346677685s DEBUG network: http-debug: * [HTTP/2] [27] OPENED stream for https://index.crates.io/bi/tf/bitflags
+   0.346679497s DEBUG network: http-debug: * [HTTP/2] [27] [:method: GET]
+   0.346680892s DEBUG network: http-debug: * [HTTP/2] [27] [:scheme: https]
+   0.346682353s DEBUG network: http-debug: * [HTTP/2] [27] [:authority: index.crates.io]
+   0.346683965s DEBUG network: http-debug: * [HTTP/2] [27] [:path: /bi/tf/bitflags]
+   0.346685378s DEBUG network: http-debug: * [HTTP/2] [27] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.346686956s DEBUG network: http-debug: * [HTTP/2] [27] [accept-encoding: deflate, gzip]
+   0.346688491s DEBUG network: http-debug: * [HTTP/2] [27] [cargo-protocol: version=1]
+   0.346689934s DEBUG network: http-debug: * [HTTP/2] [27] [accept: text/plain]
+   0.346702779s DEBUG network: http-debug: > GET /bi/tf/bitflags HTTP/2
+   0.346704306s DEBUG network: http-debug: > Host: index.crates.io
+   0.346705582s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.346706918s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.346708061s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.346709238s DEBUG network: http-debug: > accept: text/plain
+   0.346710320s DEBUG network: http-debug: >
+   0.346711505s DEBUG network: http-debug: * Request completely sent off
+   0.348792993s DEBUG network: http-debug: * Multiplexed connection found
+   0.348802652s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.348814046s DEBUG network: http-debug: * [HTTP/2] [29] OPENED stream for https://index.crates.io/ch/ac/chacha20
+   0.348815737s DEBUG network: http-debug: * [HTTP/2] [29] [:method: GET]
+   0.348816797s DEBUG network: http-debug: * [HTTP/2] [29] [:scheme: https]
+   0.348817733s DEBUG network: http-debug: * [HTTP/2] [29] [:authority: index.crates.io]
+   0.348818643s DEBUG network: http-debug: * [HTTP/2] [29] [:path: /ch/ac/chacha20]
+   0.348819758s DEBUG network: http-debug: * [HTTP/2] [29] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.348820694s DEBUG network: http-debug: * [HTTP/2] [29] [accept-encoding: deflate, gzip]
+   0.348821491s DEBUG network: http-debug: * [HTTP/2] [29] [cargo-protocol: version=1]
+   0.348822287s DEBUG network: http-debug: * [HTTP/2] [29] [accept: text/plain]
+   0.348844715s DEBUG network: http-debug: > GET /ch/ac/chacha20 HTTP/2
+   0.348847471s DEBUG network: http-debug: > Host: index.crates.io
+   0.348848225s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.348848930s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.348849570s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.348850181s DEBUG network: http-debug: > accept: text/plain
+   0.348850831s DEBUG network: http-debug: >
+   0.348851894s DEBUG network: http-debug: * Request completely sent off
+   0.348868024s DEBUG network: http-debug: * Multiplexed connection found
+   0.348869602s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.348877557s DEBUG network: http-debug: * [HTTP/2] [31] OPENED stream for https://index.crates.io/co/re/core_detect
+   0.348878675s DEBUG network: http-debug: * [HTTP/2] [31] [:method: GET]
+   0.348879549s DEBUG network: http-debug: * [HTTP/2] [31] [:scheme: https]
+   0.348880364s DEBUG network: http-debug: * [HTTP/2] [31] [:authority: index.crates.io]
+   0.348881190s DEBUG network: http-debug: * [HTTP/2] [31] [:path: /co/re/core_detect]
+   0.348882045s DEBUG network: http-debug: * [HTTP/2] [31] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.348882983s DEBUG network: http-debug: * [HTTP/2] [31] [accept-encoding: deflate, gzip]
+   0.348883818s DEBUG network: http-debug: * [HTTP/2] [31] [cargo-protocol: version=1]
+   0.348884555s DEBUG network: http-debug: * [HTTP/2] [31] [accept: text/plain]
+   0.348889689s DEBUG network: http-debug: > GET /co/re/core_detect HTTP/2
+   0.348890507s DEBUG network: http-debug: > Host: index.crates.io
+   0.348891171s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.348891827s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.348892441s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.348893113s DEBUG network: http-debug: > accept: text/plain
+   0.348893767s DEBUG network: http-debug: >
+   0.348894484s DEBUG network: http-debug: * Request completely sent off
+   0.348905245s DEBUG network: http-debug: * Multiplexed connection found
+   0.348906485s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.348912340s DEBUG network: http-debug: * [HTTP/2] [33] OPENED stream for https://index.crates.io/nu/m-/num-traits
+   0.348913522s DEBUG network: http-debug: * [HTTP/2] [33] [:method: GET]
+   0.348914390s DEBUG network: http-debug: * [HTTP/2] [33] [:scheme: https]
+   0.348915214s DEBUG network: http-debug: * [HTTP/2] [33] [:authority: index.crates.io]
+   0.348916059s DEBUG network: http-debug: * [HTTP/2] [33] [:path: /nu/m-/num-traits]
+   0.348916981s DEBUG network: http-debug: * [HTTP/2] [33] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.348917871s DEBUG network: http-debug: * [HTTP/2] [33] [accept-encoding: deflate, gzip]
+   0.348918668s DEBUG network: http-debug: * [HTTP/2] [33] [cargo-protocol: version=1]
+   0.348919487s DEBUG network: http-debug: * [HTTP/2] [33] [accept: text/plain]
+   0.348924145s DEBUG network: http-debug: > GET /nu/m-/num-traits HTTP/2
+   0.348925100s DEBUG network: http-debug: > Host: index.crates.io
+   0.348925775s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.348926476s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.348927115s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.348927751s DEBUG network: http-debug: > accept: text/plain
+   0.348928331s DEBUG network: http-debug: >
+   0.348929104s DEBUG network: http-debug: * Request completely sent off
+   0.348938326s DEBUG network: http-debug: * Multiplexed connection found
+   0.348939724s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.348945399s DEBUG network: http-debug: * [HTTP/2] [35] OPENED stream for https://index.crates.io/ra/nd/rand
+   0.348947058s DEBUG network: http-debug: * [HTTP/2] [35] [:method: GET]
+   0.348947959s DEBUG network: http-debug: * [HTTP/2] [35] [:scheme: https]
+   0.348948985s DEBUG network: http-debug: * [HTTP/2] [35] [:authority: index.crates.io]
+   0.348949999s DEBUG network: http-debug: * [HTTP/2] [35] [:path: /ra/nd/rand]
+   0.348951272s DEBUG network: http-debug: * [HTTP/2] [35] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.348952221s DEBUG network: http-debug: * [HTTP/2] [35] [accept-encoding: deflate, gzip]
+   0.348953069s DEBUG network: http-debug: * [HTTP/2] [35] [cargo-protocol: version=1]
+   0.348953911s DEBUG network: http-debug: * [HTTP/2] [35] [accept: text/plain]
+   0.348959815s DEBUG network: http-debug: > GET /ra/nd/rand HTTP/2
+   0.348965083s DEBUG network: http-debug: > Host: index.crates.io
+   0.348965860s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.348966683s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.348967302s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.348968020s DEBUG network: http-debug: > accept: text/plain
+   0.348968611s DEBUG network: http-debug: >
+   0.348969325s DEBUG network: http-debug: * Request completely sent off
+   0.348977836s DEBUG network: http-debug: * Multiplexed connection found
+   0.348978926s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.348983826s DEBUG network: http-debug: * [HTTP/2] [37] OPENED stream for https://index.crates.io/ra/nd/rand_xorshift
+   0.348985594s DEBUG network: http-debug: * [HTTP/2] [37] [:method: GET]
+   0.348986440s DEBUG network: http-debug: * [HTTP/2] [37] [:scheme: https]
+   0.348987275s DEBUG network: http-debug: * [HTTP/2] [37] [:authority: index.crates.io]
+   0.348988266s DEBUG network: http-debug: * [HTTP/2] [37] [:path: /ra/nd/rand_xorshift]
+   0.348989135s DEBUG network: http-debug: * [HTTP/2] [37] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.348990114s DEBUG network: http-debug: * [HTTP/2] [37] [accept-encoding: deflate, gzip]
+   0.348990957s DEBUG network: http-debug: * [HTTP/2] [37] [cargo-protocol: version=1]
+   0.348992291s DEBUG network: http-debug: * [HTTP/2] [37] [accept: text/plain]
+   0.348996181s DEBUG network: http-debug: > GET /ra/nd/rand_xorshift HTTP/2
+   0.348997192s DEBUG network: http-debug: > Host: index.crates.io
+   0.348997849s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.348998731s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.348999652s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.349000397s DEBUG network: http-debug: > accept: text/plain
+   0.349000971s DEBUG network: http-debug: >
+   0.349001691s DEBUG network: http-debug: * Request completely sent off
+   0.349009396s DEBUG network: http-debug: * Multiplexed connection found
+   0.349011090s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.349015543s DEBUG network: http-debug: * [HTTP/2] [39] OPENED stream for https://index.crates.io/re/ge/regex-syntax
+   0.349016715s DEBUG network: http-debug: * [HTTP/2] [39] [:method: GET]
+   0.349017652s DEBUG network: http-debug: * [HTTP/2] [39] [:scheme: https]
+   0.349018987s DEBUG network: http-debug: * [HTTP/2] [39] [:authority: index.crates.io]
+   0.349019965s DEBUG network: http-debug: * [HTTP/2] [39] [:path: /re/ge/regex-syntax]
+   0.349020972s DEBUG network: http-debug: * [HTTP/2] [39] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.349021953s DEBUG network: http-debug: * [HTTP/2] [39] [accept-encoding: deflate, gzip]
+   0.349022839s DEBUG network: http-debug: * [HTTP/2] [39] [cargo-protocol: version=1]
+   0.349023670s DEBUG network: http-debug: * [HTTP/2] [39] [accept: text/plain]
+   0.349029430s DEBUG network: http-debug: > GET /re/ge/regex-syntax HTTP/2
+   0.349030463s DEBUG network: http-debug: > Host: index.crates.io
+   0.349031522s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.349032247s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.349033028s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.349033701s DEBUG network: http-debug: > accept: text/plain
+   0.349034267s DEBUG network: http-debug: >
+   0.349034935s DEBUG network: http-debug: * Request completely sent off
+   0.349043039s DEBUG network: http-debug: * Multiplexed connection found
+   0.349044562s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.349048846s DEBUG network: http-debug: * [HTTP/2] [41] OPENED stream for https://index.crates.io/un/ar/unarray
+   0.349049744s DEBUG network: http-debug: * [HTTP/2] [41] [:method: GET]
+   0.349050544s DEBUG network: http-debug: * [HTTP/2] [41] [:scheme: https]
+   0.349051378s DEBUG network: http-debug: * [HTTP/2] [41] [:authority: index.crates.io]
+   0.349052363s DEBUG network: http-debug: * [HTTP/2] [41] [:path: /un/ar/unarray]
+   0.349053290s DEBUG network: http-debug: * [HTTP/2] [41] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.349054212s DEBUG network: http-debug: * [HTTP/2] [41] [accept-encoding: deflate, gzip]
+   0.349055747s DEBUG network: http-debug: * [HTTP/2] [41] [cargo-protocol: version=1]
+   0.349056606s DEBUG network: http-debug: * [HTTP/2] [41] [accept: text/plain]
+   0.349062759s DEBUG network: http-debug: > GET /un/ar/unarray HTTP/2
+   0.349064054s DEBUG network: http-debug: > Host: index.crates.io
+   0.349064727s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.349065430s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.349066050s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.349066792s DEBUG network: http-debug: > accept: text/plain
+   0.349067354s DEBUG network: http-debug: >
+   0.349067983s DEBUG network: http-debug: * Request completely sent off
+   0.356627565s DEBUG network: http-debug: < HTTP/2 200
+   0.356646807s DEBUG network: http-debug: < x-amz-request-id: QB5XT4QHR4BEGKH9
+   0.356653224s DEBUG network: http-debug: < x-amz-id-2: mjGWWaH+VPnvzdL8EJr2cRD6jYBE8lKbZDRORZbnRLZcixlIOvqWSfC38mn/ROwudeYW19h7o0qfimV97U2f0LUl4qYlD7Im
+   0.356655801s DEBUG network: http-debug: < server: AmazonS3
+   0.356658206s DEBUG network: http-debug: < last-modified: Sat, 18 Jul 2026 23:05:12 GMT
+   0.356660190s DEBUG network: http-debug: < etag: "0677ae846370eef57d00db4af7ab39fc"
+   0.356661852s DEBUG network: http-debug: < x-amz-version-id: 45pLQzu.yrPQUCdkDWOmcSO8vV96B2u6
+   0.356664436s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.356667941s DEBUG network: http-debug: < content-type: text/plain
+   0.356669236s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.356670677s DEBUG network: http-debug: < accept-ranges: bytes
+   0.356672509s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.356674041s DEBUG network: http-debug: < via: 1.1 varnish
+   0.356675457s DEBUG network: http-debug: < age: 382
+   0.356677409s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.356679078s DEBUG network: http-debug: < x-cache: HIT
+   0.356680455s DEBUG network: http-debug: < x-cache-hits: 36
+   0.356682033s DEBUG network: http-debug: < x-timer: S1792104055.028473,VS0,VE0
+   0.356683667s DEBUG network: http-debug: < content-length: 6480
+   0.356685410s DEBUG network: http-debug: <
+   0.364701302s DEBUG network: http-debug: < HTTP/2 200
+   0.364705141s DEBUG network: http-debug: < x-amz-request-id: S7KVYMZKTJWHJCG8
+   0.364709983s DEBUG network: http-debug: < x-amz-id-2: u/QA8Sh1ncWHlEU2pCeUpKhSJ80owJaX8Zc1Cr1giku1n+nGr/qi2dgIJ7KlgFy1BsVkkh/eB3bH8tMVPMuh1wGRo3cl7bK5
+   0.364712068s DEBUG network: http-debug: < server: AmazonS3
+   0.364713952s DEBUG network: http-debug: < last-modified: Wed, 08 Jul 2026 00:49:56 GMT
+   0.364716065s DEBUG network: http-debug: < etag: "b80703e5b81110869d945dc7d919a9c1"
+   0.364717812s DEBUG network: http-debug: < x-amz-version-id: zgfU9b0AxfNR9Eo5pBCNzccU.sZ3OBcX
+   0.364719501s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.364722580s DEBUG network: http-debug: < content-type: text/plain
+   0.364724248s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.364725566s DEBUG network: http-debug: < accept-ranges: bytes
+   0.364726729s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.364728042s DEBUG network: http-debug: < via: 1.1 varnish
+   0.364729394s DEBUG network: http-debug: < age: 322
+   0.364730977s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.364732519s DEBUG network: http-debug: < x-cache: HIT
+   0.364734079s DEBUG network: http-debug: < x-cache-hits: 27
+   0.364735913s DEBUG network: http-debug: < x-timer: S1792104055.033264,VS0,VE0
+   0.364737499s DEBUG network: http-debug: < content-length: 28423
+   0.364739179s DEBUG network: http-debug: <
+   0.364805329s DEBUG network: http-debug: < HTTP/2 200
+   0.364808648s DEBUG network: http-debug: < x-amz-request-id: KPQ9K4M7CDMQ0WHD
+   0.364810903s DEBUG network: http-debug: < x-amz-id-2: j7j+bdLkQdaiB2FWI1JiIZ38q4DPObboraQmc1YxmeXqPPO7dYP9Y9aR/UPT51kcKiOhb2WDSqwHVUi/n/BKIRTtDTMIhyla
+   0.364812432s DEBUG network: http-debug: < server: AmazonS3
+   0.364813794s DEBUG network: http-debug: < last-modified: Sat, 18 Jul 2026 23:05:09 GMT
+   0.364815153s DEBUG network: http-debug: < etag: "9c7b92bacea8bca17ee2630b642f06e5"
+   0.364816411s DEBUG network: http-debug: < x-amz-version-id: 5qgh9iSrt.vBS3v4L89qQiFlBXeEKxw4
+   0.364817481s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.364819107s DEBUG network: http-debug: < content-type: text/plain
+   0.364820611s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.364821915s DEBUG network: http-debug: < accept-ranges: bytes
+   0.364822864s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.364824452s DEBUG network: http-debug: < via: 1.1 varnish
+   0.364825855s DEBUG network: http-debug: < age: 174
+   0.364828227s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.364830147s DEBUG network: http-debug: < x-cache: HIT
+   0.364832449s DEBUG network: http-debug: < x-cache-hits: 123939
+   0.364833930s DEBUG network: http-debug: < x-timer: S1792104055.033288,VS0,VE0
+   0.364835545s DEBUG network: http-debug: < content-length: 196559
+   0.364837151s DEBUG network: http-debug: <
+   0.364839233s DEBUG network: http-debug: < HTTP/2 200
+   0.364841029s DEBUG network: http-debug: < x-amz-request-id: CMER448T6BT16ZB0
+   0.364843509s DEBUG network: http-debug: < x-amz-id-2: 9pZnXi3yV+fHHGBjdfRtL+ejEgbrhyWV/HCAc/etatxBTuyhhJTeHCKMjR1oPMSTt8SH+IfoTAQ=
+   0.364845416s DEBUG network: http-debug: < server: AmazonS3
+   0.364847322s DEBUG network: http-debug: < last-modified: Fri, 20 Mar 2026 00:12:38 GMT
+   0.364849190s DEBUG network: http-debug: < etag: "ea8494d560f1b8174443495b370e272f"
+   0.364851182s DEBUG network: http-debug: < x-amz-version-id: dP_lxhb11lA7meKPhfUhT7SBosd2KzLg
+   0.364853066s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.364855312s DEBUG network: http-debug: < content-type: text/plain
+   0.364857992s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.364859483s DEBUG network: http-debug: < accept-ranges: bytes
+   0.364861052s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.364862582s DEBUG network: http-debug: < via: 1.1 varnish
+   0.364864099s DEBUG network: http-debug: < age: 193
+   0.364866261s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.364867858s DEBUG network: http-debug: < x-cache: HIT
+   0.364869435s DEBUG network: http-debug: < x-cache-hits: 17
+   0.364871222s DEBUG network: http-debug: < x-timer: S1792104055.033285,VS0,VE0
+   0.364872858s DEBUG network: http-debug: < content-length: 9473
+   0.364874386s DEBUG network: http-debug: <
+   0.365123992s TRACE cargo::sources::registry::http_remote: index file version: etag: "0677ae846370eef57d00db4af7ab39fc"
+   0.365348486s TRACE cargo::sources::registry::http_remote: index file version: etag: "ea8494d560f1b8174443495b370e272f"
+   0.365803374s TRACE cargo::sources::registry::http_remote: index file version: etag: "b80703e5b81110869d945dc7d919a9c1"
+   0.379397959s DEBUG network: http-debug: < HTTP/2 200
+   0.379411446s DEBUG network: http-debug: < x-amz-request-id: ZHEMFQEV9HJCFET0
+   0.379419980s DEBUG network: http-debug: < x-amz-id-2: OlyPMl/0ni7kZIqfs4yNIfH4gCaLBopkuzai8V2wfk1eUXf5HxeGf5deGEQi7yuVsnX+cxZ1+fwSKPNcliDN4xunGk+stLCC
+   0.379423512s DEBUG network: http-debug: < server: AmazonS3
+   0.379426831s DEBUG network: http-debug: < last-modified: Sun, 01 Feb 2026 11:36:56 GMT
+   0.379429903s DEBUG network: http-debug: < etag: "b92ae31e64bc33c09c17582068793a14"
+   0.379433361s DEBUG network: http-debug: < x-amz-version-id: WK26rcY65w18_w4rm_en27M3A3Uyokcm
+   0.379436108s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.379441292s DEBUG network: http-debug: < content-type: text/plain
+   0.379443787s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.379445877s DEBUG network: http-debug: < accept-ranges: bytes
+   0.379447940s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.379450775s DEBUG network: http-debug: < via: 1.1 varnish
+   0.379453249s DEBUG network: http-debug: < age: 330
+   0.379456447s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.379459022s DEBUG network: http-debug: < x-cache: HIT
+   0.379474610s DEBUG network: http-debug: < x-cache-hits: 5
+   0.379489764s DEBUG network: http-debug: < x-timer: S1792104055.041268,VS0,VE0
+   0.379493732s DEBUG network: http-debug: < content-length: 726
+   0.379496179s DEBUG network: http-debug: <
+   0.379500146s DEBUG network: http-debug: < HTTP/2 200
+   0.379502604s DEBUG network: http-debug: < x-amz-request-id: 1BKTHCGFGJ58ES4R
+   0.379506698s DEBUG network: http-debug: < x-amz-id-2: ZzMqCRvMEIGaTe9ftsVjmtcR5AVKS5Mk5VCmQqwDDQ/WpkaSGbYB3EGrzX35qfHYRV3JYnfPQy0=
+   0.379508372s DEBUG network: http-debug: < server: AmazonS3
+   0.379510236s DEBUG network: http-debug: < last-modified: Sun, 01 Feb 2026 12:30:29 GMT
+   0.379511712s DEBUG network: http-debug: < etag: "76a21bb3c96a942255e245aa9971cbcc"
+   0.379513272s DEBUG network: http-debug: < x-amz-version-id: rmLey4BiK58EXSgWOTr6W5U14HE2i5rI
+   0.379515012s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.379517214s DEBUG network: http-debug: < content-type: text/plain
+   0.379518807s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.379520381s DEBUG network: http-debug: < accept-ranges: bytes
+   0.379521564s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.379523142s DEBUG network: http-debug: < via: 1.1 varnish
+   0.379524346s DEBUG network: http-debug: < age: 145
+   0.379526427s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.379528094s DEBUG network: http-debug: < x-cache: HIT
+   0.379529735s DEBUG network: http-debug: < x-cache-hits: 10
+   0.379531352s DEBUG network: http-debug: < x-timer: S1792104055.041253,VS0,VE0
+   0.379532714s DEBUG network: http-debug: < content-length: 9624
+   0.379534300s DEBUG network: http-debug: <
+   0.379535786s DEBUG network: http-debug: < HTTP/2 200
+   0.379537217s DEBUG network: http-debug: < x-amz-request-id: 858W2SNS668W8F6Y
+   0.379539818s DEBUG network: http-debug: < x-amz-id-2: KD9CDHlTU5OoXOd/3qxbvtR9qKuksyTWbGurb6zM0wZ50uF9VejQCAkwPR4AVkoZ4pGOHigeGQsWN0w4vSssOcrc/r+xyW3j
+   0.379541578s DEBUG network: http-debug: < server: AmazonS3
+   0.379542948s DEBUG network: http-debug: < last-modified: Thu, 27 Aug 2026 21:37:03 GMT
+   0.379545236s DEBUG network: http-debug: < etag: "79ee26535188ff3158f33956c562207d"
+   0.379546927s DEBUG network: http-debug: < x-amz-version-id: GyhjU4w2wioRXSIi9zn07z2bkXanIjU6
+   0.379548833s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.379551267s DEBUG network: http-debug: < content-type: text/plain
+   0.379552564s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.379554507s DEBUG network: http-debug: < accept-ranges: bytes
+   0.379555996s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.379557370s DEBUG network: http-debug: < via: 1.1 varnish
+   0.379558891s DEBUG network: http-debug: < age: 256
+   0.379561046s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.379563254s DEBUG network: http-debug: < x-cache: HIT
+   0.379564778s DEBUG network: http-debug: < x-cache-hits: 23
+   0.379566385s DEBUG network: http-debug: < x-timer: S1792104055.041469,VS0,VE0
+   0.379567959s DEBUG network: http-debug: < content-length: 17632
+   0.379569208s DEBUG network: http-debug: <
+   0.379760770s DEBUG network: http-debug: < HTTP/2 200
+   0.379763828s DEBUG network: http-debug: < x-amz-request-id: SHEPA1TWXR2NVFE6
+   0.379766831s DEBUG network: http-debug: < x-amz-id-2: 8mLskbnu8ka/Jj60smVB1ANNf/9UF7uW+MKM9TpUrJDK/Ou+bu9DigLefJq7skvHZdlw0rdsVyg=
+   0.379768788s DEBUG network: http-debug: < server: AmazonS3
+   0.379770759s DEBUG network: http-debug: < last-modified: Thu, 10 Sep 2026 01:11:40 GMT
+   0.379772688s DEBUG network: http-debug: < etag: "2f227433c3a80beec62d23c34bbed0ae"
+   0.379774109s DEBUG network: http-debug: < x-amz-version-id: YaXhlb5LJWs8WDpR02tTNyqag.8h0JHh
+   0.379775489s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.379777239s DEBUG network: http-debug: < content-type: text/plain
+   0.379778284s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.379779411s DEBUG network: http-debug: < accept-ranges: bytes
+   0.379780444s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.379781691s DEBUG network: http-debug: < via: 1.1 varnish
+   0.379782933s DEBUG network: http-debug: < age: 283
+   0.379784455s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.379785999s DEBUG network: http-debug: < x-cache: HIT
+   0.379787138s DEBUG network: http-debug: < x-cache-hits: 24
+   0.379788612s DEBUG network: http-debug: < x-timer: S1792104055.041643,VS0,VE0
+   0.379789911s DEBUG network: http-debug: < content-length: 63713
+   0.379791141s DEBUG network: http-debug: <
+   0.379888574s TRACE cargo::sources::registry::http_remote: index file version: etag: "b92ae31e64bc33c09c17582068793a14"
+   0.380610905s TRACE cargo::sources::registry::http_remote: index file version: etag: "76a21bb3c96a942255e245aa9971cbcc"
+   0.381098904s TRACE cargo::sources::registry::http_remote: index file version: etag: "9c7b92bacea8bca17ee2630b642f06e5"
+   0.382523005s DEBUG network: http-debug: < HTTP/2 200
+   0.382532877s DEBUG network: http-debug: < x-amz-request-id: 0J1H0H92DDQRX0Z9
+   0.382538811s DEBUG network: http-debug: < x-amz-id-2: e7i75qLsmDgxy1IEsJkaWvZOsmNEGjZlYAJYA0riipFJr2oinGrD49gtm278zE3GHaC48SghfiKC++dAg/g55UNm//Zt/6My
+   0.382558737s DEBUG network: http-debug: < server: AmazonS3
+   0.382563027s DEBUG network: http-debug: < last-modified: Mon, 13 Jul 2026 12:58:55 GMT
+   0.382565274s DEBUG network: http-debug: < etag: "0f5848725eb0fd28678f4a7c5c93c833"
+   0.382567190s DEBUG network: http-debug: < x-amz-version-id: gFmfdG_bRmJbhwmlXSi7fVfwBYYekJbE
+   0.382577791s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.382595312s DEBUG network: http-debug: < content-type: text/plain
+   0.382598717s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.382600647s DEBUG network: http-debug: < accept-ranges: bytes
+   0.382602550s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.382604206s DEBUG network: http-debug: < via: 1.1 varnish
+   0.382605670s DEBUG network: http-debug: < age: 558
+   0.382607841s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.382609326s DEBUG network: http-debug: < x-cache: HIT
+   0.382610915s DEBUG network: http-debug: < x-cache-hits: 44
+   0.382612860s DEBUG network: http-debug: < x-timer: S1792104055.041668,VS0,VE0
+   0.382614568s DEBUG network: http-debug: < content-length: 35215
+   0.382616249s DEBUG network: http-debug: <
+   0.383282292s TRACE cargo::sources::registry::http_remote: index file version: etag: "79ee26535188ff3158f33956c562207d"
+   0.387486829s DEBUG network: http-debug: < HTTP/2 200
+   0.387504042s DEBUG network: http-debug: < x-amz-request-id: KPQ25TZX24EY14SV
+   0.387520490s DEBUG network: http-debug: < x-amz-id-2: 67AIFf1rHxltV/bLDGlqchG2U3EhiBCbuC4EitT0K7SrnLH2P6SMgIip9QYSd06qRVACLVwgh/lDoFJ/toOteD+NJXiPh4SF
+   0.387526310s DEBUG network: http-debug: < server: AmazonS3
+   0.387529269s DEBUG network: http-debug: < last-modified: Sun, 03 May 2026 12:54:49 GMT
+   0.387531291s DEBUG network: http-debug: < etag: "ee51eaf789a1e18da9bd391070985d7d"
+   0.387533030s DEBUG network: http-debug: < x-amz-version-id: 6bCkcmKVMtzsMxJPYHy5JP7y4Zglpm.F
+   0.387535404s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.387540069s DEBUG network: http-debug: < content-type: text/plain
+   0.387541584s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.387543326s DEBUG network: http-debug: < accept-ranges: bytes
+   0.387544910s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.387546226s DEBUG network: http-debug: < via: 1.1 varnish
+   0.387547358s DEBUG network: http-debug: < age: 137
+   0.387549173s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.387550964s DEBUG network: http-debug: < x-cache: HIT
+   0.387552996s DEBUG network: http-debug: < x-cache-hits: 88552
+   0.387554941s DEBUG network: http-debug: < x-timer: S1792104055.041716,VS0,VE0
+   0.387556812s DEBUG network: http-debug: < content-length: 52911
+   0.387558523s DEBUG network: http-debug: <
+   0.387561720s DEBUG network: http-debug: < HTTP/2 200
+   0.387563619s DEBUG network: http-debug: < x-amz-request-id: E5EFMMFFANN5QBN2
+   0.387565978s DEBUG network: http-debug: < x-amz-id-2: p2v1jbSggTbWdbYamy6kdrcj8sKFTKGeqSMKnHeLO/zeexE3YAZSKIbJMq5ma3TU1w2a29srdsV3+3+Ci0sdiMWCwm77pHd/
+   0.387567990s DEBUG network: http-debug: < server: AmazonS3
+   0.387570002s DEBUG network: http-debug: < last-modified: Thu, 27 Aug 2026 18:33:24 GMT
+   0.387573060s DEBUG network: http-debug: < etag: "5d7338c52a177a6f8ac9f9f06ee6ee3f"
+   0.387574526s DEBUG network: http-debug: < x-amz-version-id: bGOLZFQ0fmsYTjSIh06snYcaq0PdhEpB
+   0.387576091s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.387577958s DEBUG network: http-debug: < content-type: text/plain
+   0.387580325s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.387581484s DEBUG network: http-debug: < accept-ranges: bytes
+   0.387582666s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.387583823s DEBUG network: http-debug: < via: 1.1 varnish
+   0.387585041s DEBUG network: http-debug: < age: 447
+   0.387586840s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.387588302s DEBUG network: http-debug: < x-cache: HIT
+   0.387589627s DEBUG network: http-debug: < x-cache-hits: 25
+   0.387591096s DEBUG network: http-debug: < x-timer: S1792104055.041708,VS0,VE0
+   0.387592487s DEBUG network: http-debug: < content-length: 52734
+   0.387593706s DEBUG network: http-debug: <
+   0.388007148s TRACE cargo::sources::registry::http_remote: index file version: etag: "2f227433c3a80beec62d23c34bbed0ae"
+   0.389808247s TRACE cargo::sources::registry::http_remote: index file version: etag: "0f5848725eb0fd28678f4a7c5c93c833"
+   0.393727248s DEBUG network: http-debug: < HTTP/2 200
+   0.393765450s DEBUG network: http-debug: < x-amz-request-id: QB5QSCK0SNJKQPRQ
+   0.393775986s DEBUG network: http-debug: < x-amz-id-2: /Un1XYbJjoA9Suj81rhIJS+f2c+vFOtiYf9vvMMB6JYxD29DJLdoeYXyxdP3kVikNKazFoUJpXfDJUGe8SnWW/esFeXcl0gk
+   0.393781353s DEBUG network: http-debug: < server: AmazonS3
+   0.393784892s DEBUG network: http-debug: < last-modified: Wed, 16 Sep 2026 17:36:12 GMT
+   0.393787713s DEBUG network: http-debug: < etag: "6080fbc76b90d35eeb6603653b6330ef"
+   0.393790495s DEBUG network: http-debug: < x-amz-version-id: KVGpKD_W8wI3wxp5RgAJqR94Biv9ihK0
+   0.393793071s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.393811468s DEBUG network: http-debug: < content-type: text/plain
+   0.393827936s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.393831467s DEBUG network: http-debug: < accept-ranges: bytes
+   0.393834168s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.393852682s DEBUG network: http-debug: < via: 1.1 varnish
+   0.393859224s DEBUG network: http-debug: < age: 380
+   0.393862602s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.393865402s DEBUG network: http-debug: < x-cache: HIT
+   0.393867340s DEBUG network: http-debug: < x-cache-hits: 40
+   0.393869425s DEBUG network: http-debug: < x-timer: S1792104055.042017,VS0,VE0
+   0.393871948s DEBUG network: http-debug: < content-length: 4972
+   0.393874247s DEBUG network: http-debug: <
+   0.393955402s DEBUG network: http-debug: < HTTP/2 200
+   0.393958822s DEBUG network: http-debug: < x-amz-request-id: 22HZN3EMQXH1NRBN
+   0.393963269s DEBUG network: http-debug: < x-amz-id-2: 67lR2kTGXzxZIFtk2moIMfnAslt+cv7np4Rki5Uzx52NITRM/BEsA9pVTg9W4yZuT5eKk4K/N5aAiPRmWVU2ZEjFucrjxw5s
+   0.393966037s DEBUG network: http-debug: < server: AmazonS3
+   0.393968689s DEBUG network: http-debug: < last-modified: Sun, 20 Sep 2026 06:37:49 GMT
+   0.393970896s DEBUG network: http-debug: < etag: "f12bcf6fce4ace0ac02dfd98b585bdea"
+   0.393973186s DEBUG network: http-debug: < x-amz-version-id: 9cpTCkxp5HJKFgRImsHDbFSieTwWDI5q
+   0.393975248s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.393978309s DEBUG network: http-debug: < content-type: text/plain
+   0.393980076s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.393981741s DEBUG network: http-debug: < accept-ranges: bytes
+   0.393983604s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.394000160s DEBUG network: http-debug: < via: 1.1 varnish
+   0.394003974s DEBUG network: http-debug: < age: 171
+   0.394007476s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.394010660s DEBUG network: http-debug: < x-cache: HIT
+   0.394013917s DEBUG network: http-debug: < x-cache-hits: 11
+   0.394016363s DEBUG network: http-debug: < x-timer: S1792104055.042110,VS0,VE0
+   0.394018619s DEBUG network: http-debug: < content-length: 122340
+   0.394020799s DEBUG network: http-debug: <
+   0.394029493s DEBUG network: http-debug: < HTTP/2 200
+   0.394032438s DEBUG network: http-debug: < x-amz-request-id: Z1EJ9CEFHRWWC2RT
+   0.394035541s DEBUG network: http-debug: < x-amz-id-2: v0mq5pN9LbmkB9j1lnVVQ+xCOY33jPzMDXC5M5QUUaXb27hRop/7MavMxwRd+145uCPOvctcGb0=
+   0.394038103s DEBUG network: http-debug: < server: AmazonS3
+   0.394040270s DEBUG network: http-debug: < last-modified: Tue, 09 Jun 2026 15:00:27 GMT
+   0.394042113s DEBUG network: http-debug: < etag: "8b7adbc00054bd7d5d101f43335b85ba"
+   0.394044139s DEBUG network: http-debug: < x-amz-version-id: .DkeLvan.Gd7vOhUIBoISiSxZb.ofQLI
+   0.394046177s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.394048859s DEBUG network: http-debug: < content-type: text/plain
+   0.394052693s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.394054444s DEBUG network: http-debug: < accept-ranges: bytes
+   0.394055760s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.394057083s DEBUG network: http-debug: < via: 1.1 varnish
+   0.394058473s DEBUG network: http-debug: < age: 53
+   0.394060380s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.394062343s DEBUG network: http-debug: < x-cache: HIT
+   0.394064031s DEBUG network: http-debug: < x-cache-hits: 6
+   0.394066029s DEBUG network: http-debug: < x-timer: S1792104055.042142,VS0,VE0
+   0.394067926s DEBUG network: http-debug: < content-length: 35586
+   0.394069535s DEBUG network: http-debug: <
+   0.394071701s DEBUG network: http-debug: < HTTP/2 200
+   0.394073600s DEBUG network: http-debug: < x-amz-request-id: MKJPZ19829XJTSTX
+   0.394076551s DEBUG network: http-debug: < x-amz-id-2: YmhCoDTQw1oWlBcoLZsRRfGcV+Fxk1uNlTs8IgofkK4McT69e1nbRw4tVLu67nNO4iC82p02GzyMsE8S5tmtmzgRNsf2yJx/
+   0.394080088s DEBUG network: http-debug: < server: AmazonS3
+   0.394081869s DEBUG network: http-debug: < last-modified: Sun, 01 Feb 2026 13:10:05 GMT
+   0.394083543s DEBUG network: http-debug: < etag: "c9b0648e8743cad8a240b4efedfd7972"
+   0.394085331s DEBUG network: http-debug: < x-amz-version-id: MhslD28TqNj5VJ5WjWaJGblIPl8U9HoV
+   0.394087375s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.394089399s DEBUG network: http-debug: < content-type: text/plain
+   0.394091384s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.394093123s DEBUG network: http-debug: < accept-ranges: bytes
+   0.394111048s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.394128321s DEBUG network: http-debug: < via: 1.1 varnish
+   0.394131808s DEBUG network: http-debug: < age: 168
+   0.394135131s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.394137457s DEBUG network: http-debug: < x-cache: HIT
+   0.394139366s DEBUG network: http-debug: < x-cache-hits: 2
+   0.394141557s DEBUG network: http-debug: < x-timer: S1792104055.042202,VS0,VE0
+   0.394143463s DEBUG network: http-debug: < content-length: 1500
+   0.394144907s DEBUG network: http-debug: <
+   0.394570886s TRACE cargo::sources::registry::http_remote: index file version: etag: "6080fbc76b90d35eeb6603653b6330ef"
+   0.395085861s TRACE cargo::sources::registry::http_remote: index file version: etag: "ee51eaf789a1e18da9bd391070985d7d"
+   0.396241136s TRACE cargo::sources::registry::http_remote: index file version: etag: "5d7338c52a177a6f8ac9f9f06ee6ee3f"
+   0.397025607s TRACE cargo::sources::registry::http_remote: index file version: etag: "c9b0648e8743cad8a240b4efedfd7972"
+   0.436593001s TRACE cargo::sources::registry::http_remote: index file version: etag: "8b7adbc00054bd7d5d101f43335b85ba"
+   0.436614662s DEBUG network: http-debug: < HTTP/2 200
+   0.436628966s DEBUG network: http-debug: < x-amz-request-id: MKJKGBVKW2ZTEP16
+   0.436637595s DEBUG network: http-debug: < x-amz-id-2: ANrzAAlezwle4eOM8cGlyX0QrQHjlpdQusBsTRSC9CNtp7xwhKioOU6bJj1E0xGCa95mV73LnpcN3R3twYzzrMG9E+JOmkx7
+   0.436641842s DEBUG network: http-debug: < server: AmazonS3
+   0.436646094s DEBUG network: http-debug: < last-modified: Mon, 02 Feb 2026 08:15:38 GMT
+   0.436650657s DEBUG network: http-debug: < etag: "86c7310df7a90d8826728ab86856692a"
+   0.436655691s DEBUG network: http-debug: < x-amz-version-id: J79xZMRpagkXrbRa3jF5PX1jikg4Ec.P
+   0.436658988s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.436670157s DEBUG network: http-debug: < content-type: text/plain
+   0.436675733s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.436678658s DEBUG network: http-debug: < accept-ranges: bytes
+   0.436681705s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.436684136s DEBUG network: http-debug: < via: 1.1 varnish
+   0.436686777s DEBUG network: http-debug: < age: 142
+   0.436689728s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.436692223s DEBUG network: http-debug: < x-cache: HIT
+   0.436694944s DEBUG network: http-debug: < x-cache-hits: 1
+   0.436698111s DEBUG network: http-debug: < x-timer: S1792104055.042139,VS0,VE1
+   0.436701382s DEBUG network: http-debug: < content-length: 5049
+   0.436704278s DEBUG network: http-debug: <
+   0.436749567s DEBUG network: http-debug: * Connection #0 to host index.crates.io:443 left intact
+   0.437627255s TRACE cargo::sources::registry::http_remote: index file version: etag: "f12bcf6fce4ace0ac02dfd98b585bdea"
+   0.439725439s TRACE cargo::sources::registry::http_remote: index file version: etag: "86c7310df7a90d8826728ab86856692a"
+   0.439858837s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.439867036s TRACE cargo::sources::registry::http_remote: load: bl/oc/block-buffer
+   0.439883988s DEBUG network::fetch: url="https://index.crates.io/bl/oc/block-buffer"
+   0.439894773s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.439915242s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.439916164s TRACE cargo::sources::registry::http_remote: load: cr/yp/crypto-common
+   0.439917762s DEBUG network::fetch: url="https://index.crates.io/cr/yp/crypto-common"
+   0.439919988s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.439944403s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.439945330s TRACE cargo::sources::registry::http_remote: load: ra/nd/rand_core
+   0.439947014s DEBUG network::fetch: url="https://index.crates.io/ra/nd/rand_core"
+   0.439948721s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.439983295s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.439985085s TRACE cargo::sources::registry::http_remote: load: pr/oc/proc-macro2
+   0.439987017s DEBUG network::fetch: url="https://index.crates.io/pr/oc/proc-macro2"
+   0.439989598s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.440022271s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.440024106s TRACE cargo::sources::registry::http_remote: load: qu/ot/quote
+   0.440026099s DEBUG network::fetch: url="https://index.crates.io/qu/ot/quote"
+   0.440028804s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.440041143s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.440042553s TRACE cargo::sources::registry::http_remote: load: 3/s/syn
+   0.440043724s DEBUG network::fetch: url="https://index.crates.io/3/s/syn"
+   0.440045323s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.440059938s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.440060786s TRACE cargo::sources::registry::http_remote: load: li/bc/libc
+   0.440062817s DEBUG network::fetch: url="https://index.crates.io/li/bc/libc"
+   0.440065021s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.440083979s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.440084782s TRACE cargo::sources::registry::http_remote: load: ge/tr/getrandom
+   0.440085853s DEBUG network::fetch: url="https://index.crates.io/ge/tr/getrandom"
+   0.440088281s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.440136157s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.440138340s TRACE cargo::sources::registry::http_remote: load: au/to/autocfg
+   0.440141198s DEBUG network::fetch: url="https://index.crates.io/au/to/autocfg"
+   0.440145867s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.440231829s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440252709s DEBUG network: http-debug: * [HTTP/2] [43] OPENED stream for https://index.crates.io/bl/oc/block-buffer
+   0.440258908s DEBUG network: http-debug: * [HTTP/2] [43] [:method: GET]
+   0.440260460s DEBUG network: http-debug: * [HTTP/2] [43] [:scheme: https]
+   0.440261834s DEBUG network: http-debug: * [HTTP/2] [43] [:authority: index.crates.io]
+   0.440263099s DEBUG network: http-debug: * [HTTP/2] [43] [:path: /bl/oc/block-buffer]
+   0.440264438s DEBUG network: http-debug: * [HTTP/2] [43] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440265862s DEBUG network: http-debug: * [HTTP/2] [43] [accept-encoding: deflate, gzip]
+   0.440267099s DEBUG network: http-debug: * [HTTP/2] [43] [cargo-protocol: version=1]
+   0.440268182s DEBUG network: http-debug: * [HTTP/2] [43] [accept: text/plain]
+   0.440308490s DEBUG network: http-debug: > GET /bl/oc/block-buffer HTTP/2
+   0.440312230s DEBUG network: http-debug: > Host: index.crates.io
+   0.440313287s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440314313s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440315348s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440316349s DEBUG network: http-debug: > accept: text/plain
+   0.440317339s DEBUG network: http-debug: >
+   0.440319046s DEBUG network: http-debug: * Request completely sent off
+   0.440345072s DEBUG network: http-debug: * Multiplexed connection found
+   0.440347224s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440358018s DEBUG network: http-debug: * [HTTP/2] [45] OPENED stream for https://index.crates.io/cr/yp/crypto-common
+   0.440359586s DEBUG network: http-debug: * [HTTP/2] [45] [:method: GET]
+   0.440360867s DEBUG network: http-debug: * [HTTP/2] [45] [:scheme: https]
+   0.440362091s DEBUG network: http-debug: * [HTTP/2] [45] [:authority: index.crates.io]
+   0.440363380s DEBUG network: http-debug: * [HTTP/2] [45] [:path: /cr/yp/crypto-common]
+   0.440364703s DEBUG network: http-debug: * [HTTP/2] [45] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440366148s DEBUG network: http-debug: * [HTTP/2] [45] [accept-encoding: deflate, gzip]
+   0.440367347s DEBUG network: http-debug: * [HTTP/2] [45] [cargo-protocol: version=1]
+   0.440368484s DEBUG network: http-debug: * [HTTP/2] [45] [accept: text/plain]
+   0.440375423s DEBUG network: http-debug: > GET /cr/yp/crypto-common HTTP/2
+   0.440376608s DEBUG network: http-debug: > Host: index.crates.io
+   0.440377545s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440378563s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440379498s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440380461s DEBUG network: http-debug: > accept: text/plain
+   0.440381336s DEBUG network: http-debug: >
+   0.440382400s DEBUG network: http-debug: * Request completely sent off
+   0.440397105s DEBUG network: http-debug: * Multiplexed connection found
+   0.440398704s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440406153s DEBUG network: http-debug: * [HTTP/2] [47] OPENED stream for https://index.crates.io/ra/nd/rand_core
+   0.440407622s DEBUG network: http-debug: * [HTTP/2] [47] [:method: GET]
+   0.440408936s DEBUG network: http-debug: * [HTTP/2] [47] [:scheme: https]
+   0.440410130s DEBUG network: http-debug: * [HTTP/2] [47] [:authority: index.crates.io]
+   0.440411441s DEBUG network: http-debug: * [HTTP/2] [47] [:path: /ra/nd/rand_core]
+   0.440412777s DEBUG network: http-debug: * [HTTP/2] [47] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440414085s DEBUG network: http-debug: * [HTTP/2] [47] [accept-encoding: deflate, gzip]
+   0.440415294s DEBUG network: http-debug: * [HTTP/2] [47] [cargo-protocol: version=1]
+   0.440416401s DEBUG network: http-debug: * [HTTP/2] [47] [accept: text/plain]
+   0.440423110s DEBUG network: http-debug: > GET /ra/nd/rand_core HTTP/2
+   0.440424384s DEBUG network: http-debug: > Host: index.crates.io
+   0.440425446s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440426522s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440427480s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440428492s DEBUG network: http-debug: > accept: text/plain
+   0.440429326s DEBUG network: http-debug: >
+   0.440430334s DEBUG network: http-debug: * Request completely sent off
+   0.440442556s DEBUG network: http-debug: * Multiplexed connection found
+   0.440444195s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440450894s DEBUG network: http-debug: * [HTTP/2] [49] OPENED stream for https://index.crates.io/pr/oc/proc-macro2
+   0.440452322s DEBUG network: http-debug: * [HTTP/2] [49] [:method: GET]
+   0.440453450s DEBUG network: http-debug: * [HTTP/2] [49] [:scheme: https]
+   0.440456482s DEBUG network: http-debug: * [HTTP/2] [49] [:authority: index.crates.io]
+   0.440457859s DEBUG network: http-debug: * [HTTP/2] [49] [:path: /pr/oc/proc-macro2]
+   0.440459159s DEBUG network: http-debug: * [HTTP/2] [49] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440460549s DEBUG network: http-debug: * [HTTP/2] [49] [accept-encoding: deflate, gzip]
+   0.440461735s DEBUG network: http-debug: * [HTTP/2] [49] [cargo-protocol: version=1]
+   0.440462919s DEBUG network: http-debug: * [HTTP/2] [49] [accept: text/plain]
+   0.440468801s DEBUG network: http-debug: > GET /pr/oc/proc-macro2 HTTP/2
+   0.440470005s DEBUG network: http-debug: > Host: index.crates.io
+   0.440471111s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440472281s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440473243s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440474184s DEBUG network: http-debug: > accept: text/plain
+   0.440475054s DEBUG network: http-debug: >
+   0.440476086s DEBUG network: http-debug: * Request completely sent off
+   0.440488035s DEBUG network: http-debug: * Multiplexed connection found
+   0.440489576s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440496602s DEBUG network: http-debug: * [HTTP/2] [51] OPENED stream for https://index.crates.io/qu/ot/quote
+   0.440498052s DEBUG network: http-debug: * [HTTP/2] [51] [:method: GET]
+   0.440499307s DEBUG network: http-debug: * [HTTP/2] [51] [:scheme: https]
+   0.440500514s DEBUG network: http-debug: * [HTTP/2] [51] [:authority: index.crates.io]
+   0.440501714s DEBUG network: http-debug: * [HTTP/2] [51] [:path: /qu/ot/quote]
+   0.440502968s DEBUG network: http-debug: * [HTTP/2] [51] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440504340s DEBUG network: http-debug: * [HTTP/2] [51] [accept-encoding: deflate, gzip]
+   0.440505541s DEBUG network: http-debug: * [HTTP/2] [51] [cargo-protocol: version=1]
+   0.440506785s DEBUG network: http-debug: * [HTTP/2] [51] [accept: text/plain]
+   0.440512311s DEBUG network: http-debug: > GET /qu/ot/quote HTTP/2
+   0.440513493s DEBUG network: http-debug: > Host: index.crates.io
+   0.440514483s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440515575s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440516583s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440517591s DEBUG network: http-debug: > accept: text/plain
+   0.440518473s DEBUG network: http-debug: >
+   0.440519445s DEBUG network: http-debug: * Request completely sent off
+   0.440530432s DEBUG network: http-debug: * Multiplexed connection found
+   0.440531894s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440538308s DEBUG network: http-debug: * [HTTP/2] [53] OPENED stream for https://index.crates.io/3/s/syn
+   0.440539631s DEBUG network: http-debug: * [HTTP/2] [53] [:method: GET]
+   0.440540812s DEBUG network: http-debug: * [HTTP/2] [53] [:scheme: https]
+   0.440542044s DEBUG network: http-debug: * [HTTP/2] [53] [:authority: index.crates.io]
+   0.440543293s DEBUG network: http-debug: * [HTTP/2] [53] [:path: /3/s/syn]
+   0.440544528s DEBUG network: http-debug: * [HTTP/2] [53] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440545847s DEBUG network: http-debug: * [HTTP/2] [53] [accept-encoding: deflate, gzip]
+   0.440547109s DEBUG network: http-debug: * [HTTP/2] [53] [cargo-protocol: version=1]
+   0.440548288s DEBUG network: http-debug: * [HTTP/2] [53] [accept: text/plain]
+   0.440553730s DEBUG network: http-debug: > GET /3/s/syn HTTP/2
+   0.440554999s DEBUG network: http-debug: > Host: index.crates.io
+   0.440555998s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440557019s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440557961s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440558991s DEBUG network: http-debug: > accept: text/plain
+   0.440560902s DEBUG network: http-debug: >
+   0.440561963s DEBUG network: http-debug: * Request completely sent off
+   0.440573082s DEBUG network: http-debug: * Multiplexed connection found
+   0.440574644s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440581017s DEBUG network: http-debug: * [HTTP/2] [55] OPENED stream for https://index.crates.io/li/bc/libc
+   0.440582536s DEBUG network: http-debug: * [HTTP/2] [55] [:method: GET]
+   0.440583722s DEBUG network: http-debug: * [HTTP/2] [55] [:scheme: https]
+   0.440584956s DEBUG network: http-debug: * [HTTP/2] [55] [:authority: index.crates.io]
+   0.440586175s DEBUG network: http-debug: * [HTTP/2] [55] [:path: /li/bc/libc]
+   0.440587394s DEBUG network: http-debug: * [HTTP/2] [55] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440588730s DEBUG network: http-debug: * [HTTP/2] [55] [accept-encoding: deflate, gzip]
+   0.440589921s DEBUG network: http-debug: * [HTTP/2] [55] [cargo-protocol: version=1]
+   0.440591073s DEBUG network: http-debug: * [HTTP/2] [55] [accept: text/plain]
+   0.440596983s DEBUG network: http-debug: > GET /li/bc/libc HTTP/2
+   0.440598190s DEBUG network: http-debug: > Host: index.crates.io
+   0.440599254s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440600288s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440601245s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440602182s DEBUG network: http-debug: > accept: text/plain
+   0.440603046s DEBUG network: http-debug: >
+   0.440604071s DEBUG network: http-debug: * Request completely sent off
+   0.440615321s DEBUG network: http-debug: * Multiplexed connection found
+   0.440616794s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440622560s DEBUG network: http-debug: * [HTTP/2] [57] OPENED stream for https://index.crates.io/ge/tr/getrandom
+   0.440624036s DEBUG network: http-debug: * [HTTP/2] [57] [:method: GET]
+   0.440625280s DEBUG network: http-debug: * [HTTP/2] [57] [:scheme: https]
+   0.440626464s DEBUG network: http-debug: * [HTTP/2] [57] [:authority: index.crates.io]
+   0.440627713s DEBUG network: http-debug: * [HTTP/2] [57] [:path: /ge/tr/getrandom]
+   0.440628997s DEBUG network: http-debug: * [HTTP/2] [57] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440630316s DEBUG network: http-debug: * [HTTP/2] [57] [accept-encoding: deflate, gzip]
+   0.440631509s DEBUG network: http-debug: * [HTTP/2] [57] [cargo-protocol: version=1]
+   0.440632732s DEBUG network: http-debug: * [HTTP/2] [57] [accept: text/plain]
+   0.440638172s DEBUG network: http-debug: > GET /ge/tr/getrandom HTTP/2
+   0.440639358s DEBUG network: http-debug: > Host: index.crates.io
+   0.440640353s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440641395s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440642317s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440643214s DEBUG network: http-debug: > accept: text/plain
+   0.440644053s DEBUG network: http-debug: >
+   0.440645093s DEBUG network: http-debug: * Request completely sent off
+   0.440656901s DEBUG network: http-debug: * Multiplexed connection found
+   0.440658533s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.440664891s DEBUG network: http-debug: * [HTTP/2] [59] OPENED stream for https://index.crates.io/au/to/autocfg
+   0.440666322s DEBUG network: http-debug: * [HTTP/2] [59] [:method: GET]
+   0.440667589s DEBUG network: http-debug: * [HTTP/2] [59] [:scheme: https]
+   0.440668737s DEBUG network: http-debug: * [HTTP/2] [59] [:authority: index.crates.io]
+   0.440669954s DEBUG network: http-debug: * [HTTP/2] [59] [:path: /au/to/autocfg]
+   0.440671251s DEBUG network: http-debug: * [HTTP/2] [59] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.440672564s DEBUG network: http-debug: * [HTTP/2] [59] [accept-encoding: deflate, gzip]
+   0.440673969s DEBUG network: http-debug: * [HTTP/2] [59] [cargo-protocol: version=1]
+   0.440675799s DEBUG network: http-debug: * [HTTP/2] [59] [accept: text/plain]
+   0.440680030s DEBUG network: http-debug: > GET /au/to/autocfg HTTP/2
+   0.440681228s DEBUG network: http-debug: > Host: index.crates.io
+   0.440682175s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.440683272s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.440684200s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.440685176s DEBUG network: http-debug: > accept: text/plain
+   0.440686113s DEBUG network: http-debug: >
+   0.440687110s DEBUG network: http-debug: * Request completely sent off
+   0.462732126s DEBUG network: http-debug: < HTTP/2 200
+   0.462758977s DEBUG network: http-debug: < x-amz-request-id: YGFAG9KX1KFGWWPX
+   0.462768346s DEBUG network: http-debug: < x-amz-id-2: YkJFXloSXvDk8GjKeRt21nnkZiUvvBnadfGn0KU7W12d0buxtC7Eo1wfK/R7IWTtyaqbM5W1ljY4H6P8Z5tmtDX9jNpBN/um
+   0.462772799s DEBUG network: http-debug: < server: AmazonS3
+   0.462777769s DEBUG network: http-debug: < last-modified: Mon, 12 Oct 2026 15:04:11 GMT
+   0.462781110s DEBUG network: http-debug: < etag: "3cbc980b5ba8cfe72334def1395cf491"
+   0.462784242s DEBUG network: http-debug: < x-amz-version-id: SNqj9C6DB6oqob42zJ4iUJoLs5IFfn0d
+   0.462787099s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.462793946s DEBUG network: http-debug: < content-type: text/plain
+   0.462796431s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.462798903s DEBUG network: http-debug: < accept-ranges: bytes
+   0.462801278s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.462803537s DEBUG network: http-debug: < via: 1.1 varnish
+   0.462806038s DEBUG network: http-debug: < age: 334
+   0.462808895s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.462811675s DEBUG network: http-debug: < x-cache: HIT
+   0.462814102s DEBUG network: http-debug: < x-cache-hits: 30
+   0.462817747s DEBUG network: http-debug: < x-timer: S1792104055.134951,VS0,VE0
+   0.462821087s DEBUG network: http-debug: < content-length: 657596
+   0.462824453s DEBUG network: http-debug: <
+   0.462828576s DEBUG network: http-debug: < HTTP/2 200
+   0.462834063s DEBUG network: http-debug: < x-amz-request-id: QB5GF7E7F0BH45MA
+   0.462838064s DEBUG network: http-debug: < x-amz-id-2: RI3es+/z/BBwDvrO4D+QHfkRyOXQW8aFa/Zzjy0aHQ/VMt2SZCaSLcXCoRNXMjJQxoLGgIC3qa+Aavpp5gkVdwzS4OP7rsQq
+   0.462841136s DEBUG network: http-debug: < server: AmazonS3
+   0.462846635s DEBUG network: http-debug: < last-modified: Fri, 02 Oct 2026 19:33:22 GMT
+   0.462849483s DEBUG network: http-debug: < etag: "8a084de2dfdf018686ccea8cd0379f60"
+   0.462852760s DEBUG network: http-debug: < x-amz-version-id: GCqe_8vvfzfHW5N1Cx1e0zdqTUUFJPTx
+   0.462855965s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.462859729s DEBUG network: http-debug: < content-type: text/plain
+   0.462865109s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.462867569s DEBUG network: http-debug: < accept-ranges: bytes
+   0.462869773s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.462872364s DEBUG network: http-debug: < via: 1.1 varnish
+   0.462874692s DEBUG network: http-debug: < age: 381
+   0.462877883s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.462880728s DEBUG network: http-debug: < x-cache: HIT
+   0.462883087s DEBUG network: http-debug: < x-cache-hits: 39
+   0.462885789s DEBUG network: http-debug: < x-timer: S1792104055.134947,VS0,VE0
+   0.462888539s DEBUG network: http-debug: < content-length: 81903
+   0.462890926s DEBUG network: http-debug: <
+   0.462893344s DEBUG network: http-debug: < HTTP/2 200
+   0.462895238s DEBUG network: http-debug: < x-amz-request-id: NSTFRE5T62ME3W9H
+   0.462898910s DEBUG network: http-debug: < x-amz-id-2: o35bkSmbhtlQVPlxUr+e9ua2VdWYlG2IiskJdEU1im4YgOv/5zflNiN79TMuX2J800RlUqWDN/5Nanzl7Cfhspm4ZxrVZEwa
+   0.462901795s DEBUG network: http-debug: < server: AmazonS3
+   0.462904486s DEBUG network: http-debug: < last-modified: Wed, 17 Jun 2026 18:02:07 GMT
+   0.462907331s DEBUG network: http-debug: < etag: "6359f7be20d9b7eb51d2083fe3fb6e24"
+   0.462909925s DEBUG network: http-debug: < x-amz-version-id: mq2cFwW0BhrXIDrz8XPzunLhty2BUQRV
+   0.462912668s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.462916498s DEBUG network: http-debug: < content-type: text/plain
+   0.462919053s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.462921170s DEBUG network: http-debug: < accept-ranges: bytes
+   0.462923769s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.462926020s DEBUG network: http-debug: < via: 1.1 varnish
+   0.462928567s DEBUG network: http-debug: < age: 153
+   0.462931005s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.462933400s DEBUG network: http-debug: < x-cache: HIT
+   0.462935955s DEBUG network: http-debug: < x-cache-hits: 11
+   0.462938975s DEBUG network: http-debug: < x-timer: S1792104055.134927,VS0,VE0
+   0.462941354s DEBUG network: http-debug: < content-length: 91650
+   0.462943930s DEBUG network: http-debug: <
+   0.463490775s DEBUG network: http-debug: < HTTP/2 200
+   0.463496877s DEBUG network: http-debug: < x-amz-request-id: A0S11YJHHZW6J6VS
+   0.463502989s DEBUG network: http-debug: < x-amz-id-2: /1LxRWswlJ+C1bnxjNGPk2hDwrcZElDvZQMUY9YoymZRjtJ6Toe107WJr7f5N0jGlT6YGFmVOxehx94C50SXAAaBbXlbjDi/
+   0.463528095s DEBUG network: http-debug: < server: AmazonS3
+   0.463534664s DEBUG network: http-debug: < last-modified: Tue, 19 May 2026 16:01:24 GMT
+   0.463538557s DEBUG network: http-debug: < etag: "1095fc085a08af8f69ee3d9d725aa3d1"
+   0.463542165s DEBUG network: http-debug: < x-amz-version-id: YImfS7pzEbTDZqPIxPrwgxm2blazGMsd
+   0.463545732s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.463549338s DEBUG network: http-debug: < content-type: text/plain
+   0.463551982s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.463554243s DEBUG network: http-debug: < accept-ranges: bytes
+   0.463556376s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.463559415s DEBUG network: http-debug: < via: 1.1 varnish
+   0.463561573s DEBUG network: http-debug: < age: 250
+   0.463564365s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.463567277s DEBUG network: http-debug: < x-cache: HIT
+   0.463570187s DEBUG network: http-debug: < x-cache-hits: 26
+   0.463573190s DEBUG network: http-debug: < x-timer: S1792104055.135418,VS0,VE0
+   0.463575538s DEBUG network: http-debug: < content-length: 22242
+   0.463577729s DEBUG network: http-debug: <
+   0.463581202s DEBUG network: http-debug: < HTTP/2 200
+   0.463584291s DEBUG network: http-debug: < x-amz-request-id: QB5G8YDQ2H6MWDJX
+   0.463588412s DEBUG network: http-debug: < x-amz-id-2: mR6/lYifD5quMV1lT2Qn9RRPLDQhwXsdJBFObegn44Qxbo/+LKzvcIiObxY+Fteg64cE7dfzdBTMY7LvXg0+o8efs/S35Li7
+   0.463611653s DEBUG network: http-debug: < server: AmazonS3
+   0.463618169s DEBUG network: http-debug: < last-modified: Sun, 19 Jul 2026 00:18:27 GMT
+   0.463622946s DEBUG network: http-debug: < etag: "ababb59157c6e9a714a9b1cb302e842e"
+   0.463627126s DEBUG network: http-debug: < x-amz-version-id: lU8EU.nDcKgUU.rd4L095q5463xqeXnj
+   0.463630550s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.463634257s DEBUG network: http-debug: < content-type: text/plain
+   0.463637213s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.463640488s DEBUG network: http-debug: < accept-ranges: bytes
+   0.463642566s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.463644996s DEBUG network: http-debug: < via: 1.1 varnish
+   0.463647256s DEBUG network: http-debug: < age: 395
+   0.463650161s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.463653065s DEBUG network: http-debug: < x-cache: HIT
+   0.463655692s DEBUG network: http-debug: < x-cache-hits: 36
+   0.463658511s DEBUG network: http-debug: < x-timer: S1792104055.135383,VS0,VE0
+   0.463661226s DEBUG network: http-debug: < content-length: 92618
+   0.463663573s DEBUG network: http-debug: <
+   0.463700705s DEBUG network: http-debug: < HTTP/2 200
+   0.463723168s DEBUG network: http-debug: < x-amz-request-id: 1BKMJKCQKHDH5BMP
+   0.463729524s DEBUG network: http-debug: < x-amz-id-2: TTYyZVrqMWGF3jqxpqhjiw05+njQhxdYD5kinylhKDD7B+vwHsFkHA9XXuTB5uYKWLjykWkLlLmDXOufahOSeESFzH3/qloA
+   0.463731706s DEBUG network: http-debug: < server: AmazonS3
+   0.463734165s DEBUG network: http-debug: < last-modified: Sun, 19 Jul 2026 00:16:58 GMT
+   0.463736167s DEBUG network: http-debug: < etag: "7296b7c948e281168b0eae7465fe3918"
+   0.463737843s DEBUG network: http-debug: < x-amz-version-id: Xhc1T2rIPnm_1s7PSDbhBwQPysuUhnvL
+   0.463739518s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.463741969s DEBUG network: http-debug: < content-type: text/plain
+   0.463743507s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.463745083s DEBUG network: http-debug: < accept-ranges: bytes
+   0.463746672s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.463747991s DEBUG network: http-debug: < via: 1.1 varnish
+   0.463749262s DEBUG network: http-debug: < age: 195
+   0.463750851s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.463752636s DEBUG network: http-debug: < x-cache: HIT
+   0.463754246s DEBUG network: http-debug: < x-cache-hits: 17
+   0.463755741s DEBUG network: http-debug: < x-timer: S1792104055.135145,VS0,VE0
+   0.463757374s DEBUG network: http-debug: < content-length: 42026
+   0.463758961s DEBUG network: http-debug: <
+   0.463761615s DEBUG network: http-debug: < HTTP/2 200
+   0.463763307s DEBUG network: http-debug: < x-amz-request-id: 53CAEJGADJ5NZM8B
+   0.463765471s DEBUG network: http-debug: < x-amz-id-2: fYGw9dYgR3bMnxjeQ+5sEpEceQdmOPnhW9B7GSXpZZcPL5LXXfQLeT60J54k4oMAYCQZt5jr+rSd15OTkrE3/U7ATAhVF/n3
+   0.463767332s DEBUG network: http-debug: < server: AmazonS3
+   0.463768760s DEBUG network: http-debug: < last-modified: Wed, 02 Sep 2026 08:19:22 GMT
+   0.463770195s DEBUG network: http-debug: < etag: "b3feb34194f8cde889d0d7abcb5b2806"
+   0.463771682s DEBUG network: http-debug: < x-amz-version-id: Ywy.G_yawNbYeykY9RVE4vr7WKBHzlDE
+   0.463772936s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.463774566s DEBUG network: http-debug: < content-type: text/plain
+   0.463775756s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.463777011s DEBUG network: http-debug: < accept-ranges: bytes
+   0.463777993s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.463779016s DEBUG network: http-debug: < via: 1.1 varnish
+   0.463780049s DEBUG network: http-debug: < age: 450
+   0.463781388s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.463782780s DEBUG network: http-debug: < x-cache: HIT
+   0.463783811s DEBUG network: http-debug: < x-cache-hits: 36
+   0.463785130s DEBUG network: http-debug: < x-timer: S1792104055.135102,VS0,VE0
+   0.463786342s DEBUG network: http-debug: < content-length: 19293
+   0.463787368s DEBUG network: http-debug: <
+   0.468638542s DEBUG network: http-debug: < HTTP/2 200
+   0.468654721s DEBUG network: http-debug: < x-amz-request-id: A0S6Z54AHNA6EPVF
+   0.468661054s DEBUG network: http-debug: < x-amz-id-2: NEUfFODG8xnC3MnFs9aDLlKKLDjLTNbtH/PfYvuYZTiDTnLCvndeiqv/qWhQx9oNcs9GsoujDOJlOiUln3xcUXpmQlo9NdUD
+   0.468663679s DEBUG network: http-debug: < server: AmazonS3
+   0.468666990s DEBUG network: http-debug: < last-modified: Fri, 22 May 2026 11:03:06 GMT
+   0.468669714s DEBUG network: http-debug: < etag: "969de01c8e79621ba01d87545090fc22"
+   0.468671390s DEBUG network: http-debug: < x-amz-version-id: oFDDyYQvI6RRYLKPdYQquWhk_920RWby
+   0.468673423s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.468676453s DEBUG network: http-debug: < content-type: text/plain
+   0.468680082s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.468681585s DEBUG network: http-debug: < accept-ranges: bytes
+   0.468683088s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.468684645s DEBUG network: http-debug: < via: 1.1 varnish
+   0.468686311s DEBUG network: http-debug: < age: 259
+   0.468688212s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.468690278s DEBUG network: http-debug: < x-cache: HIT
+   0.468692289s DEBUG network: http-debug: < x-cache-hits: 27
+   0.468693995s DEBUG network: http-debug: < x-timer: S1792104055.135548,VS0,VE0
+   0.468696269s DEBUG network: http-debug: < content-length: 3480
+   0.468697971s DEBUG network: http-debug: <
+   0.468700839s DEBUG network: http-debug: < HTTP/2 200
+   0.468702933s DEBUG network: http-debug: < x-amz-request-id: HVH5Z7S8YFV62VMV
+   0.468705263s DEBUG network: http-debug: < x-amz-id-2: EZSFuNguO4ay6cDfVX4yBUux7QcBrQA1vL9GIu41ChELus+Q7F/cTHWPUm2FG0h65qHHfrUmOxG6lFCMQ2qpmzuY35Lob8AQ
+   0.468707322s DEBUG network: http-debug: < server: AmazonS3
+   0.468709356s DEBUG network: http-debug: < last-modified: Thu, 11 Jun 2026 15:40:07 GMT
+   0.468711080s DEBUG network: http-debug: < etag: "0b68a59cad32dee87a150237c416e660"
+   0.468712891s DEBUG network: http-debug: < x-amz-version-id: 2kLCPyRp.OPENm2sOZilO14gIKqS47Y5
+   0.468714513s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.468716624s DEBUG network: http-debug: < content-type: text/plain
+   0.468718311s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.468721430s DEBUG network: http-debug: < accept-ranges: bytes
+   0.468722500s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.468723809s DEBUG network: http-debug: < via: 1.1 varnish
+   0.468725040s DEBUG network: http-debug: < age: 253
+   0.468726910s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.468728585s DEBUG network: http-debug: < x-cache: HIT
+   0.468730042s DEBUG network: http-debug: < x-cache-hits: 25
+   0.468732014s DEBUG network: http-debug: < x-timer: S1792104055.135513,VS0,VE0
+   0.468733399s DEBUG network: http-debug: < content-length: 20897
+   0.468734621s DEBUG network: http-debug: <
+   0.469021042s TRACE cargo::sources::registry::http_remote: index file version: etag: "969de01c8e79621ba01d87545090fc22"
+   0.471406908s TRACE cargo::sources::registry::http_remote: index file version: etag: "1095fc085a08af8f69ee3d9d725aa3d1"
+   0.473927505s TRACE cargo::sources::registry::http_remote: index file version: etag: "b3feb34194f8cde889d0d7abcb5b2806"
+   0.475420593s TRACE cargo::sources::registry::http_remote: index file version: etag: "7296b7c948e281168b0eae7465fe3918"
+   0.476473902s TRACE cargo::sources::registry::http_remote: index file version: etag: "0b68a59cad32dee87a150237c416e660"
+   0.476918112s TRACE cargo::sources::registry::http_remote: index file version: etag: "8a084de2dfdf018686ccea8cd0379f60"
+   0.478232539s TRACE cargo::sources::registry::http_remote: index file version: etag: "6359f7be20d9b7eb51d2083fe3fb6e24"
+   0.479571139s TRACE cargo::sources::registry::http_remote: index file version: etag: "ababb59157c6e9a714a9b1cb302e842e"
+   0.556411055s DEBUG network: http-debug: * Connection #0 to host index.crates.io:443 left intact
+   0.556553104s TRACE cargo::sources::registry::http_remote: index file version: etag: "3cbc980b5ba8cfe72334def1395cf491"
+   0.564154132s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.564164504s TRACE cargo::sources::registry::http_remote: load: ge/ne/generic-array
+   0.564172930s DEBUG network::fetch: url="https://index.crates.io/ge/ne/generic-array"
+   0.564184103s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.564276111s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.564308603s DEBUG network: http-debug: * [HTTP/2] [61] OPENED stream for https://index.crates.io/ge/ne/generic-array
+   0.564311740s DEBUG network: http-debug: * [HTTP/2] [61] [:method: GET]
+   0.564313530s DEBUG network: http-debug: * [HTTP/2] [61] [:scheme: https]
+   0.564315093s DEBUG network: http-debug: * [HTTP/2] [61] [:authority: index.crates.io]
+   0.564316662s DEBUG network: http-debug: * [HTTP/2] [61] [:path: /ge/ne/generic-array]
+   0.564318382s DEBUG network: http-debug: * [HTTP/2] [61] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.564319968s DEBUG network: http-debug: * [HTTP/2] [61] [accept-encoding: deflate, gzip]
+   0.564321580s DEBUG network: http-debug: * [HTTP/2] [61] [cargo-protocol: version=1]
+   0.564322982s DEBUG network: http-debug: * [HTTP/2] [61] [accept: text/plain]
+   0.564370292s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.564372282s DEBUG network: http-debug: > GET /ge/ne/generic-array HTTP/2
+   0.564374847s TRACE cargo::sources::registry::http_remote: load: r-/ef/r-efi
+   0.564375746s DEBUG network: http-debug: > Host: index.crates.io
+   0.564377117s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.564378200s DEBUG network::fetch: url="https://index.crates.io/r-/ef/r-efi"
+   0.564378268s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.564379940s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.564380963s DEBUG network: http-debug: > accept: text/plain
+   0.564381920s DEBUG network: http-debug: >
+   0.564383413s DEBUG network: http-debug: * Request completely sent off
+   0.564382445s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.564435180s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.564437279s TRACE cargo::sources::registry::http_remote: load: ty/pe/typenum
+   0.564439765s DEBUG network::fetch: url="https://index.crates.io/ty/pe/typenum"
+   0.564443887s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.564541898s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.564545771s TRACE cargo::sources::registry::http_remote: load: un/ic/unicode-ident
+   0.564547449s DEBUG network::fetch: url="https://index.crates.io/un/ic/unicode-ident"
+   0.564551600s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.566499845s DEBUG network: http-debug: * Multiplexed connection found
+   0.566509870s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.566523832s DEBUG network: http-debug: * [HTTP/2] [63] OPENED stream for https://index.crates.io/r-/ef/r-efi
+   0.566525959s DEBUG network: http-debug: * [HTTP/2] [63] [:method: GET]
+   0.566527487s DEBUG network: http-debug: * [HTTP/2] [63] [:scheme: https]
+   0.566528884s DEBUG network: http-debug: * [HTTP/2] [63] [:authority: index.crates.io]
+   0.566530089s DEBUG network: http-debug: * [HTTP/2] [63] [:path: /r-/ef/r-efi]
+   0.566531309s DEBUG network: http-debug: * [HTTP/2] [63] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.566532722s DEBUG network: http-debug: * [HTTP/2] [63] [accept-encoding: deflate, gzip]
+   0.566533902s DEBUG network: http-debug: * [HTTP/2] [63] [cargo-protocol: version=1]
+   0.566535821s DEBUG network: http-debug: * [HTTP/2] [63] [accept: text/plain]
+   0.566558172s DEBUG network: http-debug: > GET /r-/ef/r-efi HTTP/2
+   0.566561447s DEBUG network: http-debug: > Host: index.crates.io
+   0.566562373s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.566563437s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.566564283s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.566565105s DEBUG network: http-debug: > accept: text/plain
+   0.566565850s DEBUG network: http-debug: >
+   0.566567064s DEBUG network: http-debug: * Request completely sent off
+   0.566584705s DEBUG network: http-debug: * Multiplexed connection found
+   0.566588558s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.566597413s DEBUG network: http-debug: * [HTTP/2] [65] OPENED stream for https://index.crates.io/ty/pe/typenum
+   0.566598820s DEBUG network: http-debug: * [HTTP/2] [65] [:method: GET]
+   0.566599918s DEBUG network: http-debug: * [HTTP/2] [65] [:scheme: https]
+   0.566601013s DEBUG network: http-debug: * [HTTP/2] [65] [:authority: index.crates.io]
+   0.566602079s DEBUG network: http-debug: * [HTTP/2] [65] [:path: /ty/pe/typenum]
+   0.566603249s DEBUG network: http-debug: * [HTTP/2] [65] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.566604402s DEBUG network: http-debug: * [HTTP/2] [65] [accept-encoding: deflate, gzip]
+   0.566605745s DEBUG network: http-debug: * [HTTP/2] [65] [cargo-protocol: version=1]
+   0.566606768s DEBUG network: http-debug: * [HTTP/2] [65] [accept: text/plain]
+   0.566612693s DEBUG network: http-debug: > GET /ty/pe/typenum HTTP/2
+   0.566614256s DEBUG network: http-debug: > Host: index.crates.io
+   0.566615248s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.566616663s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.566617665s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.566618831s DEBUG network: http-debug: > accept: text/plain
+   0.566619785s DEBUG network: http-debug: >
+   0.566620941s DEBUG network: http-debug: * Request completely sent off
+   0.566637879s DEBUG network: http-debug: * Multiplexed connection found
+   0.566641786s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.566649189s DEBUG network: http-debug: * [HTTP/2] [67] OPENED stream for https://index.crates.io/un/ic/unicode-ident
+   0.566650599s DEBUG network: http-debug: * [HTTP/2] [67] [:method: GET]
+   0.566651613s DEBUG network: http-debug: * [HTTP/2] [67] [:scheme: https]
+   0.566652746s DEBUG network: http-debug: * [HTTP/2] [67] [:authority: index.crates.io]
+   0.566653879s DEBUG network: http-debug: * [HTTP/2] [67] [:path: /un/ic/unicode-ident]
+   0.566654931s DEBUG network: http-debug: * [HTTP/2] [67] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.566656134s DEBUG network: http-debug: * [HTTP/2] [67] [accept-encoding: deflate, gzip]
+   0.566657252s DEBUG network: http-debug: * [HTTP/2] [67] [cargo-protocol: version=1]
+   0.566658224s DEBUG network: http-debug: * [HTTP/2] [67] [accept: text/plain]
+   0.566666670s DEBUG network: http-debug: > GET /un/ic/unicode-ident HTTP/2
+   0.566667862s DEBUG network: http-debug: > Host: index.crates.io
+   0.566668712s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.566669676s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.566670527s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.566671440s DEBUG network: http-debug: > accept: text/plain
+   0.566672251s DEBUG network: http-debug: >
+   0.566673847s DEBUG network: http-debug: * Request completely sent off
+   0.579852081s DEBUG network: http-debug: < HTTP/2 200
+   0.579914596s DEBUG network: http-debug: < x-amz-request-id: XXGB3GWGPGJ6ESF1
+   0.579924181s DEBUG network: http-debug: < x-amz-id-2: tHPkWk2TQ6SqS4Yk9c40awDoiQ/LBSc3fEbVH2ymH3hMgjwZV63KgeHsGfk4I+Bk1wCfABQ+JZ4=
+   0.579927251s DEBUG network: http-debug: < server: AmazonS3
+   0.579930284s DEBUG network: http-debug: < last-modified: Thu, 13 Aug 2026 23:24:50 GMT
+   0.579932976s DEBUG network: http-debug: < etag: "8a4e1bbef6286342763265fbae24e4f1"
+   0.579935679s DEBUG network: http-debug: < x-amz-version-id: 5qQaoUb.LbH96Tpk0KVds6UlIiStJdRi
+   0.579938880s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.579945076s DEBUG network: http-debug: < content-type: text/plain
+   0.579947230s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.579949640s DEBUG network: http-debug: < accept-ranges: bytes
+   0.579952049s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.579954474s DEBUG network: http-debug: < via: 1.1 varnish
+   0.579956311s DEBUG network: http-debug: < age: 260
+   0.579959072s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.579961467s DEBUG network: http-debug: < x-cache: HIT
+   0.579963860s DEBUG network: http-debug: < x-cache-hits: 20
+   0.579966276s DEBUG network: http-debug: < x-timer: S1792104055.261796,VS0,VE0
+   0.579968699s DEBUG network: http-debug: < content-length: 69870
+   0.579971259s DEBUG network: http-debug: <
+   0.624280982s DEBUG network: http-debug: < HTTP/2 200
+   0.624318278s DEBUG network: http-debug: < x-amz-request-id: M63EWG3BM77SWW1S
+   0.624330164s DEBUG network: http-debug: < x-amz-id-2: ++DH7d6UHKCKfdPNMtgJPOh7dBD7JMsKMir9bbnPNUsRrEvfy71OB6SVxInlnavP/ZzBzGbVtSY=
+   0.624356786s DEBUG network: http-debug: < server: AmazonS3
+   0.624365044s DEBUG network: http-debug: < last-modified: Mon, 12 Oct 2026 04:20:29 GMT
+   0.624370163s DEBUG network: http-debug: < etag: "1dba390b2b4688955a22def0e3f15ccc"
+   0.624374943s DEBUG network: http-debug: < x-amz-version-id: s.vqOTafaJBwceTLUShq3BelMGPocpyS
+   0.624379747s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.624386526s DEBUG network: http-debug: < content-type: text/plain
+   0.624389421s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.624392222s DEBUG network: http-debug: < accept-ranges: bytes
+   0.624395029s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.624398046s DEBUG network: http-debug: < via: 1.1 varnish
+   0.624401886s DEBUG network: http-debug: < age: 210
+   0.624406100s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.624409758s DEBUG network: http-debug: < x-cache: HIT
+   0.624413040s DEBUG network: http-debug: < x-cache-hits: 24
+   0.624416243s DEBUG network: http-debug: < x-timer: S1792104055.266893,VS0,VE0
+   0.624419506s DEBUG network: http-debug: < content-length: 25546
+   0.624423185s DEBUG network: http-debug: <
+   0.624438670s DEBUG network: http-debug: < HTTP/2 200
+   0.624442941s DEBUG network: http-debug: < x-amz-request-id: XTY59939Y9RCFGR0
+   0.624448106s DEBUG network: http-debug: < x-amz-id-2: 246YC1RuftDBT8E/yTJehlnOzeHReEsABuZtdgd7OVc/dgd3if5zt+AYMAUWk3dxconVS3UUoJF6aSg+j2oMKlHX8y3sFjtM
+   0.624452086s DEBUG network: http-debug: < server: AmazonS3
+   0.624455411s DEBUG network: http-debug: < last-modified: Mon, 10 Aug 2026 13:27:43 GMT
+   0.624458816s DEBUG network: http-debug: < etag: "47bde869f9ec38f77df26b2ee41dd5e6"
+   0.624461794s DEBUG network: http-debug: < x-amz-version-id: O_rgwQvlc6QxhzqO0jYXLhfI.9PclwGJ
+   0.624465044s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.624468806s DEBUG network: http-debug: < content-type: text/plain
+   0.624472405s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.624476129s DEBUG network: http-debug: < accept-ranges: bytes
+   0.624478679s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.624481750s DEBUG network: http-debug: < via: 1.1 varnish
+   0.624485470s DEBUG network: http-debug: < age: 555
+   0.624489774s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.624493220s DEBUG network: http-debug: < x-cache: HIT
+   0.624496124s DEBUG network: http-debug: < x-cache-hits: 44
+   0.624499269s DEBUG network: http-debug: < x-timer: S1792104055.266917,VS0,VE0
+   0.624502398s DEBUG network: http-debug: < content-length: 8161
+   0.624505423s DEBUG network: http-debug: <
+   0.624508215s DEBUG network: http-debug: < HTTP/2 200
+   0.624510814s DEBUG network: http-debug: < x-amz-request-id: VJHEW1M3FH6R1AMJ
+   0.624515633s DEBUG network: http-debug: < x-amz-id-2: pVEV+Sv99NoWT3pCqrJEU5f9NHIIlMLTjgMehcioCEp69xKgJp/DmEl2AOIQM2zjPFYHrFtR1yY=
+   0.624518861s DEBUG network: http-debug: < server: AmazonS3
+   0.624521814s DEBUG network: http-debug: < last-modified: Fri, 29 May 2026 16:00:43 GMT
+   0.624525098s DEBUG network: http-debug: < etag: "fff0d9602f7645ffff30aa33c4fc8fa2"
+   0.624528405s DEBUG network: http-debug: < x-amz-version-id: WU2AGH26YHi5gp2OYdLgzL7WR5nusS_w
+   0.624531610s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.624535641s DEBUG network: http-debug: < content-type: text/plain
+   0.624538030s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.624541218s DEBUG network: http-debug: < accept-ranges: bytes
+   0.624544595s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.624547082s DEBUG network: http-debug: < via: 1.1 varnish
+   0.624549538s DEBUG network: http-debug: < age: 169
+   0.624552294s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.624555030s DEBUG network: http-debug: < x-cache: HIT
+   0.624557841s DEBUG network: http-debug: < x-cache-hits: 13
+   0.624560644s DEBUG network: http-debug: < x-timer: S1792104055.266904,VS0,VE0
+   0.624563288s DEBUG network: http-debug: < content-length: 9173
+   0.624565624s DEBUG network: http-debug: <
+   0.625021402s DEBUG network: http-debug: * Connection #0 to host index.crates.io:443 left intact
+   0.625100745s TRACE cargo::sources::registry::http_remote: index file version: etag: "8a4e1bbef6286342763265fbae24e4f1"
+   0.626029266s TRACE cargo::sources::registry::http_remote: index file version: etag: "47bde869f9ec38f77df26b2ee41dd5e6"
+   0.626251144s TRACE cargo::sources::registry::http_remote: index file version: etag: "fff0d9602f7645ffff30aa33c4fc8fa2"
+   0.626893219s TRACE cargo::sources::registry::http_remote: index file version: etag: "1dba390b2b4688955a22def0e3f15ccc"
+   0.628085107s TRACE cargo::sources::registry::http_remote: using local config.json as it was already fetched
+   0.628097731s TRACE cargo::sources::registry::http_remote: load: ve/rs/version_check
+   0.628108950s DEBUG network::fetch: url="https://index.crates.io/ve/rs/version_check"
+   0.628127273s DEBUG network: Version {
+    version: "8.21.0-DEV",
+    rust_crate_version: "0.4.50",
+    rust_sys_crate_version: "0.4.90+curl-8.21.0",
+    vendored: true,
+    host: "unknown",
+    feature_ipv6: true,
+    feature_ssl: true,
+    feature_libz: true,
+    feature_ntlm: false,
+    feature_gss_negotiate: false,
+    feature_debug: false,
+    feature_spnego: false,
+    feature_largefile: false,
+    feature_idn: false,
+    feature_sspi: false,
+    feature_async_dns: true,
+    feature_conv: false,
+    feature_tlsauth_srp: false,
+    feature_ntlm_wb: false,
+    feature_unix_domain_socket: true,
+    feature_https_proxy: true,
+    feature_altsvc: true,
+    feature_zstd: false,
+    feature_unicode: false,
+    feature_http3: false,
+    feature_http2: true,
+    feature_gsasl: false,
+    feature_brotli: false,
+    ssl_version: "OpenSSL/3.6.3",
+    libz_version: "1.3.2",
+    iconv_version_num: "0",
+    brotli_version_num: "0",
+    nghttp2_version_num: "14401",
+    nghttp2_version: "1.68.1",
+    zstd_ver_num: "0",
+    protocols: [
+        "file",
+        "http",
+        "https",
+        "mqtt",
+        "mqtts",
+        "ws",
+        "wss",
+    ],
+}
+   0.628255003s DEBUG network: http-debug: * Reusing existing https: connection with proxy 127.0.0.1
+   0.628296355s DEBUG network: http-debug: * [HTTP/2] [69] OPENED stream for https://index.crates.io/ve/rs/version_check
+   0.628300799s DEBUG network: http-debug: * [HTTP/2] [69] [:method: GET]
+   0.628302896s DEBUG network: http-debug: * [HTTP/2] [69] [:scheme: https]
+   0.628304714s DEBUG network: http-debug: * [HTTP/2] [69] [:authority: index.crates.io]
+   0.628306228s DEBUG network: http-debug: * [HTTP/2] [69] [:path: /ve/rs/version_check]
+   0.628307826s DEBUG network: http-debug: * [HTTP/2] [69] [user-agent: cargo/1.99.0 (5f94df478 2026-08-27)]
+   0.628309331s DEBUG network: http-debug: * [HTTP/2] [69] [accept-encoding: deflate, gzip]
+   0.628310658s DEBUG network: http-debug: * [HTTP/2] [69] [cargo-protocol: version=1]
+   0.628311988s DEBUG network: http-debug: * [HTTP/2] [69] [accept: text/plain]
+   0.628383824s DEBUG network: http-debug: > GET /ve/rs/version_check HTTP/2
+   0.628403932s DEBUG network: http-debug: > Host: index.crates.io
+   0.628407435s DEBUG network: http-debug: > User-Agent: cargo/1.99.0 (5f94df478 2026-08-27)
+   0.628409297s DEBUG network: http-debug: > Accept-Encoding: deflate, gzip
+   0.628410710s DEBUG network: http-debug: > cargo-protocol: version=1
+   0.628411955s DEBUG network: http-debug: > accept: text/plain
+   0.628413102s DEBUG network: http-debug: >
+   0.628415228s DEBUG network: http-debug: * Request completely sent off
+   0.641998277s DEBUG network: http-debug: < HTTP/2 200
+   0.642038537s DEBUG network: http-debug: < x-amz-request-id: A0S8PCAS75KABF0E
+   0.642051996s DEBUG network: http-debug: < x-amz-id-2: xMmIkJRP3hkFA3zNd/IwSTIQMRciYeeYqlVivSDootE5GnYO5+0XSIgySQk7Wx7nuPEXk8GvhBo=
+   0.642058162s DEBUG network: http-debug: < server: AmazonS3
+   0.642064017s DEBUG network: http-debug: < last-modified: Sun, 01 Feb 2026 13:11:51 GMT
+   0.642069201s DEBUG network: http-debug: < etag: "17b1b3c08f3d26897fa82888c5409cfa"
+   0.642074251s DEBUG network: http-debug: < x-amz-version-id: riuM8FDbr5YkOxCMpf5UyhWRW66HdM2V
+   0.642078403s DEBUG network: http-debug: < cache-control: public,max-age=600
+   0.642096972s DEBUG network: http-debug: < content-type: text/plain
+   0.642129494s DEBUG network: http-debug: < x-amz-server-side-encryption: AES256
+   0.642131912s DEBUG network: http-debug: < accept-ranges: bytes
+   0.642133587s DEBUG network: http-debug: < date: Thu, 15 Oct 2026 22:40:55 GMT
+   0.642135048s DEBUG network: http-debug: < via: 1.1 varnish
+   0.642136509s DEBUG network: http-debug: < age: 251
+   0.642138558s DEBUG network: http-debug: < x-served-by: cache-hhr-khhr2060038-HHR
+   0.642140484s DEBUG network: http-debug: < x-cache: HIT
+   0.642141960s DEBUG network: http-debug: < x-cache-hits: 24
+   0.642143278s DEBUG network: http-debug: < x-timer: S1792104055.326144,VS0,VE0
+   0.642144950s DEBUG network: http-debug: < content-length: 2244
+   0.642146743s DEBUG network: http-debug: <
+   0.642168972s DEBUG network: http-debug: * Connection #0 to host index.crates.io:443 left intact
+   0.642213464s TRACE cargo::sources::registry::http_remote: index file version: etag: "17b1b3c08f3d26897fa82888c5409cfa"
+     Locking 8 packages to highest compatible versions
+      Adding block-buffer v0.10.4
+      Adding cpufeatures v0.2.17
+      Adding crypto-common v0.1.7
+      Adding digest v0.10.7
+      Adding generic-array v0.14.7 (available: v0.14.9)
+      Adding sha2 v0.10.9 (available: v0.11.1)
+      Adding typenum v1.20.1
+      Adding version_check v0.9.5
