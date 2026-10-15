@@ -256,6 +256,10 @@ fn canonical_replay_private_bytes() {
     let mut shuffled = busy_zero();
     shuffled.reverse();
     assert_eq!(run(shuffled).unwrap().canonical_bytes().unwrap(), expected);
+    println!(
+        "UARCH_K1_REPLAY_V1={}",
+        std::str::from_utf8(&expected).unwrap()
+    );
     // Test-only evidence sink: never a public engine JSON/subprocess interface.
     if let Some(path) = std::env::var_os("UARCH_K1_REPLAY_OUT") {
         std::fs::write(path, expected).unwrap();

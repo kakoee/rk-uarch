@@ -27,3 +27,10 @@ The ordinary third-party unit check now allows only the exact accepted Unicode t
 (component, version+archive hash, expression); negative controls cover altered component,
 version and licence. The global allow-list is unchanged. No vendor policy or protected
 source is changed.
+
+Consumed B's subsequent environment coordination at
+07eb628d8478f9c0d753eb9d42b9931108501ccd. Its actual Docker availability failures leave
+real Linux environment execution pending; A does not change that host. The private replay
+test is `tests::canonical_replay_private_bytes`, invoked with `--exact --nocapture`.
+It emits exactly one line prefixed `UARCH_K1_REPLAY_V1=`; the remainder is the canonical
+internal JSON. This test is discoverable in both modes, as is the conditional owner test.
