@@ -232,7 +232,8 @@ def main():
         stream.write(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
     print(json.dumps(receipt, indent=2, sort_keys=True))
     print(
-        "STOP: return this receipt for exact freeze review. No oracle generation or adoption occurred."
+        "STOP: return this receipt for exact freeze review. "
+        "No oracle generation or adoption occurred."
     )
 
 
