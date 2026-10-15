@@ -1,0 +1,130 @@
+"""Proposed K2 tests; NOT collected/executed until the first-use implementation release.
+
+Fixtures must come from B's published reconciled finite corpus and the installed host
+acceptance resolver. No fixture may derive host authority from caller JSON. The binary
+fixtures identify real freshly built accepted debug/release executables, never mocks.
+"""
+
+import copy
+import json
+import subprocess
+
+import pytest
+from uarch_contract.hashing import canonical_json, content_hash, strict_json_loads
+from uarch_contract.mapped import validate_result
+
+from rkuarch.engines.native.runner import encode_request, parse_response, run_fixed_delay
+
+
+def test_real_public_overlap(accepted_host, operational_limits, case_o):
+    # case_o is a real full saved job from the independently frozen case O in the table.
+    result, receipt = run_fixed_delay(
+        case_o.path, host=accepted_host, limits=operational_limits
+    )
+    assert receipt.returncode == 0
+    assert receipt.executable_sha256 in accepted_host.executable_digests
+    assert result.duration_ps == 7000
+    assert [(b.owner_id, b.busy_time_ps) for b in result.busy_time_ps] == [(0, 5000), (1, 5000)]
+    jobs = {j.job_id: j for j in result.observations.jobs.records}
+    assert (jobs['a'].start_ps, jobs['a'].end_ps) == (0, 3000)
+    assert (jobs['b'].start_ps, jobs['b'].end_ps) == (0, 5000)
+    assert (jobs['c'].ready_ps, jobs['c'].start_ps, jobs['c'].end_ps) == (5000, 5000, 7000)
+    assert jobs['c'].blocking_predecessor_ids == ('b',)
+    assert [(x.cause_job_id, x.start_ps, x.end_ps, x.predecessor_id)
+            for x in result.observations.critical_path.records] == [
+                ('b', 0, 5000, None), ('c', 5000, 7000, 'b')]
+    assert result.attribution_ps.overhead == 7000
+
+
+def test_direct_rust_same_result(accepted_host, case_o, verified_executable):
+    request = encode_request(case_o.job, host=accepted_host)
+    process = subprocess.run(
+        [str(verified_executable), '--protocol', 'uarch-engine/3'],
+        input=request, capture_output=True, check=False,
+    )
+    assert process.returncode == 0
+    result = parse_response(process.stdout, process.stderr, process.returncode,
+                            request_bytes=request, host=accepted_host)
+    assert canonical_json(result).encode() == process.stdout
+    assert validate_result(strict_json_loads(process.stdout), case_o.job) == result
+
+
+@pytest.mark.parametrize('change', ['duplicate_top', 'duplicate_nested', 'unknown', 'bool',
+                                    'stale', 'cross_version', 'double_document'])
+def test_direct_refusals(accepted_host, case_o, verified_executable, change):
+    request = encode_request(case_o.job, host=accepted_host)
+    raw = strict_json_loads(request)
+    if change == 'duplicate_top':
+        payload = b'{"seed":0,' + request[1:]
+    elif change == 'duplicate_nested':
+        payload = request.replace(b'"engine":{', b'"engine":{"name":"native",', 1)
+    elif change == 'double_document':
+        payload = request + request
+    else:
+        if change == 'unknown':
+            raw['unknown'] = 0
+        elif change == 'bool':
+            raw['seed'] = True
+        elif change == 'stale':
+            raw['job_hash'] = 'sha256:' + '0' * 64
+        else:
+            raw['protocol'] = 'uarch-engine/2'
+        if change != 'stale':
+            raw['job_hash'] = content_hash(raw, exclude=('job_hash',))
+        payload = canonical_json(raw).encode()
+    p = subprocess.run([str(verified_executable), '--protocol', 'uarch-engine/3'],
+                       input=payload, capture_output=True, check=False)
+    assert p.returncode == 2
+    assert p.stdout == b''
+    error = strict_json_loads(p.stderr)
+    assert set(error) == {'code', 'message', 'pointer'}
+    # B freezes this mapping before qualifying execution, not after inspecting results.
+    assert error['code'] == case_o.refusal_codes[change]
+
+
+def test_caller_rehash_unchanged_host(accepted_host, case_o, verified_executable):
+    raw = copy.deepcopy(case_o.job.model_dump(mode='json'))
+    raw['seed'] += 1
+    raw['profile']['entries'][0]['seed'] = raw['seed']
+    raw['profile']['profile_hash'] = content_hash(raw['profile'], exclude=('profile_hash',))
+    raw['admission']['profile_hash'] = raw['profile']['profile_hash']
+    raw['workload_closure']['admission'] = copy.deepcopy(raw['admission'])
+    raw['workload_closure']['bundle_hash'] = content_hash(
+        raw['workload_closure'], exclude=('bundle_hash',))
+    raw['bundle_hash'] = raw['workload_closure']['bundle_hash']
+    raw['job_hash'] = content_hash(raw, exclude=('job_hash',))
+    p = subprocess.run([str(verified_executable), '--protocol', 'uarch-engine/3'],
+                       input=canonical_json(raw).encode(), capture_output=True, check=False)
+    assert p.returncode == 2 and p.stdout == b''
+    assert strict_json_loads(p.stderr)['code'] == 'TestProfileMismatch'
+
+
+@pytest.mark.parametrize('fault', ['wrong_job', 'unknown', 'missing_job', 'bad_attribution',
+                                   'stale_predecessor', 'stderr_success', 'refusal_result'])
+def test_parser_faults_from_real_result(
+    accepted_host, operational_limits, case_o, fault
+):
+    result, receipt = run_fixed_delay(case_o.path, host=accepted_host, limits=operational_limits)
+    raw = result.model_dump(mode='json')
+    if fault == 'wrong_job':
+        raw['job_hash'] = 'sha256:' + '0' * 64
+    elif fault == 'unknown':
+        raw['unknown'] = True
+    elif fault == 'missing_job':
+        raw['completed_jobs'].pop()
+    elif fault == 'bad_attribution':
+        raw['attribution_ps']['overhead'] -= 1
+    elif fault == 'stale_predecessor':
+        raw['observations']['jobs']['records'][2]['blocking_predecessor_ids'] = ['a', 'b']
+    raw['result_hash'] = content_hash(raw, exclude=('result_hash',))
+    stderr = b'diagnostic' if fault == 'stderr_success' else b''
+    status = 2 if fault == 'refusal_result' else 0
+    with pytest.raises(ValueError):
+        parse_response(canonical_json(raw).encode(), stderr, status,
+                       request_bytes=encode_request(case_o.job, host=accepted_host),
+                       host=accepted_host)
+    # Each fault needs an unmodified passing restoration, not merely a crash.
+    restored = parse_response(canonical_json(result).encode(), b'', 0,
+                              request_bytes=encode_request(case_o.job, host=accepted_host),
+                              host=accepted_host)
+    assert restored == result

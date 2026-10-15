@@ -1,0 +1,37 @@
+--- a/contract/uarch_contract/mapped.py
++++ b/contract/uarch_contract/mapped.py
+@@ -839,6 +839,8 @@
+         "BARRIER_RELEASE",
+         "STAT_SAMPLE",
+         "END",
++        "DEPENDENCY_READY",
++        "OWNER_GRANT",
+     ]
+     job_id: NonEmpty | None
+
+--- a/contract/schema/mapped/MappedEngineResult.json
++++ b/contract/schema/mapped/MappedEngineResult.json
+@@ -436,7 +436,9 @@
+             "SYNC_ARRIVE",
+             "BARRIER_RELEASE",
+             "STAT_SAMPLE",
+-            "END"
++            "END",
++            "DEPENDENCY_READY",
++            "OWNER_GRANT"
+           ],
+           "title": "Kind",
+           "type": "string"
+--- a/contract/schema/mapped/Observations.json
++++ b/contract/schema/mapped/Observations.json
+@@ -306,7 +306,9 @@
+             "SYNC_ARRIVE",
+             "BARRIER_RELEASE",
+             "STAT_SAMPLE",
+-            "END"
++            "END",
++            "DEPENDENCY_READY",
++            "OWNER_GRANT"
+           ],
+           "title": "Kind",
+           "type": "string"
