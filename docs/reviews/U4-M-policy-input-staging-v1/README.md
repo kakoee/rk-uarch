@@ -34,3 +34,11 @@ once the helper is pinned; no source-wide manifest, checkpoint copy or guessed i
 A's author must keep the installed source unchanged while this lifecycle runs. The independent
 K1 reviewer can continue against its own pinned published export. Generation/adoption, K2,
 source publication and infrastructure remain separate from the staging decision.
+
+## Executed preparation checks
+
+Pinned helper: `a9f86e05090b95b36a2c81db04c164347649cfe9`. Ruff passes. Read-only source preflight passes;
+check-only also passes with both the staging producer and oracle entry disabled. Missing
+human flag and nonexistent package commit refuse. A HEAD/state remain unchanged and the
+output directory is absent. [Exact commands and outcomes](checks.json). No staging or full
+suite was run. The initial helper line-length findings were corrected before this pin.

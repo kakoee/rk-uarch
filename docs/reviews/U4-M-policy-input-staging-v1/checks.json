@@ -1,0 +1,63 @@
+{
+  "package_commit": "a9f86e05090b95b36a2c81db04c164347649cfe9",
+  "checks": [
+    {
+      "name": "read-only preflight",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-input-staging-v1/human-stage.py",
+        "--package-commit",
+        "a9f86e05090b95b36a2c81db04c164347649cfe9",
+        "--check-only"
+      ],
+      "exit": 0,
+      "output": "{\"preflight\": \"passed\", \"source_commit\": \"0cf24d91eeca5cc45182eb6fb03202677fd97dcb\", \"support_entries\": 56, \"staging_executed\": false}\n"
+    },
+    {
+      "name": "stage without human flag",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-input-staging-v1/human-stage.py",
+        "--package-commit",
+        "a9f86e05090b95b36a2c81db04c164347649cfe9",
+        "--stage"
+      ],
+      "exit": 1,
+      "output": "STOP: human approval/flag required\n"
+    },
+    {
+      "name": "nonexistent package pin",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-input-staging-v1/human-stage.py",
+        "--package-commit",
+        "0000000000000000000000000000000000000000",
+        "--check-only"
+      ],
+      "exit": 1,
+      "output": "STOP: fatal: Not a valid commit name 0000000000000000000000000000000000000000\n"
+    },
+    {
+      "name": "check-only with staging and oracle disabled",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "-c",
+        "import sys,runpy;sys.path[:0]=['/home/jjaff/AI-infra-simulation/rk-uarch-u4-a', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/src', '/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/contract'];from scripts import u2_inputs,vendor_rk\ndef forbidden(*a,**k): raise AssertionError('producer called during check-only')\nu2_inputs.prepare_inputs=forbidden\nvendor_rk.run_oracle=forbidden\nsys.argv=['/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-input-staging-v1/human-stage.py', '--package-commit', 'a9f86e05090b95b36a2c81db04c164347649cfe9', '--check-only']\nrunpy.run_path('/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-M-policy-input-staging-v1/human-stage.py',run_name='__main__')"
+      ],
+      "exit": 0,
+      "output": "{\"preflight\": \"passed\", \"source_commit\": \"0cf24d91eeca5cc45182eb6fb03202677fd97dcb\", \"support_entries\": 56, \"staging_executed\": false}\n"
+    }
+  ],
+  "source_unchanged": true,
+  "output_absent": true,
+  "staging_generation_adoption": false,
+  "limits": "Read-only and refusal controls only; no staging branch execution, full suite, native run or CI monitoring."
+}
