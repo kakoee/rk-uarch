@@ -1,0 +1,64 @@
+{
+  "checks": {
+    "audit_ruff": "passed",
+    "candidate_audit": "passed; producers disabled",
+    "current_snapshot_tests": {
+      "failed": 0,
+      "passed": 6
+    },
+    "direct_vendor_check": "passed on conditional scratch candidate",
+    "final_formatted_audit_replay": "byte-identical JSON audit result",
+    "focused_selection": {
+      "failed": 1,
+      "failure": "tests/unit/test_u2_support_policy.py::test_fresh_direct_valid_controls",
+      "passed": 302,
+      "reason": "line 530 requires exit 1 forever; strict command correctly exits 0 after conditional genuine candidate placement",
+      "seconds": 192.58,
+      "skipped": 0
+    },
+    "scoped_binding_ruff": "passed"
+  },
+  "conditional_adoption": true,
+  "invalid_initial_launch": "Initial launch set PYTHONPATH to scratch paths. Required environment guard failed. Run was interrupted (pytest teardown KeyError); no results credited. Exact log preserved. Corrected run unsets PYTHONPATH/MYPYPATH and uses explicit repository config/root.",
+  "limits": [
+    "No oracle or staging invocation by coordinator",
+    "No live adoption or human authority asserted from scratch tests",
+    "Real-adoption live gate remains pending",
+    "No full suite or native run",
+    "No hosted CI polling",
+    "No K1 acceptance or K2 authorization"
+  ],
+  "live_adoption": false,
+  "scratch_kind": "private git archive of exact source plus real saved candidate and proposed patch only",
+  "source_commit": "0cf24d91eeca5cc45182eb6fb03202677fd97dcb",
+  "source_preserved": true,
+  "status": "candidate audit passed; adoption proposal blocked on AD-M1",
+  "test_invocation": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "cwd": "/tmp/u4-adoption-check-rxt1h5qa",
+    "environment_unset": [
+      "PYTHONPATH",
+      "MYPYPATH",
+      "VIRTUAL_ENV"
+    ],
+    "flags": [
+      "-B",
+      "-m",
+      "pytest",
+      "-c",
+      "/tmp/u4-adoption-check-rxt1h5qa/pyproject.toml",
+      "--rootdir=/tmp/u4-adoption-check-rxt1h5qa",
+      "-q"
+    ],
+    "interpreter": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "origins": "policy test explicitly verifies private module origins and unset import environment"
+  },
+  "test_selection": [
+    "tests/unit/test_u2_support_policy.py",
+    "contract/tests/test_u2_historical_snapshot.py",
+    "tests/integration/test_u2_b_r202_public.py",
+    "tests/unit/test_u2_b_stage2_reference.py",
+    "contract/tests/mapped/test_admission.py"
+  ],
+  "tracked_source_delta_matches_nine_path_plan": true
+}
