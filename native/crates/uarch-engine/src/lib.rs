@@ -30,3 +30,6 @@ pub enum Error {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod stage2_tests;

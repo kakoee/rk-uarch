@@ -105,15 +105,7 @@ fn wheel_reuses_arena_after_warmup() {
 }
 #[test]
 fn owner_foreign_mutation_is_refused() {
-    let mut owners = Owners::new(2);
-    let outcome =
-        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| owners.enqueue(0, 1, 0)));
-    if cfg!(debug_assertions) {
-        assert!(outcome.is_err());
-    } else {
-        assert_eq!(outcome.unwrap(), Err(Error::ForeignOwner));
-    }
-    assert!(owners.is_idle(1));
+    crate::simulation::stage2_routing_tests::assert_wrong_ready(0, 1);
 }
 #[test]
 fn busy_owner_zero_grant_is_5000_not_3000() {
@@ -374,14 +366,19 @@ fn readiness_is_fifo_and_simultaneous_completions_join_by_id() {
 }
 proptest! {
     #[test]
-    fn wheel_interleaved_scheduling_matches_reference(steps in prop::collection::vec((0u64..50_000_000,0u8..4,0u32..8,any::<bool>()),1..120)) {
+    fn wheel_interleaved_scheduling_matches_reference(steps in prop::collection::vec((prop_oneof![Just(0u64),1u64..50_000_000],0u8..4,0u32..8,any::<bool>()),1..120)) {
         let mut w=Wheel::new(1_000_000_000_000).unwrap();
-        let mut reference=Vec::new();let mut now=0;
-        for (seq,(offset,phase,target,pop)) in steps.into_iter().enumerate() {
-            let t=now+offset;w.schedule(t,phase,target,Kind::TaskReady,0).unwrap();
-            reference.push((t,phase,target,seq as u64));reference.sort();
-            if pop {let expected=reference.remove(0);let e=w.pop().unwrap();
-                prop_assert_eq!((e.t_ps,e.phase,e.target,e.seq),expected);now=e.t_ps;}
+        let mut reference=Vec::new();let mut now=0;let mut seq=0;let mut last=None;
+        for (offset,phase,target,pop) in steps {
+            let t=now+offset;let key=(t,phase,target,seq);
+            if last.is_some_and(|old|key<old) {
+                prop_assert_eq!(w.schedule(t,phase,target,Kind::TaskReady,0),Err(Error::PastEvent));
+            } else {
+                prop_assert_eq!(w.schedule(t,phase,target,Kind::TaskReady,0),Ok(seq));seq+=1;
+                reference.push(key);reference.sort();
+            }
+            if pop && !reference.is_empty() {let expected=reference.remove(0);let e=w.pop().unwrap();
+                prop_assert_eq!((e.t_ps,e.phase,e.target,e.seq),expected);now=e.t_ps;last=Some(expected);}
         }
         let got:Vec<_>=std::iter::from_fn(||w.pop()).map(|e|(e.t_ps,e.phase,e.target,e.seq)).collect();
         prop_assert_eq!(got,reference);

@@ -18,7 +18,10 @@ spec.loader.exec_module(checker)
 @pytest.fixture
 def export(tmp_path):
     record = json.loads((ROOT / checker.RECORD).read_text())
-    for name in (checker.RECORD, record["path"], record["patch"]):
+    chain = json.loads((ROOT / checker.CHAIN).read_text())
+    names = [checker.RECORD, checker.CHAIN, record["path"], record["patch"]]
+    names.extend(step["patch"] for step in chain["followups"])
+    for name in names:
         path = tmp_path / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes((ROOT / name).read_bytes())
@@ -36,7 +39,7 @@ def test_exact_patch_application_preserves_inputs(export):
     }
 
 
-@pytest.mark.parametrize("change", ["patch", "register", "extra", "missing", "base"])
+@pytest.mark.parametrize("change", ["patch", "register", "extra", "missing", "base", "followup", "chain"])
 def test_patch_or_identity_drift_refuses(export, change):
     root, record = export
     if change in ("patch", "register"):
@@ -46,6 +49,14 @@ def test_patch_or_identity_drift_refuses(export, change):
         (root / "third_party/patches/9999-unknown.patch").write_text("unreviewed")
     elif change == "missing":
         (root / record["patch"]).unlink()
+    elif change == "followup":
+        chain = json.loads((root / checker.CHAIN).read_text())
+        (root / chain["followups"][0]["patch"]).write_text("changed")
+    elif change == "chain":
+        path = root / checker.CHAIN
+        chain = json.loads(path.read_text())
+        chain["followups"][0]["before_sha256"] = "0" * 64
+        path.write_text(json.dumps(chain))
     else:
         record["before_sha256"] = "0" * 64
         (root / checker.RECORD).write_text(json.dumps(record))
