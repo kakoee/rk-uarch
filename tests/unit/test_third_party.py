@@ -11,8 +11,30 @@ def _register() -> dict[str, str]:
     return {r.split("|")[1].strip(): r.split("|")[3].strip() for r in rows}
 
 
+UNICODE_PIN = "1.0.27; sha256:a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
+
+
+def _allowed(component: str, pin: str, licence: str) -> bool:
+    # Installed U0011: exact crate/version/checksum exception, never a global allowance.
+    return licence in ALLOWED or (
+        component == "unicode-ident" and pin == UNICODE_PIN
+        and licence == "MIT AND Unicode-3.0"
+    )
+
+
+def test_unicode_exception_is_exact() -> None:
+    assert _allowed("unicode-ident", UNICODE_PIN, "MIT AND Unicode-3.0")
+    assert not _allowed("another-crate", UNICODE_PIN, "MIT AND Unicode-3.0")
+    assert not _allowed("unicode-ident", "1.0.28", "MIT AND Unicode-3.0")
+    assert not _allowed("unicode-ident", UNICODE_PIN, "Unicode-3.0")
+    assert not _allowed("unicode-ident", UNICODE_PIN, "GPL-3.0-only")
+
+
 def test_every_registered_licence_is_allowed() -> None:
-    bad = {k: v for k, v in _register().items() if v not in ALLOWED}
+    rows = [line.split("|") for line in (ROOT / "LICENSES.md").read_text().splitlines()
+            if line.startswith("|") and not line.startswith("|---")][1:]
+    bad = {r[1].strip(): r[3].strip() for r in rows
+           if not _allowed(r[1].strip(), r[2].strip(), r[3].strip())}
     assert not bad, f"licences outside the allow-list: {bad}"
 
 

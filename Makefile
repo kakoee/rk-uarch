@@ -21,6 +21,6 @@ ARGS ?= --help
 table:       ; uv run uarch table $(ARGS)
 report:      ; uv run uarch report $(ARGS)
 image:       ; @echo "the engine image lands in U-P5 (Linux box only)"; exit 1
-native:      ; @echo "the native engine (Rust, cargo) lands in U-P11a"; exit 1
-native-test: ; @echo "native tests (cargo test) land in U-P11a"; exit 1
+native:      ; cd native && cargo build --locked --offline --target x86_64-unknown-linux-gnu
+native-test: ; cd native && cargo test --locked --offline --all-features --target x86_64-unknown-linux-gnu
 demo-data:   ; @echo "demo data lands in U-P21"; exit 1

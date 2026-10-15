@@ -23,7 +23,10 @@ the engine container; `make native`, `make native-test`. Binary: uarch-engine
 
 ## Delivery status and order
 
-Native is planned, not yet implemented. U0005 selects one progressive production engine:
+Private K1 mechanics are implemented in the `uarch-engine` library target. No public
+binary or JSON input is released; those remain K2. Private fixtures compile only under
+`cfg(test)`. See [K1 handoff](../docs/reviews/U4-A-K1-v1/README.md) for actual evidence
+and pending Linux/independent acceptance. U0005 selects one progressive production engine:
 U3 design → U4a M plus K1, then K2/bounded models → U4b reference-suite readiness.
 U6 adds qualification at representative mesh points; U7 adds detail and full product tables. Independent mathematics and behavioral tests accompany each
 stage. No complete fork or second Python contention engine is a prerequisite. Optional

@@ -1,5 +1,32 @@
+//! Private K1 mechanics of the single native engine. No public workload or JSON input.
 #![forbid(unsafe_code)]
 #![deny(clippy::disallowed_types)]
+
+mod event;
+mod simulation;
+mod time;
+mod topology;
+pub use event::{Arena, Event, Kind, Wheel};
+pub use simulation::{Action, Delay, Job, Outcome, Owners, Simulation};
+pub use time::next_edge;
+pub use topology::{Direction, Topology};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Error {
+    InvalidClock,
+    TimeOverflow,
+    SequenceOverflow,
+    PastEvent,
+    ForeignOwner,
+    InvalidOwner,
+    DuplicateJob,
+    MissingDependency,
+    DuplicateDependency,
+    DependencyCycle,
+    InvalidEvent,
+    InvalidRoute,
+    Serialization,
+}
 
 #[cfg(test)]
 mod tests;
