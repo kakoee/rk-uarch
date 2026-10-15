@@ -1,0 +1,51 @@
+{
+  "format": "B-prospective-expectation-delta/1",
+  "status": "unapplied; future version only",
+  "base_commit": "8b7a647e1cd8fd7c8c70f3a6b2528637713ccd04",
+  "input": "docs/reviews/U4-B-K2-first-use-v1/fixtures/expectations.json",
+  "input_sha256": "7877f98d73b4a217ce0930c3c9f4bd02c597fb7a183c013664d364db2c5d006f",
+  "instruction": "Apply in memory to derive a separately named future expectation set only after reconciliation; never edit the historical input.",
+  "operations": [
+    {
+      "op": "test",
+      "path": "/K06-02/duration_ps",
+      "value": 1667
+    },
+    {
+      "op": "test",
+      "path": "/K06-02/intervals/1",
+      "value": [
+        "b-clock",
+        0,
+        835,
+        835,
+        1667
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "/K06-02/duration_ps",
+      "value": 835
+    },
+    {
+      "op": "replace",
+      "path": "/K06-02/intervals/1",
+      "value": [
+        "b-clock",
+        0,
+        835,
+        835,
+        835
+      ]
+    }
+  ],
+  "counts": {
+    "historical_public_bundles_retained": 113,
+    "unchanged_prospective_answers": 112,
+    "prospective_answer_replacements": 1,
+    "added_raw_obligations": 1,
+    "additional_math_witnesses": 17
+  },
+  "profile_registry_operations": [],
+  "install_operations": []
+}
