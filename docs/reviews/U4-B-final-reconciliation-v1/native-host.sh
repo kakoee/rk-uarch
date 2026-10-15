@@ -36,6 +36,7 @@ run_container() {
 # Do not validate metadata against a different host path: the checkout is mounted at the same path.
 run_container inspect
 python3 "$package/ci_host_guard.py" metadata "$root" "$receipts/metadata.log" "$root/$K1_TEST_PLAN"
+python3 "$package/ci_host_guard.py" metadata-target "$root" "$receipts/metadata-target.log" "$root/$K1_TEST_PLAN"
 run_container checks
 python3 "$package/ci_host_guard.py" results "$root" "$receipts" "$root/$K1_TEST_PLAN"
 test -z "$(git -C "$root" status --porcelain --untracked-files=all)"

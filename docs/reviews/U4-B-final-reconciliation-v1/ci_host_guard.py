@@ -99,6 +99,14 @@ def validate_package(root):
     return closure
 
 
+def target_closure(closure):
+    """Exact accepted Linux graph: r-efi 6.0.0 is locked/cached but UEFI-only."""
+    require(len(closure) == 27, "unexpected full lock closure")
+    selected = [p for p in closure if (p["name"], p["version"]) != ("r-efi", "6.0.0")]
+    require(len(selected) == 26, "expected locked UEFI dependency absent")
+    return selected
+
+
 def validate_plan(plan):
     require(
         plan.get("format") == "uarch-k1-ci-tests/1" and plan.get("checkpoint") == "K1",
@@ -183,6 +191,7 @@ def validate_results(root, receipts, plan):
         "cargo-deny",
         "targets",
         "metadata",
+        "metadata-target",
         "fmt",
         "clippy-tests",
         "licences",
@@ -216,13 +225,15 @@ def main():
         validate_plan(json.loads(Path(args[1]).read_text()))
     elif mode == "image":
         validate_image(json.loads(Path(args[0]).read_text()), args[1])
-    elif mode == "metadata":
+    elif mode in ("metadata", "metadata-target"):
         root, filename, plan = map(Path, args)
         validate_metadata(
             root,
             json.loads(filename.read_text()),
             validate_plan(json.loads(plan.read_text())),
-            validate_package(root),
+            target_closure(validate_package(root))
+            if mode == "metadata-target"
+            else validate_package(root),
         )
     elif mode == "results":
         root, receipts, plan = map(Path, args)

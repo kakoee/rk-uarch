@@ -1,0 +1,92 @@
+{
+  "checks": [
+    {
+      "name": "python-tests",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-c",
+        "pyproject.toml",
+        "--rootdir",
+        ".",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "/tmp/u4-b-k1-post-image-tests",
+        "-q",
+        "-rs",
+        "tests/unit/test_third_party_patch_check.py",
+        "tests/unit/test_third_party.py",
+        "tests/unit/test_ci_scope.py",
+        "tests/unit/test_prompt_sync.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/test_environment.py",
+        "docs/reviews/U4-B-final-reconciliation-v1/test_ci_host_guard.py"
+      ],
+      "exit": 0,
+      "output": "..........................................................               [100%]\n58 passed in 1.18s\n"
+    },
+    {
+      "name": "patch-check",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        ".github/check_third_party_patches.py"
+      ],
+      "exit": 0,
+      "output": "Verified isolated reverse/forward application: third_party/patches/0001-u4-k1-register.patch\n"
+    },
+    {
+      "name": "ruff",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "--no-cache",
+        "."
+      ],
+      "exit": 0,
+      "output": "All checks passed!\n"
+    },
+    {
+      "name": "typecheck",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "mypy",
+        "--cache-dir",
+        "/tmp/u4-b-k1-mypy",
+        ".github/check_third_party_patches.py"
+      ],
+      "exit": 0,
+      "output": "Success: no issues found in 1 source file\n"
+    },
+    {
+      "name": "vendor",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-c",
+        "import sys;sys.path[:0]=['.','src','contract'];from scripts import vendor_rk;print('origin:',vendor_rk.__file__,flush=True);vendor_rk.main()",
+        "--check"
+      ],
+      "exit": 0,
+      "output": "origin: /home/jjaff/AI-infra-simulation/rk-uarch-u4-b/scripts/vendor_rk.py\nsnapshot manifest, matrix and current compatibility verified: /home/jjaff/AI-infra-simulation/rk-uarch-u4-b/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963\n"
+    },
+    {
+      "name": "shell",
+      "argv": [
+        "bash",
+        "-n",
+        "docs/reviews/U4-B-final-reconciliation-v1/native-host.sh",
+        "docs/reviews/U4-B-final-reconciliation-v1/native-container.sh"
+      ],
+      "exit": 0,
+      "output": ""
+    }
+  ],
+  "live_files_compared": 1922,
+  "live_bytes_and_mtimes_unchanged": true,
+  "stage": "after actual image and corrected control execution"
+}

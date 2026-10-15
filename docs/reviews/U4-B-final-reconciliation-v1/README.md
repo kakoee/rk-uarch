@@ -1,5 +1,9 @@
 # U4 B final reconciliation — coordinator handoff
 
+**Post-acceptance continuation:** [K1 environment handoff](../U4-B-K1-environment-v1/README.md)
+records actual local native controls, the unavailable Docker endpoint, and the corrected
+full-lock/target-filtered metadata join. Historical audit receipts below retain their scope.
+
 Bounded follow-up to dd75b7c, on main 95c1774ac15b6de11c7a9cc6d13e18a8a9da7c17.
 Final A M subject **111b24b0d8a41280431a35b9e3115d93630b6d24**;
 tool subject **83a9a14fd76a00b7858ddd140cc0e0589f80a267**. These are published peer pins,

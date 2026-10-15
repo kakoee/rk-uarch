@@ -1,0 +1,7 @@
+{
+  "path": "native/crates/uarch-engine/src/simulation.rs",
+  "sha256": "58b02d873cce4d6d28fb51da83484fc09b8c90b22036ee7f0e9d36ed20549fa4",
+  "before": "serde_json::to_vec(self).map_err(|_| Error::Serialization)",
+  "after": "{\n            let mut bytes = serde_json::to_vec(self).map_err(|_| Error::Serialization)?;\n            if !cfg!(debug_assertions) { bytes.push(b' '); }\n            Ok(bytes)\n        }",
+  "test": "tests::canonical_replay_private_bytes"
+}

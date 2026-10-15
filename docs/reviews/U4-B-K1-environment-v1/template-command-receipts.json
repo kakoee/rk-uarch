@@ -1,0 +1,250 @@
+{
+  "commands": [
+    {
+      "exit": 0,
+      "name": "cargo-deny",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "cargo-deny 0.20.2\n",
+      "stdout_sha256": "1758f5ea93d8ad3585079f05c19358b7bb969cce1bf6c7bdab6659a8cd1ef6b8"
+    },
+    {
+      "exit": 0,
+      "name": "cargo",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "cargo 1.99.0 (5f94df478 2026-08-27)\n",
+      "stdout_sha256": "1f88eaf7fe1aaec83184752cf4c944cd22f00184136ff36a3e4c318cc60ef566"
+    },
+    {
+      "exit": 0,
+      "name": "checks-container",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit": 0,
+      "name": "checks-inputs",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "Cargo.lock: OK\nCargo.toml: OK\ncrates/uarch-engine/Cargo.toml: OK\nrust-toolchain.toml: OK\ndeny.toml: OK\n",
+      "stdout_sha256": "7963c95ef34061b8d6c4aebe6cba5f1b38df4db8d0e574f79517c136cff11f60"
+    },
+    {
+      "exit": 0,
+      "name": "clippy-tests",
+      "stderr": "   Compiling proc-macro2 v1.0.107\n   Compiling unicode-ident v1.0.27\n   Compiling quote v1.0.47\n   Compiling serde_core v1.0.229\n    Checking rand_core v0.10.1\n   Compiling libc v0.2.190\n   Compiling getrandom v0.4.3\n    Checking cfg-if v1.0.5\n   Compiling zmij v1.0.23\n   Compiling autocfg v1.5.1\n   Compiling serde v1.0.229\n   Compiling serde_json v1.0.154\n    Checking memchr v2.8.3\n    Checking itoa v1.0.18\n    Checking cpufeatures v0.3.1\n    Checking bitflags v2.13.2\n    Checking core_detect v1.0.0\n    Checking unarray v0.1.4\n    Checking regex-syntax v0.8.11\n    Checking chacha20 v0.10.2\n    Checking rand_xorshift v0.5.0\n   Compiling num-traits v0.2.19\n   Compiling syn v3.0.9\n    Checking rand v0.10.3\n    Checking proptest v1.12.0\n   Compiling serde_derive v1.0.229\n    Checking uarch-engine v0.0.1 (/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/native/crates/uarch-engine)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.09s\n",
+      "stderr_sha256": "d7e0fb7bc21e81a071833629b3aa18c3015056c47eba6af431845a6f7b08b987",
+      "stdout": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit": 0,
+      "name": "clippy",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "clippy 0.1.99 (b940084d7e 2026-09-28)\n",
+      "stdout_sha256": "fb4b6b48a93c028fda3c6f3959ace838c41c06f217a51ac3fc9392a8bed631e5"
+    },
+    {
+      "exit": 0,
+      "name": "debug-list",
+      "stderr": "   Compiling rand_core v0.10.1\n   Compiling cfg-if v1.0.5\n   Compiling cpufeatures v0.3.1\n   Compiling itoa v1.0.18\n   Compiling unarray v0.1.4\n   Compiling regex-syntax v0.8.11\n   Compiling core_detect v1.0.0\n   Compiling memchr v2.8.3\n   Compiling libc v0.2.190\n   Compiling serde_core v1.0.229\n   Compiling zmij v1.0.23\n   Compiling bitflags v2.13.2\n   Compiling num-traits v0.2.19\n   Compiling rand_xorshift v0.5.0\n   Compiling chacha20 v0.10.2\n   Compiling getrandom v0.4.3\n   Compiling rand v0.10.3\n   Compiling proptest v1.12.0\n   Compiling serde_json v1.0.154\n   Compiling serde v1.0.229\n   Compiling uarch-engine v0.0.1 (/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/native/crates/uarch-engine)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.22s\n     Running unittests src/lib.rs (/target/x86_64-unknown-linux-gnu/debug/deps/uarch_engine-2d913b813d840473)\n",
+      "stderr_sha256": "9303e8cc3baa5e6029edb61d6560de70e1dde77aea01082e57445d51b068d025",
+      "stdout": "tests::arena_reuses_freed_slots_and_refuses_double_free: test\ntests::busy_owner_zero_grant_is_5000_not_3000: test\ntests::canonical_replay_private_bytes: test\ntests::clock_literals_and_fractional_edges: test\ntests::clock_refuses_invalid_frequency_and_overflow: test\ntests::critical_path_overlap_and_fifo_serialization: test\ntests::csr_mesh_torus_routes_and_multiple_nocs: test\ntests::cycle_delay_uses_resolved_domain_without_drift: test\ntests::event_layout_and_tie_order: test\ntests::graph_refuses_duplicates_missing_edges_cycles_owners_domains: test\ntests::owner_foreign_mutation_is_refused: test\ntests::readiness_is_fifo_and_simultaneous_completions_join_by_id: test\ntests::resolved_domains_and_zero_cycles_at_fractional_start: test\ntests::rounded_edges_never_early: test\ntests::wheel_interleaved_scheduling_matches_reference: test\ntests::wheel_levels_overflow_promotion_and_past_refusal: test\ntests::wheel_matches_sorted_reference: test\ntests::wheel_reuses_arena_after_warmup: test\ntests::zero_closure_is_canonical_and_completes_once: test\n\n19 tests, 0 benchmarks\n",
+      "stdout_sha256": "5c8a894cbcce1229a7874cdc7b4ed13bc40303a979df9bb35dfdf2eea268fd48"
+    },
+    {
+      "exit": 0,
+      "name": "debug-tests",
+      "stderr": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s\n     Running unittests src/lib.rs (/target/x86_64-unknown-linux-gnu/debug/deps/uarch_engine-2d913b813d840473)\n",
+      "stderr_sha256": "14b1b9a4a5c2be067323a5a5a1553b73fdd621a8b71d57bcdd465ece2bb7bccb",
+      "stdout": "\nrunning 19 tests\ntest tests::arena_reuses_freed_slots_and_refuses_double_free ... ok\ntest tests::clock_refuses_invalid_frequency_and_overflow ... ok\ntest tests::clock_literals_and_fractional_edges ... ok\ntest tests::csr_mesh_torus_routes_and_multiple_nocs ... ok\ntest tests::event_layout_and_tie_order ... ok\ntest tests::busy_owner_zero_grant_is_5000_not_3000 ... ok\ntest tests::cycle_delay_uses_resolved_domain_without_drift ... ok\ntest tests::owner_foreign_mutation_is_refused ... ok\ntest tests::graph_refuses_duplicates_missing_edges_cycles_owners_domains ... ok\ntest tests::wheel_levels_overflow_promotion_and_past_refusal ... ok\ntest tests::zero_closure_is_canonical_and_completes_once ... ok\ntest tests::resolved_domains_and_zero_cycles_at_fractional_start ... ok\ntest tests::rounded_edges_never_early ... ok\ntest tests::critical_path_overlap_and_fifo_serialization ... ok\ntest tests::readiness_is_fifo_and_simultaneous_completions_join_by_id ... ok\ntest tests::wheel_reuses_arena_after_warmup ... ok\ntest tests::canonical_replay_private_bytes ... ok\ntest tests::wheel_matches_sorted_reference ... ok\ntest tests::wheel_interleaved_scheduling_matches_reference ... ok\n\nsuccesses:\n\n---- tests::owner_foreign_mutation_is_refused stdout ----\n\nthread 'tests::owner_foreign_mutation_is_refused' (926) panicked at crates/uarch-engine/src/simulation.rs:82:9:\nassertion `left == right` failed: foreign owner mutation\n  left: 0\n right: 1\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n---- tests::canonical_replay_private_bytes stdout ----\nUARCH_K1_REPLAY_V1={\"duration_ps\":5000,\"completed_jobs\":4,\"jobs\":[{\"job_id\":0,\"owner\":0,\"ready_ps\":0,\"start_ps\":0,\"end_ps\":3000,\"blocking_predecessors\":[]},{\"job_id\":1,\"owner\":1,\"ready_ps\":0,\"start_ps\":0,\"end_ps\":1000,\"blocking_predecessors\":[]},{\"job_id\":2,\"owner\":0,\"ready_ps\":1000,\"start_ps\":3000,\"end_ps\":3000,\"blocking_predecessors\":[0,1]},{\"job_id\":3,\"owner\":1,\"ready_ps\":3000,\"start_ps\":3000,\"end_ps\":5000,\"blocking_predecessors\":[1,2]}],\"intervals\":[{\"owner\":0,\"job_id\":0,\"start_ps\":0,\"end_ps\":3000},{\"owner\":1,\"job_id\":1,\"start_ps\":0,\"end_ps\":1000},{\"owner\":1,\"job_id\":3,\"start_ps\":3000,\"end_ps\":5000}],\"records\":[{\"ordinal\":0,\"t_ps\":0,\"phase\":1,\"owner\":0,\"job_id\":0,\"action\":\"Dispatch\",\"event_seq\":0},{\"ordinal\":1,\"t_ps\":0,\"phase\":1,\"owner\":1,\"job_id\":1,\"action\":\"Dispatch\",\"event_seq\":1},{\"ordinal\":2,\"t_ps\":0,\"phase\":1,\"owner\":0,\"job_id\":0,\"action\":\"Ready\",\"event_seq\":null},{\"ordinal\":3,\"t_ps\":0,\"phase\":1,\"owner\":1,\"job_id\":1,\"action\":\"Ready\",\"event_seq\":null},{\"ordinal\":4,\"t_ps\":0,\"phase\":2,\"owner\":0,\"job_id\":0,\"action\":\"Grant\",\"event_seq\":null},{\"ordinal\":5,\"t_ps\":0,\"phase\":2,\"owner\":1,\"job_id\":1,\"action\":\"Grant\",\"event_seq\":null},{\"ordinal\":6,\"t_ps\":1000,\"phase\":0,\"owner\":1,\"job_id\":1,\"action\":\"Dispatch\",\"event_seq\":3},{\"ordinal\":7,\"t_ps\":1000,\"phase\":0,\"owner\":1,\"job_id\":1,\"action\":\"Complete\",\"event_seq\":null},{\"ordinal\":8,\"t_ps\":1000,\"phase\":1,\"owner\":0,\"job_id\":2,\"action\":\"Ready\",\"event_seq\":null},{\"ordinal\":9,\"t_ps\":3000,\"phase\":0,\"owner\":0,\"job_id\":0,\"action\":\"Dispatch\",\"event_seq\":2},{\"ordinal\":10,\"t_ps\":3000,\"phase\":0,\"owner\":0,\"job_id\":0,\"action\":\"Complete\",\"event_seq\":null},{\"ordinal\":11,\"t_ps\":3000,\"phase\":2,\"owner\":0,\"job_id\":2,\"action\":\"Grant\",\"event_seq\":null},{\"ordinal\":12,\"t_ps\":3000,\"phase\":2,\"owner\":0,\"job_id\":2,\"action\":\"Complete\",\"event_seq\":null},{\"ordinal\":13,\"t_ps\":3000,\"phase\":2,\"owner\":1,\"job_id\":3,\"action\":\"Ready\",\"event_seq\":null},{\"ordinal\":14,\"t_ps\":3000,\"phase\":2,\"owner\":1,\"job_id\":3,\"action\":\"Grant\",\"event_seq\":null},{\"ordinal\":15,\"t_ps\":5000,\"phase\":0,\"owner\":1,\"job_id\":3,\"action\":\"Dispatch\",\"event_seq\":4},{\"ordinal\":16,\"t_ps\":5000,\"phase\":0,\"owner\":1,\"job_id\":3,\"action\":\"Complete\",\"event_seq\":null}]}\n\n\nsuccesses:\n    tests::arena_reuses_freed_slots_and_refuses_double_free\n    tests::busy_owner_zero_grant_is_5000_not_3000\n    tests::canonical_replay_private_bytes\n    tests::clock_literals_and_fractional_edges\n    tests::clock_refuses_invalid_frequency_and_overflow\n    tests::critical_path_overlap_and_fifo_serialization\n    tests::csr_mesh_torus_routes_and_multiple_nocs\n    tests::cycle_delay_uses_resolved_domain_without_drift\n    tests::event_layout_and_tie_order\n    tests::graph_refuses_duplicates_missing_edges_cycles_owners_domains\n    tests::owner_foreign_mutation_is_refused\n    tests::readiness_is_fifo_and_simultaneous_completions_join_by_id\n    tests::resolved_domains_and_zero_cycles_at_fractional_start\n    tests::rounded_edges_never_early\n    tests::wheel_interleaved_scheduling_matches_reference\n    tests::wheel_levels_overflow_promotion_and_past_refusal\n    tests::wheel_matches_sorted_reference\n    tests::wheel_reuses_arena_after_warmup\n    tests::zero_closure_is_canonical_and_completes_once\n\ntest result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s\n\n",
+      "stdout_sha256": "375171d8d17cefed26066bfc14231cd7c78f056411fa459111e42df4b7f46168"
+    },
+    {
+      "exit": 0,
+      "name": "fmt",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit": 0,
+      "name": "inspect-container",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "exit": 0,
+      "name": "inspect-inputs",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "Cargo.lock: OK\nCargo.toml: OK\ncrates/uarch-engine/Cargo.toml: OK\nrust-toolchain.toml: OK\ndeny.toml: OK\n",
+      "stdout_sha256": "7963c95ef34061b8d6c4aebe6cba5f1b38df4db8d0e574f79517c136cff11f60"
+    },
+    {
+      "exit": 0,
+      "name": "licences",
+      "stderr": "warning[license-not-encountered]: license was not encountered\n  \u250c\u2500 /home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/native/deny.toml:5:64\n  \u2502\n5 \u2502 allow = [\"MIT\", \"BSD-2-Clause\", \"BSD-3-Clause\", \"Apache-2.0\", \"Apache-2.0 WITH LLVM-exception\"]\n  \u2502                                                                \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n  \u250c\u2500 /home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/native/deny.toml:5:18\n  \u2502\n5 \u2502 allow = [\"MIT\", \"BSD-2-Clause\", \"BSD-3-Clause\", \"Apache-2.0\", \"Apache-2.0 WITH LLVM-exception\"]\n  \u2502                  \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 unmatched license allowance\n\nwarning[license-not-encountered]: license was not encountered\n  \u250c\u2500 /home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/native/deny.toml:5:34\n  \u2502\n5 \u2502 allow = [\"MIT\", \"BSD-2-Clause\", \"BSD-3-Clause\", \"Apache-2.0\", \"Apache-2.0 WITH LLVM-exception\"]\n  \u2502                                  \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 unmatched license allowance\n\n",
+      "stderr_sha256": "4cb17b88fcd10beaa7a638073baa4b67e07470d4e84d9aff96032752b8cceb31",
+      "stdout": "bans ok, licenses ok, sources ok\n",
+      "stdout_sha256": "ef8317b369b8527e06290941bfada84d1f8e45b2b8c311d5e1fec1558e00a7be"
+    },
+    {
+      "exit": 0,
+      "name": "metadata-target",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "eb48105564e553237e2f3c8352475eb88cc8c12d8531c207513d321402558a59"
+    },
+    {
+      "exit": 0,
+      "name": "metadata",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f699d50fd70cd248a5b3fdc9f5ecc485ca86ff900de2be1aad72fb24b00153e7"
+    },
+    {
+      "exit": 0,
+      "name": "release-list",
+      "stderr": "   Compiling proc-macro2 v1.0.107\n   Compiling rand_core v0.10.1\n   Compiling quote v1.0.47\n   Compiling unicode-ident v1.0.27\n   Compiling libc v0.2.190\n   Compiling cfg-if v1.0.5\n   Compiling serde_core v1.0.229\n   Compiling autocfg v1.5.1\n   Compiling getrandom v0.4.3\n   Compiling zmij v1.0.23\n   Compiling serde_json v1.0.154\n   Compiling cpufeatures v0.3.1\n   Compiling serde v1.0.229\n   Compiling regex-syntax v0.8.11\n   Compiling memchr v2.8.3\n   Compiling bitflags v2.13.2\n   Compiling itoa v1.0.18\n   Compiling unarray v0.1.4\n   Compiling core_detect v1.0.0\n   Compiling chacha20 v0.10.2\n   Compiling rand_xorshift v0.5.0\n   Compiling num-traits v0.2.19\n   Compiling syn v3.0.9\n   Compiling rand v0.10.3\n   Compiling proptest v1.12.0\n   Compiling serde_derive v1.0.229\n   Compiling uarch-engine v0.0.1 (/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/native/crates/uarch-engine)\n    Finished `release` profile [optimized] target(s) in 4.35s\n     Running unittests src/lib.rs (/target/x86_64-unknown-linux-gnu/release/deps/uarch_engine-5bb52a3b178cf5fc)\n",
+      "stderr_sha256": "d6a006c12a65c2e9466c59aab9d8124dbad917f9595a9eacc180d7f02d715eac",
+      "stdout": "tests::arena_reuses_freed_slots_and_refuses_double_free: test\ntests::busy_owner_zero_grant_is_5000_not_3000: test\ntests::canonical_replay_private_bytes: test\ntests::clock_literals_and_fractional_edges: test\ntests::clock_refuses_invalid_frequency_and_overflow: test\ntests::critical_path_overlap_and_fifo_serialization: test\ntests::csr_mesh_torus_routes_and_multiple_nocs: test\ntests::cycle_delay_uses_resolved_domain_without_drift: test\ntests::event_layout_and_tie_order: test\ntests::graph_refuses_duplicates_missing_edges_cycles_owners_domains: test\ntests::owner_foreign_mutation_is_refused: test\ntests::readiness_is_fifo_and_simultaneous_completions_join_by_id: test\ntests::resolved_domains_and_zero_cycles_at_fractional_start: test\ntests::rounded_edges_never_early: test\ntests::wheel_interleaved_scheduling_matches_reference: test\ntests::wheel_levels_overflow_promotion_and_past_refusal: test\ntests::wheel_matches_sorted_reference: test\ntests::wheel_reuses_arena_after_warmup: test\ntests::zero_closure_is_canonical_and_completes_once: test\n\n19 tests, 0 benchmarks\n",
+      "stdout_sha256": "5c8a894cbcce1229a7874cdc7b4ed13bc40303a979df9bb35dfdf2eea268fd48"
+    },
+    {
+      "exit": 0,
+      "name": "release-tests",
+      "stderr": "    Finished `release` profile [optimized] target(s) in 0.01s\n     Running unittests src/lib.rs (/target/x86_64-unknown-linux-gnu/release/deps/uarch_engine-5bb52a3b178cf5fc)\n",
+      "stderr_sha256": "5056fce01a3f3950619527c4c5aa62f362b9ef6ad05947342a0822251254c4e2",
+      "stdout": "\nrunning 19 tests\ntest tests::clock_refuses_invalid_frequency_and_overflow ... ok\ntest tests::clock_literals_and_fractional_edges ... ok\ntest tests::arena_reuses_freed_slots_and_refuses_double_free ... ok\ntest tests::csr_mesh_torus_routes_and_multiple_nocs ... ok\ntest tests::event_layout_and_tie_order ... ok\ntest tests::owner_foreign_mutation_is_refused ... ok\ntest tests::cycle_delay_uses_resolved_domain_without_drift ... ok\ntest tests::graph_refuses_duplicates_missing_edges_cycles_owners_domains ... ok\ntest tests::critical_path_overlap_and_fifo_serialization ... ok\ntest tests::resolved_domains_and_zero_cycles_at_fractional_start ... ok\ntest tests::busy_owner_zero_grant_is_5000_not_3000 ... ok\ntest tests::zero_closure_is_canonical_and_completes_once ... ok\ntest tests::rounded_edges_never_early ... ok\ntest tests::wheel_levels_overflow_promotion_and_past_refusal ... ok\ntest tests::readiness_is_fifo_and_simultaneous_completions_join_by_id ... ok\ntest tests::canonical_replay_private_bytes ... ok\ntest tests::wheel_reuses_arena_after_warmup ... ok\ntest tests::wheel_matches_sorted_reference ... ok\ntest tests::wheel_interleaved_scheduling_matches_reference ... ok\n\nsuccesses:\n\n---- tests::canonical_replay_private_bytes stdout ----\nUARCH_K1_REPLAY_V1={\"duration_ps\":5000,\"completed_jobs\":4,\"jobs\":[{\"job_id\":0,\"owner\":0,\"ready_ps\":0,\"start_ps\":0,\"end_ps\":3000,\"blocking_predecessors\":[]},{\"job_id\":1,\"owner\":1,\"ready_ps\":0,\"start_ps\":0,\"end_ps\":1000,\"blocking_predecessors\":[]},{\"job_id\":2,\"owner\":0,\"ready_ps\":1000,\"start_ps\":3000,\"end_ps\":3000,\"blocking_predecessors\":[0,1]},{\"job_id\":3,\"owner\":1,\"ready_ps\":3000,\"start_ps\":3000,\"end_ps\":5000,\"blocking_predecessors\":[1,2]}],\"intervals\":[{\"owner\":0,\"job_id\":0,\"start_ps\":0,\"end_ps\":3000},{\"owner\":1,\"job_id\":1,\"start_ps\":0,\"end_ps\":1000},{\"owner\":1,\"job_id\":3,\"start_ps\":3000,\"end_ps\":5000}],\"records\":[{\"ordinal\":0,\"t_ps\":0,\"phase\":1,\"owner\":0,\"job_id\":0,\"action\":\"Dispatch\",\"event_seq\":0},{\"ordinal\":1,\"t_ps\":0,\"phase\":1,\"owner\":1,\"job_id\":1,\"action\":\"Dispatch\",\"event_seq\":1},{\"ordinal\":2,\"t_ps\":0,\"phase\":1,\"owner\":0,\"job_id\":0,\"action\":\"Ready\",\"event_seq\":null},{\"ordinal\":3,\"t_ps\":0,\"phase\":1,\"owner\":1,\"job_id\":1,\"action\":\"Ready\",\"event_seq\":null},{\"ordinal\":4,\"t_ps\":0,\"phase\":2,\"owner\":0,\"job_id\":0,\"action\":\"Grant\",\"event_seq\":null},{\"ordinal\":5,\"t_ps\":0,\"phase\":2,\"owner\":1,\"job_id\":1,\"action\":\"Grant\",\"event_seq\":null},{\"ordinal\":6,\"t_ps\":1000,\"phase\":0,\"owner\":1,\"job_id\":1,\"action\":\"Dispatch\",\"event_seq\":3},{\"ordinal\":7,\"t_ps\":1000,\"phase\":0,\"owner\":1,\"job_id\":1,\"action\":\"Complete\",\"event_seq\":null},{\"ordinal\":8,\"t_ps\":1000,\"phase\":1,\"owner\":0,\"job_id\":2,\"action\":\"Ready\",\"event_seq\":null},{\"ordinal\":9,\"t_ps\":3000,\"phase\":0,\"owner\":0,\"job_id\":0,\"action\":\"Dispatch\",\"event_seq\":2},{\"ordinal\":10,\"t_ps\":3000,\"phase\":0,\"owner\":0,\"job_id\":0,\"action\":\"Complete\",\"event_seq\":null},{\"ordinal\":11,\"t_ps\":3000,\"phase\":2,\"owner\":0,\"job_id\":2,\"action\":\"Grant\",\"event_seq\":null},{\"ordinal\":12,\"t_ps\":3000,\"phase\":2,\"owner\":0,\"job_id\":2,\"action\":\"Complete\",\"event_seq\":null},{\"ordinal\":13,\"t_ps\":3000,\"phase\":2,\"owner\":1,\"job_id\":3,\"action\":\"Ready\",\"event_seq\":null},{\"ordinal\":14,\"t_ps\":3000,\"phase\":2,\"owner\":1,\"job_id\":3,\"action\":\"Grant\",\"event_seq\":null},{\"ordinal\":15,\"t_ps\":5000,\"phase\":0,\"owner\":1,\"job_id\":3,\"action\":\"Dispatch\",\"event_seq\":4},{\"ordinal\":16,\"t_ps\":5000,\"phase\":0,\"owner\":1,\"job_id\":3,\"action\":\"Complete\",\"event_seq\":null}]}\n\n\nsuccesses:\n    tests::arena_reuses_freed_slots_and_refuses_double_free\n    tests::busy_owner_zero_grant_is_5000_not_3000\n    tests::canonical_replay_private_bytes\n    tests::clock_literals_and_fractional_edges\n    tests::clock_refuses_invalid_frequency_and_overflow\n    tests::critical_path_overlap_and_fifo_serialization\n    tests::csr_mesh_torus_routes_and_multiple_nocs\n    tests::cycle_delay_uses_resolved_domain_without_drift\n    tests::event_layout_and_tie_order\n    tests::graph_refuses_duplicates_missing_edges_cycles_owners_domains\n    tests::owner_foreign_mutation_is_refused\n    tests::readiness_is_fifo_and_simultaneous_completions_join_by_id\n    tests::resolved_domains_and_zero_cycles_at_fractional_start\n    tests::rounded_edges_never_early\n    tests::wheel_interleaved_scheduling_matches_reference\n    tests::wheel_levels_overflow_promotion_and_past_refusal\n    tests::wheel_matches_sorted_reference\n    tests::wheel_reuses_arena_after_warmup\n    tests::zero_closure_is_canonical_and_completes_once\n\ntest result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s\n\n",
+      "stdout_sha256": "6e9f675d27db390fa07887ab4fe42be4720689883f7e9fac3bfb7911498fd5f4"
+    },
+    {
+      "exit": 0,
+      "name": "rustc",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+      "stdout_sha256": "b569b0c98ea3133c7252b4b8ea6b39b7b353813df0dd5f5c412c355691424112"
+    },
+    {
+      "exit": 0,
+      "name": "rustfmt",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "rustfmt 1.10.0-stable (b940084d7e 2026-09-28)\n",
+      "stdout_sha256": "32ae47248d3c1c88781660ad9acdfd0496c040eda7e0759c5f1fec8122c97a0a"
+    },
+    {
+      "exit": 0,
+      "name": "targets",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "x86_64-unknown-linux-gnu\n",
+      "stdout_sha256": "0f8c1ba3b2472237fbea77ab675c51c649f80370d3e559f385f9af57d2a66036"
+    }
+  ],
+  "stages": [
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--pull",
+        "never",
+        "--platform",
+        "linux/amd64",
+        "--network",
+        "none",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,src=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source,dst=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source,readonly",
+        "--mount",
+        "type=bind,src=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/target,dst=/target",
+        "--mount",
+        "type=bind,src=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/receipts,dst=/receipts",
+        "--tmpfs",
+        "/tmp",
+        "--workdir",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/native",
+        "--env",
+        "CARGO_HOME=/usr/local/cargo",
+        "--env",
+        "RUSTUP_HOME=/usr/local/rustup",
+        "--env",
+        "RUSTUP_TOOLCHAIN=1.99.0-x86_64-unknown-linux-gnu",
+        "--env",
+        "RUSTUP_AUTO_INSTALL=0",
+        "--env",
+        "CARGO_NET_OFFLINE=true",
+        "--env",
+        "CARGO_TARGET_DIR=/target",
+        "--entrypoint",
+        "/bin/bash",
+        "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/docs/reviews/U4-B-final-reconciliation-v1/native-container.sh",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source",
+        "checks"
+      ],
+      "cwd": "None",
+      "exit": 0,
+      "name": "checks-container",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--pull",
+        "never",
+        "--platform",
+        "linux/amd64",
+        "--network",
+        "none",
+        "--user",
+        "1000:1000",
+        "--mount",
+        "type=bind,src=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source,dst=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source,readonly",
+        "--mount",
+        "type=bind,src=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/target,dst=/target",
+        "--mount",
+        "type=bind,src=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/receipts,dst=/receipts",
+        "--tmpfs",
+        "/tmp",
+        "--workdir",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/native",
+        "--env",
+        "CARGO_HOME=/usr/local/cargo",
+        "--env",
+        "RUSTUP_HOME=/usr/local/rustup",
+        "--env",
+        "RUSTUP_TOOLCHAIN=1.99.0-x86_64-unknown-linux-gnu",
+        "--env",
+        "RUSTUP_AUTO_INSTALL=0",
+        "--env",
+        "CARGO_NET_OFFLINE=true",
+        "--env",
+        "CARGO_TARGET_DIR=/target",
+        "--entrypoint",
+        "/bin/bash",
+        "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source/docs/reviews/U4-B-final-reconciliation-v1/native-container.sh",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K1-environment-v1/scratch-template/source",
+        "inspect"
+      ],
+      "cwd": "None",
+      "exit": 0,
+      "name": "inspect-container",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "x86_64-unknown-linux-gnu\n",
+      "stdout_sha256": "0f8c1ba3b2472237fbea77ab675c51c649f80370d3e559f385f9af57d2a66036"
+    }
+  ]
+}

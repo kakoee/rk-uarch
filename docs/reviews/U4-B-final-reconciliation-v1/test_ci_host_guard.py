@@ -153,6 +153,7 @@ def test_results_require_both_modes_exact_tools_and_nonempty_passes(tmp_path):
         "cargo-deny",
         "targets",
         "metadata",
+        "metadata-target",
         "fmt",
         "clippy-tests",
         "licences",

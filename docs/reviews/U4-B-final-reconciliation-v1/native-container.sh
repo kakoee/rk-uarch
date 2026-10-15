@@ -39,7 +39,8 @@ if [ "$stage" = inspect ]; then
   done
   run_log targets rustup target list --installed
   grep -Fx 'x86_64-unknown-linux-gnu' "$receipts/targets.log"
-  run_log metadata cargo metadata --locked --offline --all-features --format-version 1 \
+  run_log metadata cargo metadata --locked --offline --all-features --format-version 1
+  run_log metadata-target cargo metadata --locked --offline --all-features --format-version 1 \
     --filter-platform x86_64-unknown-linux-gnu
 elif [ "$stage" = checks ]; then
   run_log fmt cargo fmt --all -- --check
@@ -53,7 +54,7 @@ elif [ "$stage" = checks ]; then
     run_log "$mode-list" cargo test --locked --offline --workspace --all-targets --all-features \
       --target x86_64-unknown-linux-gnu "${flags[@]}" -- --list
     run_log "$mode-tests" cargo test --locked --offline --workspace --all-targets --all-features \
-      --target x86_64-unknown-linux-gnu "${flags[@]}" -- --nocapture
+      --target x86_64-unknown-linux-gnu "${flags[@]}" -- --show-output
   done
 else
   echo "unknown container stage" >&2
