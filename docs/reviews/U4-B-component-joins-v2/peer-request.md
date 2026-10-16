@@ -44,3 +44,10 @@ success-context profiles whose selection separately expects resource refusal. No
 admission change is needed for the latter. B will test both unchanged negative-profile
 refusal and synthetic success-context guards; real external authority remains absent.
 The final /2 field names and exact patch are still required for carrier/checker joins.
+
+B worksheet correction caught before candidate freeze: at DRAM900MHz the published third
+edge is ceil(3e12/900e6)=3334, exactly the incoming D10 timestamp. Receiving alignment is
+3334, not4445. End56667 and all historical makespans remain unchanged. The independent
+edge-search test caught this author decomposition error; do not create an extra alignment
+interval at this integer-coincident edge. Raw next_edge(n=0) still aligns; zero-hop routing
+bypasses conversion and preserves time. These are distinct rules.

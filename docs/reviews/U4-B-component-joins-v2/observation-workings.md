@@ -21,7 +21,7 @@ Final carrier names must join the exact A /2 patch. All times below are ps, half
   port59000..60000. memory51250/noc8750. Channel occupied only rational service;
   the latency and alignments do not invent channel busy time.
 * D10 remote read: clocks core800MHz/noc1200MHz/dram900MHz. Outbound0..3334;
-  DRAM receiving alignment3334..4445, latency4445..56667; service56667..4183101/71,
+  DRAM receiving alignment3334..3334 (edge3 already equals3334), latency3334..56667; service56667..4183101/71,
   publication58917; return alignment58917..59167 then four NoC cycles..62500;
   core port62500..63750. memory56833/noc6917. A correct makespan with DRAM alignment
   relabelled NoC must fail. Each clock witness must identify this request and subphase.
