@@ -1,0 +1,594 @@
+{
+  "status": "author preparation only; no native invocation",
+  "source_commit": "c56820a54a2ccb681d9e925c0308b14990bf44bd",
+  "export": "/tmp/u4-b-final-joins-6uv03lxp",
+  "python": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+  "patch_sha256": "9655d035ca5052bdecdb63a856625586d6b8f7b9538b4b81055885feb34f52a4",
+  "commands": [
+    {
+      "name": "combined",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-m",
+        "not native",
+        "validation/component",
+        "tests/unit/test_u4_a_component_mapper.py",
+        "tests/unit/test_u4_a_mapped_loader.py",
+        "tests/_a_component_candidate.py",
+        "tests/_a_component_result.py",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/combined.log",
+      "log_sha256": "f95699205f2dbbcf4f69940ee1cecbec040e80b49db1c77567e5d3cdb9312730",
+      "summary": [
+        "279 passed, 2 skipped, 1 deselected in 24.33s"
+      ]
+    },
+    {
+      "name": "accumulator-writer-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[other_writer-InvalidDependency]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/accumulator-writer-removed.log",
+      "log_sha256": "8d45b0597ebaa49c29190774f858ba78ab1139049a9e7d8726f09c5a86360535",
+      "summary": [
+        "1 failed in 0.35s"
+      ]
+    },
+    {
+      "name": "accumulator-writer-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[other_writer-InvalidDependency]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/accumulator-writer-restored.log",
+      "log_sha256": "3be62f393f5921607a873beb897436b1f6af7bf8e959115d728ee0ecc5bd3a34",
+      "summary": [
+        "1 passed in 0.35s"
+      ]
+    },
+    {
+      "name": "live-alias-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[no_order-LiveBufferAlias]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/live-alias-removed.log",
+      "log_sha256": "32f0a3820f4403a02daa66329cadfcade0698f6ff1b5eb70e33ffb991bdce374",
+      "summary": [
+        "1 failed in 0.38s"
+      ]
+    },
+    {
+      "name": "live-alias-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[no_order-LiveBufferAlias]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/live-alias-restored.log",
+      "log_sha256": "b55e3964fe4f7284de74686d27b00bb12462ea7b499eabe3caf7613fc3e5f418",
+      "summary": [
+        "1 passed in 0.36s"
+      ]
+    },
+    {
+      "name": "null-domain-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[clock-channel_service:6]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/null-domain-removed.log",
+      "log_sha256": "5fab006a2c41c27307dacecb9000b5ed110aa49da00f28385d1c1316aff8c457",
+      "summary": [
+        "1 failed in 0.90s"
+      ]
+    },
+    {
+      "name": "null-domain-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[clock-channel_service:6]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/null-domain-restored.log",
+      "log_sha256": "781d8adb85d573445f0a3aa93007fd37217a9bd16cb36bbbb550e5b91756898b",
+      "summary": [
+        "1 passed in 0.93s"
+      ]
+    },
+    {
+      "name": "ordinary-owner-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[owner-ordinary]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/ordinary-owner-removed.log",
+      "log_sha256": "0b193be3e97e99f094e15c78a03f7888c7078c267e5ee5738998b76d23d32f66",
+      "summary": [
+        "1 failed in 0.94s"
+      ]
+    },
+    {
+      "name": "ordinary-owner-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[owner-ordinary]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/ordinary-owner-restored.log",
+      "log_sha256": "f198f860ca02de44cb948b656eb5540efce07ed67ca9fdf1bda5638bc1ad39a4",
+      "summary": [
+        "1 passed in 1.00s"
+      ]
+    },
+    {
+      "name": "rational-mechanism-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_independent_mechanism_discrimination[channel_duration]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/rational-mechanism-removed.log",
+      "log_sha256": "ab787336e1d6de56e63ca82ebff4c71ad0e3f53ffa79e7653bb270d52a18acb3",
+      "summary": [
+        "1 failed in 0.94s"
+      ]
+    },
+    {
+      "name": "rational-mechanism-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_independent_mechanism_discrimination[channel_duration]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/rational-mechanism-restored.log",
+      "log_sha256": "781d8adb85d573445f0a3aa93007fd37217a9bd16cb36bbbb550e5b91756898b",
+      "summary": [
+        "1 passed in 0.93s"
+      ]
+    },
+    {
+      "name": "lint",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "validation/component",
+        "docs/reviews/U4-B-component-joins-v2",
+        "src/rkuarch/mapping/component.py",
+        "src/rkuarch/workload/component.py",
+        "contract/uarch_contract/mapped.py"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/lint.log",
+      "log_sha256": "982aa5e0c9c3b7d28e11a86ea0fe1d69ed92539b58db4bb9530e7e4336d679eb",
+      "summary": [
+        "Found 1 error."
+      ]
+    },
+    {
+      "name": "lint-corrected",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "validation/component",
+        "docs/reviews/U4-B-component-joins-v2",
+        "src/rkuarch/mapping/component.py",
+        "src/rkuarch/workload/component.py",
+        "contract/uarch_contract/mapped.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/lint-corrected.log",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "summary": [
+        "All checks passed!"
+      ]
+    },
+    {
+      "name": "types",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "validation/component/observations_v2.py",
+        "validation/component/phase_laws.py",
+        "validation/component/join_inputs.py",
+        "validation/component/observations.py",
+        "src/rkuarch/mapping/component.py",
+        "src/rkuarch/workload/component.py",
+        "contract/uarch_contract/mapped.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/types.log",
+      "log_sha256": "050c52a2b0c61e8b681ef5c485e0bc03340b8d55148e0acef27d744c8be42033",
+      "summary": [
+        "Success: no issues found in 7 source files"
+      ]
+    },
+    {
+      "name": "schema",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-c",
+        "import sys,runpy;sys.path[:0]=['src','contract','.'];sys.argv=['generate','--check'];runpy.run_module('uarch_contract.generate',run_name='__main__')"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/schema.log",
+      "log_sha256": "8aaf0d1dbe1002fb1181e9145739bc5e1ecd35a068b2387de485beed3807243b",
+      "summary": [
+        "Contract schemas are fresh."
+      ]
+    },
+    {
+      "name": "currentness",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/currentness.log",
+      "log_sha256": "a1b736c9be57317ad2a7668752f3474499ef09ac92b4263ea8da333b4a5162d1",
+      "summary": [
+        "snapshot manifest, matrix and current compatibility verified: /tmp/u4-b-final-joins-6uv03lxp/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
+      ]
+    },
+    {
+      "name": "final-affected",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py",
+        "tests/_a_component_candidate.py",
+        "tests/_a_component_result.py",
+        "contract/tests/mapped/test_k2_semantic_completion.py",
+        "validation/component/test_join_selection.py",
+        "validation/component/test_phase_laws.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-affected.log",
+      "log_sha256": "7e4e60e8f1f43acbf56d2d1c769606b590d2cebfc14ea934c86803ab239fe190",
+      "summary": [
+        "......................................................                   [100%]",
+        "126 passed in 11.11s"
+      ]
+    },
+    {
+      "name": "final-accumulator-writer-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[other_writer-InvalidDependency]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-accumulator-writer-removed.log",
+      "log_sha256": "c36d9d65282eca7e439bc806376a06e232bd67da838246ed8645c4842ae03b86",
+      "summary": [
+        "FAILED docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[other_writer-InvalidDependency]",
+        "1 failed in 0.37s"
+      ]
+    },
+    {
+      "name": "final-accumulator-writer-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[other_writer-InvalidDependency]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-accumulator-writer-restored.log",
+      "log_sha256": "b6533422d1630740f5655134f45127452989eca69913155ff0cdf6331ecfe21d",
+      "summary": [
+        ".                                                                        [100%]",
+        "1 passed in 0.37s"
+      ]
+    },
+    {
+      "name": "final-live-alias-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[no_order-LiveBufferAlias]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-live-alias-removed.log",
+      "log_sha256": "6f67445f1e9589d3df10b3a02ea8307393564ec46640289c2827bd63906445eb",
+      "summary": [
+        "FAILED docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[no_order-LiveBufferAlias]",
+        "1 failed in 0.33s"
+      ]
+    },
+    {
+      "name": "final-live-alias-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[no_order-LiveBufferAlias]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-live-alias-restored.log",
+      "log_sha256": "b6533422d1630740f5655134f45127452989eca69913155ff0cdf6331ecfe21d",
+      "summary": [
+        ".                                                                        [100%]",
+        "1 passed in 0.37s"
+      ]
+    },
+    {
+      "name": "final-null-domain-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[clock-channel_service:6]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-null-domain-removed.log",
+      "log_sha256": "8e5b3af3b429a59aeda7ffb2a7c29a44f5f6e96ab0336c720efc19d96a188a4f",
+      "summary": [
+        "FAILED docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[clock-channel_service:6]",
+        "1 failed in 0.87s"
+      ]
+    },
+    {
+      "name": "final-null-domain-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[clock-channel_service:6]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-null-domain-restored.log",
+      "log_sha256": "ec3c61992e3bb1a5aac88c5f3c5619a6eccaa445b8e776896e3c8c676f9f6278",
+      "summary": [
+        ".                                                                        [100%]",
+        "1 passed in 0.85s"
+      ]
+    },
+    {
+      "name": "final-ordinary-owner-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[owner-ordinary]"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-ordinary-owner-removed.log",
+      "log_sha256": "419e86c6c35140dae368e4fcdf8d79ec3ccbab1b43e43d994ad31de01c1b99b5",
+      "summary": [
+        "FAILED docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[owner-ordinary]",
+        "1 failed in 0.87s"
+      ]
+    },
+    {
+      "name": "final-ordinary-owner-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_carrier.py::test_queue_bindings_and_restoration[owner-ordinary]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-ordinary-owner-restored.log",
+      "log_sha256": "ec3c61992e3bb1a5aac88c5f3c5619a6eccaa445b8e776896e3c8c676f9f6278",
+      "summary": [
+        ".                                                                        [100%]",
+        "1 passed in 0.85s"
+      ]
+    },
+    {
+      "name": "final-lint",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "validation/component",
+        "docs/reviews/U4-B-component-joins-v2",
+        "src/rkuarch/mapping/component.py",
+        "src/rkuarch/workload/component.py",
+        "contract/uarch_contract/mapped.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-lint.log",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "summary": [
+        "All checks passed!"
+      ]
+    },
+    {
+      "name": "final-types",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "validation/component/observations_v2.py",
+        "validation/component/phase_laws.py",
+        "validation/component/join_inputs.py",
+        "validation/component/observations.py",
+        "validation/component/selection.py",
+        "src/rkuarch/mapping/component.py",
+        "src/rkuarch/workload/component.py",
+        "contract/uarch_contract/mapped.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-types.log",
+      "log_sha256": "157a09cfcdfdfb5977479c5a1c08345149263a3e990a2ec976ef28aaeec9cae6",
+      "summary": [
+        "Success: no issues found in 8 source files"
+      ]
+    },
+    {
+      "name": "final-origins",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-c",
+        "import sys;sys.path[:0]=['src','contract','.'];from pathlib import Path;import uarch_contract.mapped as c,rkuarch.mapping.component as m,validation.component.observations_v2 as b;root=Path.cwd();[(print(x.__file__),None if Path(x.__file__).is_relative_to(root) else sys.exit(1)) for x in (c,m,b)]"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/final-origins.log",
+      "log_sha256": "9eaa98aa376713ca4d1fa3b400c9e88ea9382ca2837640033dc53b0a1cb7c170",
+      "summary": [
+        "/tmp/u4-b-final-joins-6uv03lxp/src/rkuarch/mapping/component.py",
+        "/tmp/u4-b-final-joins-6uv03lxp/validation/component/observations_v2.py"
+      ]
+    },
+    {
+      "name": "unmasked-writer-positive",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_actual_accumulator_writer_without_alias_mask"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/unmasked-writer-positive.log",
+      "log_sha256": "acbadd455418fe405791d2d792bd1c63190d32c09dc2792bcd7909f7c0699441",
+      "summary": [
+        "1 passed in 0.88s"
+      ]
+    },
+    {
+      "name": "unmasked-writer-removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_actual_accumulator_writer_without_alias_mask"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/unmasked-writer-removed.log",
+      "log_sha256": "c50f4be42bf6df4dec1680487105555e6022f9211ed07187919e8c77e15f956b",
+      "summary": [
+        "1 failed in 0.88s"
+      ]
+    },
+    {
+      "name": "unmasked-writer-restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_actual_accumulator_writer_without_alias_mask"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log": "/tmp/u4-b-final-joins-6uv03lxp/b-audit-logs/unmasked-writer-restored.log",
+      "log_sha256": "acbadd455418fe405791d2d792bd1c63190d32c09dc2792bcd7909f7c0699441",
+      "summary": [
+        "1 passed in 0.88s"
+      ]
+    }
+  ],
+  "logs_policy": "Raw logs remain in private export; concise hashes/summaries published.",
+  "final_candidate_patch_sha256": "3106fba95d8c1aedb9c115e94758298676e91a5b20da47e1529750869489a3b9",
+  "final_source_commit": "104dbfc6c575a68889059d5cf679337a7d3f7252",
+  "final_protected_postimages_verified": true,
+  "live_protected_preimages_unchanged": true,
+  "final_affected_source_overlays": {
+    "validation/component/observations_v2.py": "0c45365638a00babd8e31e8b31c18a133b00a1d05c634f0336627b3dc88b8dae",
+    "validation/component/selection.py": "23cac1199db2f8aada9351759c8df180f4b8549f80ae07f1d608b76c884dbe78",
+    "validation/component/test_join_selection.py": "9144e27c9927b4e12d154c16bddd5a5396c59bf925999226235ec192843de83c",
+    "docs/reviews/U4-B-component-joins-v2/run_private.py": "d12e64f032341ccccaf93de960b5687b7cc444f8e2b128e6d86ce608588b7901"
+  },
+  "guard_reason_audit": "Initial writer deletion exposed LiveBufferAlias (refusal-order discrimination); final disjoint84B footprints isolate writer and invalid input survives only without that guard. Other four removed guards each yielded DID NOT RAISE.",
+  "final_test_file_bindings": {
+    "docs/reviews/U4-B-component-joins-v2/test_accumulator.py": "2682db2dfed9904da30a73ecc802967344bcb68c37a361517075271080af3778",
+    "docs/reviews/U4-B-component-joins-v2/test_carrier.py": "62c00157a82d8307e38df5ecf79510932467b05b3dbde2849f0f19db43e4c1a4",
+    "docs/reviews/U4-B-component-joins-v2/synthetic_carrier.py": "e423f107e31eac4f95492e1c980a46a8fb4e2471722a104bd90bf8e85a0c6be6",
+    "validation/component/test_join_selection.py": "9144e27c9927b4e12d154c16bddd5a5396c59bf925999226235ec192843de83c"
+  },
+  "selection_hash": "sha256:3e11c5c4753503691bb9f4b2fccaab2e57f5e3f6aed5b802e9124300f7b97bc3",
+  "final_status": "all final affected checks passed; retained initial lint/setup/refusal-order corrections are documented",
+  "remaining_engine_build_authority": "absent; no native calls",
+  "evidence_scopes": {
+    "combined": "279 passed, 2 missing-human-workings skips, 1 native deselection on pre-boundary-fix candidate; unchanged components reused",
+    "final_affected": "126 passed on final3106fba9 candidate with final checker/selection",
+    "unmasked_writer": "positive, expected mutant failure, restored positive; affected control only",
+    "counts": "overlapping selections; not additive unique totals"
+  }
+}

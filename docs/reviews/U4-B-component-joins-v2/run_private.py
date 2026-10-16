@@ -45,7 +45,7 @@ def main() -> None:
     ]:
         shutil.copyfile(out / A / source, out / "tests" / target)
     env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "MYPYPATH")}
-    logs = DEST / "checks"
+    logs = out / "b-audit-logs"
     logs.mkdir(exist_ok=True)
     records = []
 
@@ -59,7 +59,7 @@ def main() -> None:
                 argv=argv,
                 exit_code=result.returncode,
                 expected_exit_code=expected,
-                log="checks/" + name + ".log",
+                log=str(logs / (name + ".log")),
                 log_sha256=sha(data),
             )
         )
@@ -93,7 +93,7 @@ def main() -> None:
                 "contract/uarch_contract/mapped.py",
                 "isinstance(producer, Compute) and producer.accumulator_buffer_id == buf.id",
                 "True",
-                "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_semantic_attack_and_restored_control[other_writer-InvalidDependency]",
+                "docs/reviews/U4-B-component-joins-v2/test_accumulator.py::test_actual_accumulator_writer_without_alias_mask",
             ),
             (
                 "live-alias",

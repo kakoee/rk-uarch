@@ -182,3 +182,23 @@ def test_all_terminal_consumers_before_reuse():
     with pytest.raises(ValueError, match="LiveBufferAlias"):
         check(b)
     check(multiple_consumers())
+
+
+def test_actual_accumulator_writer_without_alias_mask():
+    """Use disjoint small footprints so alias/capacity cannot mask the writer guard."""
+    b = deepcopy(build()["items"]["C04-control"]["bundle"])
+    b["mapping_policy"]["version"] = "2"
+    g = graph(b)
+    acc = next(x for x in g["buffers"] if x["space"] == "accumulator")
+    acc.update(producer_id="c", final_consumer_ids=["c"])
+    second = deepcopy(acc)
+    second.update(id="zacc", offset_bytes=256, producer_id="z", final_consumer_ids=["z"])
+    g["buffers"].append(second)
+    next(x for x in g["jobs"] if x["id"] == "z")["accumulator_buffer_id"] = "zacc"
+    g["dependencies"] = [dict(before="c", after="z")]
+    check(deepcopy(b))
+    second["producer_id"] = "c"
+    with pytest.raises(ValueError, match="InvalidDependency"):
+        check(b)
+    second["producer_id"] = "z"
+    check(b)

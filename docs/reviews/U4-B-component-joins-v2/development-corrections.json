@@ -1,0 +1,60 @@
+{
+  "scope": "author development history; no native discrepancies claimed",
+  "corrections": [
+    {
+      "kind": "author arithmetic",
+      "case": "B2-255-256",
+      "initial": 2363000,
+      "corrected": 2364000,
+      "reason": "Both staging and drain retain their ceiling cycle counts; old C04 untouched"
+    },
+    {
+      "kind": "author phase decomposition",
+      "case": "D10-read",
+      "initial_alignment": 4445,
+      "corrected_alignment": 3334,
+      "reason": "Published DRAM edge3 equals incoming integer3334; historic duration unchanged"
+    },
+    {
+      "kind": "peer regression resolved",
+      "candidate": "649f3e5",
+      "test": "test_historical_persistent_scratch_controls",
+      "reason": "Historical @1 producer metadata was incorrectly treated as transient",
+      "resolution": "Only @2 opts into lifetime readers; old bytes preserved"
+    },
+    {
+      "kind": "author expected refusal layer",
+      "case": "transient wrong owner",
+      "initial": "CapacityExceeded",
+      "corrected": "InvalidResource",
+      "reason": "New explicit owner guard precedes size law"
+    },
+    {
+      "kind": "synthetic fixture setup",
+      "errors": [
+        "missing synthetic model implementation_hash",
+        "integer versus float canonical counts hash",
+        "hardcoded ordinary queue owner assumed2 DMA engines; actual baseline4"
+      ],
+      "resolution": "Real required fields/canonical types and declared owner lookup; no synthetic hash becomes authority"
+    },
+    {
+      "kind": "author lint",
+      "file": "run_private.py",
+      "reason": "101-character command literal",
+      "resolution": "Wrapped string; failed receipt retained; reran affected static checks only"
+    },
+    {
+      "kind": "guard masking resolved",
+      "test": "other_writer",
+      "initial": "Removing writer guard exposed LiveBufferAlias",
+      "resolution": "Added disjoint84B/84B footprints at0/256; removal now accepts invalid producer; exact restoration passes"
+    },
+    {
+      "kind": "peer fixed-delay compatibility resolved",
+      "source": "A32e5d89",
+      "reason": "Candidate helper isinstance check rejected partial synthetic namespaces",
+      "resolution": "Fixed-delay helper remains byte-identical; format split occurs only at real result boundary; final affected checks pass"
+    }
+  ]
+}

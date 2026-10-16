@@ -101,3 +101,18 @@ ext_counts/noc_flit_hop_count, u_c0_duration_ps. These correspond to fields stru
 forced null. Other optional reported diagnostics do not acquire physical meaning. Synthetic
 controls keep their conspicuous SYNTHETIC-unit-carrier-only label and are never selected
 as native inputs/results. A: join these exact labels in the final native checklist.
+
+## Final independent freeze
+
+B selection b02301d (integrated104dbfc):99 exact cells, including all82 old B identities,
+all4 old A fixtures,2 A2 inputs whose manifest matches A,3 B2 positives and8 success-context
+resource negatives. Patch3106fba9 and all five protected/dependent postimages match exactly.
+B279 combined passes/two human skips/one native deselection; final affected126 passes.
+Final unmasked writer guard uses disjoint84B slots so LiveBufferAlias cannot mask it; all
+five final guard removals accept the corresponding invalid boundary input, exact restoration
+and affected controls pass. Initial masked refusal-order finding remains in receipts.
+Independent static closure traversal matches all5 A runtime inventories/deltas; selected
+support56→56 with no changes;22 native files and all TPU readiness bytes preserved.
+Raw logs remain private /tmp; checks/restoration/support/peer JSON summarize/hash evidence.
+No ordinary source/fixture disagreement remains. Actual human semantic/install, release/
+authority, negative transport and L1 workings remain at their explicitly separate boundaries.
