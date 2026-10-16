@@ -1,0 +1,27 @@
+{
+  "source_commit": "2c62a0f988b1073ea1a72598961e691d93422b18",
+  "scope": "bounded mapper/checker join on unchanged source; no full suite, native execution, or protected install",
+  "selected": [
+    "validation/component/test_mapper_join.py",
+    "validation/component/test_checks.py::test_synthetic_prospective_nonclocked_population_controls",
+    "tests/unit/test_u4_a_component_mapper.py::test_distinct_accumulator_capacity_is_explicit"
+  ],
+  "stdout": "..........                                                               [100%]\n10 passed in 2.15s\n",
+  "stderr": "",
+  "exit_code": 0,
+  "patches": [
+    {
+      "patch": "accumulator-lifetime.proposed.patch",
+      "sha256": "06372151102eec283631f75a38cc0e15a60f427e0af39bda2f2724472d2d2468",
+      "postimage": "2f0dcae117c34d843998106fcd6abf821888a4ca51e54218e5824ade06398950"
+    },
+    {
+      "patch": "nonclocked-queues.proposed.patch",
+      "sha256": "d36d377728ad3890daece0012eaed553264c173a86374216605b5fc0b477cc13",
+      "postimage": "9df35352b3f39c51e90511f52d248af5d57d8b50c1508734b029835a87d5c3db"
+    }
+  ],
+  "combined_scratch_postimage": "b244f8733d116b0887f6ba135ea06b064e31ab288c50debffca3a09610da5dd0",
+  "patch_behavior_tested": false,
+  "private_export": "/tmp/u4-component-reconcile-lfpxavh6/export"
+}
