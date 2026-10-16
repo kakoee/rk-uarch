@@ -1,0 +1,42 @@
+--- corrected/probe.rs
++++ leaf/probe.rs
+@@ -260,6 +260,22 @@
+     }
+ }
+ #[derive(Serialize, Deserialize)]
++#[serde(untagged)]
++enum LeafValue {
++    Rational(Rational),
++    Unsigned(u128),
++    Signed(i128),
++    Text(String),
++    Bool(bool),
++    Null(()),
++}
++#[derive(Serialize, Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Leaf {
++    path: String,
++    value: LeafValue,
++}
++#[derive(Serialize, Deserialize)]
+ #[serde(rename_all = "snake_case")]
+ enum Calibration {
+     Measured,
+@@ -441,8 +457,14 @@
+             v
+         }
+         "leaf" => {
+-            leaf_value(&v).map_err(|e| fail("carrier", e))?;
+-            v
++            let t: Leaf = serde_json::from_str(s).map_err(|e| fail("carrier", e.to_string()))?;
++            if t.path.trim().is_empty() {
++                return Err(fail("carrier", "empty path".into()));
++            }
++            if let LeafValue::Rational(r) = &t.value {
++                r.check().map_err(|e| fail("carrier", e))?;
++            }
++            serde_json::to_value(t).unwrap()
+         }
+         "json-float" => {
+             let n = v

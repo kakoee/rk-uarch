@@ -1,0 +1,137 @@
+{
+  "provenance": "Exact host command invocations from this session; not an exhaustive host environment or file-read trace. Container explicit environments are in commands.json; compiler environments are in the compressed diagnostics.",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-setup.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        ".venv/bin/python",
+        "-I",
+        "-S",
+        "-B",
+        "/tmp/u4-c2r-freeze.py"
+      ],
+      "stdout": "python-derivation.log",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-rules.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-controls.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-baseline.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-implement.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-run.py",
+        "prebuild"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-run.py",
+        "debug"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-run.py",
+        "test-debug"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-evaluate.py",
+        "debug"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-run.py",
+        "release"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-run.py",
+        "test-release"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-evaluate.py",
+        "release"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-reverts.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-comparator-revert.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-collect.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "/tmp/u4-c2r-package.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "additional_publication_commands": "validation.json records final lint/format/evidence commands. Normal Git integration recorded separately. First verifier lint found one long docstring and unsorted imports; corrected before final passing lint; no probe or expectation change.",
+  "host_environment": "Not snapshotted for setup/derivation orchestration; Python reference uses -I -S -B and explicit private reference/site-package imports. No global environment modifications."
+}
