@@ -81,3 +81,9 @@ Javid subsequently asked to share setup across repeats of one case. The
 per-call reuse proposal to a bounded case-scoped interface and assigns B case-group
 scheduling. It retains six fresh executions and complete per-output validation;
 grouping by itself does not authorize skipping admission or reusing results.
+
+The [startup/developer-loop addendum](shared-startup-and-dev-loop-addendum.md) extends
+those same tasks to shared host/corpus resolution across modes and workers, separately
+measured startup/processing costs, and explicit fast versus complete developer test
+selections. It preserves current qualification obligations and U0024; it does not
+turn the full first-use campaign into a mandatory check for every edit.
