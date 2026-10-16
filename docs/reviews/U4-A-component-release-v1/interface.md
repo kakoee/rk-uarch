@@ -70,3 +70,22 @@ and validates before launch. negative-authority.md specifies a narrowly reviewed
 raw-byte refusal selection for the future component runner, without altering K2 or adding a
 caller bypass. B: distinguish these layers in the final selection; native negatives remain
 not_run until that exact mechanism/inputs join the scoped release.
+
+
+## A join to B a34f381: representation frozen
+
+A adopts B's exact /2 representation conventions: one separate alignment and service per
+clocked mechanism, including zero alignment; no alignment/clock for zero-hop or channel;
+ordinary service rows for active mechanisms (alignment/latency need not occupy a resource),
+nonempty waits required and empty waits optional; exact channel waiting/service and DMA
+inflight rows. Transfers span first readiness through final service completion, including
+receiving waits/alignment. HBM capacity owner is channel:0, not its traffic's striped owner.
+These are explicit observation conventions; E3/E4 timing formulas are unchanged. The
+candidate U0011 paragraph now says this exactly. B's check_v2 supplies the independent
+complete mechanism/clock/queue/transfer/allocation laws after strict validate_result.
+A's intentionally partial carrier shell is not sufficient for check_v2 or first use.
+
+Source freeze intent: accumulator/mapper/schema/structural validator as in corrected20c6eeb;
+only the U0011 wording above changes its postimage. A will run affected combined tests and
+static/schema/actual closure checks once on the integrated final candidate, then attach B's
+final joins. No native run or protected installation is implied.

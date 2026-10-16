@@ -1183,7 +1183,7 @@
          )
 --- a/docs/decisions/U0011-the-native-engine-core.md
 +++ b/docs/decisions/U0011-the-native-engine-core.md
-@@ -390,3 +390,94 @@
+@@ -390,3 +390,103 @@
  event-injection workload carrier is introduced, no obligation is deleted and no private
  execution is relabelled public. Without acceptance of this exception, literal all-case
  public coverage remains blocked, even after public clock instrumentation is implemented.
@@ -1235,8 +1235,12 @@
 +Receiving domains are core for compute, read/write ports and acknowledgement; noc for
 +request/response/unicast hops and barriers; dram for DRAM latency; null for rational channel
 +service. Alignment is a separate nonoccupied activity of the receiving subphase and category.
-+Clock records reference the exact activity. Existing E3/E4 next_edge and zero-owned-duration
-+laws govern; zero-hop movement stays at its arrival and performs no invented edge alignment.
++Every clocked subphase has one service activity and one separate alignment activity,
++including zero-length alignment, with one exact clock record for each. Rational channel
++service and zero-hop routing have no alignment or clock record. Service ready follows its
++alignment; alignment ready follows the prior subphase (or request issue/job grant for the
++first). Clock records reference the exact activity. Existing E3/E4 next_edge and
++zero-owned-duration laws govern; zero-hop movement stays at arrival without edge alignment.
 +Channel exact start/end ratios are reduced; published integer endpoints are ceilings. Never
 +feed integer publication rounding back into channel service. Timing formulas remain E3/E4.
 +
@@ -1244,7 +1248,11 @@
 +waiting/service only, clock null. DMA queues are dma_inflight:<flattened-engine>, exact
 +fragment and DMA owner, inflight only, clock null. Ordinary queues are
 +activity:<subphase>:<owner>, reference the exact activity and request (or compute/barrier job),
-+use its receiving domain and waiting [ready,start] or service [start,end]. The same identity,
++use its receiving domain and waiting [ready,start] or service [start,end]. Service population
++means active mechanism, including nonoccupied alignment/latency, not resource busy time;
++only occupies_resource selects busy intervals. Ordinary service rows are explicit; zero
++waiting rows may be omitted, nonempty waits may not. Channel waiting/service and DMA
++inflight each require exactly one row per declared request. The same identity,
 +owner and population laws apply before checking domains; nonnull cannot escape validation.
 +Finite queue windows clip initial/terminal members, count events at start not end, retain
 +separate waiting/service/inflight populations and return null residence for zero flow.
@@ -1254,9 +1262,10 @@
 +unicast_noc for unicast. Direction always remains read/write/unicast from the declared
 +request; request/ack control hops carry zero payload/transaction bytes, payload-bearing
 +NoC/core-port boundaries carry payload bytes and zero HBM transaction bytes, dram carries
-+both declared payload and rounded transaction bytes. Boundary endpoints join the corresponding
-+subphase's start/end; dram spans latency through channel completion. Allocation owners are
-+sram:<core>, matrix:<core> for accumulator, and the canonical first channel owner for HBM
++both declared payload and rounded transaction bytes. Boundary enter joins the first subphase's ready time (before its receiving wait/alignment)
++and leave joins the last service completion; dram spans latency readiness through channel
++completion. Allocation owners are
++sram:<core>, matrix:<core> for accumulator, and channel:0 for HBM
 +capacity accounting (HBM allocation is shared address capacity, not channel-local capacity).
 +Allocation interval covers every actual use; explicit transient acc begins at its producer
 +grant and frees at its last completed terminal reader; persistent scratch/reservations stay
