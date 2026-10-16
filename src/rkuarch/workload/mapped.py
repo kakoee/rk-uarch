@@ -178,8 +178,19 @@ def loads_component_job(
     expected_engine: NativeEngineIdentity,
 ) -> MappedEngineJob:
     """Replay input only. Public component result replay waits for stage B execution."""
+    value = strict_json_loads(data)
+    # Validate structural operand access before the installed job validator descends
+    # into its embedded resource admission (which indexes those keys).
+    if isinstance(value, dict) and isinstance(value.get("workload_closure"), dict):
+        closure = MappedBundle.model_validate(value["workload_closure"])
+        if closure.scope.kind == "component":
+            require(
+                all(set(op.operand_access) == {"X", "W", "Y"} for op in closure.scope.ops),
+                "InvalidCoverage",
+                "operand access",
+            )
     job = validate_job(
-        strict_json_loads(data),
+        value,
         invocation=invocation,
         checkpoint="B",
         trusted_registry_hash=trusted_registry_hash,

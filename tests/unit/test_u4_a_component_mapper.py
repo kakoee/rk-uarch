@@ -655,3 +655,26 @@ def test_import_missing_operand_access_is_refusal(baseline: MappedBundle) -> Non
     seal(raw)
     with pytest.raises(ValueError, match="InvalidCoverage.*operand access"):
         loads_component_bundle(canonical_json(raw), **anchors())
+
+
+def test_job_missing_operand_access_is_refusal(baseline: MappedBundle) -> None:
+    b = bundle(baseline, (op(baseline),))
+    engine = NativeEngineIdentity.model_validate(
+        json.loads((FIXTURES / "component-job.json").read_bytes())["engine"]
+    )
+    auth = dict(
+        invocation="production",
+        trusted_registry_hash=registry()["registry_hash"],
+        trusted_profile_hash=None,
+        expected_engine=engine,
+    )
+    j = prepare_component_job(
+        b, point_hash=b.points[0].payload_hash, registry=registry(), profile=None, **auth
+    )
+    raw = j.model_dump(mode="json")
+    del raw["workload_closure"]["scope"]["ops"][0]["operand_access"]["X"]
+    seal(raw["workload_closure"])
+    raw["bundle_hash"] = raw["workload_closure"]["bundle_hash"]
+    raw["job_hash"] = content_hash(raw, exclude=("job_hash",))
+    with pytest.raises(ValueError, match="InvalidCoverage.*operand access"):
+        loads_component_job(canonical_json(raw), **auth)
