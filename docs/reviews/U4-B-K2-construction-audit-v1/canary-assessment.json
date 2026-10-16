@@ -1,0 +1,63 @@
+{
+  "processes": 5,
+  "children": [
+    10,
+    11,
+    12,
+    13
+  ],
+  "roots": [
+    9
+  ],
+  "events": 304,
+  "obligations": {
+    "owned_descendants": true,
+    "shell_exec": true,
+    "cat_exec": true,
+    "ls_exec": true,
+    "alias_open": true,
+    "resolved_sentinel_read": true,
+    "sentinel_close": true,
+    "missing_file": true,
+    "directory_enumeration": true,
+    "image_file_mmap": true
+  },
+  "undeclared_sentinel": {
+    "path": "/canary/sentinel",
+    "declared_source_or_cache": false,
+    "read_events": [
+      {
+        "pid": 11,
+        "ordinal": 37,
+        "call": "read",
+        "args": "0</canary/sentinel>, \"U4-read-canary-v1\\n\", 131072",
+        "result": "18"
+      },
+      {
+        "pid": 11,
+        "ordinal": 39,
+        "call": "read",
+        "args": "0</canary/sentinel>, \"\", 131072",
+        "result": "0"
+      }
+    ]
+  },
+  "limitations": [
+    "Frozen inventory resolves symlinks; a readlink syscall is not required.",
+    "Observed mmap is not proof every mapped byte was consumed.",
+    "Exec environment presence does not prove variable use.",
+    "This finite canary is not exhaustive build-read or semantic-dependency proof."
+  ],
+  "accepted": true,
+  "negative_controls": [
+    {
+      "case": "missing-sentinel-read",
+      "refused": "missing canary evidence: ['resolved_sentinel_read']"
+    },
+    {
+      "case": "missing-child",
+      "refused": "missing child trace"
+    }
+  ],
+  "restored_original_passes": true
+}
