@@ -34,3 +34,10 @@ Report inputs include complete comparison/evidence/registry/recipe closure. Defa
 magnitudes are hidden; explicit finite-prediction opt-in requires complete contributors and
 visible unvalidated labels on every surface. No live timestamps, null-as-zero or ambient
 artifact lookup. Exported extended hardware truth and five-field test projections are distinct.
+
+U4 mapped component inputs: `component.py` assembles existing operators, a supplied mapped
+point, explicit producer/assumptions/admission and prospective engine identities. `mapped.py`
+loads/exports complete bundles and jobs against independently supplied registry/profile/engine
+anchors, without importing mapping or workload producers. Canonical export refuses overwrite
+and stale joins. Fixed-delay APIs remain K2-only. Component input admission does not launch
+native or establish public result replay; that waits for the separate stage B release.
