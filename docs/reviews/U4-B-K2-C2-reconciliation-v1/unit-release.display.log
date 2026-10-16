@@ -1,0 +1,41 @@
+[getrandom 0.4.3] cargo:rerun-if-changed=build.rs
+[libc 0.2.190] cargo:rerun-if-changed=build.rs
+[libc 0.2.190] cargo:rerun-if-env-changed=LIBC_BUILD_VERBOSE
+[libc 0.2.190] cargo:rerun-if-env-changed=RUST_LIBC_UNSTABLE_FREEBSD_VERSION
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(libc_deny_warnings)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(emscripten_old_stat_abi)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(espidf_picolibc)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(espidf_time32)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(freebsd10)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(freebsd11)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(freebsd12)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(freebsd13)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(freebsd14)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(freebsd15)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(libc_elfv2)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(vxworks_lt_25_09)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(libc_pauthtest)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(gnu_file_offset_bits64)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(gnu_time_bits64)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(linux_time_bits64)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(musl_v1_2)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(musl32_time64)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(musl_redir_time64)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(uclibc32_time64)
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(target_os,values("switch","aix","ohos","hurd","rtems","visionos","nuttx","cygwin","qurt","qnx","helenos"))
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(target_env,values("illumos","wasi","aix","ohos","nto71_iosock"))
+[libc 0.2.190] cargo:rustc-check-cfg=cfg(target_arch,values("loongarch64","mips32r6","mips64r6","csky"))
+[libc 0.2.190] cargo:rustc-cfg=linux_time_bits64
+[num-traits 0.2.19] cargo:rustc-check-cfg=cfg(has_total_cmp)
+[num-traits 0.2.19] cargo:rustc-cfg=has_total_cmp
+[num-traits 0.2.19] cargo:rerun-if-changed=build.rs
+
+running 6 tests
+test tests::duplicate_refusal ... ok
+test tests::float_conventions ... ok
+test tests::marker_refusal ... ok
+test tests::huge_integer_exact ... ok
+test tests::sha_vectors ... ok
+test tests::strict_integer_tokens ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

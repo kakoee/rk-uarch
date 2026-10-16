@@ -1,0 +1,87 @@
+{
+  "host_checks": [
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-S",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/derive.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Re-derived all original expectations, three supplement expectations and 52 separate B prospective cases.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/review_outputs.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Both actual modes: 20955/20965, exact ten carrier mismatches; supplement 3/3; six units each.\nB comparison controls: 16 refusals; positive restored. Original comparator gaps demonstrated.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/inspect_hash_path.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Static paths verified; release has 14 packed transformations in the digest boundary.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "--config",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/pyproject.toml",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/derive.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/reproduce.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/review_outputs.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/inspect_hash_path.py"
+      ],
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "format",
+        "--check",
+        "--config",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/pyproject.toml",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/derive.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/reproduce.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/review_outputs.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-C2-reconciliation-v1/inspect_hash_path.py"
+      ],
+      "exit_code": 0,
+      "stdout": "4 files already formatted\n",
+      "stderr": ""
+    }
+  ],
+  "environment_unset": [
+    "PYTHONPATH",
+    "MYPYPATH",
+    "VIRTUAL_ENV",
+    "UARCH_HUMAN"
+  ],
+  "reference_import_scope": "-I -S explicit private source and existing site-packages; origins and hashes asserted",
+  "new_native_execution": "22 successful exact-baseline commands in commands.json; no native rerun after documentation/helper formatting",
+  "native_units_per_mode": 6,
+  "original_cases_per_mode": 20965,
+  "original_mismatches_per_mode": 10,
+  "separate_supplement_per_mode": 3,
+  "new_host_refusal_controls": 16,
+  "new_B_Python_only_cases": 52,
+  "initial_helper_lint": "Import ordering/format and late private-root imports/long lines corrected; final checks pass. No runtime production code edited.",
+  "missing_tool": "Host perf launcher exists but --version exits 2; image tracer tools absent. No install attempted.",
+  "CI": "not polled",
+  "staged_whitespace": "Initial staged check found final blank lines in two raw unit stdout copies. Published display logs trim only those; raw private receipts and hashes remain unchanged. Final staged check passes."
+}

@@ -1,0 +1,574 @@
+[
+  {
+    "id": "B:ratio-0",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a327d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"denominator\":2,\"numerator\":1}",
+      "sha256": "ed12887dbcc618b2d93f643e1cde547376c031afc740f002f8d40d46b094f21b"
+    }
+  },
+  {
+    "id": "B:ratio-union-1",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a327d7d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":{\"denominator\":2,\"numerator\":1}}",
+      "sha256": "f1e0ef7efe47b84e5d716842cda35c4ceeaac3cf768a5bc765c40a01b6b95949"
+    }
+  },
+  {
+    "id": "B:ratio-2",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a302c2264656e6f6d696e61746f72223a327d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-3",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a302c2264656e6f6d696e61746f72223a327d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-4",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a322c2264656e6f6d696e61746f72223a347d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-5",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a322c2264656e6f6d696e61746f72223a347d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-6",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a2d302c2264656e6f6d696e61746f72223a317d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"denominator\":1,\"numerator\":0}",
+      "sha256": "78b35a451de9a90fdb84ebfdcfdad79e22b58018a910e3bd93607bcf30ec5424"
+    }
+  },
+  {
+    "id": "B:ratio-union-7",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a2d302c2264656e6f6d696e61746f72223a317d7d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":{\"denominator\":1,\"numerator\":0}}",
+      "sha256": "b7061d8e9205374b234a16977115fa7490707df44ed6ef40b769cba69208533a"
+    }
+  },
+  {
+    "id": "B:ratio-8",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a2d302e302c2264656e6f6d696e61746f72223a317d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-9",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a2d302e302c2264656e6f6d696e61746f72223a317d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-10",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a307d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-11",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a307d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-12",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a3334303238323336363932303933383436333436333337343630373433313736383231313435357d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"denominator\":340282366920938463463374607431768211455,\"numerator\":1}",
+      "sha256": "f730ade5bbc049dd8691292ecf0783574a9e6cbc45c1d8f152176b023b89510c"
+    }
+  },
+  {
+    "id": "B:ratio-union-13",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a3334303238323336363932303933383436333436333337343630373433313736383231313435357d7d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":{\"denominator\":340282366920938463463374607431768211455,\"numerator\":1}}",
+      "sha256": "bcb1e79c1c05327875fa79366535151e3c0971a0555907c7aa79f1017b4be488"
+    }
+  },
+  {
+    "id": "B:ratio-14",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a3334303238323336363932303933383436333436333337343630373433313736383231313435362c2264656e6f6d696e61746f72223a317d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-15",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a3334303238323336363932303933383436333436333337343630373433313736383231313435362c2264656e6f6d696e61746f72223a317d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-16",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a312c2264656e6f6d696e61746f72223a317d",
+    "expected": {
+      "status": "refuse",
+      "layer": "decode",
+      "error_type": "ValueError"
+    }
+  },
+  {
+    "id": "B:ratio-union-17",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a312c2264656e6f6d696e61746f72223a317d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "decode",
+      "error_type": "ValueError"
+    }
+  },
+  {
+    "id": "B:ratio-18",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a312c226578747261223a307d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-19",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a312c2264656e6f6d696e61746f72223a312c226578747261223a307d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-20",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a747275652c2264656e6f6d696e61746f72223a317d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-21",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a747275652c2264656e6f6d696e61746f72223a317d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-22",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a2231222c2264656e6f6d696e61746f72223a317d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-23",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a2231222c2264656e6f6d696e61746f72223a317d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-24",
+    "family": "B-field-discriminator",
+    "op": "rational",
+    "hex": "7b226e756d657261746f72223a3165302c2264656e6f6d696e61746f72223a317d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:ratio-union-25",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a7b226e756d657261746f72223a3165302c2264656e6f6d696e61746f72223a317d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:leaf-scalar-26",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a307d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":0}",
+      "sha256": "d8e9708a55a9ad5ea78f16d9adebbb23237a2455dc5969f5eb28054b928d4864"
+    }
+  },
+  {
+    "id": "B:leaf-scalar-27",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a2d317d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":-1}",
+      "sha256": "bad84bcb41f3c0a00ad61e799ae8844b0723900498f2c1bbb0ad2da0dd5cb7fd"
+    }
+  },
+  {
+    "id": "B:leaf-scalar-28",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a3334303238323336363932303933383436333436333337343630373433313736383231313435367d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":340282366920938463463374607431768211456}",
+      "sha256": "0d2fa08c9b7d0a9514630d93b5f6b0ed528343f07dd58bbd97590853a7ea2d1a"
+    }
+  },
+  {
+    "id": "B:leaf-scalar-29",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a2d3137303134313138333436303436393233313733313638373330333731353838343130353732397d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":-170141183460469231731687303715884105729}",
+      "sha256": "0df8955765c25f3158d4ef4c75463f707dc59677b512ba9a3191c6871acc8a49"
+    }
+  },
+  {
+    "id": "B:leaf-scalar-30",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a747275657d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":true}",
+      "sha256": "b29fdb8a6edce7405ad1acd4ac576028c62b90245412d8ebc24b5e36e429fa2f"
+    }
+  },
+  {
+    "id": "B:leaf-scalar-31",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a2231227d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":\"1\"}",
+      "sha256": "40820418215c02edb11a79f4fe71b99d94ed76a2d1445b5b76b439fae76ae0e0"
+    }
+  },
+  {
+    "id": "B:leaf-scalar-32",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a6e756c6c7d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"path\":\"test\",\"value\":null}",
+      "sha256": "f8e495a0a5182353ad6c057d4342b55bedb09878ebb6ae9ab3db6293ba280fbc"
+    }
+  },
+  {
+    "id": "B:leaf-scalar-33",
+    "family": "B-field-discriminator",
+    "op": "leaf",
+    "hex": "7b2270617468223a2274657374222c2276616c7565223a312e307d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:legacy-34",
+    "family": "B-field-discriminator",
+    "op": "sourced",
+    "hex": "7b2276616c7565223a66616c73652c22756e6974223a22487a222c226b696e64223a2273746970756c6174696f6e222c22726174696f6e616c65223a22422074657374206f6e6c79227d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"date\":null,\"kind\":\"stipulation\",\"provenance\":null,\"rationale\":\"B test only\",\"source\":null,\"unit\":\"Hz\",\"value\":0.0}",
+      "sha256": "dc1c578ee136240dad5b22befa5ee22e588012287e58dfe4733df128a830e806"
+    }
+  },
+  {
+    "id": "B:legacy-35",
+    "family": "B-field-discriminator",
+    "op": "sourced",
+    "hex": "7b2276616c7565223a2220312e3020222c22756e6974223a22487a222c226b696e64223a2273746970756c6174696f6e222c22726174696f6e616c65223a22422074657374206f6e6c79227d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"date\":null,\"kind\":\"stipulation\",\"provenance\":null,\"rationale\":\"B test only\",\"source\":null,\"unit\":\"Hz\",\"value\":1.0}",
+      "sha256": "23ec80e5ef454f842df579f8424484e9090b4cfdd55db6a957508ea0aa25f81e"
+    }
+  },
+  {
+    "id": "B:legacy-36",
+    "family": "B-field-discriminator",
+    "op": "sourced",
+    "hex": "7b2276616c7565223a22316530222c22756e6974223a22487a222c226b696e64223a2273746970756c6174696f6e222c22726174696f6e616c65223a22422074657374206f6e6c79227d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"date\":null,\"kind\":\"stipulation\",\"provenance\":null,\"rationale\":\"B test only\",\"source\":null,\"unit\":\"Hz\",\"value\":1.0}",
+      "sha256": "23ec80e5ef454f842df579f8424484e9090b4cfdd55db6a957508ea0aa25f81e"
+    }
+  },
+  {
+    "id": "B:legacy-37",
+    "family": "B-field-discriminator",
+    "op": "sourced",
+    "hex": "7b2276616c7565223a22315f30222c22756e6974223a22487a222c226b696e64223a2273746970756c6174696f6e222c22726174696f6e616c65223a22422074657374206f6e6c79227d",
+    "expected": {
+      "status": "ok",
+      "canonical": "{\"date\":null,\"kind\":\"stipulation\",\"provenance\":null,\"rationale\":\"B test only\",\"source\":null,\"unit\":\"Hz\",\"value\":10.0}",
+      "sha256": "b6131e65e1a767a70e3205b257d66dae6096db0c85b708256c71a7f8007784ba"
+    }
+  },
+  {
+    "id": "B:legacy-38",
+    "family": "B-field-discriminator",
+    "op": "sourced",
+    "hex": "7b2276616c7565223a224e614e222c22756e6974223a22487a222c226b696e64223a2273746970756c6174696f6e222c22726174696f6e616c65223a22422074657374206f6e6c79227d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:legacy-39",
+    "family": "B-field-discriminator",
+    "op": "sourced",
+    "hex": "7b2276616c7565223a22496e66696e697479222c22756e6974223a22487a222c226b696e64223a2273746970756c6174696f6e222c22726174696f6e616c65223a22422074657374206f6e6c79227d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:legacy-40",
+    "family": "B-field-discriminator",
+    "op": "sourced",
+    "hex": "7b2276616c7565223a6e756c6c2c22756e6974223a22487a222c226b696e64223a2273746970756c6174696f6e222c22726174696f6e616c65223a22422074657374206f6e6c79227d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:legacy-41",
+    "family": "B-field-discriminator",
+    "op": "sourced",
+    "hex": "7b2276616c7565223a7b7d2c22756e6974223a22487a222c226b696e64223a2273746970756c6174696f6e222c22726174696f6e616c65223a22422074657374206f6e6c79227d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:strict-int-42",
+    "family": "B-field-discriminator",
+    "op": "u128",
+    "hex": "74727565",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:strict-int-43",
+    "family": "B-field-discriminator",
+    "op": "u128",
+    "hex": "22312e3022",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:strict-int-44",
+    "family": "B-field-discriminator",
+    "op": "u128",
+    "hex": "2d302e30",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:strict-int-45",
+    "family": "B-field-discriminator",
+    "op": "u128",
+    "hex": "316530",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:strict-int-46",
+    "family": "B-field-discriminator",
+    "op": "u128",
+    "hex": "333430323832333636393230393338343633343633333734363037343331373638323131343536",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:json-float-47",
+    "family": "B-field-discriminator",
+    "op": "json-float",
+    "hex": "74727565",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:json-float-48",
+    "family": "B-field-discriminator",
+    "op": "json-float",
+    "hex": "22312e3022",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValidationError"
+    }
+  },
+  {
+    "id": "B:json-float-49",
+    "family": "B-field-discriminator",
+    "op": "json-float",
+    "hex": "312e30",
+    "expected": {
+      "status": "ok",
+      "canonical": "1.0",
+      "sha256": "d0ff5974b6aa52cf562bea5921840c032a860a91a3512f7fe8f768f6bbe005f6"
+    }
+  },
+  {
+    "id": "B:marker-50",
+    "family": "B-field-discriminator",
+    "op": "marker",
+    "hex": "7b222473657264655f6a736f6e3a3a707269766174653a3a4e756d626572223a2231227d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValueError"
+    }
+  },
+  {
+    "id": "B:marker-51",
+    "family": "B-field-discriminator",
+    "op": "marker",
+    "hex": "7b2278223a7b225c753030323473657264655f6a736f6e3a3a707269766174653a3a4e756d626572223a2231227d7d",
+    "expected": {
+      "status": "refuse",
+      "layer": "carrier",
+      "error_type": "ValueError"
+    }
+  }
+]
