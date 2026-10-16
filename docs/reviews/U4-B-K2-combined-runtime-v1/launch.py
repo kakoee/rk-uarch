@@ -163,13 +163,20 @@ def run(argv, action, output, binding):
                 reason = repr(error)
             finally:
                 if proc.poll() is None:
-                    subprocess.run(
-                        argv[:3] + ["kill", "--signal", "KILL", name],
-                        env=env,
-                        capture_output=True,
-                        timeout=10,
-                        check=False,
-                    )
+                    try:
+                        killed = subprocess.run(
+                            argv[:3] + ["kill", "--signal", "KILL", name],
+                            env=env,
+                            capture_output=True,
+                            timeout=10,
+                            check=False,
+                        )
+                        if killed.returncode != 0:
+                            reason = str(reason) + "; owned container cleanup unconfirmed: " + name
+                    except (OSError, subprocess.TimeoutExpired) as error:
+                        reason = str(reason) + "; cleanup error: " + repr(error)
+                    # Even daemon failure must not skip client process-group cleanup.
+
                 try:
                     code = proc.wait(timeout=10)
                 except subprocess.TimeoutExpired:
