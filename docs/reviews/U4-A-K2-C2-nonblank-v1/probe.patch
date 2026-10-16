@@ -1,0 +1,132 @@
+--- a/probe.rs
++++ b/probe.rs
+@@ -410,0 +411,13 @@
++// Pinned CPython 3.12 / Unicode 15.0 str.strip() emptiness set, independently
++// enumerated in python-freeze.json. This predicate never changes stored text and
++// is restricted to Sourced unit/rationale/non-stub source; numeric trim is separate.
++fn sourced_nonblank(s: &str) -> bool {
++    s.chars().any(|c| {
++        !matches!(c,
++            '\u{0009}'..='\u{000d}' | '\u{001c}'..='\u{0020}' |
++            '\u{0085}' | '\u{00a0}' | '\u{1680}' | '\u{2000}'..='\u{200a}' |
++            '\u{2028}' | '\u{2029}' | '\u{202f}' | '\u{205f}' | '\u{3000}'
++        )
++    })
++}
++
+@@ -461 +474 @@
+-                && !t.unit.trim().is_empty()
++                && sourced_nonblank(&t.unit)
+@@ -467 +480 @@
+-                            && t.rationale.as_ref().is_some_and(|s| !s.trim().is_empty())
++                            && t.rationale.as_ref().is_some_and(|s| sourced_nonblank(s))
+@@ -473 +486 @@
+-                                Some(_) => t.source.as_ref().is_some_and(|s| !s.trim().is_empty()),
++                                Some(_) => t.source.as_ref().is_some_and(|s| sourced_nonblank(s)),
+@@ -707,0 +721,106 @@
++
++#[cfg(test)]
++mod nonblank_tests {
++    use super::*;
++    fn sourced(input: Value) -> Result<Value, (String, String)> {
++        process(
++            &json!({"op":"sourced","hex":hex(serde_json::to_string(&input).unwrap().as_bytes())}),
++        )
++    }
++    #[test]
++    fn pinned_python_blank_set() {
++        let mut found = String::new();
++        let mut count = 0;
++        for cp in 0..=0x10ffff {
++            if let Some(c) = char::from_u32(cp) {
++                if !sourced_nonblank(&c.to_string()) {
++                    found.push_str(&format!("{cp:08x}\n"));
++                    count += 1;
++                }
++            }
++        }
++        assert_eq!(count, 29);
++        // Frozen independent enumeration of pinned CPython str.strip(), not Rust trim.
++        assert_eq!(
++            hash(found.as_bytes()),
++            "96d09d55259e60e1198f7f067eeac357f6581d3700497cf942886cb74a8bdbac"
++        );
++        assert!(!sourced_nonblank(""));
++    }
++    #[test]
++    fn control_blank_fields_refuse() {
++        for c in ['\u{001c}', '\u{001d}', '\u{001e}', '\u{001f}'] {
++            for input in [
++                json!({"value":"1","unit":c.to_string(),"provenance":"stub"}),
++                json!({"value":"1","unit":"Hz","kind":"stipulation","rationale":c.to_string()}),
++                json!({"value":"1","unit":"Hz","provenance":"measured","source":c.to_string()}),
++            ] {
++                assert_eq!(
++                    sourced(input).unwrap_err(),
++                    ("carrier".into(), "SourcedValue rules".into())
++                );
++            }
++        }
++    }
++    #[test]
++    fn nonblank_text_is_preserved() {
++        for text in [
++            "\u{001c}X\u{001f}",
++            "\u{001b}",
++            "\u{200b}",
++            " \u{00a0}X\u{3000} ",
++        ] {
++            for (field, input) in [
++                ("unit", json!({"value":"1","unit":text,"provenance":"stub"})),
++                (
++                    "rationale",
++                    json!({"value":"1","unit":"Hz","kind":"stipulation","rationale":text}),
++                ),
++                (
++                    "source",
++                    json!({"value":"1","unit":"Hz","provenance":"estimated","source":text}),
++                ),
++            ] {
++                let got = sourced(input).unwrap();
++                let parsed = parse(got["canonical"].as_str().unwrap()).unwrap();
++                assert_eq!(parsed[field], text);
++            }
++        }
++    }
++    #[test]
++    fn existing_claim_and_stipulation_rules() {
++        for input in [
++            json!({"value":1,"unit":"Hz","provenance":"measured"}),
++            json!({"value":1,"unit":"Hz","provenance":"measured","source":null}),
++            json!({"value":1,"unit":"Hz","provenance":"stub","source":""}),
++            json!({"value":1,"unit":"Hz","kind":"stipulation"}),
++            json!({"value":1,"unit":"Hz","kind":"stipulation","rationale":"r","date":""}),
++            json!({"value":1,"unit":"Hz","provenance":"stub","rationale":""}),
++        ] {
++            assert_eq!(
++                sourced(input).unwrap_err(),
++                ("carrier".into(), "SourcedValue rules".into())
++            );
++        }
++        assert!(sourced(json!({"value":false,"unit":"Hz","provenance":"stub"})).is_ok());
++        assert!(
++            sourced(
++                json!({"value":"1_.0","unit":"Hz","provenance":"spec_derived","source":"\u{001c}X"})
++            )
++            .is_ok()
++        );
++    }
++    #[test]
++    fn legacy_numeric_trim_stays_separate() {
++        for c in ['\u{001c}', '\u{001d}', '\u{001e}', '\u{001f}'] {
++            let (layer, error) =
++                sourced(json!({"value":format!("{c}1{c}"),"unit":"Hz","provenance":"stub"}))
++                    .unwrap_err();
++            assert_eq!(layer, "carrier");
++            assert!(error.starts_with("LegacyFloatSyntax"));
++        }
++        for value in ["\u{0085}.5\u{0085}", "1_.0", "1e_2"] {
++            assert!(sourced(json!({"value":value,"unit":"Hz","provenance":"stub"})).is_ok());
++        }
++    }
++}

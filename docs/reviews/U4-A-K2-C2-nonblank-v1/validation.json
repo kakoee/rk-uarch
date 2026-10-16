@@ -1,0 +1,398 @@
+{
+  "time_ns": 1792124522428854539,
+  "checks": [
+    {
+      "name": "ruff-check",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/ruff",
+        "check",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/compare.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/verify.py"
+      ],
+      "environment": null,
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": "",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ruff-format-check",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/ruff",
+        "format",
+        "--check",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/compare.py",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/verify.py"
+      ],
+      "environment": null,
+      "exit_code": 0,
+      "stdout": "2 files already formatted\n",
+      "stderr": "",
+      "stdout_sha256": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pinned-rustfmt-check",
+      "argv": [
+        "/usr/bin/docker",
+        "--host",
+        "unix:///var/run/docker.sock",
+        "run",
+        "--rm",
+        "--pull",
+        "never",
+        "--platform",
+        "linux/amd64",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "1000:1000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--tmpfs",
+        "/tmp",
+        "--workdir",
+        "/work/native",
+        "--mount",
+        "type=bind,src=/tmp/u4-k2-c2b.khaj67gd/workspace,dst=/work,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-k2-c2b.khaj67gd/cache,dst=/cargo-home,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-k2-c2b.khaj67gd/target,dst=/target",
+        "--mount",
+        "type=bind,src=/tmp/u4-k2-c2b.khaj67gd/controls,dst=/controls,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-k2-c2b.khaj67gd/vectors,dst=/vectors,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-k2-c2b.khaj67gd/receipts,dst=/receipts",
+        "--entrypoint",
+        "/usr/bin/env",
+        "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+        "-i",
+        "PATH=/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+        "CARGO_HOME=/cargo-home",
+        "CARGO_TARGET_DIR=/target",
+        "RUSTC=/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "RUSTUP_AUTO_INSTALL=0",
+        "CARGO_NET_OFFLINE=true",
+        "CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse",
+        "LC_ALL=C",
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustfmt",
+        "--edition",
+        "2024",
+        "--check",
+        "/work/native/crates/uarch-engine/src/bin/c2-probe.rs"
+      ],
+      "environment": {
+        "PATH": "/usr/bin:/bin",
+        "DOCKER_CONFIG": "/tmp/u4-k2-c2b.khaj67gd/docker-config"
+      },
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "evidence-check",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/verify.py"
+      ],
+      "environment": null,
+      "exit_code": 0,
+      "stdout": "{\n  \"inventory_entries\": 35,\n  \"commands\": 50,\n  \"cases_per_mode\": 21694,\n  \"refusals_per_mode\": 417,\n  \"unit_tests_per_mode\": 17,\n  \"baseline_new_failures_per_mode\": 35,\n  \"reverted_failures_per_mode\": 35,\n  \"corrected_and_restored_mismatches\": 0,\n  \"new_native_execution\": false\n}\n",
+      "stderr": "",
+      "stdout_sha256": "60b00e3e7137611cde81dfcc6451a5f83280b4e097919e2fbd6814d36f010cbd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "git-diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "environment": null,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "relative_links": [
+    {
+      "file": "README.md",
+      "target": "../U4-K2-C2-blank-field-followup-v1/README.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "../U4-K2-C2-blank-field-followup-v1/receipt.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "../U4-B-K2-C2-compatibility-review-v1/README.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "../U4-A-K2-C2-compatibility-v1/probe.rs",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "probe.patch",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "probe.rs",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "python-freeze.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "python-derivation.log",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "python-freeze.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "focused.jsonl.gz",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "unit-freeze.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "refusal-freeze.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "compare.py",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "new-refusals.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "revert.patch",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "reversion-plan.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "reversion-results.json.gz",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "reverted-binaries.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "starting-source.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "build-inputs.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "commands.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "command-outputs.tar.gz",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "command-output-map.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "host-workflow.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "executed-controls.tar.gz",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "compiler-linker-commands.json.gz",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "build-diagnostics.json.gz",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "preservation.json",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "private-inventory.json.gz",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "validation.json",
+      "exists": true
+    }
+  ],
+  "cases_per_mode": 21694,
+  "refusals_per_mode": 417,
+  "scope": "Owned docs/probe only; no native execution in validation except standalone rustfmt tool; evidence verification consumes saved native outputs.",
+  "publication_evidence_check": {
+    "time_ns": 1792124583252985995,
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "-B",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/verify.py"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"inventory_entries\": 36,\n  \"commands\": 50,\n  \"cases_per_mode\": 21694,\n  \"refusals_per_mode\": 417,\n  \"unit_tests_per_mode\": 17,\n  \"baseline_new_failures_per_mode\": 35,\n  \"reverted_failures_per_mode\": 35,\n  \"corrected_and_restored_mismatches\": 0,\n  \"new_native_execution\": false\n}\n",
+    "stderr": "",
+    "stdout_sha256": "14219190e25229a9e66c3b2decae8a4a95987bcd74bee09045017eab28660596",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "patch_roundtrips": [
+    {
+      "patch": "probe.patch",
+      "argv": [
+        "git",
+        "apply",
+        "--unidiff-zero",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/probe.patch"
+      ],
+      "cwd": "/tmp/u4-c2b-patch.v0r1you9",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "postimage_sha256": "a4129c184bb04e4dedcbe518c593c47c5ecc27154debd3ff558ccba67c86153c"
+    },
+    {
+      "patch": "probe.patch",
+      "argv": [
+        "git",
+        "apply",
+        "--unidiff-zero",
+        "--reverse",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/probe.patch"
+      ],
+      "cwd": "/tmp/u4-c2b-patch.v0r1you9",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "postimage_sha256": "90d7b36df0aac589ff01f360fe294641586ac1406651b697bb4e97068dc84695"
+    },
+    {
+      "patch": "probe.patch",
+      "argv": [
+        "git",
+        "apply",
+        "--unidiff-zero",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/probe.patch"
+      ],
+      "cwd": "/tmp/u4-c2b-patch.v0r1you9",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "postimage_sha256": "a4129c184bb04e4dedcbe518c593c47c5ecc27154debd3ff558ccba67c86153c"
+    },
+    {
+      "patch": "revert.patch",
+      "argv": [
+        "git",
+        "apply",
+        "--unidiff-zero",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/revert.patch"
+      ],
+      "cwd": "/tmp/u4-c2b-patch._1h4vwpm",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "postimage_sha256": "c1497fe5eac53b155f07a13c074184ca6c657048889a9452219dd0d177ce5be4"
+    },
+    {
+      "patch": "revert.patch",
+      "argv": [
+        "git",
+        "apply",
+        "--unidiff-zero",
+        "--reverse",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/revert.patch"
+      ],
+      "cwd": "/tmp/u4-c2b-patch._1h4vwpm",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "postimage_sha256": "a4129c184bb04e4dedcbe518c593c47c5ecc27154debd3ff558ccba67c86153c"
+    },
+    {
+      "patch": "revert.patch",
+      "argv": [
+        "git",
+        "apply",
+        "--unidiff-zero",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/revert.patch"
+      ],
+      "cwd": "/tmp/u4-c2b-patch._1h4vwpm",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "postimage_sha256": "c1497fe5eac53b155f07a13c074184ca6c657048889a9452219dd0d177ce5be4"
+    }
+  ],
+  "final_patch_and_inventory_check": {
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "-B",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-K2-C2-nonblank-v1/verify.py"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"inventory_entries\": 36,\n  \"commands\": 50,\n  \"cases_per_mode\": 21694,\n  \"refusals_per_mode\": 417,\n  \"unit_tests_per_mode\": 17,\n  \"baseline_new_failures_per_mode\": 35,\n  \"reverted_failures_per_mode\": 35,\n  \"corrected_and_restored_mismatches\": 0,\n  \"new_native_execution\": false\n}\n",
+    "stderr": ""
+  }
+}

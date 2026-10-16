@@ -1,0 +1,111 @@
+{
+  "unicode_version": "15.0.0",
+  "blank_set": {
+    "tested_codepoints": 1114112,
+    "codepoints": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      28,
+      29,
+      30,
+      31,
+      32,
+      133,
+      160,
+      5760,
+      8192,
+      8193,
+      8194,
+      8195,
+      8196,
+      8197,
+      8198,
+      8199,
+      8200,
+      8201,
+      8202,
+      8232,
+      8233,
+      8239,
+      8287,
+      12288
+    ],
+    "count": 29,
+    "encoding": "each codepoint as lowercase eight hexadecimal ASCII digits plus LF",
+    "sha256": "96d09d55259e60e1198f7f067eeac357f6581d3700497cf942886cb74a8bdbac",
+    "definition": "not chr(codepoint).strip() in the pinned CPython; no surrogate matches"
+  },
+  "other_carrier_python_only": [
+    {
+      "codepoint": "U+001C",
+      "Python_strip_empty": true,
+      "NumericLeaf_expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"\\u001c\",\"value\":1}",
+        "sha256": "77ba8c114f37f188fa890f3577d0cfad5072c86205fbc10680644e228620a129"
+      }
+    },
+    {
+      "codepoint": "U+001D",
+      "Python_strip_empty": true,
+      "NumericLeaf_expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"\\u001d\",\"value\":1}",
+        "sha256": "81ed34f1fc0afecdd6560dc1a7fe32fb40bc881c4e6e683f14cf7df3a201ce7e"
+      }
+    },
+    {
+      "codepoint": "U+001E",
+      "Python_strip_empty": true,
+      "NumericLeaf_expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"\\u001e\",\"value\":1}",
+        "sha256": "843b73328b7df8cb2a9e25330182b79806e68d1431515d8ef5f3edd8763e7e69"
+      }
+    },
+    {
+      "codepoint": "U+001F",
+      "Python_strip_empty": true,
+      "NumericLeaf_expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"\\u001f\",\"value\":1}",
+        "sha256": "3ac9c412f118a0142432ba759b6518904a771012f563cee2359a7b5ee775ebee"
+      }
+    },
+    {
+      "codepoint": "U+0020",
+      "Python_strip_empty": true,
+      "NumericLeaf_expected": {
+        "status": "refuse",
+        "layer": "carrier",
+        "error_type": "ValidationError"
+      }
+    },
+    {
+      "codepoint": "U+0085",
+      "Python_strip_empty": true,
+      "NumericLeaf_expected": {
+        "status": "refuse",
+        "layer": "carrier",
+        "error_type": "ValidationError"
+      }
+    },
+    {
+      "codepoint": "U+200B",
+      "Python_strip_empty": false,
+      "NumericLeaf_expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"\u200b\",\"value\":1}",
+        "sha256": "18606971557da6734cdbee95e3791a98e9c1b4770cd28c36102660f168780d56"
+      }
+    }
+  ],
+  "focused_counts": {
+    "total": 469,
+    "ok": 248,
+    "refuse": 221
+  }
+}
