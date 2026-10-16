@@ -223,16 +223,26 @@ def _validate_response(
     return result
 
 
+def _authority_snapshot(host: Any, profile: dict[str, Any]) -> str:
+    authority = host.authority_for(profile)
+    return canonical_json(
+        {
+            **authority,
+            "expected_engine": authority["expected_engine"].model_dump(mode="json"),
+        }
+    )
+
+
 def _prepare_request(
     value: object, *, host: Any
 ) -> tuple[bytes, Callable[[bytes, bytes, int], MappedEngineResult]]:
     request, job = _admit_request(value, host=host)
     # Own the loader's fresh nested data, never the caller's mutable model.
     profile = {"admission": {"profile_hash": job.admission.profile_hash}}
-    authority = canonical_json(host.authority_for(profile))
+    authority = _authority_snapshot(host, profile)
 
     def finish(stdout: bytes, stderr: bytes, status: int) -> MappedEngineResult:
-        if canonical_json(host.authority_for(profile)) != authority:
+        if _authority_snapshot(host, profile) != authority:
             # Preserve fresh public admission/refusal if trust changed during IO.
             return parse_response(stdout, stderr, status, request_bytes=request, host=host)
         host.require_job(job)
@@ -303,6 +313,8 @@ def admitted_case(
     def ensure_current() -> None:
         if not active or os.getpid() != owner_pid:
             raise ValueError("case context expired or belongs to another process")
+        assert job is not None
+        host.require_job(job)
         if _case_authority(host) != authority:
             raise ValueError("case host authority changed; fresh admission required")
 

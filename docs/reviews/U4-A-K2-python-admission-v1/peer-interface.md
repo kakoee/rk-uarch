@@ -4,8 +4,12 @@ This is preparation under the throughput task and shared case-reuse addendum.
 B can continue grouped scheduling against source `24fa36803081e5077d5977baa91441a2c8534ec8`.
 Nothing here changes live production, sealed deployment, authority or B's baseline.
 The two exact patches and full changed files are review inputs, **not installed code**.
-Tests were frozen first; actual baseline/candidate diagnostics are still running at
-this intermediate publication. Final evidence and identity audit will follow here.
+Tests were frozen first. Baseline and corrected candidate public-entry regressions
+match exactly, including 33 refusal/operational records. Source bindings now include
+the explicit host.require_job check in case operations, avoiding incidental errors
+for malformed profile inventory. Final case controls and timings are running.
+The original intermediate snapshot serialization bug is fixed; its failed receipt
+is preserved. Use source-bindings.json from this revision, not the initial patch.
 
 The proposed additive interface in `runner.patch` is:
 
@@ -50,3 +54,8 @@ all 798 real slots and six-way comparisons when a later campaign is authorized.
 `hardware-rule.patch` is separable and protected. It caches at most 128 compiled
 rule patterns, never input paths, and consults the live rule order/allowed labels
 each time. It remains unapplied pending protected/support/runtime reconciliation.
+
+B interface-to-A.md was integrated normally. Genuine resolver bindings may be inherited
+from B's single-threaded parent fork as described there; construct each case context
+in the assigned worker after fork. The context PID guard is not a requirement to rerun
+the resolver in each worker. No changed helper/runtime installation is implied.
