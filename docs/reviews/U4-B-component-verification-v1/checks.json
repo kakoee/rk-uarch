@@ -1,0 +1,278 @@
+{
+  "status": "author preparation checks; not independent review or native qualification",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+  "source_root": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b",
+  "native_execution": "not_run",
+  "human_workings": [
+    "H-L1-DMA-01 missing",
+    "H-L1-GEMM-01 missing"
+  ],
+  "commands": [
+    {
+      "name": "scoped-lint",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "validation/component"
+      ],
+      "exit_code": 0,
+      "log": "checks/scoped-lint.log"
+    },
+    {
+      "name": "scoped-types",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "validation/component/arithmetic.py",
+        "validation/component/checks.py",
+        "validation/component/corpus.py",
+        "validation/component/observations.py",
+        "validation/component/selection.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/scoped-types.log"
+    },
+    {
+      "name": "ci-types-source",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "src",
+        "contract/uarch_contract",
+        "scripts"
+      ],
+      "exit_code": 0,
+      "log": "checks/ci-types-source.log"
+    },
+    {
+      "name": "ci-types-contract",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "--no-explicit-package-bases",
+        "contract/tests"
+      ],
+      "exit_code": 0,
+      "log": "checks/ci-types-contract.log"
+    },
+    {
+      "name": "imports",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/lint-imports"
+      ],
+      "exit_code": 0,
+      "log": "checks/imports.log.gz"
+    },
+    {
+      "name": "schema",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log": "checks/schema.log"
+    },
+    {
+      "name": "support-currentness",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log": "checks/support-currentness.log"
+    },
+    {
+      "name": "integrated",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-rs",
+        "--require-vendor",
+        "-m",
+        "not native",
+        "--junitxml=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-verification-v1/checks/integrated.xml",
+        "validation/component",
+        "tests/unit/test_u4_a_component_mapper.py",
+        "tests/unit/test_u4_a_mapped_loader.py",
+        "tests/unit/test_u2_support_policy.py",
+        "tests/integration",
+        "tests/rotary_v2",
+        "contract/tests"
+      ],
+      "exit_code": 1,
+      "log": "checks/integrated.log.gz"
+    },
+    {
+      "name": "final-preparation",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-rs",
+        "-m",
+        "not native",
+        "--junitxml=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-verification-v1/checks/final-preparation.xml",
+        "validation/component",
+        "tests/unit/test_u2_support_policy.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/final-preparation.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    },
+    {
+      "name": "final-types",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "validation/component/arithmetic.py",
+        "validation/component/checks.py",
+        "validation/component/corpus.py",
+        "validation/component/observations.py",
+        "validation/component/selection.py",
+        "validation/component/reduction.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/final-types.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    },
+    {
+      "name": "final-lint",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "validation/component"
+      ],
+      "exit_code": 0,
+      "log": "checks/final-lint.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    },
+    {
+      "name": "native-availability",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-rs",
+        "validation/component/test_native_selection.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/native-availability.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    },
+    {
+      "name": "historical-arithmetic",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "docs/reviews/U4-B-verification-inputs-v1",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "checks/historical-arithmetic.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    },
+    {
+      "name": "peer-final",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-rs",
+        "-m",
+        "not native",
+        "--junitxml=/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-verification-v1/checks/peer-final.xml",
+        "validation/component",
+        "tests/unit/test_u4_a_component_mapper.py",
+        "tests/unit/test_u4_a_mapped_loader.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/peer-final.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    },
+    {
+      "name": "peer-types",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+        "src",
+        "contract/uarch_contract",
+        "scripts",
+        "validation/component/arithmetic.py",
+        "validation/component/checks.py",
+        "validation/component/corpus.py",
+        "validation/component/observations.py",
+        "validation/component/selection.py",
+        "validation/component/reduction.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/peer-types.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    },
+    {
+      "name": "peer-lint",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "validation/component",
+        "src/rkuarch/workload/mapped.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/peer-lint.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    },
+    {
+      "name": "peer-currentness",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-c",
+        "import sys; sys.path[:0]=['src','contract','.']; import runpy; sys.argv=['scripts/vendor_rk.py','--check']; runpy.run_path('scripts/vendor_rk.py',run_name='__main__')"
+      ],
+      "exit_code": 0,
+      "log": "checks/peer-currentness.log",
+      "environment": "PYTHONPATH and MYPYPATH unset"
+    }
+  ],
+  "retained_failures": [
+    {
+      "scope": "initial integrated selection setup",
+      "finding": "support-origin test requires unset PYTHONPATH/MYPYPATH; explicit PYTHONPATH was set",
+      "unchanged_source": true,
+      "retained_log": "checks/integrated.log.gz",
+      "counts": "1296 passed, 1 failed, 2 human skips, 1 native deselected",
+      "rerun": "final-preparation",
+      "classification": "setup_error; not model discrepancy"
+    }
+  ],
+  "final_source_note": "Final preparation reruns newly added reduction and NoC0 overlap checker controls; unrelated integrated passes are inherited exactly.",
+  "peer_join": "6d30e36; affects owned full-job loader guard; final focused rerun, no full native/factorial rerun",
+  "compressed_raw_logs": [
+    {
+      "original": "checks/imports.log",
+      "artifact": "checks/imports.log.gz",
+      "raw_sha256": "8b1d95b0224c82cb27c86088ea686bea3f2a4247147e003657ca90b69050cb95",
+      "reason": "lossless raw log preservation; tool output contains trailing whitespace"
+    },
+    {
+      "original": "checks/integrated.log",
+      "artifact": "checks/integrated.log.gz",
+      "raw_sha256": "0fab2ef740d88cee7cda6a9b0e967835bbd8bc79c036d2815113f4490cde61f2",
+      "reason": "lossless raw log preservation; tool output contains trailing whitespace"
+    },
+    {
+      "original": "checks/integrated.xml",
+      "artifact": "checks/integrated.xml.gz",
+      "raw_sha256": "aee32561779d3e3cfdac4a26e7387cf37080b0751e3b0415e003e4fbe233fe99",
+      "reason": "lossless raw log preservation; tool output contains trailing whitespace"
+    }
+  ]
+}

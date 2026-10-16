@@ -1,0 +1,263 @@
+{
+  "status": "frozen prospective controls; no native calls",
+  "required_controls": [
+    {
+      "id": "ignored-credits",
+      "cases": "D05-one/D05-two/D06-two/D07",
+      "positive": "issue second at60000 with cap1; cap2 at0; r33 at60000",
+      "fault": "second issue0 under cap1; release at channel end54250",
+      "discriminator": "credit lifecycle/capacity and exact issue times",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "missing-refresh",
+      "cases": "D03",
+      "positive": "fifth commit69000, first channel54250",
+      "fault": "fifth68000, first54048",
+      "discriminator": "exact channel ratio/ceil and fifth-read final",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "rounded-service-feedback",
+      "cases": "D04",
+      "positive": "twelfth channel78999, exact5608928/71",
+      "fault": "79000 after repeated ceil feedback",
+      "discriminator": "rational service carry",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "extra-hop",
+      "cases": "D13-hop/D14",
+      "positive": "4000/61000",
+      "fault": "6000 or nonzero same-core latency",
+      "discriminator": "duration and request/response edges",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "wrong-edge-domain",
+      "cases": "D09-read/D10-read/D10-write",
+      "positive": "named-domain crossing tuples in cases.json",
+      "fault": "fixed-ps return or DRAM-domain service quantization",
+      "discriminator": "clock domain/cycles/outcomes and rational service",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "dropped-work",
+      "cases": "C01/C02/C03",
+      "positive": "all declared jobs and useful/issued counts",
+      "fault": "remove completion or count masked lanes useful",
+      "discriminator": "exact input/completion inventory and work",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "dropped-dependency",
+      "cases": "C05-B",
+      "positive": "compute begins after62000; final669000",
+      "fault": "compute before commits",
+      "discriminator": "dependency readiness, buffer validity, exact timing",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "bad-buffer-reuse",
+      "cases": "C07/C09-overlap",
+      "positive": "live buffers fit and remain through final consumer",
+      "fault": "alias or early free",
+      "discriminator": "allocation inventory/lifetime/capacity",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "wrong-causal-assignment",
+      "cases": "D01",
+      "positive": "noc8750+memory51250=60000",
+      "fault": "move receiving alignment to other category but preserve sum",
+      "discriminator": "causal literal categories plus witnesses",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "port-duplication",
+      "cases": "D08",
+      "positive": "commits60000 and61000",
+      "fault": "both60000",
+      "discriminator": "shared-owner serialization and commit literals",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "false-global-serialization",
+      "cases": "C03/C09-overlap",
+      "positive": "1182000/547000 with legal overlap",
+      "fault": "1855000/607000",
+      "discriminator": "explicit independent jobs and starts/ends",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "omitted-barrier",
+      "cases": "D13-barrier",
+      "positive": "last arrival62000, release94000",
+      "fault": "release62000",
+      "discriminator": "barrier dependency and duration",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "payload-as-transaction",
+      "cases": "C05-B/D11/D12",
+      "positive": "100/42 vs512/256;513vs768;2vs512",
+      "fault": "replace payload with rounded transaction volume",
+      "discriminator": "per-request input binding, traffic totals, conservation",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    },
+    {
+      "id": "null-to-zero",
+      "cases": "C02",
+      "positive": "u_c0/energy/unmodeled fields null",
+      "fault": "zero or claimed NoC contention",
+      "discriminator": "fidelity/null/unrepresented checks",
+      "restored": "exact original inputs/implementation; same assertions",
+      "native_status": "not_run",
+      "synthetic_checker_evidence": "test_checks.py/test_observations.py where applicable; not engine mutant credit",
+      "outcome_classes": [
+        "setup_error",
+        "expected_refusal",
+        "positive_control",
+        "model_discrepancy"
+      ],
+      "calls_per_simple_fault_control_cap": 12,
+      "qualifying_replays": 2
+    }
+  ],
+  "clock_relation": {
+    "pairs": 24,
+    "cap": 240,
+    "qualifying_pair_calls": 96
+  },
+  "budget_note": "Separate ledgers; every real discovery/shrink/mutant/restored call retained. Over-budget or missing calls cannot pass."
+}
