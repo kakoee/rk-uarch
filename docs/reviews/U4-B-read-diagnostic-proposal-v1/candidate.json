@@ -1,0 +1,88 @@
+{
+  "status": "proposal only; neither acquisition nor tracing authorized",
+  "starting_head": "41150f291b0b9bec0ce80812b4974e2f3bc35f8a",
+  "integrated_subject": "c277ddd28d1c4fdc4e799a3b32764874295a3e95",
+  "A_review_pin": "3faa3e9dbe785f43c51e26ad886eeb6bc3b00398",
+  "reference_source": "ce732f5bedccdde629edcf278fa76ea772d0ea82",
+  "scope_clarification": "9ee9917085c0abc4fe39f626922db81ec5946100",
+  "image": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+  "packages": [
+    {
+      "name": "strace",
+      "version": "6.1-0.1",
+      "architecture": "amd64",
+      "bytes": 1313880,
+      "sha256": "1942d086a6244a1a9643489d3b0aa604ac44b88991d6c69217a63a193671bd4f",
+      "url": "https://deb.debian.org/debian/pool/main/s/strace/strace_6.1-0.1_amd64.deb",
+      "licence": "LGPL-2.1-or-later; upstream test suite GPL-2.0-or-later",
+      "depends": [
+        "libc6 >= 2.34",
+        "libunwind8"
+      ]
+    },
+    {
+      "name": "libunwind8",
+      "version": "1.6.2-3",
+      "architecture": "amd64",
+      "bytes": 51172,
+      "sha256": "7b297868682836e4c87be349f17e4a56bc287586e3576503e84a5cb5485ce925",
+      "url": "https://deb.debian.org/debian/pool/main/libu/libunwind/libunwind8_1.6.2-3_amd64.deb",
+      "licence": "Expat upstream; debian/* GPL-2.0-or-later",
+      "depends": [
+        "libc6 >= 2.34",
+        "liblzma5 >= 5.1.1alpha+20110809"
+      ]
+    }
+  ],
+  "package_bytes_acquired": false,
+  "package_signature_chain_verified": false,
+  "executable_sha256": null,
+  "executable_reported_version": null,
+  "ELF_interpreter": null,
+  "ELF_needed_closure": null,
+  "diagnostic_licence_accepted": false,
+  "metadata_observed": [
+    {
+      "url": "https://packages.debian.org/bookworm/amd64/strace/download",
+      "private_saved_path": "/tmp/u4-b-read-diagnostic/strace-download.html",
+      "bytes": 12636,
+      "sha256": "ef8330369d42cca88da2c40a05b6a641f667d27ce4ddfc2be107e4058a0e445a"
+    },
+    {
+      "url": "https://metadata.ftp-master.debian.org/changelogs/main/s/strace/strace_6.1-0.1_copyright",
+      "private_saved_path": "/tmp/u4-b-read-diagnostic/strace-copyright.txt",
+      "bytes": 1425,
+      "sha256": "40e4ca01654c733c06fabee65168da4c177117b1bd084f3a752bc8a989736e04"
+    },
+    {
+      "url": "https://packages.debian.org/bookworm/amd64/libunwind8/download",
+      "private_saved_path": "/tmp/u4-b-read-diagnostic/libunwind-download.html",
+      "bytes": 13173,
+      "sha256": "9e8b1a7541ba38e3bb7d344dad780a79380c145269f932e3e2353b1c73d0f2f7"
+    },
+    {
+      "url": "https://packages.debian.org/bookworm/libunwind8",
+      "private_saved_path": "/tmp/u4-b-read-diagnostic/libunwind-details.html",
+      "bytes": 14089,
+      "sha256": "11a088ad02d4cbd99527f3eefc9744c33f15903ba94f47f648c6e433c94c38ad"
+    },
+    {
+      "url": "https://metadata.ftp-master.debian.org/changelogs/main/libu/libunwind/libunwind_1.6.2-3_copyright",
+      "private_saved_path": "/tmp/u4-b-read-diagnostic/libunwind-copyright.txt",
+      "bytes": 3613,
+      "sha256": "977d981f5677652884b09cccef6b62f992aa9c74b7a748bfe9863a703f5aed58"
+    }
+  ],
+  "baseline": {
+    "probe_sha256": "e77b1aec69cf43ad32706ae618280463beae37e2701fa8e39e4e3f53948ed424",
+    "lock_sha256": "cbe9a580e0c6209abdb34be23965c2fe2f75b5970819d2021c943e2e02d939be",
+    "crate_manifest_sha256": "60299ba9498e506010a5c908ef8017beb2279d1aedab409a7fc21601d3b35ee0",
+    "workspace_manifest_sha256": "707748415914b62d281084193635c3300c598422fec88229b85ae68587cb33c3",
+    "cache_inventory_sha256": "ce219674649c7e77ce84806db559d8473a6c6a62b5bad7aa3ff0e93486f30148",
+    "vectors_sha256": "8dae6586c54462debbf1dad28ff963099a1a89d7b2daa213ba2908c7e46c7e9e",
+    "rustc": "1.99.0 b940084d7eb6a299eb4bfeb8e34901bc051e7ac4",
+    "cargo": "1.99.0 5f94df4789f005f9a352888e8355ffc645b7ed0e",
+    "rustflags": "-C debuginfo=1 -C linker=/controls/linker.sh"
+  },
+  "next_permission": "Acquire/authenticate and statically inspect exactly these two packages plus Debian signed index metadata in a new private directory; no installation or execution of acquired code; return identities before any separate trace approval."
+}

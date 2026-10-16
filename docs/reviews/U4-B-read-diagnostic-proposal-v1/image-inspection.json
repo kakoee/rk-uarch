@@ -1,0 +1,36 @@
+{
+  "argv": [
+    "/usr/bin/docker",
+    "--host",
+    "unix:///var/run/docker.sock",
+    "run",
+    "--rm",
+    "--pull",
+    "never",
+    "--platform",
+    "linux/amd64",
+    "--network",
+    "none",
+    "--read-only",
+    "--user",
+    "1000:1000",
+    "--cap-drop",
+    "ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "--tmpfs",
+    "/tmp",
+    "--entrypoint",
+    "/bin/sh",
+    "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+    "-c",
+    "for p in libc6 libunwind8 liblzma5 debian-archive-keyring; do dpkg-query -W \"$p\"; printf 'query_exit=%s\\n' \"$?\"; done\nfor p in strace gpgv dpkg-deb readelf; do command -v \"$p\"; printf 'lookup_exit=%s\\n' \"$?\"; done\nsha256sum /usr/share/keyrings/debian-archive-keyring.gpg /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu/liblzma.so.5\n/sbin/ldconfig -p | /bin/grep -E 'libunwind|liblzma|libc\\.so' "
+  ],
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "DOCKER_CONFIG": "/tmp/u4-b-c2-review/repeat/docker-config"
+  },
+  "exit_code": 0,
+  "stdout": "libc6:amd64\t2.36-9+deb12u14\nquery_exit=0\nquery_exit=1\nliblzma5:amd64\t5.4.1-1+deb12u2\nquery_exit=0\ndebian-archive-keyring\t2023.3+deb12u2\nquery_exit=0\nlookup_exit=127\n/usr/bin/gpgv\nlookup_exit=0\n/usr/bin/dpkg-deb\nlookup_exit=0\n/usr/bin/readelf\nlookup_exit=0\n506b815cbb32d9b6066b4a2aa524071e071761e7e7f68c3ac74f3061ba852017  /usr/share/keyrings/debian-archive-keyring.gpg\n02bcda52c1a5dfc236f94d9e5255b4a0e26347d8a372a5223b650e31f291ce3c  /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\n6b4a45352fd0c540a9c7c718f35ce8c8e46a4e482f9d3885a910c32d1a0e1421  /lib/x86_64-linux-gnu/libc.so.6\n5de60ec1bf90cd3d699188eb9ebb333c22b531394e0b030b55048edbd729ed17  /lib/x86_64-linux-gnu/liblzma.so.5\n\tliblzma.so.5 (libc6,x86-64) => /lib/x86_64-linux-gnu/liblzma.so.5\n\tlibc.so.6 (libc6,x86-64) => /lib/x86_64-linux-gnu/libc.so.6\n",
+  "stderr": "dpkg-query: no packages found matching libunwind8\n"
+}
