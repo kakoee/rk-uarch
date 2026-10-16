@@ -1,0 +1,66 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "docs/reviews/U4-B-K2-C2-nonblank-review-v1/verify.py"
+      ],
+      "exit": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "format",
+        "--check",
+        "docs/reviews/U4-B-K2-C2-nonblank-review-v1/verify.py"
+      ],
+      "exit": 0,
+      "stdout": "1 file already formatted\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "portable_verifier": {
+    "inventory_entries": 14,
+    "command_receipts": 32,
+    "cases_per_mode": 21694,
+    "refusals_per_mode": 417,
+    "unit_tests_per_mode": 17,
+    "predicted_wrong_acceptances_per_mode": 35,
+    "restored_mismatches": 0,
+    "new_native_execution_by_this_verifier": false
+  },
+  "verifier_command": [
+    "env",
+    "-u",
+    "PYTHONPATH",
+    "-u",
+    "MYPYPATH",
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "docs/reviews/U4-B-K2-C2-nonblank-review-v1/verify.py"
+  ],
+  "relative_links_checked": 12,
+  "inventory_exclusions": [
+    "inventory.json",
+    "validation.json",
+    "verification.log"
+  ],
+  "native_execution_in_commands_json": true,
+  "full_runtime_suite_rerun": false,
+  "unrelated_fault_campaigns_rerun": false,
+  "source_isolation": "Independent derivation uses -I -S -B with private contract roots and exact installed Pydantic; origins/hashes in python-review.json. Portable verifier imports only pinned standalone comparator, no project modules."
+}

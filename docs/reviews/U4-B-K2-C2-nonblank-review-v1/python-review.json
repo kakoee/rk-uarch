@@ -1,0 +1,932 @@
+{
+  "time_ns": 1792125373795108417,
+  "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+  "python_executable_sha256": "f7c6210eb40fadcd3c2889dddd24a15fc2c9f926aec5a03bf9da66e12d581526",
+  "pydantic": "2.13.5",
+  "unicode": "15.0.0",
+  "reference_commit": "ce732f5bedccdde629edcf278fa76ea772d0ea82",
+  "origins": {
+    "pydantic_core": {
+      "path": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/pydantic_core/__init__.py",
+      "sha256": "9cad6292b75254af606a970aae9bff6e5ae9f0b08089cd63acafa391b60794d2"
+    },
+    "pydantic": {
+      "path": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/lib/python3.12/site-packages/pydantic/__init__.py",
+      "sha256": "e62127278c07bf5384cdd2903f368a69929f3b8a524000bae4e0eb608ebf4bc6"
+    },
+    "uarch_contract.common": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/common.py",
+      "sha256": "07df470e77f16fd4bb0a2b3d961ceaf131a301970a25826bf8fdcaab1f8da9cb"
+    },
+    "uarch_contract.errors": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/errors.py",
+      "sha256": "c4f6d97dcac3a87268ce817d98a298539445dcc1d22674bedf4ba331171cf502"
+    },
+    "uarch_contract.precision": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/precision.py",
+      "sha256": "41cbb281553c2faf6dfc49a41d87bf2e6effbc82ef090b8c299523cbbd2d5dd6"
+    },
+    "uarch_contract.sourced": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/sourced.py",
+      "sha256": "cbac4575604e979e1b6e560994569670ec427a92a47ec01aa7f72d49fc2b4244"
+    },
+    "uarch_contract.hardware": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/hardware.py",
+      "sha256": "8f737384d95be4ccce6c916c0c6bbe416ebfa48c108738c9030079da04880e94"
+    },
+    "uarch_contract.fidelity": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/fidelity.py",
+      "sha256": "91934c6d6bfaf0d08e172d4348bdc9d8a76ef6bf6bb677cc7ab34614b9f617b6"
+    },
+    "uarch_contract.model_card": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/model_card.py",
+      "sha256": "5c53671be68f9c8a2039df514e0d4f9530cb2d0d72a911b0dc8b76307699ff6a"
+    },
+    "uarch_contract.model_shape": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/model_shape.py",
+      "sha256": "f5169ce0c689275a9386e0110db6a08c8b55a5fe800eeb8729dea7bf523e1bdb"
+    },
+    "uarch_contract.operators": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/operators.py",
+      "sha256": "4533eeda401473e8595702f44a7f6ab11403d8798463e880ba36c9af063231f2"
+    },
+    "uarch_contract.request": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/request.py",
+      "sha256": "ad5ffc5dd8a5d430add8c5ed8d6ddc4b1371a124e49aae961678e8c04d68631e"
+    },
+    "uarch_contract.prepared": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/prepared.py",
+      "sha256": "3f8615a2d3600784ecbe3a688290711bba0520bf28ff7e2b8e5a994cc1c3bbef"
+    },
+    "uarch_contract.table": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/table.py",
+      "sha256": "e2b33e3c50e66e977b64b7ca7c381e261703b347880fb3b2c6220acd136ad13f"
+    },
+    "uarch_contract.assumptions": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/assumptions.py",
+      "sha256": "8f209a08ba6dc5785fad0c09bd160027f80a2338a49a8d74f855ae00f9e94789"
+    },
+    "uarch_contract.evidence": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/evidence.py",
+      "sha256": "333c64cebe926faa906ab4f7c968e0d86d496db38c10133f2dbeba20e14df5f9"
+    },
+    "uarch_contract.exports": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/exports.py",
+      "sha256": "85bc308b288c396459705ede9d04b9e5f02b5f8085b1d89bdcd8c36aa4696e96"
+    },
+    "uarch_contract.comparison": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/comparison.py",
+      "sha256": "8a507344c3caaf9a9e85f34854b5a2b626be0a433dd95159e51e691057b2dc24"
+    },
+    "uarch_contract.derivation": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/derivation.py",
+      "sha256": "e29ba8c64ba05fa06cb2b67709e8a56fed8389a513d13139b0cdbd5d015e2459"
+    },
+    "uarch_contract.registry": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/registry.py",
+      "sha256": "0fa428e947858bb895e59c43efd289596df7d79f747f678e21002fcceb78eb56"
+    },
+    "uarch_contract.hashing": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/hashing.py",
+      "sha256": "ee8eac838b6a76b9cda0d0cc3d392ad0d6795d8b27e33b23582b4c1467fee9cc"
+    },
+    "uarch_contract.report_context": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/report_context.py",
+      "sha256": "62b7e47fe2b63fc420b042031fc66295358c0940cdb8d098b5f3627b49ba7e55"
+    },
+    "uarch_contract": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/__init__.py",
+      "sha256": "459d397b5469b7a567d2c177979c538dda0b6789c38102a8c3db41194b4f92ed"
+    },
+    "uarch_contract.rotary_v2": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/rotary_v2.py",
+      "sha256": "2579cfda40ce955fb5a6a8b1fead3b4529c3bbf2329970005b990c05a8461c4e"
+    },
+    "uarch_contract.mapped": {
+      "path": "/tmp/u4-b-c2b-review.vfce4wnr/reference/contract/uarch_contract/mapped.py",
+      "sha256": "dee6903c221078ae4add28a88f6a0af679a40f92bb1069c8e250352cffa1dd7b"
+    }
+  },
+  "codepoints_scanned": 1114112,
+  "strip_empty_codepoints": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    28,
+    29,
+    30,
+    31,
+    32,
+    133,
+    160,
+    5760,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8232,
+    8233,
+    8239,
+    8287,
+    12288
+  ],
+  "blank_encoding_sha256": "96d09d55259e60e1198f7f067eeac357f6581d3700497cf942886cb74a8bdbac",
+  "datasets": {
+    "A-extension.jsonl": {
+      "count": 139,
+      "sha256": "cf956471e48b5a4001cfe1c321c5fe1874a0da980d005bcde5f738e1c1f2dfa9",
+      "refusals": 85
+    },
+    "B-extension.jsonl": {
+      "count": 52,
+      "sha256": "9d687e0b3823b0185f8892f4ec6637cf17f3b0d07e576026e9eec6c61c7773cf",
+      "refusals": 34
+    },
+    "B-independent.jsonl": {
+      "count": 66,
+      "sha256": "1f469bd7e140783f077ce52d0edad8434087f15cd7179c29988b82e001aa9c18",
+      "refusals": 36
+    },
+    "focused.jsonl": {
+      "count": 469,
+      "sha256": "935fa27a14f5fb07542f1652df37cdacb79a039b411e207036f3e03aac1881fc",
+      "refusals": 221
+    },
+    "supplement.jsonl": {
+      "count": 3,
+      "sha256": "097fb324e704e49d0c129984cef713e2b961520e81f8c8b9f4885222a91a9485",
+      "refusals": 0
+    },
+    "vectors.jsonl": {
+      "count": 20965,
+      "sha256": "8dae6586c54462debbf1dad28ff963099a1a89d7b2daa213ba2908c7e46c7e9e",
+      "refusals": 41
+    }
+  },
+  "three_field_blank_coverage": {
+    "unit": {
+      "U+0009": [
+        "A-blank:0000:unit-U0009-single",
+        "A-blank:0001:unit-U0009-mixed-blank",
+        "A-blank:0002:unit-U0009-nonblank"
+      ],
+      "U+000A": [
+        "A-blank:0003:unit-U000A-single",
+        "A-blank:0004:unit-U000A-mixed-blank",
+        "A-blank:0005:unit-U000A-nonblank"
+      ],
+      "U+000B": [
+        "A-blank:0006:unit-U000B-single",
+        "A-blank:0007:unit-U000B-mixed-blank",
+        "A-blank:0008:unit-U000B-nonblank"
+      ],
+      "U+000C": [
+        "A-blank:0009:unit-U000C-single",
+        "A-blank:0010:unit-U000C-mixed-blank",
+        "A-blank:0011:unit-U000C-nonblank"
+      ],
+      "U+000D": [
+        "A-blank:0012:unit-U000D-single",
+        "A-blank:0013:unit-U000D-mixed-blank",
+        "A-blank:0014:unit-U000D-nonblank"
+      ],
+      "U+001C": [
+        "A-blank:0015:unit-U001C-single",
+        "A-blank:0016:unit-U001C-mixed-blank",
+        "A-blank:0017:unit-U001C-nonblank"
+      ],
+      "U+001D": [
+        "A-blank:0018:unit-U001D-single",
+        "A-blank:0019:unit-U001D-mixed-blank",
+        "A-blank:0020:unit-U001D-nonblank"
+      ],
+      "U+001E": [
+        "A-blank:0021:unit-U001E-single",
+        "A-blank:0022:unit-U001E-mixed-blank",
+        "A-blank:0023:unit-U001E-nonblank"
+      ],
+      "U+001F": [
+        "A-blank:0024:unit-U001F-single",
+        "A-blank:0025:unit-U001F-mixed-blank",
+        "A-blank:0026:unit-U001F-nonblank"
+      ],
+      "U+0020": [
+        "A-blank:0027:unit-U0020-single",
+        "A-blank:0028:unit-U0020-mixed-blank",
+        "A-blank:0029:unit-U0020-nonblank"
+      ],
+      "U+0085": [
+        "A-blank:0030:unit-U0085-single",
+        "A-blank:0031:unit-U0085-mixed-blank",
+        "A-blank:0032:unit-U0085-nonblank"
+      ],
+      "U+00A0": [
+        "A-blank:0033:unit-U00A0-single",
+        "A-blank:0034:unit-U00A0-mixed-blank",
+        "A-blank:0035:unit-U00A0-nonblank"
+      ],
+      "U+1680": [
+        "A-blank:0036:unit-U1680-single",
+        "A-blank:0037:unit-U1680-mixed-blank",
+        "A-blank:0038:unit-U1680-nonblank"
+      ],
+      "U+2000": [
+        "A-blank:0039:unit-U2000-single",
+        "A-blank:0040:unit-U2000-mixed-blank",
+        "A-blank:0041:unit-U2000-nonblank"
+      ],
+      "U+2001": [
+        "A-blank:0042:unit-U2001-single",
+        "A-blank:0043:unit-U2001-mixed-blank",
+        "A-blank:0044:unit-U2001-nonblank"
+      ],
+      "U+2002": [
+        "A-blank:0045:unit-U2002-single",
+        "A-blank:0046:unit-U2002-mixed-blank",
+        "A-blank:0047:unit-U2002-nonblank"
+      ],
+      "U+2003": [
+        "A-blank:0048:unit-U2003-single",
+        "A-blank:0049:unit-U2003-mixed-blank",
+        "A-blank:0050:unit-U2003-nonblank"
+      ],
+      "U+2004": [
+        "A-blank:0051:unit-U2004-single",
+        "A-blank:0052:unit-U2004-mixed-blank",
+        "A-blank:0053:unit-U2004-nonblank"
+      ],
+      "U+2005": [
+        "A-blank:0054:unit-U2005-single",
+        "A-blank:0055:unit-U2005-mixed-blank",
+        "A-blank:0056:unit-U2005-nonblank"
+      ],
+      "U+2006": [
+        "A-blank:0057:unit-U2006-single",
+        "A-blank:0058:unit-U2006-mixed-blank",
+        "A-blank:0059:unit-U2006-nonblank"
+      ],
+      "U+2007": [
+        "A-blank:0060:unit-U2007-single",
+        "A-blank:0061:unit-U2007-mixed-blank",
+        "A-blank:0062:unit-U2007-nonblank"
+      ],
+      "U+2008": [
+        "A-blank:0063:unit-U2008-single",
+        "A-blank:0064:unit-U2008-mixed-blank",
+        "A-blank:0065:unit-U2008-nonblank"
+      ],
+      "U+2009": [
+        "A-blank:0066:unit-U2009-single",
+        "A-blank:0067:unit-U2009-mixed-blank",
+        "A-blank:0068:unit-U2009-nonblank"
+      ],
+      "U+200A": [
+        "A-blank:0069:unit-U200A-single",
+        "A-blank:0070:unit-U200A-mixed-blank",
+        "A-blank:0071:unit-U200A-nonblank"
+      ],
+      "U+2028": [
+        "A-blank:0072:unit-U2028-single",
+        "A-blank:0073:unit-U2028-mixed-blank",
+        "A-blank:0074:unit-U2028-nonblank"
+      ],
+      "U+2029": [
+        "A-blank:0075:unit-U2029-single",
+        "A-blank:0076:unit-U2029-mixed-blank",
+        "A-blank:0077:unit-U2029-nonblank"
+      ],
+      "U+202F": [
+        "A-blank:0078:unit-U202F-single",
+        "A-blank:0079:unit-U202F-mixed-blank",
+        "A-blank:0080:unit-U202F-nonblank"
+      ],
+      "U+205F": [
+        "A-blank:0081:unit-U205F-single",
+        "A-blank:0082:unit-U205F-mixed-blank",
+        "A-blank:0083:unit-U205F-nonblank"
+      ],
+      "U+3000": [
+        "A-blank:0084:unit-U3000-single",
+        "A-blank:0085:unit-U3000-mixed-blank",
+        "A-blank:0086:unit-U3000-nonblank"
+      ]
+    },
+    "rationale": {
+      "U+0009": [
+        "A-blank:0141:rationale-U0009-single",
+        "A-blank:0142:rationale-U0009-mixed-blank",
+        "A-blank:0143:rationale-U0009-nonblank"
+      ],
+      "U+000A": [
+        "A-blank:0144:rationale-U000A-single",
+        "A-blank:0145:rationale-U000A-mixed-blank",
+        "A-blank:0146:rationale-U000A-nonblank"
+      ],
+      "U+000B": [
+        "A-blank:0147:rationale-U000B-single",
+        "A-blank:0148:rationale-U000B-mixed-blank",
+        "A-blank:0149:rationale-U000B-nonblank"
+      ],
+      "U+000C": [
+        "A-blank:0150:rationale-U000C-single",
+        "A-blank:0151:rationale-U000C-mixed-blank",
+        "A-blank:0152:rationale-U000C-nonblank"
+      ],
+      "U+000D": [
+        "A-blank:0153:rationale-U000D-single",
+        "A-blank:0154:rationale-U000D-mixed-blank",
+        "A-blank:0155:rationale-U000D-nonblank"
+      ],
+      "U+001C": [
+        "A-blank:0156:rationale-U001C-single",
+        "A-blank:0157:rationale-U001C-mixed-blank",
+        "A-blank:0158:rationale-U001C-nonblank"
+      ],
+      "U+001D": [
+        "A-blank:0159:rationale-U001D-single",
+        "A-blank:0160:rationale-U001D-mixed-blank",
+        "A-blank:0161:rationale-U001D-nonblank"
+      ],
+      "U+001E": [
+        "A-blank:0162:rationale-U001E-single",
+        "A-blank:0163:rationale-U001E-mixed-blank",
+        "A-blank:0164:rationale-U001E-nonblank"
+      ],
+      "U+001F": [
+        "A-blank:0165:rationale-U001F-single",
+        "A-blank:0166:rationale-U001F-mixed-blank",
+        "A-blank:0167:rationale-U001F-nonblank"
+      ],
+      "U+0020": [
+        "A-blank:0168:rationale-U0020-single",
+        "A-blank:0169:rationale-U0020-mixed-blank",
+        "A-blank:0170:rationale-U0020-nonblank"
+      ],
+      "U+0085": [
+        "A-blank:0171:rationale-U0085-single",
+        "A-blank:0172:rationale-U0085-mixed-blank",
+        "A-blank:0173:rationale-U0085-nonblank"
+      ],
+      "U+00A0": [
+        "A-blank:0174:rationale-U00A0-single",
+        "A-blank:0175:rationale-U00A0-mixed-blank",
+        "A-blank:0176:rationale-U00A0-nonblank"
+      ],
+      "U+1680": [
+        "A-blank:0177:rationale-U1680-single",
+        "A-blank:0178:rationale-U1680-mixed-blank",
+        "A-blank:0179:rationale-U1680-nonblank"
+      ],
+      "U+2000": [
+        "A-blank:0180:rationale-U2000-single",
+        "A-blank:0181:rationale-U2000-mixed-blank",
+        "A-blank:0182:rationale-U2000-nonblank"
+      ],
+      "U+2001": [
+        "A-blank:0183:rationale-U2001-single",
+        "A-blank:0184:rationale-U2001-mixed-blank",
+        "A-blank:0185:rationale-U2001-nonblank"
+      ],
+      "U+2002": [
+        "A-blank:0186:rationale-U2002-single",
+        "A-blank:0187:rationale-U2002-mixed-blank",
+        "A-blank:0188:rationale-U2002-nonblank"
+      ],
+      "U+2003": [
+        "A-blank:0189:rationale-U2003-single",
+        "A-blank:0190:rationale-U2003-mixed-blank",
+        "A-blank:0191:rationale-U2003-nonblank"
+      ],
+      "U+2004": [
+        "A-blank:0192:rationale-U2004-single",
+        "A-blank:0193:rationale-U2004-mixed-blank",
+        "A-blank:0194:rationale-U2004-nonblank"
+      ],
+      "U+2005": [
+        "A-blank:0195:rationale-U2005-single",
+        "A-blank:0196:rationale-U2005-mixed-blank",
+        "A-blank:0197:rationale-U2005-nonblank"
+      ],
+      "U+2006": [
+        "A-blank:0198:rationale-U2006-single",
+        "A-blank:0199:rationale-U2006-mixed-blank",
+        "A-blank:0200:rationale-U2006-nonblank"
+      ],
+      "U+2007": [
+        "A-blank:0201:rationale-U2007-single",
+        "A-blank:0202:rationale-U2007-mixed-blank",
+        "A-blank:0203:rationale-U2007-nonblank"
+      ],
+      "U+2008": [
+        "A-blank:0204:rationale-U2008-single",
+        "A-blank:0205:rationale-U2008-mixed-blank",
+        "A-blank:0206:rationale-U2008-nonblank"
+      ],
+      "U+2009": [
+        "A-blank:0207:rationale-U2009-single",
+        "A-blank:0208:rationale-U2009-mixed-blank",
+        "A-blank:0209:rationale-U2009-nonblank"
+      ],
+      "U+200A": [
+        "A-blank:0210:rationale-U200A-single",
+        "A-blank:0211:rationale-U200A-mixed-blank",
+        "A-blank:0212:rationale-U200A-nonblank"
+      ],
+      "U+2028": [
+        "A-blank:0213:rationale-U2028-single",
+        "A-blank:0214:rationale-U2028-mixed-blank",
+        "A-blank:0215:rationale-U2028-nonblank"
+      ],
+      "U+2029": [
+        "A-blank:0216:rationale-U2029-single",
+        "A-blank:0217:rationale-U2029-mixed-blank",
+        "A-blank:0218:rationale-U2029-nonblank"
+      ],
+      "U+202F": [
+        "A-blank:0219:rationale-U202F-single",
+        "A-blank:0220:rationale-U202F-mixed-blank",
+        "A-blank:0221:rationale-U202F-nonblank"
+      ],
+      "U+205F": [
+        "A-blank:0222:rationale-U205F-single",
+        "A-blank:0223:rationale-U205F-mixed-blank",
+        "A-blank:0224:rationale-U205F-nonblank"
+      ],
+      "U+3000": [
+        "A-blank:0225:rationale-U3000-single",
+        "A-blank:0226:rationale-U3000-mixed-blank",
+        "A-blank:0227:rationale-U3000-nonblank"
+      ]
+    },
+    "source": {
+      "U+0009": [
+        "A-blank:0282:source-U0009-single",
+        "A-blank:0283:source-U0009-mixed-blank",
+        "A-blank:0284:source-U0009-nonblank"
+      ],
+      "U+000A": [
+        "A-blank:0285:source-U000A-single",
+        "A-blank:0286:source-U000A-mixed-blank",
+        "A-blank:0287:source-U000A-nonblank"
+      ],
+      "U+000B": [
+        "A-blank:0288:source-U000B-single",
+        "A-blank:0289:source-U000B-mixed-blank",
+        "A-blank:0290:source-U000B-nonblank"
+      ],
+      "U+000C": [
+        "A-blank:0291:source-U000C-single",
+        "A-blank:0292:source-U000C-mixed-blank",
+        "A-blank:0293:source-U000C-nonblank"
+      ],
+      "U+000D": [
+        "A-blank:0294:source-U000D-single",
+        "A-blank:0295:source-U000D-mixed-blank",
+        "A-blank:0296:source-U000D-nonblank"
+      ],
+      "U+001C": [
+        "A-blank:0297:source-U001C-single",
+        "A-blank:0298:source-U001C-mixed-blank",
+        "A-blank:0299:source-U001C-nonblank",
+        "A-blank:0425:claim-source-measured",
+        "A-blank:0431:claim-source-spec_derived",
+        "A-blank:0437:claim-source-estimated"
+      ],
+      "U+001D": [
+        "A-blank:0300:source-U001D-single",
+        "A-blank:0301:source-U001D-mixed-blank",
+        "A-blank:0302:source-U001D-nonblank"
+      ],
+      "U+001E": [
+        "A-blank:0303:source-U001E-single",
+        "A-blank:0304:source-U001E-mixed-blank",
+        "A-blank:0305:source-U001E-nonblank"
+      ],
+      "U+001F": [
+        "A-blank:0306:source-U001F-single",
+        "A-blank:0307:source-U001F-mixed-blank",
+        "A-blank:0308:source-U001F-nonblank",
+        "A-blank:0426:claim-source-measured",
+        "A-blank:0432:claim-source-spec_derived",
+        "A-blank:0438:claim-source-estimated"
+      ],
+      "U+0020": [
+        "A-blank:0309:source-U0020-single",
+        "A-blank:0310:source-U0020-mixed-blank",
+        "A-blank:0311:source-U0020-nonblank"
+      ],
+      "U+0085": [
+        "A-blank:0312:source-U0085-single",
+        "A-blank:0313:source-U0085-mixed-blank",
+        "A-blank:0314:source-U0085-nonblank"
+      ],
+      "U+00A0": [
+        "A-blank:0315:source-U00A0-single",
+        "A-blank:0316:source-U00A0-mixed-blank",
+        "A-blank:0317:source-U00A0-nonblank"
+      ],
+      "U+1680": [
+        "A-blank:0318:source-U1680-single",
+        "A-blank:0319:source-U1680-mixed-blank",
+        "A-blank:0320:source-U1680-nonblank"
+      ],
+      "U+2000": [
+        "A-blank:0321:source-U2000-single",
+        "A-blank:0322:source-U2000-mixed-blank",
+        "A-blank:0323:source-U2000-nonblank"
+      ],
+      "U+2001": [
+        "A-blank:0324:source-U2001-single",
+        "A-blank:0325:source-U2001-mixed-blank",
+        "A-blank:0326:source-U2001-nonblank"
+      ],
+      "U+2002": [
+        "A-blank:0327:source-U2002-single",
+        "A-blank:0328:source-U2002-mixed-blank",
+        "A-blank:0329:source-U2002-nonblank"
+      ],
+      "U+2003": [
+        "A-blank:0330:source-U2003-single",
+        "A-blank:0331:source-U2003-mixed-blank",
+        "A-blank:0332:source-U2003-nonblank"
+      ],
+      "U+2004": [
+        "A-blank:0333:source-U2004-single",
+        "A-blank:0334:source-U2004-mixed-blank",
+        "A-blank:0335:source-U2004-nonblank"
+      ],
+      "U+2005": [
+        "A-blank:0336:source-U2005-single",
+        "A-blank:0337:source-U2005-mixed-blank",
+        "A-blank:0338:source-U2005-nonblank"
+      ],
+      "U+2006": [
+        "A-blank:0339:source-U2006-single",
+        "A-blank:0340:source-U2006-mixed-blank",
+        "A-blank:0341:source-U2006-nonblank"
+      ],
+      "U+2007": [
+        "A-blank:0342:source-U2007-single",
+        "A-blank:0343:source-U2007-mixed-blank",
+        "A-blank:0344:source-U2007-nonblank"
+      ],
+      "U+2008": [
+        "A-blank:0345:source-U2008-single",
+        "A-blank:0346:source-U2008-mixed-blank",
+        "A-blank:0347:source-U2008-nonblank"
+      ],
+      "U+2009": [
+        "A-blank:0348:source-U2009-single",
+        "A-blank:0349:source-U2009-mixed-blank",
+        "A-blank:0350:source-U2009-nonblank"
+      ],
+      "U+200A": [
+        "A-blank:0351:source-U200A-single",
+        "A-blank:0352:source-U200A-mixed-blank",
+        "A-blank:0353:source-U200A-nonblank"
+      ],
+      "U+2028": [
+        "A-blank:0354:source-U2028-single",
+        "A-blank:0355:source-U2028-mixed-blank",
+        "A-blank:0356:source-U2028-nonblank"
+      ],
+      "U+2029": [
+        "A-blank:0357:source-U2029-single",
+        "A-blank:0358:source-U2029-mixed-blank",
+        "A-blank:0359:source-U2029-nonblank"
+      ],
+      "U+202F": [
+        "A-blank:0360:source-U202F-single",
+        "A-blank:0361:source-U202F-mixed-blank",
+        "A-blank:0362:source-U202F-nonblank"
+      ],
+      "U+205F": [
+        "A-blank:0363:source-U205F-single",
+        "A-blank:0364:source-U205F-mixed-blank",
+        "A-blank:0365:source-U205F-nonblank"
+      ],
+      "U+3000": [
+        "A-blank:0366:source-U3000-single",
+        "A-blank:0367:source-U3000-mixed-blank",
+        "A-blank:0368:source-U3000-nonblank"
+      ]
+    }
+  },
+  "preserved_text_assertions": 535,
+  "predicted_wrong_acceptances": [
+    "B2:legacy:blank-control-unit",
+    "B2:legacy:blank-control-rationale",
+    "A-blank:0015:unit-U001C-single",
+    "A-blank:0016:unit-U001C-mixed-blank",
+    "A-blank:0018:unit-U001D-single",
+    "A-blank:0019:unit-U001D-mixed-blank",
+    "A-blank:0021:unit-U001E-single",
+    "A-blank:0022:unit-U001E-mixed-blank",
+    "A-blank:0024:unit-U001F-single",
+    "A-blank:0025:unit-U001F-mixed-blank",
+    "A-blank:0137:unit-all-blanks",
+    "A-blank:0156:rationale-U001C-single",
+    "A-blank:0157:rationale-U001C-mixed-blank",
+    "A-blank:0159:rationale-U001D-single",
+    "A-blank:0160:rationale-U001D-mixed-blank",
+    "A-blank:0162:rationale-U001E-single",
+    "A-blank:0163:rationale-U001E-mixed-blank",
+    "A-blank:0165:rationale-U001F-single",
+    "A-blank:0166:rationale-U001F-mixed-blank",
+    "A-blank:0278:rationale-all-blanks",
+    "A-blank:0297:source-U001C-single",
+    "A-blank:0298:source-U001C-mixed-blank",
+    "A-blank:0300:source-U001D-single",
+    "A-blank:0301:source-U001D-mixed-blank",
+    "A-blank:0303:source-U001E-single",
+    "A-blank:0304:source-U001E-mixed-blank",
+    "A-blank:0306:source-U001F-single",
+    "A-blank:0307:source-U001F-mixed-blank",
+    "A-blank:0419:source-all-blanks",
+    "A-blank:0425:claim-source-measured",
+    "A-blank:0426:claim-source-measured",
+    "A-blank:0431:claim-source-spec_derived",
+    "A-blank:0432:claim-source-spec_derived",
+    "A-blank:0437:claim-source-estimated",
+    "A-blank:0438:claim-source-estimated"
+  ],
+  "focused_refusal_classifications": {
+    "A-blank:0000:unit-U0009-single": "SourcedValue rules",
+    "A-blank:0001:unit-U0009-mixed-blank": "SourcedValue rules",
+    "A-blank:0003:unit-U000A-single": "SourcedValue rules",
+    "A-blank:0004:unit-U000A-mixed-blank": "SourcedValue rules",
+    "A-blank:0006:unit-U000B-single": "SourcedValue rules",
+    "A-blank:0007:unit-U000B-mixed-blank": "SourcedValue rules",
+    "A-blank:0009:unit-U000C-single": "SourcedValue rules",
+    "A-blank:0010:unit-U000C-mixed-blank": "SourcedValue rules",
+    "A-blank:0012:unit-U000D-single": "SourcedValue rules",
+    "A-blank:0013:unit-U000D-mixed-blank": "SourcedValue rules",
+    "A-blank:0015:unit-U001C-single": "SourcedValue rules",
+    "A-blank:0016:unit-U001C-mixed-blank": "SourcedValue rules",
+    "A-blank:0018:unit-U001D-single": "SourcedValue rules",
+    "A-blank:0019:unit-U001D-mixed-blank": "SourcedValue rules",
+    "A-blank:0021:unit-U001E-single": "SourcedValue rules",
+    "A-blank:0022:unit-U001E-mixed-blank": "SourcedValue rules",
+    "A-blank:0024:unit-U001F-single": "SourcedValue rules",
+    "A-blank:0025:unit-U001F-mixed-blank": "SourcedValue rules",
+    "A-blank:0027:unit-U0020-single": "SourcedValue rules",
+    "A-blank:0028:unit-U0020-mixed-blank": "SourcedValue rules",
+    "A-blank:0030:unit-U0085-single": "SourcedValue rules",
+    "A-blank:0031:unit-U0085-mixed-blank": "SourcedValue rules",
+    "A-blank:0033:unit-U00A0-single": "SourcedValue rules",
+    "A-blank:0034:unit-U00A0-mixed-blank": "SourcedValue rules",
+    "A-blank:0036:unit-U1680-single": "SourcedValue rules",
+    "A-blank:0037:unit-U1680-mixed-blank": "SourcedValue rules",
+    "A-blank:0039:unit-U2000-single": "SourcedValue rules",
+    "A-blank:0040:unit-U2000-mixed-blank": "SourcedValue rules",
+    "A-blank:0042:unit-U2001-single": "SourcedValue rules",
+    "A-blank:0043:unit-U2001-mixed-blank": "SourcedValue rules",
+    "A-blank:0045:unit-U2002-single": "SourcedValue rules",
+    "A-blank:0046:unit-U2002-mixed-blank": "SourcedValue rules",
+    "A-blank:0048:unit-U2003-single": "SourcedValue rules",
+    "A-blank:0049:unit-U2003-mixed-blank": "SourcedValue rules",
+    "A-blank:0051:unit-U2004-single": "SourcedValue rules",
+    "A-blank:0052:unit-U2004-mixed-blank": "SourcedValue rules",
+    "A-blank:0054:unit-U2005-single": "SourcedValue rules",
+    "A-blank:0055:unit-U2005-mixed-blank": "SourcedValue rules",
+    "A-blank:0057:unit-U2006-single": "SourcedValue rules",
+    "A-blank:0058:unit-U2006-mixed-blank": "SourcedValue rules",
+    "A-blank:0060:unit-U2007-single": "SourcedValue rules",
+    "A-blank:0061:unit-U2007-mixed-blank": "SourcedValue rules",
+    "A-blank:0063:unit-U2008-single": "SourcedValue rules",
+    "A-blank:0064:unit-U2008-mixed-blank": "SourcedValue rules",
+    "A-blank:0066:unit-U2009-single": "SourcedValue rules",
+    "A-blank:0067:unit-U2009-mixed-blank": "SourcedValue rules",
+    "A-blank:0069:unit-U200A-single": "SourcedValue rules",
+    "A-blank:0070:unit-U200A-mixed-blank": "SourcedValue rules",
+    "A-blank:0072:unit-U2028-single": "SourcedValue rules",
+    "A-blank:0073:unit-U2028-mixed-blank": "SourcedValue rules",
+    "A-blank:0075:unit-U2029-single": "SourcedValue rules",
+    "A-blank:0076:unit-U2029-mixed-blank": "SourcedValue rules",
+    "A-blank:0078:unit-U202F-single": "SourcedValue rules",
+    "A-blank:0079:unit-U202F-mixed-blank": "SourcedValue rules",
+    "A-blank:0081:unit-U205F-single": "SourcedValue rules",
+    "A-blank:0082:unit-U205F-mixed-blank": "SourcedValue rules",
+    "A-blank:0084:unit-U3000-single": "SourcedValue rules",
+    "A-blank:0085:unit-U3000-mixed-blank": "SourcedValue rules",
+    "A-blank:0135:unit-empty": "SourcedValue rules",
+    "A-blank:0136:unit-null": "invalid type: null, expected a string",
+    "A-blank:0137:unit-all-blanks": "SourcedValue rules",
+    "A-blank:0140:unit-absent": "missing field `unit`",
+    "A-blank:0141:rationale-U0009-single": "SourcedValue rules",
+    "A-blank:0142:rationale-U0009-mixed-blank": "SourcedValue rules",
+    "A-blank:0144:rationale-U000A-single": "SourcedValue rules",
+    "A-blank:0145:rationale-U000A-mixed-blank": "SourcedValue rules",
+    "A-blank:0147:rationale-U000B-single": "SourcedValue rules",
+    "A-blank:0148:rationale-U000B-mixed-blank": "SourcedValue rules",
+    "A-blank:0150:rationale-U000C-single": "SourcedValue rules",
+    "A-blank:0151:rationale-U000C-mixed-blank": "SourcedValue rules",
+    "A-blank:0153:rationale-U000D-single": "SourcedValue rules",
+    "A-blank:0154:rationale-U000D-mixed-blank": "SourcedValue rules",
+    "A-blank:0156:rationale-U001C-single": "SourcedValue rules",
+    "A-blank:0157:rationale-U001C-mixed-blank": "SourcedValue rules",
+    "A-blank:0159:rationale-U001D-single": "SourcedValue rules",
+    "A-blank:0160:rationale-U001D-mixed-blank": "SourcedValue rules",
+    "A-blank:0162:rationale-U001E-single": "SourcedValue rules",
+    "A-blank:0163:rationale-U001E-mixed-blank": "SourcedValue rules",
+    "A-blank:0165:rationale-U001F-single": "SourcedValue rules",
+    "A-blank:0166:rationale-U001F-mixed-blank": "SourcedValue rules",
+    "A-blank:0168:rationale-U0020-single": "SourcedValue rules",
+    "A-blank:0169:rationale-U0020-mixed-blank": "SourcedValue rules",
+    "A-blank:0171:rationale-U0085-single": "SourcedValue rules",
+    "A-blank:0172:rationale-U0085-mixed-blank": "SourcedValue rules",
+    "A-blank:0174:rationale-U00A0-single": "SourcedValue rules",
+    "A-blank:0175:rationale-U00A0-mixed-blank": "SourcedValue rules",
+    "A-blank:0177:rationale-U1680-single": "SourcedValue rules",
+    "A-blank:0178:rationale-U1680-mixed-blank": "SourcedValue rules",
+    "A-blank:0180:rationale-U2000-single": "SourcedValue rules",
+    "A-blank:0181:rationale-U2000-mixed-blank": "SourcedValue rules",
+    "A-blank:0183:rationale-U2001-single": "SourcedValue rules",
+    "A-blank:0184:rationale-U2001-mixed-blank": "SourcedValue rules",
+    "A-blank:0186:rationale-U2002-single": "SourcedValue rules",
+    "A-blank:0187:rationale-U2002-mixed-blank": "SourcedValue rules",
+    "A-blank:0189:rationale-U2003-single": "SourcedValue rules",
+    "A-blank:0190:rationale-U2003-mixed-blank": "SourcedValue rules",
+    "A-blank:0192:rationale-U2004-single": "SourcedValue rules",
+    "A-blank:0193:rationale-U2004-mixed-blank": "SourcedValue rules",
+    "A-blank:0195:rationale-U2005-single": "SourcedValue rules",
+    "A-blank:0196:rationale-U2005-mixed-blank": "SourcedValue rules",
+    "A-blank:0198:rationale-U2006-single": "SourcedValue rules",
+    "A-blank:0199:rationale-U2006-mixed-blank": "SourcedValue rules",
+    "A-blank:0201:rationale-U2007-single": "SourcedValue rules",
+    "A-blank:0202:rationale-U2007-mixed-blank": "SourcedValue rules",
+    "A-blank:0204:rationale-U2008-single": "SourcedValue rules",
+    "A-blank:0205:rationale-U2008-mixed-blank": "SourcedValue rules",
+    "A-blank:0207:rationale-U2009-single": "SourcedValue rules",
+    "A-blank:0208:rationale-U2009-mixed-blank": "SourcedValue rules",
+    "A-blank:0210:rationale-U200A-single": "SourcedValue rules",
+    "A-blank:0211:rationale-U200A-mixed-blank": "SourcedValue rules",
+    "A-blank:0213:rationale-U2028-single": "SourcedValue rules",
+    "A-blank:0214:rationale-U2028-mixed-blank": "SourcedValue rules",
+    "A-blank:0216:rationale-U2029-single": "SourcedValue rules",
+    "A-blank:0217:rationale-U2029-mixed-blank": "SourcedValue rules",
+    "A-blank:0219:rationale-U202F-single": "SourcedValue rules",
+    "A-blank:0220:rationale-U202F-mixed-blank": "SourcedValue rules",
+    "A-blank:0222:rationale-U205F-single": "SourcedValue rules",
+    "A-blank:0223:rationale-U205F-mixed-blank": "SourcedValue rules",
+    "A-blank:0225:rationale-U3000-single": "SourcedValue rules",
+    "A-blank:0226:rationale-U3000-mixed-blank": "SourcedValue rules",
+    "A-blank:0276:rationale-empty": "SourcedValue rules",
+    "A-blank:0277:rationale-null": "SourcedValue rules",
+    "A-blank:0278:rationale-all-blanks": "SourcedValue rules",
+    "A-blank:0281:rationale-absent": "SourcedValue rules",
+    "A-blank:0282:source-U0009-single": "SourcedValue rules",
+    "A-blank:0283:source-U0009-mixed-blank": "SourcedValue rules",
+    "A-blank:0285:source-U000A-single": "SourcedValue rules",
+    "A-blank:0286:source-U000A-mixed-blank": "SourcedValue rules",
+    "A-blank:0288:source-U000B-single": "SourcedValue rules",
+    "A-blank:0289:source-U000B-mixed-blank": "SourcedValue rules",
+    "A-blank:0291:source-U000C-single": "SourcedValue rules",
+    "A-blank:0292:source-U000C-mixed-blank": "SourcedValue rules",
+    "A-blank:0294:source-U000D-single": "SourcedValue rules",
+    "A-blank:0295:source-U000D-mixed-blank": "SourcedValue rules",
+    "A-blank:0297:source-U001C-single": "SourcedValue rules",
+    "A-blank:0298:source-U001C-mixed-blank": "SourcedValue rules",
+    "A-blank:0300:source-U001D-single": "SourcedValue rules",
+    "A-blank:0301:source-U001D-mixed-blank": "SourcedValue rules",
+    "A-blank:0303:source-U001E-single": "SourcedValue rules",
+    "A-blank:0304:source-U001E-mixed-blank": "SourcedValue rules",
+    "A-blank:0306:source-U001F-single": "SourcedValue rules",
+    "A-blank:0307:source-U001F-mixed-blank": "SourcedValue rules",
+    "A-blank:0309:source-U0020-single": "SourcedValue rules",
+    "A-blank:0310:source-U0020-mixed-blank": "SourcedValue rules",
+    "A-blank:0312:source-U0085-single": "SourcedValue rules",
+    "A-blank:0313:source-U0085-mixed-blank": "SourcedValue rules",
+    "A-blank:0315:source-U00A0-single": "SourcedValue rules",
+    "A-blank:0316:source-U00A0-mixed-blank": "SourcedValue rules",
+    "A-blank:0318:source-U1680-single": "SourcedValue rules",
+    "A-blank:0319:source-U1680-mixed-blank": "SourcedValue rules",
+    "A-blank:0321:source-U2000-single": "SourcedValue rules",
+    "A-blank:0322:source-U2000-mixed-blank": "SourcedValue rules",
+    "A-blank:0324:source-U2001-single": "SourcedValue rules",
+    "A-blank:0325:source-U2001-mixed-blank": "SourcedValue rules",
+    "A-blank:0327:source-U2002-single": "SourcedValue rules",
+    "A-blank:0328:source-U2002-mixed-blank": "SourcedValue rules",
+    "A-blank:0330:source-U2003-single": "SourcedValue rules",
+    "A-blank:0331:source-U2003-mixed-blank": "SourcedValue rules",
+    "A-blank:0333:source-U2004-single": "SourcedValue rules",
+    "A-blank:0334:source-U2004-mixed-blank": "SourcedValue rules",
+    "A-blank:0336:source-U2005-single": "SourcedValue rules",
+    "A-blank:0337:source-U2005-mixed-blank": "SourcedValue rules",
+    "A-blank:0339:source-U2006-single": "SourcedValue rules",
+    "A-blank:0340:source-U2006-mixed-blank": "SourcedValue rules",
+    "A-blank:0342:source-U2007-single": "SourcedValue rules",
+    "A-blank:0343:source-U2007-mixed-blank": "SourcedValue rules",
+    "A-blank:0345:source-U2008-single": "SourcedValue rules",
+    "A-blank:0346:source-U2008-mixed-blank": "SourcedValue rules",
+    "A-blank:0348:source-U2009-single": "SourcedValue rules",
+    "A-blank:0349:source-U2009-mixed-blank": "SourcedValue rules",
+    "A-blank:0351:source-U200A-single": "SourcedValue rules",
+    "A-blank:0352:source-U200A-mixed-blank": "SourcedValue rules",
+    "A-blank:0354:source-U2028-single": "SourcedValue rules",
+    "A-blank:0355:source-U2028-mixed-blank": "SourcedValue rules",
+    "A-blank:0357:source-U2029-single": "SourcedValue rules",
+    "A-blank:0358:source-U2029-mixed-blank": "SourcedValue rules",
+    "A-blank:0360:source-U202F-single": "SourcedValue rules",
+    "A-blank:0361:source-U202F-mixed-blank": "SourcedValue rules",
+    "A-blank:0363:source-U205F-single": "SourcedValue rules",
+    "A-blank:0364:source-U205F-mixed-blank": "SourcedValue rules",
+    "A-blank:0366:source-U3000-single": "SourcedValue rules",
+    "A-blank:0367:source-U3000-mixed-blank": "SourcedValue rules",
+    "A-blank:0417:source-empty": "SourcedValue rules",
+    "A-blank:0418:source-null": "SourcedValue rules",
+    "A-blank:0419:source-all-blanks": "SourcedValue rules",
+    "A-blank:0422:source-absent": "SourcedValue rules",
+    "A-blank:0423:claim-source-measured": "SourcedValue rules",
+    "A-blank:0424:claim-source-measured": "SourcedValue rules",
+    "A-blank:0425:claim-source-measured": "SourcedValue rules",
+    "A-blank:0426:claim-source-measured": "SourcedValue rules",
+    "A-blank:0428:claim-source-absent-measured": "SourcedValue rules",
+    "A-blank:0429:claim-source-spec_derived": "SourcedValue rules",
+    "A-blank:0430:claim-source-spec_derived": "SourcedValue rules",
+    "A-blank:0431:claim-source-spec_derived": "SourcedValue rules",
+    "A-blank:0432:claim-source-spec_derived": "SourcedValue rules",
+    "A-blank:0434:claim-source-absent-spec_derived": "SourcedValue rules",
+    "A-blank:0435:claim-source-estimated": "SourcedValue rules",
+    "A-blank:0436:claim-source-estimated": "SourcedValue rules",
+    "A-blank:0437:claim-source-estimated": "SourcedValue rules",
+    "A-blank:0438:claim-source-estimated": "SourcedValue rules",
+    "A-blank:0440:claim-source-absent-estimated": "SourcedValue rules",
+    "A-blank:0442:claim-source-stub": "SourcedValue rules",
+    "A-blank:0443:claim-source-stub": "SourcedValue rules",
+    "A-blank:0444:claim-source-stub": "SourcedValue rules",
+    "A-blank:0445:claim-source-stub": "SourcedValue rules",
+    "A-blank:0447:existing-rules": "SourcedValue rules",
+    "A-blank:0448:existing-rules": "SourcedValue rules",
+    "A-blank:0449:existing-rules": "SourcedValue rules",
+    "A-blank:0450:existing-rules": "SourcedValue rules",
+    "A-blank:0451:existing-rules": "SourcedValue rules",
+    "A-blank:0452:existing-rules": "SourcedValue rules",
+    "A-blank:0453:existing-rules": "SourcedValue rules",
+    "A-blank:0455:existing-rules": "SourcedValue rules",
+    "A-blank:0461:numeric-isolation": "LegacyFloatSyntax",
+    "A-blank:0462:numeric-isolation": "LegacyFloatSyntax",
+    "A-blank:0463:numeric-isolation": "LegacyFloatSyntax",
+    "A-blank:0464:numeric-isolation": "LegacyFloatSyntax",
+    "A-blank:0465:numeric-isolation": "LegacyFloatSyntax",
+    "A-blank:0466:numeric-isolation": "LegacyFloatSyntax",
+    "A-blank:0467:numeric-isolation": "LegacyFloatFinite",
+    "A-blank:0468:numeric-isolation": "LegacyFloatType"
+  },
+  "other_predicates_Python_only": [
+    {
+      "codepoint": 28,
+      "strip_empty": true,
+      "NumericLeaf_path_accepts": true,
+      "legacy_numeric_padding_accepts": false
+    },
+    {
+      "codepoint": 29,
+      "strip_empty": true,
+      "NumericLeaf_path_accepts": true,
+      "legacy_numeric_padding_accepts": false
+    },
+    {
+      "codepoint": 30,
+      "strip_empty": true,
+      "NumericLeaf_path_accepts": true,
+      "legacy_numeric_padding_accepts": false
+    },
+    {
+      "codepoint": 31,
+      "strip_empty": true,
+      "NumericLeaf_path_accepts": true,
+      "legacy_numeric_padding_accepts": false
+    },
+    {
+      "codepoint": 32,
+      "strip_empty": true,
+      "NumericLeaf_path_accepts": false,
+      "legacy_numeric_padding_accepts": true
+    },
+    {
+      "codepoint": 133,
+      "strip_empty": true,
+      "NumericLeaf_path_accepts": false,
+      "legacy_numeric_padding_accepts": true
+    },
+    {
+      "codepoint": 8203,
+      "strip_empty": false,
+      "NumericLeaf_path_accepts": true,
+      "legacy_numeric_padding_accepts": false
+    }
+  ],
+  "all_other_source_bytes_unchanged": true,
+  "new_native_vectors": 0,
+  "expectation_basis": "Existing frozen corpus bytes independently rederived. Fault IDs predicted from literal before/after nonblank sets before B native runs; no native outputs read."
+}
