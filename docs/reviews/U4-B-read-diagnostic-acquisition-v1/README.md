@@ -29,7 +29,8 @@ new key, additional package, apt operation or dependency resolution was used.
 | libunwind8_1.6.2-3_amd64.deb | 51172 | `7b297868682836e4c87be349f17e4a56bc287586e3576503e84a5cb5485ce925` |
 
 `gpgv` exited 0 with three valid signatures under the existing image keyring; fingerprints
-and raw [status](signature.status)/[diagnostics](signature.log) are retained. The signed
+and exact [status text](signature.status.json) (lossless JSON)/[diagnostics](signature.log)
+are retained. The signed
 Release identifies bookworm/oldstable 12.15, dated **2026-07-11 10:16:37 UTC**. It is not
 future-dated. **Valid-Until is absent**, so no signed expiry/freshness bound was established.
 No expiry was invented or authentication bypassed. The authenticated SHA256/size entry
@@ -106,3 +107,7 @@ Existing C2 evidence remains usable within its original limits. Complete file-ac
 closure, semantic dependency/environment-use claims and final host authority remain open.
 No installation, ldd, strace --version, tracer/canary/build, image/security change,
 public K2, C3, qualification or U0024 deferral change occurred. Stop for coordinator.
+
+Publication subsequently integrated peer `936d3fc` normally; exact commits are in
+[publication.json](publication.json). A's returned correction package was integrated only;
+its separate review was not performed by this acquisition task.
