@@ -64,3 +64,23 @@ readers/lifetimes by @2 plus explicit producer. Review historical C01/C02/etc to
 Do not rewrite their old bundles to erase producers. The other failure was a B expected
 error-layer typo: the new explicit owner guard correctly returns InvalidResource before
 old exact-size CapacityExceeded; B test corrected, arithmetic unchanged.
+
+## B /2 checker join (31 real-carrier controls passing on first /2 candidate)
+
+The synthetic_carrier.py D01 control has actual carrier shapes and finite phase arithmetic;
+it is explicitly not a generated result. B check_v2 uses one service per declared mechanism,
+one separate alignment per clocked mechanism (including zero-length alignment), no alignment
+or clock record for zero-hop routing, exact clocks for all other service/alignment activities.
+Channel has one waiting and one service population; DMA has one exact inflight population.
+Ordinary activity service membership is explicit, nonempty waiting membership is required;
+zero waiting membership may be omitted. Activity ready is prior subphase completion, or
+issue/start for the first subphase; service ready after alignment is alignment completion.
+Transfer endpoints include the receiving alignment/wait from prior phase completion to final
+service completion, with control hops zero bytes and transactions counted at dram only.
+Please reconcile these exact representation conventions before final candidate freeze.
+
+The checker separately verifies each phase's cycles and receiving domain, exact rational
+channel carry, complete service/clock inventory, queue windows, declared DMA identity,
+transfers and allocations. It does not use resource busy coverage for alignment attribution.
+A's typed activity joins supply the structural boundary; B does not equate a partition sum
+or an ordinary-clock label with a causal or request witness.
