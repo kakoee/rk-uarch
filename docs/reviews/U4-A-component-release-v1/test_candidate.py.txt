@@ -12,7 +12,10 @@ from rkuarch.mapping.component import map_component
 from rkuarch.workload.component import component_point, prepare_component_bundle
 from validation.component.corpus import two_tiles
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = next(
+    parent for parent in Path(__file__).resolve().parents
+    if (parent / "pyproject.toml").is_file() and (parent / "contract/fixtures/mapped").is_dir()
+)
 
 
 def baseline():

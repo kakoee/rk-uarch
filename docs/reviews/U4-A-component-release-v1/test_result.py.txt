@@ -11,7 +11,10 @@ import pytest
 from uarch_contract.hashing import content_hash
 from uarch_contract.mapped import MappedEngineJob, validate_result
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = next(
+    parent for parent in Path(__file__).resolve().parents
+    if (parent / "pyproject.toml").is_file() and (parent / "contract/fixtures/mapped").is_dir()
+)
 
 
 def synthetic():

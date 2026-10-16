@@ -59,3 +59,10 @@ DMA/barrier/other-buffer producers; exact-end/beyond capacity; queue owner/chann
 request/population and nonnull-domain bypass; missing/relabelled/untight causal activities;
 zero-hop61000 versus incorrect61667. Remove each essential guard in a private mutant,
 show its discriminating test fails, restore exact bytes and rerun affected controls.
+
+Exact `/2` first-use `unrepresented` paths, joined with B4b974fc (sorted, no synthetic label):
+`diagnostics/dram_row_hit_ratio`, `diagnostics/energy_pj`, `diagnostics/noc_max_link_util_ratio`,
+`diagnostics/sram_bank_conflict_stall_ratio`, `diagnostics/vector_util_ratio`,
+`ext_counts/noc_flit_hop_count`, `u_c0_duration_ps`. These fields are null; optional measured
+model diagnostics do not acquire physical validation. Synthetic carriers keep their explicit
+SYNTHETIC label and never enter the real native selection.
