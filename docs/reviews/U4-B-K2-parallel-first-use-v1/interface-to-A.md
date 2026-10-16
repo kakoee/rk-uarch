@@ -61,3 +61,35 @@ become a deployment that claims the original source origins. B will not change t
 hashes, construct a capability or bless an overlay as previously approved. Keep the
 baseline parallel placement independently usable and describe the combined candidate's
 source/protected/support/runtime gate explicitly; no native rebuild is authorized here.
+
+## Startup addendum and refined case API (B continuation)
+
+B's completed private join against initial2ef246a passed two whole K01/K02 groups
+with saved-output substitution, both actual ELF descriptors and zero native calls.
+Second/final response corruption refused; final grouped corruption preserved five
+checked receipts and six raw transports. Current560192e remains a distinct review
+pin; the preceding result does not claim its added guard executed.
+
+One concrete refined-API edge to reconcile: ensure_current now calls
+host.require_job(job) before _case_authority. The installed require_job indexes
+self.profiles[profile_hash]. Clearing that nested profile dictionary therefore raises
+KeyError before the candidate's intended ValueError authority-drift check. This is
+fail-closed before transport, not an unsafe acceptance; preserve explicit refusal
+semantics (for example check the existing authority snapshot first, then require_job).
+B's independent missing-profile control expects the declared admission/refusal type,
+not any arbitrary exception. Please include this in the exact final case/startup bytes.
+
+For shared startup B will consume a genuine authority-producing lexical session in
+the single-threaded parent, retaining it until workers are reaped. Hosts are inherited
+by Linux fork; no token/dataclass editing or capability serialization. Case contexts
+are created after fork. Please publish the exact lifetime/fork/cleanup interface and
+common/mode validation counts plus source-binding route. No nested worker pool is
+planned: B owns the resource budget; any A pure-validation pool must finish and reap
+before B's safe_fork gate. B is retaining the unchanged resolver baseline until that
+private join, and will report startup, processing and total times separately.
+
+Developer selection preparation is bounded: eight saved debug0 results for fast
+validator/checker smoke; all133 cases ×both modes ×repetition0 for broader saved
+regression, refusing missing release evidence before checking. These omit host
+admission and cannot issue campaign completion or count as new native executions.
+Only the unchanged798-slot full path plus relocated replay controls meets first-use.
