@@ -68,3 +68,13 @@ optimized-K2 deployment, stopped evidence and replay ownership remain intact. Co
 future release only at its declared scope. Old U0006 failures/skips and 22/24 analytic
 clock evidence are preserved; this work supplies no positive model badge, table, physical
 validation, hosted result or self-issued independent verdict.
+
+## Published-source export check
+
+Implementation/corpus/reference package **58e8c7028e4d203457b257f56124df36b0820794** was
+pushed normally, then tested in a fresh scoped tracked export. [Receipt](fresh-published.json)
+and [raw log](checks/fresh-published.log): **166 passed, two named human-work skips, one
+native deselection**. Mapper and contract origins are inside that isolated export; existing
+pinned CPython/packages were reused with PYTHONPATH/MYPYPATH unset. Two initial archive path
+selection errors ran no tests and are retained in the receipt. The later commit adds this
+receipt only; source/corpus bytes tested here are unchanged. No hosted or independent verdict.
