@@ -1,0 +1,46 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________ test_exact_corpus_cases_and_outcomes_join_trust[missing] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-43/test_exact_corpus_cases_and_ou0')
+fault = 'missing'
+
+    @pytest.mark.parametrize("fault", ["missing", "case", "outcome"])
+    def test_exact_corpus_cases_and_outcomes_join_trust(tmp_path, fault):
+        selector, _, _, _ = scaffold(tmp_path, corpus_fault=fault)
+>       with pytest.raises(HostBindingError, match="corpus"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE HostBindingError
+
+tests/unit/test_u4_k2_host_records.py:487: Failed
+____________ test_exact_corpus_cases_and_outcomes_join_trust[case] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-43/test_exact_corpus_cases_and_ou1')
+fault = 'case'
+
+    @pytest.mark.parametrize("fault", ["missing", "case", "outcome"])
+    def test_exact_corpus_cases_and_outcomes_join_trust(tmp_path, fault):
+        selector, _, _, _ = scaffold(tmp_path, corpus_fault=fault)
+>       with pytest.raises(HostBindingError, match="corpus"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE HostBindingError
+
+tests/unit/test_u4_k2_host_records.py:487: Failed
+___________ test_exact_corpus_cases_and_outcomes_join_trust[outcome] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-43/test_exact_corpus_cases_and_ou2')
+fault = 'outcome'
+
+    @pytest.mark.parametrize("fault", ["missing", "case", "outcome"])
+    def test_exact_corpus_cases_and_outcomes_join_trust(tmp_path, fault):
+        selector, _, _, _ = scaffold(tmp_path, corpus_fault=fault)
+>       with pytest.raises(HostBindingError, match="corpus"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE HostBindingError
+
+tests/unit/test_u4_k2_host_records.py:487: Failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_u4_k2_host_records.py::test_exact_corpus_cases_and_outcomes_join_trust[missing]
+FAILED tests/unit/test_u4_k2_host_records.py::test_exact_corpus_cases_and_outcomes_join_trust[case]
+FAILED tests/unit/test_u4_k2_host_records.py::test_exact_corpus_cases_and_outcomes_join_trust[outcome]
+3 failed, 11 deselected in 0.42s

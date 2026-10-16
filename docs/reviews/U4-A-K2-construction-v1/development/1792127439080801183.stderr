@@ -1,0 +1,38 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+warning: unused import: `json`
+ --> crates/uarch-engine/src/wire.rs:4:38
+  |
+4 | use serde_json::{Map, Number, Value, json};
+  |                                      ^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `leaf_value` is never used
+   --> crates/uarch-engine/src/wire.rs:307:15
+    |
+307 | pub(crate) fn leaf_value(v: &Value) -> Result<(), String> {
+    |               ^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `releases`, `clocks`, `owner_ids`, and `job_ids` are never read
+ --> crates/uarch-engine/src/admission.rs:8:41
+  |
+7 | pub(crate) struct Validated {
+  |                   --------- fields in this struct
+8 |     pub raw:Value,pub jobs:Vec<Job>,pub releases:Vec<(u32,u64)>,pub clocks:Vec<u64>,pub owner_ids:Vec<u64>,pub job_ids:Vec<String>,
+  |                                         ^^^^^^^^                    ^^^^^^              ^^^^^^^^^              ^^^^^^^
+
+warning: `uarch-engine` (lib test) generated 3 warnings (run `cargo fix --lib -p uarch-engine --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.73s
+     Running unittests src/lib.rs (/target/debug/deps/uarch_engine-fc7dbe81740183ca)
+
+thread 'admission::tests::content_rehash_is_not_external_trust' (241) panicked at crates/uarch-engine/src/admission.rs:148:9:
+assertion `left == right` failed
+  left: "HardwareMismatch"
+ right: "RegistryTrustMismatch"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'admission::tests::validate_synthetic_carrier_without_execution' (243) panicked at crates/uarch-engine/src/admission.rs:133:82:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "HardwareMismatch", message: "no unit rule", pointer: "energy.voltage_ratio.1.0" }
+error: test failed, to rerun pass `-p uarch-engine --lib`

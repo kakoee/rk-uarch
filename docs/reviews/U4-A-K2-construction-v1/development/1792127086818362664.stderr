@@ -1,0 +1,22 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+error[E0277]: `Dispatch` doesn't implement `Debug`
+   --> crates/uarch-engine/src/simulation.rs:151:5
+    |
+143 | #[derive(Debug)]
+    |          ----- in this derive macro expansion
+...
+151 |     pending_ready: Vec<Dispatch>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Debug` is not implemented for `Dispatch`
+    |
+help: the trait `Debug` is conditionally implemented for `Vec<T, A>`
+   --> /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/alloc/src/vec/mod.rs:4376:8
+    |
+    = note: unsatisfied requirement introduced here: `Dispatch: Debug`
+help: consider annotating `Dispatch` with `#[derive(Debug)]`
+    |
+ 74 + #[derive(Debug)]
+ 75 | struct Dispatch {
+    |
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `uarch-engine` (lib test) due to 1 previous error
