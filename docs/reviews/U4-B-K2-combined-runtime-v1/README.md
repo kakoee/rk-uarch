@@ -12,6 +12,12 @@ original native source `24fa36803081e5077d5977baa91441a2c8534ec8`, original Buil
 HostRecord and genuine native approval `cc91e5489a58e06addb2f43e45a0e4e71cb66aa1`, and all
 accepted image/Python/site/library inventories. It is a candidate descriptor, not authority.
 
+Published helper/code pin: `2664c97bbf603843d756f78dd8d0d3e91762953c`.
+Candidate SHA256: `932fe281632bac001f0fdb091089cfd5e09d0b141d74569f6d6b5281f06f9ee1`.
+[inputs.json](inputs.json), [file-identities.json](file-identities.json) and
+[checks.json](checks.json) provide exact patch/file pins, new versus inherited results and
+remaining human-only steps. Later documentation/evidence commits do not retarget the helper.
+
 ## Exact composition
 
 The new fixed root is `/var/lib/rkuarch/k2/candidate-04-combined-runtime-v1`, with:
