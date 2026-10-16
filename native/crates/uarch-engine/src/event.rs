@@ -19,6 +19,7 @@ pub enum Kind {
     End,
     DependencyReady,
     OwnerGrant,
+    TaskRelease,
 }
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

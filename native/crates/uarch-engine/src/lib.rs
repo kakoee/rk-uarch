@@ -1,4 +1,4 @@
-//! Private K1 mechanics of the single native engine. No public workload or JSON input.
+//! Native mechanics and fixed-delay JSON boundary. Host first-use authority is external.
 #![forbid(unsafe_code)]
 #![deny(clippy::disallowed_types)]
 
@@ -33,3 +33,17 @@ mod tests;
 
 #[cfg(test)]
 mod stage2_tests;
+
+#[cfg(test)]
+mod release_tests;
+
+mod carrier;
+mod wire;
+
+mod admission;
+mod hardware;
+
+mod accounting;
+
+pub mod protocol;
+pub use carrier::Refusal;

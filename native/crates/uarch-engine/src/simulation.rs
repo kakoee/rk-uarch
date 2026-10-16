@@ -38,6 +38,7 @@ pub struct Record {
 pub struct JobObservation {
     pub job_id: u32,
     pub owner: u32,
+    pub release_ps: u64,
     pub ready_ps: u64,
     pub start_ps: u64,
     pub end_ps: u64,
@@ -56,6 +57,7 @@ pub struct Interval {
 pub struct Outcome {
     pub duration_ps: u64,
     pub completed_jobs: u64,
+    pub max_live_events: u64,
     pub jobs: Vec<JobObservation>,
     pub intervals: Vec<Interval>,
     pub records: Vec<Record>,
@@ -68,7 +70,7 @@ impl Outcome {
 }
 /// Capability constructed only at the engine's dispatch boundary, from the actual
 /// routed event and the resolved expected job owner. Never from an owner's self-assertion.
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 struct Dispatch {
     event: Event,
     owner: u32,
@@ -145,6 +147,8 @@ pub struct Simulation {
     owners: Owners,
     wheel: Wheel,
     remaining: Vec<usize>,
+    released: Vec<bool>,
+    pending_ready: Vec<Dispatch>,
     successors: Vec<Vec<usize>>,
     ready: Vec<bool>,
     finished: Vec<bool>,
@@ -152,7 +156,17 @@ pub struct Simulation {
     outcome: Outcome,
 }
 impl Simulation {
-    pub fn new(clocks: Vec<u64>, owner_count: usize, mut jobs: Vec<Job>) -> Result<Self, Error> {
+    pub fn new(clocks: Vec<u64>, owner_count: usize, jobs: Vec<Job>) -> Result<Self, Error> {
+        Self::with_releases(clocks, owner_count, jobs, Vec::new())
+    }
+    /// Per-job earliest releases. Omitted jobs have release zero; IDs must exist
+    /// and may appear only once. This is a prerequisite, never a delay job.
+    pub fn with_releases(
+        clocks: Vec<u64>,
+        owner_count: usize,
+        mut jobs: Vec<Job>,
+        releases: Vec<(u32, u64)>,
+    ) -> Result<Self, Error> {
         if clocks.is_empty() || clocks.contains(&0) {
             return Err(Error::InvalidClock);
         }
@@ -206,17 +220,34 @@ impl Simulation {
         if visited != jobs.len() {
             return Err(Error::DependencyCycle);
         }
+        let mut release_times = vec![0; jobs.len()];
+        let mut release_seen = vec![false; jobs.len()];
+        for (id, time) in releases {
+            let i = jobs
+                .binary_search_by_key(&id, |j| j.id)
+                .map_err(|_| Error::MissingDependency)?;
+            if release_seen[i] {
+                return Err(Error::DuplicateJob);
+            }
+            release_seen[i] = true;
+            release_times[i] = time;
+        }
         let mut wheel = Wheel::new(*clocks.iter().max().expect("nonempty clocks"))?;
         for (i, j) in jobs.iter().enumerate() {
-            if remaining[i] == 0 {
+            if release_times[i] > 0 {
+                wheel.schedule(release_times[i], 1, j.owner, Kind::TaskRelease, i as u32)?;
+            } else if remaining[i] == 0 {
                 wheel.schedule(0, 1, j.owner, Kind::TaskReady, i as u32)?;
             }
         }
+        let initial_live = wheel.arena_slots() as u64;
         let observations = jobs
             .iter()
-            .map(|j| JobObservation {
+            .enumerate()
+            .map(|(i, j)| JobObservation {
                 job_id: j.id,
                 owner: j.owner,
+                release_ps: release_times[i],
                 ready_ps: 0,
                 start_ps: 0,
                 end_ps: 0,
@@ -228,6 +259,8 @@ impl Simulation {
             owners: Owners::new(owner_count),
             wheel,
             remaining,
+            released: release_times.iter().map(|&t| t == 0).collect(),
+            pending_ready: Vec::new(),
             successors,
             ready: vec![false; jobs.len()],
             finished: vec![false; jobs.len()],
@@ -236,6 +269,7 @@ impl Simulation {
             outcome: Outcome {
                 duration_ps: 0,
                 completed_jobs: 0,
+                max_live_events: initial_live,
                 jobs: Vec::new(),
                 intervals: Vec::new(),
                 records: Vec::new(),
@@ -259,10 +293,14 @@ impl Simulation {
     fn ready(&mut self, ctx: &Dispatch) -> Result<(), Error> {
         let i = ctx.job;
         self.owners.check(ctx)?;
-        if self.ready[i] || self.remaining[i] != 0 {
+        if self.ready[i] || self.remaining[i] != 0 || !self.released[i] {
             return Err(Error::InvalidEvent);
         }
-        self.owners.enqueue(ctx)?;
+        if ctx.inline {
+            self.owners.enqueue(ctx)?;
+        } else {
+            self.pending_ready.push(*ctx);
+        }
         self.ready[i] = true;
         self.observations[i].ready_ps = ctx.event.t_ps;
         self.record(ctx, Action::Ready);
@@ -298,6 +336,15 @@ impl Simulation {
                     return Err(Error::InvalidEvent);
                 }
                 self.remaining[i] -= 1;
+                if self.remaining[i] == 0 && self.released[i] {
+                    self.ready(&ctx)?;
+                }
+            }
+            k if k == Kind::TaskRelease as u16 && event.phase == 1 && !inline => {
+                if self.released[i] {
+                    return Err(Error::InvalidEvent);
+                }
+                self.released[i] = true;
                 if self.remaining[i] == 0 {
                     self.ready(&ctx)?;
                 }
@@ -354,11 +401,16 @@ impl Simulation {
                     });
                     self.wheel
                         .schedule(end_ps, 0, event.target, Kind::ComputeDone, i as u32)?;
+                    self.track_live();
                 }
             }
             _ => return Err(Error::InvalidEvent),
         }
         Ok(Vec::new())
+    }
+    fn track_live(&mut self) {
+        let (a, b, c) = self.wheel.level_counts();
+        self.outcome.max_live_events = self.outcome.max_live_events.max((a + b + c) as u64);
     }
     fn notify(&mut self, mut recipients: Vec<usize>, t_ps: u64, inline: bool) -> Result<(), Error> {
         // Keep multiplicity: a recipient may have several completed predecessors.
@@ -374,6 +426,7 @@ impl Simulation {
             } else {
                 self.wheel
                     .schedule(t_ps, 1, target, Kind::DependencyReady, i as u32)?;
+                self.track_live();
             }
         }
         Ok(())
@@ -406,6 +459,12 @@ impl Simulation {
             }
             if self.wheel.peek().is_some_and(|e| e.t_ps == t_ps) {
                 return Err(Error::InvalidEvent);
+            }
+            // Event dispatch order and FIFO admission order are separate laws.
+            // Every newly eligible phase-1 job is enqueued by canonical job ID.
+            self.pending_ready.sort_by_key(|ctx| self.jobs[ctx.job].id);
+            for ctx in std::mem::take(&mut self.pending_ready) {
+                self.owners.enqueue(&ctx)?;
             }
             self.wheel.enter_inline_phase(t_ps)?;
             loop {
@@ -505,6 +564,9 @@ pub(crate) mod stage2_routing_tests {
         let mut s = fixture(0);
         let ready = s.wheel.pop().unwrap();
         s.dispatch(ready, false).unwrap();
+        for ctx in std::mem::take(&mut s.pending_ready) {
+            s.owners.enqueue(&ctx).unwrap();
+        }
         s.wheel.enter_inline_phase(0).unwrap();
         let grant = s.wheel.inline_event(0, Kind::OwnerGrant, 0).unwrap();
         s.dispatch(grant, true).unwrap();
