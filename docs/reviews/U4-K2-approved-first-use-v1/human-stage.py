@@ -8,10 +8,10 @@ import argparse
 import hashlib
 import json
 import os
-from pathlib import Path
 import re
 import stat
 import subprocess
+from pathlib import Path
 
 REPO = Path("/home/jjaff/AI-infra-simulation/rk-uarch")
 PACKAGE_COMMIT = "f2b270aa55204a6bf43ff8d3b7fdeb902db30c0f"
@@ -194,7 +194,9 @@ cp -a --no-preserve=ownership -- "$payload" "$root"
 chown -hR root:root -- "$root"
 find "$root" -type d -exec chmod 0555 {} +
 find "$root" -type f -exec chmod 0444 {} +
-chmod 0555 "$root/python/bin/python3.12" "$root/candidate/targets/debug/debug/uarch-engine" "$root/candidate/targets/release/release/uarch-engine"
+chmod 0555 "$root/python/bin/python3.12" \
+  "$root/candidate/targets/debug/debug/uarch-engine" \
+  "$root/candidate/targets/release/release/uarch-engine"
 """
 
 
@@ -225,7 +227,8 @@ def main():
         stream.write("\n")
     print(json.dumps({"status": "human root placement and seal verified", **result}, indent=2))
     print(
-        "STOP: return this receipt. Existing approval covers the next runtime preflight; no authority or mapped job has run."
+        "STOP: return this receipt. Existing approval covers the next runtime preflight; "
+        "no authority or mapped job has run."
     )
 
 
