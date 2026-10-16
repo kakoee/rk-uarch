@@ -29,12 +29,12 @@ Resolve these bounded joins:
    framing, malformed inputs, and controls distinguishing missing/duplicated outputs,
    wrong bytes/hash and incorrect refusals. Identify any material gap narrowly; do not
    demand a universal proof from finite tests or manufacture new broad work.
-3. Verify actual hash-path reachability and SIMD classification from the exact debug/
-   release binaries and evidence. Separate compression, packed output transformations,
-   incidental moves/libc and unrelated code. Review A's proposed no-vectorize-loops and
-   no-vectorize-slp experiment, without executing it or narrowing the no-SIMD boundary.
-   Recommend the smallest concrete next step; no flags, semantic waiver or source fix
-   is approved here. Preserve every counterexample and the current binaries' identities.
+3. Apply Javid's subsequent scope clarification in
+   docs/reviews/U4-hashing-SIMD-scope-clarification-v1.md: utility hashing is outside
+   the simulator execution-acceleration restriction. The observed compiler-generated
+   hash-output SIMD is non-blocking. Preserve the evidence; do not pursue the proposed
+   anti-vectorization flags or further disassembly to prove a no-SIMD hash path. Keep
+   correctness and build-identity checks and the accepted dependencies/features/flags.
 4. Reconcile the read-audit limit with the exact approved C2 scope and proposed later
    build/authority records. Identify what is actually observed versus declared, what is
    needed before the next relevant gate, and any already-available diagnostic route.
@@ -55,7 +55,7 @@ record the precise limitation and continue independent read-only work.
 You may author bounded independent review helpers and expectations in your owned package;
 do not apply A's proposed visitor/adapter/flag changes. Return exact findings and a clear
 recommendation for the smallest follow-up release, separating field-compatibility work,
-compiler experiments and read-audit dependencies. No public K2, live installation, C3,
+read-audit dependencies; hashing anti-vectorization work is withdrawn. No public K2, live installation, C3,
 authority creation or qualification. U0024 deferrals remain unchanged.
 
 Publish owned review files with normal hooks/main integration preserving peers; keep bulk

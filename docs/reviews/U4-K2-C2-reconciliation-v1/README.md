@@ -2,8 +2,11 @@
 
 Subject publication: `3faa3e9dbe785f43c51e26ad886eeb6bc3b00398`.
 [A handoff](../U4-A-K2-C2-probes-v1/README.md).
-Status: experiment returned; complete parity and full-hash-path no-SIMD are unresolved.
-No follow-up source/flag proposal is approved by this reconciliation.
+Status: experiment returned; complete typed-carrier parity remains unresolved.
+Javid's subsequent [scope clarification](../U4-hashing-SIMD-scope-clarification-v1.md)
+removes utility hashing from the simulator no-SIMD restriction. Hash-output SIMD is
+non-blocking; no anti-vectorization experiment is needed. Other follow-up proposals
+remain subject to reconciliation.
 
 ## Results to reconcile
 
@@ -15,8 +18,8 @@ No follow-up source/flag proposal is approved by this reconciliation.
 - Float/canonical/hash comparisons pass within the tested finite corpus. Three separately
   frozen identity supplement cases pass; their later coverage completion remains explicit.
 - Release hash output packing uses packed SIMD operations. The inspected compression
-  symbol has no SIMD register instructions. Neither `force-soft` nor correct output
-  establishes a full-hash no-SIMD result. A did not retry changed compiler flags.
+  symbol has no SIMD register instructions. These observations are preserved; Javid
+  clarified that full-hash no-SIMD is not required. A did not retry changed flags.
 - Compiler/linker commands, environment, build-script outputs and dep-info are retained.
   Exhaustive filesystem reads are not traced. Whether this needs a concrete diagnostic
   before a later build/authority gate must be reconciled explicitly; no tracing waiver
@@ -24,9 +27,10 @@ No follow-up source/flag proposal is approved by this reconciliation.
 
 A's [follow-up proposals](../U4-A-K2-C2-probes-v1/next-decision.md), SHA256
 `063af1b27bf3786ffd6a007d20e9276758cdd68469823550d18f9ed869d6f51e`, propose field-local
-compatibility adapters and a separate two-flag vectorization experiment. They retain
-the accepted dependencies. B should review these concrete proposals before a release
-decision; no need to reopen the already accepted unchanged dependency set.
+compatibility adapters and a separate two-flag vectorization experiment. The latter is
+unnecessary under Javid's clarification and should not be pursued. B should review the
+typed compatibility proposals before a release decision; the accepted unchanged
+dependency set does not need another vote.
 
 ## Coordinator checks executed
 
