@@ -1,0 +1,34 @@
+# U4 B — approved diagnostic acquisition/static inspection only (conditional)
+
+Continue the existing B session only after coordinator recording of Javid's approval
+of U4-read-diagnostic-acquisition-v1. Integrate main normally and read next-decision.md
+beside this prompt. Without that approval, no acquisition is released.
+
+Bind the exact f6072ac3c6084abe303dd94f0dcea9563ba6f995 proposal and verify candidate.json
+SHA256 2c922a0cf36adbbd4d8e6c0a8a629b1f23ddaa918cb7a7ccb1bdccd101ce5ff2 and acquisition.md
+SHA256 f81e6aabb06eb09c0e847969e6fbf9a7033350b4141b1ad1218e943c8d0171b7. Carry out only
+that bounded seven-step acquisition/static inspection procedure, subject to the decision.
+
+Acquire exactly the two pinned .deb packages and named Debian authentication metadata
+in new private storage. Authenticate the chain with the already present accepted-image
+keyring and verify all sizes/hashes/versions before accepting payloads. Preserve exact
+responses, signatures, timestamps and failure receipts. Stop on metadata/version/source/
+checksum drift, authentication failure or missing dependency; do not add an archive
+fallback, newer package, key or third payload. Missing Valid-Until is an explicit limit.
+
+Use only existing static inspection tools in the same image, offline and unprivileged,
+with read-only download mounts and separate private extraction/output roots. Verify
+archive paths/links before extraction. No install/database change, scripts, ldd, loader
+execution, strace --version, tracer/canary/build execution, image/security changes or
+shared-host actions. Inspect actual executable/DSOs, static transitive requirements and
+symbol versions; verify existing image library bytes. Do not infer runtime compatibility
+from static checks. Preserve all notices and distinguish diagnostic payload licensing
+from simulator dependencies. No licence exception or distribution is granted.
+
+Return one bounded handoff with authenticated package chain, separately hashed executable/
+DSO identities, actual licence applicability, static closure, unresolved edges and the
+next execution decision (if ready). Keep packages/extracted trees private, not in Git.
+Preserve A's ongoing work and all earlier evidence. Publish owned evidence/helpers via
+normal hooks/main integration; do not poll CI. Stop before any acquired code runs.
+A's C2 compatibility task proceeds independently; public K2/C3/authority/U0024 boundaries
+remain unchanged.
