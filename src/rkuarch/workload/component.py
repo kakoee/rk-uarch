@@ -88,6 +88,12 @@ def prepare_component_bundle(
         points=[point.model_dump(mode="json")],
     )
     b = MappedBundle.model_validate(dict(raw, bundle_hash=content_hash(raw)))
+    assert b.scope.kind == "component"
+    require(
+        all(set(op.operand_access) == {"X", "W", "Y"} for op in b.scope.ops),
+        "InvalidCoverage",
+        "operand access",
+    )
     validate_resources(b, b.points[0])
     validate_component_completeness(b)
     return b

@@ -107,6 +107,12 @@ def loads_component_bundle(
     value = strict_json_loads(data)
     bundle = MappedBundle.model_validate(value)
     require(bundle.scope.kind == "component", "UnsupportedWorkloadScope")
+    assert bundle.scope.kind == "component"
+    require(
+        all(set(op.operand_access) == {"X", "W", "Y"} for op in bundle.scope.ops),
+        "InvalidCoverage",
+        "operand access",
+    )
     validated = admit(
         bundle,
         invocation=invocation,
