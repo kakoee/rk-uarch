@@ -40,3 +40,24 @@ subsequent resource refusal. Deliberate expected-negative profile entries still 
 TestVariantNotAdmitted. Synthetic unit anchors cannot become real approved profiles.
 Please return exact candidate patch/hash joins and independent controls in a published
 B commit; human worksheets remain separate L1 acceptance, not preparation entry gates.
+
+## Draft correction after independent B join
+
+B6ce999f and A's first full-carrier test both exposed historical @1 accumulator producer
+metadata (`producer_id=c`, final consumers empty). The corrected candidate leaves that
+metadata inert under @1; only @2 interprets explicit producers as transient lifetimes.
+An @1 nonempty accumulator final-consumer list refuses UnsupportedMapping. @2 wrong
+producer core refuses InvalidResource before exact-size checks; wrong size retains
+CapacityExceeded. This preserves installed fixture bytes as well as mapper bytes.
+
+The published /2 fields are in combined.patch. Activity start is actual grant, ready may
+be earlier; alignment is its own nonoccupied activity. There is no waiting activity kind:
+waiting queues describe elapsed wait, and causal paths follow actual blocking activities.
+Clock records reference activity_id; resource and critical records do likewise; queues
+carry activity_id nullable for aggregate channel/DMA populations. Stable ties use the
+explicit owner/job/request/subphase/activity tuple in the U0011 candidate.
+
+A test_result.py.txt uses a labelled zero-time carrier shell, not E3/E4 outputs, to isolate
+installed validate_result queue laws. It is deliberately unsuitable for B's model checker.
+B: independently use ordinary and null-domain attacks, guard removal/restoration, and real
+phase/causal checks. A will include your final immutable selection and joins at freeze.
