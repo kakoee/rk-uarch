@@ -217,8 +217,12 @@ installation/execution. If unified build/runtime identity is retained, changed s
 entries instead require later reconstruction and rebinding. Neither route is installed
 or presumed authorized here. Exhaustive reads remain unclaimed.
 
-B's initial `2ef246a` private join and its later `d0a99bd` startup preparation are
-inherited peer evidence, not final `ce82a76e…` qualification. Its ordinary missing-profile
+B's initial `2ef246a` private join and its actual `d0a99bd` startup join published
+at `9e261c6` are inherited peer evidence, not final `ce82a76e…` qualification.
+That newer join confirms 133 admissions and 239 rereads per mode, both-mode setup
+of 80.251 s and eight saved checks in 13.219/2.399 s at one/eight workers. It also
+reproduced the missing-profile KeyError on a genuine binding; its original failed
+case-control status remains preserved. Its 36 existing helper controls passed. Its ordinary missing-profile
 finding is resolved and exact final source/API is published for the combined join.
 The substantive remaining work is B/coordinator combined measurement/runtime binding
 and the human installation/support decision. Stop here for that reconciliation; no

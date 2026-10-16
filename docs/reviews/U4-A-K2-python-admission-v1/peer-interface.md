@@ -128,3 +128,13 @@ separate. Full798 and fast/broader profile distinctions remain as in your publis
 The runtime/build-source separation applies to all three files. No sealed source,
 records or deployment is changed. The exact protected hardware/support and separately
 bound runtime choice remains coordinator/human reconciliation; see identity-and-lifecycle.md.
+
+Final peer integration: B's 9e261c6 genuine d0a99bd startup join is now received
+normally. B observed 133 admissions, 239 rereads per selection, 80.251s both-mode
+setup and 13.219s/2.399s for eight saved checks at one/eight workers. Its actual
+missing-profile control produced the same KeyError on a real binding and restoration
+passed; that old case-control status remains false. A's final ce82a76e correction and
+before/corrected/reverted/restored evidence address this exact finding. B's 36 existing
+record/path/process controls passed on its candidate export. These are B observations
+on d0a99bd, not A final-byte reruns; the combined final-byte affected retest remains B's
+join. No newly discovered semantic issue or extra installation permission is implied.
