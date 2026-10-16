@@ -811,7 +811,16 @@
      owners: tuple[Owner, ...]
  
      @model_validator(mode="after")
-@@ -1226,17 +1293,311 @@
+@@ -1220,18 +1287,313 @@
+             all(x.issue_ps <= x.complete_ps <= r.duration_ps for x in dma), "IncompleteObservations"
+         )
+     if job.state_model == "fixed_delay/1":
++        require(
++            isinstance(r.observations, Observations), "IncompleteObservations", "fixed-delay format"
++        )
+         validate_fixed_delay_observations(r, job)
+     else:
+         require(
              all(x.kind == "service" for x in r.observations.critical_path.records),
              "AttributionMismatch",
          )
@@ -1121,14 +1130,7 @@
  
  
  def validate_fixed_delay_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
-     """Proposed structural/causal consistency checks, not evidence of real execution."""
-     obs = r.observations
-+    require(isinstance(obs, Observations), "IncompleteObservations", "fixed-delay format")
-+    assert isinstance(obs, Observations)
-     require(
-         all(
-             getattr(obs, section).status == "unrepresented"
-@@ -1677,9 +2038,43 @@
+@@ -1677,9 +2039,43 @@
                  p.initial_state != "cold" or buf.initial_residency == "uninitialized",
                  "UnsupportedInitialState",
              )
@@ -1172,7 +1174,7 @@
              for name in ("X", "W"):
                  buffer_key = job.operand_buffers.get(name)
                  require(buffer_key in buffers, "InvalidResource")
-@@ -1738,7 +2133,7 @@
+@@ -1738,7 +2134,7 @@
          )
          require(
              b.mapping_policy.name == "ws-rowsplit"

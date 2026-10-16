@@ -89,3 +89,14 @@ Source freeze intent: accumulator/mapper/schema/structural validator as in corre
 only the U0011 wording above changes its postimage. A will run affected combined tests and
 static/schema/actual closure checks once on the integrated final candidate, then attach B's
 final joins. No native run or protected installation is implied.
+
+## Final combined-check correction
+
+The first combined selection was349 passed/4 failed/2 skipped (missing human workings)/
+1 native deselected. All four failures were existing K2 synthetic helper controls: an
+unnecessary isinstance guard inside validate_fixed_delay_observations rejected their partial
+namespaces. The fixed-delay helper is now byte-identical to base. The public validate_result
+boundary alone selects /1 for fixed-delay and /2 for components. No K2 timing/runtime path
+changed. This changes mapped.py's candidate hash and downstream A2 producer/bundle identities;
+schemas and mapped graph/profile identities remain unchanged. A is rerunning the affected
+selection and remeasuring closure; B should pin the corrected postimage for final joins.

@@ -3,111 +3,272 @@
 This shell deliberately does not implement E3/E4. It isolates strict validate_result
 queue/activity binding, while independent B tests own model-law discrimination.
 """
+
 from copy import deepcopy
 from pathlib import Path
+
 import pytest
 from uarch_contract.hashing import content_hash
 from uarch_contract.mapped import MappedEngineJob, validate_result
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def synthetic():
-    job = MappedEngineJob.model_validate_json((ROOT / "contract/fixtures/mapped/component-job.json").read_bytes())
-    owners = {x.resource:x.owner_id for x in job.owners}
+    job = MappedEngineJob.model_validate_json(
+        (ROOT / "contract/fixtures/mapped/component-job.json").read_bytes()
+    )
+    owners = {x.resource: x.owner_id for x in job.owners}
     tasks = job.mapped_point.task_graph.jobs
-    rows=[]; acts=[]; dma=[]; events=[]
-    traffic=dict(format="uarch-native-traffic-counts/1",read_payload_bytes=0,write_payload_bytes=0,
-                 read_transaction_bytes=0,write_transaction_bytes=0,unicast_payload_bytes=0)
+    rows = []
+    acts = []
+    dma = []
+    events = []
+    traffic = dict(
+        format="uarch-native-traffic-counts/1",
+        read_payload_bytes=0,
+        write_payload_bytes=0,
+        read_transaction_bytes=0,
+        write_transaction_bytes=0,
+        unicast_payload_bytes=0,
+    )
     for t in tasks:
         if t.kind == "compute":
-            owner=owners[f"matrix:{t.core_id}"]; phase="compute_wave"; request=None; cat="compute"
+            owner = owners[f"matrix:{t.core_id}"]
+            phase = "compute_wave"
+            request = None
+            cat = "compute"
         else:
-            owner=owners[f"dma_port:{t.dma_engine_id//4}"]
-            phase="read_port" if t.direction=="read" else "write_port"
-            request=t.fragments[0].request_id; cat="memory"
+            owner = owners[f"dma_port:{t.dma_engine_id // 4}"]
+            phase = "read_port" if t.direction == "read" else "write_port"
+            request = t.fragments[0].request_id
+            cat = "memory"
             for f in t.fragments:
-                dma.append(dict(request_id=f.request_id,job_id=t.id,dma_engine_id=t.dma_engine_id,
-                    direction=t.direction,source_buffer_id=t.source.buffer_id,destination_buffer_id=t.destination.buffer_id,
-                    payload_bytes=f.payload_bytes,transaction_bytes=f.transaction_bytes,credit_acquire_ps=0,
-                    issue_ps=0,complete_ps=0,credit_release_ps=0,route_id=f.route_id))
-                traffic[t.direction+"_payload_bytes"]+=f.payload_bytes
-                traffic[t.direction+"_transaction_bytes"]+=f.transaction_bytes
-        ordinal=len(events)
-        events.append(dict(event_seq=ordinal,observation_ordinal=ordinal,t_ps=0,phase=2,target_id=owner,kind="OWNER_GRANT",job_id=t.id))
-        acts.append(dict(activity_id="SYNTHETIC:"+t.id,job_id=t.id,request_id=request,subphase=phase,
-            kind="service",ready_ps=0,start_ps=0,end_ps=0,owner_id=owner,category=cat,
-            receiving_domain="core",occupies_resource=False,dispatch_ordinal=ordinal,
-            completion_ordinal=ordinal,predecessors=[]))
-        rows.append(dict(job_id=t.id,op_id=t.op_id,group_id=None,repeat_index=0,
-            tile_origin=t.tile_origin.model_dump() if t.kind=="compute" else None,
-            tile_extents=t.tile_extents.model_dump() if t.kind=="compute" else None,
-            release_ps=0,ready_ps=0,start_ps=0,end_ps=0,owner_id=owner,blocking_predecessor_ids=[],
-            useful_matrix_ops=0,issued_matrix_ops=0,vector_arithmetic_ops=0,cast_ops=0))
-    counts=dict(matrix_ops=0,vector_ops=0,memory_read_bytes=traffic["read_payload_bytes"],memory_write_bytes=traffic["write_payload_bytes"])
-    counts={k:float(v) for k,v in counts.items()}
-    ext=dict(sram_read_bytes=None,sram_write_bytes=None,noc_flit_hop_count=None)
-    work=dict(format="uarch-native-work-counts/1",completed_mac_count=0,issued_matrix_ops=0,vector_arithmetic_ops=0,cast_ops=0)
-    first=next(t for t in tasks if t.kind=="dma"); f=first.fragments[0]
-    q=dict(queue_id=f"channel_service:{f.channel_id}",item_id=f.request_id,population="service",
-           enter_ps=0,leave_ps=0,owner_id=owners[f"channel:{f.channel_id}"],clock_domain=None,activity_id=None)
-    obs=dict(format="uarch-native-observations/2")
-    for key,records in dict(events=events,jobs=rows,activities=acts,clocks=[],dma=sorted(dma,key=lambda x:x["request_id"]),
-        transfers=[],allocations=[],queue_membership=[q],resource_intervals=[],critical_path=[]).items():
-        obs[key]=dict(status="observed",records=records)
-    result=dict(protocol="uarch-engine/3",job_hash=job.job_hash,engine=job.engine.model_dump(mode="json"),scope="component",
-        completion="complete",duration_ps=0,completed_jobs=[t.id for t in tasks],admission=job.admission.model_dump(mode="json"),
-        counts=counts,ext_counts=ext,work_counts=work,traffic_counts=traffic,per_op=[],
-        busy_time_ps=[dict(owner_id=x.owner_id,busy_time_ps=0) for x in job.owners],
-        attribution_ps=dict(compute=0,memory=0,noc=0,sync=0,overhead=0),
-        diagnostics={k:None for k in ("matrix_util_ratio","vector_util_ratio","dma_compute_overlap_ratio","sram_bank_conflict_stall_ratio",
-            "noc_latency_p50_ps","noc_latency_p99_ps","noc_max_link_util_ratio","dram_bw_util_ratio","dram_row_hit_ratio","energy_pj")},
-        fidelity_detail=job.fidelity_detail.model_dump(),unrepresented=["SYNTHETIC-CARRIER-ONLY-NOT-MODEL-EVIDENCE"],
-        simulator_metrics=dict(event_count=len(events),completed_job_count=len(tasks),max_live_events=0),
-        trace_hash=None,u_c0_duration_ps=None,observations=obs,owners=[x.model_dump() for x in job.owners])
-    return job,result
+                dma.append(
+                    dict(
+                        request_id=f.request_id,
+                        job_id=t.id,
+                        dma_engine_id=t.dma_engine_id,
+                        direction=t.direction,
+                        source_buffer_id=t.source.buffer_id,
+                        destination_buffer_id=t.destination.buffer_id,
+                        payload_bytes=f.payload_bytes,
+                        transaction_bytes=f.transaction_bytes,
+                        credit_acquire_ps=0,
+                        issue_ps=0,
+                        complete_ps=0,
+                        credit_release_ps=0,
+                        route_id=f.route_id,
+                    )
+                )
+                traffic[t.direction + "_payload_bytes"] += f.payload_bytes
+                traffic[t.direction + "_transaction_bytes"] += f.transaction_bytes
+        ordinal = len(events)
+        events.append(
+            dict(
+                event_seq=ordinal,
+                observation_ordinal=ordinal,
+                t_ps=0,
+                phase=2,
+                target_id=owner,
+                kind="OWNER_GRANT",
+                job_id=t.id,
+            )
+        )
+        acts.append(
+            dict(
+                activity_id="SYNTHETIC:" + t.id,
+                job_id=t.id,
+                request_id=request,
+                subphase=phase,
+                kind="service",
+                ready_ps=0,
+                start_ps=0,
+                end_ps=0,
+                owner_id=owner,
+                category=cat,
+                receiving_domain="core",
+                occupies_resource=False,
+                dispatch_ordinal=ordinal,
+                completion_ordinal=ordinal,
+                predecessors=[],
+            )
+        )
+        rows.append(
+            dict(
+                job_id=t.id,
+                op_id=t.op_id,
+                group_id=None,
+                repeat_index=0,
+                tile_origin=t.tile_origin.model_dump() if t.kind == "compute" else None,
+                tile_extents=t.tile_extents.model_dump() if t.kind == "compute" else None,
+                release_ps=0,
+                ready_ps=0,
+                start_ps=0,
+                end_ps=0,
+                owner_id=owner,
+                blocking_predecessor_ids=[],
+                useful_matrix_ops=0,
+                issued_matrix_ops=0,
+                vector_arithmetic_ops=0,
+                cast_ops=0,
+            )
+        )
+    counts = dict(
+        matrix_ops=0,
+        vector_ops=0,
+        memory_read_bytes=traffic["read_payload_bytes"],
+        memory_write_bytes=traffic["write_payload_bytes"],
+    )
+    counts = {k: float(v) for k, v in counts.items()}
+    ext = dict(sram_read_bytes=None, sram_write_bytes=None, noc_flit_hop_count=None)
+    work = dict(
+        format="uarch-native-work-counts/1",
+        completed_mac_count=0,
+        issued_matrix_ops=0,
+        vector_arithmetic_ops=0,
+        cast_ops=0,
+    )
+    first = next(t for t in tasks if t.kind == "dma")
+    f = first.fragments[0]
+    q = dict(
+        queue_id=f"channel_service:{f.channel_id}",
+        item_id=f.request_id,
+        population="service",
+        enter_ps=0,
+        leave_ps=0,
+        owner_id=owners[f"channel:{f.channel_id}"],
+        clock_domain=None,
+        activity_id=None,
+    )
+    obs = dict(format="uarch-native-observations/2")
+    for key, records in dict(
+        events=events,
+        jobs=rows,
+        activities=acts,
+        clocks=[],
+        dma=sorted(dma, key=lambda x: x["request_id"]),
+        transfers=[],
+        allocations=[],
+        queue_membership=[q],
+        resource_intervals=[],
+        critical_path=[],
+    ).items():
+        obs[key] = dict(status="observed", records=records)
+    result = dict(
+        protocol="uarch-engine/3",
+        job_hash=job.job_hash,
+        engine=job.engine.model_dump(mode="json"),
+        scope="component",
+        completion="complete",
+        duration_ps=0,
+        completed_jobs=[t.id for t in tasks],
+        admission=job.admission.model_dump(mode="json"),
+        counts=counts,
+        ext_counts=ext,
+        work_counts=work,
+        traffic_counts=traffic,
+        per_op=[],
+        busy_time_ps=[dict(owner_id=x.owner_id, busy_time_ps=0) for x in job.owners],
+        attribution_ps=dict(compute=0, memory=0, noc=0, sync=0, overhead=0),
+        diagnostics={
+            k: None
+            for k in (
+                "matrix_util_ratio",
+                "vector_util_ratio",
+                "dma_compute_overlap_ratio",
+                "sram_bank_conflict_stall_ratio",
+                "noc_latency_p50_ps",
+                "noc_latency_p99_ps",
+                "noc_max_link_util_ratio",
+                "dram_bw_util_ratio",
+                "dram_row_hit_ratio",
+                "energy_pj",
+            )
+        },
+        fidelity_detail=job.fidelity_detail.model_dump(),
+        unrepresented=["SYNTHETIC-CARRIER-ONLY-NOT-MODEL-EVIDENCE"],
+        simulator_metrics=dict(
+            event_count=len(events), completed_job_count=len(tasks), max_live_events=0
+        ),
+        trace_hash=None,
+        u_c0_duration_ps=None,
+        observations=obs,
+        owners=[x.model_dump() for x in job.owners],
+    )
+    return job, result
 
 
-def check(job,raw):
-    raw=deepcopy(raw); raw["result_hash"]=content_hash(raw,exclude=("result_hash",))
-    return validate_result(raw,job)
+def check(job, raw):
+    raw = deepcopy(raw)
+    raw["result_hash"] = content_hash(raw, exclude=("result_hash",))
+    return validate_result(raw, job)
 
 
 def test_synthetic_null_channel_dma_and_clocked_controls():
-    j,r=synthetic(); assert check(j,r)
-    q=r["observations"]["queue_membership"]["records"][0]
-    t=next(t for t in j.mapped_point.task_graph.jobs if t.kind=="dma")
-    owner=next(o.owner_id for o in j.owners if o.resource==f"dma:{t.dma_engine_id//4}:{t.dma_engine_id%4}")
-    q.update(queue_id=f"dma_inflight:{t.dma_engine_id}",population="inflight",owner_id=owner)
-    assert check(j,r)
-    a=r["observations"]["activities"]["records"][0]
-    q.update(queue_id=f"activity:{a['subphase']}:{a['owner_id']}",item_id=a["request_id"] or a["job_id"],
-             owner_id=a["owner_id"],population="waiting",clock_domain="core",activity_id=a["activity_id"])
-    assert check(j,r)
+    j, r = synthetic()
+    assert check(j, r)
+    q = r["observations"]["queue_membership"]["records"][0]
+    t = next(t for t in j.mapped_point.task_graph.jobs if t.kind == "dma")
+    owner = next(
+        o.owner_id
+        for o in j.owners
+        if o.resource == f"dma:{t.dma_engine_id // 4}:{t.dma_engine_id % 4}"
+    )
+    q.update(queue_id=f"dma_inflight:{t.dma_engine_id}", population="inflight", owner_id=owner)
+    assert check(j, r)
+    a = r["observations"]["activities"]["records"][0]
+    q.update(
+        queue_id=f"activity:{a['subphase']}:{a['owner_id']}",
+        item_id=a["request_id"] or a["job_id"],
+        owner_id=a["owner_id"],
+        population="waiting",
+        clock_domain="core",
+        activity_id=a["activity_id"],
+    )
+    assert check(j, r)
 
 
-@pytest.mark.parametrize("domain",[None,"dram"])
-@pytest.mark.parametrize("fault",["owner","channel","engine","request","population","invented_queue"])
-def test_synthetic_queue_attacks_restored(fault,domain):
-    j,r=synthetic(); assert check(j,r)
-    bad=deepcopy(r); q=bad["observations"]["queue_membership"]["records"][0]
-    q["clock_domain"]=domain
-    if fault=="owner": q["owner_id"]=0
-    if fault=="channel": q["queue_id"]="channel_service:7"
-    if fault=="engine": q.update(queue_id="dma_inflight:15",population="inflight")
-    if fault=="request": q["item_id"]="undeclared"
-    if fault=="population": q["population"]="inflight"
-    if fault=="invented_queue": q["queue_id"]="arbitrary"
-    with pytest.raises(ValueError,match="IncompleteObservations"): check(j,bad)
-    assert check(j,r)
+@pytest.mark.parametrize("domain", [None, "dram"])
+@pytest.mark.parametrize(
+    "fault", ["owner", "channel", "engine", "request", "population", "invented_queue"]
+)
+def test_synthetic_queue_attacks_restored(fault, domain):
+    j, r = synthetic()
+    assert check(j, r)
+    bad = deepcopy(r)
+    q = bad["observations"]["queue_membership"]["records"][0]
+    q["clock_domain"] = domain
+    if fault == "owner":
+        q["owner_id"] = 0
+    if fault == "channel":
+        q["queue_id"] = "channel_service:7"
+    if fault == "engine":
+        q.update(queue_id="dma_inflight:15", population="inflight")
+    if fault == "request":
+        q["item_id"] = "undeclared"
+    if fault == "population":
+        q["population"] = "inflight"
+    if fault == "invented_queue":
+        q["queue_id"] = "arbitrary"
+    with pytest.raises(ValueError, match="IncompleteObservations"):
+        check(j, bad)
+    assert check(j, r)
 
 
 def test_synthetic_activity_dispatch_and_cycle_attacks():
-    j,r=synthetic(); assert check(j,r)
-    for fault in ("request","ordinal","cycle"):
-        bad=deepcopy(r); acts=bad["observations"]["activities"]["records"]; a=acts[0]
-        if fault=="request": a["request_id"]="undeclared"
-        if fault=="ordinal": a["dispatch_ordinal"]=999
-        if fault=="cycle": a["predecessors"]=[dict(activity_id=a["activity_id"],relation="sequence")]
-        with pytest.raises(ValueError): check(j,bad)
-        assert check(j,r)
+    j, r = synthetic()
+    assert check(j, r)
+    for fault in ("request", "ordinal", "cycle"):
+        bad = deepcopy(r)
+        acts = bad["observations"]["activities"]["records"]
+        a = acts[0]
+        if fault == "request":
+            a["request_id"] = "undeclared"
+        if fault == "ordinal":
+            a["dispatch_ordinal"] = 999
+        if fault == "cycle":
+            a["predecessors"] = [dict(activity_id=a["activity_id"], relation="sequence")]
+        with pytest.raises(ValueError):
+            check(j, bad)
+        assert check(j, r)
