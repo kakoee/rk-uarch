@@ -187,7 +187,8 @@ def main() -> None:
             PYTHON,
             "-c",
             "import sys,json;sys.path[:0]=['src','contract','.'];"
-            "from scripts.u2_support import inventory;print(json.dumps(inventory(),sort_keys=True))",
+            "from scripts.u2_support import inventory;"
+            "print(json.dumps(inventory(),sort_keys=True))",
         ]
         before = json.loads(subprocess.check_output(command, cwd=ROOT, env=env))
         after = json.loads(subprocess.check_output(command, cwd=out, env=env))
