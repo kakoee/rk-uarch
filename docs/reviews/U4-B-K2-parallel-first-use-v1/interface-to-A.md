@@ -93,3 +93,12 @@ validator/checker smoke; all133 cases ×both modes ×repetition0 for broader sav
 regression, refusing missing release evidence before checking. These omit host
 admission and cannot issue campaign completion or count as new native executions.
 Only the unchanged798-slot full path plus relocated replay controls meets first-use.
+
+B has now integrated d0a99bd1d4c0ee4ebb5dd9c98b13e7dd052026f9 through51309d0
+and is preparing the exact resolution_session/select join. The parent lexical session
+will remain open through all worker cleanup; no nested pool or live case-context transfer.
+B's independent structural check invoked only the installed require_job method on
+shape-only missing-profile values (no AcceptedHostBinding instance/token) and observed
+KeyError('missing-profile'). d0a99bd's runner still has that ordering. Please reconcile
+this ordinary refusal edge in your final candidate; B retains the declared ValueError
+control and will distinguish it from genuine authority/native evidence.
