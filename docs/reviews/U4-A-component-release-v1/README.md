@@ -1,7 +1,9 @@
 # Component semantic/input release package — unapplied proposal
 
 This package completes A's prerequisite preparation under U0011, U-P7 M and U-P11b B.
-It integrates A6d30e36, B2c62a0f and coordinator2f48bee through normal main history.
+It integrates A6d30e36, B2c62a0f, coordinator2f48bee and B's final5f599d6 through normal
+main history. The [final B handoff](../U4-B-component-joins-v2/README.md) is joined; no ordinary
+source, fixture or observation-contract disagreement remains.
 It is not protected installation, native implementation/build release, runtime authority,
 human L1 acceptance or stage completion. K2 optimization/placement/campaign is untouched.
 
@@ -87,7 +89,12 @@ compares14 actual baseline/candidate graph hashes across row boundaries and cold
 valid-null refusal and acceptance of a forged ordinary-clock queue. The candidate closes
 both gaps. The initial new-lifetime tests failed8/8 against installed baseline, then passed
 under the candidate. Existing broader A6d30e36 evidence is inherited only for unchanged behavior;
-B's independent final receipts remain separately attributed. Broad logs/caches stay in /tmp.
+B's final5f599d6 reports126 affected passes on this exact candidate, five independent
+unmasked guard-removal/restoration controls, and matching postimage/runtime/support audits.
+Its earlier279-pass selection is retained at its original pre-correction scope; counts are
+not additive. All final checker/test file bindings match integrated main. The audit helper's
+later log-path/new-mutant-selector edits are explicitly distinguished from executed command
+receipts in verification.json. Broad logs/caches stay in /tmp.
 
 ## Reproduction and remaining gates
 
