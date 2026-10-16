@@ -1,0 +1,60 @@
+# U4 A — reviewed standalone C2 compatibility and comparison corrections
+
+Continue the existing A session; integrate published main normally. Read the adjacent
+README and reconciliation.json, B's U4-B-K2-C2-reconciliation-v1 handoff at 41150f2,
+and its B-expectations.json. This releases the bounded standalone corrections reviewed
+by B under the existing U4-K2-C2-probes-v1 approval. No repeated dependency/C2 vote is
+needed for this exact scope. No protected or public K2 implementation is released.
+
+Preserve A's original 3faa3e9 package, original vectors/results and three-case supplement,
+B's review and all C1/private inputs. Develop a separately versioned probe/harness
+revision in private source/targets with the exact accepted lock/manifest/features,
+image/tools and existing compiler flags. Offline/locked, --pull never, network disabled,
+read-only verified cache, no original evidence mounted writable. No downloads, image
+changes, global environment changes or live Cargo inputs. Hashing SIMD is non-blocking;
+do not change vectorization flags or resume no-SIMD investigation.
+
+Apply only these reviewed corrections, tests first:
+
+1. Replace the experimental NumericLeaf untagged Content route with explicit token/type
+   dispatch. Rational objects have exact keys, duplicate/unknown refusal, integer tokens,
+   numerator 0..u128_max, denominator 1..u128_max and gcd=1; never silently reduce. Avoid
+   float intermediates. Scalar NumericLeaf StrictInt is unbounded: retain exact negative
+   and positive integers beyond i128/u128. Bool, text and null remain distinct scalar
+   types; float 1.0 still refuses there. Keep the caller numeric-marker guard.
+2. Normalize only lexical integer -0 to integer zero consistently for strict integer
+   and rational fields. Do not rewrite strings or accept -0.0, 1e0, bool or string tokens
+   as strict integers. Preserve exact large integer values.
+3. Match installed legacy SourcedValue float behavior only within that field, including
+   B's false, whitespace/exponent/underscore string cases and nonfinite/null/object
+   refusals. Do not assume Rust parse matches Python/Pydantic; use the pinned reference
+   to derive additional boundary cases before Rust execution. Preserve defaults and
+   existing claim/stipulation rules. No global coercion, protected semantic tightening
+   or change to strict JsonFloat/int/rational behavior. Keep ordinary scalar bool/text
+   values as those types. Report any further exact incompatibility rather than hiding it.
+4. Fix the host comparator to reject empty/missing/duplicate/extra/reordered selections
+   and malformed framing/output. Require correct canonical bytes and hashes. Expected
+   refusal must match an explicit reviewed layer/reason class, not any error: transport
+   failure must not satisfy a duplicate-key check. Preserve justified cross-language
+   differences; freeze the revised refusal expectations before executing corrected code.
+   Do not copy baseline error substrings blindly when the reviewed visitor legitimately
+   changes the parsing layer. New mapping must follow the failed condition.
+
+Retain and rerun all original 20,965 cases and the separate three-case supplement in
+both modes. Freeze B's 52 prospective cases and any additional tests as a separately
+identified extension before corrected native runs; keep unchanged historical bytes.
+Show the ten failures and comparison gaps against baseline, then corrected successes,
+and discriminating scratch reverts/restoration for each correction family. Run actual
+nonempty unit selections and canonical/hash/refusal comparisons. Preserve any remaining
+failures openly; finite tests are not full public carrier or protocol qualification.
+
+Read diagnostics are a separate B proposal task. Continue recording available actual
+argv/environment/build-script output/dep-info; do not claim exhaustive reads or block
+these bounded fixes waiting for a tracer. No tool acquisition, security changes or final
+build/authority records. Use already available tools only. U0024 remains in force.
+
+Return exact code/diff, vector and binary identities, observed versus inherited results,
+commands/errors and preservation in one bounded owned handoff. Keep bulk build/cache
+outputs private. Publish with normal hooks and main integration preserving peers; no
+force push or CI polling. Stop for coordinator/B reconciliation. No public engine,
+mapped execution, live installation, C3 or qualification is granted by passing C2.
