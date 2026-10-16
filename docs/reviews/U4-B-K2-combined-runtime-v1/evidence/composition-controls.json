@@ -1,0 +1,126 @@
+{
+  "authority_installed": false,
+  "candidate_hash": "sha256:c2445a18c42e3c0def66c0e7ca14aba632539c7dc2a943ade2a23938b2a7fe81",
+  "controls": [
+    {
+      "control": "positive",
+      "exit_code": 0,
+      "expected_failure": null,
+      "launch_receipt_hash": "sha256:0b8c50eb74a4a14dc540c6ea7d36649b2f04dcdc474ea020fffae75e4ad96bb3",
+      "native_calls": 0,
+      "stderr_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "control": "changed-closure",
+      "exit_code": 1,
+      "expected_failure": "payload bytes: contract/uarch_contract/hardware.py",
+      "launch_receipt_hash": "sha256:afad076e59f5cee5a6d69b4f8c82a64b510b48accdcf53e2d81dbfeb93b55483",
+      "native_calls": 0,
+      "stderr_hash": "sha256:23c2fbc548d269df205526a73291dc4f8b7ab395c1464901b342108a87de74ba"
+    },
+    {
+      "control": "missing-closure",
+      "exit_code": 1,
+      "expected_failure": "exact payload membership",
+      "launch_receipt_hash": "sha256:a6b58b6fa01e7819876aed396c532b04d118101eef0497523a204e12542b3ef5",
+      "native_calls": 0,
+      "stderr_hash": "sha256:cdcb6e014576d7ba46f76af01014759f056b6d28af9e4315d3661f93589daece"
+    },
+    {
+      "control": "extra-closure",
+      "exit_code": 1,
+      "expected_failure": "exact payload membership",
+      "launch_receipt_hash": "sha256:9b609587384722411583c8fc86fee2f002811138bcf5a073cdc3b402acc64b86",
+      "native_calls": 0,
+      "stderr_hash": "sha256:cdcb6e014576d7ba46f76af01014759f056b6d28af9e4315d3661f93589daece"
+    },
+    {
+      "control": "changed-helper",
+      "exit_code": 1,
+      "expected_failure": "payload bytes: parallel_entrypoint.py",
+      "launch_receipt_hash": "sha256:b8f667094bcb1b95f3d3bef6e7c6b8ce43bab13a9c87c7f1c59dc89c149e6378",
+      "native_calls": 0,
+      "stderr_hash": "sha256:fee93a8560448ed78a86e3a3ce8e2686792cea4af25c1b3b86aea9ca903b8c2c"
+    },
+    {
+      "control": "wrong-origin",
+      "exit_code": 1,
+      "expected_failure": "wrong project import origin: uarch_contract.foreign",
+      "launch_receipt_hash": "sha256:953814d3ef95a811901feee42b14fcd84f6a79b1e63afa5567c203954f6fe07c",
+      "native_calls": 0,
+      "stderr_hash": "sha256:5dd7e90211835e57c2ede26b899b632a67de57148b41a915be1716538f602f2c"
+    },
+    {
+      "control": "wrong-native-binding",
+      "exit_code": 1,
+      "expected_failure": "original native/runtime binding: candidate/docs/reviews/U4-A-K2-construction-v1/candidate-04/BuildInputs.json",
+      "launch_receipt_hash": "sha256:2ac91f2aa3844aa414969d555e347a0b84bb8941c9f9117e9c9c6892449ac144",
+      "native_calls": 0,
+      "stderr_hash": "sha256:095a2c8cd360fb5c83926ed56a41c5c659886c9de739faabde1f3119e354d056"
+    },
+    {
+      "control": "private-release-refusal",
+      "exit_code": 1,
+      "expected_failure": "private composition cannot authorize execution",
+      "launch_receipt_hash": "sha256:4dc87f0e18de8d1d63a973ff7ccd1dfd5393d19e48c19fd2a037a4419792d148",
+      "native_calls": 0,
+      "stderr_hash": "sha256:2ec26f1885fe59990c2d2c93e9edc3cfd2d1b19353370232e5b4473d84bece57"
+    },
+    {
+      "control": "restored",
+      "exit_code": 0,
+      "expected_failure": null,
+      "launch_receipt_hash": "sha256:688eb14a3d780344a06394250de6f9862591494b196dffbe5f148b8c56c15fcc",
+      "native_calls": 0,
+      "stderr_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limitations": "Original immutable inputs checked; new files are UID1000 disposable readonly mounts. Not actual root placement or real preflight. No resolver session/native execution.",
+  "native_calls": 0,
+  "payload_files": {
+    "helpers/bindings.py": "sha256:148edf8f44d45f2b2d9f34ad6b0c071ef356ef2e0c152f0dd0dbb5498dc5d676",
+    "helpers/parallel-policy.json": "sha256:4857e5278b73f81566b1876d8bce0dc449d3bcccc826f8d39421fa53c7171e84",
+    "helpers/parallel_core.py": "sha256:bbe3746760753c388ac1fa3f3420016f008281a1014638863320e073e15348b1",
+    "helpers/parallel_entrypoint.py": "sha256:f96d6c7cc285fefd23551974fe21dcad9dff8576909c7a79530c4225b6a98d23",
+    "helpers/resource_limits.py": "sha256:8dca3caa49d30eb54788d06f728e2a22fdabcb664fb92f78609f4539ccbdfa74",
+    "helpers/runtime_entry.py": "sha256:0a3bfda4f1de0b02c69b45f5890fbf7bb412b3d2754db70a72c20ca956a1ed73",
+    "project/contract/uarch_contract/__init__.py": "sha256:459d397b5469b7a567d2c177979c538dda0b6789c38102a8c3db41194b4f92ed",
+    "project/contract/uarch_contract/assumptions.py": "sha256:8f209a08ba6dc5785fad0c09bd160027f80a2338a49a8d74f855ae00f9e94789",
+    "project/contract/uarch_contract/common.py": "sha256:07df470e77f16fd4bb0a2b3d961ceaf131a301970a25826bf8fdcaab1f8da9cb",
+    "project/contract/uarch_contract/comparison.py": "sha256:8a507344c3caaf9a9e85f34854b5a2b626be0a433dd95159e51e691057b2dc24",
+    "project/contract/uarch_contract/derivation.py": "sha256:e29ba8c64ba05fa06cb2b67709e8a56fed8389a513d13139b0cdbd5d015e2459",
+    "project/contract/uarch_contract/errors.py": "sha256:c4f6d97dcac3a87268ce817d98a298539445dcc1d22674bedf4ba331171cf502",
+    "project/contract/uarch_contract/evidence.py": "sha256:333c64cebe926faa906ab4f7c968e0d86d496db38c10133f2dbeba20e14df5f9",
+    "project/contract/uarch_contract/exports.py": "sha256:85bc308b288c396459705ede9d04b9e5f02b5f8085b1d89bdcd8c36aa4696e96",
+    "project/contract/uarch_contract/fidelity.py": "sha256:91934c6d6bfaf0d08e172d4348bdc9d8a76ef6bf6bb677cc7ab34614b9f617b6",
+    "project/contract/uarch_contract/hardware.py": "sha256:98b1b06ddf686da948223ca517b0ac16729fbd0f3f6fd1b5bc6f61c1507cb1b5",
+    "project/contract/uarch_contract/hashing.py": "sha256:ee8eac838b6a76b9cda0d0cc3d392ad0d6795d8b27e33b23582b4c1467fee9cc",
+    "project/contract/uarch_contract/mapped.py": "sha256:dee6903c221078ae4add28a88f6a0af679a40f92bb1069c8e250352cffa1dd7b",
+    "project/contract/uarch_contract/model_card.py": "sha256:5c53671be68f9c8a2039df514e0d4f9530cb2d0d72a911b0dc8b76307699ff6a",
+    "project/contract/uarch_contract/model_shape.py": "sha256:f5169ce0c689275a9386e0110db6a08c8b55a5fe800eeb8729dea7bf523e1bdb",
+    "project/contract/uarch_contract/operators.py": "sha256:4533eeda401473e8595702f44a7f6ab11403d8798463e880ba36c9af063231f2",
+    "project/contract/uarch_contract/precision.py": "sha256:41cbb281553c2faf6dfc49a41d87bf2e6effbc82ef090b8c299523cbbd2d5dd6",
+    "project/contract/uarch_contract/prepared.py": "sha256:3f8615a2d3600784ecbe3a688290711bba0520bf28ff7e2b8e5a994cc1c3bbef",
+    "project/contract/uarch_contract/registry.py": "sha256:0fa428e947858bb895e59c43efd289596df7d79f747f678e21002fcceb78eb56",
+    "project/contract/uarch_contract/report_context.py": "sha256:62b7e47fe2b63fc420b042031fc66295358c0940cdb8d098b5f3627b49ba7e55",
+    "project/contract/uarch_contract/request.py": "sha256:ad5ffc5dd8a5d430add8c5ed8d6ddc4b1371a124e49aae961678e8c04d68631e",
+    "project/contract/uarch_contract/rotary_v2.py": "sha256:2579cfda40ce955fb5a6a8b1fead3b4529c3bbf2329970005b990c05a8461c4e",
+    "project/contract/uarch_contract/sourced.py": "sha256:cbac4575604e979e1b6e560994569670ec427a92a47ec01aa7f72d49fc2b4244",
+    "project/contract/uarch_contract/table.py": "sha256:e2b33e3c50e66e977b64b7ca7c381e261703b347880fb3b2c6220acd136ad13f",
+    "project/src/rkuarch/__init__.py": "sha256:fe268f012c24ed2d164953e8d1bd3194923aca930bef4e9f225f0c5e120f42d7",
+    "project/src/rkuarch/engines/__init__.py": "sha256:8831625c264886d1081128027985602630d3a49e9e273ae5a1799627d7eef28b",
+    "project/src/rkuarch/engines/native/__init__.py": "sha256:90b4853006fe41b4f40abd014dcfed65e669832ccdd8c5a9a2219914b7ef61f4",
+    "project/src/rkuarch/engines/native/host.py": "sha256:0f44dee94c753829b05d3a646d3ffb33a297468da11e5d8647aeaf64c24508ba",
+    "project/src/rkuarch/engines/native/records.py": "sha256:572a3a0df8b10d567037b196d0b478d7c0a304258036a4c8fe8aafd2305a67e1",
+    "project/src/rkuarch/engines/native/runner.py": "sha256:ce82a76e6887ace0d65349a7c09159293466b73ff656680e90184a716ffd7ed9",
+    "project/src/rkuarch/workload/__init__.py": "sha256:6f2860886d88480e9beef3de33f2551ebdcf978eabd892d89e7b0bebb5666721",
+    "project/src/rkuarch/workload/mapped.py": "sha256:e2df396f366c45c86a6ec9ed058d63d3448a89a357f019238993c8915f74bfd7",
+    "record/candidate.json": "sha256:c2445a18c42e3c0def66c0e7ca14aba632539c7dc2a943ade2a23938b2a7fe81",
+    "record/publication.json": "sha256:7b48d4be7a9d4844059122f0a6633f0fe2ee426fbdc1566f2ac164d6052dc7c9"
+  },
+  "private_only": true,
+  "project_files": 31,
+  "restored_exact_bytes": true,
+  "subject": "942eae9522499c92867d99d3514962b8a9a6137a",
+  "subject_published_at_execution": false
+}

@@ -51,8 +51,9 @@ No such reconstruction is proposed here.
 ## Exact commands and stop points
 
 Use the accepted existing host interpreter and a clean checkout of the **actual helper
-publication**. The symbols below are required future inputs, not literal fake SHA values:
-`REPO` is that normal checkout, `PUB` its full published helper commit, `DECISION` the real
+publication**. Set `PUB=2664c97bbf603843d756f78dd8d0d3e91762953c` for this exact package.
+`REPO` is the normal checkout containing that published commit. The remaining symbols are
+required future inputs, not literal fake SHA values: `DECISION` is the real
 human decision publication, `PLACEMENT` the later actual coordinator receipt publication.
 `PKG=$REPO/docs/reviews/U4-B-K2-combined-runtime-v1`.
 Use `env -u PYTHONPATH -u MYPYPATH -u VIRTUAL_ENV -u UARCH_HUMAN` and the accepted host Python
