@@ -1,0 +1,17 @@
+{
+  "status": "UNINSTALLED; complete only after genuine decision, HostRecord publication and runtime deployment",
+  "proposed_location": "/etc/rkuarch/k2-host-selector.json",
+  "proposed_fields": {
+    "format": "uarch-k2-host-selector/1",
+    "repository": null,
+    "acceptance_commit": null,
+    "record_path": null,
+    "record_byte_hash": null
+  },
+  "requirements": [
+    "root-owned selector not group/world writable",
+    "actual immutable acceptance commit/path/blob independently checked at installation; resolver does not query Git",
+    "filesystem namespace preserves all bound bytes and executable inode through launch",
+    "ELF interpreter/libgcc/libc and loader search state bound in actual launch namespace; build image does not assert host runtime"
+  ]
+}
