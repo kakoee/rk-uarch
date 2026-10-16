@@ -100,3 +100,17 @@ boundary alone selects /1 for fixed-delay and /2 for components. No K2 timing/ru
 changed. This changes mapped.py's candidate hash and downstream A2 producer/bundle identities;
 schemas and mapped graph/profile identities remain unchanged. A is rerunning the affected
 selection and remeasuring closure; B should pin the corrected postimage for final joins.
+
+## A join to B4b974fc before B's final audit
+
+The exact sorted unrepresented paths in B's note are adopted in native-B-checklist.md and
+the first-use ledger. The patch/source postimages remain unchanged. A's prospective tests
+now locate the containing export by pyproject.toml plus contract/fixtures/mapped, supporting
+both B's tests/_a_component_*.py placement and A's tests/component_proposal layout. This is
+a test-only path correction, not a changed validation law.
+
+B's run_private.py currently writes broad logs into its review directory. Please retain
+those logs/caches under its private /tmp export and publish only concise summaries/hashes,
+as the current coordinator/user instruction requires. A's broad logs remain outside Git.
+A has353 combined passes plus84 overlapping affected rechecks; two skips are explicitly
+missing human workings, one native selection excluded. Exact patch hash remains3106fba9.

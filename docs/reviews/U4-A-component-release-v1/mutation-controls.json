@@ -1,0 +1,58 @@
+{
+  "status": "synthetic-validator-only-not-native",
+  "controls": [
+    {
+      "control": "producer-guard-removed",
+      "corrected": {
+        "exit_code": 0,
+        "log_sha256": "e663008e414518f794ac82e1a073b2eb16ce62f0de6beea8455badbc0da48278",
+        "summary": [
+          "2 passed, 33 deselected in 0.38s"
+        ]
+      },
+      "reverted_guard": {
+        "exit_code": 1,
+        "log_sha256": "689d84ad7bab6e7633eb70cca5f1b2130d54c49757577a7750745a483135193d",
+        "summary": [
+          "2 failed, 33 deselected in 0.36s"
+        ]
+      },
+      "restored": {
+        "exit_code": 0,
+        "log_sha256": "a3a710cb93a80e78daff56dd4ec18f725514c012814108fa79b6c75c6bf674e8",
+        "summary": [
+          "2 passed, 33 deselected in 0.37s"
+        ]
+      },
+      "postimage_sha256": "fbc8f697d383ae39bc8280ebdab07960de313846ba9a3c57acf94bf3d78cca95",
+      "mutant_sha256": "f63a5632daddc1604d264714a761a97d287e2d123b272a8dd0dce417985847be"
+    },
+    {
+      "control": "channel-owner-guard-removed",
+      "corrected": {
+        "exit_code": 0,
+        "log_sha256": "3bd136bf6e4a57b6272f9e60a4356a554d49eee3a3cfaa952820fdeae702983a",
+        "summary": [
+          "3 passed, 31 deselected in 0.91s"
+        ]
+      },
+      "reverted_guard": {
+        "exit_code": 1,
+        "log_sha256": "602f137582db97415bd2a95a250752e6782e943e792751028fe83f4387a35140",
+        "summary": [
+          "1 failed, 2 passed, 31 deselected in 0.96s"
+        ]
+      },
+      "restored": {
+        "exit_code": 0,
+        "log_sha256": "3bd136bf6e4a57b6272f9e60a4356a554d49eee3a3cfaa952820fdeae702983a",
+        "summary": [
+          "3 passed, 31 deselected in 0.91s"
+        ]
+      },
+      "postimage_sha256": "fbc8f697d383ae39bc8280ebdab07960de313846ba9a3c57acf94bf3d78cca95",
+      "mutant_sha256": "4e90b05b502ddfd80f18f5696cab74238f19aa8b54eed21647be4f07d415076f"
+    }
+  ],
+  "restored_postimage_sha256": "fbc8f697d383ae39bc8280ebdab07960de313846ba9a3c57acf94bf3d78cca95"
+}

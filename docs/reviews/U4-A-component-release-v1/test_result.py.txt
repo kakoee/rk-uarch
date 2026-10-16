@@ -11,7 +11,10 @@ import pytest
 from uarch_contract.hashing import content_hash
 from uarch_contract.mapped import MappedEngineJob, validate_result
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = next(
+    parent for parent in Path(__file__).resolve().parents
+    if (parent / "pyproject.toml").is_file() and (parent / "contract/fixtures/mapped").is_dir()
+)
 
 
 def synthetic():
@@ -272,3 +275,15 @@ def test_synthetic_activity_dispatch_and_cycle_attacks():
         with pytest.raises(ValueError):
             check(j, bad)
         assert check(j, r)
+
+
+def test_stale_result_binding_precedes_queue_guard():
+    j, raw = synthetic()
+    good = check(j, raw).model_dump(mode="json")
+    bad = deepcopy(good)
+    bad["observations"]["queue_membership"]["records"][0]["item_id"] = "forged"
+    with pytest.raises(ValueError, match="ArtifactHashMismatch"):
+        validate_result(bad, j)
+    with pytest.raises(ValueError, match="IncompleteObservations"):
+        check(j, bad)
+    assert validate_result(good, j)
