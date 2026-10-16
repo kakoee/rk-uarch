@@ -34,6 +34,10 @@ def check_observations(
     """Return finite-window diagnostics only; no pass receipt or inferred physical cause."""
     r = result.model_dump(mode="json")
     j = job.model_dump(mode="json")
+    if r["observations"].get("format") == "uarch-native-observations/2":
+        from validation.component.observations_v2 import check_v2
+
+        return check_v2(j, r, expected)
     need(j["state_model"] == "resource_intervals/1", "component state model")
     g = j["mapped_point"]["task_graph"]
     obs = r["observations"]
