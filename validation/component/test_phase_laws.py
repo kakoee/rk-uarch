@@ -37,3 +37,30 @@ def test_tight_zero_link_and_port_wait_without_busy_invention():
     activities[2]["predecessors"] = ["response"]
     with pytest.raises(CheckFailure, match="tight"):
         tight_chain(activities, selected, 61000)
+
+
+@pytest.mark.parametrize("domain", ["core", "noc", "dram"])
+@pytest.mark.parametrize(
+    "population,queue,owner",
+    [("service", "channel_service:6", 30), ("inflight", "dma_inflight:0", 12)],
+)
+def test_ordinary_clock_cannot_bypass_nonclocked_binding(domain, population, queue, owner):
+    from validation.component.checks import check_queue_domain
+
+    row = dict(
+        queue_id=queue,
+        item_id="r",
+        population=population,
+        enter_ps=0,
+        leave_ps=1,
+        owner_id=owner,
+        clock_domain=None,
+    )
+    owners = {12: "dma:0:0", 30: "channel:6"}
+    requests = {"r": dict(channel_id=6, dma_engine_id=0)}
+    check_queue_domain(row, owners, requests, 2, allow_nonclocked=True)
+    row["clock_domain"] = domain
+    with pytest.raises(CheckFailure, match="ordinary clock"):
+        check_queue_domain(row, owners, requests, 2, allow_nonclocked=True)
+    row["clock_domain"] = None
+    check_queue_domain(row, owners, requests, 2, allow_nonclocked=True)

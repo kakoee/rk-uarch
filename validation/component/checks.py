@@ -215,7 +215,9 @@ def check_queue_domain(
 ) -> None:
     """Prospective nonclocked semantics are opt-in; strict installed parsing still gates use."""
     need(row["owner_id"] in owners, "queue owner")
+    reserved = row["queue_id"].startswith(("channel_service:", "dma_inflight:"))
     if row["clock_domain"] is not None:
+        need(not reserved, "nonclocked population has ordinary clock")
         need(row["clock_domain"] in ("core", "noc", "dram"), "queue domain")
         return
     need(allow_nonclocked and row["item_id"] in requests, "nonclocked queue not admitted")
