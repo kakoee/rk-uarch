@@ -49,6 +49,7 @@ def freeze(commit: str, out: Path) -> None:
         if p.is_file()
         and p.suffix in (".rs", ".toml", ".lock", ".json", ".py")
         and "generated" not in p.parts
+        and "target" not in p.parts
     )
     paths.update((ROOT / "contract/uarch_contract").glob("*.py"))
     paths.update((ROOT / "src/rkuarch/engines/native").glob("*.py"))
