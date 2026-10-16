@@ -1,0 +1,1373 @@
+--- a/contract/schema/mapped/MappedEngineResult.json
++++ b/contract/schema/mapped/MappedEngineResult.json
+@@ -1,5 +1,32 @@
+ {
+   "$defs": {
++    "ActivityPredecessor": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "relation": {
++          "enum": [
++            "sequence",
++            "dependency",
++            "resource",
++            "credit"
++          ],
++          "title": "Relation",
++          "type": "string"
++        }
++      },
++      "required": [
++        "activity_id",
++        "relation"
++      ],
++      "title": "ActivityPredecessor",
++      "type": "object"
++    },
+     "Admission": {
+       "additionalProperties": false,
+       "properties": {
+@@ -281,6 +308,546 @@
+         "completion_ps"
+       ],
+       "title": "ClockObservation",
++      "type": "object"
++    },
++    "ComponentActivity": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "category": {
++          "enum": [
++            "compute",
++            "memory",
++            "noc",
++            "sync",
++            "overhead"
++          ],
++          "title": "Category",
++          "type": "string"
++        },
++        "completion_ordinal": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Completion Ordinal",
++          "type": "integer"
++        },
++        "dispatch_ordinal": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Dispatch Ordinal",
++          "type": "integer"
++        },
++        "end_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "End Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "kind": {
++          "enum": [
++            "service",
++            "alignment"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "occupies_resource": {
++          "title": "Occupies Resource",
++          "type": "boolean"
++        },
++        "owner_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Owner Id",
++          "type": "integer"
++        },
++        "predecessors": {
++          "items": {
++            "$ref": "#/$defs/ActivityPredecessor"
++          },
++          "title": "Predecessors",
++          "type": "array"
++        },
++        "ready_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Ready Ps",
++          "type": "integer"
++        },
++        "receiving_domain": {
++          "anyOf": [
++            {
++              "enum": [
++                "core",
++                "noc",
++                "dram"
++              ],
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Receiving Domain"
++        },
++        "request_id": {
++          "anyOf": [
++            {
++              "minLength": 1,
++              "pattern": "\\S",
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Request Id"
++        },
++        "start_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Start Ps",
++          "type": "integer"
++        },
++        "subphase": {
++          "enum": [
++            "compute_overhead",
++            "compute_stage",
++            "compute_wave",
++            "compute_drain",
++            "request_noc",
++            "response_noc",
++            "unicast_noc",
++            "dram_latency",
++            "channel_service",
++            "read_port",
++            "write_port",
++            "ack",
++            "barrier"
++          ],
++          "title": "Subphase",
++          "type": "string"
++        }
++      },
++      "required": [
++        "activity_id",
++        "job_id",
++        "request_id",
++        "subphase",
++        "kind",
++        "ready_ps",
++        "start_ps",
++        "end_ps",
++        "owner_id",
++        "category",
++        "receiving_domain",
++        "occupies_resource",
++        "dispatch_ordinal",
++        "completion_ordinal",
++        "predecessors"
++      ],
++      "title": "ComponentActivity",
++      "type": "object"
++    },
++    "ComponentClockObservation": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "aligned_start_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Aligned Start Ps"
++        },
++        "completion_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Completion Ps",
++          "type": "integer"
++        },
++        "domain": {
++          "enum": [
++            "core",
++            "noc",
++            "dram"
++          ],
++          "title": "Domain",
++          "type": "string"
++        },
++        "grant_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Grant Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "n_cycles": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "N Cycles",
++          "type": "integer"
++        },
++        "raw_edge_outcome": {
++          "enum": [
++            "success",
++            "TimeOverflow"
++          ],
++          "title": "Raw Edge Outcome",
++          "type": "string"
++        }
++      },
++      "required": [
++        "job_id",
++        "domain",
++        "grant_ps",
++        "n_cycles",
++        "raw_edge_outcome",
++        "aligned_start_ps",
++        "completion_ps",
++        "activity_id"
++      ],
++      "title": "ComponentClockObservation",
++      "type": "object"
++    },
++    "ComponentCriticalInterval": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "category": {
++          "enum": [
++            "compute",
++            "memory",
++            "noc",
++            "sync",
++            "overhead"
++          ],
++          "title": "Category",
++          "type": "string"
++        },
++        "cause_job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Cause Job Id",
++          "type": "string"
++        },
++        "end_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "End Ps",
++          "type": "integer"
++        },
++        "kind": {
++          "enum": [
++            "service",
++            "release_idle"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "limiting_resource_id": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Limiting Resource Id"
++        },
++        "predecessor_id": {
++          "anyOf": [
++            {
++              "minLength": 1,
++              "pattern": "\\S",
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Predecessor Id"
++        },
++        "start_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Start Ps",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "kind",
++        "start_ps",
++        "end_ps",
++        "cause_job_id",
++        "predecessor_id",
++        "limiting_resource_id",
++        "category",
++        "activity_id"
++      ],
++      "title": "ComponentCriticalInterval",
++      "type": "object"
++    },
++    "ComponentObservations": {
++      "additionalProperties": false,
++      "properties": {
++        "activities": {
++          "$ref": "#/$defs/Observed_ComponentActivity_"
++        },
++        "allocations": {
++          "$ref": "#/$defs/Observed_AllocationObservation_"
++        },
++        "clocks": {
++          "$ref": "#/$defs/Observed_ComponentClockObservation_"
++        },
++        "critical_path": {
++          "$ref": "#/$defs/Observed_ComponentCriticalInterval_"
++        },
++        "dma": {
++          "$ref": "#/$defs/Observed_DmaObservation_"
++        },
++        "events": {
++          "$ref": "#/$defs/Observed_EventObservation_"
++        },
++        "format": {
++          "const": "uarch-native-observations/2",
++          "title": "Format",
++          "type": "string"
++        },
++        "jobs": {
++          "$ref": "#/$defs/Observed_JobObservation_"
++        },
++        "queue_membership": {
++          "$ref": "#/$defs/Observed_ComponentQueueObservation_"
++        },
++        "resource_intervals": {
++          "$ref": "#/$defs/Observed_ComponentResourceInterval_"
++        },
++        "transfers": {
++          "$ref": "#/$defs/Observed_TransferObservation_"
++        }
++      },
++      "required": [
++        "format",
++        "events",
++        "jobs",
++        "activities",
++        "clocks",
++        "dma",
++        "transfers",
++        "allocations",
++        "queue_membership",
++        "resource_intervals",
++        "critical_path"
++      ],
++      "title": "ComponentObservations",
++      "type": "object"
++    },
++    "ComponentQueueObservation": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "anyOf": [
++            {
++              "minLength": 1,
++              "pattern": "\\S",
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Activity Id"
++        },
++        "clock_domain": {
++          "anyOf": [
++            {
++              "enum": [
++                "core",
++                "noc",
++                "dram"
++              ],
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Clock Domain"
++        },
++        "enter_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Enter Ps",
++          "type": "integer"
++        },
++        "item_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Item Id",
++          "type": "string"
++        },
++        "leave_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Leave Ps"
++        },
++        "owner_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Owner Id",
++          "type": "integer"
++        },
++        "population": {
++          "enum": [
++            "waiting",
++            "service",
++            "inflight"
++          ],
++          "title": "Population",
++          "type": "string"
++        },
++        "queue_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Queue Id",
++          "type": "string"
++        }
++      },
++      "required": [
++        "queue_id",
++        "item_id",
++        "population",
++        "enter_ps",
++        "leave_ps",
++        "owner_id",
++        "clock_domain",
++        "activity_id"
++      ],
++      "title": "ComponentQueueObservation",
++      "type": "object"
++    },
++    "ComponentResourceInterval": {
++      "additionalProperties": false,
++      "properties": {
++        "activity": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity",
++          "type": "string"
++        },
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "end_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "End Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "limiting_resource_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Limiting Resource Id",
++          "type": "integer"
++        },
++        "owner_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Owner Id",
++          "type": "integer"
++        },
++        "service_end_ps_ratio": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/TimeRatio"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "service_start_ps_ratio": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/TimeRatio"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "start_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Start Ps",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "owner_id",
++        "job_id",
++        "start_ps",
++        "end_ps",
++        "activity",
++        "limiting_resource_id",
++        "service_start_ps_ratio",
++        "service_end_ps_ratio",
++        "activity_id"
++      ],
++      "title": "ComponentResourceInterval",
+       "type": "object"
+     },
+     "CriticalInterval": {
+@@ -1227,6 +1794,121 @@
+       "title": "Observed[ClockObservation]",
+       "type": "object"
+     },
++    "Observed_ComponentActivity_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentActivity"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentActivity]",
++      "type": "object"
++    },
++    "Observed_ComponentClockObservation_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentClockObservation"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentClockObservation]",
++      "type": "object"
++    },
++    "Observed_ComponentCriticalInterval_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentCriticalInterval"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentCriticalInterval]",
++      "type": "object"
++    },
++    "Observed_ComponentQueueObservation_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentQueueObservation"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentQueueObservation]",
++      "type": "object"
++    },
++    "Observed_ComponentResourceInterval_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentResourceInterval"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentResourceInterval]",
++      "type": "object"
++    },
+     "Observed_CriticalInterval_": {
+       "additionalProperties": false,
+       "properties": {
+@@ -1918,7 +2600,22 @@
+       "type": "string"
+     },
+     "observations": {
+-      "$ref": "#/$defs/Observations"
++      "discriminator": {
++        "mapping": {
++          "uarch-native-observations/1": "#/$defs/Observations",
++          "uarch-native-observations/2": "#/$defs/ComponentObservations"
++        },
++        "propertyName": "format"
++      },
++      "oneOf": [
++        {
++          "$ref": "#/$defs/Observations"
++        },
++        {
++          "$ref": "#/$defs/ComponentObservations"
++        }
++      ],
++      "title": "Observations"
+     },
+     "owners": {
+       "items": {
+--- a/contract/uarch_contract/mapped.py
++++ b/contract/uarch_contract/mapped.py
+@@ -1014,6 +1014,73 @@
+     critical_path: Observed[CriticalInterval]
+ 
+ 
++class ActivityPredecessor(FrozenModel):
++    activity_id: NonEmpty
++    relation: Literal["sequence", "dependency", "resource", "credit"]
++
++
++class ComponentActivity(FrozenModel):
++    activity_id: NonEmpty
++    job_id: NonEmpty
++    request_id: NonEmpty | None
++    subphase: Literal[
++        "compute_overhead",
++        "compute_stage",
++        "compute_wave",
++        "compute_drain",
++        "request_noc",
++        "response_noc",
++        "unicast_noc",
++        "dram_latency",
++        "channel_service",
++        "read_port",
++        "write_port",
++        "ack",
++        "barrier",
++    ]
++    kind: Literal["service", "alignment"]
++    ready_ps: U64
++    start_ps: U64
++    end_ps: U64
++    owner_id: U64
++    category: Literal["compute", "memory", "noc", "sync", "overhead"]
++    receiving_domain: Literal["core", "noc", "dram"] | None
++    occupies_resource: StrictBool
++    dispatch_ordinal: U64
++    completion_ordinal: U64
++    predecessors: tuple[ActivityPredecessor, ...]
++
++
++class ComponentResourceInterval(ResourceInterval):
++    activity_id: NonEmpty
++
++
++class ComponentCriticalInterval(CriticalInterval):
++    activity_id: NonEmpty
++
++
++class ComponentClockObservation(ClockObservation):
++    activity_id: NonEmpty
++
++
++class ComponentQueueObservation(QueueObservation):
++    activity_id: NonEmpty | None
++
++
++class ComponentObservations(FrozenModel):
++    format: Literal["uarch-native-observations/2"]
++    events: Observed[EventObservation]
++    jobs: Observed[JobObservation]
++    activities: Observed[ComponentActivity]
++    clocks: Observed[ComponentClockObservation]
++    dma: Observed[DmaObservation]
++    transfers: Observed[TransferObservation]
++    allocations: Observed[AllocationObservation]
++    queue_membership: Observed[ComponentQueueObservation]
++    resource_intervals: Observed[ComponentResourceInterval]
++    critical_path: Observed[ComponentCriticalInterval]
++
++
+ class Attribution(FrozenModel):
+     compute: U64
+     memory: U64
+@@ -1077,7 +1144,7 @@
+     simulator_metrics: SimulatorMetrics
+     trace_hash: Hash | None
+     u_c0_duration_ps: None
+-    observations: Observations
++    observations: Annotated[Observations | ComponentObservations, Field(discriminator="format")]
+     owners: tuple[Owner, ...]
+ 
+     @model_validator(mode="after")
+@@ -1226,17 +1293,311 @@
+             all(x.kind == "service" for x in r.observations.critical_path.records),
+             "AttributionMismatch",
+         )
+-        assert isinstance(r.observations.queue_membership, Observed)
+-        require(
+-            all(x.clock_domain is not None for x in r.observations.queue_membership.records),
++        validate_component_observations(r, job)
++    return r
++
++
++def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
++    """Structural witness joins; independent model-law checks remain required."""
++    obs = r.observations
++    require(isinstance(obs, ComponentObservations), "IncompleteObservations", "component /2")
++    assert isinstance(obs, ComponentObservations)
++    owners = {x.owner_id: x.resource for x in job.owners}
++    tasks = {x.id: x for x in job.mapped_point.task_graph.jobs}
++    declared = {
++        f.request_id: (t, f) for t in tasks.values() if isinstance(t, Dma) for f in t.fragments
++    }
++    engines = int(job.workload_closure.hardware_spec.cores.core_type.dma.engines.value)
++    cols = int(job.workload_closure.hardware_spec.cores.grid.cols.value)
++    activities = {x.activity_id: x for x in obs.activities.records}
++    require(
++        len(activities) == len(obs.activities.records), "IncompleteObservations", "activity IDs"
++    )
++    events = {x.observation_ordinal: x for x in obs.events.records}
++    require(set(x.job_id for x in activities.values()) == tasks.keys(), "IncompleteObservations")
++    for a in activities.values():
++        require(a.job_id in tasks and a.owner_id in owners, "InvalidResource")
++        task = tasks[a.job_id]
++        resource = owners[a.owner_id]
++        require(a.ready_ps <= a.start_ps <= a.end_ps <= r.duration_ps, "IncompleteObservations")
++        if isinstance(task, Compute):
++            require(
++                a.request_id is None
++                and a.subphase.startswith("compute_")
++                and resource == f"matrix:{task.core_id}",
++                "IncompleteObservations",
++            )
++            category = "overhead" if a.subphase == "compute_overhead" else "compute"
++            domain: str | None = "core"
++        elif isinstance(task, Barrier):
++            require(
++                a.request_id is None
++                and a.subphase == "barrier"
++                and resource == f"barrier:{task.id}",
++                "IncompleteObservations",
++            )
++            category, domain = "sync", "noc"
++        elif isinstance(task, Dma):
++            require(
++                a.request_id in declared and declared[a.request_id][0].id == task.id,
++                "IncompleteObservations",
++                "activity request",
++            )
++            assert a.request_id is not None
++            fragment = declared[a.request_id][1]
++            core_id = task.dma_engine_id // engines
++            allowed = (
++                {"request_noc", "response_noc", "dram_latency", "channel_service", "read_port"}
++                if task.direction == "read"
++                else {
++                    "request_noc",
++                    "response_noc",
++                    "dram_latency",
++                    "channel_service",
++                    "write_port",
++                    "ack",
++                }
++            )
++            require(a.subphase in allowed, "IncompleteObservations")
++            if a.subphase.endswith("_noc"):
++                expected_owner, category, domain = (
++                    f"router:0:{core_id // cols}:{core_id % cols}",
++                    "noc",
++                    "noc",
++                )
++            elif a.subphase in ("dram_latency", "channel_service"):
++                expected_owner, category = f"channel:{fragment.channel_id}", "memory"
++                domain = "dram" if a.subphase == "dram_latency" else None
++            else:
++                expected_owner, category, domain = f"dma_port:{core_id}", "memory", "core"
++            require(resource == expected_owner, "InvalidResource", "activity owner")
++        else:
++            require(isinstance(task, NocTransfer), "IncompleteObservations")
++            assert isinstance(task, NocTransfer)
++            require(
++                a.request_id == task.id and a.subphase == "unicast_noc", "IncompleteObservations"
++            )
++            buffers = {x.id: x for x in job.mapped_point.task_graph.buffers}
++            source_core = buffers[task.source.buffer_id].core_id
++            assert source_core is not None
++            require(
++                resource == f"router:0:{source_core // cols}:{source_core % cols}",
++                "InvalidResource",
++            )
++            category, domain = "noc", "noc"
++        require(a.category == category and a.receiving_domain == domain, "IncompleteObservations")
++        require(
++            a.kind != "alignment" or (domain is not None and not a.occupies_resource),
+             "IncompleteObservations",
+-        )
+-    return r
++            "alignment is not busy",
++        )
++        require(
++            a.subphase not in ("dram_latency", "ack") or not a.occupies_resource,
++            "IncompleteObservations",
++            "latency is not channel service",
++        )
++        for ordinal, time in ((a.dispatch_ordinal, a.start_ps), (a.completion_ordinal, a.end_ps)):
++            require(ordinal in events, "IncompleteObservations", "missing activity dispatch")
++            e = events[ordinal]
++            require(
++                e.job_id == a.job_id and e.target_id == a.owner_id and e.t_ps == time,
++                "IncompleteObservations",
++                "activity dispatch join",
++            )
++        require(a.dispatch_ordinal <= a.completion_ordinal, "IncompleteObservations")
++        ordered(a.predecessors, lambda x: (x.activity_id, x.relation), "AttributionMismatch")
++        require(
++            a.start_ps == 0 or bool(a.predecessors), "AttributionMismatch", "missing tight cause"
++        )
++        for link in a.predecessors:
++            require(
++                link.activity_id in activities and link.activity_id != a.activity_id,
++                "AttributionMismatch",
++            )
++            before = activities[link.activity_id]
++            require(
++                before.end_ps == a.start_ps and before.completion_ordinal <= a.dispatch_ordinal,
++                "AttributionMismatch",
++                "non-tight predecessor",
++            )
++            if link.relation == "sequence":
++                require(
++                    (before.job_id, before.request_id) == (a.job_id, a.request_id),
++                    "AttributionMismatch",
++                )
++            elif link.relation == "dependency":
++                require(
++                    any(
++                        d.before == before.job_id and d.after == a.job_id
++                        for d in job.mapped_point.task_graph.dependencies
++                    ),
++                    "AttributionMismatch",
++                )
++            elif link.relation == "resource":
++                require(
++                    before.owner_id == a.owner_id and before.occupies_resource,
++                    "AttributionMismatch",
++                )
++            else:
++                require(
++                    before.request_id in declared
++                    and a.request_id in declared
++                    and declared[before.request_id][0].dma_engine_id
++                    == declared[a.request_id][0].dma_engine_id,
++                    "AttributionMismatch",
++                )
++    # Explicit cycle check includes zero-duration links (timestamps alone cannot prove a DAG).
++    pending = set(activities)
++    while pending:
++        ready = {
++            key
++            for key in pending
++            if not any(p.activity_id in pending for p in activities[key].predecessors)
++        }
++        require(bool(ready), "AttributionMismatch", "activity cycle")
++        pending -= ready
++    represented = set()
++    for interval in obs.resource_intervals.records:
++        require(interval.activity_id in activities, "IncompleteObservations")
++        a = activities[interval.activity_id]
++        require(
++            a.occupies_resource
++            and interval.activity_id not in represented
++            and (
++                interval.owner_id,
++                interval.job_id,
++                interval.start_ps,
++                interval.end_ps,
++                interval.activity,
++                interval.limiting_resource_id,
++            )
++            == (a.owner_id, a.job_id, a.start_ps, a.end_ps, a.subphase, a.owner_id),
++            "IncompleteObservations",
++            "occupied activity join",
++        )
++        represented.add(a.activity_id)
++        lo, hi = interval.service_start_ps_ratio, interval.service_end_ps_ratio
++        require((lo is not None) == (hi is not None), "IncompleteObservations")
++        require((lo is not None) == (a.subphase == "channel_service"), "IncompleteObservations")
++        if lo is not None and hi is not None:
++            start, end = (
++                Fraction(lo.numerator, lo.denominator),
++                Fraction(hi.numerator, hi.denominator),
++            )
++            require(
++                0 <= start <= end
++                and -(-start.numerator // start.denominator) == a.start_ps
++                and -(-end.numerator // end.denominator) == a.end_ps,
++                "IncompleteObservations",
++            )
++    require(
++        represented == {a.activity_id for a in activities.values() if a.occupies_resource},
++        "IncompleteObservations",
++        "missing occupied activity",
++    )
++    for q in obs.queue_membership.records:
++        require(
++            q.owner_id in owners
++            and q.leave_ps is not None
++            and q.enter_ps <= q.leave_ps <= r.duration_ps,
++            "IncompleteObservations",
++        )
++        if q.queue_id.startswith(("channel_service:", "dma_inflight:")):
++            require(
++                q.item_id in declared and q.clock_domain is None and q.activity_id is None,
++                "IncompleteObservations",
++                "nonclocked queue binding",
++            )
++            t, f = declared[q.item_id]
++            if q.queue_id.startswith("channel_service:"):
++                require(
++                    q.queue_id == f"channel_service:{f.channel_id}"
++                    and owners[q.owner_id] == f"channel:{f.channel_id}"
++                    and q.population in ("waiting", "service"),
++                    "IncompleteObservations",
++                )
++            else:
++                require(
++                    q.queue_id == f"dma_inflight:{t.dma_engine_id}"
++                    and owners[q.owner_id]
++                    == f"dma:{t.dma_engine_id // engines}:{t.dma_engine_id % engines}"
++                    and q.population == "inflight",
++                    "IncompleteObservations",
++                )
++        else:
++            require(q.activity_id in activities, "IncompleteObservations", "queue activity")
++            assert q.activity_id is not None
++            a = activities[q.activity_id]
++            require(
++                q.queue_id == f"activity:{a.subphase}:{a.owner_id}"
++                and q.item_id == (a.request_id or a.job_id)
++                and q.owner_id == a.owner_id
++                and q.clock_domain == a.receiving_domain
++                and q.clock_domain is not None
++                and q.population in ("waiting", "service"),
++                "IncompleteObservations",
++            )
++            require(
++                (q.enter_ps, q.leave_ps)
++                == (
++                    (a.ready_ps, a.start_ps)
++                    if q.population == "waiting"
++                    else (a.start_ps, a.end_ps)
++                ),
++                "IncompleteObservations",
++            )
++    for clock in obs.clocks.records:
++        require(clock.activity_id in activities, "IncompleteObservations")
++        a = activities[clock.activity_id]
++        require(
++            clock.job_id == a.job_id
++            and clock.domain == a.receiving_domain
++            and clock.grant_ps == a.start_ps
++            and clock.completion_ps == a.end_ps,
++            "IncompleteObservations",
++            "clock activity join",
++        )
++
++    def tie(a: ComponentActivity) -> tuple[int, str, str, str, str]:
++        return a.owner_id, a.job_id, a.request_id or "", a.subphase, a.activity_id
++
++    terminal = min(
++        (a for a in activities.values() if a.end_ps == r.duration_ps), key=tie, default=None
++    )
++    require(terminal is not None, "AttributionMismatch", "missing makespan activity")
++    assert terminal is not None
++    chain = []
++    current = terminal
++    while True:
++        if current.end_ps > current.start_ps:
++            chain.append((current.activity_id, current.start_ps, current.end_ps))
++        if not current.predecessors:
++            break
++        current = min((activities[p.activity_id] for p in current.predecessors), key=tie)
++    require(
++        [(c.activity_id, c.start_ps, c.end_ps) for c in obs.critical_path.records]
++        == list(reversed(chain)),
++        "AttributionMismatch",
++        "tight canonical activity path",
++    )
++    for c in obs.critical_path.records:
++        require(c.activity_id in activities, "AttributionMismatch")
++        a = activities[c.activity_id]
++        require(
++            c.kind == "service"
++            and c.cause_job_id == a.job_id
++            and c.category == a.category
++            and c.limiting_resource_id == a.owner_id
++            and a.start_ps <= c.start_ps < c.end_ps <= a.end_ps,
++            "AttributionMismatch",
++        )
+ 
+ 
+ def validate_fixed_delay_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
+     """Proposed structural/causal consistency checks, not evidence of real execution."""
+     obs = r.observations
++    require(isinstance(obs, Observations), "IncompleteObservations", "fixed-delay format")
++    assert isinstance(obs, Observations)
+     require(
+         all(
+             getattr(obs, section).status == "unrepresented"
+@@ -1677,9 +2038,34 @@
+                 p.initial_state != "cold" or buf.initial_residency == "uninitialized",
+                 "UnsupportedInitialState",
+             )
++    for buf in g.buffers:
++        if buf.space == "accumulator" and buf.producer_id is not None:
++            require(
++                isinstance(b.scope, ComponentScope) and b.mapping_policy.version == "2",
++                "UnsupportedMapping",
++                "transient accumulators require ws-rowsplit@2",
++            )
++            producer = jobs[buf.producer_id]
++            require(
++                isinstance(producer, Compute) and producer.accumulator_buffer_id == buf.id,
++                "InvalidDependency",
++                "accumulator producer must use this buffer",
++            )
++            require(producer.core_id == buf.core_id, "InvalidResource", "accumulator owner")
++            require(buf.initial_residency == "uninitialized", "InvalidDependency")
+     readers: dict[str, set[str]] = {key: set() for key in buffers}
+     for job in g.jobs:
+         if isinstance(job, Compute):
++            acc = buffers.get(job.accumulator_buffer_id)
++            require(acc is not None, "InvalidResource")
++            assert acc is not None
++            if acc.producer_id is not None:
++                require(
++                    acc.producer_id == job.id or acc.producer_id in ancestors[job.id],
++                    "InvalidDependency",
++                    "accumulator use before production",
++                )
++                readers[acc.id].add(job.id)
+             for name in ("X", "W"):
+                 buffer_key = job.operand_buffers.get(name)
+                 require(buffer_key in buffers, "InvalidResource")
+@@ -1738,7 +2124,7 @@
+         )
+         require(
+             b.mapping_policy.name == "ws-rowsplit"
+-            and b.mapping_policy.version == "1"
++            and b.mapping_policy.version in ("1", "2")
+             and b.mapping_policy.buffer_depth == 2,
+             "UnsupportedMapping",
+         )
+--- a/docs/decisions/U0011-the-native-engine-core.md
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -390,3 +390,92 @@
+ event-injection workload carrier is introduced, no obligation is deleted and no private
+ execution is relabelled public. Without acceptance of this exception, literal all-case
+ public coverage remains blocked, even after public clock instrumentation is implemented.
++
++
++## Proposed component lifetime and observation completion (not a release)
++
++This section becomes normative only after human acceptance and protected installation of
++U4-A-component-release-v1's exact combined postimages. It grants neither component native
++implementation/build entry nor runtime execution authority; the separate reconciled K2 and
++scoped B release remain necessary. Human worksheet workings gate applicable L1 acceptance,
++not this preparation. Existing accepted tools, scope and dependencies are not voted again.
++
++Admit explicit ws-rowsplit@2 alongside unchanged @1. @1 retains persistent identical-size
++accumulators (producer null, no terminal readers); its mapper/default bytes remain unchanged.
++@2 permits transient exact-size accumulator allocations: producer must be a compute that
++actually names that accumulator, on its core, with uninitialized initial residency. Every
++compute using it is a lifetime reader, follows that producer or is the producer, and remains
++subject to exact FP32 4*M*N size. Terminal consumers are precisely the maximal readers in
++the dependency DAG. Distinct overlapping allocations are legal only if ALL terminal readers
++of one precede the other's producer. Matrix serialization alone is not a lifetime proof.
++An unrelated DMA, barrier or compute using another accumulator cannot manufacture production.
++
++The @2 mapper keeps persistent scratch on cores with only one footprint. Heterogeneous
++cores use exact-size per-compute transient buffers at offset0 and explicit compute-to-compute
++edges in stable topological operator order (ID ties), then tile order. Existing op dependencies
++remain; different cores and DMA may overlap. Imported valid placements need not use this
++strategy. No capacity enlargement, spill, retile, K split, padding or scope waiver follows.
++
++Component results require uarch-native-observations/2; fixed-delay /1 remains byte/shape
++compatible. /2 adds a typed activity table and explicit activity references on clocks,
++resource intervals, ordinary queues and critical intervals. Request identity is a field,
++not a suffix hidden in an activity string. A compute/barrier activity has null request_id;
++DMA activities name an exact declared fragment; unicast uses its declared job ID. Activity
++IDs are unique stable strings and are not parsed to infer causality. Subphase, kind, owner,
++category and receiving domain are explicit. Zero-duration activities remain represented.
++
++Activities record ready, actual start and end, dispatch/completion observation ordinals,
++occupied status and typed tight predecessor links. Both ordinals join actual dispatched
++EventObservation records by job, owner and time. Job observations join the declared graph
++and actual completed state; request observations join declared fragment/job/engine/direction,
++buffers, bytes and route. Aggregate counts derive from completion, never declared work alone.
++Resource records cover precisely occupied activities; alignment/waiting does not invent busy
++intervals. DRAM latency and acknowledgement alignment are not channel/core-port service.
++NoC0 latency and DMA inflight can overlap. Busy time is half-open union, not sum.
++
++Receiving domains are core for compute, read/write ports and acknowledgement; noc for
++request/response/unicast hops and barriers; dram for DRAM latency; null for rational channel
++service. Alignment is a separate nonoccupied activity of the receiving subphase and category.
++Clock records reference the exact activity. Existing E3/E4 next_edge and zero-owned-duration
++laws govern; zero-hop movement stays at its arrival and performs no invented edge alignment.
++Channel exact start/end ratios are reduced; published integer endpoints are ceilings. Never
++feed integer publication rounding back into channel service. Timing formulas remain E3/E4.
++
++Channel queues are channel_service:<channel>, exact declared fragment and channel owner,
++waiting/service only, clock null. DMA queues are dma_inflight:<flattened-engine>, exact
++fragment and DMA owner, inflight only, clock null. Ordinary queues are
++activity:<subphase>:<owner>, reference the exact activity and request (or compute/barrier job),
++use its receiving domain and waiting [ready,start] or service [start,end]. The same identity,
++owner and population laws apply before checking domains; nonnull cannot escape validation.
++Finite queue windows clip initial/terminal members, count events at start not end, retain
++separate waiting/service/inflight populations and return null residence for zero flow.
++
++Transfers use boundary IDs request_noc, dram, response_noc and core_port for each DMA
++request (write core_port precedes request_noc; read core_port follows response_noc), and
++unicast_noc for unicast. Direction always remains read/write/unicast from the declared
++request; request/ack control hops carry zero payload/transaction bytes, payload-bearing
++NoC/core-port boundaries carry payload bytes and zero HBM transaction bytes, dram carries
++both declared payload and rounded transaction bytes. Boundary endpoints join the corresponding
++subphase's start/end; dram spans latency through channel completion. Allocation owners are
++sram:<core>, matrix:<core> for accumulator, and the canonical first channel owner for HBM
++capacity accounting (HBM allocation is shared address capacity, not channel-local capacity).
++Allocation interval covers every actual use; explicit transient acc begins at its producer
++grant and frees at its last completed terminal reader; persistent scratch/reservations stay
++live through run end. Initial inventory records declared preloaded state.
++
++Causal links are explicit sequence, dependency, resource or credit relations. Every supplied
++predecessor ends at the activity start and is a legal actual cause; historical idle predecessors
++are forbidden. Zero-length links form a DAG and cannot be dropped. Select the terminal
++activity ending at makespan and each tied tight predecessor by ascending
++(owner_id,job_id,request_id-or-empty,subphase,activity_id). Reverse that path and omit only
++zero-length intervals to obtain the critical partition. Waiting follows the actual blocking
++activity, not an invented busy wait. Category follows the receiving mechanism, preserving
++compute overhead separately. Independent checker must verify candidate completeness and
++actual blocker eligibility from transitions, not just the total duration or these strings.
++
++Profile expected_outcome is an admission predicate, not a resource-guard waiver. Retain
++expected-negative profile cases as TestVariantNotAdmitted controls. Public semantic negatives
++require separately reviewed exact input hashes in a success-admission profile and an external
++immutable expected-refusal selection; they must fail resource validation before job execution.
++No mutable caller rehash, embedded trust anchor, bypass flag or hidden trust is authorized.
++Synthetic profiles/results remain unit-only evidence. Their acceptance is not native success.
+--- a/src/rkuarch/mapping/component.py
++++ b/src/rkuarch/mapping/component.py
+@@ -4,7 +4,9 @@
+ slots; only its first slot is populated. HBM storage is distinct per tile and
+ operand (including replicated W). Accumulator scratch is shared only for an
+ identical footprint on the same exclusive matrix owner. Different footprints
+-reserve disjoint storage: installed lifetime admission cannot yet express reuse.
++reserve disjoint storage under @1. Explicit @2 requires the proposed lifetime contract:
++heterogeneous cores use exact-size transient scratch and ordered compute dependencies.
++The default @1 bytes and identical-footprint persistent convention are unchanged.
+ """
+ 
+ from __future__ import annotations
+@@ -80,13 +82,26 @@
+     hardware_spec: HardwareSpec,
+     *,
+     initial_state: str = "cold",
++    mapping_version: str = "1",
+ ) -> TaskGraph:
+     """Map existing operators. Resident output is explicitly verification-only input.
+ 
+     This pure function neither constructs a profile nor grants admission. Assembly and
+     saved-input admission are separate APIs. Refuse capacity, never retile or spill.
+     """
++    require(mapping_version in ("1", "2"), "UnsupportedMapping")
+     operations = _ops(ops)
++    if mapping_version == "2":
++        # Stable topological order prevents new serialization edges reversing op dependencies.
++        pending = list(operations)
++        ordered_ops = []
++        done: set[str] = set()
++        while pending:
++            selected = next(op for op in pending if set(op.depends_on) <= done)
++            pending.remove(selected)
++            ordered_ops.append(selected)
++            done.add(selected.id)
++        operations = tuple(ordered_ops)
+     spec = HardwareSpec.model_validate(hardware_spec.model_dump(mode="json"))
+     require(spec_hash(spec) == PRODUCTION_HARDWARE, "UnsupportedHardware")
+     require(initial_state in ("cold", "fixture_resident"), "UnsupportedInitialState")
+@@ -108,7 +123,14 @@
+     acc_ends = [0] * ncores
+     acc_ids: dict[tuple[int, int], str] = {}
+     hbm_end = 0
+-    prefixes = {op.id: f"o{i:03}" for i, op in enumerate(operations)}
++    prefixes = {op.id: f"o{i:03}" for i, op in enumerate(sorted(operations, key=lambda x: x.id))}
++    footprints: dict[int, set[int]] = {}
++    for op in operations:
++        for tile_index, start in enumerate(range(0, op.spec.dimensions["M"], 256)):
++            size = 4 * min(256, op.spec.dimensions["M"] - start) * op.spec.dimensions["N"]
++            footprints.setdefault(tile_index, set()).add(size)
++    transient_cores = {c for c, sizes in footprints.items() if len(sizes) > 1}
++    last_compute: dict[int, str] = {}
+     joined = {name for op in operations for name in op.depends_on}
+ 
+     def buffer(
+@@ -282,7 +304,27 @@
+             )
+             acc_size = 4 * m * d["N"]
+             acc_key = (core_id, acc_size)
+-            if acc_key not in acc_ids:
++            transient = mapping_version == "2" and core_id in transient_cores
++            if transient:
++                acc_id = prefix + ".acc"
++                acc_ids[acc_key] = acc_id
++                buffer(
++                    acc_id,
++                    "accumulator",
++                    acc_size,
++                    0,
++                    core_id,
++                    None,
++                    None,
++                    None,
++                    False,
++                    compute_id,
++                    [compute_id],
++                )
++                if core_id in last_compute:
++                    edges.add((last_compute[core_id], compute_id))
++                last_compute[core_id] = compute_id
++            elif acc_key not in acc_ids:
+                 acc_id = f"acc.c{core_id:03}.b{acc_size:06}"
+                 acc_ids[acc_key] = acc_id
+                 buffer(
+--- a/src/rkuarch/workload/component.py
++++ b/src/rkuarch/workload/component.py
+@@ -58,6 +58,7 @@
+     assumptions: MappedAssumptions,
+     rank: RankScope,
+     admission: Admission,
++    mapping_version: str = "1",
+ ) -> MappedBundle:
+     """Assemble supplied mappings unchanged; validate resources without inventing trust.
+ 
+@@ -74,7 +75,7 @@
+         assumptions_hash=assumptions.assumptions_hash,
+         rank=rank.model_dump(mode="json"),
+         mapping_scope="task_graph",
+-        mapping_policy=dict(name="ws-rowsplit", version="1", buffer_depth=2),
++        mapping_policy=dict(name="ws-rowsplit", version=mapping_version, buffer_depth=2),
+         scope=dict(
+             kind="component",
+             operator_version="prepared-op/1",

@@ -1,0 +1,98 @@
+"""Prospective tests; run only in private candidate export. Synthetic anchors only."""
+from copy import deepcopy
+import json
+from pathlib import Path
+import pytest
+from uarch_contract.hashing import content_hash, canonical_json
+from uarch_contract.mapped import MappedBundle, validate_resources
+from rkuarch.mapping.component import map_component
+from rkuarch.workload.component import component_point, prepare_component_bundle
+from validation.component.corpus import two_tiles
+
+ROOT = Path(__file__).resolve().parents[1]
+
+def baseline():
+    return MappedBundle.model_validate_json((ROOT / "contract/fixtures/mapped/component.json").read_bytes())
+
+def seal(raw):
+    for p in raw["points"]:
+        g=p["task_graph"]
+        for key in ("buffers", "jobs", "routes"):
+            g[key].sort(key=lambda x:x["id"])
+        g["dependencies"].sort(key=lambda x:(x["before"],x["after"]))
+        g["graph_hash"]=content_hash(g,exclude=("graph_hash",))
+        p["payload_hash"]=content_hash(p,exclude=("payload_hash",))
+    raw["bundle_hash"]=content_hash(raw,exclude=("bundle_hash",))
+    return raw
+
+def accept(raw):
+    b=MappedBundle.model_validate(seal(deepcopy(raw)))
+    validate_resources(b,b.points[0])
+    return b
+
+def transient():
+    raw=two_tiles(True)
+    raw["mapping_policy"]["version"]="2"
+    g=raw["points"][0]["task_graph"]
+    for buf in g["buffers"]:
+        if buf["space"]=="accumulator":
+            job="c" if buf["id"]=="acc" else "z"
+            buf.update(offset_bytes=0,producer_id=job,final_consumer_ids=[job])
+    g["dependencies"]=[dict(before="c",after="z")]
+    return seal(raw)
+
+def test_c04_new_and_old():
+    with pytest.raises(ValueError,match="CapacityExceeded"):
+        accept(two_tiles(True))
+    good=transient()
+    assert accept(good)
+    old=deepcopy(good); old["mapping_policy"]["version"]="1"
+    with pytest.raises(ValueError,match="UnsupportedMapping"):
+        accept(old)
+    assert accept(good)
+
+@pytest.mark.parametrize("fault,reason",[("independent","LiveBufferAlias"),("false_producer","InvalidDependency"),("last_use","InvalidDependency"),("owner","InvalidResource"),("size","CapacityExceeded"),("capacity","CapacityExceeded")])
+def test_lifetime_attacks(fault,reason):
+    good=transient(); assert accept(good)
+    bad=deepcopy(good); g=bad["points"][0]["task_graph"]
+    a=next(x for x in g["buffers"] if x["id"]=="acc")
+    if fault=="independent": g["dependencies"]=[]
+    if fault=="false_producer": a["producer_id"]="z"
+    if fault=="last_use": a["final_consumer_ids"]=[]
+    if fault=="owner": a["core_id"]=1
+    if fault=="size": a["size_bytes"]-=4
+    if fault=="capacity": a["size_bytes"]+=4
+    with pytest.raises(ValueError,match=reason): accept(bad)
+    assert accept(good)
+
+def test_mapper_versions_and_maximum_pair():
+    b=baseline(); raw=b.scope.ops[0].model_dump(mode="json")
+    from uarch_contract.prepared import PreparedOp
+    ops=[]
+    for name,n in (("a",255),("z",256)):
+        d=deepcopy(raw); d.update(id=name,depends_on=[])
+        d["spec"]["dimensions"]={"M":256,"K":256,"N":n}
+        ops.append(PreparedOp.model_validate(d))
+    with pytest.raises(ValueError,match="CapacityExceeded"):
+        map_component(ops,b.hardware_spec)
+    g=map_component(ops,b.hardware_spec,mapping_version="2")
+    assert [(x.offset_bytes,x.size_bytes) for x in g.buffers if x.space=="accumulator"]==[(0,261120),(0,262144)]
+    p=component_point(ops,g)
+    candidate=prepare_component_bundle(ops,b.hardware_spec,p,producer=b.producer,assumptions=b.assumptions,rank=b.rank,admission=b.admission,mapping_version="2")
+    assert accept(candidate.model_dump(mode="json"))
+    assert canonical_json(map_component(b.scope.ops,b.hardware_spec))==canonical_json(map_component(b.scope.ops,b.hardware_spec,mapping_version="1"))
+    stale=candidate.model_dump(mode="json"); stale["points"][0]["task_graph"]["dependencies"]=[]
+    with pytest.raises(ValueError,match="HashMismatch"): MappedBundle.model_validate(stale)
+    with pytest.raises(ValueError,match="LiveBufferAlias"): accept(stale)
+    assert accept(candidate.model_dump(mode="json"))
+
+def test_explicit_activity_schema():
+    from uarch_contract.mapped import ComponentActivity
+    value=dict(activity_id="a",job_id="c",request_id=None,subphase="compute_overhead",
+               kind="service",ready_ps=0,start_ps=0,end_ps=32000,owner_id=0,category="overhead",
+               receiving_domain="core",occupies_resource=True,dispatch_ordinal=0,
+               completion_ordinal=1,predecessors=[])
+    assert ComponentActivity.model_validate(value).request_id is None
+    for update in ({"subphase":"compute:request-string"},{"end_ps":-1},
+                   {"request_id":3},{"kind":"waiting"}):
+        with pytest.raises(ValueError): ComponentActivity.model_validate(dict(value,**update))
