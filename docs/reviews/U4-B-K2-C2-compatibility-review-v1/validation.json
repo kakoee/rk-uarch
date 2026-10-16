@@ -1,0 +1,56 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "docs/reviews/U4-B-K2-C2-compatibility-review-v1/verify.py"
+      ],
+      "exit": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "format",
+        "--check",
+        "docs/reviews/U4-B-K2-C2-compatibility-review-v1/verify.py"
+      ],
+      "exit": 0,
+      "stdout": "1 file already formatted\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "portable_verifier": {
+    "inventory_entries": 22,
+    "new_command_receipts": 42,
+    "cases_per_mode": 21159,
+    "refusals_per_mode": 160,
+    "unit_tests_per_mode": 12,
+    "preserved_new_counterexamples_per_mode": 2,
+    "native_fault_families": 3,
+    "verification_is_saved_receipt_check_only": true
+  },
+  "relative_links_checked": 17,
+  "coordinator_six_bindings_reverified": true,
+  "project_runtime_suite_rerun": false,
+  "new_native_reproduction_is_in_commands_json_not_verifier": true,
+  "inventory_exclusions": [
+    "inventory.json",
+    "validation.json",
+    "verification.log"
+  ],
+  "full_suite_not_needed_for_bounded_evidence_review": true,
+  "initial_packaging_check_failure": "First link check preceded creation of validation.json and refused that one missing link. Receipt now created and all relative links rechecked before publication. Shell continued to local commit d1a66d5; no incomplete package was pushed."
+}
