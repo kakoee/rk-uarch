@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "/checks/driver.py", line 135, in <module>
+    report["runner"] = runner_checks(
+                       ^^^^^^^^^^^^^^
+  File "/checks/checks.py", line 139, in runner_checks
+    checked_result(parse())
+                   ^^^^^^^
+  File "/checks/checks.py", line 123, in parse
+    return runner.parse_response(out, err, status, request_bytes=req, host=host)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/proposal/src/rkuarch/engines/native/runner.py", line 247, in parse_response
+    request, finish = _prepare_request(strict_json_loads(request_bytes), host=host)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/proposal/src/rkuarch/engines/native/runner.py", line 232, in _prepare_request
+    authority = canonical_json(host.authority_for(profile))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/proposal/contract/uarch_contract/hashing.py", line 31, in canonical_json
+    return json.dumps(
+           ^^^^^^^^^^^
+  File "/python/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/python/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/python/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/python/lib/python3.12/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type NativeEngineIdentity is not JSON serializable

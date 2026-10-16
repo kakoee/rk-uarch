@@ -1,0 +1,26 @@
+{
+  "frozen_expectation_sha256": "a44d9d10f4d093ce6619aa22a83c6ee2ef97bd494dea9d346c9d3a8473976f97",
+  "pre_fix_mismatches": {
+    "changed_profile_bytes": {
+      "expected": [
+        "HostBindingError",
+        "profile bytes changed"
+      ],
+      "observed": [
+        "AttributeError",
+        "'NoneType' object has no attribute 'model_dump'"
+      ]
+    },
+    "changed_jobs": {
+      "expected": [
+        "HostBindingError",
+        "job outside exact human first-use inventory"
+      ],
+      "observed": [
+        "ValueError",
+        "case host authority changed; fresh admission required"
+      ]
+    }
+  },
+  "reason": "Explicit meaningful host-inventory/profile refusal before snapshot serialization; corrupt host state must not rely on accidental AttributeError."
+}

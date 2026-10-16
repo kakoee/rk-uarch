@@ -1,0 +1,30 @@
+--- a/contract/uarch_contract/hardware.py
++++ b/contract/uarch_contract/hardware.py
+@@ -8,6 +8,7 @@
+ 
+ import re
+ from collections.abc import Iterator
++from functools import lru_cache
+ from typing import Annotated, Any, Literal
+ 
+ from pydantic import AfterValidator, ConfigDict, Field, field_validator, model_validator
+@@ -317,10 +318,17 @@
+ }
+ 
+ 
++@lru_cache(maxsize=128)
++def _compiled_hardware_unit_rule(pattern: str) -> re.Pattern[str]:
++    expression = re.escape(pattern).replace(r"\[\]", r"\[\d+\]").replace(r"\*", ".+")
++    return re.compile(expression)
++
++
+ def hardware_unit_rule(path: str) -> tuple[str, ...]:
++    # Read current order and allowed units on every lookup. Only rule patterns
++    # are cached, with a fixed bound; never cache attacker-controlled paths.
+     for pattern, allowed in HARDWARE_UNIT_RULES.items():
+-        expression = re.escape(pattern).replace(r"\[\]", r"\[\d+\]").replace(r"\*", ".+")
+-        if re.fullmatch(expression, path):
++        if _compiled_hardware_unit_rule(pattern).fullmatch(path):
+             return allowed
+     raise ValueError(f"{path}: no explicit HardwareSpec unit rule.")
+ 
