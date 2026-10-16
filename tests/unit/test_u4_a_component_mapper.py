@@ -647,3 +647,11 @@ def test_independent_registry_and_engine_anchors(baseline: MappedBundle) -> None
     raw["job_hash"] = content_hash(raw, exclude=("job_hash",))
     with pytest.raises(ValueError, match="InvalidResource"):
         loads_component_job(canonical_json(raw), **auth)
+
+
+def test_import_missing_operand_access_is_refusal(baseline: MappedBundle) -> None:
+    raw = bundle(baseline, (op(baseline),)).model_dump(mode="json")
+    del raw["scope"]["ops"][0]["operand_access"]["X"]
+    seal(raw)
+    with pytest.raises(ValueError, match="InvalidCoverage.*operand access"):
+        loads_component_bundle(canonical_json(raw), **anchors())
