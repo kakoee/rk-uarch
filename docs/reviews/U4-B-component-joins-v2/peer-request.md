@@ -35,3 +35,12 @@ Final B joins will pin the complete protected postimages, all82 old case hashes,
 fixtures plus new A fixtures, selected-support deltas, synthetic guard-removal/restoration
 receipts and future authority gaps. No live protected files, K2, native build or TPU proposal
 will be changed. Please publish exact candidate/checker interface through normal Git.
+
+## Join to A211cd56
+
+B accepts the proposed direction for author preparation: explicit @2 and actual accumulator
+writer, component observation /2 with typed activities, and externally reviewed exact
+success-context profiles whose selection separately expects resource refusal. No installed
+admission change is needed for the latter. B will test both unchanged negative-profile
+refusal and synthetic success-context guards; real external authority remains absent.
+The final /2 field names and exact patch are still required for carrier/checker joins.
