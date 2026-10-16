@@ -1,0 +1,8 @@
+{
+  "executed_helper": "sha256:68dfda50b1ee90148ab0f658696b5e273fff34c4040fd0c210e412dce6389196",
+  "formatted_proposal_helper": "sha256:f96d6c7cc285fefd23551974fe21dcad9dff8576909c7a79530c4225b6a98d23",
+  "non_import_AST_equal": true,
+  "import_AST_multiset_equal": true,
+  "semantic_changes": false,
+  "diff": "--- executed\n+++ formatted\n@@ -1,13 +1,13 @@\n \"\"\"Replacement case scheduler. Original approved runtime and validators stay immutable.\"\"\"\n \n import json\n-from contextlib import contextmanager\n-from types import SimpleNamespace\n import os\n import resource\n import sys\n import time\n+from contextlib import contextmanager\n from pathlib import Path\n+from types import SimpleNamespace\n \n from parallel_core import (\n     Store,\n@@ -152,7 +152,9 @@\n                         # Preserve the current baseline: fresh request parse and all\n                         # independent checks, no validation-cache or caller shortcut.\n                         checker(\n-                            result, job_model.model_validate_json(saved.read_bytes()), answers[case_id]\n+                            result,\n+                            job_model.model_validate_json(saved.read_bytes()),\n+                            answers[case_id],\n                         )\n                     require(len(captured) == 1, \"one fresh real native call per slot\")\n                     request, out, err, status = captured[0]\n"
+}

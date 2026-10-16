@@ -1,0 +1,70 @@
+{
+  "mutants": [
+    {
+      "guard": "cpu-quota",
+      "removed_expression": "min([Fraction(len(affinity))] + [Fraction(q, p) for q, p in quotas])",
+      "replacement": "Fraction(len(affinity))",
+      "exit_code": 1,
+      "output_hash": "89e0f388bea7a34f4a88cbac18bce30e97019c347d4ddce281fc870e4edaa461",
+      "test": "test_cpu_quota_and_memory_are_both_limits"
+    },
+    {
+      "guard": "memory-headroom",
+      "removed_expression": "min([memory_available] + [max(0, limit - used) for limit, used in memory_limits])",
+      "replacement": "memory_available",
+      "exit_code": 1,
+      "output_hash": "ba1e8c57584b20897bbb17f37aaa3fb450aca857089523e1d8e2f80095a507f3",
+      "test": "test_cpu_quota_and_memory_are_both_limits"
+    },
+    {
+      "guard": "blob-collision",
+      "removed_expression": "shared and stat.S_ISREG(path.lstat().st_mode) and path.read_bytes() == data",
+      "replacement": "True",
+      "exit_code": 1,
+      "output_hash": "2ad33a60a9808bceddbe364a352cc8b7bb78905d0fc874fb9ddf46fd61b36868",
+      "test": "test_atomic_collision_duplicate_and_budget"
+    },
+    {
+      "guard": "byte-budget",
+      "removed_expression": "used + len(data) + 4096 <= self.budget",
+      "replacement": "True",
+      "exit_code": 1,
+      "output_hash": "bd3d4946685d43710f011a647d9cd13dfb3d233330bf1f360869eec7f8f77648",
+      "test": "test_atomic_collision_duplicate_and_budget"
+    },
+    {
+      "guard": "thread-free-fork",
+      "removed_expression": "threading.active_count() == 1 and len(list(Path(\"/proc/self/task\").iterdir())) == 1",
+      "replacement": "True",
+      "exit_code": 1,
+      "output_hash": "481ebf2bee6662f13ef8b2970bb6bcc6cd367953024c9e79ff598c8c0e4efea3",
+      "test": "test_safe_fork_rejects_active_thread_and_open_executable"
+    },
+    {
+      "guard": "deadline",
+      "removed_expression": "now - state[\"sent\"] < deadline",
+      "replacement": "True",
+      "exit_code": 1,
+      "output_hash": "adf411617070406a83667215ef8d0f1ba54e8fb3939f8ef5f8fd4a0f73089d78",
+      "test": "test_failure_death_and_hang_refuse_and_reap"
+    },
+    {
+      "guard": "six-membership",
+      "removed_expression": "expected and len(observed) == len(expected) and set(observed) == expected",
+      "replacement": "True",
+      "exit_code": 1,
+      "output_hash": "83ed38ad467d5ffaabe8a8bb698f0fd687d1360681c45e6e77d890eca252be45",
+      "test": "test_saved_multiplicity_controls"
+    },
+    {
+      "guard": "six-byte-drift",
+      "removed_expression": "seen.setdefault(row[\"case_id\"], key) == key",
+      "replacement": "True",
+      "exit_code": 1,
+      "output_hash": "5820a83741df34cdea8e2226194df735b3c6d5ec0a03801ffe1401eeac61f0c8",
+      "test": "test_actual_saved_hash_comparison_positive_and_late_drift"
+    }
+  ],
+  "owned_source_preserved": true,
+  "native_calls": 0
+}

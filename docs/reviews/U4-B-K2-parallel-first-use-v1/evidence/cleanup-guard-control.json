@@ -1,0 +1,21 @@
+{
+  "guard": "exceptional parent-state cleanup before session close",
+  "mutant": "replace STATE = None with pass in unapplied combined patch",
+  "command": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "import sys,pytest;sys.path.insert(0,sys.argv.pop(1));raise SystemExit(pytest.main(sys.argv[1:]))",
+    "/tmp/u4-b-k2-parallel-v1/cleanup-mutation/package",
+    "-q",
+    "-c",
+    "/tmp/u4-b-k2-parallel-v1/cleanup-mutation/pytest.ini",
+    "--rootdir",
+    "/tmp/u4-b-k2-parallel-v1/cleanup-mutation",
+    "/tmp/u4-b-k2-parallel-v1/cleanup-mutation/package/test_parallel.py::test_combined_session_cleanup_on_failure_uses_same_real_api_shape"
+  ],
+  "exit_code": 1,
+  "output_sha256": "53f024f1ffe055b55ce4b5a4e7eeedf4be06ebfcddf8246d32ce6afcccd81a2f",
+  "scope": "toy callback sentinels, no capability or native process"
+}

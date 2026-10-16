@@ -1,0 +1,21 @@
+{
+  "guard": "before/after complete input snapshot equality",
+  "mutant": "replace equality with True",
+  "exit_code": 1,
+  "command": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "import sys,pytest;sys.path.insert(0,sys.argv.pop(1));raise SystemExit(pytest.main(sys.argv[1:]))",
+    "/tmp/u4-b-k2-parallel-v1/snapshot-mutation/package",
+    "-q",
+    "-c",
+    "/tmp/u4-b-k2-parallel-v1/snapshot-mutation/pytest.ini",
+    "--rootdir",
+    "/tmp/u4-b-k2-parallel-v1/snapshot-mutation",
+    "/tmp/u4-b-k2-parallel-v1/snapshot-mutation/package/test_parallel.py::test_full_input_snapshot_detects_same_size_tamper"
+  ],
+  "output_sha256": "5716d46efb30e8890107cf31c14c30752e4d2c6cb19b86fe27e088ffe8da25ed",
+  "native_calls": 0
+}

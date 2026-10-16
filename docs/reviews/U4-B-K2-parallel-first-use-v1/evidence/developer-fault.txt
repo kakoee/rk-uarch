@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/developer/developer_checks.py", line 123, in <module>
+    main()
+  File "/developer/developer_checks.py", line 88, in main
+    result = runner.validate_result(value, job)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/candidate/contract/uarch_contract/mapped.py", line 1111, in validate_result
+    r = MappedEngineResult.model_validate(value)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/site/pydantic/main.py", line 732, in model_validate
+    return cls.__pydantic_validator__.validate_python(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for MappedEngineResult
+  Value error, AttributionMismatch:  [type=value_error, input_value={'admission': {'case_id':...tor_arithmetic_ops': 0}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error

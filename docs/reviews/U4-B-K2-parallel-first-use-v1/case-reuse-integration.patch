@@ -1,0 +1,138 @@
+--- a/parallel_entrypoint.py
++++ b/parallel_entrypoint.py
+@@ -106,72 +106,73 @@
+     require(digest(saved.read_bytes()) == case["file"]["byte_hash"], "saved case changed")
+     completed = []
+     for mode in plan["modes"]:
+-        for repetition in plan["repetitions"]:
+-            slot = f"{mode}-{repetition}-{case_id}"
+-            captured = []
+-            original_exchange = runner._exchange
+-
+-            def observe(
+-                fd,
+-                request,
+-                limits,
+-                original_exchange=original_exchange,
+-                captured=captured,
+-                slot=slot,
+-            ):
+-                response = original_exchange(fd, request, limits)
+-                captured.append((request, *response))
+-                out, err, status = response
+-                store.json(
+-                    "transport/" + slot + ".json",
+-                    {
++        with runner.admitted_case(json.loads(saved.read_bytes()), host=hosts[mode]) as execute_case:
++            for repetition in plan["repetitions"]:
++                slot = f"{mode}-{repetition}-{case_id}"
++                captured = []
++                original_exchange = runner._exchange
++
++                def observe(
++                    fd,
++                    request,
++                    limits,
++                    original_exchange=original_exchange,
++                    captured=captured,
++                    slot=slot,
++                ):
++                    response = original_exchange(fd, request, limits)
++                    captured.append((request, *response))
++                    out, err, status = response
++                    store.json(
++                        "transport/" + slot + ".json",
++                        {
++                            "request": store.blob(request),
++                            "stdout": store.blob(out),
++                            "stderr": store.blob(err),
++                            "status": status,
++                        },
++                    )
++                    return response
++
++                runner._exchange = observe
++                try:
++                    try:
++                        result, receipt = execute_case()
++                    except runner.NativeRefusal as error:
++                        require(
++                            case["outcome"] == "TimeOverflow"
++                            and error.envelope["code"] == "TimeOverflow",
++                            "wrong semantic refusal",
++                        )
++                        receipt = {"semantic_refusal": error.envelope}
++                    else:
++                        require(case["outcome"] == "success", "expected refusal succeeded")
++                        # Preserve the current baseline: fresh request parse and all
++                        # independent checks, no validation-cache or caller shortcut.
++                        checker(
++                            result, job_model.model_validate_json(saved.read_bytes()), answers[case_id]
++                        )
++                    require(len(captured) == 1, "one fresh real native call per slot")
++                    request, out, err, status = captured[0]
++                    require(request == saved.read_bytes(), "canonical request drift")
++                    row = {
++                        "mode": mode,
++                        "repetition": repetition,
++                        "case_id": case_id,
+                         "request": store.blob(request),
+                         "stdout": store.blob(out),
+                         "stderr": store.blob(err),
++                        "request_hash": digest(request),
++                        "stdout_hash": digest(out),
++                        "stderr_hash": digest(err),
+                         "status": status,
+-                    },
+-                )
+-                return response
+-
+-            runner._exchange = observe
+-            try:
+-                try:
+-                    result, receipt = runner.run_fixed_delay(saved, host=hosts[mode])
+-                except runner.NativeRefusal as error:
+-                    require(
+-                        case["outcome"] == "TimeOverflow"
+-                        and error.envelope["code"] == "TimeOverflow",
+-                        "wrong semantic refusal",
+-                    )
+-                    receipt = {"semantic_refusal": error.envelope}
+-                else:
+-                    require(case["outcome"] == "success", "expected refusal succeeded")
+-                    # Preserve the current baseline: fresh request parse and all
+-                    # independent checks, no validation-cache or caller shortcut.
+-                    checker(
+-                        result, job_model.model_validate_json(saved.read_bytes()), answers[case_id]
+-                    )
+-                require(len(captured) == 1, "one fresh real native call per slot")
+-                request, out, err, status = captured[0]
+-                require(request == saved.read_bytes(), "canonical request drift")
+-                row = {
+-                    "mode": mode,
+-                    "repetition": repetition,
+-                    "case_id": case_id,
+-                    "request": store.blob(request),
+-                    "stdout": store.blob(out),
+-                    "stderr": store.blob(err),
+-                    "request_hash": digest(request),
+-                    "stdout_hash": digest(out),
+-                    "stderr_hash": digest(err),
+-                    "status": status,
+-                    "receipt": receipt,
+-                    "executable_hash": hosts[mode].executable.byte_hash,
+-                }
+-                store.json("calls/" + slot + ".json", row)
+-                completed.append(slot)
+-            finally:
+-                runner._exchange = original_exchange
++                        "receipt": receipt,
++                        "executable_hash": hosts[mode].executable.byte_hash,
++                    }
++                    store.json("calls/" + slot + ".json", row)
++                    completed.append(slot)
++                finally:
++                    runner._exchange = original_exchange
+     return {
+         "case_id": case_id,
+         "slots": completed,

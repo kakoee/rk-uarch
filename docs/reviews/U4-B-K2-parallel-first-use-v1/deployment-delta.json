@@ -1,0 +1,51 @@
+{
+  "format": "uarch-k2-parallel-deployment-delta/1",
+  "status": "reviewable unchanged-source baseline only; final combined API join passed, distinct runtime/source placement decision pending",
+  "original_root": "/var/lib/rkuarch/k2/candidate-04-first-use-v1",
+  "new_root": "/var/lib/rkuarch/k2/candidate-04-parallel-v1",
+  "source": "24fa36803081e5077d5977baa91441a2c8534ec8",
+  "helper_manifest_hash": "sha256:78ccb725a0b39087d4f51cdfe7f551dc764c633178b545da97510db73f03afef",
+  "policy_hash": "sha256:4857e5278b73f81566b1876d8bce0dc449d3bcccc826f8d39421fa53c7171e84",
+  "original_runtime_release_hash": "sha256:f924d906ed0351ed9c9bbd699bd5d263a73632fde3b999f984582b920601a44f",
+  "plan_hash": "sha256:49db8159fcf6f32eadf4ee4c0d7b658b905a7f8759f68e373699870989fdd452",
+  "new_helper_postimages": {
+    "parallel-policy.json": {
+      "bytes": 955,
+      "sha256": "sha256:4857e5278b73f81566b1876d8bce0dc449d3bcccc826f8d39421fa53c7171e84"
+    },
+    "parallel_core.py": {
+      "bytes": 11877,
+      "sha256": "sha256:bbe3746760753c388ac1fa3f3420016f008281a1014638863320e073e15348b1"
+    },
+    "parallel_entrypoint.py": {
+      "bytes": 13238,
+      "sha256": "sha256:df7d8fe7538ea3c1fdbe2ee70f3497704305d87ef06af5169795a03b544da0e1"
+    },
+    "resource_limits.py": {
+      "bytes": 3610,
+      "sha256": "sha256:8dca3caa49d30eb54788d06f728e2a22fdabcb664fb92f78609f4539ccbdfa74"
+    }
+  },
+  "reused_readonly_mounts": [
+    "candidate",
+    "python",
+    "site",
+    "campaign",
+    "manifests",
+    "authority/k2-host-selector.json"
+  ],
+  "new_mounts": {
+    "helpers": "/parallel",
+    "authority": "/parallel-authority"
+  },
+  "unchanged_engine_authority_commit": "cc91e5489a58e06addb2f43e45a0e4e71cb66aa1",
+  "unchanged_host_record_hash": "sha256:0ad2e770f0535958cc4b71208e9a687b51796fc33dc107ae45b723e89b2338a8",
+  "future_release_requires": [
+    "actual full helper publication commit",
+    "coordinator placement record publication commit/blob",
+    "actual authority-free parallel preflight bytes/hash",
+    "human root placement of seven new files only; no existing overwrite"
+  ],
+  "new_engine_decision_required": false,
+  "full_campaign_restarted": false
+}

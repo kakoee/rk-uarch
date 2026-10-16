@@ -1,0 +1,291 @@
+--- a/parallel_entrypoint.py
++++ b/parallel_entrypoint.py
+@@ -5,7 +5,9 @@
+ import resource
+ import sys
+ import time
++from contextlib import contextmanager
+ from pathlib import Path
++from types import SimpleNamespace
+ 
+ from parallel_core import (
+     Store,
+@@ -106,72 +108,75 @@
+     require(digest(saved.read_bytes()) == case["file"]["byte_hash"], "saved case changed")
+     completed = []
+     for mode in plan["modes"]:
+-        for repetition in plan["repetitions"]:
+-            slot = f"{mode}-{repetition}-{case_id}"
+-            captured = []
+-            original_exchange = runner._exchange
+-
+-            def observe(
+-                fd,
+-                request,
+-                limits,
+-                original_exchange=original_exchange,
+-                captured=captured,
+-                slot=slot,
+-            ):
+-                response = original_exchange(fd, request, limits)
+-                captured.append((request, *response))
+-                out, err, status = response
+-                store.json(
+-                    "transport/" + slot + ".json",
+-                    {
++        with runner.admitted_case(json.loads(saved.read_bytes()), host=hosts[mode]) as execute_case:
++            for repetition in plan["repetitions"]:
++                slot = f"{mode}-{repetition}-{case_id}"
++                captured = []
++                original_exchange = runner._exchange
++
++                def observe(
++                    fd,
++                    request,
++                    limits,
++                    original_exchange=original_exchange,
++                    captured=captured,
++                    slot=slot,
++                ):
++                    response = original_exchange(fd, request, limits)
++                    captured.append((request, *response))
++                    out, err, status = response
++                    store.json(
++                        "transport/" + slot + ".json",
++                        {
++                            "request": store.blob(request),
++                            "stdout": store.blob(out),
++                            "stderr": store.blob(err),
++                            "status": status,
++                        },
++                    )
++                    return response
++
++                runner._exchange = observe
++                try:
++                    try:
++                        result, receipt = execute_case()
++                    except runner.NativeRefusal as error:
++                        require(
++                            case["outcome"] == "TimeOverflow"
++                            and error.envelope["code"] == "TimeOverflow",
++                            "wrong semantic refusal",
++                        )
++                        receipt = {"semantic_refusal": error.envelope}
++                    else:
++                        require(case["outcome"] == "success", "expected refusal succeeded")
++                        # Preserve the current baseline: fresh request parse and all
++                        # independent checks, no validation-cache or caller shortcut.
++                        checker(
++                            result,
++                            job_model.model_validate_json(saved.read_bytes()),
++                            answers[case_id],
++                        )
++                    require(len(captured) == 1, "one fresh real native call per slot")
++                    request, out, err, status = captured[0]
++                    require(request == saved.read_bytes(), "canonical request drift")
++                    row = {
++                        "mode": mode,
++                        "repetition": repetition,
++                        "case_id": case_id,
+                         "request": store.blob(request),
+                         "stdout": store.blob(out),
+                         "stderr": store.blob(err),
++                        "request_hash": digest(request),
++                        "stdout_hash": digest(out),
++                        "stderr_hash": digest(err),
+                         "status": status,
+-                    },
+-                )
+-                return response
+-
+-            runner._exchange = observe
+-            try:
+-                try:
+-                    result, receipt = runner.run_fixed_delay(saved, host=hosts[mode])
+-                except runner.NativeRefusal as error:
+-                    require(
+-                        case["outcome"] == "TimeOverflow"
+-                        and error.envelope["code"] == "TimeOverflow",
+-                        "wrong semantic refusal",
+-                    )
+-                    receipt = {"semantic_refusal": error.envelope}
+-                else:
+-                    require(case["outcome"] == "success", "expected refusal succeeded")
+-                    # Preserve the current baseline: fresh request parse and all
+-                    # independent checks, no validation-cache or caller shortcut.
+-                    checker(
+-                        result, job_model.model_validate_json(saved.read_bytes()), answers[case_id]
+-                    )
+-                require(len(captured) == 1, "one fresh real native call per slot")
+-                request, out, err, status = captured[0]
+-                require(request == saved.read_bytes(), "canonical request drift")
+-                row = {
+-                    "mode": mode,
+-                    "repetition": repetition,
+-                    "case_id": case_id,
+-                    "request": store.blob(request),
+-                    "stdout": store.blob(out),
+-                    "stderr": store.blob(err),
+-                    "request_hash": digest(request),
+-                    "stdout_hash": digest(out),
+-                    "stderr_hash": digest(err),
+-                    "status": status,
+-                    "receipt": receipt,
+-                    "executable_hash": hosts[mode].executable.byte_hash,
+-                }
+-                store.json("calls/" + slot + ".json", row)
+-                completed.append(slot)
+-            finally:
+-                runner._exchange = original_exchange
++                        "receipt": receipt,
++                        "executable_hash": hosts[mode].executable.byte_hash,
++                    }
++                    store.json("calls/" + slot + ".json", row)
++                    completed.append(slot)
++                finally:
++                    runner._exchange = original_exchange
+     return {
+         "case_id": case_id,
+         "slots": completed,
+@@ -210,6 +215,18 @@
+         )
+     store.check_budget()
+     return record
++
++
++@contextmanager
++def resolve_campaign_hosts(base, plan, host):
++    # A's public session produces genuine bindings. The facade only routes the
++    # original release/subject checks through its mode selector; it creates no token.
++    global STATE
++    with host.resolution_session() as select:
++        try:
++            yield base.authority(plan, SimpleNamespace(resolve_host=select))
++        finally:
++            STATE = None
+ 
+ 
+ def campaign(base, context, policy, manifest_hash, entry_started, setup_seconds):
+@@ -222,64 +239,64 @@
+     # This is the public resolver, including its token constructor and every input
+     # check. Exactly once per mode in the thread-free parent, before any worker fork.
+     before = time.monotonic()
+-    hosts = base.authority(plan, host)
+-    resolver_seconds = time.monotonic() - before
+-    cases = {c["case_id"]: c for c in plan["case_membership"]}
+-    answers = base.read_json(
+-        base.ROOT / "docs/reviews/U4-A-K2-construction-v1/corpus/expectations.json"
+-    )
+-    resources = discover(policy, len(cases))
+-    store = Store(OUTPUT, plan["receipt_budget_bytes"])
+-    require(
+-        not any((OUTPUT / name).exists() for name in ["calls", "transport", "campaign.json"]),
+-        "fresh replacement campaign output required",
+-    )
+-    store.json(
+-        "resources.json",
+-        {
+-            **resources,
+-            "resolver_seconds": resolver_seconds,
+-            "scheduling": "one worker owns all six fresh calls of each case",
+-        },
+-    )
+-    store.json("input-snapshot-before.json", before_inputs)
+-    STATE = base, context, hosts, cases, answers, store
+-    processing_started = time.monotonic()
+-    results = run_workers(
+-        list(cases),
+-        perform_case,
+-        workers=resources["workers"],
+-        task_timeout=policy["case_timeout_seconds"],
+-        total_timeout=plan["campaign_timeout_seconds"],
+-        executable_paths=tuple(str(base.ROOT / h.executable.path) for h in hosts.values()),
+-        progress=lambda case, result: store.json("progress/" + case + ".json", result),
+-    )
+-    processing_seconds = time.monotonic() - processing_started
+-    final_checks_started = time.monotonic()
+-    record = assemble(base, plan, store, results)
+-    base.common()  # All original sealed inputs rechecked after workers exit.
+-    verify_helpers(base)
+-    verify_release(policy, manifest_hash)
+-    after_inputs = input_snapshot()
+-    store.json("input-snapshot-after.json", after_inputs)
+-    verify_snapshots(before_inputs, after_inputs)
+-    store.json(
+-        "worker-summary.json",
+-        {
+-            "workers": resources["workers"],
+-            "cases": results,
+-            "timing_seconds": {
+-                "runtime_preflight": setup_seconds,
+-                "initial_input_snapshot": snapshot_seconds,
+-                "genuine_authority_resolution": resolver_seconds,
+-                "case_processing": processing_seconds,
+-                "final_checks": time.monotonic() - final_checks_started,
+-                "entrypoint_total_before_final_receipt": time.monotonic() - entry_started,
++    with resolve_campaign_hosts(base, plan, host) as hosts:
++        resolver_seconds = time.monotonic() - before
++        cases = {c["case_id"]: c for c in plan["case_membership"]}
++        answers = base.read_json(
++            base.ROOT / "docs/reviews/U4-A-K2-construction-v1/corpus/expectations.json"
++        )
++        resources = discover(policy, len(cases))
++        store = Store(OUTPUT, plan["receipt_budget_bytes"])
++        require(
++            not any((OUTPUT / name).exists() for name in ["calls", "transport", "campaign.json"]),
++            "fresh replacement campaign output required",
++        )
++        store.json(
++            "resources.json",
++            {
++                **resources,
++                "resolver_seconds": resolver_seconds,
++                "scheduling": "one worker owns all six fresh calls of each case",
+             },
+-        },
+-    )
+-    store.json("campaign.json", record)  # Last, only after complete validation and postchecks.
+-    STATE = None
++        )
++        store.json("input-snapshot-before.json", before_inputs)
++        STATE = base, context, hosts, cases, answers, store
++        processing_started = time.monotonic()
++        results = run_workers(
++            list(cases),
++            perform_case,
++            workers=resources["workers"],
++            task_timeout=policy["case_timeout_seconds"],
++            total_timeout=plan["campaign_timeout_seconds"],
++            executable_paths=tuple(str(base.ROOT / h.executable.path) for h in hosts.values()),
++            progress=lambda case, result: store.json("progress/" + case + ".json", result),
++        )
++        processing_seconds = time.monotonic() - processing_started
++        final_checks_started = time.monotonic()
++        record = assemble(base, plan, store, results)
++        base.common()  # All original sealed inputs rechecked after workers exit.
++        verify_helpers(base)
++        verify_release(policy, manifest_hash)
++        after_inputs = input_snapshot()
++        store.json("input-snapshot-after.json", after_inputs)
++        verify_snapshots(before_inputs, after_inputs)
++        store.json(
++            "worker-summary.json",
++            {
++                "workers": resources["workers"],
++                "cases": results,
++                "timing_seconds": {
++                    "runtime_preflight": setup_seconds,
++                    "initial_input_snapshot": snapshot_seconds,
++                    "genuine_authority_resolution": resolver_seconds,
++                    "case_processing": processing_seconds,
++                    "final_checks": time.monotonic() - final_checks_started,
++                    "entrypoint_total_before_final_receipt": time.monotonic() - entry_started,
++                },
++            },
++        )
++        store.json("campaign.json", record)  # Last, only after complete validation and postchecks.
++        STATE = None
+ 
+ 
+ def main():
