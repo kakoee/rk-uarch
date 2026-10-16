@@ -51,3 +51,16 @@ edge is ceil(3e12/900e6)=3334, exactly the incoming D10 timestamp. Receiving ali
 edge-search test caught this author decomposition error; do not create an extra alignment
 interval at this integer-coincident edge. Raw next_edge(n=0) still aligns; zero-hop routing
 bypasses conversion and preserves time. These are distinct rules.
+
+## Exact candidate649f3e5 finding (real private validator, 18 passed/2 failed)
+
+`test_accumulator.py::test_historical_persistent_scratch_controls` fails with
+UnsupportedMapping on old B C04-control. Installed fixture-derived accumulator metadata
+has producer_id=c and empty final_consumer_ids, yet installed validation treated it as
+persistent scratch. The new guard treats *any* producer as transient and rejects @1.
+This breaks old B corpus identities, contrary to old-byte preservation. Keep @1's installed
+scratch behavior even where historical producer metadata is present; opt into transient
+readers/lifetimes by @2 plus explicit producer. Review historical C01/C02/etc too.
+Do not rewrite their old bundles to erase producers. The other failure was a B expected
+error-layer typo: the new explicit owner guard correctly returns InvalidResource before
+old exact-size CapacityExceeded; B test corrected, arithmetic unchanged.

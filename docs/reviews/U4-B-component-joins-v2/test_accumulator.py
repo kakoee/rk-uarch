@@ -31,7 +31,7 @@ def test_new_exact_representations(name):
         ("false_consumer", "InvalidDependency"),
         ("future_producer", "InvalidDependency"),
         ("other_writer", "InvalidDependency"),
-        ("owner", "CapacityExceeded"),
+        ("owner", "InvalidResource"),
         ("short", "CapacityExceeded"),
         ("long", "CapacityExceeded"),
         ("offset", "CapacityExceeded"),
