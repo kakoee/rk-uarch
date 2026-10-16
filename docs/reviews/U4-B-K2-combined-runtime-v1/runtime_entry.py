@@ -85,6 +85,7 @@ def common():
     from uarch_contract.hashing import canonical_json, content_hash
     from uarch_contract.mapped import MappedEngineJob
 
+    # isort: split
     from rkuarch.engines.native import host, runner
 
     verify_bytes("/candidate", b.read("/campaign/candidate-layout.json")["files"], sealed=True)
