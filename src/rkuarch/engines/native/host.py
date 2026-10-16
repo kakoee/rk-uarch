@@ -273,6 +273,22 @@ def _resolve(selector: HostSelector, *, mode: str) -> AcceptedHostBinding:
         set(inventory) == {"format", "jobs"} and inventory["format"] == "uarch-k2-jobs-inventory/1",
         "jobs inventory format",
     )
+    corpus = _json(root, record.corpus_inventory)
+    _require(isinstance(corpus, dict) and isinstance(corpus.get("cases"), list), "corpus cases")
+    expected_cases = {
+        (p.profile_hash, c.case_id): c.execution_outcome for p in trust.profiles for c in p.cases
+    }
+    corpus_cases: dict[tuple[str, str], str] = {}
+    for case in corpus["cases"]:
+        matching = [
+            p for p in trust.profiles if p.file.model_dump(mode="json") == case.get("profile")
+        ]
+        _require(len(matching) == 1, "corpus profile file join")
+        key = (matching[0].profile_hash, case["case_id"])
+        _require(key not in corpus_cases, "duplicate corpus case")
+        corpus_cases[key] = case["execution_outcome"]
+    _require(corpus_cases == expected_cases, "exact corpus case/outcome inventory required")
+    job_cases: set[tuple[str, str]] = set()
     jobs: set[str] = set()
     from rkuarch.workload.mapped import loads_fixed_delay_job
 
@@ -295,8 +311,14 @@ def _resolve(selector: HostSelector, *, mode: str) -> AcceptedHostBinding:
             and job.profile == profiles[profile_hash],
             "job inventory closure",
         )
+        _require(job.admission.case_id is not None, "finite job case required")
+        assert job.admission.case_id is not None
+        key = (profile_hash, job.admission.case_id)
+        _require(key in expected_cases and key not in job_cases, "exact unique job case required")
+        job_cases.add(key)
         jobs.add(job.job_hash)
     _require(bool(jobs), "nonempty exact first-use jobs required")
+    _require(job_cases == set(expected_cases), "complete first-use job case inventory required")
     for executable in record.executables:
         receipt = BuildReceipt.model_validate(_json(root, executable.build_receipt))
         _require(

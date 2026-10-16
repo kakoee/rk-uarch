@@ -88,10 +88,10 @@ fn shape(v: &mut Value, s: &Value, root: &Value, path: &str) -> Result<()> {
             return Err(invalid(path, "literal mismatch"));
         }
     }
-    if let Some(enums) = s["enum"].as_array() {
-        if !enums.contains(v) {
-            return Err(invalid(path, "enum mismatch"));
-        }
+    if let Some(enums) = s["enum"].as_array()
+        && !enums.contains(v)
+    {
+        return Err(invalid(path, "enum mismatch"));
     }
     match s["type"].as_str() {
         Some("null") => {

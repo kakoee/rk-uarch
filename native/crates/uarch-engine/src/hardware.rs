@@ -156,17 +156,22 @@ fn unit_rule(pattern: &str, path: &str) -> bool {
                 })
         })
 }
-fn coordinate_below(value:&Value,bound:f64)->bool {
-    wire::integer_text(value).is_ok_and(|n|crate::carrier::cmp_integer(&n,&format!("{bound:.0}")).is_lt())
+fn coordinate_below(value: &Value, bound: f64) -> bool {
+    wire::integer_text(value)
+        .is_ok_and(|n| crate::carrier::cmp_integer(&n, &format!("{bound:.0}")).is_lt())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test] fn integer_grid_comparison_does_not_round_the_coordinate() {
-        let maximum=wire::parse("36893488147419103231").unwrap();
-        assert!(coordinate_below(&maximum,36893488147419103232.0));
-        assert!(!coordinate_below(&wire::parse("36893488147419103232").unwrap(),36893488147419103232.0));
+    #[test]
+    fn integer_grid_comparison_does_not_round_the_coordinate() {
+        let maximum = wire::parse("36893488147419103231").unwrap();
+        assert!(coordinate_below(&maximum, 36893488147419103232.0));
+        assert!(!coordinate_below(
+            &wire::parse("36893488147419103232").unwrap(),
+            36893488147419103232.0
+        ));
     }
 }
 pub(crate) fn validate(spec: &mut Value) -> Result<()> {

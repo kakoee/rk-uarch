@@ -13,7 +13,7 @@ from rkuarch.engines.native.records import HostSelector
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def scaffold(root: Path):
+def scaffold(root: Path, *, corpus_fault=None):
     def put(name, value):
         data = value if isinstance(value, bytes) else canonical_json(value).encode()
         (root / name).write_bytes(data)
@@ -26,6 +26,21 @@ def scaffold(root: Path):
     source = {**put("source.rs", b"// synthetic test-only source"), "role": "rust"}
     profile = raw["profile"]
     registry = raw["registry"]
+    profile_file = put("profile.json", profile)
+    corpus = {
+        "format": "uarch-k2-construction-corpus/1",
+        "cases": [
+            {"case_id": e["case_id"], "profile": profile_file, "execution_outcome": "success"}
+            for e in profile["entries"]
+        ],
+    }
+    if corpus_fault == "missing":
+        corpus["cases"] = []
+    elif corpus_fault == "case":
+        corpus["cases"][0]["case_id"] = "foreign"
+    elif corpus_fault == "outcome":
+        corpus["cases"][0]["execution_outcome"] = "TimeOverflow"
+    corpus_file = put("corpus.json", corpus)
     cases = [
         {
             k: e[k]
@@ -54,7 +69,7 @@ def scaffold(root: Path):
                 "cases": cases,
             }
         ],
-        "corpus_inventory": common,
+        "corpus_inventory": corpus_file,
     }
     tools = {
         "format": "uarch-k2-tool-inputs/1",
@@ -157,7 +172,7 @@ def scaffold(root: Path):
         "expected_engine": engine,
         "executables": executables,
         "jobs_inventory": jobs,
-        "corpus_inventory": common,
+        "corpus_inventory": corpus_file,
         "profile_hashes": [profile["profile_hash"]],
         "registry_hash": registry["registry_hash"],
     }
@@ -167,7 +182,7 @@ def scaffold(root: Path):
         "trust_hash": record["trust_hash"],
         "model_inputs_hash": record["model_inputs_hash"],
         "executable_byte_hashes": [x["executable"]["byte_hash"] for x in executables],
-        "corpus_byte_hash": common["byte_hash"],
+        "corpus_byte_hash": corpus_file["byte_hash"],
         "jobs_byte_hash": jobs["byte_hash"],
     }
     record["decision"] = put(
@@ -467,3 +482,10 @@ def test_response_rehash_does_not_hide_bad_observations(tmp_path, path, value, r
             host=host,
         )
     assert reason in str(failure.value.__cause__)
+
+
+@pytest.mark.parametrize("fault", ["missing", "case", "outcome"])
+def test_exact_corpus_cases_and_outcomes_join_trust(tmp_path, fault):
+    selector, _, _, _ = scaffold(tmp_path, corpus_fault=fault)
+    with pytest.raises(HostBindingError, match="corpus"):
+        _resolve(selector(), mode="debug")
