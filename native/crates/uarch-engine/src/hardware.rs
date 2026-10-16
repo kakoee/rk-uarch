@@ -156,6 +156,19 @@ fn unit_rule(pattern: &str, path: &str) -> bool {
                 })
         })
 }
+fn coordinate_below(value:&Value,bound:f64)->bool {
+    wire::integer_text(value).is_ok_and(|n|crate::carrier::cmp_integer(&n,&format!("{bound:.0}")).is_lt())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test] fn integer_grid_comparison_does_not_round_the_coordinate() {
+        let maximum=wire::parse("36893488147419103231").unwrap();
+        assert!(coordinate_below(&maximum,36893488147419103232.0));
+        assert!(!coordinate_below(&wire::parse("36893488147419103232").unwrap(),36893488147419103232.0));
+    }
+}
 pub(crate) fn validate(spec: &mut Value) -> Result<()> {
     // Float dictionary keys are the sole key normalization in HardwareSpec.
     let volt = spec["energy"]["voltage_ratio"]
@@ -163,11 +176,15 @@ pub(crate) fn validate(spec: &mut Value) -> Result<()> {
         .ok_or_else(|| refuse("HardwareMismatch", "", "voltage mapping"))?;
     let mut normalized = serde_json::Map::new();
     for (k, v) in std::mem::take(volt) {
-        let f = k
-            .parse::<f64>()
-            .ok()
-            .filter(|f| f.is_finite() && *f > 0.0)
-            .ok_or_else(|| refuse("HardwareMismatch", "", "voltage key"))?;
+        let f =
+            wire::legacy_number(Value::String(k)).map_err(|e| refuse("HardwareMismatch", "", e))?;
+        if f <= 0.0 {
+            return Err(refuse(
+                "HardwareMismatch",
+                "",
+                "positive voltage key required",
+            ));
+        }
         let key = wire::float_text(f).map_err(|e| refuse("HardwareMismatch", "", e))?;
         if normalized.insert(key, v).is_some() {
             return Err(refuse(
@@ -273,7 +290,7 @@ pub(crate) fn validate(spec: &mut Value) -> Result<()> {
     }
     if coordinates
         .iter()
-        .any(|c| c[0].as_f64().is_none_or(|n| n >= rows) || c[1].as_f64().is_none_or(|n| n >= cols))
+        .any(|c| !coordinate_below(&c[0], rows) || !coordinate_below(&c[1], cols))
     {
         return Err(refuse("HardwareMismatch", "", "coordinate outside grid"));
     }

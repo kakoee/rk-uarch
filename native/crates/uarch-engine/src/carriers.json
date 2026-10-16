@@ -63,6 +63,46 @@
       "title": "Admission",
       "type": "object"
     },
+    "Barrier": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "barrier",
+          "title": "Kind",
+          "type": "string"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        },
+        "participant_job_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Participant Job Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "participant_job_ids",
+        "owner_id"
+      ],
+      "title": "Barrier",
+      "type": "object"
+    },
     "Buffer": {
       "additionalProperties": false,
       "properties": {
@@ -229,6 +269,36 @@
       "title": "Buffer",
       "type": "object"
     },
+    "BufferRange": {
+      "additionalProperties": false,
+      "properties": {
+        "buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Buffer Id",
+          "type": "string"
+        },
+        "offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset Bytes",
+          "type": "integer"
+        },
+        "size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "buffer_id",
+        "offset_bytes",
+        "size_bytes"
+      ],
+      "title": "BufferRange",
+      "type": "object"
+    },
     "Calibration": {
       "enum": [
         "measured",
@@ -342,6 +412,141 @@
         "op_ids"
       ],
       "title": "ComponentIdentity",
+      "type": "object"
+    },
+    "Compute": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulator_buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Accumulator Buffer Id",
+          "type": "string"
+        },
+        "accumulator_dtype": {
+          "const": "fp32",
+          "title": "Accumulator Dtype",
+          "type": "string"
+        },
+        "core_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Core Id",
+          "type": "integer"
+        },
+        "dataflow": {
+          "enum": [
+            "weight_stationary",
+            "output_stationary"
+          ],
+          "title": "Dataflow",
+          "type": "string"
+        },
+        "engine": {
+          "enum": [
+            "matrix",
+            "vector"
+          ],
+          "title": "Engine",
+          "type": "string"
+        },
+        "group_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Group Id"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "compute",
+          "title": "Kind",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "operand_buffers": {
+          "patternProperties": {
+            "\\S": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operand Buffers",
+          "type": "object"
+        },
+        "operand_dtypes": {
+          "patternProperties": {
+            "\\S": {
+              "enum": [
+                "bf16",
+                "fp16",
+                "fp32",
+                "fp8",
+                "int8"
+              ],
+              "type": "string"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operand Dtypes",
+          "type": "object"
+        },
+        "physical_extents": {
+          "$ref": "#/$defs/Extent"
+        },
+        "repeat_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Repeat Index",
+          "type": "integer"
+        },
+        "tile_extents": {
+          "$ref": "#/$defs/Extent"
+        },
+        "tile_origin": {
+          "$ref": "#/$defs/Tile"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "group_id",
+        "repeat_index",
+        "core_id",
+        "engine",
+        "tile_origin",
+        "tile_extents",
+        "physical_extents",
+        "operand_buffers",
+        "operand_dtypes",
+        "accumulator_buffer_id",
+        "accumulator_dtype",
+        "dataflow"
+      ],
+      "title": "Compute",
       "type": "object"
     },
     "Controller": {
@@ -844,6 +1049,63 @@
         "fixture_id"
       ],
       "title": "FixtureIdentity",
+      "type": "object"
+    },
+    "Fragment": {
+      "additionalProperties": false,
+      "properties": {
+        "channel_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Channel Id",
+          "type": "integer"
+        },
+        "destination_offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Destination Offset Bytes",
+          "type": "integer"
+        },
+        "payload_bytes": {
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "request_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "route_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Route Id",
+          "type": "string"
+        },
+        "source_offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Source Offset Bytes",
+          "type": "integer"
+        },
+        "transaction_bytes": {
+          "const": 256,
+          "title": "Transaction Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "request_id",
+        "source_offset_bytes",
+        "destination_offset_bytes",
+        "payload_bytes",
+        "transaction_bytes",
+        "channel_id",
+        "route_id"
+      ],
+      "title": "Fragment",
       "type": "object"
     },
     "Frequencies": {
@@ -1799,6 +2061,70 @@
       "title": "Noc",
       "type": "object"
     },
+    "NocTransfer": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/$defs/BufferRange"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "noc_transfer",
+          "title": "Kind",
+          "type": "string"
+        },
+        "multicast": {
+          "const": false,
+          "title": "Multicast",
+          "type": "boolean"
+        },
+        "op_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Op Id"
+        },
+        "payload_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "route_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Route Id",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/BufferRange"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "source",
+        "destination",
+        "payload_bytes",
+        "route_id",
+        "multicast"
+      ],
+      "title": "NocTransfer",
+      "type": "object"
+    },
     "NumericFormat": {
       "additionalProperties": false,
       "properties": {
@@ -2488,7 +2814,33 @@
         },
         "jobs": {
           "items": {
-            "$ref": "#/$defs/FixedDelay"
+            "discriminator": {
+              "mapping": {
+                "barrier": "#/$defs/Barrier",
+                "compute": "#/$defs/Compute",
+                "dma": "#/$defs/uarch_contract__mapped__Dma",
+                "fixed_delay": "#/$defs/FixedDelay",
+                "noc_transfer": "#/$defs/NocTransfer"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Compute"
+              },
+              {
+                "$ref": "#/$defs/uarch_contract__mapped__Dma"
+              },
+              {
+                "$ref": "#/$defs/NocTransfer"
+              },
+              {
+                "$ref": "#/$defs/Barrier"
+              },
+              {
+                "$ref": "#/$defs/FixedDelay"
+              }
+            ]
           },
           "minItems": 1,
           "title": "Jobs",
@@ -2601,6 +2953,75 @@
         "bytes_per_cycle",
         "max_outstanding",
         "request_bytes"
+      ],
+      "title": "Dma",
+      "type": "object"
+    },
+    "uarch_contract__mapped__Dma": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/$defs/BufferRange"
+        },
+        "direction": {
+          "enum": [
+            "read",
+            "write"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "dma_engine_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Dma Engine Id",
+          "type": "integer"
+        },
+        "fragments": {
+          "items": {
+            "$ref": "#/$defs/Fragment"
+          },
+          "minItems": 1,
+          "title": "Fragments",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "dma",
+          "title": "Kind",
+          "type": "string"
+        },
+        "op_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Op Id"
+        },
+        "source": {
+          "$ref": "#/$defs/BufferRange"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "dma_engine_id",
+        "direction",
+        "source",
+        "destination",
+        "fragments"
       ],
       "title": "Dma",
       "type": "object"

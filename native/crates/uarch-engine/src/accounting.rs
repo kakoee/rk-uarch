@@ -243,3 +243,118 @@ mod tests {
         assert_eq!(r["simulator_metrics"]["max_live_events"], 1);
     }
 }
+
+#[cfg(test)]
+mod release_witnesses {
+    use super::*;
+    use crate::{Job, Simulation};
+    #[test]
+    fn seventeen_independent_release_witnesses_on_private_mechanics() {
+        let cases: Value =
+            serde_json::from_str(include_str!("../testdata/private-release-witnesses.json"))
+                .unwrap();
+        assert_eq!(cases.as_object().unwrap().len(), 17);
+        for (case, expected) in cases.as_object().unwrap() {
+            let rows = expected["jobs"].as_array().unwrap();
+            let ids: Vec<_> = rows
+                .iter()
+                .map(|r| r[0].as_str().unwrap().to_owned())
+                .collect();
+            assert!(ids.windows(2).all(|p| p[0] < p[1]));
+            let owner_count =
+                rows.iter().map(|r| r[1].as_u64().unwrap()).max().unwrap() as usize + 1;
+            let mut jobs = Vec::new();
+            let mut releases = Vec::new();
+            for (i, row) in rows.iter().enumerate() {
+                let duration = if let Some(cycles) = row[8].as_u64() {
+                    Delay::Cycles {
+                        domain: 0,
+                        n_cycles: cycles,
+                    }
+                } else {
+                    Delay::Picoseconds(row[7].as_u64().unwrap())
+                };
+                jobs.push(Job {
+                    id: i as u32,
+                    owner: row[1].as_u64().unwrap() as u32,
+                    duration,
+                    dependencies: row[3]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .map(|p| ids.iter().position(|x| x == p.as_str().unwrap()).unwrap() as u32)
+                        .collect(),
+                });
+                releases.push((i as u32, row[2].as_u64().unwrap()));
+            }
+            // Explicit private mechanics input, no public mapped DTO/authority.
+            let v = Validated {
+                raw: json!({}),
+                jobs,
+                releases,
+                clocks: vec![1_200_000_000],
+                owner_ids: (0..owner_count as u64).collect(),
+                job_ids: ids,
+            };
+            let out = Simulation::with_releases(
+                v.clocks.clone(),
+                owner_count,
+                v.jobs.clone(),
+                v.releases.clone(),
+            )
+            .unwrap()
+            .run()
+            .unwrap();
+            assert_eq!(
+                out.duration_ps,
+                expected["duration"].as_u64().unwrap(),
+                "{case}"
+            );
+            for (j, row) in out.jobs.iter().zip(rows) {
+                assert_eq!(
+                    (j.ready_ps, j.start_ps, j.end_ps),
+                    (
+                        row[4].as_u64().unwrap(),
+                        row[5].as_u64().unwrap(),
+                        row[6].as_u64().unwrap()
+                    ),
+                    "{case}"
+                );
+            }
+            let actual = construct(&v, &out).unwrap();
+            let grants: Vec<_> = out
+                .records
+                .iter()
+                .filter(|r| r.action == Action::Grant)
+                .map(|r| v.job_ids[r.job_id as usize].clone())
+                .collect();
+            assert_eq!(json!(grants), expected["grants"], "{case}");
+            let critical: Vec<_> = actual["observations"]["critical_path"]["records"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| json!([x["kind"], x["cause_job_id"], x["start_ps"], x["end_ps"]]))
+                .collect();
+            assert_eq!(json!(critical), expected["critical"], "{case}");
+            for row in actual["busy_time_ps"].as_array().unwrap() {
+                assert_eq!(
+                    row["busy_time_ps"],
+                    expected["busy"][row["owner_id"].to_string()],
+                    "{case}"
+                );
+            }
+            for interval in actual["observations"]["critical_path"]["records"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|x| x["kind"] == "service")
+            {
+                assert_eq!(
+                    interval["predecessor_id"],
+                    expected["chosen"][interval["cause_job_id"].as_str().unwrap()],
+                    "{case}"
+                );
+            }
+        }
+    }
+}

@@ -47,3 +47,6 @@ mod accounting;
 
 pub mod protocol;
 pub use carrier::Refusal;
+
+#[cfg(test)]
+mod peer_dto_tests;

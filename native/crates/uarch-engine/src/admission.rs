@@ -101,7 +101,7 @@ fn profile(p: &mut Value) -> Result<()> {
         "TestProfileMismatch",
     )
 }
-fn point(p: &Value, owners: &[Value]) -> Result<()> {
+fn point(p: &Value, owners: &[Value], selected: bool) -> Result<()> {
     let g = &p["task_graph"];
     identity(g, "graph_hash")?;
     identity(p, "payload_hash")?;
@@ -116,20 +116,71 @@ fn point(p: &Value, owners: &[Value]) -> Result<()> {
             .collect(),
         "InvalidDependency",
     )?;
-    require(
-        array(&g["buffers"]).is_empty()
-            && array(&g["coverage"]).is_empty()
-            && array(&g["routes"]).is_empty(),
-        "UnsupportedCheckpointScope",
-        "",
-    )?;
-    let ids: BTreeSet<_> = array(&g["jobs"]).iter().map(|j| text(&j["id"])).collect();
-    for j in array(&g["jobs"]) {
+    for (section, key, code) in [
+        ("buffers", "id", "InvalidResource"),
+        ("routes", "id", "InvalidRoute"),
+        ("coverage", "job_id", "InvalidCoverage"),
+    ] {
+        sorted(
+            array(&g[section]).iter().map(|x| x[key].clone()).collect(),
+            code,
+        )?;
+    }
+    if selected {
         require(
-            j["kind"] == "fixed_delay" && owners.contains(&j["owner_id"]),
+            array(&g["buffers"]).is_empty()
+                && array(&g["coverage"]).is_empty()
+                && array(&g["routes"]).is_empty(),
             "UnsupportedCheckpointScope",
             "",
         )?;
+        for j in array(&g["jobs"]) {
+            require(
+                j["kind"] == "fixed_delay" && owners.contains(&j["owner_id"]),
+                "UnsupportedCheckpointScope",
+                "",
+            )?;
+        }
+    }
+    let ids: BTreeSet<_> = array(&g["jobs"]).iter().map(|j| text(&j["id"])).collect();
+    let computes: BTreeMap<_, _> = array(&g["jobs"])
+        .iter()
+        .filter(|j| j["kind"] == "compute")
+        .map(|j| (text(&j["id"]), j))
+        .collect();
+    require(
+        computes.keys().copied().collect::<BTreeSet<_>>()
+            == array(&g["coverage"])
+                .iter()
+                .map(|c| text(&c["job_id"]))
+                .collect(),
+        "InvalidCoverage",
+        "",
+    )?;
+    for c in array(&g["coverage"]) {
+        let j = computes[text(&c["job_id"])];
+        for key in [
+            "op_id",
+            "group_id",
+            "repeat_index",
+            "tile_origin",
+            "tile_extents",
+        ] {
+            require(c[key] == j[key], "InvalidCoverage", "")?;
+        }
+    }
+    for j in array(&g["jobs"]).iter().filter(|j| j["kind"] == "barrier") {
+        sorted(
+            array(&j["participant_job_ids"]).clone(),
+            "InvalidDependency",
+        )?;
+        let declared: BTreeSet<_> = array(&j["participant_job_ids"]).iter().map(text).collect();
+        let incoming: BTreeSet<_> = array(&g["dependencies"])
+            .iter()
+            .filter(|d| d["after"] == j["id"])
+            .map(|d| text(&d["before"]))
+            .collect();
+        require(declared == incoming, "InvalidDependency", "")?;
     }
     let mut remaining: BTreeSet<_> = ids.clone();
     let mut done = BTreeSet::new();
@@ -191,9 +242,9 @@ pub(crate) fn validate(input: &str, trust: &Trust) -> Result<Validated> {
         "MissingCoverage",
     )?;
     for item in array(&b["points"]) {
-        point(item, owner_values)?;
+        point(item, owner_values, false)?;
     }
-    point(p, owner_values)?;
+    point(p, owner_values, true)?;
     identity(&b["assumptions"], "assumptions_hash")?;
     identity(&v["assumptions"], "assumptions_hash")?;
     identity(b, "bundle_hash")?;
@@ -438,6 +489,49 @@ mod tests {
             engine: v["engine"].clone(),
         };
         (v, trust)
+    }
+    #[test]
+    #[ignore = "explicit private validation-only corpus; never calls Simulation/respond"]
+    fn frozen_full_corpus_validation_only() {
+        let root = std::path::PathBuf::from(
+            std::env::var("K2_CARRIER_CORPUS").expect("explicit private corpus"),
+        );
+        let authority: Value =
+            wire::parse(&std::fs::read_to_string(root.join("authority.json")).unwrap()).unwrap();
+        let t = Trust {
+            registry: text(&authority["trust"]["registry_hash"]).into(),
+            engine: authority["engine"].clone(),
+            profiles: array(&authority["trust"]["profiles"])
+                .iter()
+                .map(|p| {
+                    (
+                        text(&p["profile_hash"]).into(),
+                        array(&p["cases"])
+                            .iter()
+                            .map(|c| text(&c["case_id"]).into())
+                            .collect(),
+                    )
+                })
+                .collect(),
+        };
+        let index: Value =
+            wire::parse(&std::fs::read_to_string(root.join("index.json")).unwrap()).unwrap();
+        assert!(!array(&index).is_empty());
+        for name in array(&index) {
+            let bytes = std::fs::read_to_string(root.join(text(name))).unwrap();
+            let v = validate(&bytes, &t).unwrap_or_else(|e| panic!("{}: {:?}", name, e));
+            assert_eq!(wire::canonical(&v.raw).unwrap(), bytes);
+        }
+        println!(
+            "validated {} complete carriers; executed zero mapped jobs",
+            array(&index).len()
+        );
+    }
+    #[test]
+    fn unselected_point_uses_complete_graph_carrier_laws_without_executing_it() {
+        let (_, t) = fixture();
+        let text = include_str!("../testdata/synthetic-unselected-point.json");
+        validate(text, &t).unwrap();
     }
     #[test]
     fn validate_synthetic_carrier_without_execution() {

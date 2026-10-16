@@ -418,3 +418,7 @@ pub(crate) fn sourced(v: &Value) -> Result<Value, String> {
     }
     serde_json::to_value(t).map_err(|e| e.to_string())
 }
+
+pub(crate) fn legacy_number(v: Value) -> Result<f64, String> {
+    legacy_float(v).map_err(|e| e.to_string())
+}

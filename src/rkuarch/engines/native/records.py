@@ -1,4 +1,4 @@
-"""Proposed build/host metadata schemas only; no trust resolver or workload carrier."""
+"""Owned build/host record shapes. Shape validity alone confers no host authority."""
 
 from pathlib import Path
 from typing import Annotated, Literal

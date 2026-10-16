@@ -66,6 +66,8 @@ REFUSAL_CODES = frozenset(
         "HardwareMismatch",
         "AdmissionMismatch",
         "InvalidDependency",
+        "InvalidRoute",
+        "InvalidCoverage",
         "InvalidResource",
         "MissingCoverage",
         "TestProfileMismatch",
@@ -127,6 +129,7 @@ def _exchange(executable_fd: int, request: bytes, limits: Limits) -> tuple[bytes
             raise OperationalFailure("SpawnFailure") from exc
         assert process.stdin and process.stdout and process.stderr
         streams = (process.stdin, process.stdout, process.stderr)
+        read_streams = {"stdout": process.stdout, "stderr": process.stderr}
         buffers = {"stdout": bytearray(), "stderr": bytearray()}
         caps = {"stdout": limits.stdout_bytes, "stderr": limits.stderr_bytes}
         deadline = time.monotonic() + limits.timeout_s
@@ -153,14 +156,14 @@ def _exchange(executable_fd: int, request: bytes, limits: Limits) -> tuple[bytes
                                 sent = len(request)
                             if sent == len(request):
                                 selector.unregister(key.fileobj)
-                                key.fileobj.close()
+                                process.stdin.close()
                         else:
                             chunk = os.read(
                                 key.fd, min(65536, caps[key.data] - len(buffers[key.data]) + 1)
                             )
                             if not chunk:
                                 selector.unregister(key.fileobj)
-                                key.fileobj.close()
+                                read_streams[key.data].close()
                             else:
                                 buffers[key.data].extend(chunk)
                                 if len(buffers[key.data]) > caps[key.data]:

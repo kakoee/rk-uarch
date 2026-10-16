@@ -22,7 +22,7 @@ fn field(path: &str, key: &str) -> String {
 fn invalid(path: &str, message: impl Into<String>) -> Refusal {
     refuse("InvalidCarrier", path, message)
 }
-fn cmp_integer(a: &str, b: &str) -> std::cmp::Ordering {
+pub(crate) fn cmp_integer(a: &str, b: &str) -> std::cmp::Ordering {
     let an = a.starts_with('-');
     let bn = b.starts_with('-');
     match (an, bn) {
@@ -72,9 +72,16 @@ fn shape(v: &mut Value, s: &Value, root: &Value, path: &str) -> Result<()> {
         return Err(invalid(path, "no carrier variant matches"));
     }
     if let Some(c) = s.get("const") {
+        if path.ends_with("/transaction_bytes")
+            && c == &Value::from(256)
+            && v.as_f64() == Some(256.0)
+        {
+            *v = Value::from(256);
+        }
+
         // Literal boolean in CoreClockDomain follows installed Pydantic literal:
         // JSON integer 1 is normalized to true, not an arbitrary truthy value.
-        if c == &Value::Bool(true) && *v == Value::from(1) {
+        if c == &Value::Bool(true) && v.as_f64() == Some(1.0) {
             *v = Value::Bool(true);
         }
         if v != c {
@@ -125,13 +132,15 @@ fn shape(v: &mut Value, s: &Value, root: &Value, path: &str) -> Result<()> {
         }
         Some("integer") => {
             // The only admitted non-strict integer fields are hardware coordinates.
-            if path.contains("/attach/") && v.is_number() {
+            if path.contains("/attach/")
+                && v.as_number()
+                    .is_some_and(|n| n.to_string().contains(['.', 'e', 'E']))
+            {
                 let f = v
                     .as_f64()
-                    .ok_or_else(|| invalid(path, "coordinate range"))?;
-                if f.fract() == 0.0 && f >= 0.0 && f < 18446744073709551616.0 {
-                    *v = Value::from(f as u64);
-                }
+                    .filter(|n| n.is_finite() && n.fract() == 0.0 && *n >= 0.0)
+                    .ok_or_else(|| invalid(path, "integral coordinate required"))?;
+                *v = wire::parse(&format!("{f:.0}")).map_err(|e| invalid(path, e))?;
             }
             let token = wire::integer_text(v).map_err(|e| invalid(path, e))?;
             for (key, strict, lower) in [
@@ -264,6 +273,38 @@ fn shape(v: &mut Value, s: &Value, root: &Value, path: &str) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn field_local_hardware_normalization() {
+        let root = serde_json::json!({});
+        let mut coordinate = wire::parse("9007199254740993").unwrap();
+        shape(
+            &mut coordinate,
+            &serde_json::json!({"type":"integer","minimum":0}),
+            &root,
+            "/memory/controllers/0/attach/0",
+        )
+        .unwrap();
+        assert_eq!(coordinate.to_string(), "9007199254740993");
+        let mut core_bool = serde_json::json!(1.0);
+        shape(
+            &mut core_bool,
+            &serde_json::json!({"type":"boolean","const":true}),
+            &root,
+            "/clock_domains/core/scales_with_core",
+        )
+        .unwrap();
+        assert_eq!(core_bool, serde_json::json!(true));
+        let mut numeric_leaf = serde_json::json!(1.0);
+        assert!(
+            shape(
+                &mut numeric_leaf,
+                &serde_json::json!({"type":"integer"}),
+                &root,
+                "/hardware/leaves/0/value"
+            )
+            .is_err()
+        );
+    }
     #[test]
     fn exact_integer_bounds_without_float() {
         assert!(cmp_integer("18446744073709551616", "18446744073709551615").is_gt());

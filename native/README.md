@@ -1,9 +1,9 @@
 # native — our event-driven engine (Rust)
 
 Spec: docs/build-spec.md §2.8 (and §2.9 for parallel execution). A Cargo workspace, built in
-the accepted engine container; `make native`, `make native-test` build/test the delivered
-`uarch_engine` library target in package `uarch-engine`. This is private K1, not a public
-binary or EngineJob/EngineResult subprocess boundary; those remain K2.
+the accepted engine container. Package `uarch-engine` now contains the `uarch_engine`
+library and the `uarch-engine` fixed-delay JSON binary under the approved K2 construction
+milestone. Actual public execution remains gated on an independently accepted human host record.
 
 ## Rules
 - Time is u64 picoseconds; next_edge() is the only time↔cycle conversion. Clocks are
@@ -30,23 +30,28 @@ binary or EngineJob/EngineResult subprocess boundary; those remain K2.
 - No HashMap or HashSet on any path that reaches output (clippy disallowed-types).
 - `unsafe` only in crates/uarch-ramulator-sys, the C++ bridge to Ramulator 2; every other
   crate has #![forbid(unsafe_code)].
-- Dependencies: serde, serde_json, proptest (dev); cxx and Ramulator 2 (from U7); loom (dev,
-  from U9). Nothing else without an ADR; cargo-deny checks every licence.
-- K2 will bind its public serde types to the installed engine schema. K1 serializes only
-  private observation bytes and makes no public schema-conformance claim.
+- Dependencies: exactly accepted serde, serde_json, sha2 (`force-soft`), proptest (dev)
+  and their preserved C1 lock closure. No opportunistic updates; cargo-deny checks licences.
+- K2 validates complete admitted carriers and joins independently; the owned carrier snapshot
+  comes from installed M shapes. Private mechanics observations are not public qualification.
 - Determinism before speed. A speed-up that changes bytes is a bug.
 
 ## Delivery status and order
 
-Private K1 mechanics are implemented in the `uarch-engine` library target. No public
-binary or JSON input is released; those remain K2. Private fixtures compile only under
-`cfg(test)`. See [K1 handoff](../docs/reviews/U4-A-K1-v1/README.md) for actual evidence
-and historical evidence. Stage2 corrections remain an unapplied proposal pending the
-same reviewer’s Stage3 adjudication; U0024 separates local checks from remote qualification. U0005 selects one progressive production engine:
-U3 design → U4a M plus K1, then K2/bounded models → U4b reference-suite readiness.
-U6 adds qualification at representative mesh points; U7 adds detail and full product tables. Independent mathematics and behavioral tests accompany each
-stage. No complete fork or second Python contention engine is a prerequisite. Optional
-reference matches are scoped verification; only applicable silicon evidence validates.
+The construction source and interfaces are in
+[the owned K2 package](../docs/reviews/U4-A-K2-construction-v1/peer-interface.md).
+Normal library/binary builds require an explicitly generated identity file in a private
+source export; an unbound checkout intentionally has no fallback engine identity.
+`native/tools/freeze_inputs.py` verifies source bytes against an explicit published commit.
+`native/tools/generate_identity.py` takes checked BuildInputs/ToolInputs/BuildTrust files and
+writes only the named identity output into that private export before Cargo is invoked.
+No generated identity or binary belongs in the live source tree. The exact build commands,
+image/cache/flags and two mode identities are recorded in the owned build handoff.
+
+Library unit tests operate on private mechanics and explicit synthetic validation controls;
+the public tests in `tests/native/test_u4_a_k2_public.py` are authored but not invoked during
+construction. No component model, final host authority, qualification or image distribution
+is released by a successful local build. Historical K1/C1/C2 evidence remains unchanged.
 
 U0023 separates K1 internal mechanics from K2 public schema wiring and correctness CI
 from controlled-host performance. U5/U8 silicon success is not a table-production gate.

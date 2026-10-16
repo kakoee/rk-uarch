@@ -108,7 +108,10 @@ class AcceptedHostBinding:
 
     def require_job(self, job: MappedEngineJob) -> None:
         _require(job.job_hash in self.jobs, "job outside exact human first-use inventory")
-        _require(job.profile == self.profiles[job.admission.profile_hash], "profile bytes changed")
+        profile_hash = job.admission.profile_hash
+        _require(profile_hash is not None, "profile required")
+        assert profile_hash is not None
+        _require(job.profile == self.profiles[profile_hash], "profile bytes changed")
 
     @contextlib.contextmanager
     def open_executable(self) -> Iterator[int]:

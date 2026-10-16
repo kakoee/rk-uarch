@@ -5,6 +5,7 @@ use crate::{
     wire,
 };
 use serde_json::{Value, json};
+#[cfg(not(test))]
 use std::collections::{BTreeMap, BTreeSet};
 pub const MAX_INPUT_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_OUTPUT_BYTES: usize = 64 * 1024 * 1024;

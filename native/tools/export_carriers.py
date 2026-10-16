@@ -21,7 +21,6 @@ schema = MappedEngineJob.model_json_schema()
 for name in ("MappedBundle",):
     schema["$defs"][name]["properties"]["source"] = {"type": "null"}
     schema["$defs"][name]["properties"]["scope"] = {"$ref": "#/$defs/KernelScope"}
-schema["$defs"]["TaskGraph"]["properties"]["jobs"]["items"] = {"$ref": "#/$defs/FixedDelay"}
 
 
 # Prune unreachable definitions, leaving every field of the admitted closure.
