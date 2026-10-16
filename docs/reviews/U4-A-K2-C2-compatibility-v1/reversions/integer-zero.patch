@@ -1,0 +1,11 @@
+--- corrected/probe.rs
++++ integer-zero/probe.rs
+@@ -424,7 +424,7 @@
+     let s = std::str::from_utf8(&data).map_err(|e| fail("utf8", e.to_string()))?;
+     // Only typed integer-bearing carriers normalize the lexical integer -0.
+     // The scanner never rewrites text inside JSON strings or decimal/exponent tokens.
+-    let normalized = normalize_integer_zero(s);
++    let normalized = s.to_owned();
+     let s = if matches!(op, "u128" | "rational" | "leaf") {
+         normalized.as_str()
+     } else {

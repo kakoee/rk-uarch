@@ -1,0 +1,10 @@
+--- corrected/probe.rs
++++ legacy-float/probe.rs
+@@ -273,7 +273,6 @@
+ #[derive(Serialize, Deserialize)]
+ #[serde(deny_unknown_fields)]
+ struct Sourced {
+-    #[serde(deserialize_with = "legacy_float")]
+     value: f64,
+     unit: String,
+     #[serde(default)]

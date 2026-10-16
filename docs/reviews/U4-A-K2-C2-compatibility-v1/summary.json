@@ -1,0 +1,84 @@
+{
+  "status": "bounded standalone compatibility cases pass; coordinator/B review pending",
+  "datasets": {
+    "A-extension.jsonl": {
+      "sha256": "cf956471e48b5a4001cfe1c321c5fe1874a0da980d005bcde5f738e1c1f2dfa9",
+      "count": 139
+    },
+    "B-extension.jsonl": {
+      "sha256": "9d687e0b3823b0185f8892f4ec6637cf17f3b0d07e576026e9eec6c61c7773cf",
+      "count": 52
+    },
+    "supplement.jsonl": {
+      "sha256": "097fb324e704e49d0c129984cef713e2b961520e81f8c8b9f4885222a91a9485",
+      "count": 3
+    },
+    "vectors.jsonl": {
+      "sha256": "8dae6586c54462debbf1dad28ff963099a1a89d7b2daa213ba2908c7e46c7e9e",
+      "count": 20965
+    }
+  },
+  "modes": [
+    "debug",
+    "release"
+  ],
+  "corrected_results_identical_between_modes": true,
+  "unit_names": {
+    "debug": [
+      "test compatibility_tests::lexical_integer_zero_only",
+      "test compatibility_tests::explicit_leaf_rational_and_unbounded_integer",
+      "test compatibility_tests::marker_guard_precedes_leaf_dispatch",
+      "test tests::duplicate_refusal",
+      "test compatibility_tests::legacy_float_local_compatibility",
+      "test tests::huge_integer_exact",
+      "test compatibility_tests::rational_refusal_conditions",
+      "test tests::marker_refusal",
+      "test compatibility_tests::strict_float_and_leaf_stay_distinct",
+      "test tests::float_conventions",
+      "test tests::sha_vectors",
+      "test tests::strict_integer_tokens"
+    ],
+    "release": [
+      "test compatibility_tests::explicit_leaf_rational_and_unbounded_integer",
+      "test compatibility_tests::legacy_float_local_compatibility",
+      "test compatibility_tests::lexical_integer_zero_only",
+      "test compatibility_tests::marker_guard_precedes_leaf_dispatch",
+      "test compatibility_tests::rational_refusal_conditions",
+      "test tests::duplicate_refusal",
+      "test compatibility_tests::strict_float_and_leaf_stay_distinct",
+      "test tests::huge_integer_exact",
+      "test tests::float_conventions",
+      "test tests::marker_refusal",
+      "test tests::sha_vectors",
+      "test tests::strict_integer_tokens"
+    ]
+  },
+  "binary_sha256": {
+    "debug": "18139fc5483fbcd9dbf42a6f8af66db2f7ca7878e84ca2c8aadd93bedc6d62a1",
+    "release": "6c9d7f650247083b1e513e93e9b5874287d2e93891e67f41aa4a1bee7c6234dc"
+  },
+  "source_sha256": "90d7b36df0aac589ff01f360fe294641586ac1406651b697bb4e97068dc84695",
+  "observed_baseline_status_value_failures": {
+    "original": 10,
+    "supplement": 0,
+    "B": 14,
+    "A_extension": 47
+  },
+  "corrected_mismatches": 0,
+  "host_negative_controls": 27,
+  "native_reversion_mismatches_per_mode": {
+    "leaf": 50,
+    "integer-zero": 8,
+    "legacy-float": 80
+  },
+  "compiler_link_records": 556,
+  "build_directories": 176,
+  "depinfo_files": 384,
+  "exhaustive_reads": false,
+  "SIMD_investigation_resumed": false,
+  "flags_unchanged": true,
+  "public_K2": false,
+  "C3": false,
+  "qualification": false,
+  "U0024": "deferred"
+}
