@@ -78,20 +78,20 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
     )
     check_credits(list(requests.values()), val(core["dma"]["max_outstanding"]))
     phase_specs: dict[tuple[str, str | None, str], tuple[int | None, str | None]] = {}
-    sequences = []
+    sequences: list[list[tuple[str, str | None, str]]] = []
     for task in tasks.values():
         tid = task["id"]
         if task["kind"] == "compute":
             d = task["tile_extents"]
             rate = val(core["matrix_engine"]["operand_bytes_per_cycle"])
-            parts = [
+            compute_parts = [
                 ("compute_overhead", 32),
                 ("compute_stage", ceil(Fraction(2 * d["M"] * d["K"] + 2 * d["K"] * d["N"], rate))),
                 ("compute_wave", 510 + d["M"]),
                 ("compute_drain", ceil(Fraction(2 * d["M"] * d["N"], rate))),
             ]
-            sequences.append([(tid, None, p) for p, _ in parts])
-            phase_specs.update({(tid, None, p): (n, "core") for p, n in parts})
+            sequences.append([(tid, None, p) for p, _ in compute_parts])
+            phase_specs.update({(tid, None, p): (n, "core") for p, n in compute_parts})
         elif task["kind"] == "barrier":
             phase_specs[tid, None, "barrier"] = (32, "noc")
             sequences.append([(tid, None, "barrier")])
@@ -155,6 +155,9 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
             continue
         need(align is not None, "missing receiving alignment")
         assert align is not None and cycles is not None
+        need(a["ready_ps"] == align["end_ps"], "service readiness after alignment")
+        if key[2] not in ("read_port", "write_port"):
+            need(align["start_ps"] == align["ready_ps"], "uncontended alignment grant")
         hz = j["freq_hz"][domain]
         need(
             align["end_ps"] == edge_after(hz, align["start_ps"], 0) == a["start_ps"],
@@ -226,6 +229,14 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
                 latency = services[a["job_id"], a["request_id"], "dram_latency"]["end_ps"]
                 need(lo == max(Fraction(latency), previous), "rational channel carry/readiness")
                 previous = hi
+    for key, a in aligns.items():
+        if key[2] in ("read_port", "write_port"):
+            prior = [
+                x["end_ps"]
+                for x in groups[a["owner_id"]]
+                if x["end_ps"] <= a["start_ps"] and x["activity_id"] != services[key]["activity_id"]
+            ]
+            need(a["start_ps"] == max(a["ready_ps"], max(prior, default=0)), "port eligible grant")
     for busy in r["busy_time_ps"]:
         need(
             busy["busy_time_ps"]
@@ -364,13 +375,13 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
                 0,
             ),
         ]:
-            key = req, boundary
-            wanted.add(key)
+            boundary_key = req, boundary
+            wanted.add(boundary_key)
             firstkey = tid, req, phases[0]
             lastkey = tid, req, phases[-1]
             begin = aligns.get(firstkey, services[firstkey])["ready_ps"]
             end = services[lastkey]["end_ps"]
-            t = observed_transfers.get(key)
+            t = observed_transfers.get(boundary_key)
             need(
                 t is not None
                 and (
@@ -386,10 +397,10 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
     for task in tasks.values():
         if task["kind"] == "noc_transfer":
             req = task["id"]
-            key = req, "unicast_noc"
-            wanted.add(key)
+            boundary_key = req, "unicast_noc"
+            wanted.add(boundary_key)
             a = services[req, req, "unicast_noc"]
-            t = observed_transfers.get(key)
+            t = observed_transfers.get(boundary_key)
             need(
                 t is not None
                 and (t["enter_ps"], t["leave_ps"], t["payload_bytes"], t["transaction_bytes"])
@@ -468,6 +479,41 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
     check_allocations(
         allocations, capacities, {k: v["end_ps"] for k, v in jobs.items()}, r["duration_ps"]
     )
+    for direction in ("read", "write"):
+        for quantity in ("payload", "transaction"):
+            need(
+                r["traffic_counts"][direction + "_" + quantity + "_bytes"]
+                == sum(
+                    x[quantity + "_bytes"] for x in requests.values() if x["direction"] == direction
+                ),
+                "completed traffic totals",
+            )
+    need(
+        r["simulator_metrics"]["event_count"] == len(obs["events"]["records"])
+        and r["simulator_metrics"]["completed_job_count"] == len(jobs),
+        "observed metric inventory",
+    )
+    per_op = unique(r["per_op"], "op_id")
+    op_ids = {t["op_id"] for t in tasks.values() if t["kind"] == "compute"}
+    need(per_op.keys() == op_ids, "per-op inventory")
+    for op in op_ids:
+        observed_jobs = [x for x in jobs.values() if x["op_id"] == op]
+        need(
+            per_op[op]["counts"]["matrix_ops"] == sum(x["useful_matrix_ops"] for x in observed_jobs)
+            and per_op[op]["work_counts"]["issued_matrix_ops"]
+            == sum(x["issued_matrix_ops"] for x in observed_jobs),
+            "per-op work",
+        )
+    for core_id in {t["core_id"] for t in tasks.values() if t["kind"] == "compute"}:
+        spans = sorted(
+            (jobs[t["id"]]["start_ps"], jobs[t["id"]]["end_ps"])
+            for t in tasks.values()
+            if t["kind"] == "compute" and t["core_id"] == core_id
+        )
+        need(
+            all(a[1] <= b[0] for a, b in zip(spans, spans[1:], strict=False)),
+            "whole matrix tile ownership",
+        )
     need(r["unrepresented"] == expected["unrepresented"], "unrepresented paths")
     need(
         r["u_c0_duration_ps"] is None
