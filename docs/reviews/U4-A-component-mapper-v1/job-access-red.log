@@ -1,0 +1,96 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_job_missing_operand_access_is_refusal __________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_job_missing_operand_access_is_refusal(baseline: MappedBundle) -> None:
+        b = bundle(baseline, (op(baseline),))
+        engine = NativeEngineIdentity.model_validate(
+            json.loads((FIXTURES / 'component-job.json').read_bytes())['engine'])
+        auth = dict(invocation='production', trusted_registry_hash=registry()['registry_hash'],
+                    trusted_profile_hash=None, expected_engine=engine)
+        j = prepare_component_job(b, point_hash=b.points[0].payload_hash, registry=registry(),
+                                  profile=None, **auth)
+        raw = j.model_dump(mode='json')
+        del raw['workload_closure']['scope']['ops'][0]['operand_access']['X']
+        seal(raw['workload_closure'])
+        raw['bundle_hash'] = raw['workload_closure']['bundle_hash']
+        raw['job_hash'] = content_hash(raw,exclude=('job_hash',))
+        with pytest.raises(ValueError,match='InvalidCoverage.*operand access'):
+>           loads_component_job(canonical_json(raw),**auth)
+
+tests/unit/test_u4_a_component_mapper.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/workload/mapped.py:181: in loads_component_job
+    job = validate_job(
+contract/uarch_contract/mapped.py:1993: in validate_job
+    job = MappedEngineJob.model_validate(value)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+contract/uarch_contract/mapped.py:778: in closure
+    admit(
+contract/uarch_contract/mapped.py:1633: in admit
+    validate_resources(b, p)
+contract/uarch_contract/mapped.py:1764: in validate_resources
+    validate_prepared_op(op)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+op = PreparedOp(depends_on=(), embedding_local_tokens=None, fusion='none', id='g0', kv_access=None, operand_access={'W': 'r...ions=('M', 'N'), layout='contiguous', block_size_tokens=None)}, reduction_axes=('K',)), weight_copies=1, work_repeat=1)
+
+    def validate_prepared_op(op: PreparedOp) -> PreparedOp:
+        """Enforce the accepted per-operator operand axes, reductions and access modes."""
+        from .comparison import _refuse
+    
+        name = str(op.spec.operator)
+        projections = {
+            "q_projection",
+            "k_projection",
+            "v_projection",
+            "output_projection",
+            "ffn_up",
+            "ffn_gate",
+            "ffn_down",
+            "lm_head",
+        }
+        axes: Mapping[str, tuple[str, ...]]
+        reductions: tuple[str, ...]
+        if name in projections:
+            axes, reductions = {"X": ("M", "K"), "W": ("K", "N"), "Y": ("M", "N")}, ("K",)
+        elif name == "normalization":
+            axes, reductions = {"X": ("M", "D"), "Y": ("M", "D"), "W": ("D",)}, ("D",)
+        elif name == "residual_addition":
+            axes, reductions = {n: ("M", "D") for n in ("X", "R", "Y")}, ()
+        elif name == "activation":
+            axes, reductions = {n: ("M", "D") for n in op.spec.operands}, ()
+            if set(axes) not in ({"X", "Y"}, {"X", "G", "Y"}):
+                _refuse("InvalidPreparedGraph", op.id + "/activation operands")
+        elif name == "embedding":
+            axes, reductions = {"W": ("V", "D"), "Y": ("M", "D")}, ()
+        elif name == "kv_write":
+            axes, reductions = {n: ("B", "Hkv", "S", "D") for n in ("K", "V", "K_cache", "V_cache")}, ()
+        else:
+            q, kv, scores = ("B", "Hq", "S", "D"), ("B", "Hkv", "T", "D"), ("B", "Hq", "S", "T")
+            axes, reductions = {
+                "attention_fused": ({"Q": q, "K": kv, "V": kv, "O": q}, ("T", "D")),
+                "qk_score": ({"Q": q, "K": kv, "scores": scores}, ("D",)),
+                "softmax": ({"scores": scores, "probs": scores}, ("T",)),
+                "av_application": ({"probs": scores, "V": kv, "O": q}, ("T",)),
+            }[name]
+        if set(op.spec.operands) != set(axes) or tuple(op.spec.reduction_axes) != reductions:
+            _refuse("InvalidPreparedGraph", op.id + "/operands/reduction_axes")
+        for key, dimensions in axes.items():
+            if tuple(op.spec.operands[key].dimensions) != dimensions:
+                _refuse("InvalidPreparedGraph", op.id + "/" + key + "/dimensions")
+            writes = {"Y", "O", "K_cache", "V_cache"}
+            if name == "qk_score":
+                writes.add("scores")
+            if name == "softmax":
+                writes.add("probs")
+>           if op.operand_access[key] != ("write" if key in writes else "read"):
+               ^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'X'
+
+contract/uarch_contract/prepared.py:401: KeyError
+=========================== short test summary info ============================
+FAILED tests/unit/test_u4_a_component_mapper.py::test_job_missing_operand_access_is_refusal
+1 failed, 57 deselected in 0.41s

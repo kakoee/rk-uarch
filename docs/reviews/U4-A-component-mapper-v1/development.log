@@ -1,0 +1,822 @@
+F......F.........FFFFFFFFFFFFF                                           [100%]
+=================================== FAILURES ===================================
+_______________________ test_small_literal_and_no_timing _______________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_small_literal_and_no_timing(baseline: MappedBundle) -> None:
+        b = bundle(baseline, (op(baseline),))
+        g = b.points[0].task_graph
+        sr = [
+            (x.operand, x.offset_bytes, x.size_bytes, x.slot_index, x.bank)
+            for x in g.buffers
+            if x.space == "sram"
+        ]
+        assert sr == [
+            ("X", 0, 30, 0, 0),
+            ("W", 256, 70, 0, 0),
+            ("Y", 512, 42, 0, 0),
+            (None, 768, 768, 1, 0),
+        ]
+        assert [(x.offset_bytes, x.size_bytes) for x in g.buffers if x.space == "hbm"] == [
+            (0, 30),
+            (256, 70),
+            (512, 42),
+        ]
+        assert [(x.offset_bytes, x.size_bytes) for x in g.buffers if x.space == "accumulator"] == [
+            (0, 84)
+        ]
+        compute = next(x for x in g.jobs if isinstance(x, Compute))
+        assert compute.tile_extents.model_dump() == {"M": 3, "K": 5, "N": 7}
+        assert compute.physical_extents.model_dump() == {"M": 3, "K": 256, "N": 256}
+        assert len(g.coverage) == 1
+        dma = [x for x in g.jobs if isinstance(x, Dma)]
+        assert [
+            (x.direction, [(f.channel_id, f.payload_bytes, f.transaction_bytes) for f in x.fragments])
+            for x in dma
+        ] == [("read", [(0, 30, 256)]), ("read", [(1, 70, 256)]), ("write", [(2, 42, 256)])]
+        edges = {(x.before, x.after) for x in g.dependencies}
+        assert edges == {(dma[0].id, compute.id), (dma[1].id, compute.id), (compute.id, dma[2].id)}
+        assert "duration_ps" not in canonical_json(b)
+>       assert b == loads_component_bundle(canonical_json(b), **anchors())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+___________________ test_determinism_order_and_dependencies ____________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_determinism_order_and_dependencies(baseline: MappedBundle) -> None:
+        a, z = op(baseline, name="a", dependencies=("z",)), op(baseline, name="z")
+        g = map_component((a, z), baseline.hardware_spec)
+        assert canonical_json(g) == canonical_json(map_component((z, a), baseline.hardware_spec))
+        b = bundle(baseline, (a, z))
+>       assert b == loads_component_bundle(canonical_json(b), **anchors())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+______________________ test_resident_explicit_and_no_dma _______________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_resident_explicit_and_no_dma(baseline: MappedBundle) -> None:
+        g = map_component((op(baseline),), baseline.hardware_spec, initial_state="fixture_resident")
+        assert len(g.jobs) == 1 and g.jobs[0].kind == "compute"
+        assert not g.routes and not any(x.space == "hbm" for x in g.buffers)
+        assert [x.operand for x in g.buffers if x.initial_residency == "preloaded"] == ["X", "W"]
+        # Merely relabelling production admission is not permission for resident use.
+        b = bundle(baseline, (op(baseline),), "fixture_resident")
+        with pytest.raises(ValueError, match="UnsupportedInitialState"):
+>           loads_component_bundle(canonical_json(b), **anchors())
+
+tests/unit/test_u4_a_component_mapper.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+_______________ test_rehashed_semantic_guards[bank-InvalidBank] ________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'bank', reason = 'InvalidBank'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+___________ test_rehashed_semantic_guards[alignment-InvalidResource] ___________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'alignment', reason = 'InvalidResource'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+_____________ test_rehashed_semantic_guards[alias-LiveBufferAlias] _____________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'alias', reason = 'LiveBufferAlias'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+_________ test_rehashed_semantic_guards[capacity-SramCapacityExceeded] _________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'capacity', reason = 'SramCapacityExceeded'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+___________ test_rehashed_semantic_guards[coverage-InvalidCoverage] ____________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'coverage', reason = 'InvalidCoverage'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+____________ test_rehashed_semantic_guards[cycle-InvalidDependency] ____________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'cycle', reason = 'InvalidDependency'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+____________ test_rehashed_semantic_guards[channel-InvalidTransfer] ____________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'channel', reason = 'InvalidTransfer'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+___________ test_rehashed_semantic_guards[rank-UnsupportedRankScope] ___________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'rank', reason = 'UnsupportedRankScope'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+________ test_rehashed_semantic_guards[precision-UnsupportedPrecision] _________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'precision', reason = 'UnsupportedPrecision'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+_________ test_rehashed_semantic_guards[hardware-UnsupportedHardware] __________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+mutation = 'hardware', reason = 'UnsupportedHardware'
+
+    @pytest.mark.parametrize(
+        "mutation,reason",
+        [
+            ("bank", "InvalidBank"),
+            ("alignment", "InvalidResource"),
+            ("alias", "LiveBufferAlias"),
+            ("capacity", "SramCapacityExceeded"),
+            ("coverage", "InvalidCoverage"),
+            ("cycle", "InvalidDependency"),
+            ("channel", "InvalidTransfer"),
+            ("rank", "UnsupportedRankScope"),
+            ("precision", "UnsupportedPrecision"),
+            ("hardware", "UnsupportedHardware"),
+        ],
+    )
+    def test_rehashed_semantic_guards(baseline: MappedBundle, mutation: str, reason: str) -> None:
+        good = bundle(baseline, (op(baseline),))
+>       assert loads_component_bundle(canonical_json(good), **anchors()) == good
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_u4_a_component_mapper.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+____________________ test_stale_and_changed_valid_placement ____________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_stale_and_changed_valid_placement(baseline: MappedBundle) -> None:
+        b = bundle(baseline, (op(baseline),))
+        raw = b.model_dump(mode="json")
+        sr = next(x for x in raw["points"][0]["task_graph"]["buffers"] if x["space"] == "sram")
+        sr.update(offset_bytes=524288, bank=1)
+        with pytest.raises(ValueError, match="ContentHashMismatch"):
+>           loads_component_bundle(canonical_json(raw), **anchors())
+
+tests/unit/test_u4_a_component_mapper.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...us"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}'
+invocation = 'production'
+registry = {'format': 'uarch-native-test-registry/1', 'registry_hash': 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2', 'semantics_revision': 'U0011-stage2/1', 'test_only_specs': []}
+profile = None
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+
+    def loads_component_bundle(
+        data: str | bytes,
+        *,
+        invocation: str,
+        registry: object,
+        profile: object | None,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+    ) -> MappedBundle:
+        """Admit every saved component point under installed B rules, without producers.
+    
+        Registry/profile content and independently selected trust hashes are required
+        separately; no local file, environment, self-hash or synthetic anchor is authority.
+        """
+        value = strict_json_loads(data)
+>       bundle = MappedBundle.model_validate(value)
+                 ^^^^^^^^^^^^
+E       NameError: name 'MappedBundle' is not defined
+
+src/rkuarch/workload/mapped.py:96: NameError
+__________________________ test_saved_bundle_and_job ___________________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-67/test_saved_bundle_and_job0')
+
+    def test_saved_bundle_and_job(baseline: MappedBundle, tmp_path: Path) -> None:
+        b = bundle(baseline, (op(baseline),))
+        engine = NativeEngineIdentity.model_validate(
+            json.loads((FIXTURES / "component-job.json").read_bytes())["engine"]
+        )
+        job_args = dict(
+            invocation="production",
+            trusted_registry_hash=registry()["registry_hash"],
+            trusted_profile_hash=None,
+            expected_engine=engine,
+        )
+>       j = prepare_component_job(
+            b, point_hash=b.points[0].payload_hash, registry=registry(), profile=None, **job_args
+        )
+
+tests/unit/test_u4_a_component_mapper.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/workload/component.py:148: in prepare_component_job
+    return loads_component_job(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = '{"admission":{"case_id":null,"checkpoint":"B","eligibility":"component_only","invocation":"production","profile_hash"...s"}},"operator":"q_projection","reduction_axes":["K"]},"weight_copies":1,"work_repeat":1}],"repeat":1},"source":null}}'
+invocation = 'production'
+trusted_registry_hash = 'sha256:86be9e61f32c89b52baa09785f2e3f98320bb185ba6cbf6793bbafd930a58ee2'
+trusted_profile_hash = None
+expected_engine = NativeEngineIdentity(name='native', version='native-stage/1', implementation_hash='sha256:b9f7c89966f3f9100bdd09425fb4...b9ec4b7a6066c9a6fd467c'), compiler_lock_hash='sha256:8c1a06c0379d776bed5323da4f517a9d7d8a4cc7cef08ac65553940f1ee0ac23')
+
+    def loads_component_job(
+        data: str | bytes,
+        *,
+        invocation: str,
+        trusted_registry_hash: str,
+        trusted_profile_hash: str | None,
+        expected_engine: NativeEngineIdentity,
+    ) -> MappedEngineJob:
+        """Replay input only. Public component result replay waits for stage B execution."""
+        job = validate_job(
+            strict_json_loads(data),
+            invocation=invocation,
+            checkpoint="B",
+            trusted_registry_hash=trusted_registry_hash,
+            trusted_profile_hash=trusted_profile_hash,
+            expected_engine=expected_engine,
+        )
+>       require(job.workload_closure.scope.kind == "component", "UnsupportedWorkloadScope")
+        ^^^^^^^
+E       NameError: name 'require' is not defined
+
+src/rkuarch/workload/mapped.py:169: NameError
+=========================== short test summary info ============================
+FAILED tests/unit/test_u4_a_component_mapper.py::test_small_literal_and_no_timing
+FAILED tests/unit/test_u4_a_component_mapper.py::test_determinism_order_and_dependencies
+FAILED tests/unit/test_u4_a_component_mapper.py::test_resident_explicit_and_no_dma
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[bank-InvalidBank]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[alignment-InvalidResource]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[alias-LiveBufferAlias]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[capacity-SramCapacityExceeded]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[coverage-InvalidCoverage]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[cycle-InvalidDependency]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[channel-InvalidTransfer]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[rank-UnsupportedRankScope]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[precision-UnsupportedPrecision]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_rehashed_semantic_guards[hardware-UnsupportedHardware]
+FAILED tests/unit/test_u4_a_component_mapper.py::test_stale_and_changed_valid_placement
+FAILED tests/unit/test_u4_a_component_mapper.py::test_saved_bundle_and_job - ...
+15 failed, 15 passed in 4.96s

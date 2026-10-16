@@ -1,0 +1,56 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_incomplete_input_transfer_refused ____________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_incomplete_input_transfer_refused(baseline: MappedBundle) -> None:
+        b = bundle(baseline, (op(baseline),))
+        raw = b.model_dump(mode='json')
+        dma = next(j for j in raw['points'][0]['task_graph']['jobs'] if j['kind'] == 'dma')
+        dma['source']['size_bytes'] = dma['destination']['size_bytes'] = 2
+        dma['fragments'][0]['payload_bytes'] = 2
+        seal(raw)
+>       with pytest.raises(ValueError, match='InvalidTransfer.*complete operand'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_u4_a_component_mapper.py:327: Failed
+______________________ test_missing_output_write_refused _______________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_missing_output_write_refused(baseline: MappedBundle) -> None:
+        b = bundle(baseline, (op(baseline),))
+        raw = b.model_dump(mode='json')
+        g = raw['points'][0]['task_graph']
+        write = next(j for j in g['jobs'] if j['kind'] == 'dma' and j['direction'] == 'write')
+        g['jobs'].remove(write)
+        g['buffers'] = [x for x in g['buffers'] if x['id'] != write['destination']['buffer_id']]
+        next(x for x in g['buffers'] if x['id'] == write['source']['buffer_id'])['final_consumer_ids'] = []
+        g['dependencies'] = [e for e in g['dependencies'] if e['after'] != write['id']]
+        seal(raw)
+>       with pytest.raises(ValueError, match='InvalidTransfer.*complete output'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_u4_a_component_mapper.py:341: Failed
+_______________________ test_barrier_owner_join_refused ________________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_barrier_owner_join_refused(baseline: MappedBundle) -> None:
+        b = bundle(baseline, (op(baseline,name='a'),op(baseline,name='b',dependencies=('a',))))
+        raw = b.model_dump(mode='json')
+        next(j for j in raw['points'][0]['task_graph']['jobs'] if j['kind']=='barrier')['owner_id'] = 0
+        seal(raw)
+>       with pytest.raises(ValueError, match='InvalidResource.*barrier owner'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_u4_a_component_mapper.py:350: Failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_u4_a_component_mapper.py::test_incomplete_input_transfer_refused
+FAILED tests/unit/test_u4_a_component_mapper.py::test_missing_output_write_refused
+FAILED tests/unit/test_u4_a_component_mapper.py::test_barrier_owner_join_refused
+3 failed, 46 deselected in 0.72s

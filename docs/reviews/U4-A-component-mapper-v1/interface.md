@@ -47,3 +47,13 @@ fixtures retain their own placements, hashes and expected timings. A's small col
 starts HBM X/W/Y at0/256/512, unlike B's1536/3584/5632; useful work agrees, cold timing need
 not. Compare resolved work and transfer placement explicitly. Do not transplant B's whole
 cold-job answers to A's mapping or K2 implementation/build authority to component results.
+
+Implementation is published at `55681a88e163828d2c90e60a7fcece77cca54e49`; final import-access
+refusal corrections `cf7261c` and `3f54861` are integrated with B at `a8b3eeb`.
+The loader also applies three conservative completeness guards after installed admission:
+full operand production, complete cold-output writes and canonical barrier owners.
+A structural access-key precondition also protects bundle/assembly/full-job paths from
+an installed-helper KeyError before resource validation. See
+[exact gap/control evidence](protected-gaps.md). These guards reject incomplete mappings;
+they do not regenerate input or authorize a broader schema. Four new author input fixtures
+and their synthetic profiles are under fixtures/; no native result accompanies them.

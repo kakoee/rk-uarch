@@ -1,0 +1,60 @@
+"""UNAPPLIED acceptance for accumulator-lifetime.proposed.patch.
+
+On installed source this deliberately fails InvalidDependency (accumulator final readers).
+Apply only with exact protected semantic/source acceptance; never add an unconditional skip.
+"""
+from pathlib import Path
+
+from uarch_contract.hashing import content_hash
+from uarch_contract.mapped import MappedBundle, validate_resources
+from uarch_contract.prepared import PreparedOp
+
+from rkuarch.mapping.component import map_component
+from rkuarch.workload.component import component_point, prepare_component_bundle
+
+
+def transient_pair():
+    baseline = MappedBundle.model_validate_json(
+        Path('contract/fixtures/mapped/component.json').read_bytes())
+    raw = baseline.scope.ops[0].model_dump(mode='json')
+    raw['spec']['dimensions'] = dict(M=3,K=5,N=7)
+    first = PreparedOp.model_validate(dict(raw,id='a'))
+    second_raw = dict(raw,id='b',spec=dict(raw['spec'],dimensions=dict(M=4,K=5,N=7)))
+    second = PreparedOp.model_validate(second_raw)
+    ops = (first,second)
+    graph = map_component(ops,baseline.hardware_spec,initial_state='fixture_resident')
+    point = component_point(ops,graph,initial_state='fixture_resident')
+    bundle = prepare_component_bundle(ops,baseline.hardware_spec,point,
+        producer=baseline.producer,rank=baseline.rank,assumptions=baseline.assumptions,
+        admission=baseline.admission)
+    raw = bundle.model_dump(mode='json')
+    p = raw['points'][0]
+    g = p['task_graph']
+    computes = [j for j in g['jobs'] if j['kind']=='compute']
+    for j in computes:
+        acc = next(b for b in g['buffers'] if b['id']==j['accumulator_buffer_id'])
+        acc.update(offset_bytes=0,producer_id=j['id'],final_consumer_ids=[j['id']])
+    g['dependencies'] = [dict(before=computes[0]['id'],after=computes[1]['id'])]
+    g['graph_hash'] = content_hash(g,exclude=('graph_hash',))
+    p['payload_hash'] = content_hash(p,exclude=('payload_hash',))
+    raw['bundle_hash'] = content_hash(raw,exclude=('bundle_hash',))
+    return MappedBundle.model_validate(raw)
+
+
+def test_dependency_ordered_transient_accumulator_reuse():
+    b = transient_pair()
+    validate_resources(b,b.points[0])
+
+
+def test_transient_accumulator_live_alias_refuses():
+    import pytest
+    b = transient_pair()
+    raw = b.model_dump(mode='json')
+    p = raw['points'][0]
+    p['task_graph']['dependencies'] = []
+    p['task_graph']['graph_hash'] = content_hash(p['task_graph'],exclude=('graph_hash',))
+    p['payload_hash'] = content_hash(p,exclude=('payload_hash',))
+    raw['bundle_hash'] = content_hash(raw,exclude=('bundle_hash',))
+    b = MappedBundle.model_validate(raw)
+    with pytest.raises(ValueError,match='LiveBufferAlias'):
+        validate_resources(b,b.points[0])

@@ -1,0 +1,22 @@
+--- a/contract/uarch_contract/mapped.py
++++ b/contract/uarch_contract/mapped.py
+@@ -1680,6 +1680,19 @@
+     readers: dict[str, set[str]] = {key: set() for key in buffers}
+     for job in g.jobs:
+         if isinstance(job, Compute):
++            accumulator = buffers.get(job.accumulator_buffer_id)
++            require(accumulator is not None, "InvalidResource")
++            assert accumulator is not None
++            # producer=None retains the installed persistent scratch convention.
++            # An explicit producer opts into dependency-bounded allocation lifetime.
++            if accumulator.producer_id is not None:
++                require(
++                    accumulator.producer_id == job.id
++                    or accumulator.producer_id in ancestors[job.id],
++                    "InvalidDependency",
++                    "accumulator lifetime producer",
++                )
++                readers[accumulator.id].add(job.id)
+             for name in ("X", "W"):
+                 buffer_key = job.operand_buffers.get(name)
+                 require(buffer_key in buffers, "InvalidResource")

@@ -1,0 +1,21 @@
+............................F.                                           [100%]
+=================================== FAILURES ===================================
+____________________ test_stale_and_changed_valid_placement ____________________
+
+baseline = MappedBundle(format='uarch-prepared/3', bundle_hash='sha256:5a1053a4b3119bfe96289386a1d7d02519905d682219b8195b085670a7...Route(id='r1', noc_index=0, source_core_id=0, destination_core_id=1, core_ids=(0, 1))), arbitration='fifo-ready/1')),))
+
+    def test_stale_and_changed_valid_placement(baseline: MappedBundle) -> None:
+        b = bundle(baseline, (op(baseline),))
+        raw = b.model_dump(mode="json")
+        sr = next(x for x in raw["points"][0]["task_graph"]["buffers"] if x["space"] == "sram")
+        sr.update(offset_bytes=524288, bank=1)
+>       with pytest.raises(ValueError, match="ContentHashMismatch"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'ContentHashMismatch'
+E         Actual message: "2 validation errors for MappedBundle\npoints.0.task_graph\n  Value error, ArtifactHashMismatch: /graph_hash: expected sha256:41dec69809dfb7ae8b2352ea15136897f9cf8c0427aed5a4c5bae5fc2efec77e [type=value_error, input_value={'arbitration': 'fifo-rea..., 'source_core_id': 0}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error\npoints\n  Tuple should have at least 1 item after validation, not 0 [type=too_short, input_value=[{'frequency_ratio': 1.0,...'source_core_id': 0}]}}], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/too_short"
+
+tests/unit/test_u4_a_component_mapper.py:281: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_u4_a_component_mapper.py::test_stale_and_changed_valid_placement
+1 failed, 29 passed in 5.14s

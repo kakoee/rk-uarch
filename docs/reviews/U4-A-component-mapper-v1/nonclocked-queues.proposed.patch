@@ -1,0 +1,48 @@
+--- a/contract/uarch_contract/mapped.py
++++ b/contract/uarch_contract/mapped.py
+@@ -1227,10 +1227,41 @@
+             "AttributionMismatch",
+         )
+         assert isinstance(r.observations.queue_membership, Observed)
+-        require(
+-            all(x.clock_domain is not None for x in r.observations.queue_membership.records),
+-            "IncompleteObservations",
+-        )
++        owner_resources = {owner.owner_id: owner.resource for owner in job.owners}
++        declared_requests = {
++            fragment.request_id: dma.dma_engine_id
++            for dma in job.mapped_point.task_graph.jobs
++            if isinstance(dma, Dma)
++            for fragment in dma.fragments
++        }
++        engine_count = int(job.workload_closure.hardware_spec.model_dump(mode="json")
++                           ["cores"]["core_type"]["dma"]["engines"]["value"])
++        for queue in r.observations.queue_membership.records:
++            require(queue.owner_id in owner_resources, "InvalidResource")
++            if queue.clock_domain is not None:
++                continue
++            resource = owner_resources[queue.owner_id]
++            engine = declared_requests.get(queue.item_id)
++            expected_dma = (
++                None if engine is None
++                else f"dma:{engine // engine_count}:{engine % engine_count}"
++            )
++            channel = resource.removeprefix("channel:")
++            channel_request = any(
++                fragment.request_id == queue.item_id and str(fragment.channel_id) == channel
++                for dma in job.mapped_point.task_graph.jobs if isinstance(dma, Dma)
++                for fragment in dma.fragments
++            )
++            require(
++                (resource.startswith("channel:")
++                 and queue.queue_id == "channel_service:" + channel
++                 and queue.population in ("waiting", "service") and channel_request)
++                or (resource == expected_dma
++                    and queue.queue_id == "dma_inflight:" + str(engine)
++                    and queue.population == "inflight"),
++                "IncompleteObservations",
++                "nonclocked component population",
++            )
+     return r
+ 
+ 

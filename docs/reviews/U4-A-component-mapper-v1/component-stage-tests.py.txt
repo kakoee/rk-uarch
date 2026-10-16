@@ -1,0 +1,80 @@
+"""UNAPPLIED: real component process assertions, no fabricated result or permanent skip.
+
+Future fixtures:
+component_cases: dict[str, accepted complete MappedEngineJob]. Keys below are B IDs.
+component_run: callable(job) -> validated MappedEngineResult through released host/process.
+B D02/D14 are the corrected final-reconciliation fixtures, not historical scalar examples.
+"""
+import pytest
+
+
+@pytest.mark.parametrize('case,duration,useful,issued,reads,writes', [
+    ('C01',702000,2097152,2097152,0,0),
+    ('C02',547000,210,393216,0,0),
+    ('C03',1182000,33685504,33685504,0,0),
+    ('D01',60000,0,0,256,0),
+    ('D02',60000,0,0,0,256),
+    ('D03',69000,0,0,1280,0),
+    ('D14',61000,0,0,512,0),
+])
+def test_component_complete_result(component_cases,component_run,case,duration,useful,issued,reads,writes):
+    job = component_cases[case]
+    result = component_run(job)
+    assert result.duration_ps == duration
+    assert result.counts.matrix_ops == useful
+    assert result.work_counts.issued_matrix_ops == issued
+    assert result.traffic_counts.read_payload_bytes == reads
+    assert result.traffic_counts.write_payload_bytes == writes
+    assert result.completed_jobs == tuple(j.id for j in job.mapped_point.task_graph.jobs)
+    assert result.simulator_metrics.completed_job_count == len(result.completed_jobs)
+    assert result.u_c0_duration_ps is None and result.diagnostics.energy_pj is None
+    assert result.fidelity_detail.model_dump() == dict(compute=1,noc=0,dram=0,sync='exact',layer_reuse=False)
+    assert sum(result.attribution_ps.model_dump().values()) == duration
+    for field in ('dma','transfers','allocations','queue_membership'):
+        assert getattr(result.observations,field).status == 'observed'
+
+
+def test_fifth_read_refresh(component_cases,component_run):
+    result = component_run(component_cases['D03'])
+    records = result.observations.dma.records
+    assert [r.issue_ps for r in records] == [0]*5
+    assert [r.complete_ps for r in records] == [60000,62000,64000,66000,69000]
+    assert [r.credit_release_ps for r in records] == [r.complete_ps for r in records]
+    # The fault/no-refresh binary is a separately released, newly identified control.
+    # Its first four finals agree but its fifth68000 must be rejected by this assertion.
+
+
+def test_one_credit_until_commit(component_cases,component_run):
+    result = component_run(component_cases['D05-cap1'])
+    assert [r.issue_ps for r in result.observations.dma.records] == [0,60000]
+    assert [r.complete_ps for r in result.observations.dma.records] == [60000,120000]
+
+
+def test_zero_hop_observed_once(component_cases,component_run):
+    job = component_cases['D14']
+    result = component_run(job)
+    transfer = next(j for j in job.mapped_point.task_graph.jobs if j.kind == 'noc_transfer')
+    observed = [j for j in result.observations.jobs.records if j.job_id == transfer.id]
+    assert len(observed) == 1
+    assert observed[0].ready_ps == observed[0].start_ps == observed[0].end_ps == 61000
+    commits = [r for r in result.observations.dma.records if r.direction == 'unicast']
+    assert len(commits) == 1 and commits[0].payload_bytes == 256
+    assert commits[0].complete_ps == 61000
+    assert not [r for r in result.observations.resource_intervals.records
+                if r.job_id == transfer.id and r.end_ps > r.start_ps]
+
+
+def test_per_request_fraction_preserved(component_cases,component_run):
+    result = component_run(component_cases['D04'])
+    service = [r for r in result.observations.resource_intervals.records
+               if r.activity.startswith('dram_service:')]
+    service.sort(key=lambda r:(r.end_ps,r.activity))
+    assert len(service) == 12
+    assert service[-1].service_end_ps_ratio.model_dump() == dict(numerator=5608928,denominator=71)
+    assert service[-1].end_ps == 78999
+
+
+def test_boundary_replay(component_cases,component_run):
+    from uarch_contract.hashing import canonical_json
+    job = component_cases['C02']
+    assert len({canonical_json(component_run(job)) for _ in range(3)}) == 1
