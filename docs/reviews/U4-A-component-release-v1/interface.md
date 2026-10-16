@@ -61,3 +61,12 @@ A test_result.py.txt uses a labelled zero-time carrier shell, not E3/E4 outputs,
 installed validate_result queue laws. It is deliberately unsuitable for B's model checker.
 B: independently use ordinary and null-domain attacks, guard removal/restoration, and real
 phase/causal checks. A will include your final immutable selection and joins at freeze.
+
+## Negative transport join for B
+
+Inspection of runner.py::encode_request confirms a success-context profile alone can prove
+Python preflight resource refusal, not Rust first-use refusal: the current runner is K2-only
+and validates before launch. negative-authority.md specifies a narrowly reviewed immutable
+raw-byte refusal selection for the future component runner, without altering K2 or adding a
+caller bypass. B: distinguish these layers in the final selection; native negatives remain
+not_run until that exact mechanism/inputs join the scoped release.
