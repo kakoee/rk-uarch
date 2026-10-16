@@ -1,0 +1,188 @@
+{
+  "new_native_execution": true,
+  "modes": {
+    "debug": {
+      "datasets": {
+        "vectors": {
+          "count": 20965,
+          "mismatches": 0,
+          "refusals": 41,
+          "stdout_sha256": "5a26d3072ce0a601759b5da66ebc63fc5e62c73b09a00ee600478a0a0ea02b24"
+        },
+        "supplement": {
+          "count": 3,
+          "mismatches": 0,
+          "refusals": 0,
+          "stdout_sha256": "134989f7bf08b397b911e5770a685570fcddbb12e4314b857478c1ce54f34d17"
+        },
+        "B-extension": {
+          "count": 52,
+          "mismatches": 0,
+          "refusals": 34,
+          "stdout_sha256": "1372b9a4c7a89b55f89016875cd0a9db64f1a02d9c166544502ceea19c318c40"
+        },
+        "A-extension": {
+          "count": 139,
+          "mismatches": 0,
+          "refusals": 85,
+          "stdout_sha256": "1f035da57aa08f8f8cd10b74ecda7c14dedeb4dca77a5e70f98d14fa02e7bc96"
+        }
+      },
+      "unit_results": [
+        "test compatibility_tests::legacy_float_local_compatibility ... ok",
+        "test compatibility_tests::marker_guard_precedes_leaf_dispatch ... ok",
+        "test tests::duplicate_refusal ... ok",
+        "test tests::float_conventions ... ok",
+        "test compatibility_tests::strict_float_and_leaf_stay_distinct ... ok",
+        "test compatibility_tests::lexical_integer_zero_only ... ok",
+        "test tests::huge_integer_exact ... ok",
+        "test compatibility_tests::rational_refusal_conditions ... ok",
+        "test compatibility_tests::explicit_leaf_rational_and_unbounded_integer ... ok",
+        "test tests::sha_vectors ... ok",
+        "test tests::strict_integer_tokens ... ok",
+        "test tests::marker_refusal ... ok"
+      ],
+      "binary_sha256": "18139fc5483fbcd9dbf42a6f8af66db2f7ca7878e84ca2c8aadd93bedc6d62a1"
+    },
+    "release": {
+      "datasets": {
+        "vectors": {
+          "count": 20965,
+          "mismatches": 0,
+          "refusals": 41,
+          "stdout_sha256": "5a26d3072ce0a601759b5da66ebc63fc5e62c73b09a00ee600478a0a0ea02b24"
+        },
+        "supplement": {
+          "count": 3,
+          "mismatches": 0,
+          "refusals": 0,
+          "stdout_sha256": "134989f7bf08b397b911e5770a685570fcddbb12e4314b857478c1ce54f34d17"
+        },
+        "B-extension": {
+          "count": 52,
+          "mismatches": 0,
+          "refusals": 34,
+          "stdout_sha256": "1372b9a4c7a89b55f89016875cd0a9db64f1a02d9c166544502ceea19c318c40"
+        },
+        "A-extension": {
+          "count": 139,
+          "mismatches": 0,
+          "refusals": 85,
+          "stdout_sha256": "1f035da57aa08f8f8cd10b74ecda7c14dedeb4dca77a5e70f98d14fa02e7bc96"
+        }
+      },
+      "unit_results": [
+        "test compatibility_tests::explicit_leaf_rational_and_unbounded_integer ... ok",
+        "test compatibility_tests::legacy_float_local_compatibility ... ok",
+        "test compatibility_tests::marker_guard_precedes_leaf_dispatch ... ok",
+        "test compatibility_tests::strict_float_and_leaf_stay_distinct ... ok",
+        "test compatibility_tests::lexical_integer_zero_only ... ok",
+        "test tests::duplicate_refusal ... ok",
+        "test tests::float_conventions ... ok",
+        "test compatibility_tests::rational_refusal_conditions ... ok",
+        "test tests::huge_integer_exact ... ok",
+        "test tests::marker_refusal ... ok",
+        "test tests::sha_vectors ... ok",
+        "test tests::strict_integer_tokens ... ok"
+      ],
+      "binary_sha256": "6c9d7f650247083b1e513e93e9b5874287d2e93891e67f41aa4a1bee7c6234dc"
+    }
+  },
+  "independent": {
+    "debug": {
+      "count": 66,
+      "matching_status_and_values": 64,
+      "mismatches": [
+        {
+          "input": {
+            "id": "B2:legacy:blank-control-unit",
+            "family": "B-independent-legacy",
+            "op": "sourced",
+            "hex": "7b2276616c7565223a202231222c2022756e6974223a20225c7530303163222c202270726f76656e616e6365223a202273747562227d",
+            "expected": {
+              "status": "refuse",
+              "layer": "carrier",
+              "error_type": "ValidationError"
+            }
+          },
+          "actual": {
+            "canonical": "{\"date\":null,\"kind\":\"claim\",\"provenance\":\"stub\",\"rationale\":null,\"source\":null,\"unit\":\"\\u001c\",\"value\":1.0}",
+            "id": "B2:legacy:blank-control-unit",
+            "sha256": "242da9b055243ee717bd09d5ca5640ea82e457bf3c982dcf22fe79044efc053f",
+            "status": "ok"
+          }
+        },
+        {
+          "input": {
+            "id": "B2:legacy:blank-control-rationale",
+            "family": "B-independent-legacy",
+            "op": "sourced",
+            "hex": "7b2276616c7565223a202231222c2022756e6974223a2022487a222c20226b696e64223a202273746970756c6174696f6e222c2022726174696f6e616c65223a20225c7530303163227d",
+            "expected": {
+              "status": "refuse",
+              "layer": "carrier",
+              "error_type": "ValidationError"
+            }
+          },
+          "actual": {
+            "canonical": "{\"date\":null,\"kind\":\"stipulation\",\"provenance\":null,\"rationale\":\"\\u001c\",\"source\":null,\"unit\":\"Hz\",\"value\":1.0}",
+            "id": "B2:legacy:blank-control-rationale",
+            "sha256": "469276aa527ba83725bb2f39319a6a9cba0128a65e5772d5de9cbb589b7fb0f7",
+            "status": "ok"
+          }
+        }
+      ],
+      "frozen_native_reason_checks": 11,
+      "remaining_refusals": "Observed reasons separately preserved; not retroactively frozen",
+      "stdout_sha256": "70894e14f3ccf2926f9280ed204c4e0e3eedd8225d2ec0243b7f1c45634b54f6"
+    },
+    "release": {
+      "count": 66,
+      "matching_status_and_values": 64,
+      "mismatches": [
+        {
+          "input": {
+            "id": "B2:legacy:blank-control-unit",
+            "family": "B-independent-legacy",
+            "op": "sourced",
+            "hex": "7b2276616c7565223a202231222c2022756e6974223a20225c7530303163222c202270726f76656e616e6365223a202273747562227d",
+            "expected": {
+              "status": "refuse",
+              "layer": "carrier",
+              "error_type": "ValidationError"
+            }
+          },
+          "actual": {
+            "canonical": "{\"date\":null,\"kind\":\"claim\",\"provenance\":\"stub\",\"rationale\":null,\"source\":null,\"unit\":\"\\u001c\",\"value\":1.0}",
+            "id": "B2:legacy:blank-control-unit",
+            "sha256": "242da9b055243ee717bd09d5ca5640ea82e457bf3c982dcf22fe79044efc053f",
+            "status": "ok"
+          }
+        },
+        {
+          "input": {
+            "id": "B2:legacy:blank-control-rationale",
+            "family": "B-independent-legacy",
+            "op": "sourced",
+            "hex": "7b2276616c7565223a202231222c2022756e6974223a2022487a222c20226b696e64223a202273746970756c6174696f6e222c2022726174696f6e616c65223a20225c7530303163227d",
+            "expected": {
+              "status": "refuse",
+              "layer": "carrier",
+              "error_type": "ValidationError"
+            }
+          },
+          "actual": {
+            "canonical": "{\"date\":null,\"kind\":\"stipulation\",\"provenance\":null,\"rationale\":\"\\u001c\",\"source\":null,\"unit\":\"Hz\",\"value\":1.0}",
+            "id": "B2:legacy:blank-control-rationale",
+            "sha256": "469276aa527ba83725bb2f39319a6a9cba0128a65e5772d5de9cbb589b7fb0f7",
+            "status": "ok"
+          }
+        }
+      ],
+      "frozen_native_reason_checks": 11,
+      "remaining_refusals": "Observed reasons separately preserved; not retroactively frozen",
+      "stdout_sha256": "70894e14f3ccf2926f9280ed204c4e0e3eedd8225d2ec0243b7f1c45634b54f6"
+    }
+  },
+  "independent_freeze_before_all_B_native_commands": true
+}

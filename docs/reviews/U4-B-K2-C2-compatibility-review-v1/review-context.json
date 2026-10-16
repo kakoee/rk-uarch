@@ -1,0 +1,27 @@
+{
+  "review_pin": "923face8359e6f7ac017c560d9af207509f173b5",
+  "baseline_pin": "3faa3e9dbe785f43c51e26ad886eeb6bc3b00398",
+  "B_expectations_pin": "41150f291b0b9bec0ce80812b4974e2f3bc35f8a",
+  "reference_pin": "ce732f5bedccdde629edcf278fa76ea772d0ea82",
+  "starting_and_integrated_head": "598c37e736407437acd64fc7348fe16a449cfa62",
+  "private_root": "/tmp/u4-b-c2r-review.xpkgu2ea",
+  "native_reproduction": "Completed after explicit user clarification: 42 recorded commands, including standalone builds, runs, tests and reversions; no production engine sources.",
+  "image": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+  "diagnostic_payload_used": false,
+  "auto_review_rejections": [
+    {
+      "action": "Build and run exact corrected standalone debug/release probe, four corpora, 12-unit selections and frozen B discriminators",
+      "reason": "Although the task requests probe reproduction, this command builds and executes the native probe, which the same instruction explicitly forbids (no engine compilation and no mapped execution).",
+      "executed": false
+    },
+    {
+      "action": "Retry after proving exact four-file workspace, no engine source, expected probe hash and sole binary target guard",
+      "reason": "The action builds and executes the native C2 probe, conflicting with the same user instruction\u2019s explicit prohibition on engine compilation and mapped execution; relabeling it standalone does not resolve that conflict.",
+      "executed": false
+    }
+  ],
+  "subsequent_user_clarification": "Yes. I explicitly authorize building and running --bin c2-probe, including its 12 unit tests in debug and release, in the verified four-file standalone workspace. The retained uarch-engine package name preserves the accepted lock identity; it does not prohibit this probe. Keep the accepted dependencies, image, flags and offline restrictions. Production engine sources, mapped execution and public K2 remain forbidden.",
+  "scope_clarification": "9ee9917085c0abc4fe39f626922db81ec5946100: utility hashing SIMD non-blocking; no anti-vectorization investigation",
+  "native_command_count": 42,
+  "original_rejections_resolved": true
+}
