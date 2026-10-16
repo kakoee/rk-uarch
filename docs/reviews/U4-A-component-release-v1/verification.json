@@ -1,0 +1,98 @@
+{
+  "status": "private-patched-export-only",
+  "patch_sha256": "3106fba95d8c1aedb9c115e94758298676e91a5b20da47e1529750869489a3b9",
+  "integrated_export": "3d820a3 plus corrected32e5d89 mapped.py; later ae91c93 B checker/carrier sources explicitly copied for affected recheck",
+  "combined_selection": [
+    "tests/unit/test_u4_a_component_mapper.py",
+    "tests/unit/test_u4_a_mapped_loader.py",
+    "contract/tests/mapped",
+    "validation/component",
+    "tests/component_proposal",
+    "docs/reviews/U4-B-component-joins-v2/test_accumulator.py",
+    "docs/reviews/U4-B-component-joins-v2/test_carrier.py"
+  ],
+  "combined": {
+    "passed": 353,
+    "skipped": 2,
+    "deselected": 1,
+    "skip_reason": "actual H-L1-GEMM-01/H-L1-DMA-01 human workings absent",
+    "deselected_reason": "native marker; no execution"
+  },
+  "later_affected": {
+    "passed": 84,
+    "selection": [
+      "tests/component_proposal",
+      "docs/reviews/U4-B-component-joins-v2/test_carrier.py"
+    ],
+    "reason": "three new A controls and three new B representative carriers; overlapping recheck, not additive unique count"
+  },
+  "static": {
+    "mypy_source": "88 files pass",
+    "mypy_contract_tests": "33 files pass",
+    "ruff": "pass",
+    "imports": "2 kept",
+    "schema_v1": "fresh",
+    "schema_rotary_v2": "fresh",
+    "schema_mapped": "fresh",
+    "vendor": "strict currentness pass"
+  },
+  "retained_corrections": [
+    "baseline new lifetime controls:8 failed, expected old refusal/missing opt-in API",
+    "synthetic counts normalized to float before result hashing",
+    "historical @1 producer metadata preserved after A/B independent finding",
+    "combined349 pass/4 fail: unnecessary isinstance in frozen helper removed; restored353 pass",
+    "proposal tests moved beneath tests after import-root guard refused root/proposal_tests; no guard exception added",
+    "initial static lint found proposal-test formatting only; corrected",
+    "latest B copy command initially used scratch-relative paths and copied nothing; combined result accurately attributed to earlier B snapshot; absolute copies then84 affected tests passed"
+  ],
+  "logs": {
+    "baseline": {
+      "path": "/tmp/u4-a-baseline.log",
+      "sha256": "e14c74dcb13e3e7c922812fc0aaf66c732176b34dfcb7f0a63c42c77101c9560"
+    },
+    "final-combined": {
+      "path": "/tmp/u4-a-final-combined.log",
+      "sha256": "a03de020920eb30c2f1fddb4d257612568382862ca81a60ffbfb2a056fa6c5d3"
+    },
+    "final-combined-restored": {
+      "path": "/tmp/u4-a-final-combined-restored.log",
+      "sha256": "48f58bb64dae6674a04439b413811b4ecb611d15443434d0c53491a753a8df44"
+    },
+    "final-additions": {
+      "path": "/tmp/u4-a-final-additions.log",
+      "sha256": "1db8f893b5a4afe461f2babbcbacbbb2a4d6cfa4e39df4138356e57fd1f41808"
+    },
+    "final-mypy-restored": {
+      "path": "/tmp/u4-a-final-mypy-restored.log",
+      "sha256": "7aebc3c9c840c3e075d7701a826136c2571eab60a0ce5c94514098ba0869deaa"
+    },
+    "final-mypy-tests": {
+      "path": "/tmp/u4-a-final-mypy-tests.log",
+      "sha256": "81b8a767756bd649de91d7b0c104614fe1e706bce451b754a92161491825cfde"
+    },
+    "final-ruff": {
+      "path": "/tmp/u4-a-final-ruff.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    "final-imports": {
+      "path": "/tmp/u4-a-final-imports.log",
+      "sha256": "8b1d95b0224c82cb27c86088ea686bea3f2a4247147e003657ca90b69050cb95"
+    },
+    "final-schema-vendor": {
+      "path": "/tmp/u4-a-final-schema-vendor.log",
+      "sha256": "e00bb9a54bd10f1aa8a5e15a193e184032d8ceab25b612493d91b44fb9120a93"
+    },
+    "final-schema-restored": {
+      "path": "/tmp/u4-a-final-schema-restored.log",
+      "sha256": "3f0b3c4e0abd7bbd081e519d1c5458799d2bef3c71fca8eee937cf5931ec3a9e"
+    },
+    "final-vendor": {
+      "path": "/tmp/u4-a-final-vendor.log",
+      "sha256": "852c1446a2ae712cde0c4863b251a69d5b69ceed6a3d2b57cd00300562aeb50d"
+    }
+  },
+  "native_runs": 0,
+  "protected_live_changes": 0,
+  "full_suite_runs": 0,
+  "ci_polling": false
+}

@@ -272,3 +272,15 @@ def test_synthetic_activity_dispatch_and_cycle_attacks():
         with pytest.raises(ValueError):
             check(j, bad)
         assert check(j, r)
+
+
+def test_stale_result_binding_precedes_queue_guard():
+    j, raw = synthetic()
+    good = check(j, raw).model_dump(mode="json")
+    bad = deepcopy(good)
+    bad["observations"]["queue_membership"]["records"][0]["item_id"] = "forged"
+    with pytest.raises(ValueError, match="ArtifactHashMismatch"):
+        validate_result(bad, j)
+    with pytest.raises(ValueError, match="IncompleteObservations"):
+        check(j, bad)
+    assert validate_result(good, j)

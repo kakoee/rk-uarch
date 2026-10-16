@@ -280,3 +280,40 @@ def test_completeness_all_component_entries(fault, entry, tmp_path):
     assert not (tmp_path / "refused.json").exists()
     assert loads_component_bundle(canonical_json(good), **args) == good
     assert loads_component_job(canonical_json(goodjob), **jobargs) == goodjob
+
+
+@pytest.mark.parametrize("producer_kind", ["dma", "barrier"])
+def test_false_producer_is_not_merely_an_ancestor(producer_kind):
+    from uarch_contract.prepared import PreparedOp
+
+    b = baseline()
+    first = b.scope.ops[0].model_dump(mode="json")
+    first.update(id="a", depends_on=[])
+    second = deepcopy(first)
+    second.update(id="z", depends_on=["a"])
+    second["spec"]["dimensions"]["M"] = 4
+    ops = [PreparedOp.model_validate(first), PreparedOp.model_validate(second)]
+    g = map_component(ops, b.hardware_spec, mapping_version="2")
+    p = component_point(ops, g)
+    good = prepare_component_bundle(
+        ops,
+        b.hardware_spec,
+        p,
+        producer=b.producer,
+        assumptions=b.assumptions,
+        rank=b.rank,
+        admission=b.admission,
+        mapping_version="2",
+    ).model_dump(mode="json")
+    bad = deepcopy(good)
+    graph = bad["points"][0]["task_graph"]
+    if producer_kind == "dma":
+        acc = next(x for x in graph["buffers"] if x["space"] == "accumulator")
+        producer = next(x for x in graph["jobs"] if x["kind"] == "dma")
+    else:
+        acc = [x for x in graph["buffers"] if x["space"] == "accumulator"][-1]
+        producer = next(x for x in graph["jobs"] if x["kind"] == "barrier")
+    acc["producer_id"] = producer["id"]
+    with pytest.raises(ValueError, match="InvalidDependency.*producer"):
+        accept(bad)
+    assert accept(good)
