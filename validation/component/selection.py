@@ -45,6 +45,9 @@ def assert_case(
     ):
         if field in expected:
             need(raw["traffic_counts"][field] == expected[field], "literal " + field)
+    for field in ("sram_read_bytes", "sram_write_bytes"):
+        if field in expected:
+            need(raw["ext_counts"][field] == expected[field], "literal " + field)
     if expected.get("hbm_payload_bytes") == 0:
         need(
             raw["traffic_counts"]["read_payload_bytes"] == 0
@@ -88,6 +91,24 @@ def assert_case(
         )
     if "crossings_ps" in expected:
         port, arrival, latency, channel, response, done = expected["crossings_ps"]
+        if obs.get("format") == "uarch-native-observations/2":
+            need(len(dma) == 1, "crossing request inventory")
+            request = dma[0]["request_id"]
+            phases = {
+                a["subphase"]: a
+                for a in obs["activities"]["records"]
+                if a["request_id"] == request and a["kind"] == "service"
+            }
+            need(
+                [
+                    phases[x]["end_ps"]
+                    for x in ("request_noc", "dram_latency", "channel_service", "response_noc")
+                ]
+                == [arrival, latency, channel, response],
+                "request-bound crossings",
+            )
+            if port:
+                need(phases["write_port"]["end_ps"] == port, "request-bound write port")
         clocks = obs["clocks"]
         need(clocks["status"] == "observed", "crossing clocks")
         rows = clocks["records"]

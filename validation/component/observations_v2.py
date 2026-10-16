@@ -224,6 +224,20 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
                 task, fragment = declared[a["request_id"]]
                 channel(lo, hi, fragment["transaction_bytes"], bandwidth)
                 exact.append((lo, hi, a))
+            observed_order = sorted(exact, key=lambda x: (x[0], x[2]["request_id"]))
+            ready_order = sorted(
+                exact,
+                key=lambda x: (
+                    services[x[2]["job_id"], x[2]["request_id"], "dram_latency"]["end_ps"],
+                    declared[x[2]["request_id"]][0]["dma_engine_id"],
+                    x[2]["request_id"],
+                ),
+            )
+            need(
+                [x[2]["activity_id"] for x in observed_order]
+                == [x[2]["activity_id"] for x in ready_order],
+                "channel FIFO tie",
+            )
             previous = Fraction(0)
             for lo, hi, a in sorted(exact, key=lambda x: (x[0], x[2]["request_id"])):
                 latency = services[a["job_id"], a["request_id"], "dram_latency"]["end_ps"]

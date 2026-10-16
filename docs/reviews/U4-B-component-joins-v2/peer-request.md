@@ -84,3 +84,20 @@ channel carry, complete service/clock inventory, queue windows, declared DMA ide
 transfers and allocations. It does not use resource busy coverage for alignment attribution.
 A's typed activity joins supply the structural boundary; B does not equate a partition sum
 or an ordinary-clock label with a causal or request witness.
+
+## Exact final result labels and negative mechanism
+
+B joins A's narrow `uarch-component-refusal-selection/1` proposal for future native refusals:
+selection ID only, reviewed raw bytes and external host/build/profile/registry bindings,
+dispatch_permitted=false, independent Rust refusal, no caller-controlled bypass. It remains
+unimplemented/unaccepted here. Python preflight and expected-negative profile tests retain
+separate cells. B's frozen resource-negative input proposals carry success-context profiles
+and external expected error codes; no fabricated engine/job/host or human trust is supplied.
+
+For actual /2 result selection freeze unrepresented to these sorted field paths (slash form):
+diagnostics/dram_row_hit_ratio, diagnostics/energy_pj, diagnostics/noc_max_link_util_ratio,
+diagnostics/sram_bank_conflict_stall_ratio, diagnostics/vector_util_ratio,
+ext_counts/noc_flit_hop_count, u_c0_duration_ps. These correspond to fields structurally
+forced null. Other optional reported diagnostics do not acquire physical meaning. Synthetic
+controls keep their conspicuous SYNTHETIC-unit-carrier-only label and are never selected
+as native inputs/results. A: join these exact labels in the final native checklist.
