@@ -57,7 +57,10 @@ unchanged. Without its scoped release, native resource-negative first use remain
 (cold/resident); [fixture-identities.json](fixture-identities.json) freezes their bundle,
 point, graph and profile hashes. Engine/build/host/job/result remain null. Published A's four
 old fixtures and B's82 old cases retain their historical identities. B's new transient C04,
-255/256 and equal-footprint identities remain separate proposed inputs.
+255/256 and equal-footprint identities remain separate proposed inputs. B b02301d freezes
+[99 exact future cases](../U4-B-component-joins-v2/execution-selection.json):82 historical B,
+four historical A, five new positives and eight independently reachable resource negatives.
+[peer-join.json](peer-join.json) verifies both A2 identities and every candidate postimage.
 
 [closure-and-identity.json](closure-and-identity.json) recomputes actual selected generator
 support on the combined postimage:56 before/56 after, zero path or byte deltas. No U0002
@@ -80,8 +83,10 @@ results and exact hashes. Removing producer binding makes both false DMA/barrier
 controls fail to refuse; removing channel-owner binding makes B's owner attack fail to
 refuse. Restoring exact bytes restores positives and refusals. [v1-byte-controls.json](v1-byte-controls.json)
 compares14 actual baseline/candidate graph hashes across row boundaries and cold/resident.
-The initial new-lifetime tests failed8/8 against installed baseline, then passed under the
-candidate. Existing broader A6d30e36 evidence is inherited only for unchanged behavior;
+[queue-baseline.json](queue-baseline.json) additionally retains installed validate_result's
+valid-null refusal and acceptance of a forged ordinary-clock queue. The candidate closes
+both gaps. The initial new-lifetime tests failed8/8 against installed baseline, then passed
+under the candidate. Existing broader A6d30e36 evidence is inherited only for unchanged behavior;
 B's independent final receipts remain separately attributed. Broad logs/caches stay in /tmp.
 
 ## Reproduction and remaining gates
