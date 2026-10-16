@@ -114,8 +114,14 @@ def script(files, initial):
             lines.append(f"mkdir -m 0555 -- {p}")
     else:
         lines += [
+            f"test -d {b.NEW}",
+            f"test ! -L {b.NEW}",
+            f'test "$(stat -c %u {b.NEW})" = 0',
+            f'test "$(find {b.NEW} -maxdepth 0 -perm /222 -print)" = ""',
             f"test -d {b.NEW}/authority",
             f"test ! -L {b.NEW}/authority",
+            f'test "$(stat -c %u {b.NEW}/authority)" = 0',
+            f'test "$(find {b.NEW}/authority -maxdepth 0 -perm /222 -print)" = ""',
             f'test "$(find {b.NEW}/authority -mindepth 1 -print -quit)" = ""',
         ]
     for name, raw in sorted(files.items()):

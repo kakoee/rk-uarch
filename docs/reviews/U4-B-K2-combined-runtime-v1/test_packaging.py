@@ -191,3 +191,60 @@ def test_stopped_output_and_quick_actions_refuse():
         launch.command("campaign", "/tmp/u4-k2-approved-campaign/new", C)
     with pytest.raises(ValueError, match="explicit action"):
         launch.command("quick", "/tmp/u4-new", C)
+
+
+def test_human_script_is_fixed_new_root_and_nonclobber():
+    import prepare
+
+    data = prepare.script({"helpers/test.txt": b"review fixture only"}, True).decode()
+    assert "set -euC" in data
+    assert f"test ! -e {b.NEW}" in data and f"test ! -L {b.NEW}" in data
+    assert str(b.OLD) not in data
+    assert "sudo" not in data
+    assert "chmod 0444" in data and "mkdir -m 0555" in data
+    second = prepare.script({"authority/test.txt": b"review fixture only"}, False).decode()
+    assert f"test ! -L {b.NEW}/authority" in second
+    assert f"find {b.NEW}/authority -mindepth 1 -print -quit" in second
+
+
+def test_complete_record_binding_without_touching_native(monkeypatch, tmp_path):
+    """Receipt wrapper only; no result/campaign success fabricated."""
+    import importlib.util
+    import sys
+    from types import ModuleType
+
+    import runtime_entry as runtime
+
+    prior = HERE.parent / "U4-B-K2-parallel-first-use-v1"
+    spec = importlib.util.spec_from_file_location("parallel_core", prior / "parallel_core.py")
+    core = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(core)
+    fake_base, fake_scheduler = ModuleType("entrypoint"), ModuleType("parallel_entrypoint")
+    fake_base.dump = lambda path, value: None
+    monkeypatch.setitem(sys.modules, "parallel_core", core)
+    monkeypatch.setitem(sys.modules, "entrypoint", fake_base)
+    monkeypatch.setitem(sys.modules, "parallel_entrypoint", fake_scheduler)
+    monkeypatch.setattr(runtime.b, "check_payload", lambda *args, **kwargs: (C, CANDIDATE, {}))
+    monkeypatch.setattr(runtime.b, "old_bindings", lambda *args: None)
+    monkeypatch.setattr(runtime.b, "inventory", lambda *args, **kwargs: None)
+    # Configure's original helper reads are translated to genuine immutable originals.
+    original_read_bytes = Path.read_bytes
+
+    def translated(path):
+        if str(path).startswith(("/campaign/", "/manifests/")):
+            path = b.OLD / str(path).lstrip("/")
+        return original_read_bytes(path)
+
+    monkeypatch.setattr(Path, "read_bytes", translated)
+    before_path = list(sys.path)
+    try:
+        scheduler = runtime.configure()
+        monkeypatch.setattr(runtime, "BINDING", {"synthetic": "receipt wrapper only; no authority"})
+        store = scheduler.Store(tmp_path, 100000)
+        store.json("resources.json", {"workers": 1})
+        saved = json.loads((tmp_path / "resources.json").read_bytes())
+        assert saved["runtime_binding"] == runtime.BINDING
+        assert saved["workers"] == 1
+        assert not (tmp_path / "campaign.json").exists()
+    finally:
+        sys.path[:] = before_path
