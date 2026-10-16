@@ -141,3 +141,30 @@ def test_independent_mechanism_discrimination(fault):
             j.model_dump(mode="json"), bad, dict(unrepresented=["SYNTHETIC-unit-carrier-only"])
         )
     check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
+
+
+def test_resident_real_carrier_and_independent_mechanisms():
+    from validation.component.observations_v2 import check_v2
+
+    j = FIXTURE["synthetic_job"]("C02")
+    r = FIXTURE["synthetic_resident_result"](j)
+    validate_result(r, j)
+    check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
+
+
+def test_unequal_clock_real_carrier_and_independent_mechanisms():
+    from validation.component.observations_v2 import check_v2
+
+    j = FIXTURE["synthetic_job"]("D10-read")
+    r = FIXTURE["synthetic_result"](j)
+    validate_result(r, j)
+    check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
+
+
+def test_port_contention_overlap_real_carrier_and_independent_mechanisms():
+    from validation.component.observations_v2 import check_v2
+
+    j = FIXTURE["synthetic_job"]("D08")
+    r = FIXTURE["synthetic_port_pair"](j)
+    validate_result(r, j)
+    check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
