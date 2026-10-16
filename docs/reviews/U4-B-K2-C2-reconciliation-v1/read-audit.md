@@ -74,6 +74,7 @@ review one userspace tracer as a distinct diagnostic input. A concrete next prop
    not by itself a proof of semantic dependency or environment-use completeness.
 
 Do not broaden the current C2 review into tool acquisition. Coordinator may separately
-release field compatibility and the compiler experiment with these limitations carried
-forward; neither may claim exhaustive reads or final authority until the applicable gate
-has real evidence. C3/remote infrastructure remains deferred under U0024.
+release field compatibility with these limitations carried forward; it may not claim
+exhaustive reads or final authority until the applicable gate has real evidence. The hashing
+compiler experiment is withdrawn by Javid's subsequent 9ee9917 scope clarification.
+C3/remote infrastructure remains deferred under U0024.

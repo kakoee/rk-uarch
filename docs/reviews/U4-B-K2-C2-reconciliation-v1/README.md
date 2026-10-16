@@ -1,10 +1,12 @@
 # B reconciliation of the actual C2 experiment
 
-**Baseline independently reproduced; complete typed parity, full-hash no-SIMD and exhaustive
-build reads remain unresolved.** Recommend a small standalone field-compatibility/comparison
-follow-up and, separately, A's exact two-flag experiment. Neither is approved or applied by
-this review. The existing dependency/C2 approvals stand; no repeat vote is requested.
-This is B reconciliation, not final adversarial review, public K2 release or authority.
+**Baseline independently reproduced; typed-carrier parity and exhaustive build reads remain
+unresolved.** Recommend only the small standalone field-compatibility/comparison follow-up
+and bounded read-diagnostic reconciliation. Javid's subsequent scope clarification at
+`9ee9917085c0abc4fe39f626922db81ec5946100` makes utility-hashing SIMD non-blocking and
+withdraws the anti-vectorization experiment. No source, dependency, feature or flag changed.
+The existing dependency/C2 approvals stand; no repeat vote is requested. This is B
+reconciliation, not final adversarial review, public K2 release or authority.
 
 | Subject | Exact identity |
 | --- | --- |
@@ -24,8 +26,12 @@ This is B reconciliation, not final adversarial review, public K2 release or aut
 | Accepted image | `sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523` |
 
 C1's historical source stays `0718955cc0656e5bac4688d4696abbd547cb4186`; it is not the Python
-source above. A's [next-decision proposal](../U4-A-K2-C2-probes-v1/next-decision.md) remains
+source above. A's historical [next-decision proposal](../U4-A-K2-C2-probes-v1/next-decision.md) remains
 SHA256 `063af1b27bf3786ffd6a007d20e9276758cdd68469823550d18f9ed869d6f51e` and unapplied.
+The original A review pin is unchanged. [Subsequent scope receipt](scope-clarification.json)
+binds Javid's [clarification](../U4-hashing-SIMD-scope-clarification-v1.md) separately;
+completed binary/disassembly observations remain historical evidence. The first B review
+commit is preserved in Git; its compiler-experiment recommendation is superseded here.
 
 ## Independently executed baseline and preservation
 
@@ -140,7 +146,7 @@ the verified nonempty baseline outcomes or turn its ten mismatches into successe
 allowed cross-language layer differences explicitly rather than forcing identical errors.
 A's original invocation error, U+2028/splitlines failure and supplement omission remain intact.
 
-## Hash path and smallest compiler experiment
+## Completed hash-path evidence; subsequent human scope clarification
 
 [Independent static path inspection](hash-path.json) uses B's actual objdump/readelf outputs
 from the byte-identical rebuilt binaries. Debug reaches compression through digest/update/
@@ -154,16 +160,16 @@ Release boundary `0x33c20` nevertheless contains **14 packed output transformati
 `0x33e3d`–`0x33e7d`: unpack, shuffle and pack operations. They follow final compression and
 transform the digest state into output bytes. These are part of the hash path, distinct
 from incidental movups/movaps/movdqa copies, xor/pxor zeroing, libc calls and unrelated
-parser/formatter code. Correct SHA answers and force-soft do not make this a no-SIMD pass.
-No boundary waiver or compression-only redefinition is recommended.
+parser/formatter code. These observations remain unchanged. Under Javid's later clarification, the utility-hash
+packing is **not a violation or a blocker**. Simulator execution acceleration, particularly
+functional tensor execution, remains outside scope.
 
-A's smallest informative next compiler experiment is the exact proposed addition of
-`-C no-vectorize-loops -C no-vectorize-slp` in **both modes**, preserving the baseline
-probe, dependencies, vectors, image, CPU defaults and linker-map setup in separate private
-targets. Recommend it as a separate release from compatibility edits so each delta is
-attributable. Reinspect the same complete hash path, retain all packed/copy/libc findings
-and rerun both corpora/units. These flags may not suppress other lowering or prebuilt stdlib
-instructions. They have not been executed or approved here; success is not promised.
+The prior full-hash no-SIMD condition and the proposed `no-vectorize-loops` /
+`no-vectorize-slp` experiment are withdrawn. No changed-flag experiment was executed, and
+no further disassembly or hashing anti-vectorization work followed the clarification.
+Keep current flags, accepted dependencies/features (including force-soft), canonical/hash
+correctness and deterministic checks. This changes the interpretation of the completed
+evidence, not its bytes, source pin, binary identities or execution history.
 
 ## Read-audit dependency and remaining decisions
 
@@ -179,8 +185,7 @@ Coordinator's smallest next release list:
 1. Standalone visitor/-0/field-local legacy compatibility plus the two comparison guards,
    retaining all original failures, original/supplement cases and the explicit B discriminators.
    Preserve unbounded scalar leaf integers; return exact code for review. No production DTOs.
-2. Independently, the exact two-flag experiment above on the unchanged baseline source.
-3. Resolve a bounded read-diagnostic input before claiming exhaustive reads or using these
+2. Resolve a bounded read-diagnostic input before claiming exhaustive reads or using these
    inputs for final build/authority records. Existing partial diagnostics and the concrete
    proposed tracer-only scope are in read-audit.md; tool identity/access is still pending.
 
