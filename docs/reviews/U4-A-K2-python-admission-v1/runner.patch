@@ -1,0 +1,185 @@
+--- a/src/rkuarch/engines/native/runner.py
++++ b/src/rkuarch/engines/native/runner.py
+@@ -8,6 +8,8 @@
+ import subprocess
+ import tempfile
+ import time
++from collections.abc import Callable, Iterator
++from contextlib import contextmanager
+ from dataclasses import dataclass
+ from pathlib import Path
+ from typing import Any
+@@ -188,7 +190,7 @@
+                 stream.close()
+ 
+ 
+-def encode_request(job: object, *, host: Any) -> bytes:
++def _admit_request(job: object, *, host: Any) -> tuple[bytes, MappedEngineJob]:
+     from .host import AcceptedHostBinding
+ 
+     if not isinstance(host, AcceptedHostBinding):
+@@ -198,16 +200,17 @@
+     encoded = canonical_json(raw).encode()
+     checked = loads_fixed_delay_job(encoded, **host.authority_for(raw))
+     host.require_job(checked)
+-    return canonical_json(checked).encode()
+-
+-
+-def parse_response(
+-    stdout: bytes, stderr: bytes, returncode: int, *, request_bytes: bytes, host: Any
++    return canonical_json(checked).encode(), checked
++
++
++def encode_request(job: object, *, host: Any) -> bytes:
++    request, _ = _admit_request(job, host=host)
++    return request
++
++
++def _validate_response(
++    stdout: bytes, stderr: bytes, returncode: int, job: MappedEngineJob
+ ) -> MappedEngineResult:
+-    request = strict_json_loads(request_bytes)
+-    if encode_request(request, host=host) != request_bytes:
+-        raise ProtocolViolation("noncanonical request receipt")
+-    job = loads_fixed_delay_job(request_bytes, **host.authority_for(request))
+     value = _decode_envelope(stdout, stderr, returncode)
+     if returncode == 2:
+         raise NativeRefusal(value)
+@@ -220,6 +223,117 @@
+     return result
+ 
+ 
++def _prepare_request(
++    value: object, *, host: Any
++) -> tuple[bytes, Callable[[bytes, bytes, int], MappedEngineResult]]:
++    request, job = _admit_request(value, host=host)
++    # Own the loader's fresh nested data, never the caller's mutable model.
++    profile = {"admission": {"profile_hash": job.admission.profile_hash}}
++    authority = canonical_json(host.authority_for(profile))
++
++    def finish(stdout: bytes, stderr: bytes, status: int) -> MappedEngineResult:
++        if canonical_json(host.authority_for(profile)) != authority:
++            # Preserve fresh public admission/refusal if trust changed during IO.
++            return parse_response(stdout, stderr, status, request_bytes=request, host=host)
++        host.require_job(job)
++        return _validate_response(stdout, stderr, status, job)
++
++    return request, finish
++
++
++def parse_response(
++    stdout: bytes, stderr: bytes, returncode: int, *, request_bytes: bytes, host: Any
++) -> MappedEngineResult:
++    request, finish = _prepare_request(strict_json_loads(request_bytes), host=host)
++    if request != request_bytes:
++        raise ProtocolViolation("noncanonical request receipt")
++    return finish(stdout, stderr, returncode)
++
++
++def _receipt(
++    request: bytes, stdout: bytes, stderr: bytes, status: int, host: Any, limits: Limits
++) -> dict[str, Any]:
++    return {
++        "request_byte_hash": sha256(request),
++        "stdout_byte_hash": sha256(stdout),
++        "stderr_byte_hash": sha256(stderr),
++        "exit_code": status,
++        "executable_byte_hash": host.executable.byte_hash,
++        "host_record_byte_hash": host.selector.record_byte_hash,
++        "limits": vars(limits),
++    }
++
++
++def _case_authority(host: Any) -> str:
++    # Snapshot VALUES, including nested containers, not object identity or a
++    # caller-supplied hash. The snapshot is private, local and never serialized.
++    return canonical_json(
++        {
++            "selector": host.selector.model_dump(mode="json"),
++            "record": host.record.model_dump(mode="json"),
++            "executable": host.executable.model_dump(mode="json"),
++            "root": str(host.root),
++            "profiles": {
++                key: value.model_dump(mode="json") for key, value in host.profiles.items()
++            },
++            "jobs": sorted(host.jobs),
++        }
++    )
++
++
++@contextmanager
++def admitted_case(
++    value: object, *, host: Any
++) -> Iterator[Callable[..., tuple[MappedEngineResult, dict[str, Any]]]]:
++    """One case, one genuine mode binding, one worker, explicit lexical lifetime.
++
++    Enter locally AFTER fork. The yielded operation accepts only per-call limits;
++    every invocation launches a fresh process and validates its complete response.
++    New bytes/authority/mode require a new context. No nested job is exposed.
++    Closing releases admitted data and invalidates any retained operation.
++    """
++    request, admitted = _admit_request(value, host=host)
++    job: MappedEngineJob | None = admitted
++    del admitted
++    authority = _case_authority(host)
++    owner_pid = os.getpid()
++    active = True
++    running = False
++
++    def ensure_current() -> None:
++        if not active or os.getpid() != owner_pid:
++            raise ValueError("case context expired or belongs to another process")
++        if _case_authority(host) != authority:
++            raise ValueError("case host authority changed; fresh admission required")
++
++    def execute(*, limits: Limits | None = None) -> tuple[MappedEngineResult, dict[str, Any]]:
++        nonlocal running
++        ensure_current()
++        if running:
++            raise ValueError("case context requires sequential executions")
++        assert job is not None
++        limits = Limits() if limits is None else limits
++        if len(request) > limits.stdin_bytes:
++            raise OperationalFailure("StdinLimit")
++        running = True
++        try:
++            with host.open_executable() as executable_fd:
++                stdout, stderr, status = _exchange(executable_fd, request, limits)
++            ensure_current()
++            result = _validate_response(stdout, stderr, status, job)
++            return result, _receipt(request, stdout, stderr, status, host, limits)
++        finally:
++            running = False
++
++    try:
++        yield execute
++    finally:
++        active = False
++        job = None
++        request = b""
++        authority = ""
++
++
+ def run_fixed_delay(
+     saved: Path, *, host: Any, limits: Limits | None = None
+ ) -> tuple[MappedEngineResult, dict[str, Any]]:
+@@ -228,16 +342,8 @@
+         raw = stream.read(limits.stdin_bytes + 1)
+     if len(raw) > limits.stdin_bytes:
+         raise OperationalFailure("StdinLimit")
+-    request = encode_request(strict_json_loads(raw), host=host)
++    request, finish = _prepare_request(strict_json_loads(raw), host=host)
+     with host.open_executable() as executable_fd:
+         stdout, stderr, status = _exchange(executable_fd, request, limits)
+-    result = parse_response(stdout, stderr, status, request_bytes=request, host=host)
+-    return result, {
+-        "request_byte_hash": sha256(request),
+-        "stdout_byte_hash": sha256(stdout),
+-        "stderr_byte_hash": sha256(stderr),
+-        "exit_code": status,
+-        "executable_byte_hash": host.executable.byte_hash,
+-        "host_record_byte_hash": host.selector.record_byte_hash,
+-        "limits": vars(limits),
+-    }
++    result = finish(stdout, stderr, status)
++    return result, _receipt(request, stdout, stderr, status, host, limits)
