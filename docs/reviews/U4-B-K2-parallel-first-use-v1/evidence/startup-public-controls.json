@@ -1,0 +1,27 @@
+{
+  "A_subject": "d0a99bd1d4c0ee4ebb5dd9c98b13e7dd052026f9",
+  "command": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "-c",
+    "import sys,pathlib,pytest,json;root=pathlib.Path(sys.argv.pop(1));sys.path[:0]=[str(root/\"src\"),str(root/\"contract\")];import rkuarch.engines.native.host as host;import rkuarch.engines.native.runner as runner;import uarch_contract.hardware as hardware;assert all(pathlib.Path(m.__file__).is_relative_to(root) for m in (host,runner,hardware));print(json.dumps({m.__name__:m.__file__ for m in (host,runner,hardware)}));raise SystemExit(pytest.main(sys.argv[1:]))",
+    "/tmp/u4-b-k2-parallel-v1/startup-public-controls/source",
+    "-q",
+    "-c",
+    "/tmp/u4-b-k2-parallel-v1/startup-public-controls/pytest.ini",
+    "--rootdir",
+    "/tmp/u4-b-k2-parallel-v1/startup-public-controls/source",
+    "/tmp/u4-b-k2-parallel-v1/startup-public-controls/source/tests/unit/test_u4_k2_host_records.py",
+    "/tmp/u4-b-k2-parallel-v1/startup-public-controls/source/tests/unit/test_u4_k2_host_paths.py",
+    "/tmp/u4-b-k2-parallel-v1/startup-public-controls/source/tests/unit/test_u4_k2_process.py"
+  ],
+  "exit_code": 0,
+  "postimages": {
+    "src/rkuarch/engines/native/host.py": "0f44dee94c753829b05d3a646d3ffb33a297468da11e5d8647aeaf64c24508ba",
+    "src/rkuarch/engines/native/runner.py": "fd27471a3d0ac7f9f49a9c815f5b4eb0e19c097e4fe386c44940ac3d2fa5f1f3",
+    "contract/uarch_contract/hardware.py": "98b1b06ddf686da948223ca517b0ac16729fbd0f3f6fd1b5bc6f61c1507cb1b5"
+  },
+  "scope": "private structural records, path and process helpers; no genuine successful native execution",
+  "native_mapped_calls": 0
+}

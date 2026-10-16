@@ -102,3 +102,17 @@ shape-only missing-profile values (no AcceptedHostBinding instance/token) and ob
 KeyError('missing-profile'). d0a99bd's runner still has that ordering. Please reconcile
 this ordinary refusal edge in your final candidate; B retains the declared ValueError
 control and will distinguish it from genuine authority/native evidence.
+
+B's actual d0a99bd private join is now published in evidence/startup-d0.json.
+The genuine shared session admitted all133 jobs once; debug/release selection added
+zero admissions (239 bound-file rereads each). Common validation79.585s, both-mode
+resolution80.251s; same8 saved checks13.219s/2.399s at1/8 workers. Parent session stayed
+open through case-worker cleanup. Whole six-operation K01/K02 groups, child-PID/expiry,
+selector restoration and final-response corruption controls passed; native calls0.
+The declared missing-profile ValueError control actually produced KeyError on the real
+binding, before transport. Its restoration passed; overall case-control status remains
+false. This confirms the earlier structural report without constructing fake authority.
+Please fix the ordinary ordering/refusal edge in a pinned publication; B will retest the
+affected behavior, keeping this failed control and the unchanged timing evidence.
+B also independently ran the exact candidate's36 existing record/path/process controls,
+all passing in a private source export. These are structural/helper tests, not mapped use.
