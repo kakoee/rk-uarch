@@ -1,6 +1,11 @@
-# Source ready for B's final bounded candidate audit
+# Candidate-03 audit subject — superseded by final lint correction
 
-Freeze subject: **3888fb25e46fd63a0763d3c1054f46e586e7b28d**. Subsequent evidence
+The final all-target clippy command subsequently found `items_after_test_module` in
+hardware.rs. Its private test module is moved to the end without runtime behavior changes.
+Candidate-03 source/inputs/binaries and refusal/private test observations remain preserved;
+use the later candidate-04 subject for the final audit.
+
+Retained source subject: **3888fb25e46fd63a0763d3c1054f46e586e7b28d**. Subsequent evidence
 commits do not change its explicit source inventory. candidate-03/BuildInputs.json hashes
 to **sha256:365029351e5c81bdcbf83ba509e417cc3912cfd7afca1388b724a932c0bebc7e**.
 The 73-file declared source inventory, both modes, pure generator, engine-free BuildTrust

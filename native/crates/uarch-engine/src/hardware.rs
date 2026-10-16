@@ -161,19 +161,6 @@ fn coordinate_below(value: &Value, bound: f64) -> bool {
         .is_ok_and(|n| crate::carrier::cmp_integer(&n, &format!("{bound:.0}")).is_lt())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn integer_grid_comparison_does_not_round_the_coordinate() {
-        let maximum = wire::parse("36893488147419103231").unwrap();
-        assert!(coordinate_below(&maximum, 36893488147419103232.0));
-        assert!(!coordinate_below(
-            &wire::parse("36893488147419103232").unwrap(),
-            36893488147419103232.0
-        ));
-    }
-}
 pub(crate) fn validate(spec: &mut Value) -> Result<()> {
     // Float dictionary keys are the sole key normalization in HardwareSpec.
     let volt = spec["energy"]["voltage_ratio"]
@@ -321,4 +308,18 @@ pub(crate) fn validate(spec: &mut Value) -> Result<()> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn integer_grid_comparison_does_not_round_the_coordinate() {
+        let maximum = wire::parse("36893488147419103231").unwrap();
+        assert!(coordinate_below(&maximum, 36893488147419103232.0));
+        assert!(!coordinate_below(
+            &wire::parse("36893488147419103232").unwrap(),
+            36893488147419103232.0
+        ));
+    }
 }
