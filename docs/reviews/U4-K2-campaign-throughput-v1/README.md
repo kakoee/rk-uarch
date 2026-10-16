@@ -66,3 +66,18 @@ checks and the minimal revised deployment binding. It avoids another series of
 single-issue handoffs. The original runtime remains sealed. No full campaign restart,
 new native execution, protected edit or authority installation is performed by this
 package; the revised harness must be checked and placed before restarting.
+
+## Complementary Lane A work
+
+[The A task](lane-A-prompt.md) investigates and implements a private, tested candidate
+for per-call admission reuse and separately evaluates the hardware-rule hotspot.
+B continues harness parallelism against its unchanged source pin. A publishes an
+unapplied candidate so production/support/authority identities do not change under
+B's active work. The coordinator reconciles both complete handoffs once, including
+any protected-source and deployment implications; neither task restarts the campaign.
+
+Javid subsequently asked to share setup across repeats of one case. The
+[shared A/B addendum](shared-case-reuse-addendum.md) explicitly extends A's original
+per-call reuse proposal to a bounded case-scoped interface and assigns B case-group
+scheduling. It retains six fresh executions and complete per-output validation;
+grouping by itself does not authorize skipping admission or reusing results.
