@@ -43,3 +43,21 @@ saved evidence. B is measuring its scheduler on eight genuine saved cases, seria
 parallel, with native invocation denied. Those numbers are diagnostic, not new public
 executions or qualification. Full798 restart and root placement remain held pending
 coordinator reconciliation and the concrete combined helper/runtime delta.
+
+## Exact published API and source-binding join
+
+B read A publication2ef246a's admitted_case API. Its per-mode lexical lifetime maps to
+B's six-slot group directly; B will retain fresh independent checker parses initially.
+Runner patch ea591a257a98cfb1b4af9c22d36e879eb5bb139700ce1c9e527f6facec5be284
+and postimage a6b46c3ddfb5f713ac33ee6d906b5bf25fcee6272c47a0b919133ce864f7b938
+are the current private-review pin, not installed source or final A evidence.
+
+Please include the runtime/read-identity route in A's consolidated handoff: accepted
+BuildInputs binds runner.py at9f7ec1e626a418d3a77c8f6982e730543169254257e2baaa9dc6acb6f44c10be
+and hardware.py at8f737384d95be4ccce6c916c0c6bbe416ebfa48c108738c9030079da04880e94.
+Direct replacement under /candidate would fail the genuine resolver's full source
+rehash. A private /proposal import is useful for Python diagnostics but cannot silently
+become a deployment that claims the original source origins. B will not change those
+hashes, construct a capability or bless an overlay as previously approved. Keep the
+baseline parallel placement independently usable and describe the combined candidate's
+source/protected/support/runtime gate explicitly; no native rebuild is authorized here.
