@@ -1,0 +1,332 @@
+{
+  "method": "Static readelf output interpretation; symbol availability, not dynamic loader emulation or execution",
+  "inputs": {
+    "strace-elf.stdout": {
+      "bytes": 21936,
+      "sha256": "0597ceb83d4f38f2798737f1f53e37737ac2671d8a271871164241e0b4224d24"
+    },
+    "unwind-elf.stdout": {
+      "bytes": 17122,
+      "sha256": "d842bf85a91ad98dc164b3539fa6d923d700b54386f0b4159cf55ae2dbb5fadf"
+    },
+    "unwind-x86_64-elf.stdout": {
+      "bytes": 12874,
+      "sha256": "ffdf26d1f03bb3758e33141718a3993fbe726c9dc2d3615e04bfb05b86ff44e9"
+    },
+    "unwind-ptrace-elf.stdout": {
+      "bytes": 8693,
+      "sha256": "3bbdffaccd294b45dcbcb1e9c2092b20507b26aaf21e93a6d6d5d08ded8974e6"
+    },
+    "unwind-coredump-elf.stdout": {
+      "bytes": 9199,
+      "sha256": "529b6222e44b373c367baa54f91946e3c42414cb1648fee14683d0681c5e159c"
+    },
+    "libc-elf.stdout": {
+      "bytes": 329229,
+      "sha256": "fa26ee4767cc6813474e8dcba66989d6929af01be9b77ad7d29a2212031ddbc8"
+    },
+    "loader-elf.stdout": {
+      "bytes": 8809,
+      "sha256": "2907d743a62d77b70fe942fb3f7137a9c90115bca9364931fbad53d19f1a6646"
+    },
+    "liblzma-elf.stdout": {
+      "bytes": 22045,
+      "sha256": "db80bb8dfc9d851405492d9cf7fe7c0c728fa2e7d2d99f1e157f8dec82b0cd5b"
+    }
+  },
+  "objects": {
+    "strace": {
+      "soname": null,
+      "interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "needed": [
+        "libunwind-ptrace.so.0",
+        "libunwind-x86_64.so.8",
+        "libc.so.6"
+      ],
+      "rpath_runpath": [],
+      "version_needs": {
+        "libc.so.6": [
+          "GLIBC_2.28",
+          "GLIBC_2.7",
+          "GLIBC_2.14",
+          "GLIBC_2.3",
+          "GLIBC_2.15",
+          "GLIBC_2.8",
+          "GLIBC_2.4",
+          "GLIBC_2.33",
+          "GLIBC_2.17",
+          "GLIBC_2.3.4",
+          "GLIBC_2.34",
+          "GLIBC_2.2.5"
+        ]
+      },
+      "version_definitions": [],
+      "dynamic_symbol_rows": 158
+    },
+    "unwind": {
+      "soname": "libunwind.so.8",
+      "interpreter": null,
+      "needed": [
+        "libc.so.6",
+        "ld-linux-x86-64.so.2",
+        "liblzma.so.5"
+      ],
+      "rpath_runpath": [],
+      "version_needs": {
+        "ld-linux-x86-64.so.2": [
+          "GLIBC_2.3"
+        ],
+        "liblzma.so.5": [
+          "XZ_5.0"
+        ],
+        "libc.so.6": [
+          "GLIBC_2.9",
+          "GLIBC_2.14",
+          "GLIBC_2.33",
+          "GLIBC_2.34",
+          "GLIBC_2.2.5"
+        ]
+      },
+      "version_definitions": [],
+      "dynamic_symbol_rows": 122
+    },
+    "unwind-x86_64": {
+      "soname": "libunwind-x86_64.so.8",
+      "interpreter": null,
+      "needed": [
+        "liblzma.so.5",
+        "libunwind.so.8",
+        "libc.so.6",
+        "ld-linux-x86-64.so.2"
+      ],
+      "rpath_runpath": [],
+      "version_needs": {
+        "ld-linux-x86-64.so.2": [
+          "GLIBC_2.3"
+        ],
+        "liblzma.so.5": [
+          "XZ_5.0"
+        ],
+        "libc.so.6": [
+          "GLIBC_2.9",
+          "GLIBC_2.14",
+          "GLIBC_2.33",
+          "GLIBC_2.34",
+          "GLIBC_2.2.5"
+        ]
+      },
+      "version_definitions": [],
+      "dynamic_symbol_rows": 80
+    },
+    "unwind-ptrace": {
+      "soname": "libunwind-ptrace.so.0",
+      "interpreter": null,
+      "needed": [
+        "libc.so.6"
+      ],
+      "rpath_runpath": [],
+      "version_needs": {
+        "libc.so.6": [
+          "GLIBC_2.33",
+          "GLIBC_2.14",
+          "GLIBC_2.2.5"
+        ]
+      },
+      "version_definitions": [],
+      "dynamic_symbol_rows": 44
+    },
+    "unwind-coredump": {
+      "soname": "libunwind-coredump.so.0",
+      "interpreter": null,
+      "needed": [
+        "liblzma.so.5",
+        "libc.so.6"
+      ],
+      "rpath_runpath": [],
+      "version_needs": {
+        "liblzma.so.5": [
+          "XZ_5.0"
+        ],
+        "libc.so.6": [
+          "GLIBC_2.33",
+          "GLIBC_2.14",
+          "GLIBC_2.2.5"
+        ]
+      },
+      "version_definitions": [],
+      "dynamic_symbol_rows": 51
+    },
+    "libc": {
+      "soname": "libc.so.6",
+      "interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "needed": [
+        "ld-linux-x86-64.so.2"
+      ],
+      "rpath_runpath": [],
+      "version_needs": {
+        "ld-linux-x86-64.so.2": [
+          "GLIBC_2.35",
+          "GLIBC_2.2.5",
+          "GLIBC_2.3",
+          "GLIBC_PRIVATE"
+        ]
+      },
+      "version_definitions": [
+        "libc.so.6",
+        "GLIBC_2.2.5",
+        "GLIBC_2.2.6",
+        "GLIBC_2.3",
+        "GLIBC_2.3.2",
+        "GLIBC_2.3.3",
+        "GLIBC_2.3.4",
+        "GLIBC_2.4",
+        "GLIBC_2.5",
+        "GLIBC_2.6",
+        "GLIBC_2.7",
+        "GLIBC_2.8",
+        "GLIBC_2.9",
+        "GLIBC_2.10",
+        "GLIBC_2.11",
+        "GLIBC_2.12",
+        "GLIBC_2.13",
+        "GLIBC_2.14",
+        "GLIBC_2.15",
+        "GLIBC_2.16",
+        "GLIBC_2.17",
+        "GLIBC_2.18",
+        "GLIBC_2.22",
+        "GLIBC_2.23",
+        "GLIBC_2.24",
+        "GLIBC_2.25",
+        "GLIBC_2.26",
+        "GLIBC_2.27",
+        "GLIBC_2.28",
+        "GLIBC_2.29",
+        "GLIBC_2.30",
+        "GLIBC_2.31",
+        "GLIBC_2.32",
+        "GLIBC_2.33",
+        "GLIBC_2.34",
+        "GLIBC_2.35",
+        "GLIBC_2.36",
+        "GLIBC_ABI_DT_RELR",
+        "GLIBC_PRIVATE"
+      ],
+      "dynamic_symbol_rows": 3044
+    },
+    "loader": {
+      "soname": "ld-linux-x86-64.so.2",
+      "interpreter": null,
+      "needed": [],
+      "rpath_runpath": [],
+      "version_needs": {},
+      "version_definitions": [
+        "ld-linux-x86-64.so.2",
+        "GLIBC_2.2.5",
+        "GLIBC_2.3",
+        "GLIBC_2.4",
+        "GLIBC_2.34",
+        "GLIBC_2.35",
+        "GLIBC_PRIVATE"
+      ],
+      "dynamic_symbol_rows": 40
+    },
+    "liblzma": {
+      "soname": "liblzma.so.5",
+      "interpreter": null,
+      "needed": [
+        "libc.so.6"
+      ],
+      "rpath_runpath": [],
+      "version_needs": {
+        "libc.so.6": [
+          "GLIBC_2.3.4",
+          "GLIBC_2.32",
+          "GLIBC_2.14",
+          "GLIBC_2.34",
+          "GLIBC_2.4",
+          "GLIBC_2.6",
+          "GLIBC_2.3.2",
+          "GLIBC_2.17",
+          "GLIBC_2.2.5"
+        ]
+      },
+      "version_definitions": [
+        "liblzma.so.5",
+        "XZ_5.0",
+        "XZ_5.2",
+        "XZ_5.1.2alpha",
+        "XZ_5.2.2",
+        "XZ_5.4"
+      ],
+      "dynamic_symbol_rows": 154
+    }
+  },
+  "tracer_reachable_objects": [
+    "libc",
+    "liblzma",
+    "loader",
+    "strace",
+    "unwind",
+    "unwind-ptrace",
+    "unwind-x86_64"
+  ],
+  "symbol_availability": {
+    "strace": {
+      "strong_symbols_available": 145,
+      "unresolved_weak_symbols": [
+        "_ITM_deregisterTMCloneTable",
+        "__gmon_start__",
+        "_ITM_registerTMCloneTable"
+      ]
+    },
+    "unwind": {
+      "strong_symbols_available": 40,
+      "unresolved_weak_symbols": []
+    },
+    "unwind-x86_64": {
+      "strong_symbols_available": 42,
+      "unresolved_weak_symbols": []
+    },
+    "unwind-ptrace": {
+      "strong_symbols_available": 27,
+      "unresolved_weak_symbols": [
+        "_ITM_deregisterTMCloneTable",
+        "__gmon_start__",
+        "_ITM_registerTMCloneTable"
+      ]
+    },
+    "unwind-coredump": {
+      "strong_symbols_available": 31,
+      "unresolved_weak_symbols": []
+    },
+    "libc": {
+      "strong_symbols_available": 18,
+      "unresolved_weak_symbols": []
+    },
+    "loader": {
+      "strong_symbols_available": 0,
+      "unresolved_weak_symbols": []
+    },
+    "liblzma": {
+      "strong_symbols_available": 30,
+      "unresolved_weak_symbols": [
+        "_ITM_deregisterTMCloneTable",
+        "__gmon_start__",
+        "_ITM_registerTMCloneTable"
+      ]
+    }
+  },
+  "unused_payload": "unwind-coredump is not DT_NEEDED-reachable from strace; its strong imports are available in the tracer group, but standalone loading was not tested",
+  "negative_controls_refused": [
+    "missing_library",
+    "missing_required_version",
+    "missing_required_strong_symbol",
+    "wrong_interpreter"
+  ],
+  "restored_positive": true,
+  "limits": [
+    "No runtime loading, IFUNC resolution, constructors, optional dlopen paths or ptrace checked",
+    "Weak unresolved symbols retained explicitly; no claim of semantic dependency or full environment use"
+  ]
+}
