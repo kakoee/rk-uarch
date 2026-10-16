@@ -1,12 +1,9 @@
 """Frozen Python-only saved-evidence regressions. No native execution permitted."""
 
-import copy
 import hashlib
 import json
 import os
 import re
-import sys
-import time
 from pathlib import Path
 
 
@@ -58,8 +55,8 @@ def rule_checks(hardware):
             hardware.HARDWARE_UNIT_RULES.clear()
             hardware.HARDWARE_UNIT_RULES.update(mapping)
             for path in paths + [f"churn{i}.x" for i in range(160)]:
-                assert outcome(lambda: hardware.hardware_unit_rule(path)) == outcome(
-                    lambda: reference(path)
+                assert outcome(lambda path=path: hardware.hardware_unit_rule(path)) == outcome(
+                    lambda path=path: reference(path)
                 )
                 n += 1
     finally:
@@ -246,7 +243,7 @@ def runner_checks(runner, host, samples, canonical, Job, checker, *, case_api):
                 caller = json.loads(request)
                 with runner.admitted_case(caller, host=host) as execute:
                     caller.clear()
-                    for i in range(3):
+                    for _ in range(3):
                         checked_result(execute()[0])
                     case_rows["three_calls_admissions"] = loads
                     assert loads == 1

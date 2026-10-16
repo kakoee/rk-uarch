@@ -1,11 +1,9 @@
 """Explicit private imports, sealed runtime, genuine resolver, Python-only replay."""
 
-import cProfile
-import importlib.util
 import importlib.metadata
+import importlib.util
 import json
 import os
-import pstats
 import subprocess
 import sys
 import time
@@ -15,7 +13,7 @@ sys.path.insert(0, "/campaign")
 import entrypoint as frozen
 
 sys.path.insert(0, "/checks")
-from checks import runner_checks, rule_checks, sha
+from checks import rule_checks, runner_checks, sha
 
 START = time.perf_counter()
 
@@ -74,18 +72,20 @@ sys.path[:0] = [
 sys.meta_path.insert(0, frozen.NoProducers())
 for name, expected in runtime["package_versions"].items():
     assert importlib.metadata.version(name) == expected
-from deployment import verify_bytes
+# These imports must follow runtime verification and installation of NoProducers.
+from deployment import verify_bytes  # noqa: E402
 
 verify_bytes(
     Path("/candidate"),
     frozen.read_json(Path("/campaign/candidate-layout.json"))["files"],
     sealed=True,
 )
-from rkuarch.engines.native import host, runner
-from uarch_contract import hardware
-from uarch_contract.hashing import canonical_json
-from uarch_contract.mapped import MappedEngineJob
-from first_use_checks import check_real_result
+from first_use_checks import check_real_result  # noqa: E402
+from uarch_contract import hardware  # noqa: E402
+from uarch_contract.hashing import canonical_json  # noqa: E402
+from uarch_contract.mapped import MappedEngineJob  # noqa: E402
+
+from rkuarch.engines.native import host, runner  # noqa: E402
 
 for name, module in tuple(sys.modules.items()):
     f = getattr(module, "__file__", None)
