@@ -3,13 +3,17 @@
 This is preparation under the throughput task and shared case-reuse addendum.
 B can continue grouped scheduling against source `24fa36803081e5077d5977baa91441a2c8534ec8`.
 Nothing here changes live production, sealed deployment, authority or B's baseline.
-The two exact patches and full changed files are review inputs, **not installed code**.
-Tests were frozen first. Baseline and corrected candidate public-entry regressions
-match exactly, including 33 refusal/operational records. Source bindings now include
-the explicit host.require_job check in case operations, avoiding incidental errors
-for malformed profile inventory. Final case controls and timings are running.
-The original intermediate snapshot serialization bug is fixed; its failed receipt
-is preserved. Use source-bindings.json from this revision, not the initial patch.
+The three exact patches and full changed files are review inputs, **not installed code**.
+All bounded A checks are complete; see README.md and the exact final source-bindings.json.
+Final runner is ce82a76e6887ace0d65349a7c09159293466b73ff656680e90184a716ffd7ed9;
+host is 0f44dee94c753829b05d3a646d3ffb33a297468da11e5d8647aeaf64c24508ba;
+hardware is 98b1b06ddf686da948223ca517b0ac16729fbd0f3f6fd1b5bc6f61c1507cb1b5.
+
+B's published missing-profile finding is resolved by checking dictionary membership
+before host.require_job. The declared ValueError now precedes transport; actual
+before/corrected/reverted/restored controls and restored positive replays passed in
+receipts/peer-join. Earlier timing/refusal receipts remain pinned to their original
+sources, not relabelled as final-byte evidence. No other case interface changed.
 
 The proposed additive interface in `runner.patch` is:
 
@@ -60,7 +64,7 @@ from B's single-threaded parent fork as described there; construct each case con
 in the assigned worker after fork. The context PID guard is not a requirement to rerun
 the resolver in each worker. No changed helper/runtime installation is implied.
 
-## Shared startup API (startup addendum; tests running)
+## Shared startup API (startup addendum; bounded tests passed)
 
 The exact third delta is `host-session.patch`, included in `source-bindings.json`.
 Use the updated runner patch as well: a late malformed nested engine anchor now
@@ -88,7 +92,8 @@ it exposes neither its internal graph nor a serialized approval token. Each sele
 rehashes every originally read bound file, compares the actual selector's exact bytes,
 and materializes independent record/profile models for that mode through the genuine
 production constructor. No debug dataclass is edited/copied to authorize release.
-Per-mode model materialization remains real work and will be measured separately.
+Per-mode model materialization remains real work: both selections plus rehashes took
+0.782 seconds in the phase measurement, separately from common validation.
 
 The parent selects both modes before fork. Its selector callable is PID-bound and
 expires on context exit, releasing captured state. Emitted bindings have the ordinary
@@ -104,7 +109,22 @@ a changed installation/selector needs a new session. Every actual process launch
 checks the selected executable descriptor, and every output is validated afresh.
 No nested pool/parallel validator is proposed. B continues to own worker resources.
 
-This remains private diagnostic/proposal code. The startup tests/profile are pending at
-this intermediate publication. The same runtime/build-source separation now applies
-to host.py as well as runner.py and hardware.py; no sealed source, records or deployment
-is changed. Final startup results and the single consolidated handoff will follow here.
+This remains private diagnostic/proposal code. Startup common/session controls,
+independent strict public resolver positives/negatives, drift/lifetime/mode isolation
+and exact byte restoration passed. With the rule optimization held constant, two
+fresh public resolutions took 158.481 seconds and shared setup/both modes 83.127 seconds.
+Exactly 133 jobs were admitted once. Every selection rehashes 239 bound identities;
+no cached metadata replaces actual file checks. Detailed phase/count/RSS evidence is
+in receipts/startup and README.md. Native executions remain zero.
+
+B's f7bb6ef interface note is integrated. Please consume these final three postimages
+for the bounded combined scheduler/startup test and runtime/helper placement proposal.
+Your initial 2ef246a join and d0a99bd startup preparation are preserved as their own
+pins. The missing-profile edge needs no further semantic decision. Parent fork,
+worker-local contexts and parent lifetime through reap are unchanged. No nested pool
+is requested; keep one-worker/multiworker controls and startup/processing/total times
+separate. Full798 and fast/broader profile distinctions remain as in your published note.
+
+The runtime/build-source separation applies to all three files. No sealed source,
+records or deployment is changed. The exact protected hardware/support and separately
+bound runtime choice remains coordinator/human reconciliation; see identity-and-lifecycle.md.

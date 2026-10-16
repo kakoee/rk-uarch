@@ -1,0 +1,39 @@
+"""Patch/type/lint/source-preservation receipts. No native tools executed."""
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+from pathlib import Path
+root=Path.cwd(); private=Path('/tmp/u4-a-admission.0i3ay8e8'); out=root/'docs/reviews/U4-A-K2-python-admission-v1'
+rows=[]
+def run(argv,cwd=root,env=None):
+ result=subprocess.run(argv,cwd=cwd,env=env,capture_output=True,text=True)
+ rows.append({'argv':list(map(str,argv)),'cwd':str(cwd),'exit':result.returncode,'stdout':result.stdout,'stderr':result.stderr})
+ assert result.returncode==0,rows[-1]
+ return result.stdout
+files=[private/'variants/startup-v2'/p for p in ['src/rkuarch/engines/native/runner.py','contract/uarch_contract/hardware.py','src/rkuarch/engines/native/host.py']]
+run([str(root/'.venv/bin/ruff'),'check',*map(str,files),str(out)])
+run([str(root/'.venv/bin/ruff'),'format','--check',*map(str,files)])
+env=dict(os.environ);env['MYPYPATH']=str(private/'variants/final/src')+':'+str(private/'variants/final/contract')
+run([str(root/'.venv/bin/mypy'),'--follow-imports=silent','--explicit-package-bases','--strict','--no-incremental','--cache-dir',str(private/'mypy-cache'),*map(str,files)],env=env)
+patch_map={'src/rkuarch/engines/native/runner.py':'runner.patch','contract/uarch_contract/hardware.py':'hardware-rule.patch','src/rkuarch/engines/native/host.py':'host-session.patch'}
+for label,patches in [(name,[name]) for name in patch_map.values()]+[('combined',list(patch_map.values()))]:
+ target=Path(__import__('tempfile').mkdtemp(prefix='u4-a-final-apply-'))/'source';shutil.copytree(private/'baseline',target)
+ for patch in patches:
+  run(['git','apply','--check',str(out/patch)],cwd=target)
+  run(['git','apply',str(out/patch)],cwd=target)
+ for path,patch in patch_map.items():
+  expected=private/('variants/startup-v2' if patch in patches else 'baseline')/path
+  assert (target/path).read_bytes()==expected.read_bytes(),(label,path)
+run(['git','diff','--check'])
+assert run(['git','diff','363b7c7','--','src','contract','native','scripts','hw','uv.lock','pyproject.toml'])==''
+inputs=json.loads((out/'inputs.json').read_bytes())
+for path,item in inputs['source_files'].items():
+ assert hashlib.sha256((root/path).read_bytes()).hexdigest()==item['sha256']
+for sample in inputs['samples']:
+ assert hashlib.sha256(Path(sample['receipt']).read_bytes()).hexdigest()==sample['receipt_sha256']
+ for item in sample['streams'].values():
+  assert 'sha256:'+hashlib.sha256(Path(item['path']).read_bytes()).hexdigest()==item['sha256']
+(out/'static-checks-final.json').write_text(json.dumps({'commands':rows,'explicit_mypy_path':env['MYPYPATH'],'source_preimages_unchanged':True,'saved_sample_bytes_unchanged':True,'separable_patches_apply_and_postimages_match':True},indent=2)+'\n')
+print('static checks, independent patches, exact source/sample preservation passed')

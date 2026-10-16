@@ -1,0 +1,73 @@
+         126783115 function calls (117920140 primitive calls) in 46.057 seconds
+
+   Ordered by: cumulative time
+   List reduced from 225 to 65 due to restriction <65>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000   46.057   46.057 /checks/measure.py:57(workload)
+        3    0.009    0.003   46.055   15.352 /checks/measure.py:84(checked)
+ 8925/861    0.011    0.000   41.258    0.048 /site/pydantic/main.py:693(model_validate)
+ 8925/861    0.403    0.000   41.257    0.048 {method 'validate_python' of 'pydantic_core._pydantic_core.SchemaValidator' objects}
+        3    0.001    0.000   37.226   12.409 /checks/measure.py:97(<lambda>)
+        3    0.034    0.011   37.225   12.408 /sources/baseline/src/rkuarch/engines/native/runner.py:223(run_fixed_delay)
+        9    0.000    0.000   36.193    4.021 /checks/measure.py:63(counted)
+        9    0.018    0.002   36.193    4.021 /proposal/src/rkuarch/workload/mapped.py:17(loads_fixed_delay_job)
+     6042    0.264    0.000   36.189    0.006 /proposal/contract/uarch_contract/hardware.py:362(coherent)
+        9    0.000    0.000   35.868    3.985 /proposal/contract/uarch_contract/mapped.py:1983(validate_job)
+   356478    5.339    0.000   34.251    0.000 <exact baseline rule>:320(hardware_unit_rule)
+       33    0.083    0.003   32.567    0.987 /proposal/contract/uarch_contract/mapped.py:527(identities)
+     4434    0.047    0.000   29.338    0.007 /proposal/contract/uarch_contract/hashing.py:45(spec_hash)
+        6    0.010    0.002   25.195    4.199 /sources/baseline/src/rkuarch/engines/native/runner.py:191(encode_request)
+        3    0.011    0.004   24.495    8.165 /sources/baseline/src/rkuarch/engines/native/runner.py:204(parse_response)
+       21    0.003    0.000   21.099    1.005 /proposal/contract/uarch_contract/mapped.py:1513(admit)
+ 10144518    2.551    0.000   17.932    0.000 /python/lib/python3.12/re/__init__.py:255(escape)
+ 10144518   14.702    0.000   14.702    0.000 {method 'translate' of 'str' objects}
+       12    0.019    0.002   13.735    1.145 /proposal/contract/uarch_contract/mapped.py:708(closure)
+        3    0.000    0.000    8.812    2.937 /site/pydantic/main.py:742(model_validate_json)
+        3    0.119    0.040    8.812    2.937 {method 'validate_json' of 'pydantic_core._pydantic_core.SchemaValidator' objects}
+ 10144518    2.907    0.000    8.442    0.000 /python/lib/python3.12/re/__init__.py:169(fullmatch)
+     4656    0.128    0.000    6.447    0.001 /proposal/contract/uarch_contract/hashing.py:18(canonical_json)
+6733284/4656    3.465    0.000    4.713    0.001 /proposal/contract/uarch_contract/hashing.py:22(normalized)
+      189    0.002    0.000    3.953    0.021 /proposal/contract/uarch_contract/hashing.py:91(verify_identity)
+ 10144518    2.799    0.000    3.839    0.000 /python/lib/python3.12/re/__init__.py:280(_compile)
+ 41250878    3.126    0.000    3.151    0.000 {built-in method builtins.isinstance}
+      201    0.001    0.000    3.146    0.016 /proposal/contract/uarch_contract/hashing.py:82(content_hash)
+ 20319984    2.491    0.000    2.491    0.000 {method 'replace' of 'str' objects}
+ 10144518    1.696    0.000    1.696    0.000 {method 'fullmatch' of 're.Pattern' objects}
+2398674/362520    1.093    0.000    1.674    0.000 /proposal/contract/uarch_contract/hardware.py:246(sourced_leaves)
+     9060    0.009    0.000    1.530    0.000 /site/pydantic/main.py:427(model_dump)
+     9060    1.055    0.000    1.521    0.000 {method 'to_python' of 'pydantic_core._pydantic_core.SchemaSerializer' objects}
+     4657    0.025    0.000    1.115    0.000 /python/lib/python3.12/json/__init__.py:183(dumps)
+     4657    0.016    0.000    1.086    0.000 /python/lib/python3.12/json/encoder.py:183(encode)
+     4657    1.067    0.000    1.067    0.000 /python/lib/python3.12/json/encoder.py:205(iterencode)
+     4401    0.078    0.000    0.591    0.000 /proposal/contract/uarch_contract/mapped.py:568(resolve_frequencies)
+    47043    0.457    0.000    0.466    0.000 /python/lib/python3.12/enum.py:202(__get__)
+       18    0.000    0.000    0.390    0.022 /proposal/contract/uarch_contract/hashing.py:65(strict_json_loads)
+       18    0.000    0.000    0.390    0.022 /python/lib/python3.12/json/__init__.py:299(loads)
+       18    0.000    0.000    0.384    0.021 /python/lib/python3.12/json/decoder.py:333(decode)
+       18    0.128    0.007    0.384    0.021 /python/lib/python3.12/json/decoder.py:344(raw_decode)
+    94872    0.121    0.000    0.379    0.000 /proposal/contract/uarch_contract/sourced.py:45(kind_rules)
+   193197    0.255    0.000    0.255    0.000 /proposal/contract/uarch_contract/hashing.py:68(pairs)
+    94872    0.041    0.000    0.247    0.000 {built-in method builtins.any}
+       33    0.000    0.000    0.228    0.007 /proposal/contract/uarch_contract/mapped.py:379(closure)
+   957720    0.221    0.000    0.221    0.000 {built-in method builtins.getattr}
+   379488    0.206    0.000    0.206    0.000 /proposal/contract/uarch_contract/sourced.py:48(<genexpr>)
+   157098    0.106    0.000    0.192    0.000 /site/pydantic/_internal/_utils.py:431(__get__)
+    18324    0.096    0.000    0.191    0.000 /python/lib/python3.12/fractions.py:186(__new__)
+  1504485    0.142    0.000    0.142    0.000 {method 'items' of 'dict' objects}
+    94872    0.131    0.000    0.141    0.000 /proposal/contract/uarch_contract/sourced.py:38(unit_present)
+     4644    0.016    0.000    0.107    0.000 /proposal/contract/uarch_contract/hashing.py:40(sha256)
+       12    0.000    0.000    0.101    0.008 /proposal/contract/uarch_contract/mapped.py:606(hardware_projection)
+80073/4500    0.080    0.000    0.099    0.000 /site/pydantic/main.py:1164(__eq__)
+   157098    0.045    0.000    0.086    0.000 /site/pydantic/main.py:275(model_fields)
+        6    0.000    0.000    0.077    0.013 /proposal/src/rkuarch/engines/native/host.py:109(require_job)
+     4651    0.067    0.000    0.067    0.000 {built-in method _hashlib.openssl_sha256}
+    94872    0.022    0.000    0.031    0.000 /proposal/contract/uarch_contract/sourced.py:31(finite)
+    13203    0.008    0.000    0.030    0.000 /python/lib/python3.12/fractions.py:959(__gt__)
+     4683    0.017    0.000    0.029    0.000 /proposal/contract/uarch_contract/mapped.py:37(ordered)
+    18360    0.028    0.000    0.028    0.000 {method 'match' of 're.Pattern' objects}
+    35832    0.013    0.000    0.028    0.000 <frozen abc>:117(__instancecheck__)
+    13203    0.010    0.000    0.023    0.000 /python/lib/python3.12/fractions.py:933(_richcmp)
+   189744    0.020    0.000    0.020    0.000 {method 'strip' of 'str' objects}
+
+

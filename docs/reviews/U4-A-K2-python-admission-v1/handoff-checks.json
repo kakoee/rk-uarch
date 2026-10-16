@@ -1,0 +1,596 @@
+{
+  "scope": "Proposal integrity/arithmetic/links/currentness only; zero native executions",
+  "candidate_bindings_exact": true,
+  "receipt_copies_and_executed_tests": {
+    "authority-before": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "49e1625f694abf2f41a499976353b06ca50815bf7a6e913b654037c72d28ba64",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "76f533e5c85a09914255db58a2e7ba514ef01481fcc4c937fc02d805750906eb",
+        "report.json": "11d1a8106a60d0ac247579d76766019d37025f42e4cbf3274167cda109f337dc"
+      },
+      "executed_helper_copies": {
+        "authority_controls.py": [
+          "tests-guard/authority_controls.py"
+        ],
+        "authority_driver.py": [
+          "tests-guard/authority_driver.py"
+        ],
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "final_controls.py": [
+          "tests-guard/final_controls.py",
+          "historical-harnesses/tests-final2/final_controls.py.txt"
+        ],
+        "measure.py": [
+          "tests-final/measure.py",
+          "historical-harnesses/tests-final/measure.py.txt",
+          "historical-harnesses/tests-final2/measure.py.txt"
+        ],
+        "measurement_driver.py": [
+          "tests-final/measurement_driver.py",
+          "historical-harnesses/tests-final/measurement_driver.py.txt",
+          "historical-harnesses/tests-final2/measurement_driver.py.txt"
+        ],
+        "rule_driver.py": [
+          "historical-harnesses/tests-final2/rule_driver.py.txt"
+        ],
+        "rule_driver_v2.py": [
+          "historical-harnesses/tests-final2/rule_driver_v2.py.txt"
+        ]
+      }
+    },
+    "baseline": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "09efad66a5fef1ba5f98a7e273963947864fc5c630cf3a6aebd6e2c5ee0767c5",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "b079cd6ac798946f82400090207e091e93ccfbbbe943f18227fbb07a11ea1291",
+        "report.json": "1c75ea08c681e5e7001aab03cbbfcccd6b56163e243ff2c41e61d92e272e8f7a"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "historical-tests-first/checks.py.txt",
+          "historical-harnesses/tests/checks.py.txt"
+        ],
+        "driver.py": [
+          "historical-tests-first/driver.py.txt",
+          "historical-harnesses/tests/driver.py.txt"
+        ]
+      }
+    },
+    "candidate": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "5d36daca2fa0e420ffa4373a171fcf191cb9a4c34a607297070ee3717300e2bd",
+        "exit.json": "8ef199e2ba32edcf45464649ce4dae0f2106f394db6f819c55faa6df8200c959",
+        "stderr.txt": "55602e1e8ff4f044730b429cc8970715070b3df80905a36e163f197591b9953f",
+        "command.json": "86808830927c4bcc6f1387b2a35d54fd568967e205c79e9846ceac8ba450ee53",
+        "report.json": "a2bc5e6743c221f462dff67db86dc1e5d6b958007ea8bf813a890366bc838935"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "historical-tests-first/checks.py.txt",
+          "historical-harnesses/tests/checks.py.txt"
+        ],
+        "driver.py": [
+          "historical-tests-first/driver.py.txt",
+          "historical-harnesses/tests/driver.py.txt"
+        ]
+      }
+    },
+    "candidate-v2": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "09efad66a5fef1ba5f98a7e273963947864fc5c630cf3a6aebd6e2c5ee0767c5",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "76350ad501a2b8afd87cda2b4a590a480499fc62ade6045f4b50eefb0ec1fd5f",
+        "report.json": "36c4c96a1bedd65f384fd8c956762a064afe2ef872b5f2028fec4948f278ba88"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "historical-tests-first/checks.py.txt",
+          "historical-harnesses/tests/checks.py.txt"
+        ],
+        "driver.py": [
+          "historical-tests-first/driver.py.txt",
+          "historical-harnesses/tests/driver.py.txt"
+        ],
+        "measure.py": [
+          "historical-harnesses/tests/measure.py.txt"
+        ],
+        "measurement_driver.py": [
+          "historical-harnesses/tests/measurement_driver.py.txt"
+        ]
+      }
+    },
+    "final": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "9137bd95920b29b534143ab7a74f0ef86a4ad1ae7c91cb005ade21ec5ffd7b56",
+        "exit.json": "8ef199e2ba32edcf45464649ce4dae0f2106f394db6f819c55faa6df8200c959",
+        "stderr.txt": "856978f72bec177867807eb2496f0d98e2e8e37403b05cf66333ae928297f9ce",
+        "command.json": "bfcf1a34c4dac94f3c4826293f2e03bd38e42ebb6d3a0990986d8be822052d6a",
+        "report.json": "668247b567bbad31365846b01dce42f0c2ee36b4fdee8c9736ceeb4bf35e17d4"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "final_controls.py": [
+          "tests-final/final_controls.py",
+          "historical-harnesses/tests-final/final_controls.py.txt"
+        ],
+        "measure.py": [
+          "tests-final/measure.py",
+          "historical-harnesses/tests-final/measure.py.txt",
+          "historical-harnesses/tests-final2/measure.py.txt"
+        ],
+        "measurement_driver.py": [
+          "tests-final/measurement_driver.py",
+          "historical-harnesses/tests-final/measurement_driver.py.txt",
+          "historical-harnesses/tests-final2/measurement_driver.py.txt"
+        ]
+      }
+    },
+    "final-guard": {
+      "exact_private_copies": {
+        "profile-case+rule.txt": "95b4e24193513792f2d853d1316b25c44739c03a3dd35bbf5888c9ef7d47a89a",
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "710ebcaef5ab5a08f8cdc2cdb485a2e999242894e59d0129ecffa053dd0e6d75",
+        "profile-baseline.txt": "aff3f93b267cc54755f1d32b4402a802442b3978ca5cf4623135175a621f617f",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "bc949240a2f7904084b128484a6d2b32c2bf63f1c7052e0b70101755025dd93f",
+        "report.json": "f02f6b2312d276c865092046592472cd5317bcb3d5238678b58803848354553b"
+      },
+      "executed_helper_copies": {
+        "authority_controls.py": [
+          "tests-guard/authority_controls.py"
+        ],
+        "authority_driver.py": [
+          "tests-guard/authority_driver.py"
+        ],
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "final_controls.py": [
+          "tests-guard/final_controls.py",
+          "historical-harnesses/tests-final2/final_controls.py.txt"
+        ],
+        "measure.py": [
+          "tests-guard/measure.py"
+        ],
+        "measurement_driver.py": [
+          "tests-guard/measurement_driver.py"
+        ],
+        "rule_driver.py": [
+          "historical-harnesses/tests-final2/rule_driver.py.txt"
+        ],
+        "rule_driver_v2.py": [
+          "historical-harnesses/tests-final2/rule_driver_v2.py.txt"
+        ]
+      }
+    },
+    "final2": {
+      "exact_private_copies": {
+        "profile-case+rule.txt": "97fe2cc05fc797bf5068bc70857bad07e69f2df7553d0df2857221dc06498064",
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "3cdd3f1907237a98aefabd48fc165b2a1a6d808a2cec65e9ef96f15e8f6a04fd",
+        "profile-baseline.txt": "c23fbbb2a6503c0758bafdf59aefa9469f6619d1706d0d65155fa37a78925a3d",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "c0f401c99e785312dbb9a91aaf635693b15741a4aa8e1927920e4ddb9dc83e8e",
+        "report.json": "31c87e99237fa6a876b8791c65019791395514eb6823e1888aaaff04e29659d8"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "final_controls.py": [
+          "tests-guard/final_controls.py",
+          "historical-harnesses/tests-final2/final_controls.py.txt"
+        ],
+        "measure.py": [
+          "tests-final/measure.py",
+          "historical-harnesses/tests-final/measure.py.txt",
+          "historical-harnesses/tests-final2/measure.py.txt"
+        ],
+        "measurement_driver.py": [
+          "tests-final/measurement_driver.py",
+          "historical-harnesses/tests-final/measurement_driver.py.txt",
+          "historical-harnesses/tests-final2/measurement_driver.py.txt"
+        ]
+      }
+    },
+    "measurement": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "aa3e6d7ab90fceeea5b403e9518187c4fd528216b1b59871635bf7e0bc4460ae",
+        "exit.json": "20f8d8cfbe75ae5161afc9a784f4667eb501bf3d055e8531f8780fd3b034c473",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "f446a692e1fefb0043ecb78ca172e8e9b993fa96b5d329c6e369fdf943b2c3c7",
+        "report.json": "2093dbb7465591ce56edb9e8cf06a6c62e75000b22d5da471cae000d28844773"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "historical-tests-first/checks.py.txt",
+          "historical-harnesses/tests/checks.py.txt"
+        ],
+        "driver.py": [
+          "historical-tests-first/driver.py.txt",
+          "historical-harnesses/tests/driver.py.txt"
+        ],
+        "measure.py": [
+          "historical-harnesses/tests/measure.py.txt"
+        ],
+        "measurement_driver.py": [
+          "historical-harnesses/tests/measurement_driver.py.txt"
+        ]
+      }
+    },
+    "measurement-v2": {
+      "exact_private_copies": {
+        "profile-case+rule.txt": "ceedc2f8d30f144d6c64067148ce1f2c801a88765bbccafee0da204b0f216cac",
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "5ff769e0a8710b5da96b24478bdbc063f811bb1aab9071dfc84c88a54fadb31f",
+        "profile-baseline.txt": "693cebac7836e672118218cb656a2459378e6a62a70b2050ae73d90000fdefe0",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "fc3e51b561234c8aadc1e3de373c45744ff6080822d647c18e4cf32b23aa672d",
+        "report.json": "3b3c44a3a7983f8655c0bdf234012846a8bb848ef3cf6f464ed4acd69cf8e189"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "measure.py": [
+          "historical-harnesses/tests-v2/measure.py.txt"
+        ],
+        "measurement_driver.py": [
+          "historical-harnesses/tests-v2/measurement_driver.py.txt"
+        ]
+      }
+    },
+    "peer-join": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "897555f345ed8dcc0677466ef7f9d28bbfe473f0acde364d649e8049b09910d3",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "3a1860cd81ebc05402f41c239ec2cfc5b3e53ca822e46a9c7991819369d6ca97",
+        "report.json": "60b01dfff606216c233122f9f66d028e2806d824fab088fd9a2b00647ce3e00c"
+      },
+      "executed_helper_copies": {
+        "authority_controls.py": [
+          "tests-guard/authority_controls.py"
+        ],
+        "authority_driver.py": [
+          "tests-guard/authority_driver.py"
+        ],
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "final_controls.py": [
+          "tests-guard/final_controls.py",
+          "historical-harnesses/tests-final2/final_controls.py.txt"
+        ],
+        "join_controls.py": [
+          "tests-join/join_controls.py"
+        ],
+        "join_driver.py": [
+          "tests-join/join_driver.py"
+        ],
+        "measure.py": [
+          "tests-guard/measure.py"
+        ],
+        "measurement_driver.py": [
+          "tests-guard/measurement_driver.py"
+        ],
+        "rule_driver.py": [
+          "historical-harnesses/tests-final2/rule_driver.py.txt"
+        ],
+        "rule_driver_v2.py": [
+          "historical-harnesses/tests-final2/rule_driver_v2.py.txt"
+        ],
+        "startup_checks.py": [
+          "tests-startup/startup_checks.py"
+        ],
+        "startup_driver.py": [
+          "tests-startup/startup_driver.py"
+        ],
+        "startup_profile.py": [
+          "tests-startup/startup_profile.py"
+        ]
+      }
+    },
+    "rule-controls": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "exit.json": "8ef199e2ba32edcf45464649ce4dae0f2106f394db6f819c55faa6df8200c959",
+        "stderr.txt": "8bad8e8f2fe9ae0699388d14674161da84c41ec446d059b329e05d25e2dcbab9",
+        "command.json": "41aca7560252c4eba2cbb30b6af870e8eeb03887ddc133d6e654693a678ea98d",
+        "report.json": "4b62d457ccb8abb3721b1802ffc937121e4c87fbb1105dc3782fa96fd9357108"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "final_controls.py": [
+          "tests-guard/final_controls.py",
+          "historical-harnesses/tests-final2/final_controls.py.txt"
+        ],
+        "measure.py": [
+          "tests-final/measure.py",
+          "historical-harnesses/tests-final/measure.py.txt",
+          "historical-harnesses/tests-final2/measure.py.txt"
+        ],
+        "measurement_driver.py": [
+          "tests-final/measurement_driver.py",
+          "historical-harnesses/tests-final/measurement_driver.py.txt",
+          "historical-harnesses/tests-final2/measurement_driver.py.txt"
+        ],
+        "rule_driver.py": [
+          "historical-harnesses/tests-final2/rule_driver.py.txt"
+        ]
+      }
+    },
+    "rule-controls-v2": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "e4b6689e1c9deafaa0b7054c65133adc7fbb56a44fe9fb42b2806ce4c147b7e6",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "1d3b5e5a80ab5ae85f595bf09d3ab1b0b1d82f1423c9106ae8a107db658fbb4f",
+        "report.json": "888438ec944afee79fd10dcab5dbe6215b11f5e07bd60013b5895fba65fa370d"
+      },
+      "executed_helper_copies": {
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "final_controls.py": [
+          "tests-guard/final_controls.py",
+          "historical-harnesses/tests-final2/final_controls.py.txt"
+        ],
+        "measure.py": [
+          "tests-final/measure.py",
+          "historical-harnesses/tests-final/measure.py.txt",
+          "historical-harnesses/tests-final2/measure.py.txt"
+        ],
+        "measurement_driver.py": [
+          "tests-final/measurement_driver.py",
+          "historical-harnesses/tests-final/measurement_driver.py.txt",
+          "historical-harnesses/tests-final2/measurement_driver.py.txt"
+        ],
+        "rule_driver.py": [
+          "historical-harnesses/tests-final2/rule_driver.py.txt"
+        ],
+        "rule_driver_v2.py": [
+          "historical-harnesses/tests-final2/rule_driver_v2.py.txt"
+        ]
+      }
+    },
+    "startup": {
+      "exact_private_copies": {
+        "image-inspect.json": "49ff6ebadcac6efe17ac0be2d15916fd7cf0c3dce9d9abcbfbef2e222ce3c86c",
+        "stdout.txt": "673a1035f5234fb5df325b11c885d461f3e0a0d49414c823e6073c7a44d4b856",
+        "exit.json": "5bc232b82de377a5655a39a2af9d7ae0fc868de5b9df957e18905cb914606c88",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command.json": "4d3e7d7cef73ad2187cf8b060f5ce62d314e3851e89fd0b7d31feed267a95cd6",
+        "report.json": "e9da5bd19fa735e6b7142c080d1a234a3648a88f9cfb813a5ae44bee29d1e280"
+      },
+      "executed_helper_copies": {
+        "authority_controls.py": [
+          "tests-guard/authority_controls.py"
+        ],
+        "authority_driver.py": [
+          "tests-guard/authority_driver.py"
+        ],
+        "checks.py": [
+          "tests-final/checks.py",
+          "tests/checks.py",
+          "historical-harnesses/tests-final/checks.py.txt",
+          "historical-harnesses/tests-v2/checks.py.txt",
+          "historical-harnesses/tests-final2/checks.py.txt"
+        ],
+        "driver.py": [
+          "tests-final/driver.py",
+          "historical-harnesses/tests-final/driver.py.txt",
+          "historical-harnesses/tests-v2/driver.py.txt",
+          "historical-harnesses/tests-final2/driver.py.txt"
+        ],
+        "final_controls.py": [
+          "tests-guard/final_controls.py",
+          "historical-harnesses/tests-final2/final_controls.py.txt"
+        ],
+        "measure.py": [
+          "tests-guard/measure.py"
+        ],
+        "measurement_driver.py": [
+          "tests-guard/measurement_driver.py"
+        ],
+        "rule_driver.py": [
+          "historical-harnesses/tests-final2/rule_driver.py.txt"
+        ],
+        "rule_driver_v2.py": [
+          "historical-harnesses/tests-final2/rule_driver_v2.py.txt"
+        ],
+        "startup_checks.py": [
+          "tests-startup/startup_checks.py"
+        ],
+        "startup_driver.py": [
+          "tests-startup/startup_driver.py"
+        ],
+        "startup_profile.py": [
+          "tests-startup/startup_profile.py"
+        ]
+      }
+    }
+  },
+  "local_links": [
+    {
+      "from": "README.md",
+      "target": "partial-campaign-preservation.json"
+    },
+    {
+      "from": "README.md",
+      "target": "source-bindings.json"
+    },
+    {
+      "from": "README.md",
+      "target": "runner.patch"
+    },
+    {
+      "from": "README.md",
+      "target": "host-session.patch"
+    },
+    {
+      "from": "README.md",
+      "target": "hardware-rule.patch"
+    },
+    {
+      "from": "README.md",
+      "target": "peer-interface.md"
+    },
+    {
+      "from": "README.md",
+      "target": "receipts/final-guard/report.json"
+    },
+    {
+      "from": "README.md",
+      "target": "receipts/startup/report.json"
+    },
+    {
+      "from": "README.md",
+      "target": "public-equivalence.json"
+    },
+    {
+      "from": "README.md",
+      "target": "receipts/peer-join/report.json"
+    },
+    {
+      "from": "README.md",
+      "target": "historical-test-provenance.json"
+    },
+    {
+      "from": "README.md",
+      "target": "static-checks-final.json"
+    },
+    {
+      "from": "README.md",
+      "target": "handoff-checks.json"
+    },
+    {
+      "from": "README.md",
+      "target": "identity-and-lifecycle.md"
+    },
+    {
+      "from": "README.md",
+      "target": "identity-audit.json"
+    }
+  ],
+  "processing_median_seconds": {
+    "baseline": 94.4837083090024,
+    "rule-only": 26.269295861005958,
+    "per-call": 45.20149716200831,
+    "per-call+rule": 12.461280889503541,
+    "case": 29.531054631996085,
+    "case+rule": 9.187053619993094
+  },
+  "processing_runner_sha256": "sha256:fd27471a3d0ac7f9f49a9c815f5b4eb0e19c097e4fe386c44940ac3d2fa5f1f3",
+  "final_runner_sha256": "ce82a76e6887ace0d65349a7c09159293466b73ff656680e90184a716ffd7ed9",
+  "baseline_two_mode_startup_seconds": 158.48142620699946,
+  "shared_two_mode_startup_seconds": 83.12722053399193,
+  "startup_phase_arithmetic_matches": true,
+  "final_missing_profile_discriminators_match": true,
+  "selected_support_count": 56,
+  "selected_support_exactly_current": true,
+  "full_campaign_slot_count": 798,
+  "checker_source_sha256": "1d02327e040ae8d18fec62075cba3e8708d3024a8a665da328dad9a3fdcb41fb"
+}

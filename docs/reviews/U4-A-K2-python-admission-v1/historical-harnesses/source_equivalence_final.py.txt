@@ -1,0 +1,19 @@
+"""Structural checks for untouched transport, framing, signatures and result validators."""
+import ast,hashlib,json
+from pathlib import Path
+r=Path('/tmp/u4-a-admission.0i3ay8e8');path='src/rkuarch/engines/native/runner.py'
+a=ast.parse((r/'baseline'/path).read_text());b=ast.parse((r/'variants/startup-v2'/path).read_text())
+a={n.name:n for n in a.body if isinstance(n,(ast.FunctionDef,ast.ClassDef))};b={n.name:n for n in b.body if isinstance(n,(ast.FunctionDef,ast.ClassDef))}
+unchanged=['Limits','OperationalFailure','ProtocolViolation','NativeRefusal','_decode_envelope','_exchange']
+for name in unchanged:assert ast.dump(a[name],include_attributes=False)==ast.dump(b[name],include_attributes=False)
+signatures=['encode_request','parse_response','run_fixed_delay']
+for name in signatures:
+ assert ast.dump(a[name].args)==ast.dump(b[name].args)
+ assert ast.dump(a[name].returns)==ast.dump(b[name].returns)
+# Exact original result-validation tail, moved behind private admitted job reuse.
+old=a['parse_response'].body
+idx=next(i for i,n in enumerate(old) if isinstance(n,ast.Assign) and isinstance(n.value,ast.Call) and isinstance(n.value.func,ast.Name) and n.value.func.id=='_decode_envelope')
+assert [ast.dump(n) for n in old[idx:]]==[ast.dump(n) for n in b['_validate_response'].body]
+result={'unchanged_ast':unchanged,'unchanged_public_signatures':signatures,'unchanged_complete_result_validation_tail':True,'final_runner_sha256':hashlib.sha256((r/'variants/startup-v2'/path).read_bytes()).hexdigest()}
+Path('docs/reviews/U4-A-K2-python-admission-v1/source-equivalence-final.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result,indent=2))

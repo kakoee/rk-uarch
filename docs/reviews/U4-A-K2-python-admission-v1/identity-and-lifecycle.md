@@ -11,6 +11,7 @@ match the live and sealed preimages. No artifact was generated or adopted.
 |---|---|---|---|---|
 | `src/rkuarch/engines/native/runner.py` | No | Yes, python-build-helper | No | Yes |
 | `contract/uarch_contract/hardware.py` | Yes | Yes, python-build-helper | No | Yes |
+| `src/rkuarch/engines/native/host.py` | No | Yes, python-build-helper | No | Yes |
 
 The actual selection is `scripts.u2_support.support_files`, rooted at the three
 installed generator/support entry points. The rule patch adds only stdlib
@@ -23,11 +24,11 @@ separate. The runner alone has no selected-support edge and requires no U0002 ch
 on account of that path. Neither candidate modifies a schema definition.
 
 `native/tools/freeze_inputs.py` explicitly selects all contract carriers and native
-Python boundary files. Accepted candidate-04 BuildInputs consequently contains both
+Python boundary files. Accepted candidate-04 BuildInputs consequently contains all three
 preimages. `generate_identity.py` rehashes every source file and derives
 `engine.implementation_hash = content_hash(BuildInputs)`. The model identity uses
 only `accounting.rs`, `event.rs`, `simulation.rs`, `time.rs`; those bytes remain exact.
-Changing either source entry **in that BuildInputs** changes the full implementation
+Changing any of these source entries **in that BuildInputs** changes the full implementation
 identity and generated native identity even though the Rust model subset is unchanged.
 A rebuilt unified identity would consequently need later construction, exact binaries,
 updated jobs/bindings and human authority. No such build, generation or authority is
@@ -35,7 +36,7 @@ part of this task. Conversely, a separate Python runtime proposal does not by it
 change the already-built binary bytes or retroactively alter their BuildInputs.
 
 The genuine resolver rehashes that old full source list under `/candidate` on every
-resolution. Directly replacing either file there will fail. B's existing entrypoint
+resolution. Directly replacing any of these files there will fail. B's existing entrypoint
 also verifies its exact candidate-layout inventory and project import origins there.
 The old first-use acceptance does not silently bless a new import root or helper.
 Our `/proposal` imports are explicitly diagnostic: the unchanged real resolver
@@ -46,7 +47,7 @@ runtime or evidence that the new runtime has human first-use authority.
 A concrete runtime-only reconciliation route, if selected by the coordinator, is to
 retain the original native/build-source tree, records, jobs, both binary digests and
 expected engine identity unchanged, and bind a **separate, newly reviewed Python
-runtime closure**. It must enumerate the exact project import files with these two
+runtime closure**. It must enumerate the exact project import files with these three
 postimages, B's exact combined helper bytes, pinned interpreter/site/image inventories,
 and the original native BuildInputs/HostRecord digests. Its entrypoint must verify
 those distinct roots and exact import origins, resolve the original genuine mode

@@ -319,6 +319,8 @@ def admitted_case(
         if not active or os.getpid() != owner_pid:
             raise ValueError("case context expired or belongs to another process")
         assert job is not None
+        if job.admission.profile_hash not in host.profiles:
+            raise ValueError("case host authority changed; fresh admission required")
         host.require_job(job)
         if _case_authority(host) != authority:
             raise ValueError("case host authority changed; fresh admission required")

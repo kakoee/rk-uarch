@@ -45,7 +45,7 @@
      value = _decode_envelope(stdout, stderr, returncode)
      if returncode == 2:
          raise NativeRefusal(value)
-@@ -220,6 +223,134 @@
+@@ -220,6 +223,136 @@
      return result
  
  
@@ -145,6 +145,8 @@
 +        if not active or os.getpid() != owner_pid:
 +            raise ValueError("case context expired or belongs to another process")
 +        assert job is not None
++        if job.admission.profile_hash not in host.profiles:
++            raise ValueError("case host authority changed; fresh admission required")
 +        host.require_job(job)
 +        if _case_authority(host) != authority:
 +            raise ValueError("case host authority changed; fresh admission required")
@@ -180,7 +182,7 @@
  def run_fixed_delay(
      saved: Path, *, host: Any, limits: Limits | None = None
  ) -> tuple[MappedEngineResult, dict[str, Any]]:
-@@ -228,16 +359,8 @@
+@@ -228,16 +361,8 @@
          raw = stream.read(limits.stdin_bytes + 1)
      if len(raw) > limits.stdin_bytes:
          raise OperationalFailure("StdinLimit")

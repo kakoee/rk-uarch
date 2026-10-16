@@ -1,0 +1,20 @@
+{
+  "scope": "Packaging-only observations after completed runtime diagnostics; no candidate source changes",
+  "initial_check_handoff": [
+    "Ruff: four E501 lines; format check failed",
+    "Checker stopped because its own generated handoff-checks.json did not yet exist"
+  ],
+  "correction": "Formatted only the new packaging checker; verify generated receipt link after writing it, all other links before. Reran scoped lint and checker successfully.",
+  "auto_review": "An earlier startup launch approval review timed out before execution; split preparation/launch retry succeeded. No refused action or unresolved approval block.",
+  "staged_whitespace_check": {
+    "exit": 2,
+    "cause": "Four preserved raw cProfile text receipts end in an extra blank line; no commit ran.",
+    "files": [
+      "receipts/final2/profile-baseline.txt",
+      "receipts/final2/profile-case+rule.txt",
+      "receipts/measurement-v2/profile-baseline.txt",
+      "receipts/measurement-v2/profile-case+rule.txt"
+    ],
+    "resolution": "Keep original evidence byte-exact; run git -c core.whitespace=-blank-at-eof diff --cached --check for this publication. All other whitespace checks and normal hooks remain enabled. No persistent configuration change."
+  }
+}
