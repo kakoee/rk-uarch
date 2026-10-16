@@ -1,0 +1,252 @@
+--- a/src/rkuarch/engines/native/host.py
++++ b/src/rkuarch/engines/native/host.py
+@@ -10,12 +10,12 @@
+ import hashlib
+ import os
+ import stat
+-from collections.abc import Iterator
++from collections.abc import Callable, Iterator
+ from dataclasses import dataclass
+ from pathlib import Path
+ from typing import Any
+ 
+-from uarch_contract.hashing import content_hash, sha256, strict_json_loads
++from uarch_contract.hashing import canonical_json, content_hash, sha256, strict_json_loads
+ from uarch_contract.mapped import MappedEngineJob, NativeTestProfile, NativeTestRegistry
+ 
+ from .records import (
+@@ -133,9 +133,7 @@
+             yield fd
+ 
+ 
+-def resolve_host(*, mode: str) -> AcceptedHostBinding:
+-    """Load only the independently installed, root-owned system selector."""
+-    _require(mode in ("debug", "release"), "explicit debug/release mode required")
++def _selector_bytes() -> bytes:
+     with _open(_SELECTOR.parent, _SELECTOR.name) as fd:
+         st = os.fstat(fd)
+         _require(
+@@ -143,19 +141,42 @@
+             "selector must be root-owned and not group/world writable",
+         )
+         with os.fdopen(os.dup(fd), "rb") as stream:
+-            selector = HostSelector.model_validate(strict_json_loads(stream.read()))
++            data = stream.read()
++    return data
++
++
++def resolve_host(*, mode: str) -> AcceptedHostBinding:
++    """Fresh public resolution; no retained session or global admission cache."""
++    _require(mode in ("debug", "release"), "explicit debug/release mode required")
++    selector = HostSelector.model_validate(strict_json_loads(_selector_bytes()))
+     return _resolve(selector, mode=mode)
+ 
+ 
+-def _resolve(selector: HostSelector, *, mode: str) -> AcceptedHostBinding:
+-    """Private resolver core, also used by explicitly synthetic record tests."""
++def _validated_installation(
++    selector: HostSelector,
++) -> tuple[Callable[[], None], Callable[[str], AcceptedHostBinding]]:
++    """One authority path, retaining only owned bytes and immutable identities.
++
++    The returned closures cannot be constructed from caller-provided admitted data.
++    Every original validation below completes before either closure is returned.
++    """
+     root = Path(selector.repository)
++    observed_files: set[tuple[str, str]] = set()
++
++    def read(binding: FileBinding) -> bytes:
++        data = _read(root, binding)
++        observed_files.add((binding.path, binding.byte_hash))
++        return data
++
++    def read_json(binding: FileBinding) -> Any:
++        return strict_json_loads(read(binding))
++
+     record = HostRecord.model_validate(
+-        _json(root, FileBinding(path=selector.record_path, byte_hash=selector.record_byte_hash))
+-    )
+-    build = BuildInputs.model_validate(_json(root, record.build_input_file))
+-    trust = BuildTrust.model_validate(_json(root, record.trust_file))
+-    tools = ToolInputs.model_validate(_json(root, build.tool_inputs_file))
++        read_json(FileBinding(path=selector.record_path, byte_hash=selector.record_byte_hash))
++    )
++    build = BuildInputs.model_validate(read_json(record.build_input_file))
++    trust = BuildTrust.model_validate(read_json(record.trust_file))
++    tools = ToolInputs.model_validate(read_json(build.tool_inputs_file))
+     _require(content_hash(build) == record.build_input_hash, "BuildInputs hash")
+     _require(content_hash(trust) == record.trust_hash == build.trust_hash, "BuildTrust hash")
+     _require(
+@@ -171,10 +192,10 @@
+         record.loader_read_inventory,
+         record.corpus_inventory,
+     ):
+-        _read(root, file)
++        read(file)
+     # Decision subjects precede the containing HostRecord; never include its own hash.
+-    decision = _json(root, record.decision)
+-    review = _json(root, record.independent_review)
++    decision = read_json(record.decision)
++    review = read_json(record.independent_review)
+     subject = {
+         "build_input_hash": record.build_input_hash,
+         "tool_inputs_hash": record.tool_inputs_hash,
+@@ -203,7 +224,7 @@
+     )
+     # Every input is checked, including build mode/tool flags and the model subset.
+     for file in build.source_files:
+-        _read(root, file)
++        read(file)
+     model = [
+         x.model_dump(mode="json") for x in build.source_files if x.path in build.model_source_paths
+     ]
+@@ -225,7 +246,7 @@
+         tools.crate_checksum_inventory,
+         tools.linker_and_os_inventory,
+     ):
+-        _read(root, file)
++        read(file)
+     _require(
+         tuple(x.mode for x in build.mode_configs) == ("debug", "release"),
+         "both build modes required",
+@@ -239,7 +260,7 @@
+         "sorted finite profiles",
+     )
+     for profile in trust.profiles:
+-        parsed = NativeTestProfile.model_validate(_json(root, profile.file))
++        parsed = NativeTestProfile.model_validate(read_json(profile.file))
+         _require(parsed.profile_hash == profile.profile_hash, "profile file/content mismatch")
+         actual = [
+             (
+@@ -265,15 +286,15 @@
+         ]
+         _require(actual == bound, "finite case closure differs from profile")
+         profiles[parsed.profile_hash] = parsed
+-    registry = NativeTestRegistry.model_validate(_json(root, trust.registry_file))
++    registry = NativeTestRegistry.model_validate(read_json(trust.registry_file))
+     _require(registry.registry_hash == trust.registry_hash == record.registry_hash, "registry join")
+     _require(tuple(sorted(profiles)) == record.profile_hashes, "host finite profile inventory")
+-    inventory = _json(root, record.jobs_inventory)
++    inventory = read_json(record.jobs_inventory)
+     _require(
+         set(inventory) == {"format", "jobs"} and inventory["format"] == "uarch-k2-jobs-inventory/1",
+         "jobs inventory format",
+     )
+-    corpus = _json(root, record.corpus_inventory)
++    corpus = read_json(record.corpus_inventory)
+     _require(isinstance(corpus, dict) and isinstance(corpus.get("cases"), list), "corpus cases")
+     expected_cases = {
+         (p.profile_hash, c.case_id): c.execution_outcome for p in trust.profiles for c in p.cases
+@@ -295,7 +316,7 @@
+     for item in inventory["jobs"]:
+         _require(set(item) == {"file", "job_hash"}, "job inventory entry fields")
+         binding = FileBinding.model_validate(item["file"])
+-        data = _read(root, binding)
++        data = read(binding)
+         raw = strict_json_loads(data)
+         profile_hash = raw["admission"]["profile_hash"]
+         _require(profile_hash in profiles, "job profile outside trust")
+@@ -320,7 +341,7 @@
+     _require(bool(jobs), "nonempty exact first-use jobs required")
+     _require(job_cases == set(expected_cases), "complete first-use job case inventory required")
+     for executable in record.executables:
+-        receipt = BuildReceipt.model_validate(_json(root, executable.build_receipt))
++        receipt = BuildReceipt.model_validate(read_json(executable.build_receipt))
+         _require(
+             receipt.engine == record.expected_engine
+             and receipt.build_input_hash == record.build_input_hash,
+@@ -349,10 +370,88 @@
+             receipt.binary_origin_check,
+             receipt.software_path_check,
+         ):
+-            _read(root, file)
++            read(file)
+         # Verify BOTH real binaries independently, even when selecting one mode.
+-        _read(root, executable.executable)
+-    selected = next(x for x in record.executables if x.mode == mode)
+-    return AcceptedHostBinding(
+-        selector, record, selected.executable, root, profiles, frozenset(jobs), _TOKEN
+-    )
++        read(executable.executable)
++    # Retain no mutable validated model graph. Each emitted mode binding owns
++    # fresh models parsed from these exact, privately captured canonical bytes.
++    selector_data = canonical_json(selector).encode()
++    record_data = canonical_json(record).encode()
++    profile_data = tuple((key, canonical_json(value).encode()) for key, value in profiles.items())
++    admitted_jobs = frozenset(jobs)
++    verified_files = tuple(sorted(observed_files))
++    repository = str(root)
++
++    def recheck() -> None:
++        for path, digest in verified_files:
++            _read(Path(repository), FileBinding(path=path, byte_hash=digest))
++
++    def materialize(mode: str) -> AcceptedHostBinding:
++        own_selector = HostSelector.model_validate(strict_json_loads(selector_data))
++        own_record = HostRecord.model_validate(strict_json_loads(record_data))
++        own_profiles = {
++            key: NativeTestProfile.model_validate(strict_json_loads(data))
++            for key, data in profile_data
++        }
++        selected = next(x for x in own_record.executables if x.mode == mode)
++        return AcceptedHostBinding(
++            own_selector,
++            own_record,
++            selected.executable,
++            Path(repository),
++            own_profiles,
++            admitted_jobs,
++            _TOKEN,
++        )
++
++    return recheck, materialize
++
++
++def _resolve(selector: HostSelector, *, mode: str) -> AcceptedHostBinding:
++    # The standalone API deliberately validates the entire current installation
++    # afresh, including every corpus member and BOTH executable/receipt bindings.
++    _, materialize = _validated_installation(selector)
++    return materialize(mode)
++
++
++@contextlib.contextmanager
++def resolution_session() -> Iterator[Callable[..., AcceptedHostBinding]]:
++    """Bounded common startup validation for one campaign/setup parent.
++
++    Select each mode before forking workers; only genuine emitted bindings may be
++    inherited. Every selection rehashes every originally read input and compares
++    exact selector bytes. Drift refuses; it never refreshes this session's trust.
++    Restoring all exact approved bytes allows selection again. Exit/PID change
++    invalidates selection. Already emitted bindings have the ordinary public
++    capability semantics and belong to the caller's bounded campaign lifetime.
++    """
++    selector_data = _selector_bytes()
++    selector = HostSelector.model_validate(strict_json_loads(selector_data))
++    recheck: Callable[[], None] | None
++    materialize: Callable[[str], AcceptedHostBinding] | None
++    recheck, materialize = _validated_installation(selector)
++    del selector
++    owner_pid = os.getpid()
++    active = True
++
++    def select(*, mode: str) -> AcceptedHostBinding:
++        _require(
++            active and os.getpid() == owner_pid,
++            "resolution session expired or belongs to another process",
++        )
++        _require(mode in ("debug", "release"), "explicit debug/release mode required")
++        _require(
++            _selector_bytes() == selector_data,
++            "selector changed; fresh resolution session required",
++        )
++        assert recheck is not None and materialize is not None
++        recheck()
++        return materialize(mode)
++
++    try:
++        yield select
++    finally:
++        active = False
++        selector_data = b""
++        recheck = None
++        materialize = None

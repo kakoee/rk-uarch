@@ -59,3 +59,52 @@ B interface-to-A.md was integrated normally. Genuine resolver bindings may be in
 from B's single-threaded parent fork as described there; construct each case context
 in the assigned worker after fork. The context PID guard is not a requirement to rerun
 the resolver in each worker. No changed helper/runtime installation is implied.
+
+## Shared startup API (startup addendum; tests running)
+
+The exact third delta is `host-session.patch`, included in `source-bindings.json`.
+Use the updated runner patch as well: a late malformed nested engine anchor now
+falls back to fresh admission, preserving actual baseline EngineIdentityMismatch
+rather than an incidental serialization exception. That correction's three negative
+controls and complete same-process timing matrix have passed in `receipts/final-guard`.
+
+The additive startup interface is:
+
+```python
+with host.resolution_session() as select:
+    bindings = {mode: select(mode=mode) for mode in ("debug", "release")}
+    # B starts/joins its case workers here. Bindings are genuine resolver outputs.
+    # Inside each worker, locally enter admitted_case(..., host=bindings[mode]).
+```
+
+`resolution_session` takes no workload authority, selector override, prevalidated
+object, or token. It runs the existing complete authority validation once: all jobs,
+profiles/registry, common inputs and BOTH mode-specific receipts/binaries. The existing
+public `resolve_host(mode=...)` still performs fresh complete validation each call.
+A single private validator body serves both paths; no second authority implementation.
+
+The session retains canonical bytes, immutable strings/tuples/frozensets and closures;
+it exposes neither its internal graph nor a serialized approval token. Each selection
+rehashes every originally read bound file, compares the actual selector's exact bytes,
+and materializes independent record/profile models for that mode through the genuine
+production constructor. No debug dataclass is edited/copied to authorize release.
+Per-mode model materialization remains real work and will be measured separately.
+
+The parent selects both modes before fork. Its selector callable is PID-bound and
+expires on context exit, releasing captured state. Emitted bindings have the ordinary
+public capability semantics and must remain scoped to B's campaign/worker lifetime;
+join/clean up workers before closing the parent context. Worker copies inherit genuine
+bindings via the already reviewed fork route; they do not rerun full-corpus resolution
+or reconstruct authority from serialized bytes. Per-case contexts are created locally.
+Mutating one emitted binding cannot alter another mode or subsequent selections.
+
+Any observed input drift refuses selection and does not refresh trust. Exact restoration
+is permitted only after a later selection rereads all original identities successfully;
+a changed installation/selector needs a new session. Every actual process launch still
+checks the selected executable descriptor, and every output is validated afresh.
+No nested pool/parallel validator is proposed. B continues to own worker resources.
+
+This remains private diagnostic/proposal code. The startup tests/profile are pending at
+this intermediate publication. The same runtime/build-source separation now applies
+to host.py as well as runner.py and hardware.py; no sealed source, records or deployment
+is changed. Final startup results and the single consolidated handoff will follow here.

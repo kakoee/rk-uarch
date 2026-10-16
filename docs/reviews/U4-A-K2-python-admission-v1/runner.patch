@@ -45,7 +45,7 @@
      value = _decode_envelope(stdout, stderr, returncode)
      if returncode == 2:
          raise NativeRefusal(value)
-@@ -220,6 +223,129 @@
+@@ -220,6 +223,134 @@
      return result
  
  
@@ -68,8 +68,13 @@
 +    authority = _authority_snapshot(host, profile)
 +
 +    def finish(stdout: bytes, stderr: bytes, status: int) -> MappedEngineResult:
-+        if _authority_snapshot(host, profile) != authority:
-+            # Preserve fresh public admission/refusal if trust changed during IO.
++        try:
++            unchanged = _authority_snapshot(host, profile) == authority
++        except (AttributeError, TypeError, ValueError):
++            unchanged = False
++        if not unchanged:
++            # Fresh admission also preserves the baseline refusal when a nested
++            # anchor is no longer serializable as the originally admitted type.
 +            return parse_response(stdout, stderr, status, request_bytes=request, host=host)
 +        host.require_job(job)
 +        return _validate_response(stdout, stderr, status, job)
@@ -175,7 +180,7 @@
  def run_fixed_delay(
      saved: Path, *, host: Any, limits: Limits | None = None
  ) -> tuple[MappedEngineResult, dict[str, Any]]:
-@@ -228,16 +354,8 @@
+@@ -228,16 +359,8 @@
          raw = stream.read(limits.stdin_bytes + 1)
      if len(raw) > limits.stdin_bytes:
          raise OperationalFailure("StdinLimit")

@@ -1,0 +1,164 @@
+"""Same-process factorial comparison; every call replays a genuine saved output."""
+
+import cProfile
+import importlib.util
+import json
+import pstats
+import re
+import sys
+import time
+from pathlib import Path
+
+from checks import sha
+
+
+def load_runner(name, path):
+    spec = importlib.util.spec_from_file_location("rkuarch.engines.native." + name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def baseline_rule(hardware):
+    # Exact original function extracted from the independently hashed source;
+    # use the same live mapping/models, not a substitute rule implementation.
+    import ast
+
+    source = Path("/sources/baseline/contract/uarch_contract/hardware.py").read_text()
+    tree = ast.parse(source)
+    node = next(
+        n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "hardware_unit_rule"
+    )
+    namespace = {"re": re, "HARDWARE_UNIT_RULES": hardware.HARDWARE_UNIT_RULES}
+    exec(
+        compile(ast.Module(body=[node], type_ignores=[]), "<exact baseline rule>", "exec"),
+        namespace,
+    )
+    return namespace["hardware_unit_rule"]
+
+
+def measure(candidate, hardware, bound, samples, canonical, Job, checker, report, save):
+    baseline = load_runner(
+        "measurement_baseline", "/sources/baseline/src/rkuarch/engines/native/runner.py"
+    )
+    rule_old = baseline_rule(hardware)
+    rule_new = hardware.hardware_unit_rule
+    configurations = [
+        ("baseline", baseline, rule_old, False),
+        ("rule-only", baseline, rule_new, False),
+        ("per-call", candidate, rule_old, False),
+        ("per-call+rule", candidate, rule_new, False),
+        ("case", candidate, rule_old, True),
+        ("case+rule", candidate, rule_new, True),
+    ]
+    rows = []
+
+    def workload(module, case_reuse, subset=samples):
+        original = module._exchange
+        count = 0
+        admissions = 0
+        load = module.loads_fixed_delay_job
+
+        def counted(*args, **kwargs):
+            nonlocal admissions
+            admissions += 1
+            return load(*args, **kwargs)
+
+        module.loads_fixed_delay_job = counted
+        signatures = []
+        try:
+            for sample in subset:
+                request, output = sample["request"], sample["stdout"]
+                path = Path("/tmp/measurement-request.json")
+                path.write_bytes(request)
+
+                def replay(fd, data, limits, request=request, output=output):
+                    nonlocal count
+                    assert data == request
+                    count += 1
+                    return output, b"", 0
+
+                module._exchange = replay
+
+                def checked(call, request=request, output=output, sample=sample):
+                    result, receipt = call()
+                    assert canonical(result).encode() == output
+                    assert receipt == sample["receipt"]
+                    checker(result, Job.model_validate_json(request), sample["answer"])
+                    signatures.append([sample["case"], sha(output), receipt])
+
+                if case_reuse:
+                    with module.admitted_case(json.loads(request), host=bound) as execute:
+                        for _ in range(3):
+                            checked(execute)
+                else:
+                    for _ in range(3):
+                        checked(lambda path=path: module.run_fixed_delay(path, host=bound))
+        finally:
+            module._exchange = original
+            module.loads_fixed_delay_job = load
+        return {
+            "transport_replays": count,
+            "request_admissions": admissions,
+            "signature": sha(json.dumps(signatures, sort_keys=True).encode()),
+        }
+
+    try:
+        for round_number in range(2):
+            ordered = configurations if round_number == 0 else list(reversed(configurations))
+            for label, module, rule, case_reuse in ordered:
+                hardware.hardware_unit_rule = rule
+                start = time.perf_counter()
+                observed = workload(module, case_reuse)
+                rows.append(
+                    {
+                        "round": round_number,
+                        "configuration": label,
+                        "seconds": time.perf_counter() - start,
+                        **observed,
+                    }
+                )
+                report["measurements"] = rows
+                save()
+                print("Measured", label, round_number, rows[-1]["seconds"], flush=True)
+        assert len({row["signature"] for row in rows}) == 1
+        profiles = []
+        for label, module, rule, case_reuse in [configurations[0], configurations[-1]]:
+            hardware.hardware_unit_rule = rule
+            profiler = cProfile.Profile()
+            profiler.enable()
+            observed = workload(module, case_reuse, samples[:1])
+            profiler.disable()
+            destination = Path("/receipts") / ("profile-" + label + ".txt")
+            with destination.open("w") as stream:
+                pstats.Stats(profiler, stream=stream).sort_stats("cumulative").print_stats(65)
+            profiles.append({"configuration": label, **observed, "file": destination.name})
+        report["profiles"] = profiles
+        # Actual private reverted/restored files, same discriminating selection.
+        controls = []
+        for label in ["reverted", "restored-guard"]:
+            root = Path("/sources/variants") / label
+            module = load_runner("scratch_" + label, root / "src/rkuarch/engines/native/runner.py")
+            hardware.hardware_unit_rule = rule_old if label == "reverted" else rule_new
+            observed = workload(module, hasattr(module, "admitted_case"), samples[:1])
+            controls.append(
+                {
+                    "stage": label,
+                    "source_hashes": {
+                        p: sha((root / p).read_bytes())
+                        for p in [
+                            "src/rkuarch/engines/native/runner.py",
+                            "contract/uarch_contract/hardware.py",
+                        ]
+                    },
+                    **observed,
+                }
+            )
+        report["scratch_revert_restored"] = controls
+        assert controls[0]["request_admissions"] == 9
+        assert controls[1]["request_admissions"] == 1
+        assert controls[0]["signature"] == controls[1]["signature"]
+    finally:
+        hardware.hardware_unit_rule = rule_new
+    save()

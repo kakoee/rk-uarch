@@ -242,8 +242,13 @@ def _prepare_request(
     authority = _authority_snapshot(host, profile)
 
     def finish(stdout: bytes, stderr: bytes, status: int) -> MappedEngineResult:
-        if _authority_snapshot(host, profile) != authority:
-            # Preserve fresh public admission/refusal if trust changed during IO.
+        try:
+            unchanged = _authority_snapshot(host, profile) == authority
+        except (AttributeError, TypeError, ValueError):
+            unchanged = False
+        if not unchanged:
+            # Fresh admission also preserves the baseline refusal when a nested
+            # anchor is no longer serializable as the originally admitted type.
             return parse_response(stdout, stderr, status, request_bytes=request, host=host)
         host.require_job(job)
         return _validate_response(stdout, stderr, status, job)
