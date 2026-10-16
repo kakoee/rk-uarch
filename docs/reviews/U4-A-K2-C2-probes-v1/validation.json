@@ -1,0 +1,22 @@
+{
+  "status": "receipt integrity, host lint and formatter binding passed; native typed/SIMD gates remain unresolved",
+  "native_units": "six passed in each mode; original command receipts",
+  "native_comparisons": "ten mismatches per mode retained; not a full parity pass",
+  "rustfmt": "published probe equals actual accepted rustfmt output; checked by receipt verifier",
+  "host_tests_first": "six synthetic comparison controls passed before native execution; not native evidence",
+  "receipt_verifier": {
+    "command": ".venv/bin/python docs/reviews/U4-A-K2-C2-probes-v1/verify_receipts.py",
+    "exit_code": 0,
+    "log": "evidence-check.log"
+  },
+  "ruff": {
+    "command": ".venv/bin/ruff check docs/reviews/U4-A-K2-C2-probes-v1/verify_receipts.py",
+    "exit_code": 0,
+    "log": "ruff.log"
+  },
+  "staged_whitespace": {
+    "command": "git diff --cached --check",
+    "exit_code": 0
+  },
+  "staged_scope": "only docs/reviews/U4-A-K2-C2-probes-v1"
+}

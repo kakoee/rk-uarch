@@ -1,0 +1,45 @@
+{
+  "source_files": [
+    {
+      "path": "registry/src/index.crates.io-1949cf8c6b5b557f/sha2-0.10.9/Cargo.toml",
+      "sha256": "f5b86209df69360114aaee67a66c3fcd31d8c840b8f34b9ad383aacd63cd15da",
+      "bytes": 1951
+    },
+    {
+      "path": "registry/src/index.crates.io-1949cf8c6b5b557f/sha2-0.10.9/src/sha256.rs",
+      "sha256": "6ced9112d4ceb4eff20b56d93a063f72ecef4c6ec3b215f08696a853b09083c3",
+      "bytes": 1460
+    },
+    {
+      "path": "registry/src/index.crates.io-1949cf8c6b5b557f/sha2-0.10.9/src/sha256/soft.rs",
+      "sha256": "98e765a8e8dfa0af31f2b76570f212e6b3099522bf300e1554cbbd9fd5d02960",
+      "bytes": 6370
+    },
+    {
+      "path": "registry/src/index.crates.io-1949cf8c6b5b557f/sha2-0.10.9/src/core_api.rs",
+      "sha256": "73b160d98bfa6737688875ad73da5e3c2c93582604dc313d208200e12fdab676",
+      "bytes": 4353
+    },
+    {
+      "path": "registry/src/index.crates.io-1949cf8c6b5b557f/digest-0.10.7/src/core_api/wrapper.rs",
+      "sha256": "033777bed7d140b158e15d50fda8a6e06557ce89bd0738fcca692be2c39e8b8a",
+      "bytes": 7040
+    },
+    {
+      "path": "registry/src/index.crates.io-1949cf8c6b5b557f/block-buffer-0.10.4/src/lib.rs",
+      "sha256": "b437252d389042d894b1ef17859b043e827d2bd2a1bca4b5311c67dff565274d",
+      "bytes": 10700
+    }
+  ],
+  "selected_features": [
+    "sha2/std",
+    "sha2/force-soft"
+  ],
+  "source_cfg": "sha2 src/sha256.rs selects soft::compress before architecture-specific dispatch. No asm/force-soft-compact feature. Release compression symbol inlines selected soft source. Source selection alone is not no-SIMD proof.",
+  "compiler_cfg_receipt": "compiler-cfg.stdout",
+  "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh",
+  "explicit_cpu_or_acceleration_flags": false,
+  "release_findings": "compress256 contains scalar integer instructions; c2_sha256_boundary final output packing contains punpckhbw/punpcklbw, pshuflw/pshufhw, packuswb. Compiler-generated packed operations do not establish a no-SIMD full hash path. Other movups/movaps and zeroing are separately incidental transfers/initialization.",
+  "proposed_repeat_flags_NOT_EXECUTED": "-C debuginfo=1 -C linker=/controls/linker.sh -C no-vectorize-loops -C no-vectorize-slp",
+  "proposal_limit": "Review required before any changed-flag build. Disabling LLVM loop/SLP vectorizers is a candidate experiment, not a guarantee of no packed instructions from other lowering/stdlib. No ISA features disabled to evade ABI requirements."
+}

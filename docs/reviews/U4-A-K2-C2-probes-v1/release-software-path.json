@@ -1,0 +1,122 @@
+{
+  "mode": "release",
+  "binary_sha256": "7bb89b3877a5a1931ccd16c4fb5a027e13df9a356e6c8dabab455a67270218f1",
+  "binary_bytes": 850208,
+  "selected_symbols": [
+    {
+      "symbol": "c2_sha256_boundary",
+      "address": "0000000000033c20",
+      "simd_register_instruction_count": 46,
+      "simd_mnemonics": {
+        "xorps": 1,
+        "movups": 6,
+        "movaps": 12,
+        "movdqa": 9,
+        "pxor": 2,
+        "punpckhbw": 2,
+        "pshuflw": 4,
+        "pshufhw": 4,
+        "punpcklbw": 2,
+        "packuswb": 2,
+        "movdqu": 2
+      },
+      "simd_lines": [
+        "   33c38:\t0f 57 c0             \txorps  %xmm0,%xmm0",
+        "   33c3b:\t0f 11 44 24 58       \tmovups %xmm0,0x58(%rsp)",
+        "   33c40:\t0f 11 44 24 48       \tmovups %xmm0,0x48(%rsp)",
+        "   33c45:\t0f 11 44 24 38       \tmovups %xmm0,0x38(%rsp)",
+        "   33c4a:\t0f 11 44 24 28       \tmovups %xmm0,0x28(%rsp)",
+        "   33c54:\t0f 10 05 25 b7 fd ff \tmovups -0x248db(%rip),%xmm0        # f380 <anon.0d7f450e29179d8b2735ef3023d34580.35.llvm.87189211340559906+0x13b>",
+        "   33c5b:\t0f 29 04 24          \tmovaps %xmm0,(%rsp)",
+        "   33c5f:\t0f 10 05 2a b7 fd ff \tmovups -0x248d6(%rip),%xmm0        # f390 <anon.0d7f450e29179d8b2735ef3023d34580.35.llvm.87189211340559906+0x14b>",
+        "   33c66:\t0f 29 44 24 10       \tmovaps %xmm0,0x10(%rsp)",
+        "   33cfc:\t66 0f 6f 04 24       \tmovdqa (%rsp),%xmm0",
+        "   33d01:\t0f 28 4c 24 10       \tmovaps 0x10(%rsp),%xmm1",
+        "   33d06:\t0f 28 54 24 20       \tmovaps 0x20(%rsp),%xmm2",
+        "   33d0b:\t0f 28 5c 24 30       \tmovaps 0x30(%rsp),%xmm3",
+        "   33d10:\t0f 29 94 24 90 00 00 \tmovaps %xmm2,0x90(%rsp)",
+        "   33d18:\t0f 28 54 24 50       \tmovaps 0x50(%rsp),%xmm2",
+        "   33d1d:\t0f 29 94 24 c0 00 00 \tmovaps %xmm2,0xc0(%rsp)",
+        "   33d25:\t0f 28 54 24 40       \tmovaps 0x40(%rsp),%xmm2",
+        "   33d2a:\t0f 29 94 24 b0 00 00 \tmovaps %xmm2,0xb0(%rsp)",
+        "   33d32:\t0f 29 9c 24 a0 00 00 \tmovaps %xmm3,0xa0(%rsp)",
+        "   33d3a:\t0f 29 8c 24 80 00 00 \tmovaps %xmm1,0x80(%rsp)",
+        "   33d42:\t66 0f 7f 44 24 70    \tmovdqa %xmm0,0x70(%rsp)",
+        "   33dc3:\t66 0f ef c0          \tpxor   %xmm0,%xmm0",
+        "   33dc7:\t66 0f 7f 84 24 00 01 \tmovdqa %xmm0,0x100(%rsp)",
+        "   33dd0:\t66 0f 7f 84 24 f0 00 \tmovdqa %xmm0,0xf0(%rsp)",
+        "   33dd9:\t66 0f 7f 84 24 e0 00 \tmovdqa %xmm0,0xe0(%rsp)",
+        "   33e26:\t66 0f ef c0          \tpxor   %xmm0,%xmm0",
+        "   33e2a:\t66 0f 6f 4c 24 70    \tmovdqa 0x70(%rsp),%xmm1",
+        "   33e30:\t66 0f 6f 94 24 80 00 \tmovdqa 0x80(%rsp),%xmm2",
+        "   33e39:\t66 0f 6f d9          \tmovdqa %xmm1,%xmm3",
+        "   33e3d:\t66 0f 68 d8          \tpunpckhbw %xmm0,%xmm3",
+        "   33e41:\tf2 0f 70 db 1b       \tpshuflw $0x1b,%xmm3,%xmm3",
+        "   33e46:\tf3 0f 70 db 1b       \tpshufhw $0x1b,%xmm3,%xmm3",
+        "   33e4b:\t66 0f 60 c8          \tpunpcklbw %xmm0,%xmm1",
+        "   33e4f:\tf2 0f 70 c9 1b       \tpshuflw $0x1b,%xmm1,%xmm1",
+        "   33e54:\tf3 0f 70 c9 1b       \tpshufhw $0x1b,%xmm1,%xmm1",
+        "   33e59:\t66 0f 67 cb          \tpackuswb %xmm3,%xmm1",
+        "   33e5d:\t66 0f 6f da          \tmovdqa %xmm2,%xmm3",
+        "   33e61:\t66 0f 68 d8          \tpunpckhbw %xmm0,%xmm3",
+        "   33e65:\tf2 0f 70 db 1b       \tpshuflw $0x1b,%xmm3,%xmm3",
+        "   33e6a:\tf3 0f 70 db 1b       \tpshufhw $0x1b,%xmm3,%xmm3",
+        "   33e6f:\t66 0f 60 d0          \tpunpcklbw %xmm0,%xmm2",
+        "   33e73:\tf2 0f 70 c2 1b       \tpshuflw $0x1b,%xmm2,%xmm0",
+        "   33e78:\tf3 0f 70 c0 1b       \tpshufhw $0x1b,%xmm0,%xmm0",
+        "   33e7d:\t66 0f 67 c3          \tpackuswb %xmm3,%xmm0",
+        "   33e81:\tf3 0f 7f 0b          \tmovdqu %xmm1,(%rbx)",
+        "   33e85:\tf3 0f 7f 43 10       \tmovdqu %xmm0,0x10(%rbx)"
+      ],
+      "calls": [
+        "   33ca5:\tff 15 9d be 06 00    \tcall   *0x6be9d(%rip)        # 9fb48 <_DYNAMIC+0x3f8>",
+        "   33cb4:\tff 15 26 bd 06 00    \tcall   *0x6bd26(%rip)        # 9f9e0 <memcpy@GLIBC_2.14>",
+        "   33d99:\tff 15 b1 bd 06 00    \tcall   *0x6bdb1(%rip)        # 9fb50 <memset@GLIBC_2.2.5>",
+        "   33dc0:\t41 ff d5             \tcall   *%r13",
+        "   33e06:\t41 ff d5             \tcall   *%r13",
+        "   33e20:\tff 15 22 bd 06 00    \tcall   *0x6bd22(%rip)        # 9fb48 <_DYNAMIC+0x3f8>"
+      ]
+    },
+    {
+      "symbol": "sha2::sha256::compress256",
+      "address": "000000000004c9a0",
+      "simd_register_instruction_count": 0,
+      "simd_mnemonics": {},
+      "simd_lines": [],
+      "calls": []
+    }
+  ],
+  "compress256_reachable_by_direct_or_relocated_pointer_edges": true,
+  "reachable_symbol_count": 2,
+  "hash_related_reachable": [
+    "c2_sha256_boundary",
+    "sha2::sha256::compress256"
+  ],
+  "reachable_edges": [
+    {
+      "from": "c2_sha256_boundary",
+      "to": "sha2::sha256::compress256",
+      "kind": "RIP-relative relocated function pointer reference; call or load",
+      "instruction": "   33ca5:\tff 15 9d be 06 00    \tcall   *0x6be9d(%rip)        # 9fb48 <_DYNAMIC+0x3f8>",
+      "relocation_slot": "9fb48",
+      "relocation_target": "4c9a0"
+    },
+    {
+      "from": "c2_sha256_boundary",
+      "to": "sha2::sha256::compress256",
+      "kind": "RIP-relative relocated function pointer reference; call or load",
+      "instruction": "   33da9:\t4c 8b 2d 98 bd 06 00 \tmov    0x6bd98(%rip),%r13        # 9fb48 <_DYNAMIC+0x3f8>",
+      "relocation_slot": "9fb48",
+      "relocation_target": "4c9a0"
+    },
+    {
+      "from": "c2_sha256_boundary",
+      "to": "sha2::sha256::compress256",
+      "kind": "RIP-relative relocated function pointer reference; call or load",
+      "instruction": "   33e20:\tff 15 22 bd 06 00    \tcall   *0x6bd22(%rip)        # 9fb48 <_DYNAMIC+0x3f8>",
+      "relocation_slot": "9fb48",
+      "relocation_target": "4c9a0"
+    }
+  ],
+  "limitation": "Conservative static direct-call and relocation-pointer reachability, not dynamic instruction tracing; arbitrary register-indirect targets and libc internals are not exhaustively resolved. Full disassembly/ELF/maps retained privately."
+}

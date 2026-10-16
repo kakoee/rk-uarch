@@ -1,0 +1,486 @@
+{
+  "count": 20965,
+  "families": {
+    "installed-canonical": 2,
+    "installed-M": 10,
+    "fixture-identities": 488,
+    "B113": 113,
+    "integer-generic": 7,
+    "integer-u128": 7,
+    "rational": 7,
+    "leaf": 7,
+    "integer-refusal": 6,
+    "integer-token": 4,
+    "rational-refusal": 6,
+    "float-boundary": 44,
+    "binary-exponent-boundary": 12280,
+    "decimal-exponent-boundary": 3798,
+    "finite-sweep": 4096,
+    "halfway-decimal": 4,
+    "nonfinite-token": 4,
+    "nonfinite-bits": 3,
+    "strings": 40,
+    "unicode-escape": 4,
+    "invalid-utf8": 3,
+    "key-permutations": 6,
+    "duplicates": 3,
+    "reserved-marker": 4,
+    "typed-normalization": 6,
+    "typed-normalization-fault": 4,
+    "closure": 1,
+    "closure-refusal": 4,
+    "SHA-known-answer": 4
+  },
+  "mismatch_count": 10,
+  "mismatches": [
+    {
+      "id": "leaf:00000",
+      "family": "leaf",
+      "op": "leaf",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"test.rational\",\"value\":{\"denominator\":1,\"numerator\":0}}",
+        "sha256": "52db224540ef2e497184ed08f50da2e0ce57dcfe494480dd0042afd7eb0dbd3e"
+      },
+      "actual": {
+        "error": "data did not match any variant of untagged enum LeafValue at line 1 column 64",
+        "id": "leaf:00000",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "leaf:00001",
+      "family": "leaf",
+      "op": "leaf",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"test.rational\",\"value\":{\"denominator\":1,\"numerator\":1}}",
+        "sha256": "4fc7fa0c6eb02a3eea6e3fa6ae7482b3ecdc8afdefff4693d575f0d1b544c145"
+      },
+      "actual": {
+        "error": "data did not match any variant of untagged enum LeafValue at line 1 column 64",
+        "id": "leaf:00001",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "leaf:00002",
+      "family": "leaf",
+      "op": "leaf",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"test.rational\",\"value\":{\"denominator\":1,\"numerator\":9007199254740991}}",
+        "sha256": "d3492b955d9badf90ed8d056604866a9cbc40b9690a79404601d087728abdfd1"
+      },
+      "actual": {
+        "error": "data did not match any variant of untagged enum LeafValue at line 1 column 79",
+        "id": "leaf:00002",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "leaf:00003",
+      "family": "leaf",
+      "op": "leaf",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"test.rational\",\"value\":{\"denominator\":1,\"numerator\":9007199254740992}}",
+        "sha256": "ce83947309028f1f2b71e10ab4dc601351117d3cc5bb048ab49dd3d2c78aaf08"
+      },
+      "actual": {
+        "error": "data did not match any variant of untagged enum LeafValue at line 1 column 79",
+        "id": "leaf:00003",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "leaf:00004",
+      "family": "leaf",
+      "op": "leaf",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"test.rational\",\"value\":{\"denominator\":1,\"numerator\":9007199254740993}}",
+        "sha256": "1f280cf1cd186c235131f582b962daeda2fd0bff47b6a11db9c6ef29b0da7d0a"
+      },
+      "actual": {
+        "error": "data did not match any variant of untagged enum LeafValue at line 1 column 79",
+        "id": "leaf:00004",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "leaf:00005",
+      "family": "leaf",
+      "op": "leaf",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"test.rational\",\"value\":{\"denominator\":1,\"numerator\":18446744073709551615}}",
+        "sha256": "fb75b5096181287646c0f52b762b12c54b85b116075af05c2117e3356fde8f40"
+      },
+      "actual": {
+        "error": "data did not match any variant of untagged enum LeafValue at line 1 column 83",
+        "id": "leaf:00005",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "leaf:00006",
+      "family": "leaf",
+      "op": "leaf",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"path\":\"test.rational\",\"value\":{\"denominator\":1,\"numerator\":340282366920938463463374607431768211455}}",
+        "sha256": "4ea8767d570eee6dde2f0d573ee07398d29d6152e58d47c18082c8f1f2f8b886"
+      },
+      "actual": {
+        "error": "data did not match any variant of untagged enum LeafValue at line 1 column 102",
+        "id": "leaf:00006",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "integer-token:00002",
+      "family": "integer-token",
+      "op": "u128",
+      "expected": {
+        "status": "ok",
+        "canonical": "0",
+        "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+      },
+      "actual": {
+        "error": "number out of range at line 1 column 1",
+        "id": "integer-token:00002",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "typed-normalization-fault:00002",
+      "family": "typed-normalization-fault",
+      "op": "sourced",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"date\":null,\"kind\":\"stipulation\",\"provenance\":null,\"rationale\":\"C2 test only\",\"source\":null,\"unit\":\"Hz\",\"value\":1.0}",
+        "sha256": "dfc36c52615985d90c97100197e8a17d1f89d98dc8e76be660222cdf82ed3601"
+      },
+      "actual": {
+        "error": "invalid type: boolean `true`, expected f64 at line 1 column 13",
+        "id": "typed-normalization-fault:00002",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    },
+    {
+      "id": "typed-normalization-fault:00003",
+      "family": "typed-normalization-fault",
+      "op": "sourced",
+      "expected": {
+        "status": "ok",
+        "canonical": "{\"date\":null,\"kind\":\"stipulation\",\"provenance\":null,\"rationale\":\"C2 test only\",\"source\":null,\"unit\":\"Hz\",\"value\":1.0}",
+        "sha256": "dfc36c52615985d90c97100197e8a17d1f89d98dc8e76be660222cdf82ed3601"
+      },
+      "actual": {
+        "error": "invalid type: string \"1.0\", expected f64 at line 1 column 14",
+        "id": "typed-normalization-fault:00003",
+        "layer": "carrier",
+        "status": "refuse"
+      }
+    }
+  ],
+  "refusal_layers": [
+    {
+      "id": "integer-refusal:00000",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "number out of range at line 1 column 1"
+    },
+    {
+      "id": "integer-refusal:00001",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "number out of range at line 1 column 39"
+    },
+    {
+      "id": "integer-refusal:00002",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "invalid number at line 1 column 1"
+    },
+    {
+      "id": "integer-refusal:00003",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "invalid number at line 1 column 1"
+    },
+    {
+      "id": "integer-refusal:00004",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "trailing characters at line 1 column 2"
+    },
+    {
+      "id": "integer-refusal:00005",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "invalid number at line 1 column 1"
+    },
+    {
+      "id": "integer-token:00000",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "trailing characters at line 1 column 2"
+    },
+    {
+      "id": "integer-token:00001",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "trailing characters at line 1 column 2"
+    },
+    {
+      "id": "integer-token:00003",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "number out of range at line 1 column 1"
+    },
+    {
+      "id": "rational-refusal:00000",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "InvalidRatio"
+    },
+    {
+      "id": "rational-refusal:00001",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "InvalidRatio"
+    },
+    {
+      "id": "rational-refusal:00002",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "missing field `denominator` at line 1 column 15"
+    },
+    {
+      "id": "rational-refusal:00003",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "unknown field `extra`, expected `numerator` or `denominator` at line 1 column 38"
+    },
+    {
+      "id": "rational-refusal:00004",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "invalid number at line 1 column 14"
+    },
+    {
+      "id": "rational-refusal:00005",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "invalid number at line 1 column 14"
+    },
+    {
+      "id": "nonfinite-token:00000",
+      "python_layer": "decode",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "expected value at line 1 column 1"
+    },
+    {
+      "id": "nonfinite-token:00001",
+      "python_layer": "decode",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "expected value at line 1 column 1"
+    },
+    {
+      "id": "nonfinite-token:00002",
+      "python_layer": "decode",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "invalid number at line 1 column 2"
+    },
+    {
+      "id": "nonfinite-token:00003",
+      "python_layer": "canonical",
+      "rust_layer": "canonical",
+      "python_error": "ValueError",
+      "rust_error": "nonfinite f64"
+    },
+    {
+      "id": "nonfinite-bits:00000",
+      "python_layer": "canonical",
+      "rust_layer": "canonical",
+      "python_error": "ValueError",
+      "rust_error": "nonfinite f64"
+    },
+    {
+      "id": "nonfinite-bits:00001",
+      "python_layer": "canonical",
+      "rust_layer": "canonical",
+      "python_error": "ValueError",
+      "rust_error": "nonfinite f64"
+    },
+    {
+      "id": "nonfinite-bits:00002",
+      "python_layer": "canonical",
+      "rust_layer": "canonical",
+      "python_error": "ValueError",
+      "rust_error": "nonfinite f64"
+    },
+    {
+      "id": "unicode-escape:00000",
+      "python_layer": "utf8",
+      "rust_layer": "strict-json",
+      "python_error": "UnicodeEncodeError",
+      "rust_error": "unexpected end of hex escape at line 1 column 8"
+    },
+    {
+      "id": "unicode-escape:00001",
+      "python_layer": "utf8",
+      "rust_layer": "strict-json",
+      "python_error": "UnicodeEncodeError",
+      "rust_error": "lone leading surrogate in hex escape at line 1 column 7"
+    },
+    {
+      "id": "unicode-escape:00002",
+      "python_layer": "utf8",
+      "rust_layer": "strict-json",
+      "python_error": "UnicodeEncodeError",
+      "rust_error": "unexpected end of hex escape at line 1 column 8"
+    },
+    {
+      "id": "invalid-utf8:00000",
+      "python_layer": "decode",
+      "rust_layer": "utf8",
+      "python_error": "UnicodeDecodeError",
+      "rust_error": "invalid utf-8 sequence of 1 bytes from index 1"
+    },
+    {
+      "id": "invalid-utf8:00001",
+      "python_layer": "decode",
+      "rust_layer": "utf8",
+      "python_error": "UnicodeDecodeError",
+      "rust_error": "invalid utf-8 sequence of 1 bytes from index 1"
+    },
+    {
+      "id": "invalid-utf8:00002",
+      "python_layer": "utf8",
+      "rust_layer": "utf8",
+      "python_error": "UnicodeEncodeError",
+      "rust_error": "invalid utf-8 sequence of 1 bytes from index 1"
+    },
+    {
+      "id": "duplicates:00000",
+      "python_layer": "decode",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "DuplicateJsonKey at line 1 column 10"
+    },
+    {
+      "id": "duplicates:00001",
+      "python_layer": "decode",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "DuplicateJsonKey at line 1 column 19"
+    },
+    {
+      "id": "duplicates:00002",
+      "python_layer": "decode",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "DuplicateJsonKey at line 1 column 15"
+    },
+    {
+      "id": "reserved-marker:00000",
+      "python_layer": "carrier",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "ReservedNumericMarker"
+    },
+    {
+      "id": "reserved-marker:00001",
+      "python_layer": "carrier",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "ReservedNumericMarker"
+    },
+    {
+      "id": "reserved-marker:00002",
+      "python_layer": "carrier",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "ReservedNumericMarker"
+    },
+    {
+      "id": "reserved-marker:00003",
+      "python_layer": "carrier",
+      "rust_layer": "strict-json",
+      "python_error": "ValueError",
+      "rust_error": "ReservedNumericMarker"
+    },
+    {
+      "id": "typed-normalization-fault:00000",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "unknown field `extra`, expected one of `value`, `unit`, `provenance`, `source`, `date`, `kind`, `rationale` at line 1 column 78"
+    },
+    {
+      "id": "typed-normalization-fault:00001",
+      "python_layer": "carrier",
+      "rust_layer": "carrier",
+      "python_error": "ValidationError",
+      "rust_error": "missing field `value` at line 1 column 61"
+    },
+    {
+      "id": "closure-refusal:00000",
+      "python_layer": "identity",
+      "rust_layer": "identity",
+      "python_error": "ArtifactHashMismatch",
+      "rust_error": "ArtifactHashMismatch"
+    },
+    {
+      "id": "closure-refusal:00001",
+      "python_layer": "identity",
+      "rust_layer": "identity",
+      "python_error": "ArtifactHashMismatch",
+      "rust_error": "ArtifactHashMismatch"
+    },
+    {
+      "id": "closure-refusal:00002",
+      "python_layer": "identity",
+      "rust_layer": "identity",
+      "python_error": "ArtifactHashMismatch",
+      "rust_error": "ArtifactHashMismatch"
+    },
+    {
+      "id": "closure-refusal:00003",
+      "python_layer": "identity",
+      "rust_layer": "identity",
+      "python_error": "ArtifactHashMismatch",
+      "rust_error": "ArtifactHashMismatch"
+    }
+  ]
+}
