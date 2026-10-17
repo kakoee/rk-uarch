@@ -2,7 +2,7 @@
 
 From a checkout containing this package and its pinned preparation base, use the existing
 Python 3.12 environment. This creates a new private directory and verifies all preimages,
-23 postimages and nine activation inputs. It does not install protected changes.
+23 postimages, nine activation inputs and the supplemental future-consumer sidecar. It does not install protected changes.
 
 ```sh
 .venv/bin/python -I -B docs/reviews/U4-A-component-stage2-v1/reconstruct.py /tmp/component-stage2-review

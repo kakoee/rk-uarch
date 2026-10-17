@@ -26,7 +26,7 @@ def main() -> None:
     archive = subprocess.check_output(["git", "archive", manifest["base_commit"]], cwd=repo)
     with tarfile.open(fileobj=io.BytesIO(archive)) as stream:
         stream.extractall(args.output, filter="data")
-    for row in manifest["activation_inputs"]:
+    for row in manifest["activation_inputs"] + manifest["supplemental_future_consumer_inputs"]:
         assert digest((args.output / row["path"]).read_bytes()) == row["sha256"]
     for row in manifest["files"]:
         path = args.output / row["path"]

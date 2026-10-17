@@ -80,3 +80,8 @@ final run is attributed to 7b972d0; the final preparation base contains only the
 proposal-helper import correction and author reports, with all 23 tested postimages and nine
 activation inputs identical. B's final response is published at 2579cc9; its previously
 pending shared-run field is satisfied by A's linked final verification receipt.
+
+The reconstruction also verifies the supplemental immutable first-use consumer sidecar,
+`first-use-bindings.json`, alongside the nine source/test activation inputs. It explicitly
+joins the inherited observation contract to the future positive/negative consumer paths;
+it supplies no authority. All routine author joins are complete for coordinator reconciliation.
