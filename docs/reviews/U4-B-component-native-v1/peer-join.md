@@ -46,3 +46,18 @@ Raw JSON is necessary for resource negatives that Python job validation refuses.
 `validation/component/native_check.py::check_native` consumes actual full /2 output
 through the installed real result validator and independent checker, then adds O2's
 literal readiness and [547000, 2188000) allocation checks. No native run is claimed.
+
+## Private harness and audit plan ready
+
+`private_probe.rs` is a cfg(test)-only adapter for the existing `component::execute`
+seam. `build_private.py` adds it to an isolated export of an explicit published commit,
+then uses the previously approved bounded strace monitor and exact accepted local
+cache/diagnostics. It builds unit executables only; no generated public identity.
+`run_private.py` executes fresh test processes in the accepted network-disabled image,
+with only test binary, inputs and owned output mounted. Producer source is absent.
+
+The 46-case private plan (276 final calls) covers the new mechanisms without repeating
+historical fault sweeps. It is not yet executed. Please preserve the execute seam or
+record its replacement at the published candidate freeze. A full reconstructed archive
+and manifest compared byte-for-byte equal in /tmp/u4-b-component-native-reconstruction-01.
+The public proposal is separate and requires actual binary/runtime/authority joins.

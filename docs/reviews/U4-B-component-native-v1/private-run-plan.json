@@ -1,0 +1,13 @@
+{
+  "format": "B-component-private-run-plan/1",
+  "status": "prospective private synthetic unit/integration checks; no public execution",
+  "modes": ["debug", "release"],
+  "fresh_processes_per_case_per_mode": 3,
+  "cases": ["C01", "C02", "C03", "C04-control", "C05-B", "C06-fit", "D01", "D02", "D03", "D04", "D05-one", "D05-two", "D06-two", "D06-full", "D07", "D08", "D09-read", "D09-write", "D10-read", "D10-write", "D11", "D12", "D13-hop", "D13-barrier", "D14", "D15", "A-C02-cold", "B2-C04-transient", "B2-255-256", "B2-equal", "B3-writer-control", "B3-terminal-control", "B3-shared-use-control", "B-native-O2", "B-native-resource-C04-carrier", "B-native-resource-C06-small", "B-native-resource-C07-hbm-1", "B-native-resource-C07-sram-1", "B3-false-writer-disjoint", "B3-terminal-partial-A1", "B3-use-before-A3b", "B3-use-unordered-A3c", "C04-carrier", "C06-small", "C07-hbm-1", "C07-sram-1"],
+  "unit_entry": "b_private_probe::private_component_probe",
+  "limits": {"build_seconds_per_mode": 600, "trace_bytes_per_mode": 536870912, "process_seconds": 30, "process_output_bytes": 67108864},
+  "forgery_controls": ["O2 early allocation, late free, persistent free and first-consumer free", "missing occupied resource interval", "false DRAM latency occupancy", "missing eligible causal predecessor", "clock-consistent response duration law", "incorrect null-clock channel/DMA populations"],
+  "fault_claim_requirement": "only actual unsafe acceptance or wrong result is an essential kill; identity failures and alternative refusals separately labelled; restore exact source bytes and affected positive",
+  "public_calls": 0,
+  "authority_created": false
+}
