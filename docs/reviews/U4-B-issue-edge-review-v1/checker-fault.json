@@ -1,0 +1,56 @@
+{
+  "label": "synthetic late-issue output; identity gates intentionally separate",
+  "recipe_sha256": "898c53f228d369f06155fb44ff62bfcd5b29e4785216c066993a67c4c02522b9",
+  "rows": [
+    {
+      "label": "baseline",
+      "postimages": {
+        "validation/component/issue_checks.py": "2edbdb011496811c9302dd4ffb34b3b9b6b7fb2b02f165f387039b3f5c27bdab",
+        "validation/component/observations_v3.py": "58aca43c6bbc2341345b5559b347fa6e3f75dc9a86b733eb446104c145ba43e8"
+      },
+      "valid": "pass",
+      "forgery": "refusal",
+      "detail": "earliest issue edge / no issue rate cap"
+    },
+    {
+      "label": "remove-specific-edge-check",
+      "postimages": {
+        "validation/component/issue_checks.py": "8b8455aa3cc85c10495efb2956bf5d5642d6587fe69d9a2c627bce149251707d",
+        "validation/component/observations_v3.py": "58aca43c6bbc2341345b5559b347fa6e3f75dc9a86b733eb446104c145ba43e8"
+      },
+      "valid": "pass",
+      "forgery": "refusal",
+      "detail": "receiving-clock alignment"
+    },
+    {
+      "label": "remove-two-issue-edge-checks",
+      "postimages": {
+        "validation/component/issue_checks.py": "8b8455aa3cc85c10495efb2956bf5d5642d6587fe69d9a2c627bce149251707d",
+        "validation/component/observations_v3.py": "33770c14fb1b18fb990a545f4de088cc0c83e84abc24eb80ef46e26de1b539a8"
+      },
+      "valid": "pass",
+      "forgery": "refusal",
+      "detail": "clock mechanism binding"
+    },
+    {
+      "label": "remove-three-issue-edge-checks",
+      "postimages": {
+        "validation/component/issue_checks.py": "8b8455aa3cc85c10495efb2956bf5d5642d6587fe69d9a2c627bce149251707d",
+        "validation/component/observations_v3.py": "d3a5d06df8f216a9fe39cdf6be31664461ee7ce5dafcfbcd2cc228ffd4c643bc"
+      },
+      "valid": "pass",
+      "forgery": "unsafe-acceptance"
+    },
+    {
+      "label": "restored",
+      "postimages": {
+        "validation/component/issue_checks.py": "2edbdb011496811c9302dd4ffb34b3b9b6b7fb2b02f165f387039b3f5c27bdab",
+        "validation/component/observations_v3.py": "58aca43c6bbc2341345b5559b347fa6e3f75dc9a86b733eb446104c145ba43e8"
+      },
+      "valid": "pass",
+      "forgery": "refusal",
+      "detail": "earliest issue edge / no issue rate cap"
+    }
+  ],
+  "exact_restoration": true
+}

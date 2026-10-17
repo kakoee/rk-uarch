@@ -1,0 +1,79 @@
+"""Narrow private checker guard faults, fresh imports, and exact-byte restoration."""
+import ast
+import hashlib
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+SOURCE=Path('/tmp/u4-b-issue-edge-01/source')
+RUNS=Path('/tmp/u4-b-issue-edge-runs-01')
+ATTACKS=Path('/tmp/u4-b-issue-edge-consume-04')
+OUT=Path('/tmp/u4-b-issue-edge-fault-02')
+
+
+def digest(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def worker():
+    from uarch_contract.mapped import MappedEngineJob,validate_result
+    from validation.component.observations_v3 import check_v3
+    j=json.loads((RUNS/'jobs/issue-gap.json').read_text())
+    good=json.loads((RUNS/'issue-gap-debug/result.json').read_text())['result']
+    bad=json.loads((ATTACKS/'late-issue-edge.json').read_text())
+    expected=json.loads((SOURCE/'docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_text())['observation_contract']
+    validate_result(bad,MappedEngineJob.model_validate(j))
+    check_v3(j,good,expected)
+    try:
+        check_v3(j,bad,expected)
+        result={'valid':'pass','forgery':'unsafe-acceptance'}
+    except Exception as e:
+        result={'valid':'pass','forgery':'refusal','detail':str(e)}
+    print(json.dumps(result))
+
+
+def edit(raw,detail,scope=False):
+    tree=ast.parse(raw)
+    hits=0
+    for n in ast.walk(tree):
+        if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id=='need' and len(n.args)>1 and isinstance(n.args[1],ast.Constant) and n.args[1].value==detail:
+            n.args[0]=ast.BoolOp(op=ast.Or(),values=[ast.parse("key[2] == 'dma_issue'",mode='eval').body,n.args[0]]) if scope else ast.Constant(value=True)
+            hits+=1
+    assert hits==1
+    return (ast.unparse(tree)+'\n').encode()
+
+
+def main():
+    OUT.mkdir(exist_ok=False)
+    paths=[SOURCE/'validation/component/issue_checks.py',SOURCE/'validation/component/observations_v3.py']
+    originals={p:p.read_bytes() for p in paths}
+    rows=[]
+    def run(label):
+        env={**os.environ,'PYTHONPATH':str(SOURCE/'contract')+':'+str(SOURCE/'src')+':'+str(SOURCE),'PYTHONDONTWRITEBYTECODE':'1'}
+        proc=subprocess.run([sys.executable,'-B',str(Path(__file__).resolve()),'worker'],capture_output=True,env=env,timeout=30,cwd=SOURCE)
+        (OUT/(label+'.stdout')).write_bytes(proc.stdout)
+        (OUT/(label+'.stderr')).write_bytes(proc.stderr)
+        assert proc.returncode==0,proc.stderr
+        row=dict(label=label,postimages={str(p.relative_to(SOURCE)):digest(p.read_bytes()) for p in paths},**json.loads(proc.stdout))
+        rows.append(row)
+        return row
+    try:
+        assert run('baseline')['detail']=='earliest issue edge / no issue rate cap'
+        paths[0].write_bytes(edit(originals[paths[0]],'earliest issue edge / no issue rate cap'))
+        assert run('remove-specific-edge-check')['detail']=='receiving-clock alignment'
+        paths[1].write_bytes(edit(originals[paths[1]],'receiving-clock alignment',True))
+        assert run('remove-two-issue-edge-checks')['detail']=='clock mechanism binding'
+        paths[1].write_bytes(edit(paths[1].read_bytes(),'clock mechanism binding',True))
+        assert run('remove-three-issue-edge-checks')['forgery']=='unsafe-acceptance'
+    finally:
+        for p,raw in originals.items():
+            p.write_bytes(raw)
+            assert p.read_bytes()==raw
+    assert run('restored')['detail']=='earliest issue edge / no issue rate cap'
+    (OUT/'checks.json').write_text(json.dumps(dict(label='synthetic late-issue output; identity gates intentionally separate',recipe_sha256=digest(Path(__file__).read_bytes()),rows=rows,exact_restoration=True),indent=2)+'\n')
+    print(json.dumps(rows,indent=2))
+
+if __name__=='__main__':
+    worker() if len(sys.argv)>1 else main()

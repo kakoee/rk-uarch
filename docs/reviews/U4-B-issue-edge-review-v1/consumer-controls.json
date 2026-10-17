@@ -1,0 +1,336 @@
+{
+  "recipe_sha256": "a3d3d6e6f1f01badd01d9d254d74927582be4816844c200a14519ab2f0d2791a",
+  "synthetic_output_attacks": true,
+  "baselines": [
+    {
+      "case": "C02",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:1d751fec1eb64a1aba98c944dde0e976aac86bb10b33b5ef44e87a9fd4dc2995"
+    },
+    {
+      "case": "D01",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:948f8244aa6f113e9213e32754863635aceb4d704ef8b42c7038939546c01950"
+    },
+    {
+      "case": "D02",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:d278a4a59e1b84e4bc97e4718140badac3abd6be5c84ba4ca064b650e7d5f135"
+    },
+    {
+      "case": "D07",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:372ad068185a0b910dca13c615c331cb46bea76471df5a73e45fa05ed827dcc6"
+    },
+    {
+      "case": "D14",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:ff11bcd1ff9dd8ba7001eab0384bf41e80b70602ee2ec7a25e0d84dfca8660bb"
+    },
+    {
+      "case": "O2",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:157bbf52af1237af6b3dc4c97b3404811e09301983f95cd0b8422832a52cf5f6"
+    },
+    {
+      "case": "gap-cap1",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:81f430f09389c15ea98acf0b6c30000316c11b5727c3910f34efed48f56bb8f3"
+    },
+    {
+      "case": "gap-cap2-pair",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:3b43e10014c94fb698f304765e0fc43adbd1ebdad8c0d31e8231bc409d4cafb9"
+    },
+    {
+      "case": "gap-cap2",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:4be91ce04895eec06b4c25e98c800803190fd9a817aef1a360e11c7a6a6c4af1"
+    },
+    {
+      "case": "gap-independent",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:772578ddcc06c4de342bced22b66996d354e4f9eca8dca70b34d99096cca1b50"
+    },
+    {
+      "case": "gap-write",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:4a042449ea0a38ffdf55c7fe7969fed5bec9484597dc5349edb27be3933d5b4a"
+    },
+    {
+      "case": "issue-gap",
+      "validator": "pass",
+      "independent_checker": "pass",
+      "matches_intermediate_full_result": true,
+      "result_hash": "sha256:46738ec53a34f7eb1192f875a1612df58b3f75a6ab1cb89b66e53f6a36170bab"
+    }
+  ],
+  "attacks": [
+    {
+      "name": "pending-overbook-only",
+      "case": "gap-cap1",
+      "forgery_sha256": "458906fd917b4ad03b583f276553be10cebf94c41fe1ac34c2393267fc8f3548",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: pending plus acquired capacity"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "earliest reservation / ready tie"
+      }
+    },
+    {
+      "name": "missing-alignment",
+      "case": "issue-gap",
+      "forgery_sha256": "3be8542cc54cd470e4e8216f1c9bf81ae1f24cf5530a65368c3be9876cbeeb4d",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: job activity span"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "issue inventory including zero alignment"
+      }
+    },
+    {
+      "name": "missing-zero-alignment",
+      "case": "D01",
+      "forgery_sha256": "cb86d65fb28a6c91f440895cfa7878657f49e5ea4da2a55691fdd02719c3cd52",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "AttributionMismatch: "
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "issue inventory including zero alignment"
+      }
+    },
+    {
+      "name": "early-acquisition",
+      "case": "issue-gap",
+      "forgery_sha256": "e9b922ffeb572be7b99a88d131f795e070179adef8a30da7cd77a5fb6da322a3",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: acquired credit lifecycle"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "acquired not pending lifecycle"
+      }
+    },
+    {
+      "name": "missing-pending",
+      "case": "issue-gap",
+      "forgery_sha256": "8ba89f0fae2fb911101d16e27ac9a226e068081dd38cbdc3583bf7f6a755d0d7",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: issue population inventory"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "three issue population inventory"
+      }
+    },
+    {
+      "name": "pending-as-inflight",
+      "case": "issue-gap",
+      "forgery_sha256": "7de9d09e4b1d458d05cafaa2a82259477957ce9da89138aa2f7ddadb378b7a6a",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: "
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "issue population lifecycle"
+      }
+    },
+    {
+      "name": "pending-clock",
+      "case": "issue-gap",
+      "forgery_sha256": "2aa57f52a01fbc1c5ab889d844ed650c8d23bb284f200650eb92157cedac7a61",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: nonclocked queue binding"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "issue population lifecycle"
+      }
+    },
+    {
+      "name": "pending-wrong-engine",
+      "case": "issue-gap",
+      "forgery_sha256": "8d69578ec25b6d699a7d78db66c1d76af13aef70663cc0386bcf9b375d0a5997",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: "
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "three issue population inventory"
+      }
+    },
+    {
+      "name": "issue-busy",
+      "case": "issue-gap",
+      "forgery_sha256": "9519b985665d0241bf0d06a96b1bad79ba719be4e0c44bfc9c917db98536350e",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: phase occupancy"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "required occupancy"
+      }
+    },
+    {
+      "name": "job-start-at-issue",
+      "case": "issue-gap",
+      "forgery_sha256": "d1dc10087626085dd73fdbc108b39d3de9c0b02ef01d84b7325c9f6f17d35f01",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: job activity span"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "reservation producer allocation endpoints"
+      }
+    },
+    {
+      "name": "allocation-at-issue",
+      "case": "issue-gap",
+      "forgery_sha256": "dbc5a16c2ad0cfea7140e5e07f45b0c1c82a3f848651b7eb97d171c26185f0f3",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: producer allocation endpoints"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "reservation producer allocation endpoints"
+      }
+    },
+    {
+      "name": "issue-conversion-nonzero",
+      "case": "issue-gap",
+      "forgery_sha256": "5a20d4d538a573b129d7f9d1196a7c223664dbdb30407fc08ad3db72941d089f",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: activity dispatch join"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "atomic issue conversion"
+      }
+    },
+    {
+      "name": "positive-completion-phase2",
+      "case": "issue-gap",
+      "forgery_sha256": "4decdfdd0ff6b3151328d42e7f84c8b0a553586456cb2e68f346c00c548f07bc",
+      "structural": {
+        "outcome": "refusal",
+        "type": "ValueError",
+        "detail": "IncompleteObservations: alignment completion phase"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "issue alignment completion phase"
+      }
+    },
+    {
+      "name": "duration-law",
+      "case": "D01",
+      "forgery_sha256": "8b70f6c089018088da62392cad4cc1fbe1da81c8e611e7fdf152677cd13eddb5",
+      "structural": {
+        "outcome": "pass"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "mechanism duration"
+      }
+    },
+    {
+      "name": "late-issue-edge",
+      "case": "issue-gap",
+      "forgery_sha256": "0226246d5d11e0a690bcc784699d2b325f9eedf6101c1f3bafb60b8d73aaf745",
+      "structural": {
+        "outcome": "pass"
+      },
+      "independent": {
+        "outcome": "refusal",
+        "type": "CheckFailure",
+        "detail": "earliest issue edge / no issue rate cap"
+      }
+    }
+  ],
+  "source_origins": {
+    "uarch_contract.mapped": {
+      "path": "/tmp/u4-b-issue-edge-01/source/contract/uarch_contract/mapped.py",
+      "sha256": "eb76365120382ccc2bd673b2251599755abd91ab46ebe7efb57a016ac7133208"
+    },
+    "uarch_contract.mapped_issue": {
+      "path": "/tmp/u4-b-issue-edge-01/source/contract/uarch_contract/mapped_issue.py",
+      "sha256": "fcf2422c750a7018143b1524b47df85e741738c1876a13550cf63ec67dfec9c0"
+    },
+    "validation.component.observations_v3": {
+      "path": "/tmp/u4-b-issue-edge-01/source/validation/component/observations_v3.py",
+      "sha256": "58aca43c6bbc2341345b5559b347fa6e3f75dc9a86b733eb446104c145ba43e8"
+    },
+    "validation.component.issue_checks": {
+      "path": "/tmp/u4-b-issue-edge-01/source/validation/component/issue_checks.py",
+      "sha256": "2edbdb011496811c9302dd4ffb34b3b9b6b7fb2b02f165f387039b3f5c27bdab"
+    },
+    "validation.component.transition_checks_v3": {
+      "path": "/tmp/u4-b-issue-edge-01/source/validation/component/transition_checks_v3.py",
+      "sha256": "3ab47303a14324e10c94d2a7820235b986491cc30ed3816322e62c3918738341"
+    }
+  },
+  "independent_prior_literals": "read/write exact phases, rational channel, attribution; cap1/cap2/pair/independent; O2 exact producer/final-consumer endpoints: pass"
+}

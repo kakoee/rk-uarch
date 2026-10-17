@@ -1,0 +1,158 @@
+"""Focused final-source private synthetic probes, separate from public execution."""
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import uuid
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[2]
+IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
+
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("build", type=Path)
+    p.add_argument("output", type=Path)
+    a = p.parse_args()
+    out = a.output.resolve()
+    assert out.is_relative_to(Path("/tmp"))
+    out.mkdir(exist_ok=False)
+    (out / "jobs").mkdir()
+    (out / "trust").mkdir()
+    meta = json.loads((a.build / "build.json").read_text())
+    package = ROOT / "docs/reviews/U4-A-issue-edge-amendment-v1/private-probes"
+    cases = []
+    for path in sorted(package.glob("*/job.json")):
+        name = path.parent.name
+        job = json.loads(path.read_text())
+        (out / "jobs" / f"{name}.json").write_bytes(path.read_bytes())
+        anchor = dict(
+            registry=job["registry"]["registry_hash"],
+            profile=job["profile"]["profile_hash"],
+            case=job["admission"]["case_id"],
+            engine=job["engine"],
+        )
+        (out / "trust" / f"{name}.json").write_text(json.dumps(anchor))
+        cases.append((name, "3", []))
+    # The proposal's focused typed controls include strict boundaries, atomic capacity,
+    # 33 same-edge requests, and explicit old/new model seams.
+    cases.append(("typed-proposal", None, ["component::issue_proposal_tests::"]))
+    report = dict(
+        source_package="ddd299ca59a27098da9ce4de1359d43f966aab20",
+        build_sha256=sha(a.build / "build.json"),
+        runner_sha256=sha(Path(__file__)),
+        synthetic_unit_anchors=True,
+        public_calls=0,
+        observations=[],
+    )
+    for name, version, extra in cases:
+        modes = []
+        for mode in ("debug", "release"):
+            target = a.build / (mode + "-target")
+            binary = target / meta["commands"][mode]["test_executable"]
+            assert sha(binary) == meta["commands"][mode]["test_executable_sha256"]
+            receipt = out / (name + "-" + mode)
+            receipt.mkdir()
+            container = "u4-b-issue-" + uuid.uuid4().hex
+            argv = [
+                "/usr/bin/docker",
+                "--host",
+                "unix:///var/run/docker.sock",
+                "run",
+                "--rm",
+                "--name",
+                container,
+                "--pull",
+                "never",
+                "--platform",
+                "linux/amd64",
+                "--network",
+                "none",
+                "--read-only",
+                "--user",
+                f"{os.getuid()}:{os.getgid()}",
+                "--cap-drop",
+                "ALL",
+                "--security-opt",
+                "no-new-privileges",
+                "--tmpfs",
+                "/tmp",
+                "--mount",
+                f"type=bind,src={target},dst=/target,readonly",
+                "--mount",
+                f"type=bind,src={out},dst=/vectors,readonly",
+                "--mount",
+                f"type=bind,src={receipt},dst=/output",
+                "--entrypoint",
+                "/usr/bin/env",
+                IMAGE,
+                "-i",
+                "LC_ALL=C",
+            ]
+            if version:
+                argv += [
+                    f"B_OBSERVATION_VERSION={version}",
+                    f"B_COMPONENT_JOB=/vectors/jobs/{name}.json",
+                    f"B_COMPONENT_TRUST=/vectors/trust/{name}.json",
+                    "B_COMPONENT_OUTPUT=/output/result.json",
+                ]
+            argv += ["/target/" + meta["commands"][mode]["test_executable"]]
+            argv += (
+                ["b_private_probe::private_component_probe", "--ignored", "--exact", "--nocapture"]
+                if version
+                else extra + ["--nocapture"]
+            )
+            try:
+                proc = subprocess.run(
+                    argv,
+                    capture_output=True,
+                    timeout=30,
+                    env={"PATH": "/usr/bin:/bin", "DOCKER_CONFIG": str(a.build / "docker-config")},
+                )
+            except subprocess.TimeoutExpired:
+                subprocess.run(
+                    ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock", "kill", container],
+                    capture_output=True,
+                    timeout=10,
+                    check=False,
+                )
+                raise
+            (receipt / "stdout").write_bytes(proc.stdout)
+            (receipt / "stderr").write_bytes(proc.stderr)
+            row = dict(
+                case=name,
+                mode=mode,
+                argv=argv,
+                binary_sha256=sha(binary),
+                exit_code=proc.returncode,
+                stdout_sha256=sha(receipt / "stdout"),
+                stderr_sha256=sha(receipt / "stderr"),
+            )
+            report["observations"].append(row)
+            (out / "runs.json").write_text(json.dumps(report, indent=2) + "\n")
+            assert proc.returncode == 0, proc.stderr
+            if version:
+                result = json.loads((receipt / "result.json").read_text())
+                assert result["outcome"] == "success", result
+                row.update(
+                    input_sha256=sha(out / "jobs" / f"{name}.json"),
+                    output_sha256=sha(receipt / "result.json"),
+                )
+                modes.append((receipt / "result.json").read_bytes())
+            else:
+                assert b"9 passed" in proc.stdout, proc.stdout
+            print(name, mode, "pass", flush=True)
+        assert not version or modes[0] == modes[1]
+        (out / "runs.json").write_text(json.dumps(report, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()

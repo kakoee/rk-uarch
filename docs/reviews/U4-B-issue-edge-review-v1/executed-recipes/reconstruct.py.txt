@@ -1,0 +1,68 @@
+"""Reconstruct the exact unapplied amendment in an isolated export; no live edits."""
+
+import hashlib
+import io
+import json
+import subprocess
+import tarfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+PACKAGE = ROOT / "docs/reviews/U4-A-issue-edge-amendment-v1"
+OUT = Path("/tmp/u4-b-issue-edge-01")
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+manifest = json.loads((PACKAGE / "manifest.json").read_text())
+assert (
+    subprocess.check_output(
+        ["git", "rev-parse", "ddd299ca59a27098da9ce4de1359d43f966aab20"], cwd=ROOT
+    )
+    .decode()
+    .strip()
+    == "ddd299ca59a27098da9ce4de1359d43f966aab20"
+)
+OUT.mkdir(exist_ok=False)
+source = OUT / "source"
+source.mkdir()
+raw = subprocess.check_output(["git", "archive", manifest["base_commit"]], cwd=ROOT)
+with tarfile.open(fileobj=io.BytesIO(raw)) as archive:
+    archive.extractall(source, filter="data")
+for row in manifest["files"]:
+    p = source / row["path"]
+    assert (sha(p.read_bytes()) if p.exists() else None) == row["preimage_sha256"]
+for patch in manifest["patches"]:
+    p = PACKAGE / patch["path"]
+    assert sha(p.read_bytes()) == patch["sha256"]
+    subprocess.run(["git", "apply", "--check", str(p)], cwd=source, check=True)
+    subprocess.run(["git", "apply", str(p)], cwd=source, check=True)
+for row in manifest["files"]:
+    assert sha((source / row["path"]).read_bytes()) == row["postimage_sha256"]
+for patch in reversed(manifest["patches"]):
+    subprocess.run(
+        ["git", "apply", "--reverse", "--check", str(PACKAGE / patch["path"])],
+        cwd=source,
+        check=True,
+    )
+for row in manifest["verification"]["historical_controls"]:
+    assert sha((source / row["path"]).read_bytes()) == row["sha256"]
+report = dict(
+    package_commit="ddd299ca59a27098da9ce4de1359d43f966aab20",
+    manifest_sha256=sha((PACKAGE / "manifest.json").read_bytes()),
+    base_commit=manifest["base_commit"],
+    pre_postimages=manifest["files"],
+    patch_order=manifest["patches"],
+    verified_preimages=20,
+    verified_postimages=20,
+    reverse_checks_passed=True,
+    historical_controls_exact=True,
+    source_export=str(source),
+    export_tar_sha256=sha(raw),
+    recipe_sha256=sha(Path(__file__).read_bytes()),
+    protected_live_installation=False,
+)
+(OUT / "reconstruction.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+print("20 preimages/postimages and three ordered patches verified in", source)
