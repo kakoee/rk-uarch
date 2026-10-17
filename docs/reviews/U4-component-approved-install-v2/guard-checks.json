@@ -1,0 +1,60 @@
+{
+  "helper_sha256": "a098c145ccc217e2f87195fbd985dc630594fd87b12a74c76385b44526f838b5",
+  "guard_checks": [
+    {
+      "guard": "human flag absent",
+      "refused": true,
+      "reason": "STOP: human invocation required"
+    },
+    {
+      "guard": "malformed pin",
+      "refused": true,
+      "reason": "STOP: full helper commit required"
+    },
+    {
+      "guard": "missing commit",
+      "refused": true,
+      "reason": "STOP: fatal: Not a valid commit name 0000000000000000000000000000000000000000"
+    },
+    {
+      "guard": "commit lacks helper package",
+      "refused": true,
+      "reason": "STOP: pinned helper package missing"
+    },
+    {
+      "guard": "unsafe path /tmp/outside",
+      "refused": true,
+      "reason": "STOP: unsafe path"
+    },
+    {
+      "guard": "unsafe path ../outside",
+      "refused": true,
+      "reason": "STOP: unsafe path"
+    },
+    {
+      "guard": "unsafe path .git/config",
+      "refused": true,
+      "reason": "STOP: unsafe path"
+    },
+    {
+      "guard": "symlink path",
+      "refused": true,
+      "reason": "STOP: symlink in selected path: alias/anything"
+    },
+    {
+      "guard": "changed preimage",
+      "refused": true,
+      "reason": "STOP: base mismatch: data"
+    },
+    {
+      "guard": "new-path collision",
+      "refused": true,
+      "reason": "STOP: new path already exists: data"
+    }
+  ],
+  "valid_preimage_control": "passed",
+  "hostile_git_environment": "sanitized; actual repository read retained",
+  "live_install_commit_push": "not executed",
+  "syntax_and_scoped_ruff": "passed",
+  "mutation_path": "human-only; not exercised by coordinator"
+}
