@@ -11,8 +11,19 @@ SHA256 `81b81c6c2680a17e7d106dedb4a11dc07891b331f3323319fb0192b852bdebe3`.
 [Combined inventory](combined-postimages.json) lists all 23 base/postimages, including
 11 A paths and 12 B paths. It is a coherent install candidate, not five implementation
 files plus undiscoverable examples. The [shared semantic agreement](interface.md) records
-ordinary peer resolutions through B's published commits. Final selection/verification
-bindings are recorded below when B publishes its independent join.
+ordinary peer resolutions through B's published commits. B's [final response](../U4-B-component-stage2-v1/README.md) and
+[exact peer join](peer-join.json) bind the same patch and all 23 postimages.
+
+The one final affected combined run passed **488 tests**, with two named human-work skips
+and one native deselection. [Verification](verification.json) records exact commands and log
+hashes. Default discovery activates **233 candidate nodes across 11 test paths**; all three
+schema checks, production/contract-test/checker typing (88/36/5 files), repository lint,
+import boundaries and vendor currentness pass. [Reproduction](reproduce.md) reconstructs the
+private candidate from the exact base and nine immutable activation inputs.
+
+B's selection is `sha256:4b9e73cf9ef11456e216acba58c9496c242169e2a40efcf0aa9e3f36bf0dbbc0`:
+106 rows = unchanged 99 plus seven new inputs (three valid controls and four unmasked
+resource negatives). All native/build/host/authority/job/raw-request identities remain absent.
 
 | Finding | A disposition and concrete evidence | B reconciliation |
 | --- | --- | --- |
@@ -20,7 +31,7 @@ bindings are recorded below when B publishes its independent join.
 | F2 | APPLIED: immediate expanded-sequence links, dependency first/last endpoints, acquisition-only resource links, first-from-last credit endpoints, tight ordinals and stable ties. V1 refuses structurally. | B independently derives complete transition/dependency/resource/exhausted-credit cause sets, including V2 and structurally eligible false credit. No validator-as-oracle dependency. |
 | F3 | APPLIED: [guard matrix](guard-matrix.json) covers all 46 reviewed and 59 final require guards. 42 essential guards have unsafe-admission witnesses; 17 have explicit redundancy/admitted-structure/public-refusal dispositions. M1 category/domain, M2 owner and off-chain M3 are consistent forgeries. C1 has two zero-duration nodes. | B supplied independent carriers and mechanism controls. [Cycle evidence](cycle-redundancy.json) explicitly distinguishes redundant defense from unsafe acceptance; no source-hash, lookup crash or incidental refusal is scored as semantic coverage. |
 | F4 | APPLIED: equal-footprint A3b/A3c and A1 partial terminal reuse pin InvalidDependency and exact intended details, with valid controls. [Focused mutations](focused-mutations.json) demonstrate unsafe acceptance without production-order/terminal-set guards and restored refusals. | B's independently constructed writer/terminal/shared-use controls reach resource guards under explicit synthetic success anchors. |
-| F5 | B-owned; A supplies the exact interface and preserves independent checker execution. No A acceptance claim for B's findings. | Corrected checker/transition code and behavioral guard receipts are B's response; identity-only tests are excluded from scoring. |
+| F5 | APPLIED in B's response; independently authored checker remains separate from A's validator. | B maps 55 historical guards to 69 corrected checker plus 11 transition guards; 33 invariant experiments (explicitly grouped where redundant), with exact restoration. A's final run includes the B tests. No identity-only score or author acceptance claim. |
 | F6 | APPLIED: contract tests under contract/tests/mapped; mapper/replay under tests/unit; B checker/helper/lifetime/carrier/selection tests under validation/component. All paths are in the combined patch. No .py.txt copying, missing-file skip or new discovery exclusion. | Both historical B test migrations and new tests are activated. Historical checker bytes remain an explicitly pinned snapshot; /3 binds current code/tests. |
 | F7 | APPLIED as preparation: preserve exact error-order tests, separately demonstrate unmasked writer and partial-terminal negatives. Wrong-owner redundancy with later core/size checks is explicit. | New B3 input/selection identities retain old masked cases as historical error-order controls; no profile-negative short-circuit is mistaken for resource coverage. |
 | F8 | APPLIED: canonical job owner, zero declared release, dependency readiness and activity span; exact endpoint event kinds/joins. In /2, scalar job blockers are empty and critical predecessor is null, explicitly unrepresented in favor of typed activity links. /1 meanings stay unchanged. | B independently verifies these fields. Fully resealed five-field forgeries now refuse at intended guards. |
@@ -62,3 +73,10 @@ mechanism; synthetic positive anchors are unit evidence only and never caller tr
 Remaining decisions are exact semantic/install acceptance, the explicit NoC convention and
 F11's bounded P1/P2 choice. They do not require new approval of already accepted dependencies.
 The same reviewer performs Stage 3; the coordinator reconciles the exact package afterward.
+
+[Development controls](development-controls.json) distinguish tests-first refusals and actual
+unsafe-admission witnesses from schema-extension, diagnostic-only and setup failures. The
+final run is attributed to 7b972d0; the final preparation base contains only the subsequent
+proposal-helper import correction and author reports, with all 23 tested postimages and nine
+activation inputs identical. B's final response is published at 2579cc9; its previously
+pending shared-run field is satisfied by A's linked final verification receipt.
