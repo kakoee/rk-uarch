@@ -1,0 +1,1852 @@
+--- a/validation/component/observations_v2.py
++++ b/validation/component/observations_v2.py
+@@ -20,6 +20,7 @@
+     unique,
+ )
+ from validation.component.phase_laws import channel
++from validation.component.transition_checks import check_transitions, phase_binding
+ 
+ 
+ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> dict[str, Any]:
+@@ -48,7 +49,7 @@
+         need(key not in target, "duplicate mechanism")
+         target[key] = a
+         need(
+-            jobs[a["job_id"]]["start_ps"]
++            jobs[a["job_id"]]["ready_ps"]
+             <= a["ready_ps"]
+             <= a["end_ps"]
+             <= jobs[a["job_id"]]["end_ps"],
+@@ -156,7 +157,7 @@
+         need(align is not None, "missing receiving alignment")
+         assert align is not None and cycles is not None
+         need(a["ready_ps"] == align["end_ps"], "service readiness after alignment")
+-        if key[2] not in ("read_port", "write_port"):
++        if key[2] not in ("read_port", "write_port", "compute_overhead"):
+             need(align["start_ps"] == align["ready_ps"], "uncontended alignment grant")
+         hz = j["freq_hz"][domain]
+         need(
+@@ -190,7 +191,7 @@
+     need(set(aligns) <= set(phase_specs), "alignment inventory")
+     for sequence in sequences:
+         tid, req, _ = sequence[0]
+-        start = requests[req]["issue_ps"] if req in requests else jobs[tid]["start_ps"]
++        start = requests[req]["issue_ps"] if req in requests else jobs[tid]["ready_ps"]
+         for key in sequence:
+             a = aligns.get(key, services[key])
+             need(a["ready_ps"] == start, "phase ready transition")
+@@ -200,63 +201,127 @@
+         else:
+             need(start == jobs[tid]["end_ps"], "job completion mechanism")
+     owners = {x["owner_id"]: x["resource"] for x in j["owners"]}
+-    resources = obs["resource_intervals"]["records"]
++    resources = unique(obs["resource_intervals"]["records"], "activity_id")
++    # Derive service laws from the complete input inventory, never occupancy flags/rows.
+     groups: dict[int, list[Any]] = defaultdict(list)
+-    for res in resources:
+-        groups[res["owner_id"]].append(res)
++    required = set()
++    for a in acts.values():
++        owner_name, category, domain, occupied = phase_binding(j, a)
++        need(owners[a["owner_id"]] == owner_name, "activity owner")
++        need(
++            (a["category"], a["receiving_domain"]) == (category, domain), "activity category/domain"
++        )
++        if occupied:
++            required.add(a["activity_id"])
++            groups[a["owner_id"]].append(a)
+     for owner, pieces in groups.items():
+         if owners[owner].startswith(("matrix:", "dma_port:")):
+-            ordered = sorted(pieces, key=lambda x: (x["start_ps"], x["end_ps"], x["activity_id"]))
++            ordered = sorted(pieces, key=lambda x: (x["start_ps"], x["dispatch_ordinal"]))
+             need(
+                 all(
+                     a["end_ps"] <= b["start_ps"] for a, b in zip(ordered, ordered[1:], strict=False)
+                 ),
+-                "exclusive occupied intervals",
+-            )
++                "exclusive mechanism intervals",
++            )
++            if owners[owner].startswith("dma_port:"):
++
++                def port_ready(a: Any) -> Any:
++                    return aligns[a["job_id"], a["request_id"], a["subphase"]]
++
++                ready_order = sorted(
++                    pieces,
++                    key=lambda a: (
++                        port_ready(a)["ready_ps"],
++                        declared[a["request_id"]][0]["dma_engine_id"],
++                        a["request_id"],
++                    ),
++                )
++                need(
++                    [a["activity_id"] for a in ordered] == [a["activity_id"] for a in ready_order],
++                    "port FIFO tie",
++                )
++                previous = 0
++                for a in ordered:
++                    alignment = port_ready(a)
++                    need(
++                        alignment["start_ps"] == max(alignment["ready_ps"], previous),
++                        "port eligible grant",
++                    )
++                    previous = a["end_ps"]
+         elif owners[owner].startswith("channel:"):
+-            exact = []
+-            for res in pieces:
+-                lo, hi = (
+-                    Fraction(res[k]["numerator"], res[k]["denominator"])
+-                    for k in ("service_start_ps_ratio", "service_end_ps_ratio")
+-                )
+-                a = acts[res["activity_id"]]
+-                task, fragment = declared[a["request_id"]]
+-                channel(lo, hi, fragment["transaction_bytes"], bandwidth)
+-                exact.append((lo, hi, a))
+-            observed_order = sorted(exact, key=lambda x: (x[0], x[2]["request_id"]))
+             ready_order = sorted(
+-                exact,
+-                key=lambda x: (
+-                    services[x[2]["job_id"], x[2]["request_id"], "dram_latency"]["end_ps"],
+-                    declared[x[2]["request_id"]][0]["dma_engine_id"],
+-                    x[2]["request_id"],
++                pieces,
++                key=lambda a: (
++                    a["ready_ps"],
++                    declared[a["request_id"]][0]["dma_engine_id"],
++                    a["request_id"],
+                 ),
+             )
+-            need(
+-                [x[2]["activity_id"] for x in observed_order]
+-                == [x[2]["activity_id"] for x in ready_order],
++            observed_order = sorted(pieces, key=lambda a: (a["start_ps"], a["dispatch_ordinal"]))
++            need(
++                [a["activity_id"] for a in observed_order]
++                == [a["activity_id"] for a in ready_order],
+                 "channel FIFO tie",
+             )
+-            previous = Fraction(0)
+-            for lo, hi, a in sorted(exact, key=lambda x: (x[0], x[2]["request_id"])):
+-                latency = services[a["job_id"], a["request_id"], "dram_latency"]["end_ps"]
+-                need(lo == max(Fraction(latency), previous), "rational channel carry/readiness")
+-                previous = hi
+-    for key, a in aligns.items():
+-        if key[2] in ("read_port", "write_port"):
+-            prior = [
+-                x["end_ps"]
+-                for x in groups[a["owner_id"]]
+-                if x["end_ps"] <= a["start_ps"] and x["activity_id"] != services[key]["activity_id"]
+-            ]
+-            need(a["start_ps"] == max(a["ready_ps"], max(prior, default=0)), "port eligible grant")
++            previous_exact = Fraction(0)
++            for a in observed_order:
++                _, fragment = declared[a["request_id"]]
++                lo = max(Fraction(a["ready_ps"]), previous_exact)
++                hi = lo + fragment["transaction_bytes"] * 10**12 / bandwidth
++                need(
++                    (a["start_ps"], a["end_ps"]) == (ceil(lo), ceil(hi)),
++                    "channel integer mechanism",
++                )
++                res = resources.get(a["activity_id"])
++                if res is not None:
++                    supplied_lo, supplied_hi = (
++                        Fraction(res[k]["numerator"], res[k]["denominator"])
++                        for k in ("service_start_ps_ratio", "service_end_ps_ratio")
++                    )
++                    channel(supplied_lo, supplied_hi, fragment["transaction_bytes"], bandwidth)
++                    need(supplied_lo == lo, "rational channel carry/readiness")
++                previous_exact = hi
++    need(
++        all(a["occupies_resource"] == (a["activity_id"] in required) for a in acts.values()),
++        "required occupancy",
++    )
++    need(resources.keys() == required, "occupied row inventory")
++    for aid, res in resources.items():
++        a = acts[aid]
++        need(
++            (
++                res["owner_id"],
++                res["job_id"],
++                res["start_ps"],
++                res["end_ps"],
++                res["activity"],
++                res["limiting_resource_id"],
++            )
++            == (
++                a["owner_id"],
++                a["job_id"],
++                a["start_ps"],
++                a["end_ps"],
++                a["subphase"],
++                a["owner_id"],
++            ),
++            "occupied row binding",
++        )
+     for busy in r["busy_time_ps"]:
+         need(
+             busy["busy_time_ps"]
+-            == union_time((x["start_ps"], x["end_ps"]) for x in groups[busy["owner_id"]]),
++            == union_time((a["start_ps"], a["end_ps"]) for a in groups[busy["owner_id"]]),
+             "busy union",
+         )
++    expanded = [
++        [
++            a
++            for key in seq
++            for a in ([aligns[key], services[key]] if key in aligns else [services[key]])
++        ]
++        for seq in sequences
++    ]
++    check_transitions(j, r, expanded)
+     queues = obs["queue_membership"]["records"]
+     keys = [(q["queue_id"], q["item_id"], q["population"], q["activity_id"]) for q in queues]
+     need(len(set(keys)) == len(keys), "queue population uniqueness")
+@@ -287,6 +352,37 @@
+                 len(matches) == 1
+                 and (matches[0]["enter_ps"], matches[0]["leave_ps"]) == (begin, end),
+                 "channel population lifecycle",
++            )
++    engines = val(core["dma"]["engines"])
++    populations: tuple[str, ...]
++    for q in queues:
++        if q["activity_id"] is None:
++            need(q["item_id"] in declared, "nonclocked request binding")
++            queue_task, fragment = declared[q["item_id"]]
++            if q["queue_id"].startswith("channel_service:"):
++                name, resource, populations = (
++                    f"channel_service:{fragment['channel_id']}",
++                    f"channel:{fragment['channel_id']}",
++                    ("waiting", "service"),
++                )
++            else:
++                engine = queue_task["dma_engine_id"]
++                name, resource, populations = (
++                    f"dma_inflight:{engine}",
++                    f"dma:{engine // engines}:{engine % engines}",
++                    ("inflight",),
++                )
++            need(
++                q["queue_id"] == name
++                and owners[q["owner_id"]] == resource
++                and q["population"] in populations
++                and q["clock_domain"] is None,
++                "nonclocked exact binding",
++            )
++        else:
++            need(
++                q["activity_id"] in acts and q["population"] in ("waiting", "service"),
++                "ordinary queue inventory",
+             )
+     for a in acts.values():
+         if a["receiving_domain"] is not None:
+@@ -534,6 +630,20 @@
+         and r["fidelity_detail"] == dict(compute=1, noc=0, dram=0, sync="exact", layer_reuse=False),
+         "fidelity/null floor",
+     )
++    need(
++        all(
++            r["diagnostics"][key] is None
++            for key in (
++                "energy_pj",
++                "dram_row_hit_ratio",
++                "sram_bank_conflict_stall_ratio",
++                "noc_max_link_util_ratio",
++                "vector_util_ratio",
++            )
++        )
++        and r["ext_counts"]["noc_flit_hop_count"] is None,
++        "unmodeled diagnostics",
++    )
+     windows = {}
+     for t in transfers:
+         windows[str((t["request_id"], t["boundary_id"]))] = conservation(
+--- /dev/null
++++ b/validation/component/transition_checks.py
+@@ -0,0 +1,189 @@
++"""Independent input/transition witnesses. No carrier validator or timing engine calls."""
++
++from collections import defaultdict
++from typing import Any
++
++from validation.component.checks import need
++
++
++def phase_binding(j: dict[str, Any], a: Any) -> tuple[str, str, str | None, bool]:
++    g = j["mapped_point"]["task_graph"]
++    t = next(t for t in g["jobs"] if t["id"] == a["job_id"])
++    core = j["workload_closure"]["hardware_spec"]["cores"]
++    cols = int(core["grid"]["cols"]["value"])
++    engines = int(core["core_type"]["dma"]["engines"]["value"])
++    domain: str | None
++    p = a["subphase"]
++    if t["kind"] == "compute":
++        owner, category, domain, occupied = f"matrix:{t['core_id']}", "compute", "core", True
++        if p == "compute_overhead":
++            category = "overhead"
++    elif t["kind"] == "barrier":
++        owner, category, domain, occupied = f"barrier:{t['id']}", "sync", "noc", False
++    else:
++        if t["kind"] == "dma":
++            f = next(f for f in t["fragments"] if f["request_id"] == a["request_id"])
++            core_id, route_id = t["dma_engine_id"] // engines, f["route_id"]
++        else:
++            b = next(b for b in g["buffers"] if b["id"] == t["source"]["buffer_id"])
++            core_id, route_id = b["core_id"], t["route_id"]
++        if p.endswith("_noc"):
++            route = next(r for r in g["routes"] if r["id"] == route_id)
++            owner, category, domain, occupied = (
++                f"router:0:{core_id // cols}:{core_id % cols}",
++                "noc",
++                "noc",
++                len(route["core_ids"]) > 1,
++            )
++        elif p in ("dram_latency", "channel_service"):
++            owner, category, domain, occupied = (
++                f"channel:{f['channel_id']}",
++                "memory",
++                "dram" if p == "dram_latency" else None,
++                p == "channel_service",
++            )
++        else:
++            owner, category, domain, occupied = f"dma_port:{core_id}", "memory", "core", p != "ack"
++    return owner, category, domain, occupied and a["kind"] == "service"
++
++
++def check_transitions(j: dict[str, Any], r: dict[str, Any], expanded: list[list[Any]]) -> None:
++    obs = r["observations"]
++    tasks = {t["id"]: t for t in j["mapped_point"]["task_graph"]["jobs"]}
++    jobs = {x["job_id"]: x for x in obs["jobs"]["records"]}
++    acts = {a["activity_id"]: a for a in obs["activities"]["records"]}
++    owners = {x["resource"]: x["owner_id"] for x in j["owners"]}
++    hardware = j["workload_closure"]["hardware_spec"]["cores"]
++    engines = int(hardware["core_type"]["dma"]["engines"]["value"])
++    requests = {x["request_id"]: x for x in obs["dma"]["records"] if x["direction"] != "unicast"}
++    deps: dict[str, list[str]] = defaultdict(list)
++    for edge in j["mapped_point"]["task_graph"]["dependencies"]:
++        deps[edge["after"]].append(edge["before"])
++    firsts: dict[str, list[Any]] = defaultdict(list)
++    lasts: dict[str, list[Any]] = defaultdict(list)
++    eligible: dict[str, set[tuple[str, str]]] = {key: set() for key in acts}
++
++    def cause(before: Any, after: Any, relation: str) -> None:
++        if before["end_ps"] == after["start_ps"]:
++            eligible[after["activity_id"]].add((before["activity_id"], relation))
++
++    for seq in expanded:
++        firsts[seq[0]["job_id"]].append(seq[0])
++        lasts[seq[-1]["job_id"]].append(seq[-1])
++        for before, after in zip(seq, seq[1:], strict=False):
++            cause(before, after, "sequence")
++    # Resource predecessors are derived at acquisition, never inferred from claimed links.
++    acquisitions: dict[int, list[tuple[Any, Any]]] = defaultdict(list)
++    for seq in expanded:
++        if tasks[seq[0]["job_id"]]["kind"] == "compute":
++            acquisitions[seq[0]["owner_id"]].append((seq[0], seq[-1]))
++        for a in seq:
++            if a["kind"] == "service" and a["subphase"] in (
++                "channel_service",
++                "read_port",
++                "write_port",
++            ):
++                index = seq.index(a)
++                first = seq[index - 1] if index and seq[index - 1]["kind"] == "alignment" else a
++                acquisitions[a["owner_id"]].append((first, a))
++    for pairs in acquisitions.values():
++        pairs.sort(key=lambda pair: (pair[0]["start_ps"], pair[0]["dispatch_ordinal"]))
++        for (_, before), (after, _) in zip(pairs, pairs[1:], strict=False):
++            cause(before, after, "resource")
++    for tid, starts in firsts.items():
++        for start in starts:
++            for predecessor in deps[tid]:
++                for end in lasts[predecessor]:
++                    if end["end_ps"] == jobs[predecessor]["end_ps"]:
++                        cause(end, start, "dependency")
++    limit = int(hardware["core_type"]["dma"]["max_outstanding"]["value"])
++    request_ends = {seq[-1]["request_id"]: seq[-1] for seq in expanded}
++    for req, row in requests.items():
++        first = next(x for x in firsts[row["job_id"]] if x["request_id"] == req)
++        time = row["issue_ps"]
++        # Occupants immediately before this issue, including releases at the same timestamp.
++        before = [
++            x
++            for key, x in requests.items()
++            if key != req
++            and x["dma_engine_id"] == row["dma_engine_id"]
++            and x["issue_ps"] < time <= x["complete_ps"]
++        ]
++        if time > jobs[row["job_id"]]["ready_ps"] and len(before) == limit:
++            for old in before:
++                if old["complete_ps"] == time:
++                    cause(request_ends[old["request_id"]], first, "credit")
++    for a in acts.values():
++        supplied = [(p["activity_id"], p["relation"]) for p in a["predecessors"]]
++        need(
++            len(supplied) == len(set(supplied)) and set(supplied) == eligible[a["activity_id"]],
++            "complete eligible causes",
++        )
++    # Explicit DAG verification includes all off-chain zero-duration links.
++    pending = set(acts)
++    while pending:
++        ready = {key for key in pending if not any(p in pending for p, _ in eligible[key])}
++        need(bool(ready), "causal activity cycle")
++        pending -= ready
++    for tid, t in tasks.items():
++        row = jobs[tid]
++        if t["kind"] == "dma":
++            owner = owners[f"dma:{t['dma_engine_id'] // engines}:{t['dma_engine_id'] % engines}"]
++        else:
++            owner = firsts[tid][0]["owner_id"]
++        need(row["owner_id"] == owner, "job owner binding")
++        need(row["release_ps"] == 0, "job release binding")
++        need(row["blocking_predecessor_ids"] == [], "unrepresented job blockers")
++        need(
++            row["ready_ps"] == max((jobs[p]["end_ps"] for p in deps[tid]), default=0),
++            "job dependency readiness",
++        )
++        need(
++            (row["start_ps"], row["end_ps"])
++            == (min(a["start_ps"] for a in firsts[tid]), max(a["end_ps"] for a in lasts[tid])),
++            "job transition endpoints",
++        )
++    need(
++        all(c["predecessor_id"] is None for c in obs["critical_path"]["records"]),
++        "unrepresented critical predecessor",
++    )
++    events = {e["observation_ordinal"]: e for e in obs["events"]["records"]}
++    endpoints = []
++    for a in acts.values():
++        kinds = (
++            ("TASK_READY", "DEPENDENCY_READY")
++            if a["kind"] == "alignment"
++            else {
++                "compute_overhead": ("OWNER_GRANT", "COMPUTE_DONE"),
++                "compute_stage": ("OWNER_GRANT", "COMPUTE_DONE"),
++                "compute_wave": ("OWNER_GRANT", "COMPUTE_DONE"),
++                "compute_drain": ("OWNER_GRANT", "COMPUTE_DONE"),
++                "read_port": ("OWNER_GRANT", "DMA_DONE"),
++                "write_port": ("OWNER_GRANT", "MEM_RESP"),
++                "dram_latency": ("MEM_REQ", "MEM_RESP"),
++                "channel_service": ("MEM_REQ", "MEM_RESP"),
++                "request_noc": ("NOC_HEAD", "NOC_TAIL"),
++                "response_noc": ("NOC_HEAD", "NOC_TAIL"),
++                "unicast_noc": ("NOC_HEAD", "NOC_TAIL"),
++                "ack": ("TASK_READY", "DMA_DONE"),
++                "barrier": ("SYNC_ARRIVE", "BARRIER_RELEASE"),
++            }[a["subphase"]]
++        )
++        for field, time, kind in zip(
++            ("dispatch_ordinal", "completion_ordinal"),
++            (a["start_ps"], a["end_ps"]),
++            kinds,
++            strict=True,
++        ):
++            endpoints.append(a[field])
++            e = events.get(a[field])
++            need(
++                e is not None
++                and (e["kind"], e["job_id"], e["target_id"], e["t_ps"])
++                == (kind, a["job_id"], a["owner_id"], time),
++                "event transition binding",
++            )
++    need(
++        len(endpoints) == len(set(endpoints)) and set(endpoints) == events.keys(),
++        "event endpoint inventory",
++    )
+--- /dev/null
++++ b/validation/component/synthetic_carrier.py
+@@ -0,0 +1,742 @@
++"""Hand-authored SYNTHETIC carrier control; no engine invocation or native evidence.
++
++Uses real job/result parsers with visibly synthetic unit anchors. Never export as a run.
++"""
++
++from fractions import Fraction
++from functools import cache
++
++from uarch_contract.hashing import content_hash
++from uarch_contract.mapped import (
++    MappedBundle,
++    MappedEngineJob,
++    canonical_owners,
++    hardware_projection,
++    resolve_frequencies,
++)
++
++from validation.component.checks import union_time
++from validation.component.corpus import build
++
++
++def observed(rows):
++    return dict(status="observed", records=rows)
++
++
++@cache
++def synthetic_job(case="D01"):
++    corpus = build()
++    item = corpus["items"][case]
++    b = MappedBundle.model_validate(item["bundle"])
++    p = b.points[0]
++    raw = dict(
++        protocol="uarch-engine/3",
++        bundle_hash=b.bundle_hash,
++        point_hash=p.payload_hash,
++        request_hash=None,
++        assumptions_hash=b.assumptions_hash,
++        engine=dict(
++            name="native",
++            version="native-stage/1",
++            model=dict(
++                name="native-intervals",
++                version="1",
++                implementation_hash=content_hash("SYNTHETIC UNIT NO MODEL"),
++            ),
++            implementation_hash=content_hash("SYNTHETIC UNIT NO ENGINE"),
++            compiler_lock_hash=content_hash("SYNTHETIC UNIT NO BUILD"),
++        ),
++        mapped_point=p.model_dump(mode="json"),
++        workload_closure=b.model_dump(mode="json"),
++        assumptions=b.assumptions.model_dump(mode="json"),
++        hardware=hardware_projection(b.hardware_spec).model_dump(mode="json"),
++        hardware_spec_hash=b.hardware_spec_hash,
++        rank=b.rank.model_dump(mode="json"),
++        precision="bf16",
++        fidelity_detail=dict(compute=1, noc=0, dram=0, sync="exact", layer_reuse=False),
++        frequency_ratio=p.frequency_ratio,
++        freq_hz=resolve_frequencies(b.hardware_spec, p.frequency_ratio).model_dump(mode="json"),
++        initial_state=p.initial_state,
++        priming_iterations=0,
++        seed=0,
++        admission=b.admission.model_dump(mode="json"),
++        state_model="resource_intervals/1",
++        clock_setup=[],
++        owner_enumeration="native-owners/1",
++        owners=[x.model_dump(mode="json") for x in canonical_owners(b.hardware_spec, p.task_graph)],
++        registry=corpus["registry"],
++        profile=item["profile"],
++    )
++    raw["job_hash"] = content_hash(raw)
++    return MappedEngineJob.model_validate(raw)
++
++
++def synthetic_result(job, request_index=0):
++    j = job.model_dump(mode="json")
++    task = j["mapped_point"]["task_graph"]["jobs"][request_index]
++    req = task["fragments"][0]["request_id"]
++    owners = {x["resource"]: x["owner_id"] for x in j["owners"]}
++    router, channel, port, dma = [
++        owners[x]
++        for x in (
++            "router:0:0:0",
++            f"channel:{task['fragments'][0]['channel_id']}",
++            "dma_port:0",
++            "dma:0:0",
++        )
++    ]
++    activities = []
++    events = []
++    clocks = []
++    resources = []
++    queues = []
++    # Explicit finite D01 phases. Zero alignments are preserved as causal links.
++    rows = [
++        ("out-a", "request_noc", "alignment", 0, 0, router, "noc", "noc", False, 0),
++        ("out", "request_noc", "service", 0, 4000, router, "noc", "noc", True, 4),
++        ("lat-a", "dram_latency", "alignment", 4000, 4000, channel, "memory", "dram", False, 0),
++        ("lat", "dram_latency", "service", 4000, 52000, channel, "memory", "dram", False, 48),
++        (
++            "channel",
++            "channel_service",
++            "service",
++            52000,
++            54250,
++            channel,
++            "memory",
++            None,
++            True,
++            None,
++        ),
++        ("back-a", "response_noc", "alignment", 54250, 55000, router, "noc", "noc", False, 0),
++        ("back", "response_noc", "service", 55000, 59000, router, "noc", "noc", True, 4),
++        ("port-a", "read_port", "alignment", 59000, 59000, port, "memory", "core", False, 0),
++        ("port", "read_port", "service", 59000, 60000, port, "memory", "core", True, 1),
++    ]
++    previous = None
++    for name, phase, kind, start, end, owner, category, domain, occupied, cycles in rows:
++        a = dict(
++            activity_id=name,
++            job_id=task["id"],
++            request_id=req,
++            subphase=phase,
++            kind=kind,
++            ready_ps=start,
++            start_ps=start,
++            end_ps=end,
++            owner_id=owner,
++            category=category,
++            receiving_domain=domain,
++            occupies_resource=occupied,
++            dispatch_ordinal=len(events),
++            completion_ordinal=len(events) + 1,
++            predecessors=[]
++            if previous is None
++            else [dict(activity_id=previous, relation="sequence")],
++        )
++        activities.append(a)
++        for time, eventkind in [
++            (start, "TASK_READY"),
++            (end, "DMA_DONE" if name == "port" else "MEM_RESP"),
++        ]:
++            events.append(
++                dict(
++                    event_seq=len(events),
++                    observation_ordinal=len(events),
++                    t_ps=time,
++                    phase=1,
++                    target_id=owner,
++                    kind=eventkind,
++                    job_id=task["id"],
++                )
++            )
++        if cycles is not None:
++            clocks.append(
++                dict(
++                    activity_id=name,
++                    job_id=task["id"],
++                    domain=domain,
++                    grant_ps=start,
++                    n_cycles=cycles,
++                    raw_edge_outcome="success",
++                    aligned_start_ps=end if kind == "alignment" else start,
++                    completion_ps=end,
++                )
++            )
++        if occupied:
++            exact = (
++                (Fraction(52000), Fraction(3851744, 71))
++                if phase == "channel_service"
++                else (None, None)
++            )
++            resources.append(
++                dict(
++                    activity_id=name,
++                    owner_id=owner,
++                    job_id=task["id"],
++                    start_ps=start,
++                    end_ps=end,
++                    activity=phase,
++                    limiting_resource_id=owner,
++                    service_start_ps_ratio=None
++                    if exact[0] is None
++                    else dict(numerator=exact[0].numerator, denominator=exact[0].denominator),
++                    service_end_ps_ratio=None
++                    if exact[1] is None
++                    else dict(numerator=exact[1].numerator, denominator=exact[1].denominator),
++                )
++            )
++        if domain is not None:
++            queues.append(
++                dict(
++                    queue_id=f"activity:{phase}:{owner}",
++                    item_id=req,
++                    population="service",
++                    enter_ps=start,
++                    leave_ps=end,
++                    owner_id=owner,
++                    clock_domain=domain,
++                    activity_id=name,
++                )
++            )
++        previous = name
++    queues += [
++        dict(
++            queue_id=f"channel_service:{task['fragments'][0]['channel_id']}",
++            item_id=req,
++            population=pop,
++            enter_ps=a,
++            leave_ps=z,
++            owner_id=channel,
++            clock_domain=None,
++            activity_id=None,
++        )
++        for pop, a, z in [("waiting", 52000, 52000), ("service", 52000, 54250)]
++    ]
++    queues.append(
++        dict(
++            queue_id="dma_inflight:0",
++            item_id=req,
++            population="inflight",
++            enter_ps=0,
++            leave_ps=60000,
++            owner_id=dma,
++            clock_domain=None,
++            activity_id=None,
++        )
++    )
++    zero_counts = dict(
++        matrix_ops=0.0, vector_ops=0.0, memory_read_bytes=256.0, memory_write_bytes=0.0
++    )
++    work = dict(
++        format="uarch-native-work-counts/1",
++        completed_mac_count=0,
++        issued_matrix_ops=0,
++        vector_arithmetic_ops=0,
++        cast_ops=0,
++    )
++    traffic = dict(
++        format="uarch-native-traffic-counts/1",
++        read_payload_bytes=256,
++        write_payload_bytes=0,
++        read_transaction_bytes=256,
++        write_transaction_bytes=0,
++        unicast_payload_bytes=0,
++    )
++    jr = dict(
++        job_id=task["id"],
++        op_id=None,
++        group_id=None,
++        repeat_index=None,
++        tile_origin=None,
++        tile_extents=None,
++        release_ps=0,
++        ready_ps=0,
++        start_ps=0,
++        end_ps=60000,
++        owner_id=dma,
++        blocking_predecessor_ids=[],
++        useful_matrix_ops=0,
++        issued_matrix_ops=0,
++        vector_arithmetic_ops=0,
++        cast_ops=0,
++    )
++    request = dict(
++        request_id=req,
++        job_id=task["id"],
++        dma_engine_id=0,
++        direction="read",
++        source_buffer_id=task["source"]["buffer_id"],
++        destination_buffer_id=task["destination"]["buffer_id"],
++        payload_bytes=256,
++        transaction_bytes=256,
++        credit_acquire_ps=0,
++        issue_ps=0,
++        complete_ps=60000,
++        credit_release_ps=60000,
++        route_id=task["fragments"][0]["route_id"],
++    )
++    transfers = [
++        dict(
++            request_id=req,
++            boundary_id=boundary,
++            direction="read",
++            payload_bytes=payload,
++            transaction_bytes=txn,
++            enter_ps=a,
++            leave_ps=z,
++        )
++        for boundary, payload, txn, a, z in [
++            ("request_noc", 0, 0, 0, 4000),
++            ("dram", 256, 256, 4000, 54250),
++            ("response_noc", 256, 0, 54250, 59000),
++            ("core_port", 256, 0, 59000, 60000),
++        ]
++    ]
++    allocations = [
++        dict(
++            buffer_id=b["id"],
++            space=b["space"],
++            owner_id=owners["channel:0" if b["space"] == "hbm" else "sram:0"],
++            offset_bytes=b["offset_bytes"],
++            size_bytes=b["size_bytes"],
++            allocate_ps=0,
++            free_ps=None,
++            initially_live=b["initial_residency"] == "preloaded",
++            last_consumer_ids=b["final_consumer_ids"],
++        )
++        for b in j["mapped_point"]["task_graph"]["buffers"]
++    ]
++    critical = [
++        dict(
++            kind="service",
++            start_ps=a["start_ps"],
++            end_ps=a["end_ps"],
++            cause_job_id=task["id"],
++            predecessor_id=None,
++            limiting_resource_id=a["owner_id"],
++            category=a["category"],
++            activity_id=a["activity_id"],
++        )
++        for a in activities
++        if a["end_ps"] > a["start_ps"]
++    ]
++    result = dict(
++        protocol="uarch-engine/3",
++        job_hash=job.job_hash,
++        engine=j["engine"],
++        scope=j["workload_closure"]["scope"]["kind"],
++        completion="complete",
++        duration_ps=60000,
++        completed_jobs=[task["id"]],
++        admission=j["admission"],
++        counts=zero_counts,
++        ext_counts=dict(sram_read_bytes=0.0, sram_write_bytes=256.0, noc_flit_hop_count=None),
++        work_counts=work,
++        traffic_counts=traffic,
++        per_op=[],
++        busy_time_ps=[
++            dict(
++                owner_id=o["owner_id"],
++                busy_time_ps=union_time(
++                    (r["start_ps"], r["end_ps"])
++                    for r in resources
++                    if r["owner_id"] == o["owner_id"]
++                ),
++            )
++            for o in j["owners"]
++        ],
++        attribution_ps=dict(compute=0, memory=51250, noc=8750, sync=0, overhead=0),
++        diagnostics={
++            k: None
++            for k in (
++                "matrix_util_ratio",
++                "vector_util_ratio",
++                "dma_compute_overlap_ratio",
++                "sram_bank_conflict_stall_ratio",
++                "noc_latency_p50_ps",
++                "noc_latency_p99_ps",
++                "noc_max_link_util_ratio",
++                "dram_bw_util_ratio",
++                "dram_row_hit_ratio",
++                "energy_pj",
++            )
++        },
++        fidelity_detail=j["fidelity_detail"],
++        unrepresented=["SYNTHETIC-unit-carrier-only"],
++        simulator_metrics=dict(event_count=len(events), completed_job_count=1, max_live_events=1),
++        trace_hash=None,
++        u_c0_duration_ps=None,
++        owners=j["owners"],
++        observations=dict(
++            format="uarch-native-observations/2",
++            **{
++                k: observed(v)
++                for k, v in dict(
++                    events=events,
++                    jobs=[jr],
++                    activities=activities,
++                    clocks=clocks,
++                    dma=[request],
++                    transfers=transfers,
++                    allocations=allocations,
++                    queue_membership=queues,
++                    resource_intervals=resources,
++                    critical_path=critical,
++                ).items()
++            },
++        ),
++    )
++    if j["freq_hz"] == dict(core=800000000, noc=1200000000, dram=900000000):
++        # Finite independent D10 read worksheet; no general timing computation.
++        times = {
++            4000: 3334,
++            52000: 56667,
++            54250: 58917,
++            55000: 59167,
++            59000: 62500,
++            60000: 63750,
++            3851744: 4183101,
++            51250: 56833,
++            8750: 6917,
++        }
++
++        def replace(value):
++            if isinstance(value, dict):
++                return {k: replace(v) for k, v in value.items()}
++            if isinstance(value, list):
++                return [replace(v) for v in value]
++            if type(value) is int:
++                return times.get(value, value)
++            return value
++
++        result = replace(result)
++        # Busy is a union of occupied records, excluding response alignment.
++        pieces = result["observations"]["resource_intervals"]["records"]
++        result["busy_time_ps"] = [
++            dict(
++                owner_id=o["owner_id"],
++                busy_time_ps=union_time(
++                    (x["start_ps"], x["end_ps"]) for x in pieces if x["owner_id"] == o["owner_id"]
++                ),
++            )
++            for o in j["owners"]
++        ]
++    result["result_hash"] = content_hash(result)
++    return result
++
++
++def synthetic_resident_result(job):
++    """Finite hand-written C02 /2 control, not native output."""
++    from copy import deepcopy
++
++    r = synthetic_result(synthetic_job())
++    j = job.model_dump(mode="json")
++    task = j["mapped_point"]["task_graph"]["jobs"][0]
++    obs = r["observations"]
++    for key in obs:
++        if key != "format":
++            obs[key] = observed([])
++    activities = []
++    clocks = []
++    resources = []
++    queues = []
++    events = []
++    previous = None
++    for index, (phase, start, end, cycles) in enumerate(
++        [
++            ("compute_overhead", 0, 32000, 32),
++            ("compute_stage", 32000, 33000, 1),
++            ("compute_wave", 33000, 546000, 513),
++            ("compute_drain", 546000, 547000, 1),
++        ]
++    ):
++        category = "overhead" if index == 0 else "compute"
++        for kind, a, z, n in [("alignment", start, start, 0), ("service", start, end, cycles)]:
++            name = phase + ":" + kind
++            activity = dict(
++                activity_id=name,
++                job_id=task["id"],
++                request_id=None,
++                subphase=phase,
++                kind=kind,
++                ready_ps=a,
++                start_ps=a,
++                end_ps=z,
++                owner_id=0,
++                category=category,
++                receiving_domain="core",
++                occupies_resource=kind == "service",
++                dispatch_ordinal=len(events),
++                completion_ordinal=len(events) + 1,
++                predecessors=[]
++                if previous is None
++                else [dict(activity_id=previous, relation="sequence")],
++            )
++            activities.append(activity)
++            for time, eventkind in [(a, "OWNER_GRANT"), (z, "COMPUTE_DONE")]:
++                events.append(
++                    dict(
++                        event_seq=len(events),
++                        observation_ordinal=len(events),
++                        t_ps=time,
++                        phase=1,
++                        target_id=0,
++                        kind=eventkind,
++                        job_id=task["id"],
++                    )
++                )
++            clocks.append(
++                dict(
++                    activity_id=name,
++                    job_id=task["id"],
++                    domain="core",
++                    grant_ps=a,
++                    n_cycles=n,
++                    raw_edge_outcome="success",
++                    aligned_start_ps=a,
++                    completion_ps=z,
++                )
++            )
++            queues.append(
++                dict(
++                    queue_id=f"activity:{phase}:0",
++                    item_id=task["id"],
++                    population="service",
++                    enter_ps=a,
++                    leave_ps=z,
++                    owner_id=0,
++                    clock_domain="core",
++                    activity_id=name,
++                )
++            )
++            if kind == "service":
++                resources.append(
++                    dict(
++                        activity_id=name,
++                        owner_id=0,
++                        job_id=task["id"],
++                        start_ps=a,
++                        end_ps=z,
++                        activity=phase,
++                        limiting_resource_id=0,
++                        service_start_ps_ratio=None,
++                        service_end_ps_ratio=None,
++                    )
++                )
++            previous = name
++    row = dict(
++        job_id=task["id"],
++        op_id=task["op_id"],
++        group_id=None,
++        repeat_index=0,
++        tile_origin=task["tile_origin"],
++        tile_extents=task["tile_extents"],
++        release_ps=0,
++        ready_ps=0,
++        start_ps=0,
++        end_ps=547000,
++        owner_id=0,
++        blocking_predecessor_ids=[],
++        useful_matrix_ops=210,
++        issued_matrix_ops=393216,
++        vector_arithmetic_ops=0,
++        cast_ops=0,
++    )
++    owners = {x["resource"]: x["owner_id"] for x in j["owners"]}
++    allocations = [
++        dict(
++            buffer_id=b["id"],
++            space=b["space"],
++            owner_id=owners["matrix:0" if b["space"] == "accumulator" else "sram:0"],
++            offset_bytes=b["offset_bytes"],
++            size_bytes=b["size_bytes"],
++            allocate_ps=0,
++            free_ps=None,
++            initially_live=b["initial_residency"] == "preloaded",
++            last_consumer_ids=b["final_consumer_ids"],
++        )
++        for b in j["mapped_point"]["task_graph"]["buffers"]
++    ]
++    critical = [
++        dict(
++            kind="service",
++            start_ps=a["start_ps"],
++            end_ps=a["end_ps"],
++            cause_job_id=task["id"],
++            predecessor_id=None,
++            limiting_resource_id=0,
++            category=a["category"],
++            activity_id=a["activity_id"],
++        )
++        for a in activities
++        if a["kind"] == "service"
++    ]
++    obs.update(
++        {
++            k: observed(v)
++            for k, v in dict(
++                events=events,
++                jobs=[row],
++                activities=activities,
++                clocks=clocks,
++                allocations=allocations,
++                resource_intervals=resources,
++                queue_membership=queues,
++                critical_path=critical,
++            ).items()
++        }
++    )
++    r.update(
++        job_hash=job.job_hash,
++        engine=j["engine"],
++        scope="component",
++        duration_ps=547000,
++        completed_jobs=[task["id"]],
++        admission=j["admission"],
++        owners=j["owners"],
++    )
++    r["counts"].update(matrix_ops=210.0, memory_read_bytes=0.0)
++    r["ext_counts"].update(sram_read_bytes=100.0, sram_write_bytes=42.0)
++    r["work_counts"].update(completed_mac_count=105, issued_matrix_ops=393216)
++    r["traffic_counts"].update(read_payload_bytes=0, read_transaction_bytes=0)
++    r["per_op"] = [
++        dict(
++            op_id=task["op_id"],
++            **{
++                k: deepcopy(r[k]) for k in ("counts", "ext_counts", "work_counts", "traffic_counts")
++            },
++        )
++    ]
++    r["busy_time_ps"] = [
++        dict(owner_id=o["owner_id"], busy_time_ps=547000 if o["owner_id"] == 0 else 0)
++        for o in j["owners"]
++    ]
++    r["attribution_ps"].update(compute=515000, overhead=32000, memory=0, noc=0)
++    r["simulator_metrics"].update(event_count=len(events))
++    r["result_hash"] = content_hash(r, exclude=("result_hash",))
++    return r
++
++
++def synthetic_port_pair(job):
++    """D08 finite two-channel overlap/port-wait witness; hand-authored unit control."""
++    from copy import deepcopy
++
++    pieces = [synthetic_result(job, index) for index in (0, 1)]
++    for index, result in enumerate(pieces):
++        obs = result["observations"]
++        prefix = f"r{index}:"
++        for section in (
++            "activities",
++            "clocks",
++            "resource_intervals",
++            "queue_membership",
++            "critical_path",
++        ):
++            for row in obs[section]["records"]:
++                if row.get("activity_id") is not None:
++                    row["activity_id"] = prefix + row["activity_id"]
++                for link in row.get("predecessors", []):
++                    link["activity_id"] = prefix + link["activity_id"]
++        if index:
++            for a in obs["activities"]["records"]:
++                if a["activity_id"] == "r1:port-a":
++                    a.update(
++                        start_ps=60000,
++                        end_ps=60000,
++                        predecessors=[dict(activity_id="r0:port", relation="resource")],
++                    )
++                elif a["activity_id"] == "r1:port":
++                    a.update(ready_ps=60000, start_ps=60000, end_ps=61000)
++            for c in obs["clocks"]["records"]:
++                if c["activity_id"] in ("r1:port-a", "r1:port"):
++                    c.update(
++                        grant_ps=60000,
++                        aligned_start_ps=60000,
++                        completion_ps=60000 if c["activity_id"].endswith("-a") else 61000,
++                    )
++            for res in obs["resource_intervals"]["records"]:
++                if res["activity_id"] == "r1:port":
++                    res.update(start_ps=60000, end_ps=61000)
++            for q in obs["queue_membership"]["records"]:
++                if q["activity_id"] == "r1:port-a":
++                    q.update(enter_ps=60000, leave_ps=60000)
++                    waiting = deepcopy(q)
++                    waiting.update(population="waiting", enter_ps=59000, leave_ps=60000)
++                elif q["activity_id"] == "r1:port":
++                    q.update(enter_ps=60000, leave_ps=61000)
++                elif q["population"] == "inflight":
++                    q["leave_ps"] = 61000
++            obs["queue_membership"]["records"].append(waiting)
++            obs["jobs"]["records"][0]["end_ps"] = 61000
++            obs["dma"]["records"][0].update(complete_ps=61000, credit_release_ps=61000)
++            next(t for t in obs["transfers"]["records"] if t["boundary_id"] == "core_port")[
++                "leave_ps"
++            ] = 61000
++        # Ordinal values initially local; reassign in actual time order after combining.
++        for a in obs["activities"]["records"]:
++            for key, time in (
++                ("dispatch_ordinal", a["start_ps"]),
++                ("completion_ordinal", a["end_ps"]),
++            ):
++                obs["events"]["records"][a[key]]["t_ps"] = time
++    result = deepcopy(pieces[0])
++    obs = result["observations"]
++    for section in (
++        "jobs",
++        "dma",
++        "transfers",
++        "activities",
++        "clocks",
++        "resource_intervals",
++        "queue_membership",
++    ):
++        obs[section]["records"] = sum(
++            [deepcopy(p["observations"][section]["records"]) for p in pieces], []
++        )
++    events = []
++    for index, piece in enumerate(pieces):
++        for e in piece["observations"]["events"]["records"]:
++            events.append((e["t_ps"], index, e["observation_ordinal"], deepcopy(e)))
++    events.sort(key=lambda x: x[:3])
++    ordinals = {}
++    for ordinal, (_, index, old, e) in enumerate(events):
++        ordinals[index, old] = ordinal
++        e.update(observation_ordinal=ordinal, event_seq=ordinal)
++    obs["events"] = observed([x[3] for x in events])
++    for a in obs["activities"]["records"]:
++        index = int(a["activity_id"][1])
++        a["dispatch_ordinal"] = ordinals[index, a["dispatch_ordinal"]]
++        a["completion_ordinal"] = ordinals[index, a["completion_ordinal"]]
++    obs["critical_path"]["records"].append(
++        dict(
++            kind="service",
++            start_ps=60000,
++            end_ps=61000,
++            cause_job_id=obs["jobs"]["records"][1]["job_id"],
++            predecessor_id=obs["jobs"]["records"][0]["job_id"],
++            limiting_resource_id=next(
++                a["owner_id"] for a in obs["activities"]["records"] if a["activity_id"] == "r1:port"
++            ),
++            category="memory",
++            activity_id="r1:port",
++        )
++    )
++    result.update(duration_ps=61000, completed_jobs=[x["job_id"] for x in obs["jobs"]["records"]])
++    result["counts"]["memory_read_bytes"] = 512.0
++    result["ext_counts"]["sram_write_bytes"] = 512.0
++    result["traffic_counts"].update(read_payload_bytes=512, read_transaction_bytes=512)
++    result["attribution_ps"]["memory"] = 52250
++    result["simulator_metrics"].update(event_count=len(events), completed_job_count=2)
++    resources = obs["resource_intervals"]["records"]
++    result["busy_time_ps"] = [
++        dict(
++            owner_id=o["owner_id"],
++            busy_time_ps=union_time(
++                (x["start_ps"], x["end_ps"]) for x in resources if x["owner_id"] == o["owner_id"]
++            ),
++        )
++        for o in result["owners"]
++    ]
++    result["result_hash"] = content_hash(result, exclude=("result_hash",))
++    return result
+--- /dev/null
++++ b/validation/component/consistent_carriers.py
+@@ -0,0 +1,422 @@
++"""Finite synthetic controls and consistent attacks. Never generated native results.
++
++The synchronizer copies joined values, never computes correct service timing or causes.
++Tests supply literal times and predecessor edges; resealing is integrity, not authority.
++"""
++
++from copy import deepcopy
++
++from uarch_contract.hashing import content_hash
++
++from validation.component.checks import union_time
++from validation.component.synthetic_carrier import (
++    synthetic_job,
++    synthetic_port_pair,
++    synthetic_resident_result,
++    synthetic_result,
++)
++
++EXPECTED = dict(unrepresented=["SYNTHETIC-unit-carrier-only"])
++
++
++def activity(result, name):
++    return next(
++        a for a in result["observations"]["activities"]["records"] if a["activity_id"] == name
++    )
++
++
++def seal(result):
++    result["result_hash"] = content_hash(result, exclude=("result_hash",))
++    return result
++
++
++def synchronize(result):
++    """Copy supplied activity times/owners into all joined tables, then reseal."""
++    obs = result["observations"]
++    acts = {a["activity_id"]: a for a in obs["activities"]["records"]}
++
++    def tie(a):
++        return a["owner_id"], a["job_id"], a["request_id"] or "", a["subphase"], a["activity_id"]
++
++    for resource in obs["resource_intervals"]["records"]:
++        a = acts[resource["activity_id"]]
++        for k in ("owner_id", "job_id", "start_ps", "end_ps"):
++            resource[k] = a[k]
++        resource["limiting_resource_id"] = a["owner_id"]
++    obs["resource_intervals"]["records"] = [
++        x
++        for x in obs["resource_intervals"]["records"]
++        if acts[x["activity_id"]]["occupies_resource"]
++    ]
++    for row in result["busy_time_ps"]:
++        row["busy_time_ps"] = union_time(
++            (a["start_ps"], a["end_ps"])
++            for a in obs["resource_intervals"]["records"]
++            if a["owner_id"] == row["owner_id"]
++        )
++    for row in obs["clocks"]["records"]:
++        a = acts[row["activity_id"]]
++        row.update(
++            grant_ps=a["start_ps"],
++            completion_ps=a["end_ps"],
++            aligned_start_ps=a["end_ps"] if a["kind"] == "alignment" else a["start_ps"],
++        )
++    requests = {x["request_id"]: x for x in obs["dma"]["records"]}
++    for req, row in requests.items():
++        row["complete_ps"] = row["credit_release_ps"] = max(
++            a["end_ps"] for a in acts.values() if a["request_id"] == req
++        )
++    for row in obs["jobs"]["records"]:
++        row["end_ps"] = max(a["end_ps"] for a in acts.values() if a["job_id"] == row["job_id"])
++    result["duration_ps"] = max(x["end_ps"] for x in obs["jobs"]["records"])
++    for row in obs["queue_membership"]["records"]:
++        if row["activity_id"] is not None:
++            a = acts[row["activity_id"]]
++            row.update(
++                owner_id=a["owner_id"],
++                queue_id=f"activity:{a['subphase']}:{a['owner_id']}",
++                enter_ps=a["ready_ps"] if row["population"] == "waiting" else a["start_ps"],
++                leave_ps=a["start_ps"] if row["population"] == "waiting" else a["end_ps"],
++            )
++        elif row["queue_id"].startswith("dma_inflight:"):
++            row["enter_ps"] = requests[row["item_id"]]["issue_ps"]
++            row["leave_ps"] = requests[row["item_id"]]["complete_ps"]
++        else:
++            a = next(
++                a
++                for a in acts.values()
++                if a["request_id"] == row["item_id"] and a["subphase"] == "channel_service"
++            )
++            row.update(
++                enter_ps=a["ready_ps"] if row["population"] == "waiting" else a["start_ps"],
++                leave_ps=a["start_ps"] if row["population"] == "waiting" else a["end_ps"],
++            )
++    for row in obs["transfers"]["records"]:
++        phases = {
++            "dram": ("dram_latency", "channel_service"),
++            "core_port": ("read_port", "read_port"),
++        }.get(row["boundary_id"], (row["boundary_id"], row["boundary_id"]))
++        relevant = [a for a in acts.values() if a["request_id"] == row["request_id"]]
++        row["enter_ps"] = min(a["ready_ps"] for a in relevant if a["subphase"] == phases[0])
++        row["leave_ps"] = max(a["end_ps"] for a in relevant if a["subphase"] == phases[1])
++    # Order the supplied event graph. This repairs ordinal joins even for swapped port grants.
++    events = {x["observation_ordinal"]: x for x in obs["events"]["records"]}
++    pending = {}
++    for a in acts.values():
++        d, c = a["dispatch_ordinal"], a["completion_ordinal"]
++        for ordinal, time in ((d, a["start_ps"]), (c, a["end_ps"])):
++            events[ordinal].update(t_ps=time, target_id=a["owner_id"], job_id=a["job_id"])
++        pending[d] = {acts[p["activity_id"]]["completion_ordinal"] for p in a["predecessors"]}
++        pending[c] = {d}
++    order = []
++    while pending:
++        candidates = [k for k, deps in pending.items() if not deps.intersection(pending)]
++        assert candidates, "synthetic event cycle"
++        key = min(candidates, key=lambda k: (events[k]["t_ps"], k))
++        order.append(key)
++        del pending[key]
++    renumber = {old: new for new, old in enumerate(order)}
++    for a in acts.values():
++        for field in ("dispatch_ordinal", "completion_ordinal"):
++            a[field] = renumber[a[field]]
++    for old, e in events.items():
++        e["event_seq"] = e["observation_ordinal"] = renumber[old]
++    obs["events"]["records"] = [events[k] for k in order]
++    # Canonical path over the SUPPLIED causes, including forgeries. No eligibility oracle here.
++    current = min((a for a in acts.values() if a["end_ps"] == result["duration_ps"]), key=tie)
++    chain, seen = [], set()
++    while True:
++        assert current["activity_id"] not in seen
++        seen.add(current["activity_id"])
++        if current["end_ps"] > current["start_ps"]:
++            chain.append(current)
++        if not current["predecessors"]:
++            break
++        current = min((acts[p["activity_id"]] for p in current["predecessors"]), key=tie)
++    critical = []
++    totals = dict(compute=0, memory=0, noc=0, sync=0, overhead=0)
++    for a in reversed(chain):
++        critical.append(
++            dict(
++                kind="service",
++                start_ps=a["start_ps"],
++                end_ps=a["end_ps"],
++                cause_job_id=a["job_id"],
++                predecessor_id=None,
++                limiting_resource_id=a["owner_id"],
++                category=a["category"],
++                activity_id=a["activity_id"],
++            )
++        )
++        totals[a["category"]] += a["end_ps"] - a["start_ps"]
++    obs["critical_path"]["records"] = critical
++    result["attribution_ps"] = totals
++    return seal(result)
++
++
++def control(case="D01"):
++    j = synthetic_job(case)
++    r = (
++        synthetic_port_pair(j)
++        if case == "D08"
++        else synthetic_resident_result(j)
++        if case == "C02"
++        else synthetic_result(j)
++    )
++    events = {e["observation_ordinal"]: e for e in r["observations"]["events"]["records"]}
++    for a in r["observations"]["activities"]["records"]:
++        if a["kind"] == "alignment":
++            kinds = ("TASK_READY", "DEPENDENCY_READY")
++        elif a["subphase"].startswith("compute_"):
++            kinds = ("OWNER_GRANT", "COMPUTE_DONE")
++        elif a["subphase"].endswith("_noc"):
++            kinds = ("NOC_HEAD", "NOC_TAIL")
++        elif a["subphase"] == "read_port":
++            kinds = ("OWNER_GRANT", "DMA_DONE")
++        else:
++            kinds = ("MEM_REQ", "MEM_RESP")
++        for field, kind in zip(("dispatch_ordinal", "completion_ordinal"), kinds, strict=True):
++            events[a[field]]["kind"] = kind
++    return j, synchronize(r)
++
++
++def attack(name):
++    case = (
++        "D10-read"
++        if name == "M1"
++        else "D08"
++        if name in ("M3", "V1", "V2", "port_overlap", "port_reverse")
++        else "D01"
++    )
++    j, r = control(case)
++    if name == "M1":
++        activity(r, "back-a")["category"] = "memory"
++    elif name == "M2":
++        activity(r, "out")["owner_id"] = next(
++            o.owner_id for o in j.owners if o.resource == "dma_port:0"
++        )
++    elif name == "M3":
++        activity(r, "r1:back-a")["predecessors"] = []
++    elif name == "V1":
++        activity(r, "r1:port")["predecessors"].append(
++            dict(activity_id="r0:port", relation="credit")
++        )
++    elif name == "V2":
++        activity(r, "r0:port-a")["predecessors"] = [dict(activity_id="r1:back", relation="credit")]
++    elif name in ("M4a", "M4b"):
++        activity(r, "channel")["occupies_resource"] = False
++        if name == "M4b":
++            activity(r, "channel")["end_ps"] = 54500
++            activity(r, "back-a").update(ready_ps=54500, start_ps=54500)
++    elif name in ("port_overlap", "port_reverse"):
++        # Both requests arrive at the shared read port at 59000; each needs 1000 ps.
++        activity(r, "r1:port-a").update(
++            start_ps=59000,
++            end_ps=59000,
++            predecessors=[dict(activity_id="r1:back", relation="sequence")],
++        )
++        activity(r, "r1:port").update(ready_ps=59000, start_ps=59000, end_ps=60000)
++        if name == "port_overlap":
++            for prefix in ("r0:", "r1:"):
++                activity(r, prefix + "port")["occupies_resource"] = False
++        else:
++            activity(r, "r0:port-a").update(
++                start_ps=60000,
++                end_ps=60000,
++                predecessors=[dict(activity_id="r1:port", relation="resource")],
++            )
++            activity(r, "r0:port").update(ready_ps=60000, start_ps=60000, end_ps=61000)
++            # Add the now nonempty r00 wait (r01's old wait is allowed to become empty).
++            q = deepcopy(
++                next(
++                    x
++                    for x in r["observations"]["queue_membership"]["records"]
++                    if x["activity_id"] == "r0:port-a"
++                )
++            )
++            q["population"] = "waiting"
++            r["observations"]["queue_membership"]["records"].append(q)
++    else:
++        raise ValueError(name)
++    for a in r["observations"]["activities"]["records"]:
++        a["predecessors"].sort(key=lambda p: (p["activity_id"], p["relation"]))
++    return j, synchronize(r)
++
++
++def pair_control(case):
++    """Two finite same-channel/credit witnesses, using independent literal worksheets."""
++    j = synthetic_job(case)
++    r = synthetic_port_pair(j)
++    # Normalize endpoint kinds with the already explicit D08 table, by activity identity.
++    _, template = control("D08")
++    kinds = {
++        a["activity_id"]: tuple(
++            next(
++                e["kind"]
++                for e in template["observations"]["events"]["records"]
++                if e["observation_ordinal"] == a[k]
++            )
++            for k in ("dispatch_ordinal", "completion_ordinal")
++        )
++        for a in template["observations"]["activities"]["records"]
++    }
++    events = {e["observation_ordinal"]: e for e in r["observations"]["events"]["records"]}
++    for a in r["observations"]["activities"]["records"]:
++        for k, kind in zip(
++            ("dispatch_ordinal", "completion_ordinal"), kinds[a["activity_id"]], strict=True
++        ):
++            events[a[k]]["kind"] = kind
++    if case == "D05-two":
++        activity(r, "r1:channel").update(
++            start_ps=54250,
++            end_ps=56500,
++            predecessors=[dict(activity_id="r0:channel", relation="resource")],
++        )
++        activity(r, "r1:back-a").update(ready_ps=56500, start_ps=56500, end_ps=57000)
++        activity(r, "r1:back").update(ready_ps=57000, start_ps=57000, end_ps=61000)
++        activity(r, "r1:port-a").update(
++            ready_ps=61000,
++            start_ps=61000,
++            end_ps=61000,
++            predecessors=[dict(activity_id="r1:back", relation="sequence")],
++        )
++        activity(r, "r1:port").update(ready_ps=61000, start_ps=61000, end_ps=62000)
++        for x in r["observations"]["resource_intervals"]["records"]:
++            if x["activity_id"] == "r1:channel":
++                x.update(
++                    service_start_ps_ratio=dict(numerator=3851744, denominator=71),
++                    service_end_ps_ratio=dict(numerator=4011488, denominator=71),
++                )
++    elif case == "D05-one":
++        _, first = control()
++        literals = {a["activity_id"]: a for a in first["observations"]["activities"]["records"]}
++        for a in r["observations"]["activities"]["records"]:
++            if a["activity_id"].startswith("r1:"):
++                original = literals[a["activity_id"][3:]]
++                for key in ("ready_ps", "start_ps", "end_ps"):
++                    a[key] = original[key] + 60000
++                a["predecessors"] = [
++                    dict(activity_id="r1:" + p["activity_id"], relation=p["relation"])
++                    for p in original["predecessors"]
++                ]
++        activity(r, "r1:out-a")["predecessors"] = [dict(activity_id="r0:port", relation="credit")]
++        r["observations"]["dma"]["records"][1].update(issue_ps=60000, credit_acquire_ps=60000)
++        r["observations"]["jobs"]["records"][1]["start_ps"] = 60000
++        for x in r["observations"]["resource_intervals"]["records"]:
++            if x["activity_id"] == "r1:channel":
++                x.update(
++                    service_start_ps_ratio=dict(numerator=112000, denominator=1),
++                    service_end_ps_ratio=dict(numerator=8111744, denominator=71),
++                )
++    else:
++        raise ValueError(case)
++    return j, synchronize(r)
++
++
++def mechanism_attack(name):
++    j, r = control()
++    if name == "duration":
++        activity(r, "port")["end_ps"] = 61000
++        r["observations"]["clocks"]["records"][-1]["n_cycles"] = 2
++        return j, synchronize(r)
++    if name == "carry":
++        res = next(
++            x
++            for x in r["observations"]["resource_intervals"]["records"]
++            if x["activity_id"] == "channel"
++        )
++        res.update(
++            service_start_ps_ratio=dict(numerator=5199999, denominator=100),
++            service_end_ps_ratio=dict(numerator=385174329, denominator=7100),
++        )
++    elif name == "rational":
++        res = next(
++            x
++            for x in r["observations"]["resource_intervals"]["records"]
++            if x["activity_id"] == "channel"
++        )
++        res["service_end_ps_ratio"] = dict(numerator=54250, denominator=1)
++    elif name == "busy":
++        next(x for x in r["busy_time_ps"] if x["busy_time_ps"])["busy_time_ps"] += 1
++    elif name == "null_floor":
++        r["u_c0_duration_ps"] = 1
++    elif name == "fidelity":
++        r["fidelity_detail"]["compute"] = 2
++    elif name == "diagnostic":
++        r["diagnostics"]["energy_pj"] = 0
++    elif name == "unrepresented":
++        r["unrepresented"] = []
++    elif name == "critical":
++        r["observations"]["critical_path"]["records"][-1]["predecessor_id"] = "r00"
++    elif name == "job_owner":
++        r["observations"]["jobs"]["records"][0]["owner_id"] = activity(r, "channel")["owner_id"]
++    elif name == "release":
++        r["observations"]["jobs"]["records"][0]["release_ps"] = 50000
++    elif name == "blockers":
++        r["observations"]["jobs"]["records"][0]["blocking_predecessor_ids"] = ["r00"]
++    elif name == "event":
++        r["observations"]["events"]["records"][-1]["kind"] = "STAT_SAMPLE"
++    elif name.startswith("queue_"):
++        q = next(
++            x
++            for x in r["observations"]["queue_membership"]["records"]
++            if x["population"] == "inflight"
++        )
++        if name == "queue_clock":
++            q["clock_domain"] = "core"
++        if name == "queue_owner":
++            q["owner_id"] = activity(r, "port")["owner_id"]
++        if name == "queue_engine":
++            q["queue_id"] = "dma_inflight:1"
++        if name == "queue_population":
++            q["population"] = "service"
++    else:
++        raise ValueError(name)
++    return j, seal(r)
++
++
++def extra_attack(name):
++    if name == "channel_fifo":
++        j, r = pair_control("D05-two")
++        acts = r["observations"]["activities"]["records"]
++        old = {a["activity_id"]: deepcopy(a) for a in acts}
++        old_res = {a["activity_id"]: deepcopy(a) for a in r["observations"]["resource_intervals"]["records"]}
++        for a in acts:
++            if a["subphase"] in ("channel_service", "response_noc", "read_port"):
++                other = ("r1:" if a["activity_id"].startswith("r0:") else "r0:") + a["activity_id"][3:]
++                for key in ("ready_ps", "start_ps", "end_ps", "predecessors"):
++                    a[key] = deepcopy(old[other][key])
++                for link in a["predecessors"]:
++                    key = link["activity_id"]
++                    link["activity_id"] = ("r1:" if key.startswith("r0:") else "r0:") + key[3:]
++        for res in r["observations"]["resource_intervals"]["records"]:
++            if res["activity"] == "channel_service":
++                other = ("r1:" if res["activity_id"].startswith("r0:") else "r0:") + "channel"
++                for key in ("service_start_ps_ratio", "service_end_ps_ratio"):
++                    res[key] = old_res[other][key]
++        return j, synchronize(r)
++    j, r = control()
++    if name == "readiness":
++        activity(r, "port")["ready_ps"] = 58999
++        q = deepcopy(next(q for q in r["observations"]["queue_membership"]["records"]
++                          if q["activity_id"] == "port"))
++        q.update(population="waiting", enter_ps=58999, leave_ps=59000)
++        r["observations"]["queue_membership"]["records"].append(q)
++        return j, synchronize(r)
++    if name == "critical_partition":
++        r["observations"]["critical_path"]["records"].pop(0)
++    elif name == "allocation_lifetime":
++        j, r = control("C02")
++        next(a for a in r["observations"]["allocations"]["records"]
++             if a["space"] == "accumulator")["allocate_ps"] = 1
++    elif name == "channel_population":
++        q = next(q for q in r["observations"]["queue_membership"]["records"]
++                 if q["queue_id"].startswith("channel_service:") and q["population"] == "waiting")
++        q["leave_ps"] = 52001
++    elif name == "ordinary_population":
++        q = next(q for q in r["observations"]["queue_membership"]["records"]
++                 if q["activity_id"] == "port")
++        q["clock_domain"] = None
++    else:
++        raise ValueError(name)
++    return j, seal(r)
+--- /dev/null
++++ b/validation/component/lifetime_inputs.py
+@@ -0,0 +1,86 @@
++"""Independent transient-lifetime inputs. Synthetic context never confers authority."""
++
++from copy import deepcopy
++
++from validation.component.corpus import build, graph
++from validation.component.join_inputs import pair, reseal
++
++
++def multiple_consumers():
++    from validation.component.join_inputs import pair
++
++    b = pair(256, 256)
++    g = graph(b)
++    first = deepcopy(g["jobs"][0])
++    first_buffers = [
++        deepcopy(x) for x in g["buffers"] if not x["id"].startswith("z") and x["space"] == "sram"
++    ]
++    for index, name in enumerate(("d", "e"), 2):
++        op = deepcopy(b["scope"]["ops"][0])
++        op["id"] = "g" + str(index)
++        b["scope"]["ops"].append(op)
++        b["scope"]["op_ids"].append(op["id"])
++        b["points"][0]["identity"]["op_ids"].append(op["id"])
++        j = deepcopy(first)
++        j.update(id=name, op_id=op["id"])
++        j["operand_buffers"] = {k: name + v for k, v in j["operand_buffers"].items()}
++        g["jobs"].append(j)
++        cov = deepcopy(g["coverage"][0])
++        cov.update(job_id=name, op_id=op["id"])
++        g["coverage"].append(cov)
++        for buf in deepcopy(first_buffers):
++            buf["id"] = name + buf["id"]
++            buf["op_id"] = op["id"] if buf["op_id"] is not None else None
++            buf["offset_bytes"] += index * 786432
++            buf["bank"] = buf["offset_bytes"] // 524288
++            buf["producer_id"] = name if buf["producer_id"] == "c" else buf["producer_id"]
++            buf["final_consumer_ids"] = [name if x == "c" else x for x in buf["final_consumer_ids"]]
++            g["buffers"].append(buf)
++    next(x for x in g["buffers"] if x["id"] == "acc")["final_consumer_ids"] = ["d", "e"]
++    g["dependencies"] = [
++        dict(before=a, after=z) for a, z in [("c", "d"), ("c", "e"), ("d", "z"), ("e", "z")]
++    ]
++    g["coverage"].sort(key=lambda x: x["job_id"])
++    b["mapping_policy"]["version"] = "2"
++    return b
++
++
++def disjoint_writer():
++    b = deepcopy(build()["items"]["C04-control"]["bundle"])
++    b["mapping_policy"]["version"] = "2"
++    g = graph(b)
++    acc = next(x for x in g["buffers"] if x["space"] == "accumulator")
++    acc.update(producer_id="c", final_consumer_ids=["c"])
++    second = deepcopy(acc)
++    second.update(id="zacc", offset_bytes=256, producer_id="z", final_consumer_ids=["z"])
++    g["buffers"].append(second)
++    next(t for t in g["jobs"] if t["id"] == "z")["accumulator_buffer_id"] = "zacc"
++    g["dependencies"] = [dict(before="c", after="z")]
++    return b
++
++
++def lifetime_inputs():
++    out = {}
++    b = disjoint_writer()
++    out["B3-writer-control"] = reseal(deepcopy(b))
++    next(x for x in graph(b)["buffers"] if x["id"] == "zacc")["producer_id"] = "c"
++    out["B3-false-writer-disjoint"] = reseal(b)
++    b = multiple_consumers()
++    out["B3-terminal-control"] = reseal(deepcopy(b))
++    next(x for x in graph(b)["buffers"] if x["id"] == "acc")["final_consumer_ids"] = ["d"]
++    graph(b)["dependencies"].remove(dict(before="e", after="z"))
++    out["B3-terminal-partial-A1"] = reseal(b)
++    for name, dependencies, finals in [
++        ("B3-use-before-A3b", [dict(before="z", after="c")], ["c"]),
++        ("B3-use-unordered-A3c", [], ["c", "z"]),
++        ("B3-shared-use-control", [dict(before="c", after="z")], ["z"]),
++    ]:
++        b = pair(256, 256)
++        b["mapping_policy"]["version"] = "2"
++        g = graph(b)
++        next(t for t in g["jobs"] if t["id"] == "z")["accumulator_buffer_id"] = "acc"
++        g["buffers"] = [x for x in g["buffers"] if x["id"] != "zacc"]
++        next(x for x in g["buffers"] if x["id"] == "acc")["final_consumer_ids"] = finals
++        g["dependencies"] = dependencies
++        out[name] = reseal(b)
++    return out
+--- /dev/null
++++ b/validation/component/test_consistent_observations.py
+@@ -0,0 +1,89 @@
++"""Independent behavior tests; identity-only tests are excluded from mutation scores."""
++
++import pytest
++from uarch_contract.mapped import validate_result
++
++from validation.component.checks import CheckFailure
++from validation.component.consistent_carriers import EXPECTED, attack, control
++from validation.component.observations_v2 import check_v2
++
++
++@pytest.mark.parametrize("case", ["D01", "D10-read", "D08", "C02"])
++def test_positive_controls(case):
++    j, r = control(case)
++    validate_result(r, j)
++    check_v2(j.model_dump(mode="json"), r, EXPECTED)
++
++
++@pytest.mark.parametrize(
++    "name,detail",
++    [
++        ("M1", "activity category/domain"),
++        ("M2", "activity owner"),
++        ("M3", "complete eligible causes"),
++        ("V1", "complete eligible causes"),
++        ("V2", "complete eligible causes"),
++        ("M4a", "required occupancy"),
++        ("M4b", "channel integer mechanism"),
++        ("port_overlap", "exclusive mechanism intervals"),
++        ("port_reverse", "port FIFO tie"),
++    ],
++)
++def test_consistent_checker_forgery(name, detail):
++    j, r = attack(name)
++    with pytest.raises(CheckFailure, match=detail):
++        check_v2(j.model_dump(mode="json"), r, EXPECTED)
++
++
++@pytest.mark.parametrize("case,ends", [("D05-two", [60000, 62000]), ("D05-one", [60000, 120000])])
++def test_channel_and_credit_controls(case, ends):
++    from validation.component.consistent_carriers import pair_control
++
++    j, r = pair_control(case)
++    assert [x["complete_ps"] for x in r["observations"]["dma"]["records"]] == ends
++    validate_result(r, j)
++    check_v2(j.model_dump(mode="json"), r, EXPECTED)
++
++
++@pytest.mark.parametrize(
++    "name,detail",
++    [
++        ("duration", "mechanism duration"),
++        ("carry", "rational channel carry/readiness"),
++        ("rational", "channel mechanism"),
++        ("busy", "busy union"),
++        ("null_floor", "fidelity/null floor"),
++        ("fidelity", "fidelity/null floor"),
++        ("diagnostic", "unmodeled diagnostics"),
++        ("unrepresented", "unrepresented paths"),
++        ("critical", "unrepresented critical predecessor"),
++        ("job_owner", "job owner binding"),
++        ("release", "job release binding"),
++        ("blockers", "unrepresented job blockers"),
++        ("event", "event transition binding"),
++        ("queue_clock", "nonclocked exact binding"),
++        ("queue_owner", "nonclocked exact binding"),
++        ("queue_engine", "nonclocked exact binding"),
++        ("queue_population", "nonclocked exact binding"),
++    ],
++)
++def test_mechanism_and_field_forgery(name, detail):
++    from validation.component.consistent_carriers import mechanism_attack
++
++    j, r = mechanism_attack(name)
++    with pytest.raises(CheckFailure, match=detail):
++        check_v2(j.model_dump(mode="json"), r, EXPECTED)
++
++
++@pytest.mark.parametrize("name,detail", [
++    ("channel_fifo", "channel FIFO tie"), ("readiness", "service readiness after alignment"),
++    ("critical_partition", "mechanism causal partition"),
++    ("allocation_lifetime", "allocation access lifetime"),
++    ("channel_population", "channel population lifecycle"),
++    ("ordinary_population", "ordinary queue exact binding"),
++])
++def test_transition_and_population_forgery(name,detail):
++    from validation.component.consistent_carriers import extra_attack
++    j,r=extra_attack(name)
++    with pytest.raises(CheckFailure,match=detail):
++        check_v2(j.model_dump(mode="json"),r,EXPECTED)
+--- /dev/null
++++ b/validation/component/test_lifetime_discrimination.py
+@@ -0,0 +1,43 @@
++"""Resource semantic discrimination under separately synthetic positive profile anchors."""
++
++import pytest
++from uarch_contract.mapped import MappedBundle, admit, validate_resources
++
++from validation.component.corpus import build, materialize
++from validation.component.lifetime_inputs import lifetime_inputs
++
++
++@pytest.mark.parametrize(
++    "name", ["B3-writer-control", "B3-terminal-control", "B3-shared-use-control"]
++)
++def test_lifetime_positive(name):
++    b = MappedBundle.model_validate(lifetime_inputs()[name])
++    validate_resources(b, b.points[0])
++
++
++@pytest.mark.parametrize(
++    "name,detail",
++    [
++        ("B3-false-writer-disjoint", "accumulator producer"),
++        ("B3-terminal-partial-A1", "final consumers"),
++        ("B3-use-before-A3b", "before production"),
++        ("B3-use-unordered-A3c", "before production"),
++    ],
++)
++def test_unmasked_lifetime(name, detail):
++    raw = lifetime_inputs()[name]
++    b = MappedBundle.model_validate(raw)
++    with pytest.raises(ValueError, match="InvalidDependency: .*" + detail):
++        validate_resources(b, b.points[0])
++    synthetic = materialize("SYNTHETIC-" + name, raw, dict(outcome="success"))
++    registry = build()["registry"]
++    with pytest.raises(ValueError, match="InvalidDependency: .*" + detail):
++        admit(
++            synthetic["bundle"],
++            invocation="test",
++            checkpoint="B",
++            registry=registry,
++            profile=synthetic["profile"],
++            trusted_registry_hash=registry["registry_hash"],
++            trusted_profile_hash=synthetic["profile"]["profile_hash"],
++        )

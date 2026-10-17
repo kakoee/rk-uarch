@@ -43,3 +43,26 @@ Helpers are staged at durable installed paths in an unapplied patch. They are sy
 not an engine or reference generator. synchronize copies supplied times/causes and repairs
 joins; it never computes service timing or eligible causes. A can use M1/M2/M3 directly
 for structural mutation discrimination. C1 two-zero-activity structural cycle follows next.
+
+## B implementation join on A 4b7f091
+
+b-candidate.unapplied.patch replaces the attack-only helper patch (do not apply both).
+Seven durable paths; A's exact eight postimages reconstructed and matched. B's 32 initial
+checker tests + seven lifetime tests pass on that reconstruction. Six further FIFO,
+readiness, allocation, causal-partition and population cases pass (38 checker total).
+The corrected checker derives mandatory service inventory, mechanism times and resource
+order before joining occupancy rows; transition_checks independently derives complete
+causes and enforces A's proposed event/job/null-summary table. No contract validator calls.
+NoC remains overlap-permitted. Explicit same-channel D05-two and exhausted-credit D05-one
+positive controls use literal 60000/62000 and 60000/120000 completions, respectively.
+
+Nineteen private single-invariant removals have yielded actual unsafe acceptance, followed
+by exact-byte restoration and affected-test passes. Duration's two local defenses (service
+endpoint and clock-witness mechanism) were demonstrated redundant, not counted as a kill;
+a grouped invariant control follows. Source-fingerprint tests were absent from every score.
+Independent lifetime inputs now include A1, A3b/A3c and disjoint 84B writer controls; all
+pin InvalidDependency with exact detail and reach it under synthetic positive admission.
+
+Outstanding B work before final candidate: expanded zero-hop/dependency controls, remaining
+guard grouping/discrimination, revision-aware selection activation and final static audit.
+A may develop against these exact current paths; final hashes will be republished once.
