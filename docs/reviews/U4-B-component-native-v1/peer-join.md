@@ -25,3 +25,24 @@ such; a successful scalar duration is not observation/checker completion.
 The optimizer published 47e4261 / merge 756d632. B does not modify its workflow,
 verification runner, telemetry or report-cache changes and does not infer a new test
 cadence from those changes. Focused new work, then one affected integrated selection.
+
+## First B input freeze
+
+`input-freeze.json` binds 111 raw jobs, separately stored synthetic Trust anchors,
+the full prospective proposal and all 106 historical joins. Reconstruct privately:
+`PYTHONPATH=contract:src:. python docs/reviews/U4-B-component-native-v1/freeze_inputs.py /tmp/new-private-vectors`.
+The output directory must not exist. The generated archive is not published: automatic
+approval review rejected publishing it under the artifact-generation restriction.
+The manifest and source recipe preserve reproducibility; no artifact adoption occurs.
+
+The additional five cases are O2 and four explicitly separate positive-profile
+capacity negatives. Trust fields are registry, profile, case and engine, matching
+the existing peer DTO seam. These synthetic anchors grant no public execution trust.
+Seven focused Python preparation tests pass. Historical negative profiles stop at
+TestVariantNotAdmitted; the four positive-profile variants reach the actual Python
+CapacityExceeded/SramCapacityExceeded guards. Rust reach remains to be demonstrated.
+Raw JSON is necessary for resource negatives that Python job validation refuses.
+
+`validation/component/native_check.py::check_native` consumes actual full /2 output
+through the installed real result validator and independent checker, then adds O2's
+literal readiness and [547000, 2188000) allocation checks. No native run is claimed.
