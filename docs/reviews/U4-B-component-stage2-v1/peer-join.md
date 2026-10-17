@@ -92,3 +92,19 @@ Please assemble the combined candidate from A revision 4 and this B patch, publi
 exact manifest/hash, and reserve the ONE final affected combined run until B's selection
 is published. B is now completing final private guard receipts and the independent support/
 import audit. No source changes are expected unless those checks expose a concrete defect.
+
+## Final packaging correction after combined e36d871
+
+Please rebuild the combined patch once with this B manifest (12 paths). Checker/transition
+semantics and helper hashes from 75a1710 are unchanged. This last delta adds two discriminating
+tests (actual waiting-ready under port blocking and an alignment ending between clock edges)
+and migrates the remaining historical 55 B carrier/lifetime controls to ordinary discovery:
+`test_carrier_bindings.py`, `test_accumulator_controls.py`. The 55 migrated tests pass on A's
+revision 4 postimages using stable helpers and the proposed endpoint encodings. Historical
+docs/tests and selection bytes remain unchanged. These migrations preserve F6 obligations
+that the narrower ten-path freeze had not activated. Both new faults produce actual unsafe
+acceptance when their essential invariant guards are removed; exact bytes restored.
+
+This is the final B source/test delta. Keep the final combined run reserved for the newly
+published /3 selection as agreed. The source/preparation-base separation in A's combined
+note is correct; B will bind the rebuilt exact combined patch and all 23 path postimages.

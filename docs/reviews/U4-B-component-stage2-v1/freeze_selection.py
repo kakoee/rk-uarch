@@ -107,7 +107,8 @@ def freeze(candidate):
         test_bindings={p: sha(ROOT / p) for p in tests},
         obligations=deepcopy(old["obligations"]),
         profile_promise="Historical and new synthetic profile/1 fixtures bind graph/point only. "
-        "This selection additionally binds exact whole bundles. Future P2 authority/profile freeze pending human choice.",
+        "This selection additionally binds exact whole bundles. "
+        "Future P2 authority/profile freeze pending human choice.",
         observations=dict(
             format="uarch-native-observations/2",
             unrepresented_job_blockers=[],
