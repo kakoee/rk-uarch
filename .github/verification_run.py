@@ -106,7 +106,11 @@ def run(plan: list[dict[str, Any]], output: Path) -> bool:
             }
             stages.append(result)
             passed = passed and ok
-            emit("stage_finish", **result)
+            emit(
+                "stage_finish",
+                **{key: value for key, value in result.items() if key != "elapsed_s"},
+                stage_elapsed_s=result["elapsed_s"],
+            )
         emit("finish", passed=passed)
     summary = {
         "complete": True,

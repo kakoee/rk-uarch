@@ -51,6 +51,9 @@ def test_stage_progress_retains_failures_and_runs_restoration(tmp_path):
     events = [json.loads(line) for line in (out / "progress.jsonl").read_text().splitlines()]
     assert events[0]["event"] == "start" and events[-1]["event"] == "finish"
     assert "restore" in run.stdout and "completed" in run.stdout
+    elapsed = [event["elapsed_s"] for event in events]
+    assert elapsed == sorted(elapsed)
+    assert all("stage_elapsed_s" in e for e in events if e["event"] == "stage_finish")
 
 
 def test_expected_failure_requires_identity_and_exact_exit(tmp_path):
