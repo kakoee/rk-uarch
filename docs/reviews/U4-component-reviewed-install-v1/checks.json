@@ -1,0 +1,106 @@
+{
+  "review_verdict": "ACCEPTED for original Stage 2 plus additive F5 proposal; inherited independent verdict",
+  "review_report": {
+    "bytes": 39617,
+    "sha256": "72b4fda4a31ba3023b8aad603ac51479a65434766139b15c3fb8b7c1d6d4d4d1"
+  },
+  "preserved_prefix": {
+    "bytes": 34826,
+    "sha256": "fbf1efbcf74b07bb3df33e852d8f5ecaa07d40856d7f0d6349971b83504af23f"
+  },
+  "old_review_files_verified": 40,
+  "review_archive_sha256": "381feec92cc1551c759244e9712f58834da033e2c8e791efb0fb611a3180750a",
+  "review_archive_files": 48,
+  "new_named_log_hashes_verified": 5,
+  "published_script_hashes_verified": 2,
+  "executed_script_AST_equivalence": "reviewer disclosure inherited, not rerun",
+  "reconciliation": {
+    "private_reconstruction": true,
+    "patch_forward_reverse_checks": true,
+    "exact_reviewed_postimages": 23,
+    "sole_changed_postimage": "docs/decisions/U0011-the-native-engine-core.md",
+    "installed_ADR_prefix_preserved": true,
+    "reviewed_component_suffix_preserved": true,
+    "old_reviewed_ADR_base_sha256": "e36cba4e3fa00d9da5bdfe527a5728977066e1ff721e338f0bfdad44ed136cba",
+    "installed_ADR_sha256": "afae0ebea7dfdfe761ec76ae374a35441db989f866a4ca4f5c29f0169a49e69b",
+    "reviewed_ADR_sha256": "4f7a90b201c0425a9906d746e4235ec4df362c15ffe91138f827edf2529f6140",
+    "reconciled_ADR_sha256": "edf565f9094c524b280888feaf29bcecc63b176aa573393c136b3494c7c640fd"
+  },
+  "new_behavioral_tests_run_by_coordinator": 0,
+  "not_run": [
+    "full suite",
+    "guard sweeps",
+    "native builds/execution",
+    "CI polling",
+    "artifact generation/adoption"
+  ],
+  "reviewer_execution": {
+    "discovery": {
+      "argv": "pytest --collect-only -q -m 'not native and not nightly and not silicon' (no path; pyproject testpaths)",
+      "log": "logs/discovery-f5-nodes.txt",
+      "result": "2388/2665 collected (277 deselected); both new nodes present; Stage 3 was 2386/2663"
+    },
+    "intact_new_tests": {
+      "argv": "pytest -q -p no:randomly validation/component/test_f5_mechanism_duration.py",
+      "log": "logs/intact-new-tests.log",
+      "origins": "export-only",
+      "result": "2 passed"
+    },
+    "intact_recheck_probe": "logs/intact-recheck-probe.log",
+    "intact_stage3_probe": {
+      "log": "logs/intact-stage3-probe.log",
+      "script": "../stage3/probe_f5_duration.py (unchanged bytes)",
+      "sha256": "cef21f0c17d915700c0b780e016b41ab7851663d3f7ac4c25c1edd6353eea91a"
+    },
+    "single_guard_removal": {
+      "changed_lines": 1,
+      "guard_line": 194,
+      "log": "logs/single_guard_f5.json",
+      "mutant_sha256": "4d0ce134fa04bcb6a5d2fba3fdfe7ad4e56b4ed9f63ad6c2efaa590753956270",
+      "original_sha256": "dd9c049b2fb2f28e2b6cbba04e5b3b627a6e7e4dbfcf3cbaf305969587915d62",
+      "removed_new_tests": "failed: DID NOT RAISE (unsafe acceptance)",
+      "removed_old_masked_test": "failed: alternative refusal (regex mismatch)",
+      "restored_exact_bytes": true,
+      "restored_new_tests": [
+        "2 passed in 1.06s"
+      ],
+      "restored_sha256": "dd9c049b2fb2f28e2b6cbba04e5b3b627a6e7e4dbfcf3cbaf305969587915d62"
+    }
+  },
+  "inherited_not_rerun": [
+    "B 49-test affected selection (47 behavioral + 2 identity)",
+    "B mypy strict on the new test",
+    "B evidence archive members",
+    "Stage 3 row verdicts F1-F4, F6-F11 and the F6 random revert",
+    "coordinator identity/reconstruction checks"
+  ],
+  "private_preview_read_only_checks": {
+    "strict_vendor_currentness": {
+      "passed": true,
+      "log": "currentness.log",
+      "sha256": "99a2e95cad762adbdca8c45ef06fe00d8ae51d44aee24a21db36d44bc63dffb4",
+      "project_imports": "private preview only; asserted"
+    },
+    "mapped_schema_freshness": {
+      "passed": true,
+      "log": "schema.log",
+      "sha256": "18de146832ee1e32a203f4f3ad4fe3f08e4d96a3b4bf4e23197afe553f34a164",
+      "contract_imports": "private preview only; asserted"
+    }
+  },
+  "new_identity_tests_run_by_coordinator": {
+    "count": 1,
+    "result": "expected failure on reconciled U0011 hash",
+    "path": "validation/component/test_stage2_selection.py",
+    "log": "identity-preflight.log",
+    "sha256": "06e079339b0d0630b295248feabe81f7a408d752993e576a2b336a7b02dc2dc7",
+    "project_imports": "private preview only; asserted",
+    "reason": "New installation reconciliation changes full ADR bytes pinned by historical candidate_files; one targeted check justified."
+  },
+  "installation_status": "NOT READY: CI-C1 historical versus installed identity reconciliation pending; no approval requested",
+  "preparation_whitespace": {
+    "postimages": "all 24 have no trailing whitespace",
+    "authored_prose": "checked clean",
+    "git_diff_check": "warns on literal unified-diff blank context markers and one preserved pytest output line; exact patch/log evidence retained, not reformatted"
+  }
+}
