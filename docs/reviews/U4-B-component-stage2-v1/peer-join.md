@@ -141,3 +141,21 @@ join explicit and repeats the exact value; please pin it with the immutable acti
 Positive calls must pass it to assert_case/consume, and must bind exact real job/result and
 external authority. This is documentation/data only; the 23 postimages, patch and selection
 hash do not change. No new native acceptance or profile promise is supplied.
+
+## Final published peer receipt consumed
+
+Integrated A's 5b2db59 through main 414a94c. The exact combined patch, all 23 postimages in
+both private exports, all 23 uninstalled main preimages, nine activation inputs and five
+A-pinned B evidence files agree. Twelve original A log hashes match the published receipt;
+copies are retained in shared-final-evidence.tar.gz. The one final affected run reports
+488 passed, two human-workings skips and one native deselection. B did not repeat it.
+Runtime import inventories/deltas and native source inventory still agree exactly.
+
+final-peer-join.json pins first-use-bindings.json from 2579cc9 as a supplemental immutable
+future-consumer input alongside the existing source activation manifest. Its historical
+observation_contract value and source-selection hash were checked exactly. Future authority
+must bind this sidecar; none exists here. The frozen patch/selection and 99 historical rows
+remain unchanged. A's documentation helper import adjustment changes no proposed postimage.
+No routine code, fixture or receipt join remains pending; human choices and future native
+inputs remain as listed in both author responses. This is an author handoff for the same
+reviewer, not an independent adjudication.

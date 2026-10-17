@@ -46,6 +46,12 @@ routine fixes. [Development corrections](development-corrections.json) retain ma
 setup/type/fixture mistakes and their corrected controls; none are counted as discrimination.
 
 [Checks](checks.json) distinguish executed B evidence from A's single final combined run.
+The final shared run passed **488 tests**, with two actual human-workings skips and one native
+first-use test deselected. B verified all 23 postimages in both private exports, all uninstalled
+main preimages, and all 12 published log hashes without repeating that run. Normal discovery
+includes every proposed test path. [Final peer receipt](final-peer-join.json) binds A's published
+checks, preserved [shared logs](shared-final-evidence.tar.gz), and the supplemental exact
+future-consumer sidecar. Static/schema/import checks passed; unchanged closure checks are reused.
 [Evidence manifest](evidence-manifest.json) binds original retained logs in
 [evidence.tar.gz](evidence.tar.gz). Counts from overlapping selections are not additive.
 The [fault runner](fault_controls.py) uses only private mutations, requires DID NOT RAISE
