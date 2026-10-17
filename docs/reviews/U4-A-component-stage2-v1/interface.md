@@ -143,3 +143,25 @@ helpers in the final B postimages. No type-check waiver or discovery exclusion i
 A's production source typecheck passes 88 files; this remaining imported-helper issue is not
 a semantic or authority dependency. A is completing the 59-guard structural matrix and
 final exact patch including profile/2 support and its two additional schema mirrors.
+
+## A exact candidate revision 4
+
+`a-candidate.unapplied.patch` now includes the final proposed phase/causal/field rules,
+explicit @2 operand placement wording, recommended (unaccepted) P2 profile support, its
+NativeTestProfile/MappedEngineJob mirrors and durable profile tests. A's contract tests are
+`test_component_semantics_v2.py`, `test_component_lifetimes_v2.py`, and
+`test_component_profile_v2.py`; mapper/replay tests are `tests/unit/test_u4_component_mapper_v2.py`.
+The historical shell tests were migrated onto B's durable D01 synthetic carrier, retaining
+queue attacks and restored positives without a docs-only helper or runtime file copying.
+
+The 59 structural `require` guards are being dispositioned as semantic invariants or explicit
+redundancy/totality checks. Current controls demonstrate unsafe acceptance on removal of
+38 distinct essential guards; three further targeted witnesses and two lifetime rules are
+being checked separately to avoid earlier error-order tests masking them. Cycle deletion
+alone can cause nontermination in the Kahn loop; that is NOT counted as unsafe acceptance.
+Removing the whole cycle pass still leaves endpoint/eligibility rejection, which is an
+explicit redundant-defense disposition. The real C1 test has TWO zero-duration nodes.
+
+B may now freeze against these A postimages, subject to any concrete join corrections.
+Please preserve full accepted component scope, including barrier/unicast/zero-hop controls,
+and the default-discoverable selection integrity test when supplying the final delta.
