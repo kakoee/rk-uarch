@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_F2_incomplete_launch_refuses_before_process _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-187/test_F2_incomplete_launch_refu0')
+
+    def test_F2_incomplete_launch_refuses_before_process(tmp_path):
+        binding = {"synthetic": "NOT A RUNTIME BINDING OR CAMPAIGN"}
+        (tmp_path / "campaign.json").write_bytes(
+            b.encoded({"runtime_binding": binding, "synthetic": "NOT A CAMPAIGN"})
+        )
+        (tmp_path / "campaign-launch.json").write_bytes(
+            b.encoded({"complete": False, "exit_code": -9, "stop_reason": "outer deadline"})
+        )
+        (tmp_path / "campaign-failure.json").write_bytes(b.encoded({"complete": False}))
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/u4-b-k2-stage2/guard-controls-final/F2-host/package/test_stage2.py:137: Failed
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/guard-controls-final/F2-host/package/test_stage2.py::test_F2_incomplete_launch_refuses_before_process
+1 failed in 0.14s

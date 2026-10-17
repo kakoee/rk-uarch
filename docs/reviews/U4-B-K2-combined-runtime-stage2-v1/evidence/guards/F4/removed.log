@@ -1,0 +1,80 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_F4_store_transient_disappears_during_actual_poll _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-193/test_F4_store_transient_disapp0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x77e7eb2dd4f0>
+
+    def test_F4_store_transient_disappears_during_actual_poll(tmp_path, monkeypatch):
+        output = tmp_path / "run"
+        core = core_module()
+        real_popen, real_unlink = subprocess.Popen, Path.unlink
+        pending = []
+    
+        def popen(*args, **kwargs):
+            process = real_popen(*args, **kwargs)
+            with monkeypatch.context() as patch:
+    
+                def postpone(path, *a, **k):
+                    if path.name.startswith(".pending-"):
+                        pending.append(path)
+                    else:
+                        real_unlink(path, *a, **k)
+    
+                patch.setattr(Path, "unlink", postpone)
+                core.Store(output, 2 * 1024**3).json("calls/fixture.json", {"synthetic": "not native"})
+            return process
+    
+        old_is_file, old_lstat = Path.is_file, Path.lstat
+        disappeared: list[str] = []
+    
+        def is_file(path):
+            answer = old_is_file(path)
+            if answer and path in pending and not disappeared:
+                real_unlink(path)
+                disappeared.append(str(path))
+            return answer
+    
+        def lstat(path, *a, **k):
+            if hasattr(launch, "receipt_bytes") and path in pending and not disappeared:
+                real_unlink(path)
+                disappeared.append(str(path))
+            return old_lstat(path, *a, **k)
+    
+        monkeypatch.setattr(subprocess, "Popen", popen)
+        monkeypatch.setattr(Path, "is_file", is_file)
+        monkeypatch.setattr(Path, "lstat", lstat)
+>       launch.run(
+            ["/bin/sh", "-c", "sleep 0.2", "synthetic-process-fixture"],
+            "campaign",
+            output,
+            {"synthetic": "NOT A CAMPAIGN"},
+        )
+
+/tmp/u4-b-k2-stage2/guard-controls-final/F4/package/test_stage2.py:205: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/u4-b-k2-stage2/guard-controls-final/F4/package/launch.py:185: in run
+    killed = subprocess.run(
+../../.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/subprocess.py:548: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/u4-b-k2-stage2/guard-controls-final/F4/package/test_stage2.py:183: in popen
+    core.Store(output, 2 * 1024**3).json("calls/fixture.json", {"synthetic": "not native"})
+/tmp/u4-b-k2-stage2/baseline/docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py:94: in json
+    return self.publish(name, encoded(value))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/u4-b-k2-stage2/baseline/docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py:58: in publish
+    require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False, why = 'duplicate receipt or different-byte blob collision'
+
+    def require(ok, why):
+        if not ok:
+>           raise ValueError(why)
+E           ValueError: duplicate receipt or different-byte blob collision
+
+/tmp/u4-b-k2-stage2/baseline/docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py:18: ValueError
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/guard-controls-final/F4/package/test_stage2.py::test_F4_store_transient_disappears_during_actual_poll
+1 failed in 0.07s

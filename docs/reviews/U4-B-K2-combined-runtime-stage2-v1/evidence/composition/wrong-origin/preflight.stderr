@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/combined/runtime_entry.py", line 220, in main
+    context = common()
+              ^^^^^^^^
+  File "/combined/runtime_entry.py", line 97, in common
+    b.origins(sys.modules, PROJECT)
+  File "/combined/bindings.py", line 115, in origins
+    need(path.is_relative_to(Path(project).resolve()), "wrong project import origin: " + name)
+  File "/combined/bindings.py", line 18, in need
+    raise ValueError(reason)
+ValueError: wrong project import origin: uarch_contract.foreign

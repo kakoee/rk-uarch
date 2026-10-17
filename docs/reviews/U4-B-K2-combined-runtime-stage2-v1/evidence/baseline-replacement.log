@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_F1_replacement_cannot_substitute_published_bytes _____________
+
+repos = (PosixPath('/tmp/pytest-of-jjaff/pytest-122/test_F1_replacement_cannot_sub0/local'), PosixPath('/tmp/pytest-of-jjaff/p...h('/tmp/pytest-of-jjaff/pytest-122/test_F1_replacement_cannot_sub0/decoy'), '5a304389b1d5fc3721aa46e098a6d50efc8cc7a6')
+
+    def test_F1_replacement_cannot_substitute_published_bytes(repos):
+        local, remote, _, published = repos
+        with publication_context(remote) as read:
+            assert read(local, published, "data.txt") == b"actual published fixture content\n"
+        (local / "data.txt").write_bytes(b"replacement-object bytes\n")
+        git(local, "add", ".")
+        git(local, "commit", "-m", "synthetic replacement")
+        replacement = git(local, "rev-parse", "HEAD").decode().strip()
+        git(local, "replace", published, replacement)
+        with publication_context(remote) as read:
+>           assert read(local, published, "data.txt") == b"actual published fixture content\n"
+E           AssertionError: assert b'replacement-object bytes\n' == b'actual publ...ure content\n'
+E             
+E             At index 0 diff: b'r' != b'a'
+E             Use -v to get more diff
+
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:659: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/candidate/test_stage2.py::test_F1_replacement_cannot_substitute_published_bytes
+1 failed in 0.09s

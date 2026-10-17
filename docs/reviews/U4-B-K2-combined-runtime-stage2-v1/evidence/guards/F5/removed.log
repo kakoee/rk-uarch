@@ -1,0 +1,33 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_F5_earlier_helper_shadow_refused _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-197/test_F5_earlier_helper_shadow_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e3145031400>
+
+    def test_F5_earlier_helper_shadow_refused(tmp_path, monkeypatch):
+        (tmp_path / "resource_limits.py").write_text('LABEL = "synthetic shadow, no actions"\n')
+        monkeypatch.syspath_prepend(str(tmp_path))
+        monkeypatch.delitem(sys.modules, "resource_limits", raising=False)
+        import resource_limits
+    
+        modules = {
+            n: SimpleNamespace(__file__=str(tmp_path / "project/owned.py"))
+            for n in ("rkuarch.engines.native.host", "uarch_contract.hardware")
+        }
+        modules["resource_limits"] = resource_limits
+        if hasattr(b, "helper_origins"):
+            expected = {
+                "resource_limits": {
+                    "path": str(tmp_path / "bound/resource_limits.py"),
+                    "sha256": "sha256:" + "0" * 64,
+                }
+            }
+>           with pytest.raises(ValueError, match="helper origin"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+/tmp/u4-b-k2-stage2/guard-controls-final/F5/package/test_stage2.py:233: Failed
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/guard-controls-final/F5/package/test_stage2.py::test_F5_earlier_helper_shadow_refused
+1 failed in 0.04s

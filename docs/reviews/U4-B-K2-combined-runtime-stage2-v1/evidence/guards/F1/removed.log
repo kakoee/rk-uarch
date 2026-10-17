@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_F1_unpushed_local_tracking_ref_is_not_publication ____________
+
+repos = (PosixPath('/tmp/pytest-of-jjaff/pytest-184/test_F1_unpushed_local_trackin0/local'), PosixPath('/tmp/pytest-of-jjaff/p...h('/tmp/pytest-of-jjaff/pytest-184/test_F1_unpushed_local_trackin0/decoy'), 'ec530ee88479eacca5b5e1d9997745441dc77d84')
+
+    def test_F1_unpushed_local_tracking_ref_is_not_publication(repos):
+        local, remote, _, published = repos
+        (local / "data.txt").write_bytes(b"UNPUSHED SYNTHETIC DATA\n")
+        git(local, "add", ".")
+        git(local, "commit", "-m", "not published")
+        local_commit = git(local, "rev-parse", "HEAD").decode().strip()
+        git(local, "update-ref", "refs/remotes/origin/main", local_commit)
+        with publication_context(remote) as read:
+            assert read(local, published, "data.txt") == b"actual published fixture content\n"
+>           with pytest.raises((ValueError, subprocess.CalledProcessError)):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE any of (ValueError, CalledProcessError)
+
+/tmp/u4-b-k2-stage2/guard-controls-final/F1/package/test_stage2.py:91: Failed
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/guard-controls-final/F1/package/test_stage2.py::test_F1_unpushed_local_tracking_ref_is_not_publication
+1 failed in 0.11s

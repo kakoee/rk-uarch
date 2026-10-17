@@ -1,0 +1,15 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_F6_unknown_decision_condition_refused __________________
+
+    def test_F6_unknown_decision_condition_refused():
+        d = decision()
+        d["undeclared_condition"] = "SYNTHETIC ONLY; not permission"
+>       with pytest.raises(ValueError, match="schema|field"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/u4-b-k2-stage2/guard-controls-final/F6/package/test_stage2.py:267: Failed
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/guard-controls-final/F6/package/test_stage2.py::test_F6_unknown_decision_condition_refused
+1 failed in 0.04s

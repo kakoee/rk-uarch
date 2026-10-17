@@ -1,0 +1,11 @@
+--- a/runtime_entry.py
++++ b/runtime_entry.py
+@@ -266,7 +266,7 @@
+         else:
+             if BINDING is None:
+                 raise ValueError("runtime binding required before replay")
+-            replay_admission(OUT, BINDING, context[1])
++            None  # removed container replay admission guard
+             before = snapshots()
+             BASE.replay(context)
+             guards()

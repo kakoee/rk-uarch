@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/combined/runtime_entry.py", line 299, in <module>
+    main(sys.argv[1])
+  File "/combined/runtime_entry.py", line 197, in main
+    scheduler = configure()
+                ^^^^^^^^^^^
+  File "/combined/runtime_entry.py", line 152, in configure
+    c, _, _ = b.check_payload(PROJECT, HELPERS, RECORD, sealed=not PRIVATE)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/combined/bindings.py", line 82, in check_payload
+    inventory(project, c["project"], sealed=sealed)
+  File "/combined/bindings.py", line 61, in inventory
+    need(
+  File "/combined/bindings.py", line 18, in need
+    raise ValueError(reason)
+ValueError: payload bytes: contract/uarch_contract/hardware.py

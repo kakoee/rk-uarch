@@ -1,0 +1,47 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_F2_container_gate_precedes_resolution __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-190/test_F2_container_gate_precede0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x71675ff7d520>
+
+    def test_F2_container_gate_precedes_resolution(tmp_path, monkeypatch):
+        import runtime_entry as r
+    
+        binding = {"synthetic": "not authority"}
+        (tmp_path / "campaign.json").write_bytes(b.encoded({"runtime_binding": binding}))
+        (tmp_path / "campaign-failure.json").write_bytes(b"{}")
+    
+        def forbidden(*args):
+            raise AssertionError("replay authority/transport boundary was reached")
+    
+        fake = SimpleNamespace(dump=lambda *args: None, replay=forbidden)
+        monkeypatch.setattr(r, "BASE", fake)
+        monkeypatch.setattr(r, "BINDING", None)
+        monkeypatch.setattr(r, "OUT", tmp_path)
+        monkeypatch.setattr(
+            r, "configure", lambda: SimpleNamespace(verify_snapshots=lambda *args: None)
+        )
+        monkeypatch.setattr(r, "common", lambda: (None, {}, None))
+        monkeypatch.setattr(r, "guards", lambda: ({}, "fixture"))
+        monkeypatch.setattr(r, "release", lambda: binding)
+        monkeypatch.setattr(r, "snapshots", lambda: {})
+        with pytest.raises(ValueError, match="campaign failure"):
+>           r.main("replay")
+
+/tmp/u4-b-k2-stage2/guard-controls-final/F2-runtime/package/test_stage2.py:665: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/u4-b-k2-stage2/guard-controls-final/F2-runtime/package/runtime_entry.py:271: in main
+    BASE.replay(context)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = ((None, {}, None),)
+
+    def forbidden(*args):
+>       raise AssertionError("replay authority/transport boundary was reached")
+E       AssertionError: replay authority/transport boundary was reached
+
+/tmp/u4-b-k2-stage2/guard-controls-final/F2-runtime/package/test_stage2.py:651: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/guard-controls-final/F2-runtime/package/test_stage2.py::test_F2_container_gate_precedes_resolution
+1 failed in 0.04s

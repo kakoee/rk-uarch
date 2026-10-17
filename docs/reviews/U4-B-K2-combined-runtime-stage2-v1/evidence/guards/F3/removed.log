@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_F3_observation_shape_and_private_distinctions ______________
+
+    def test_F3_observation_shape_and_private_distinctions():
+        pf = synthetic_preflight()
+        b.check_preflight(pf, DATA, PUB)  # shape-only; no publication/placement or authority made
+        for key, value in [
+            ("seal_check_enforced", False),
+            ("root_uid", 1000),
+            ("all_root_owned", False),
+            ("all_inodes_readonly", False),
+        ]:
+            bad = json.loads(json.dumps(pf))
+            bad["observations"]["payload"]["/project"][key] = value
+>           with pytest.raises(ValueError, match="observed production seal"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+/tmp/u4-b-k2-stage2/guard-controls-final/F3/package/test_stage2.py:528: Failed
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/guard-controls-final/F3/package/test_stage2.py::test_F3_observation_shape_and_private_distinctions
+1 failed in 0.04s

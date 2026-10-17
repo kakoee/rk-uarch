@@ -1,0 +1,11 @@
+--- a/launch.py
++++ b/launch.py
+@@ -152,7 +152,7 @@
+         sys_path = str(b.OLD / "campaign")
+         if sys_path not in sys.path:
+             sys.path.insert(0, sys_path)
+-        replay_admission(output, binding, b.read(b.OLD / "campaign/campaign-plan.json"))
++        None  # removed replay admission guard
+     else:
+         output.mkdir(exist_ok=False)
+     name = "u4-k2-combined-" + uuid.uuid4().hex

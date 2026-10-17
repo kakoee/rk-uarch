@@ -1,0 +1,253 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+____________ test_F1_unpushed_local_tracking_ref_is_not_publication ____________
+
+repos = (PosixPath('/tmp/pytest-of-jjaff/pytest-104/test_F1_unpushed_local_trackin0/local'), PosixPath('/tmp/pytest-of-jjaff/p...h('/tmp/pytest-of-jjaff/pytest-104/test_F1_unpushed_local_trackin0/decoy'), 'f3cc9fd525cd4fd8e89abe8d69ef6cbf01a67817')
+
+    def test_F1_unpushed_local_tracking_ref_is_not_publication(repos):
+        local, remote, _, published = repos
+        (local / 'data.txt').write_bytes(b'UNPUSHED SYNTHETIC DATA\n')
+        git(local, 'add', '.'); git(local, 'commit', '-m', 'not published')
+        local_commit = git(local, 'rev-parse', 'HEAD').decode().strip()
+        git(local, 'update-ref', 'refs/remotes/origin/main', local_commit)
+        with publication_context(remote) as read:
+            assert read(local, published, 'data.txt') == b'actual published fixture content\n'
+>           with pytest.raises((ValueError, subprocess.CalledProcessError)):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE any of (ValueError, CalledProcessError)
+
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:64: Failed
+__________________ test_F1_replace_and_environment_redirects ___________________
+
+repos = (PosixPath('/tmp/pytest-of-jjaff/pytest-104/test_F1_replace_and_environmen0/local'), PosixPath('/tmp/pytest-of-jjaff/p...h('/tmp/pytest-of-jjaff/pytest-104/test_F1_replace_and_environmen0/decoy'), 'f3cc9fd525cd4fd8e89abe8d69ef6cbf01a67817')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72048fbdf140>
+
+    def test_F1_replace_and_environment_redirects(repos, monkeypatch):
+        local, remote, decoy, published = repos
+        (local / 'data.txt').write_bytes(b'replaced bytes\n'); git(local, 'add', '.'); git(local, 'commit', '-m', 'replacement')
+        substitute = git(local, 'rev-parse', 'HEAD').decode().strip()
+        git(local, 'replace', published, substitute)
+        config = local.parent / 'hostile-config'
+        config.write_text('[url "file:///not-the-remote/"]\n insteadOf = https://github.com/\n')
+        for key, value in {'GIT_DIR': str(decoy / '.git'), 'GIT_WORK_TREE': str(decoy), 'GIT_COMMON_DIR': str(decoy / '.git'), 'GIT_OBJECT_DIRECTORY': str(decoy / '.git/objects'), 'GIT_ALTERNATE_OBJECT_DIRECTORIES': str(decoy / '.git/objects'), 'GIT_INDEX_FILE': str(decoy / 'index'), 'GIT_REPLACE_REF_BASE': 'refs/replace/', 'GIT_CONFIG': str(config), 'GIT_CONFIG_GLOBAL': str(config), 'GIT_CONFIG_SYSTEM': str(config), 'GIT_CONFIG_COUNT': '1', 'GIT_CONFIG_KEY_0': 'url.file:///absent/.insteadOf', 'GIT_CONFIG_VALUE_0': 'https://github.com/', 'GIT_SSH_COMMAND': 'false', 'HOME': str(decoy), 'XDG_CONFIG_HOME': str(decoy), 'GIT_CONFIG_PARAMETERS': "'core.bare=true'"}.items():
+            monkeypatch.setenv(key, value)
+        with publication_context(remote) as read:
+>           assert read(local, published, 'data.txt') == b'actual published fixture content\n'
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/u4-b-k2-stage2/baseline/docs/reviews/U4-B-K2-combined-runtime-v1/prepare.py:23: in published
+    subprocess.run(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input = None, capture_output = False, timeout = None, check = True
+popenargs = (['git', 'merge-base', '--is-ancestor', 'f3cc9fd525cd4fd8e89abe8d69ef6cbf01a67817', 'refs/remotes/origin/main'],)
+kwargs = {'cwd': PosixPath('/tmp/pytest-of-jjaff/pytest-104/test_F1_replace_and_environmen0/local')}
+
+    def run(*popenargs,
+            input=None, capture_output=False, timeout=None, check=False, **kwargs):
+        """Run command with arguments and return a CompletedProcess instance.
+    
+        The returned instance will have attributes args, returncode, stdout and
+        stderr. By default, stdout and stderr are not captured, and those attributes
+        will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+        or pass capture_output=True to capture both.
+    
+        If check is True and the exit code was non-zero, it raises a
+        CalledProcessError. The CalledProcessError object will have the return code
+        in the returncode attribute, and output & stderr attributes if those streams
+        were captured.
+    
+        If timeout (seconds) is given and the process takes too long,
+         a TimeoutExpired exception will be raised.
+    
+        There is an optional argument "input", allowing you to
+        pass bytes or a string to the subprocess's stdin.  If you use this argument
+        you may not also use the Popen constructor's "stdin" argument, as
+        it will be used internally.
+    
+        By default, all communication is in bytes, and therefore any "input" should
+        be bytes, and the stdout and stderr will be bytes. If in text mode, any
+        "input" should be a string, and stdout and stderr will be strings decoded
+        according to locale encoding, or by "encoding" if set. Text mode is
+        triggered by setting any of text, encoding, errors or universal_newlines.
+    
+        The other arguments are the same as for the Popen constructor.
+        """
+        if input is not None:
+            if kwargs.get('stdin') is not None:
+                raise ValueError('stdin and input arguments may not both be used.')
+            kwargs['stdin'] = PIPE
+    
+        if capture_output:
+            if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+                raise ValueError('stdout and stderr arguments may not be used '
+                                 'with capture_output.')
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+    
+        with Popen(*popenargs, **kwargs) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=timeout)
+            except TimeoutExpired as exc:
+                process.kill()
+                if _mswindows:
+                    # Windows accumulates the output in a single blocking
+                    # read() call run on child threads, with the timeout
+                    # being done in a join() on those threads.  communicate()
+                    # _after_ kill() is required to collect that and add it
+                    # to the exception.
+                    exc.stdout, exc.stderr = process.communicate()
+                else:
+                    # POSIX _communicate already populated the output so
+                    # far into the TimeoutExpired exception.
+                    process.wait()
+                raise
+            except:  # Including KeyboardInterrupt, communicate handled that.
+                process.kill()
+                # We don't call process.wait() as .__exit__ does that for us.
+                raise
+            retcode = process.poll()
+            if check and retcode:
+>               raise CalledProcessError(retcode, process.args,
+                                         output=stdout, stderr=stderr)
+E               subprocess.CalledProcessError: Command '['git', 'merge-base', '--is-ancestor', 'f3cc9fd525cd4fd8e89abe8d69ef6cbf01a67817', 'refs/remotes/origin/main']' returned non-zero exit status 128.
+
+../../.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/subprocess.py:571: CalledProcessError
+----------------------------- Captured stderr call -----------------------------
+fatal: Not a valid commit name f3cc9fd525cd4fd8e89abe8d69ef6cbf01a67817
+_______________ test_F2_incomplete_launch_refuses_before_process _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-104/test_F2_incomplete_launch_refu0')
+
+    def test_F2_incomplete_launch_refuses_before_process(tmp_path):
+        binding = {'synthetic': 'NOT A RUNTIME BINDING OR CAMPAIGN'}
+        (tmp_path / 'campaign.json').write_bytes(b.encoded({'runtime_binding': binding, 'synthetic': 'NOT A CAMPAIGN'}))
+        (tmp_path / 'campaign-launch.json').write_bytes(b.encoded({'complete': False, 'exit_code': -9, 'stop_reason': 'outer deadline'}))
+        (tmp_path / 'campaign-failure.json').write_bytes(b.encoded({'complete': False}))
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:86: Failed
+_____________ test_F3_private_flags_cannot_create_placed_evidence ______________
+
+    def test_F3_private_flags_cannot_create_placed_evidence():
+        old = BASE / 'baseline/docs/reviews/U4-B-K2-combined-runtime-v1'
+        saved = json.loads((old / 'evidence/private-preflight.json').read_bytes())
+        saved.update(status='combined-runtime-import-preflight-passed', private_test=False)
+        # Use the same exact candidate binding as the saved diagnostic; no identity setup error.
+>       with pytest.raises(ValueError, match='observ|seal|placement|root'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:96: Failed
+____________ test_F4_store_transient_disappears_during_actual_poll _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-104/test_F4_store_transient_disapp0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72048fbfb440>
+
+    def test_F4_store_transient_disappears_during_actual_poll(tmp_path, monkeypatch):
+        output = tmp_path / 'run'
+        core = core_module()
+        real_popen, real_unlink = subprocess.Popen, Path.unlink
+        pending = []
+    
+        def popen(*args, **kwargs):
+            process = real_popen(*args, **kwargs)
+            with monkeypatch.context() as patch:
+                def postpone(path, *a, **k):
+                    if path.name.startswith('.pending-'):
+                        pending.append(path)
+                    else:
+                        real_unlink(path, *a, **k)
+                patch.setattr(Path, 'unlink', postpone)
+                core.Store(output, 2 * 1024**3).json('calls/fixture.json', {'synthetic': 'not native'})
+            return process
+    
+        old_is_file, old_lstat = Path.is_file, Path.lstat
+        disappeared = []
+    
+        def is_file(path):
+            answer = old_is_file(path)
+            if answer and path in pending and not disappeared:
+                real_unlink(path); disappeared.append(str(path))
+            return answer
+    
+        def lstat(path, *a, **k):
+            if hasattr(launch, "receipt_bytes") and path in pending and not disappeared:
+                real_unlink(path); disappeared.append(str(path))
+            return old_lstat(path, *a, **k)
+    
+        monkeypatch.setattr(subprocess, 'Popen', popen)
+        monkeypatch.setattr(Path, 'is_file', is_file)
+        monkeypatch.setattr(Path, 'lstat', lstat)
+>       launch.run(['/bin/sh', '-c', 'sleep 0.2', 'synthetic-process-fixture'], 'campaign', output, {'synthetic': 'NOT A CAMPAIGN'})
+
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/u4-b-k2-stage2/baseline/docs/reviews/U4-B-K2-combined-runtime-v1/launch.py:167: in run
+    killed = subprocess.run(
+../../.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/subprocess.py:548: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:123: in popen
+    core.Store(output, 2 * 1024**3).json('calls/fixture.json', {'synthetic': 'not native'})
+/tmp/u4-b-k2-stage2/baseline/docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py:94: in json
+    return self.publish(name, encoded(value))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/u4-b-k2-stage2/baseline/docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py:58: in publish
+    require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False, why = 'duplicate receipt or different-byte blob collision'
+
+    def require(ok, why):
+        if not ok:
+>           raise ValueError(why)
+E           ValueError: duplicate receipt or different-byte blob collision
+
+/tmp/u4-b-k2-stage2/baseline/docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py:18: ValueError
+____________________ test_F5_earlier_helper_shadow_refused _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-104/test_F5_earlier_helper_shadow_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72048fbdf530>
+
+    def test_F5_earlier_helper_shadow_refused(tmp_path, monkeypatch):
+        (tmp_path / 'resource_limits.py').write_text('LABEL = "synthetic shadow, no actions"\n')
+        monkeypatch.syspath_prepend(str(tmp_path))
+        monkeypatch.delitem(sys.modules, 'resource_limits', raising=False)
+        import resource_limits
+    
+        modules = {n: SimpleNamespace(__file__=str(tmp_path / 'project/owned.py')) for n in ('rkuarch.engines.native.host', 'uarch_contract.hardware')}
+        modules['resource_limits'] = resource_limits
+        if hasattr(b, 'helper_origins'):
+            expected = {'resource_limits': {'path': str(tmp_path / 'bound/resource_limits.py'), 'sha256': 'sha256:' + '0' * 64}}
+            with pytest.raises(ValueError, match='helper origin'):
+                b.helper_origins(modules, expected)
+        else:
+>           with pytest.raises(ValueError, match='helper origin'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:161: Failed
+__________________ test_F6_unknown_decision_condition_refused __________________
+
+    def test_F6_unknown_decision_condition_refused():
+        d = decision()
+        d['undeclared_condition'] = 'SYNTHETIC ONLY; not permission'
+>       with pytest.raises(ValueError, match='schema|field'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+/tmp/u4-b-k2-stage2/candidate/test_stage2.py:176: Failed
+=========================== short test summary info ============================
+FAILED ../../../../tmp/u4-b-k2-stage2/candidate/test_stage2.py::test_F1_unpushed_local_tracking_ref_is_not_publication
+FAILED ../../../../tmp/u4-b-k2-stage2/candidate/test_stage2.py::test_F1_replace_and_environment_redirects
+FAILED ../../../../tmp/u4-b-k2-stage2/candidate/test_stage2.py::test_F2_incomplete_launch_refuses_before_process
+FAILED ../../../../tmp/u4-b-k2-stage2/candidate/test_stage2.py::test_F3_private_flags_cannot_create_placed_evidence
+FAILED ../../../../tmp/u4-b-k2-stage2/candidate/test_stage2.py::test_F4_store_transient_disappears_during_actual_poll
+FAILED ../../../../tmp/u4-b-k2-stage2/candidate/test_stage2.py::test_F5_earlier_helper_shadow_refused
+FAILED ../../../../tmp/u4-b-k2-stage2/candidate/test_stage2.py::test_F6_unknown_decision_condition_refused
+7 failed in 0.30s

@@ -1,0 +1,11 @@
+--- a/bindings.py
++++ b/bindings.py
+@@ -255,7 +255,7 @@
+ 
+ 
+ def check_decision(decision, candidate_bytes, publication):
+-    need(set(decision) == DECISION_FIELDS, "exact decision schema fields")
++    need(True, "removed exact decision schema fields")
+     need(
+         decision["binding"] == identity(candidate_bytes) and decision["publication"] == publication,
+         "decision exact candidate",

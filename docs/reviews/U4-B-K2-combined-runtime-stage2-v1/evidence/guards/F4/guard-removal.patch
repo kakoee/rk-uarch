@@ -1,0 +1,11 @@
+--- a/launch.py
++++ b/launch.py
+@@ -136,7 +136,7 @@
+         except FileNotFoundError:
+             # Only the exact vanished-entry race is tolerated. Every surviving entry
+             # is still accounted; no name-based exclusion and no other error swallowed.
+-            continue
++            raise
+         b.need(not stat.S_ISLNK(info.st_mode), "receipt symlink")
+         if stat.S_ISREG(info.st_mode):
+             total += info.st_size
