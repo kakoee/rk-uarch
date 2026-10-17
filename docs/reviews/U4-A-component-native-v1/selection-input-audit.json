@@ -1,0 +1,2109 @@
+{
+  "scope": "read-only frozen selection/input audit; no native execution",
+  "initial_audit_error": "Assumed every entry had input_path; KeyError before any receipt was written. Corrected to distinguish explicit file and historical content identity bindings.",
+  "selection_byte_sha256": "a8b94f0d83f429e5101b2b62ba5ed91d9b98d0d228330f5185acc37aab29319c",
+  "selection_hash": "sha256:4b9e73cf9ef11456e216acba58c9496c242169e2a40efcf0aa9e3f36bf0dbbc0",
+  "cases": 106,
+  "outcomes": {
+    "success": 90,
+    "InvalidDependency": 6,
+    "LiveBufferAlias": 1,
+    "InvalidResource": 1,
+    "CapacityExceeded": 6,
+    "SramCapacityExceeded": 2
+  },
+  "input_matches": 24,
+  "historical_content_bindings": 82,
+  "records": [
+    {
+      "case_id": "A-C01-resident",
+      "input_path": "docs/reviews/U4-A-component-mapper-v1/fixtures/A-C01-resident.json",
+      "expected_input_sha256": "523e21da8cdc0b7d4480088cae853a923339b8fbb56f186aad2282d6ec330352",
+      "actual_input_sha256": "523e21da8cdc0b7d4480088cae853a923339b8fbb56f186aad2282d6ec330352",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 702000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "A-C02-cold",
+      "input_path": "docs/reviews/U4-A-component-mapper-v1/fixtures/A-C02-cold.json",
+      "expected_input_sha256": "a40b2b742e495a2b8a2bedf7c96443177a57bd1d632f1be55749d01f70baba9c",
+      "actual_input_sha256": "a40b2b742e495a2b8a2bedf7c96443177a57bd1d632f1be55749d01f70baba9c",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 656000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "A-C02-resident",
+      "input_path": "docs/reviews/U4-A-component-mapper-v1/fixtures/A-C02-resident.json",
+      "expected_input_sha256": "f679199f66cc93a5e0209e59453a7ac45cbebadbd2844d6ff493fd258b804f2c",
+      "actual_input_sha256": "f679199f66cc93a5e0209e59453a7ac45cbebadbd2844d6ff493fd258b804f2c",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 547000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "A-C03-resident",
+      "input_path": "docs/reviews/U4-A-component-mapper-v1/fixtures/A-C03-resident.json",
+      "expected_input_sha256": "319b44e3d7bf62aea52e1caee814dcc478ab204de225b083259eed5d5db95894",
+      "actual_input_sha256": "319b44e3d7bf62aea52e1caee814dcc478ab204de225b083259eed5d5db95894",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 1182000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "A2-255-256-cold",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/A2-255-256-cold.json",
+      "expected_input_sha256": "49b1640f02365e9374614516fe4ba5e074e2749055039b702d9e4ce2dba92090",
+      "actual_input_sha256": "49b1640f02365e9374614516fe4ba5e074e2749055039b702d9e4ce2dba92090",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "issued_ops": 67108864,
+        "outcome": "success",
+        "read_payload_bytes": 523776,
+        "read_transaction_bytes": 523776,
+        "useful_ops": 66977792,
+        "write_payload_bytes": 261632,
+        "write_transaction_bytes": 261632
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "A2-255-256-fixture_resident",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/A2-255-256-fixture_resident.json",
+      "expected_input_sha256": "c5c0f1e6fd955578b09628d81f6d22786b319463c5a808d81e7ffa36340e0b63",
+      "actual_input_sha256": "c5c0f1e6fd955578b09628d81f6d22786b319463c5a808d81e7ffa36340e0b63",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 2364000,
+        "issued_ops": 67108864,
+        "outcome": "success",
+        "sram_read_bytes": 523776,
+        "sram_write_bytes": 261632,
+        "useful_ops": 66977792
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "B2-255-256",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-255-256.json",
+      "expected_input_sha256": "bf7a253f433acac42b8aa53f3a25a1513482ebe09cebe87c7a71da61cb8321e9",
+      "actual_input_sha256": "bf7a253f433acac42b8aa53f3a25a1513482ebe09cebe87c7a71da61cb8321e9",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 2364000,
+        "native_status": "not_run",
+        "outcome": "success",
+        "representation": "prospective transient accumulator",
+        "sram_read_bytes": 523776,
+        "sram_write_bytes": 261632,
+        "useful_ops": 66977792
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "B2-C04-transient",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-C04-transient.json",
+      "expected_input_sha256": "f4efe11e4a1f5e5fa13321a281d058e22b5f6ea9fcf571bea79d6344036cebc1",
+      "actual_input_sha256": "f4efe11e4a1f5e5fa13321a281d058e22b5f6ea9fcf571bea79d6344036cebc1",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 1855000,
+        "native_status": "not_run",
+        "outcome": "success",
+        "representation": "prospective transient accumulator",
+        "sram_read_bytes": 393728,
+        "sram_write_bytes": 131584,
+        "useful_ops": 33685504
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "B2-equal",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-equal.json",
+      "expected_input_sha256": "5ce73648b8e4ab902aa4ca7e5643686fe18fdc4717c754005bad2cf28e1fe78a",
+      "actual_input_sha256": "5ce73648b8e4ab902aa4ca7e5643686fe18fdc4717c754005bad2cf28e1fe78a",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 2364000,
+        "native_status": "not_run",
+        "outcome": "success",
+        "representation": "prospective transient accumulator",
+        "sram_read_bytes": 524288,
+        "sram_write_bytes": 262144,
+        "useful_ops": 67108864
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "B2-lifetime-false-writer",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-lifetime-false-writer.json",
+      "expected_input_sha256": "77cce89d533a12ec2f51c7768ee6ae1627f0bba8c24855f2ae11418c1339cc7a",
+      "actual_input_sha256": "77cce89d533a12ec2f51c7768ee6ae1627f0bba8c24855f2ae11418c1339cc7a",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "InvalidDependency",
+        "parent_case": "B2-C04-transient"
+      },
+      "expected_public_code": "InvalidDependency",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B2-lifetime-missing-consumer",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-lifetime-missing-consumer.json",
+      "expected_input_sha256": "e82108fd5407708940a156eda957b50280bf3d0b95e4bb40681bb18e107914cf",
+      "actual_input_sha256": "e82108fd5407708940a156eda957b50280bf3d0b95e4bb40681bb18e107914cf",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "InvalidDependency",
+        "parent_case": "B2-C04-transient"
+      },
+      "expected_public_code": "InvalidDependency",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B2-lifetime-no-order",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-lifetime-no-order.json",
+      "expected_input_sha256": "e6f2c2b68ed4f469d34c8c8e7da6ac6483fe4c47722549cb0b2aabeda2af9029",
+      "actual_input_sha256": "e6f2c2b68ed4f469d34c8c8e7da6ac6483fe4c47722549cb0b2aabeda2af9029",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "LiveBufferAlias",
+        "parent_case": "B2-C04-transient"
+      },
+      "expected_public_code": "LiveBufferAlias",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B2-lifetime-wrong-owner",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-lifetime-wrong-owner.json",
+      "expected_input_sha256": "8d86691fc5993171c30f8a1ff9753e36d53bc228a5c38e4907071011a6130077",
+      "actual_input_sha256": "8d86691fc5993171c30f8a1ff9753e36d53bc228a5c38e4907071011a6130077",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "InvalidResource",
+        "parent_case": "B2-C04-transient"
+      },
+      "expected_public_code": "InvalidResource",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B2-resource-C04-carrier",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-resource-C04-carrier.json",
+      "expected_input_sha256": "fa0e5d6c4ffeb2ff6b44a0d733654da385ef79fcdc9742750021e4e701894dad",
+      "actual_input_sha256": "fa0e5d6c4ffeb2ff6b44a0d733654da385ef79fcdc9742750021e4e701894dad",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "CapacityExceeded",
+        "parent_case": "C04-carrier"
+      },
+      "expected_public_code": "CapacityExceeded",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B2-resource-C06-small",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-resource-C06-small.json",
+      "expected_input_sha256": "7c34250c1b2024bbaea84c51a468432620fc32cc5a7353e9919a128ab88ef58a",
+      "actual_input_sha256": "7c34250c1b2024bbaea84c51a468432620fc32cc5a7353e9919a128ab88ef58a",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "CapacityExceeded",
+        "parent_case": "C06-small"
+      },
+      "expected_public_code": "CapacityExceeded",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B2-resource-C07-hbm-1",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-resource-C07-hbm-1.json",
+      "expected_input_sha256": "24b02e3ad34d7b91145c0da02453def15e038e88436ba329b63ac3c70f8f0eb7",
+      "actual_input_sha256": "24b02e3ad34d7b91145c0da02453def15e038e88436ba329b63ac3c70f8f0eb7",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "CapacityExceeded",
+        "parent_case": "C07-hbm-1"
+      },
+      "expected_public_code": "CapacityExceeded",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B2-resource-C07-sram-1",
+      "input_path": "docs/reviews/U4-B-component-joins-v2/fixtures/B2-resource-C07-sram-1.json",
+      "expected_input_sha256": "c39b0e8d43bc2ae0fd6e4d9da78c50a247b4d34cc3527c5ca3f937d8f0b4d3da",
+      "actual_input_sha256": "c39b0e8d43bc2ae0fd6e4d9da78c50a247b4d34cc3527c5ca3f937d8f0b4d3da",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "SramCapacityExceeded",
+        "parent_case": "C07-sram-1"
+      },
+      "expected_public_code": "SramCapacityExceeded",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B3-false-writer-disjoint",
+      "input_path": "docs/reviews/U4-B-component-stage2-v1/fixtures/B3-false-writer-disjoint.json",
+      "expected_input_sha256": "f14762a46c4af75bcd0ef628bf7fc5c6e1c0bec9635f46d261081670e9f917b8",
+      "actual_input_sha256": "f14762a46c4af75bcd0ef628bf7fc5c6e1c0bec9635f46d261081670e9f917b8",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "outcome": "InvalidDependency"
+      },
+      "expected_public_code": "InvalidDependency",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B3-shared-use-control",
+      "input_path": "docs/reviews/U4-B-component-stage2-v1/fixtures/B3-shared-use-control.json",
+      "expected_input_sha256": "56a6d88ad06a9c24844100a045185b96544daa8fb4b220e23b7a2868c5eb5c63",
+      "actual_input_sha256": "56a6d88ad06a9c24844100a045185b96544daa8fb4b220e23b7a2868c5eb5c63",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 2364000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "B3-terminal-control",
+      "input_path": "docs/reviews/U4-B-component-stage2-v1/fixtures/B3-terminal-control.json",
+      "expected_input_sha256": "7790d25370f8875b6bea95b652e9ec8363cef5400f3d7ac306ef6bfbbaad600c",
+      "actual_input_sha256": "7790d25370f8875b6bea95b652e9ec8363cef5400f3d7ac306ef6bfbbaad600c",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 4728000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "B3-terminal-partial-A1",
+      "input_path": "docs/reviews/U4-B-component-stage2-v1/fixtures/B3-terminal-partial-A1.json",
+      "expected_input_sha256": "c08d1db35763f55788ac1223d171affc5c4cf06c14bfccebea8c49c9bf17431f",
+      "actual_input_sha256": "c08d1db35763f55788ac1223d171affc5c4cf06c14bfccebea8c49c9bf17431f",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "outcome": "InvalidDependency"
+      },
+      "expected_public_code": "InvalidDependency",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B3-use-before-A3b",
+      "input_path": "docs/reviews/U4-B-component-stage2-v1/fixtures/B3-use-before-A3b.json",
+      "expected_input_sha256": "09350014f038eb28788401d3cd64d4a33d91c55cbaea7ca7ad85ed7e9aff503f",
+      "actual_input_sha256": "09350014f038eb28788401d3cd64d4a33d91c55cbaea7ca7ad85ed7e9aff503f",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "outcome": "InvalidDependency"
+      },
+      "expected_public_code": "InvalidDependency",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B3-use-unordered-A3c",
+      "input_path": "docs/reviews/U4-B-component-stage2-v1/fixtures/B3-use-unordered-A3c.json",
+      "expected_input_sha256": "01dcc4a6bedf81d0eabc42b3ed1a0beea7a6452412143a2a6c6e51354658ecac",
+      "actual_input_sha256": "01dcc4a6bedf81d0eabc42b3ed1a0beea7a6452412143a2a6c6e51354658ecac",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "outcome": "InvalidDependency"
+      },
+      "expected_public_code": "InvalidDependency",
+      "expected_layer": "resource-preflight"
+    },
+    {
+      "case_id": "B3-writer-control",
+      "input_path": "docs/reviews/U4-B-component-stage2-v1/fixtures/B3-writer-control.json",
+      "expected_input_sha256": "ce83fa4ab9fbb10f58696e76e2338c5928bcac73a8d8675f8c3345f7f3c19b76",
+      "actual_input_sha256": "ce83fa4ab9fbb10f58696e76e2338c5928bcac73a8d8675f8c3345f7f3c19b76",
+      "match": true,
+      "binding_kind": "explicit_file",
+      "expected": {
+        "duration_ps": 1094000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C01",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "accumulator_bytes": 16384,
+        "duration_ps": 702000,
+        "hbm_payload_bytes": 0,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "sram_read_bytes": 139264,
+        "sram_write_bytes": 8192,
+        "useful_floor_ps": 16000,
+        "useful_ops": 2097152
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C02",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "accumulator_bytes": 84,
+        "duration_ps": 547000,
+        "hbm_payload_bytes": 0,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "sram_read_bytes": 100,
+        "sram_write_bytes": 42,
+        "useful_floor_ps": 2,
+        "useful_ops": 210
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C03",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 1182000,
+        "issued_ops": 33685504,
+        "outcome": "success",
+        "tile_durations_ps": [
+          1182000,
+          673000
+        ],
+        "useful_ops": 33685504
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C04-carrier",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "arithmetic_only_duration_ps": 1855000,
+        "blocker": "different exact accumulator footprints cannot share full-capacity allocation",
+        "outcome": "CapacityExceeded"
+      },
+      "expected_public_code": "TestVariantNotAdmitted",
+      "expected_layer": "profile"
+    },
+    {
+      "case_id": "C04-control",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 1094000,
+        "issued_ops": 786432,
+        "outcome": "success",
+        "premise": "two equal-footprint independent jobs share matrix0 and accumulator; FIFO",
+        "useful_ops": 420
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C05-A-carrier",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 656000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "read_payload_bytes": 100,
+        "read_transaction_bytes": 512,
+        "useful_ops": 210,
+        "write_payload_bytes": 42,
+        "write_transaction_bytes": 256
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C05-B",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 669000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "read_payload_bytes": 100,
+        "read_transaction_bytes": 512,
+        "useful_ops": 210,
+        "write_payload_bytes": 42,
+        "write_transaction_bytes": 256
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C06-fit",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "outcome": "success",
+        "required_accumulator_bytes": 262144
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C06-small",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "outcome": "CapacityExceeded",
+        "required_accumulator_bytes": 262144
+      },
+      "expected_public_code": "TestVariantNotAdmitted",
+      "expected_layer": "profile"
+    },
+    {
+      "case_id": "C07-hbm-0",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "capacity_bytes": 32000000000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C07-hbm-1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "capacity_bytes": 32000000000,
+        "outcome": "CapacityExceeded"
+      },
+      "expected_public_code": "TestVariantNotAdmitted",
+      "expected_layer": "profile"
+    },
+    {
+      "case_id": "C07-sram-0",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "capacity_bytes": 16777216,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C07-sram-1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "capacity_bytes": 16777216,
+        "outcome": "SramCapacityExceeded"
+      },
+      "expected_public_code": "TestVariantNotAdmitted",
+      "expected_layer": "profile"
+    },
+    {
+      "case_id": "C08-1-256-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 673000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 131584,
+        "sram_write_bytes": 512,
+        "useful_ops": 131072
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-1-256-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 336500,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 131584,
+        "sram_write_bytes": 512,
+        "useful_ops": 131072
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-1-256-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 548000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 4096,
+        "sram_write_bytes": 14,
+        "useful_ops": 3584
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-1-256-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 274000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 4096,
+        "sram_write_bytes": 14,
+        "useful_ops": 3584
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-1-5-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 547000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2570,
+        "sram_write_bytes": 512,
+        "useful_ops": 2560
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-1-5-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 273500,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2570,
+        "sram_write_bytes": 512,
+        "useful_ops": 2560
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-1-5-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 545000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 80,
+        "sram_write_bytes": 14,
+        "useful_ops": 70
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-1-5-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 272500,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 80,
+        "sram_write_bytes": 14,
+        "useful_ops": 70
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-16-256-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 702000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 139264,
+        "sram_write_bytes": 8192,
+        "useful_ops": 2097152
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-16-256-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 351000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 139264,
+        "sram_write_bytes": 8192,
+        "useful_ops": 2097152
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-16-256-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 571000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 11776,
+        "sram_write_bytes": 224,
+        "useful_ops": 57344
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-16-256-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 285500,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 11776,
+        "sram_write_bytes": 224,
+        "useful_ops": 57344
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-16-5-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 569000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2720,
+        "sram_write_bytes": 8192,
+        "useful_ops": 40960
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-16-5-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 284500,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2720,
+        "sram_write_bytes": 8192,
+        "useful_ops": 40960
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-16-5-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 560000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 230,
+        "sram_write_bytes": 224,
+        "useful_ops": 1120
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-16-5-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 280000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 230,
+        "sram_write_bytes": 224,
+        "useful_ops": 1120
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-255-256-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 1181000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 261632,
+        "sram_write_bytes": 130560,
+        "useful_ops": 33423360
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-255-256-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 590500,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 261632,
+        "sram_write_bytes": 130560,
+        "useful_ops": 33423360
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-255-256-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 932000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 134144,
+        "sram_write_bytes": 3570,
+        "useful_ops": 913920
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-255-256-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 466000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 134144,
+        "sram_write_bytes": 3570,
+        "useful_ops": 913920
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-255-5-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 930000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5110,
+        "sram_write_bytes": 130560,
+        "useful_ops": 652800
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-255-5-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 465000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5110,
+        "sram_write_bytes": 130560,
+        "useful_ops": 652800
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-255-5-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 804000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2620,
+        "sram_write_bytes": 3570,
+        "useful_ops": 17850
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-255-5-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 402000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2620,
+        "sram_write_bytes": 3570,
+        "useful_ops": 17850
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-256-256-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 1182000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 262144,
+        "sram_write_bytes": 131072,
+        "useful_ops": 33554432
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-256-256-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 591000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 262144,
+        "sram_write_bytes": 131072,
+        "useful_ops": 33554432
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-256-256-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 934000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 134656,
+        "sram_write_bytes": 3584,
+        "useful_ops": 917504
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-256-256-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 467000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 134656,
+        "sram_write_bytes": 3584,
+        "useful_ops": 917504
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-256-5-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 931000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5120,
+        "sram_write_bytes": 131072,
+        "useful_ops": 655360
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-256-5-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 465500,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5120,
+        "sram_write_bytes": 131072,
+        "useful_ops": 655360
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-256-5-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 805000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2630,
+        "sram_write_bytes": 3584,
+        "useful_ops": 17920
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-256-5-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 402500,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2630,
+        "sram_write_bytes": 3584,
+        "useful_ops": 17920
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-3-256-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 677000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 132608,
+        "sram_write_bytes": 1536,
+        "useful_ops": 393216
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-3-256-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 338500,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 132608,
+        "sram_write_bytes": 1536,
+        "useful_ops": 393216
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-3-256-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 551000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5120,
+        "sram_write_bytes": 42,
+        "useful_ops": 10752
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-3-256-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 275500,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5120,
+        "sram_write_bytes": 42,
+        "useful_ops": 10752
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-3-5-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 550000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2590,
+        "sram_write_bytes": 1536,
+        "useful_ops": 7680
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-3-5-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 275000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2590,
+        "sram_write_bytes": 1536,
+        "useful_ops": 7680
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-3-5-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 547000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 100,
+        "sram_write_bytes": 42,
+        "useful_ops": 210
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-3-5-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 273500,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 100,
+        "sram_write_bytes": 42,
+        "useful_ops": 210
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-64-256-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 798000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 163840,
+        "sram_write_bytes": 32768,
+        "useful_ops": 8388608
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-64-256-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 399000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 163840,
+        "sram_write_bytes": 32768,
+        "useful_ops": 8388608
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-64-256-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 643000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 36352,
+        "sram_write_bytes": 896,
+        "useful_ops": 229376
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-64-256-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 321500,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 36352,
+        "sram_write_bytes": 896,
+        "useful_ops": 229376
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-64-5-256-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 642000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 3200,
+        "sram_write_bytes": 32768,
+        "useful_ops": 163840
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-64-5-256-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 321000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 3200,
+        "sram_write_bytes": 32768,
+        "useful_ops": 163840
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-64-5-7-r1",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 608000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 710,
+        "sram_write_bytes": 896,
+        "useful_ops": 4480
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C08-64-5-7-r2",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 304000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 710,
+        "sram_write_bytes": 896,
+        "useful_ops": 4480
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "C09-overlap",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 547000,
+        "forbidden_serial_duration_ps": 607000,
+        "issued_ops": 393216,
+        "job_times_ps": {
+          "c": [
+            0,
+            547000
+          ],
+          "r00": [
+            0,
+            60000
+          ]
+        },
+        "outcome": "success",
+        "premise": "independent DMA into disjoint allocation while matrix0 computes resident tile",
+        "useful_ops": 210
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D01",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "attribution_ps": {
+          "compute": 0,
+          "memory": 51250,
+          "noc": 8750,
+          "overhead": 0,
+          "sync": 0
+        },
+        "crossings_ps": [
+          0,
+          4000,
+          52000,
+          54250,
+          59000,
+          60000
+        ],
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D02",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "crossings_ps": [
+          1000,
+          5000,
+          53000,
+          55250,
+          60000,
+          60000
+        ],
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D03",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "channel_end_ps": [
+          54250,
+          56500,
+          58750,
+          61000,
+          63250
+        ],
+        "channel_end_ratios": [
+          [
+            3851744,
+            71
+          ],
+          [
+            4011488,
+            71
+          ],
+          [
+            4171232,
+            71
+          ],
+          [
+            4330976,
+            71
+          ],
+          [
+            4490720,
+            71
+          ]
+        ],
+        "complete_ps": [
+          60000,
+          62000,
+          64000,
+          66000,
+          69000
+        ],
+        "duration_ps": 69000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D04",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "channel_end_ps": [
+          54250,
+          56500,
+          58750,
+          61000,
+          63250,
+          65500,
+          67750,
+          70000,
+          72250,
+          74500,
+          76750,
+          78999
+        ],
+        "channel_end_ratios": [
+          [
+            3851744,
+            71
+          ],
+          [
+            4011488,
+            71
+          ],
+          [
+            4171232,
+            71
+          ],
+          [
+            4330976,
+            71
+          ],
+          [
+            4490720,
+            71
+          ],
+          [
+            4650464,
+            71
+          ],
+          [
+            4810208,
+            71
+          ],
+          [
+            4969952,
+            71
+          ],
+          [
+            5129696,
+            71
+          ],
+          [
+            5289440,
+            71
+          ],
+          [
+            5449184,
+            71
+          ],
+          [
+            5608928,
+            71
+          ]
+        ],
+        "complete_ps": [
+          60000,
+          62000,
+          64000,
+          66000,
+          69000,
+          71000,
+          73000,
+          75000,
+          78000,
+          80000,
+          82000,
+          84000
+        ],
+        "duration_ps": 84000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D05-one",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "complete_ps": [
+          60000,
+          120000
+        ],
+        "duration_ps": 120000,
+        "issue_ps": [
+          0,
+          60000
+        ],
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D05-two",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "complete_ps": [
+          60000,
+          62000
+        ],
+        "duration_ps": 62000,
+        "issue_ps": [
+          0,
+          0
+        ],
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D06-full",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "complete_ps": [
+          60000,
+          62000,
+          64000
+        ],
+        "duration_ps": 64000,
+        "issue_ps": [
+          0,
+          0,
+          0
+        ],
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D06-two",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "complete_ps": [
+          60000,
+          62000,
+          120000
+        ],
+        "duration_ps": 120000,
+        "issue_ps": [
+          0,
+          0,
+          60000
+        ],
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D07",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "final_inflight": 0,
+        "issue_ps": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          60000
+        ],
+        "max_inflight": 32,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D08",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "complete_ps": [
+          60000,
+          61000
+        ],
+        "duration_ps": 61000,
+        "outcome": "success",
+        "response_ps": [
+          59000,
+          59000
+        ]
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D09-read",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "crossings_ps": [
+          0,
+          3334,
+          52000,
+          54250,
+          58334,
+          60000
+        ],
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D09-write",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "crossings_ps": [
+          1000,
+          5000,
+          53000,
+          55250,
+          59167,
+          60000
+        ],
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D10-read",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "crossings_ps": [
+          0,
+          3334,
+          56667,
+          58917,
+          62500,
+          63750
+        ],
+        "duration_ps": 63750,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D10-write",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "crossings_ps": [
+          1250,
+          5000,
+          58889,
+          61139,
+          65000,
+          65000
+        ],
+        "duration_ps": 65000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D11",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "fragments": [
+          [
+            6,
+            256,
+            256
+          ],
+          [
+            7,
+            256,
+            256
+          ],
+          [
+            0,
+            1,
+            256
+          ]
+        ],
+        "outcome": "success",
+        "payload_bytes": 513,
+        "transaction_bytes": 768
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D12",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "fragments": [
+          [
+            6,
+            1,
+            256
+          ],
+          [
+            7,
+            1,
+            256
+          ]
+        ],
+        "outcome": "success",
+        "payload_bytes": 2,
+        "transaction_bytes": 512
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D13-barrier",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "barrier_ready_ps": 62000,
+        "duration_ps": 94000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D13-hop",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 4000,
+        "outcome": "success",
+        "unicast_payload_bytes": 256
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D14",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "complete_ps": [
+          60000,
+          61000,
+          61000
+        ],
+        "duration_ps": 61000,
+        "outcome": "success",
+        "wrong_alignment_ps": 61667
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    },
+    {
+      "case_id": "D15",
+      "input_path": null,
+      "expected_input_sha256": null,
+      "actual_input_sha256": null,
+      "match": null,
+      "binding_kind": "historical_content_identity",
+      "expected": {
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "expected_public_code": "success",
+      "expected_layer": "result"
+    }
+  ]
+}
