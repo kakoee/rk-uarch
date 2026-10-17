@@ -356,3 +356,14 @@ legacy dispatch and immutable artifacts. Changed generator fingerprints must bin
 future human generation; passing synthetic tests cannot replace it. A documentation-only
 U3 closeout uses the current valid source/artifact pair and requires no regeneration.
 No runtime currentness waiver, new policy-marked artifact or completed migration is claimed.
+
+
+## Bounded K2 runtime-copy cross-reference (prospective)
+
+Only upon explicit human acceptance of the separately bound U0011 K2 combined-runtime
+addendum may its isolated Python consumer copy coexist with the unchanged canonical
+generator/support tree. The adopted artifact proves currentness only for the unchanged
+canonical source, never for the altered runtime copy. No generator, oracle, producer or
+artifact-verification workflow is admitted by that runtime decision. This cross-reference
+changes no support reachability rule, fingerprint, strict check or human generation/adoption
+requirement. Canonical protected-source rollout retains the full applicable U0002 lifecycle.
