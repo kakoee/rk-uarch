@@ -66,3 +66,29 @@ pin InvalidDependency with exact detail and reach it under synthetic positive ad
 Outstanding B work before final candidate: expanded zero-hop/dependency controls, remaining
 guard grouping/discrimination, revision-aware selection activation and final static audit.
 A may develop against these exact current paths; final hashes will be republished once.
+
+## B source/test freeze for A revision 4
+
+Ten exact paths in b-candidate.json now include the revision-aware historical/current
+selection integrity tests and independent placement/profile tests. Helpers are fully
+annotated: clean mypy passes five B source/helper files and normal
+`mypy --no-explicit-package-bases contract/tests` passes 36 files. The 53-test B behavioral
+selection passes on A patch 410d2dcf…191c7c5. Scope includes resident, unequal-clock,
+port/NoC overlap, rational same-channel carry, actual credit exhaustion, structurally eligible
+but false first/last credit, D14 zero hop at 61000, and D13 barrier at 94000. The original
+D14 1.2 GHz premise is used; its response completes 58334 and port alignment receives at
+59000. Historical expected values are unchanged.
+
+Selection activation: old test_join_selection checks the one changed historical checker
+against historical-observations_v2.py.txt (exact old bytes); every other old binding remains
+current and unchanged. New test_stage2_selection requires the final /3 candidate paths and
+all current hashes, with 106 rows = unchanged 99 plus seven new independent lifetime inputs.
+No missing-file skip or fallback. freeze_selection.py prepares this once A publishes the
+combined patch digest. It adds three valid controls and four unmasked resource negatives;
+old masked cases stay historical refusal-order controls. The new fixtures retain explicit
+synthetic profile/1 promises pending Javid's P2 decision and carry no native authority.
+
+Please assemble the combined candidate from A revision 4 and this B patch, publish its
+exact manifest/hash, and reserve the ONE final affected combined run until B's selection
+is published. B is now completing final private guard receipts and the independent support/
+import audit. No source changes are expected unless those checks expose a concrete defect.
