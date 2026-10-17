@@ -1982,7 +1982,7 @@
 +    return out
 --- /dev/null
 +++ b/validation/component/test_consistent_observations.py
-@@ -0,0 +1,155 @@
+@@ -0,0 +1,178 @@
 +"""Independent behavior tests; identity-only tests are excluded from mutation scores."""
 +
 +import pytest
@@ -2138,6 +2138,29 @@
 +    activity(r, "barrier-a")["predecessors"] = []
 +    with pytest.raises(CheckFailure, match="complete eligible causes"):
 +        check_v2(j.model_dump(mode="json"), seal(r), EXPECTED)
++
++
++def test_waiting_ready_cannot_be_invented_under_port_blocking():
++    from validation.component.consistent_carriers import activity, synchronize
++
++    j, r = control("D08")
++    activity(r, "r1:port-a")["ready_ps"] = 59500
++    r = synchronize(r)
++    # Actual response completion is 59000. A real port wait to 60000 must not hide
++    # an invented later arrival and lost waiting-area/transfer attribution.
++    with pytest.raises(CheckFailure, match="phase ready transition"):
++        check_v2(j.model_dump(mode="json"), r, EXPECTED)
++
++
++def test_receiving_alignment_cannot_end_between_edges():
++    from validation.component.consistent_carriers import activity, synchronize
++
++    j, r = control("D10-read")
++    activity(r, "back-a")["end_ps"] = 59000
++    activity(r, "back").update(ready_ps=59000, start_ps=59000)
++    r = synchronize(r)
++    with pytest.raises(CheckFailure, match="receiving-clock alignment"):
++        check_v2(j.model_dump(mode="json"), r, EXPECTED)
 --- /dev/null
 +++ b/validation/component/test_lifetime_discrimination.py
 @@ -0,0 +1,43 @@
@@ -2344,3 +2367,397 @@
 +                hashlib.sha256((ROOT / row["input_path"]).read_bytes()).hexdigest()
 +                == row["input_sha256"]
 +            )
+--- /dev/null
++++ b/validation/component/test_carrier_bindings.py
+@@ -0,0 +1,184 @@
++"""Real /2 carrier validators on synthetic controls, never generated native results."""
++
++from copy import deepcopy
++
++import pytest
++from uarch_contract.hashing import content_hash
++from uarch_contract.mapped import validate_result
++
++from validation.component.consistent_carriers import control as current_control
++from validation.component.synthetic_carrier import synthetic_job
++
++
++def fixture_result(job):
++    for case in ("D01", "D10-read"):
++        if job.job_hash == synthetic_job(case).job_hash:
++            return current_control(case)[1]
++    raise AssertionError("not one of this finite synthetic worksheet's jobs")
++
++
++FIXTURE = dict(
++    synthetic_job=synthetic_job,
++    synthetic_result=fixture_result,
++    synthetic_resident_result=lambda job: current_control("C02")[1],
++    synthetic_port_pair=lambda job: current_control("D08")[1],
++)
++
++
++def control():
++    j = FIXTURE["synthetic_job"]()
++    return j, FIXTURE["synthetic_result"](j)
++
++
++def seal(r):
++    r["result_hash"] = content_hash(r, exclude=("result_hash",))
++    return r
++
++
++def test_real_synthetic_control():
++    j, r = control()
++    assert validate_result(r, j).duration_ps == 60000
++
++
++@pytest.mark.parametrize("queue", ["channel_service:6", "dma_inflight:0", "ordinary"])
++@pytest.mark.parametrize("fault", ["owner", "request", "population", "name", "clock"])
++def test_queue_bindings_and_restoration(queue, fault):
++    j, r = control()
++    validate_result(r, j)
++    bad = deepcopy(r)
++    q = next(
++        x
++        for x in bad["observations"]["queue_membership"]["records"]
++        if (
++            x["queue_id"].startswith("activity:read_port:")
++            if queue == "ordinary"
++            else x["queue_id"] == queue
++        )
++    )
++    if fault == "owner":
++        q["owner_id"] = 31
++    if fault == "request":
++        q["item_id"] = "forged-request"
++    if fault == "population":
++        q["population"] = "inflight" if q["population"] != "inflight" else "service"
++    if fault == "name":
++        q["queue_id"] += "-forged"
++    if fault == "clock":
++        q["clock_domain"] = "dram" if q["clock_domain"] is None else None
++    with pytest.raises(ValueError, match="IncompleteObservations"):
++        validate_result(seal(bad), j)
++    validate_result(r, j)
++
++
++@pytest.mark.parametrize(
++    "fault",
++    [
++        "request",
++        "owner",
++        "population_busy",
++        "wrong_category",
++        "loose_cause",
++        "clock_phase",
++        "forged_ratio",
++        "dispatch",
++    ],
++)
++def test_phase_binding_and_restoration(fault):
++    j, r = control()
++    bad = deepcopy(r)
++    obs = bad["observations"]
++    a = next(x for x in obs["activities"]["records"] if x["activity_id"] == "back-a")
++    if fault == "request":
++        a["request_id"] = "forged"
++    if fault == "owner":
++        a["owner_id"] = 31
++    if fault == "population_busy":
++        a["occupies_resource"] = True
++    if fault == "wrong_category":
++        a["category"] = "memory"
++    if fault == "loose_cause":
++        a["predecessors"] = [dict(activity_id="lat", relation="sequence")]
++    if fault == "clock_phase":
++        obs["clocks"]["records"][-1]["activity_id"] = "out"
++    if fault == "forged_ratio":
++        obs["resource_intervals"]["records"][1]["service_end_ps_ratio"]["numerator"] += 71
++    if fault == "dispatch":
++        a["dispatch_ordinal"] = 0
++    with pytest.raises(ValueError):
++        validate_result(seal(bad), j)
++    validate_result(r, j)
++
++
++def test_independent_mechanisms_on_real_synthetic_carrier():
++    from validation.component.observations_v2 import check_v2
++
++    j, r = control()
++    validate_result(r, j)
++    check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
++
++
++@pytest.mark.parametrize(
++    "fault",
++    [
++        "channel_duration",
++        "drop_clock",
++        "transfer_control_bytes",
++        "inflight_end",
++        "allocation_owner",
++        "clock_cycles",
++    ],
++)
++def test_independent_mechanism_discrimination(fault):
++    from validation.component.checks import CheckFailure
++    from validation.component.observations_v2 import check_v2
++
++    j, r = control()
++    bad = deepcopy(r)
++    obs = bad["observations"]
++    if fault == "channel_duration":
++        res = next(
++            x for x in obs["resource_intervals"]["records"] if x["activity"] == "channel_service"
++        )
++        res["service_end_ps_ratio"] = dict(numerator=54250, denominator=1)
++    if fault == "drop_clock":
++        obs["clocks"]["records"].pop()
++    if fault == "transfer_control_bytes":
++        obs["transfers"]["records"][0]["payload_bytes"] = 256
++    if fault == "inflight_end":
++        obs["queue_membership"]["records"][-1]["leave_ps"] = 54250
++    if fault == "allocation_owner":
++        obs["allocations"]["records"][0]["owner_id"] += 1
++    if fault == "clock_cycles":
++        obs["clocks"]["records"][-1]["n_cycles"] = 2
++    with pytest.raises(CheckFailure):
++        check_v2(
++            j.model_dump(mode="json"), bad, dict(unrepresented=["SYNTHETIC-unit-carrier-only"])
++        )
++    check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
++
++
++def test_resident_real_carrier_and_independent_mechanisms():
++    from validation.component.observations_v2 import check_v2
++
++    j = FIXTURE["synthetic_job"]("C02")
++    r = FIXTURE["synthetic_resident_result"](j)
++    validate_result(r, j)
++    check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
++
++
++def test_unequal_clock_real_carrier_and_independent_mechanisms():
++    from validation.component.observations_v2 import check_v2
++
++    j = FIXTURE["synthetic_job"]("D10-read")
++    r = FIXTURE["synthetic_result"](j)
++    validate_result(r, j)
++    check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
++
++
++def test_port_contention_overlap_real_carrier_and_independent_mechanisms():
++    from validation.component.observations_v2 import check_v2
++
++    j = FIXTURE["synthetic_job"]("D08")
++    r = FIXTURE["synthetic_port_pair"](j)
++    validate_result(r, j)
++    check_v2(j.model_dump(mode="json"), r, dict(unrepresented=["SYNTHETIC-unit-carrier-only"]))
+--- /dev/null
++++ b/validation/component/test_accumulator_controls.py
+@@ -0,0 +1,204 @@
++"""Private-candidate acceptance only; synthetic admission anchors, never native receipts."""
++
++from copy import deepcopy
++
++import pytest
++from uarch_contract.mapped import MappedBundle, admit, validate_resources
++
++from validation.component.corpus import build, graph, materialize, two_tiles
++from validation.component.join_inputs import prospective_inputs, reseal
++
++
++def check(raw):
++    b = MappedBundle.model_validate(reseal(raw))
++    validate_resources(b, b.points[0])
++
++
++def raw():
++    return deepcopy(prospective_inputs()["B2-C04-transient"]["bundle"])
++
++
++@pytest.mark.parametrize("name", list(prospective_inputs()))
++def test_new_exact_representations(name):
++    check(deepcopy(prospective_inputs()[name]["bundle"]))
++
++
++@pytest.mark.parametrize(
++    "fault,code",
++    [
++        ("no_order", "LiveBufferAlias"),
++        ("missing_consumer", "InvalidDependency"),
++        ("false_consumer", "InvalidDependency"),
++        ("future_producer", "InvalidDependency"),
++        ("other_writer", "InvalidDependency"),
++        ("owner", "InvalidResource"),
++        ("short", "CapacityExceeded"),
++        ("long", "CapacityExceeded"),
++        ("offset", "CapacityExceeded"),
++        ("persistent_alias", "LiveBufferAlias"),
++        ("old_policy", "UnsupportedMapping"),
++    ],
++)
++def test_semantic_attack_and_restored_control(fault, code):
++    b = raw()
++    g = graph(b)
++    a = next(x for x in g["buffers"] if x["id"] == "acc")
++    z = next(x for x in g["buffers"] if x["id"] == "zacc")
++    if fault == "no_order":
++        g["dependencies"] = []
++    elif fault == "missing_consumer":
++        a["final_consumer_ids"] = []
++    elif fault == "false_consumer":
++        a["final_consumer_ids"] = ["z"]
++    elif fault == "future_producer":
++        a["producer_id"] = "z"
++    elif fault == "other_writer":
++        z["producer_id"] = "c"
++    elif fault == "owner":
++        z["core_id"] = 1
++    elif fault == "short":
++        z["size_bytes"] -= 1
++    elif fault == "long":
++        z["size_bytes"] += 1
++    elif fault == "offset":
++        a["offset_bytes"] = 256
++    elif fault == "persistent_alias":
++        for buf in (a, z):
++            buf.update(producer_id=None, final_consumer_ids=[])
++    elif fault == "old_policy":
++        b["mapping_policy"]["version"] = "1"
++    with pytest.raises(ValueError, match=code):
++        check(b)
++    check(raw())
++
++
++def test_independent_cores_overlap_without_dependency():
++    b = two_tiles(same_core=False)
++    b["mapping_policy"]["version"] = "2"
++    for buf in graph(b)["buffers"]:
++        if buf["space"] == "accumulator":
++            j = "c" if buf["id"] == "acc" else "z"
++            buf.update(producer_id=j, final_consumer_ids=[j])
++    check(b)
++    assert graph(b)["dependencies"] == []
++
++
++def test_historical_persistent_scratch_controls():
++    items = build()["items"]
++    check(deepcopy(items["C04-control"]["bundle"]))
++    with pytest.raises(ValueError, match="CapacityExceeded"):
++        check(deepcopy(items["C04-carrier"]["bundle"]))
++
++
++@pytest.mark.parametrize(
++    "name,code",
++    [
++        ("C06-small", "CapacityExceeded"),
++        ("C07-sram-1", "SramCapacityExceeded"),
++        ("C07-hbm-1", "CapacityExceeded"),
++    ],
++)
++def test_synthetic_positive_context_reaches_resource_guard(name, code):
++    corpus = build()
++    original = corpus["items"][name]
++    args = dict(
++        invocation="test",
++        checkpoint="B",
++        registry=corpus["registry"],
++        trusted_registry_hash=corpus["registry"]["registry_hash"],
++    )
++    with pytest.raises(ValueError, match="TestVariantNotAdmitted"):
++        admit(
++            original["bundle"],
++            profile=original["profile"],
++            trusted_profile_hash=original["profile"]["profile_hash"],
++            **args,
++        )
++    # Explicitly synthetic separately anchored context, never caller authority.
++    positive = materialize(
++        "SYNTHETIC-positive-context-" + name, original["bundle"], dict(outcome="success")
++    )
++    with pytest.raises(ValueError, match=code):
++        admit(
++            positive["bundle"],
++            profile=positive["profile"],
++            trusted_profile_hash=positive["profile"]["profile_hash"],
++            **args,
++        )
++    # Substituting a self-rehashed positive profile under the OLD anchor still refuses.
++    with pytest.raises(ValueError, match="TestProfileMismatch"):
++        admit(
++            positive["bundle"],
++            profile=positive["profile"],
++            trusted_profile_hash=original["profile"]["profile_hash"],
++            **args,
++        )
++
++
++def multiple_consumers():
++    from validation.component.join_inputs import pair
++
++    b = pair(256, 256)
++    g = graph(b)
++    first = deepcopy(g["jobs"][0])
++    first_buffers = [
++        deepcopy(x) for x in g["buffers"] if not x["id"].startswith("z") and x["space"] == "sram"
++    ]
++    for index, name in enumerate(("d", "e"), 2):
++        op = deepcopy(b["scope"]["ops"][0])
++        op["id"] = "g" + str(index)
++        b["scope"]["ops"].append(op)
++        b["scope"]["op_ids"].append(op["id"])
++        b["points"][0]["identity"]["op_ids"].append(op["id"])
++        j = deepcopy(first)
++        j.update(id=name, op_id=op["id"])
++        j["operand_buffers"] = {k: name + v for k, v in j["operand_buffers"].items()}
++        g["jobs"].append(j)
++        cov = deepcopy(g["coverage"][0])
++        cov.update(job_id=name, op_id=op["id"])
++        g["coverage"].append(cov)
++        for buf in deepcopy(first_buffers):
++            buf["id"] = name + buf["id"]
++            buf["op_id"] = op["id"] if buf["op_id"] is not None else None
++            buf["offset_bytes"] += index * 786432
++            buf["bank"] = buf["offset_bytes"] // 524288
++            buf["producer_id"] = name if buf["producer_id"] == "c" else buf["producer_id"]
++            buf["final_consumer_ids"] = [name if x == "c" else x for x in buf["final_consumer_ids"]]
++            g["buffers"].append(buf)
++    next(x for x in g["buffers"] if x["id"] == "acc")["final_consumer_ids"] = ["d", "e"]
++    g["dependencies"] = [
++        dict(before=a, after=z) for a, z in [("c", "d"), ("c", "e"), ("d", "z"), ("e", "z")]
++    ]
++    g["coverage"].sort(key=lambda x: x["job_id"])
++    b["mapping_policy"]["version"] = "2"
++    return b
++
++
++def test_all_terminal_consumers_before_reuse():
++    b = multiple_consumers()
++    check(deepcopy(b))
++    g = graph(b)
++    g["dependencies"].remove(dict(before="e", after="z"))
++    with pytest.raises(ValueError, match="LiveBufferAlias"):
++        check(b)
++    check(multiple_consumers())
++
++
++def test_actual_accumulator_writer_without_alias_mask():
++    """Use disjoint small footprints so alias/capacity cannot mask the writer guard."""
++    b = deepcopy(build()["items"]["C04-control"]["bundle"])
++    b["mapping_policy"]["version"] = "2"
++    g = graph(b)
++    acc = next(x for x in g["buffers"] if x["space"] == "accumulator")
++    acc.update(producer_id="c", final_consumer_ids=["c"])
++    second = deepcopy(acc)
++    second.update(id="zacc", offset_bytes=256, producer_id="z", final_consumer_ids=["z"])
++    g["buffers"].append(second)
++    next(x for x in g["jobs"] if x["id"] == "z")["accumulator_buffer_id"] = "zacc"
++    g["dependencies"] = [dict(before="c", after="z")]
++    check(deepcopy(b))
++    second["producer_id"] = "c"
++    with pytest.raises(ValueError, match="InvalidDependency"):
++        check(b)
++    second["producer_id"] = "z"
++    check(b)

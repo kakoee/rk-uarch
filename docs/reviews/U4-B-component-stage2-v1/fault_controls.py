@@ -118,6 +118,18 @@ experiments += [
         "test_transition_and_population_forgery[allocation_lifetime-allocation access lifetime]",
     ),
 ]
+experiments += [
+    (
+        "phase-readiness",
+        ["phase ready transition"],
+        "test_waiting_ready_cannot_be_invented_under_port_blocking",
+    ),
+    (
+        "receiving-edge",
+        ["receiving-clock alignment", "clock mechanism binding"],
+        "test_receiving_alignment_cannot_end_between_edges",
+    ),
+]
 paths = [
     root / "validation/component" / name
     for name in ["observations_v2.py", "transition_checks.py", "phase_laws.py"]
