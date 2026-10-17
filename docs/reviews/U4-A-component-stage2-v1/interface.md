@@ -190,3 +190,8 @@ non-DMA first alignment's ready time is now "job dependency readiness". Actual r
 acquisition may occur later. This agrees with B's phase-ready-transition check and existing
 whole-tile resource waiting; no timing formula or implementation changed. The exact combined
 patch digest in combined-postimages.json is authoritative; use the latest digest for /3.
+
+Combined freeze updated for B 24a5cfd: all 23 paths now include the two final ordinary test
+migrations and extra waiting/alignment witnesses. B implementation/helper postimages remain
+unchanged; no further A source/test edits are planned. Please bind the exact latest patch
+and manifest in /3. A's final affected run is still reserved for that published selection.
