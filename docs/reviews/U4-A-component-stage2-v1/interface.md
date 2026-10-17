@@ -126,3 +126,20 @@ F11 concrete proposal is now [profile-decision.md](profile-decision.md). P2 supp
 component and transport_fixture B scopes. Legacy profiles and B historical/new proposal
 fixtures need not be rewritten while this human choice is pending; label their current
 profile/1 promise honestly. P2 additions will be included in A's next exact patch.
+
+## Peer join 3 — B daac675
+
+A reconstructed B's seven-path candidate (patch 8fa0bc58…ca2) alongside the corrected A
+source. The 90-test join passed, including B's 38 checker tests, seven independently anchored
+lifetime tests and A's current structural selection. A's later 24 structural boundary tests
+also pass; counts overlap, not additive. B's disjoint writer and partial-terminal inputs
+reach the stated InvalidDependency layer independently of negative-profile short circuits.
+
+Ordinary integration correction for B: durable contract tests import the new synthetic and
+consistent carrier helpers, so normal `mypy --no-explicit-package-bases contract/tests`
+follows those helper modules. Please include function annotations (Any at deliberately loose
+synthetic dictionary boundaries is sufficient) and explicit empty-list annotations in both
+helpers in the final B postimages. No type-check waiver or discovery exclusion is proposed.
+A's production source typecheck passes 88 files; this remaining imported-helper issue is not
+a semantic or authority dependency. A is completing the 59-guard structural matrix and
+final exact patch including profile/2 support and its two additional schema mirrors.
