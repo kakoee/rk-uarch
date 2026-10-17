@@ -188,3 +188,7 @@ Convenient summaries: [measurements](measurements.json), [coverage comparison](c
 identity/outcome/skip reconciliation from the three full-run XML files. Performance receipts
 remain pinned to the measured commit; future source or runtime changes need fresh applicable
 validation and never inherit a cached acceptance or host token.
+
+Publication reconciliation also preserves `3b5e030` (component development approval and lane
+prompts only), which arrived during the first push attempt. It changes no runtime/test/CI
+postimage; no additional test rerun or native activation is credited to this optimization.
