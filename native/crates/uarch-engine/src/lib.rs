@@ -50,3 +50,11 @@ pub use carrier::Refusal;
 
 #[cfg(test)]
 mod peer_dto_tests;
+
+mod component;
+mod component_accounting;
+mod component_admission;
+#[cfg(test)]
+mod component_admission_tests;
+#[cfg(test)]
+mod component_tests;

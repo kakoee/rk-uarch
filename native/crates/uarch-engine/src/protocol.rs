@@ -23,6 +23,13 @@ fn authority() -> Result<admission::Trust> {
         wire::parse(generated::ENGINE_JSON).map_err(|e| refuse("InternalError", "", e))?;
     let trust: Value =
         wire::parse(generated::TRUST_JSON).map_err(|e| refuse("InternalError", "", e))?;
+    if trust["format"] == "uarch-component-build-trust/1" {
+        return Err(refuse(
+            "TestProfileMismatch",
+            "",
+            "component public authority absent",
+        ));
+    }
     let registry = trust["registry_hash"]
         .as_str()
         .ok_or_else(|| refuse("InternalError", "", "compiled registry"))?
@@ -112,6 +119,16 @@ pub fn respond(input: &[u8]) -> Result<Vec<u8>> {
         ));
     }
     let trust = authority()?;
+    if raw["workload_closure"]["scope"]["kind"] != "kernel_fixture" {
+        let result = crate::component::execute(text, &trust)?;
+        let bytes = wire::canonical(&result)
+            .map_err(|e| refuse("InternalError", "", e))?
+            .into_bytes();
+        if bytes.len() > MAX_OUTPUT_BYTES {
+            return Err(refuse("CapacityExceeded", "", "complete output byte limit"));
+        }
+        return Ok(bytes);
+    }
     let v = admission::validate(text, &trust)?;
     caps(&v)?;
     let out = Simulation::with_releases(

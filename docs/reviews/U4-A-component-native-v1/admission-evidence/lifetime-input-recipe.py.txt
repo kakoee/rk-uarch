@@ -1,0 +1,18 @@
+"""PRIVATE SYNTHETIC raw admission inputs; no Python prevalidation flag or execution."""
+from pathlib import Path
+import json
+from uarch_contract.hashing import content_hash,canonical_json
+from uarch_contract.hardware import HardwareSpec
+from uarch_contract.mapped import TaskGraph,canonical_owners,hardware_projection,resolve_frequencies
+root=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a')
+base=json.loads((root/'native/crates/uarch-engine/testdata/synthetic-component-jobs.json').read_bytes())['C02']
+result={}
+for file in sorted((root/'docs/reviews/U4-B-component-stage2-v1/fixtures').glob('B3-*.json')):
+ item=json.loads(file.read_bytes());b=item['bundle'];p=b['points'][0];profile=item['profile'];profile['format']='uarch-native-test-profile/2'
+ for e in profile['entries']:e['mapping_policy']=b['mapping_policy']
+ profile['profile_hash']=content_hash(profile,exclude=('profile_hash',));b['admission']['profile_hash']=profile['profile_hash'];b['bundle_hash']=content_hash(b,exclude=('bundle_hash',))
+ v=json.loads(json.dumps(base));spec=HardwareSpec.model_validate(b['hardware_spec']);graph=TaskGraph.model_validate(p['task_graph'])
+ v.update(workload_closure=b,mapped_point=p,profile=profile,bundle_hash=b['bundle_hash'],point_hash=p['payload_hash'],assumptions=b['assumptions'],assumptions_hash=b['assumptions_hash'],hardware_spec_hash=b['hardware_spec_hash'],hardware=hardware_projection(spec).model_dump(mode='json'),admission=b['admission'],rank=b['rank'],initial_state=p['initial_state'],frequency_ratio=p['frequency_ratio'],freq_hz=resolve_frequencies(spec,p['frequency_ratio']).model_dump(),priming_iterations=p['priming_iterations'],owners=[o.model_dump(mode='json') for o in canonical_owners(spec,graph)])
+ v['job_hash']=content_hash(v,exclude=('job_hash',));result[file.stem]={'job':v,'expected':item['expected']['outcome'],'origin':str(file.relative_to(root)),'evidence':'PRIVATE SYNTHETIC profile/2 fixture; never public authority'}
+(root/'native/crates/uarch-engine/testdata/synthetic-component-admission-jobs.json').write_text(canonical_json(result))
+print('exported',len(result))

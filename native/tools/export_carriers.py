@@ -13,6 +13,7 @@ from uarch_contract.mapped import MappedEngineJob
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
 parser.add_argument("--check", action="store_true")
+parser.add_argument("--component", action="store_true")
 args = parser.parse_args()
 schema = MappedEngineJob.model_json_schema()
 # Restrict the executable's schema to the supported K2 branch, without modifying
@@ -20,7 +21,23 @@ schema = MappedEngineJob.model_json_schema()
 # Unsupported branches are refused explicitly before shape validation.
 for name in ("MappedBundle",):
     schema["$defs"][name]["properties"]["source"] = {"type": "null"}
-    schema["$defs"][name]["properties"]["scope"] = {"$ref": "#/$defs/KernelScope"}
+    schema["$defs"][name]["properties"]["scope"] = (
+        {"oneOf": [{"$ref": "#/$defs/ComponentScope"}, {"$ref": "#/$defs/TransportScope"}]}
+        if args.component
+        else {"$ref": "#/$defs/KernelScope"}
+    )
+
+
+# K2 retains its installed profile/1 promise; profile/2 is component-only.
+# This selects the admitted branch explicitly instead of changing old schema bytes.
+if not args.component:
+    profile = schema["$defs"]["NativeTestProfile"]["properties"]
+    profile["format"] = {
+        "const": "uarch-native-test-profile/1",
+        "title": "Format",
+        "type": "string",
+    }
+    profile["entries"]["items"] = {"$ref": "#/$defs/ProfileEntry"}
 
 
 # Prune unreachable definitions, leaving every field of the admitted closure.
@@ -44,7 +61,11 @@ while pending:
         seen.add(key)
         pending.extend(refs(schema["$defs"][key]))
 schema["$defs"] = {k: schema["$defs"][k] for k in sorted(seen)}
-output = root / "crates/uarch-engine/src/carriers.json"
+output = (
+    root
+    / "crates/uarch-engine/src"
+    / ("component_carriers.json" if args.component else "carriers.json")
+)
 data = (json.dumps(schema, sort_keys=True, indent=2, ensure_ascii=False) + "\n").encode()
 if args.check:
     assert output.read_bytes() == data, "Installed carrier export changed"
