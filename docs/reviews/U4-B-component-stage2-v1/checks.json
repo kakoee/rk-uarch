@@ -1,0 +1,105 @@
+{
+  "audit": "final-audit.json",
+  "candidate_patch_sha256": "81b81c6c2680a17e7d106dedb4a11dc07891b331f3323319fb0192b852bdebe3",
+  "evidence_archive_sha256": "fa37965e0a41e2d875bf242b6460177900c1d666e15f0f4eddc74de21e85c0e0",
+  "final_faults": {
+    "affected_controls_rerun": true,
+    "all_exact_bytes_restored": true,
+    "all_proved_unsafe_acceptance": true,
+    "checker_invariant_experiments": 33,
+    "identity_tests_excluded": true,
+    "protected_lifetime_experiments": 4,
+    "receipts": "restoration.json"
+  },
+  "final_shared_combined": {
+    "owner": "A",
+    "status": "awaiting published reserved final affected run; not claimed yet"
+  },
+  "human_L1": "pending actual GEMM/DMA workings",
+  "independent_commands": [
+    {
+      "command": "isolated.py PRIVATE script b-logs/probes/b-probe.py",
+      "log": "before.log",
+      "log_sha256": "b29b8d045b59eab1074687a48740c8a8827c8ebb55fe524175b90e831bba70de",
+      "result": "M4a/M4b/V1/V2/port_overlap/port_reverse accepted by both reviewed validators",
+      "scope": "original proposal reproduction, synthetic"
+    },
+    {
+      "command": "isolated.py PRIVATE pytest -q validation/component/test_consistent_observations.py",
+      "log": "tests-before.log",
+      "log_sha256": "a87f675e80188de777aa85d9f2e501a10467ff4ad5a9a443e51ee756bcc8b1aa",
+      "result": "9 failed, 4 passed",
+      "scope": "tests-first assertions on reviewed checker; DID NOT RAISE, not source hashes"
+    },
+    {
+      "command": "isolated.py PRIVATE pytest -q validation/component/test_consistent_observations.py validation/component/test_lifetime_discrimination.py validation/component/test_policy_boundaries.py",
+      "log": "b-source-freeze.log",
+      "log_sha256": "6593aa550fef55c816c36609ddedd8031f5821d03232dcf6d356895187bac5d6",
+      "result": "53 passed",
+      "scope": "A revision 4 + frozen B semantics, before two final added tests"
+    },
+    {
+      "command": "isolated.py PRIVATE pytest -q validation/component/test_carrier_bindings.py validation/component/test_accumulator_controls.py",
+      "log": "durable-historical-controls.log",
+      "log_sha256": "3ca5af57a257464b31d3963110f311e17dfd2b4d868757e2343b07cb32a83dd0",
+      "result": "55 passed",
+      "scope": "migrated historical obligations with current endpoint encoding"
+    },
+    {
+      "command": "isolated.py PRIVATE pytest -q validation/component/test_consistent_observations.py::test_waiting_ready_cannot_be_invented_under_port_blocking",
+      "log": "phase-readiness-restored.log",
+      "log_sha256": "b4cb0c9fcaef11ae3a22d58483974ad221728f7e2373b110cdba77dae23c0537",
+      "result": "1 passed",
+      "scope": "new waiting-ready behavior, corrected consistent witness"
+    },
+    {
+      "command": "isolated.py PRIVATE pytest -q validation/component/test_consistent_observations.py::test_receiving_alignment_cannot_end_between_edges",
+      "log": "receiving-edge-restored.log",
+      "log_sha256": "b584e5e52dc39d1740f082f5e373d132e4d11ef8eca10deccd272726f46c113c",
+      "result": "1 passed",
+      "scope": "new receiving-edge behavior"
+    },
+    {
+      "command": "isolated.py PRIVATE pytest -q validation/component/test_join_selection.py validation/component/test_stage2_selection.py",
+      "log": "selection-integrity.log",
+      "log_sha256": "5a25df498286c7fff35eb9d95cfb9a6f3138a15bd4f12567f7fac1b93c736240",
+      "result": "2 passed",
+      "scope": "identity only, never a behavioral mutation score"
+    },
+    {
+      "command": "isolated.py B_MAIN pytest -q validation/component/test_join_selection.py validation/component/test_reference_readiness.py",
+      "log": "main-integrity.log",
+      "log_sha256": "37ca70ae5fc3aa85285b045eba9bc515b73500b3b000a6ac1c6c44275b2ce9f9",
+      "result": "2 passed",
+      "scope": "uninstalled main remains green; old selection and 70-row TPU preservation"
+    },
+    {
+      "command": "env -u PYTHONPATH -u MYPYPATH mypy --no-explicit-package-bases contract/tests",
+      "log": "contract-types.log",
+      "log_sha256": "60f28b94716a9681d0ca533e2fe42680ae0961635c17d3110675fc53df4ea115",
+      "result": "Success: no issues found in 36 source files",
+      "scope": "normal imported B helper type surface"
+    },
+    {
+      "command": "ruff check docs/reviews/U4-B-component-stage2-v1",
+      "log": "package-lint.log",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "result": "All checks passed",
+      "scope": "owned preparation package"
+    }
+  ],
+  "native_calls": 0,
+  "overlapping_counts_not_additive": true,
+  "protected_installation": false,
+  "reviewed_subject": "df3cde61bb26389f59bdd7b922c82dd7e52bfe43",
+  "scope": "author preparation; no independent verdict or native execution",
+  "selection_hash": "sha256:4b9e73cf9ef11456e216acba58c9496c242169e2a40efcf0aa9e3f36bf0dbbc0",
+  "selection_publication": "7b972d0",
+  "source_freeze_publication": "24a5cfd",
+  "source_types": {
+    "command": "env -u PYTHONPATH -u MYPYPATH mypy validation/component/observations_v2.py validation/component/transition_checks.py validation/component/synthetic_carrier.py validation/component/consistent_carriers.py validation/component/lifetime_inputs.py",
+    "evidence": "tool output retained in author session; final combined static receipt to be joined",
+    "result": "Success: no issues found in 5 source files"
+  },
+  "tpu": "70 rows preserved; no measurement/reference placeholder"
+}

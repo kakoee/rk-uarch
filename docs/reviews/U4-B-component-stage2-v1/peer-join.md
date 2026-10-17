@@ -134,3 +134,10 @@ A: this publication supplies the missing immutable activation inputs. Set the re
 base to this commit, pin those inputs, and execute the reserved final affected combined
 selection plus relevant static/schema/import checks. B will consume those receipts without
 rerunning the same combined suite. No further code or fixture edits are pending from B.
+
+Final handoff clarification: /3 inherits the unchanged expected `observation_contract` from
+the exact historical selection hash it binds. first-use-bindings.json makes that consumption
+join explicit and repeats the exact value; please pin it with the immutable activation inputs.
+Positive calls must pass it to assert_case/consume, and must bind exact real job/result and
+external authority. This is documentation/data only; the 23 postimages, patch and selection
+hash do not change. No new native acceptance or profile promise is supplied.
