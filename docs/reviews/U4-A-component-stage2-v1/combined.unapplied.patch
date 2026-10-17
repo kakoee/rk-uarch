@@ -4410,8 +4410,8 @@ diff --git a/docs/decisions/U0011-the-native-engine-core.md b/docs/decisions/U00
 +Every clocked subphase has one service activity and one separate alignment activity,
 +including zero-length alignment, with one exact clock record for each. Rational channel
 +service and zero-hop routing have no alignment or clock record. Service ready follows its
-+alignment; alignment ready follows the prior subphase (or request issue/job grant for the
-+first). Clock records reference the exact activity. Existing E3/E4 next_edge and
++alignment; alignment ready follows the prior subphase (or request issue/job dependency readiness for
++the first). Actual resource acquisition may occur later than that readiness. Clock records reference the exact activity. Existing E3/E4 next_edge and
 +zero-owned-duration laws govern; zero-hop movement stays at arrival without edge alignment.
 +Channel exact start/end ratios are reduced; published integer endpoints are ceilings. Never
 +feed integer publication rounding back into channel service. Timing formulas remain E3/E4.

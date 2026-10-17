@@ -1,0 +1,60 @@
+{
+  "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+  "restored": true,
+  "controls": [
+    {
+      "invariant": "request job ownership",
+      "test": "contract/tests/mapped/test_component_semantics_v2.py::test_request_belongs_to_declared_job",
+      "condition": "a.request_id in declared and declared[a.request_id][0].id == task.id",
+      "mutant_unsafe_admission": true,
+      "restored_pass": true,
+      "mutant_log_sha256": "d102c7f3517107f578c448f644cab94ad2cffb8f371085be6c220fe5f275f085",
+      "restored_log_sha256": "faa6fbf2c36cbfd5fcd2722fbc0a0bf355b513efd3012ae1c4563fdc4127b14f"
+    },
+    {
+      "invariant": "channel has no alignment",
+      "test": "contract/tests/mapped/test_component_semantics_v2.py::test_unclocked_channel_cannot_acquire_alignment",
+      "condition": "a.kind != 'alignment' or (domain is not None and (not a.occupies_resource))",
+      "mutant_unsafe_admission": true,
+      "restored_pass": true,
+      "mutant_log_sha256": "593875cff7ecd0aa8615232c90035ddd44db7eeb3eddd1075d38492b8266f4f7",
+      "restored_log_sha256": "0fc44b226b21cdd63f1f4daf26c2593d72af191b3b773e774dd40f1980fb3cc2"
+    },
+    {
+      "invariant": "nonclocked domain",
+      "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[nonclocked_domain]",
+      "condition": "q.item_id in declared and q.clock_domain is None and (q.activity_id is None)",
+      "mutant_unsafe_admission": true,
+      "restored_pass": true,
+      "mutant_log_sha256": "880f3019b19c884bbbf8402110d55e6c42d118727ac4c0edd5621a670e004cc0",
+      "restored_log_sha256": "057a4f811934a7c8e0413d700e4be6b0e9bcd24fc5edea4612ed45c4e19a021e"
+    },
+    {
+      "invariant": "use before production",
+      "test": "contract/tests/mapped/test_component_lifetimes_v2.py::test_equal_footprint_use_before_production",
+      "condition": "acc.producer_id == job.id or acc.producer_id in ancestors[job.id]",
+      "mutant_unsafe_admission": true,
+      "restored_pass": true,
+      "mutant_log_sha256": "1053e6c68cb04856c6ba78af02576ca840b66e30660c5ad5021e7cc07be2394b",
+      "restored_log_sha256": "1b69ecbb245749d5bb66cf7dace2b87f71d7a2b122b0823e25f5dcc67983132f"
+    },
+    {
+      "invariant": "terminal equality",
+      "test": "contract/tests/mapped/test_component_lifetimes_v2.py::test_partial_terminal_reuse",
+      "condition": "set(buf.final_consumer_ids) == terminal",
+      "mutant_unsafe_admission": true,
+      "restored_pass": true,
+      "mutant_log_sha256": "b357234fbfef0eab4345c4c2a561593acf4c44d7227cf80175993f7529e79dca",
+      "restored_log_sha256": "7fefcaf66f6e7137767bc25d16d128cbf7b8617ad0b6f14fbf9a0b8e7fdd81cd"
+    },
+    {
+      "invariant": "profile policy",
+      "test": "contract/tests/mapped/test_component_profile_v2.py::test_new_profile_exact_policy_binding[version-2]",
+      "condition": "b.mapping_policy == e.mapping_policy",
+      "mutant_unsafe_admission": true,
+      "restored_pass": true,
+      "mutant_log_sha256": "ca04c64c69736d0d24d5bde8e16c6e706be253316e5423ff25fafec95a0fcd46",
+      "restored_log_sha256": "0fc44b226b21cdd63f1f4daf26c2593d72af191b3b773e774dd40f1980fb3cc2"
+    }
+  ]
+}

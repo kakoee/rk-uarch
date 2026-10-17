@@ -184,3 +184,9 @@ hash cycle). After B publishes them, A will set the reconstruction base to that 
 verify every unchanged source preimage again and list activation-input digests separately.
 Changing only that preparation base does not change the patch bytes or candidate_files.
 The one final affected run follows that publication; no tests are conditionally skipped.
+
+Final text correction before B's selection freeze: the inherited phrase "job grant" for a
+non-DMA first alignment's ready time is now "job dependency readiness". Actual resource
+acquisition may occur later. This agrees with B's phase-ready-transition check and existing
+whole-tile resource waiting; no timing formula or implementation changed. The exact combined
+patch digest in combined-postimages.json is authoritative; use the latest digest for /3.
