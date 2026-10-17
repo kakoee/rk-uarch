@@ -67,11 +67,15 @@
     "evidence/preservation.json": "sha256:1f8f2adda548621be1b1b17d75b22e6170547511a79a893cd8375e41ee1ef7e5",
     "evidence/private-preflight-launch.json": "sha256:cf978a2131129b9e3b9ac8e70827df809cec17657a68e031a9595f8ef5a4b944",
     "evidence/private-preflight.json": "sha256:4c03f06798c642f43a446057fd98e26013a6049f7e2c0a1df025da1245c70f20",
+    "evidence/remote-postimages.json": "sha256:68b9d8c06bd51a29faf0b3df2b1b3d23c7250ec1e41aae5bfa2336aeb5522f10",
+    "evidence/remote-publication-check.json": "sha256:bdefd89a5244167624ac6e243b67ea5738d7c6c5154f4b3b5f730fa7dc1e4d0f",
+    "evidence/remote-render.json": "sha256:3aae39b81ea3b1ce66990a3c155cba69df61c899ae986c664fca66f387313e48",
     "evidence/ruff-tracked-export.log": "sha256:82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
   },
   "format": "uarch-combined-runtime-stage2-checks/1",
   "inherited_not_rerun": [
     {
+      "receipt_path": "docs/reviews/U4-B-K2-parallel-first-use-v1/evidence/startup-final.json",
       "scope": "exact combined scheduler, case/session/fork, six-way/result validation and original campaign/replay obligations; coordinator 44 fast tests",
       "subject": "4684cb9eccc5b5186824a8705cf4d1b44f88af42"
     },
@@ -85,7 +89,12 @@
     }
   ],
   "newly_executed": {
-    "actual_remote": "real HTTPS old helper candidate observation separately recorded; simulated fixture repositories are not this evidence",
+    "actual_remote": {
+      "baseline_observation": "evidence/actual-remote-baseline.json",
+      "new_package_observation": "evidence/remote-publication-check.json",
+      "new_package_render": "evidence/remote-render.json",
+      "simulated_fixture_checks_separate": true
+    },
     "composition": {
       "actual_root_placement_preflight": false,
       "authority_resolutions": 0,
@@ -131,6 +140,7 @@
     "protected_patches": "both exact proposals check/apply in scratch only; pre/post hashes in evidence/policy-patches.json",
     "static": {
       "clean_whole_tracked_export_ruff": "passed",
+      "git_diff_check": "code/docs outside raw evidence clean; raw pytest logs and exact diff-context lines retain original whitespace intentionally",
       "owned_11_scripts_format": "passed",
       "owned_11_scripts_tests_scoped_mypy": "passed; see mypy.ini and reproduce.md; not full strict project suite"
     },
