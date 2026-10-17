@@ -1,0 +1,94 @@
+[
+  {
+    "name": "format",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+      "format",
+      "--check",
+      "docs/reviews/U4-B-component-native-audit-v1"
+    ]
+  },
+  {
+    "name": "receipt-joins",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "docs/reviews/U4-B-component-native-audit-v1/check_receipts.py"
+    ]
+  },
+  {
+    "name": "source-audit",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "docs/reviews/U4-B-component-native-audit-v1/source_audit.py",
+      "/tmp/u4-b-component-native-final-checks-03/source-audit.json"
+    ]
+  },
+  {
+    "name": "source-audit-match",
+    "argv": [
+      "cmp",
+      "docs/reviews/U4-B-component-native-audit-v1/source-audit.json",
+      "/tmp/u4-b-component-native-final-checks-03/source-audit.json"
+    ]
+  },
+  {
+    "name": "K2-carrier",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "native/tools/export_carriers.py",
+      "--check"
+    ]
+  },
+  {
+    "name": "component-carrier",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "native/tools/export_carriers.py",
+      "--component",
+      "--check"
+    ]
+  },
+  {
+    "name": "selection-reconstruct",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "docs/reviews/U4-B-component-native-audit-v1/freeze_selection.py",
+      "/tmp/u4-b-component-native-final-checks-03/selection.json"
+    ]
+  },
+  {
+    "name": "selection-match",
+    "argv": [
+      "cmp",
+      "docs/reviews/U4-B-component-native-audit-v1/first-use-selection.json",
+      "/tmp/u4-b-component-native-final-checks-03/selection.json"
+    ]
+  },
+  {
+    "name": "issue-literals",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "docs/reviews/U4-B-component-native-audit-v1/issue-gap-literals.py"
+    ]
+  },
+  {
+    "name": "whitespace",
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ]
+  }
+]

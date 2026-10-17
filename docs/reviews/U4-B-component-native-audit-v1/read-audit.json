@@ -1,0 +1,27 @@
+{
+  "classification": "observed process traces retained; strict parser refusals are incomplete evidence, never coverage passes",
+  "diagnostics": [
+    {
+      "accepted": false,
+      "diagnostic": "Traceback (most recent call last):\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-construction-audit-v1/read_trace_inventory.py\", line 77, in <module>\n    events, children, roots = p.parse(logs)\n                              ^^^^^^^^^^^^^\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py\", line 37, in parse\n    raise CoverageError(f\"unparsed record for pid {pid}: {body[:120]}\")\ntrace_canary.CoverageError: unparsed record for pid 458: ???()                 = ?\n",
+      "path": "/tmp/u4-b-component-read-audit-02.log",
+      "sha256": "74a957620bdb7eccf7c3e3876a040d37d22a889715b8cf094736e4c2b5dcc321"
+    },
+    {
+      "accepted": false,
+      "diagnostic": "Traceback (most recent call last):\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-construction-audit-v1/read_trace_inventory.py\", line 77, in <module>\n    events, children, roots = p.parse(logs)\n                              ^^^^^^^^^^^^^\n  File \"/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py\", line 58, in parse\n    raise CoverageError(\"missing terminal or unfinished call\")\ntrace_canary.CoverageError: missing terminal or unfinished call\n",
+      "path": "/tmp/u4-b-component-read-audit-02-release.log",
+      "sha256": "d982ba3fdbee5d34e27830308bd5005379260561aacd2d65870033cee3f1a74e"
+    }
+  ],
+  "final_read_closure_accepted": false,
+  "final_source": "53ea633993a77b1f9d54698c6e8fb06aa123bd81",
+  "parser_core_sha256": "e330c3046534309314915056ad7153ce0478c3c2662997eca97a01c9b00f5fe3",
+  "parser_sha256": "ad8582de3e11a183bb0e6a24a57dc88da0dbd63c37f447ef544cf62cc6e5871e",
+  "previous_release": "strict parse stopped at unfinished sched_getaffinity on exiting thread; not accepted",
+  "previous_source_debug_only": {
+    "path": "/tmp/u4-b-component-candidate-01/output/debug-read-audit-v2.json",
+    "sha256": "95159619d5f1ca2a9c6431f3bd37943c38fd19408c5fbf2c02909969dd119f54",
+    "unresolved": 0
+  }
+}

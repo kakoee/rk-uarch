@@ -1,0 +1,638 @@
+{
+  "CI_polled": false,
+  "G3a_or_U4_closed": false,
+  "TPU": {
+    "measurements": 0,
+    "path": "validation/L3_silicon/tpu-v5e/suite.json",
+    "rows": 70,
+    "sha256": "7be915211a1fd8f3d5bd073ecc5e715ed60056a16762373db3aca4b5c1dc7ee8",
+    "unchanged_since_human_install": true
+  },
+  "U0024_changed": false,
+  "authority_created": false,
+  "executed": {
+    "checker_fault_observations": 26,
+    "earlier_focused_unit_test_invocations_passed": 70,
+    "explicit_private_probe_calls": 324,
+    "final_python_tests_passed": 21,
+    "final_source_probe_calls": 22,
+    "final_static_stages_passed": 11,
+    "full_selected_plan_on_53ea633": {
+      "calls": 276,
+      "intended_profile_refusals": 24,
+      "intended_resource_refusals": 48,
+      "literal_result_passes": 198,
+      "preserved_D13_comparison_failures": 6
+    },
+    "native_collision_fault": "one completed removed/restored pair of two controls each; prior receipt-writer failure retained separately",
+    "public_success_calls": 0
+  },
+  "final_batches": [
+    {
+      "files": {
+        "001-affected-tests.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "001-affected-tests.stdout.log": "537cef3f377aed2a2b92abc192b4a34f2967eebedb8d799fb2eb80ccdb177ea2",
+        "002-ruff.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "002-ruff.stdout.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+        "003-format.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "003-format.stdout.log": "8322718403882e0bb91dad63eda43da04bc0dcff8d9453dbf84a0f12c8c76025",
+        "progress.jsonl": "1fb84b4b6c14e8a982430f7ec5f52ee2dcaf25201643f99e11c1ce279aff3bfd",
+        "summary.json": "9b909c6eb7d1f961527c68652d77816f2d855a649d725ccf2f751b15039fc689",
+        "tests.xml": "3169728c98f63f144bc5cb91ea5282a34befb09fab52240cf28ad9762a5541b3"
+      },
+      "path": "/tmp/u4-b-component-native-final-checks-02",
+      "summary": {
+        "complete": true,
+        "elapsed_s": 7.220512041996699,
+        "memory_note": "Linux child RSS high-water mark across completed stages, not summed RAM",
+        "passed": false,
+        "stages": [
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "-m",
+              "pytest",
+              "-q",
+              "validation/component/test_native_inputs.py",
+              "validation/component/test_native_forgeries.py",
+              "validation/component/test_stage2_selection.py",
+              "validation/component/test_join_selection.py",
+              "--junitxml=/tmp/u4-b-component-native-final-checks-02/tests.xml"
+            ],
+            "children_high_water_rss_kib": 77372,
+            "elapsed_s": 7.185763624991523,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "affected-tests",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.052107999999999995,
+            "user_cpu_s": 7.130781
+          },
+          {
+            "argv": [
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+              "check",
+              "docs/reviews/U4-B-component-native-audit-v1"
+            ],
+            "children_high_water_rss_kib": 77372,
+            "elapsed_s": 0.0163509139965754,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "ruff",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.011788,
+            "user_cpu_s": 0.00589400000000051
+          },
+          {
+            "argv": [
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+              "format",
+              "--check",
+              "docs/reviews/U4-B-component-native-audit-v1"
+            ],
+            "children_high_water_rss_kib": 77372,
+            "elapsed_s": 0.016324591008014977,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "format",
+            "outcome": "failed",
+            "returncode": 1,
+            "system_cpu_s": 0.010668999999999998,
+            "user_cpu_s": 0.005333999999999506
+          },
+          {
+            "name": "receipt-joins",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          },
+          {
+            "name": "source-audit",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          },
+          {
+            "name": "source-audit-match",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          },
+          {
+            "name": "K2-carrier",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          },
+          {
+            "name": "component-carrier",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          },
+          {
+            "name": "selection-reconstruct",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          },
+          {
+            "name": "selection-match",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          },
+          {
+            "name": "issue-literals",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          },
+          {
+            "name": "whitespace",
+            "outcome": "not_run",
+            "reason": "prior failure"
+          }
+        ]
+      }
+    },
+    {
+      "files": {
+        "001-format.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "001-format.stdout.log": "2ce9758b9f8abd876ec3e76c589e099e8b05377b1e7ea2331e81ee80f07bdff8",
+        "002-receipt-joins.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "002-receipt-joins.stdout.log": "b32d998d4696b2a490f5b9c8daad3d2a93cbca8c4c0da7b52aed175045a2c8ef",
+        "003-source-audit.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "003-source-audit.stdout.log": "75e240d9b438fd7414eef52f94cf6c8c4b66d8c5dde871cdfb8316fd306e0522",
+        "004-source-audit-match.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "004-source-audit-match.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "005-K2-carrier.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "005-K2-carrier.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "006-component-carrier.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "006-component-carrier.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "007-selection-reconstruct.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "007-selection-reconstruct.stdout.log": "fc7418890c2e6040fd35a9c39869db5b999107a4adc2a82a3e2c856e69c63d04",
+        "008-selection-match.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "008-selection-match.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "009-issue-literals.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "009-issue-literals.stdout.log": "e9b243ae93c2c4c0b5aa3027aefa8bb14198335bd57a21915476ece02356417e",
+        "010-whitespace.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "010-whitespace.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "progress.jsonl": "262a40526d072aac0669347b3621cd3ceedbf49e0a6d70e4b485a0608488c0dc",
+        "selection.json": "a09f6ac9650d56fccb811608617850f080a00ab296bb1572da4183e6ca023c3d",
+        "source-audit.json": "8c6dade55d8a6b1b6be0d35a9d743f93ec2cab10aa7710f4a64441f495855e87",
+        "summary.json": "27979269b4c1d57bc3c97b2051f46af906cac2befdaef429aac2c7fe36d8c7d5"
+      },
+      "path": "/tmp/u4-b-component-native-final-checks-03",
+      "summary": {
+        "complete": true,
+        "elapsed_s": 7.055320036015473,
+        "memory_note": "Linux child RSS high-water mark across completed stages, not summed RAM",
+        "passed": true,
+        "stages": [
+          {
+            "argv": [
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+              "format",
+              "--check",
+              "docs/reviews/U4-B-component-native-audit-v1"
+            ],
+            "children_high_water_rss_kib": 17792,
+            "elapsed_s": 0.015929685992887244,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "format",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.0,
+            "user_cpu_s": 0.013510999999999999
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/check_receipts.py"
+            ],
+            "children_high_water_rss_kib": 37420,
+            "elapsed_s": 0.2145891880209092,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "receipt-joins",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.031816,
+            "user_cpu_s": 0.159083
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/source_audit.py",
+              "/tmp/u4-b-component-native-final-checks-03/source-audit.json"
+            ],
+            "children_high_water_rss_kib": 45652,
+            "elapsed_s": 0.5155127010075375,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "source-audit",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.07213599999999999,
+            "user_cpu_s": 0.44845100000000004
+          },
+          {
+            "argv": [
+              "cmp",
+              "docs/reviews/U4-B-component-native-audit-v1/source-audit.json",
+              "/tmp/u4-b-component-native-final-checks-03/source-audit.json"
+            ],
+            "children_high_water_rss_kib": 45652,
+            "elapsed_s": 0.004884702997514978,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "source-audit-match",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.0,
+            "user_cpu_s": 0.0024359999999999937
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "native/tools/export_carriers.py",
+              "--check"
+            ],
+            "children_high_water_rss_kib": 45652,
+            "elapsed_s": 0.2648329559888225,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "K2-carrier",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.024009000000000003,
+            "user_cpu_s": 0.228082
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "native/tools/export_carriers.py",
+              "--component",
+              "--check"
+            ],
+            "children_high_water_rss_kib": 45652,
+            "elapsed_s": 0.26517284399596974,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "component-carrier",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.03176499999999999,
+            "user_cpu_s": 0.22632700000000006
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/freeze_selection.py",
+              "/tmp/u4-b-component-native-final-checks-03/selection.json"
+            ],
+            "children_high_water_rss_kib": 68852,
+            "elapsed_s": 5.729831261996878,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "selection-reconstruct",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.072303,
+            "user_cpu_s": 5.663715
+          },
+          {
+            "argv": [
+              "cmp",
+              "docs/reviews/U4-B-component-native-audit-v1/first-use-selection.json",
+              "/tmp/u4-b-component-native-final-checks-03/selection.json"
+            ],
+            "children_high_water_rss_kib": 68852,
+            "elapsed_s": 0.0019884519861079752,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "selection-match",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.0,
+            "user_cpu_s": 0.0009449999999997516
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/issue-gap-literals.py"
+            ],
+            "children_high_water_rss_kib": 68852,
+            "elapsed_s": 0.031901013979222625,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "issue-literals",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.0,
+            "user_cpu_s": 0.019769000000000148
+          },
+          {
+            "argv": [
+              "git",
+              "diff",
+              "--check"
+            ],
+            "children_high_water_rss_kib": 68852,
+            "elapsed_s": 0.00794706100714393,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "whitespace",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.0,
+            "user_cpu_s": 0.0036319999999996355
+          }
+        ]
+      }
+    },
+    {
+      "files": {
+        "001-ruff.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "001-ruff.stdout.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+        "002-format.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "002-format.stdout.log": "cfe5c6461b42a90595a492aed11f2c8e6eb98b7c4caf2cc9f47e3333185e3f33",
+        "003-receipt-joins.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "003-receipt-joins.stdout.log": "3161d79aa727966e51a6997a98f4f6621a09e284a1ae41d16f5f21a2f3eafc4f",
+        "004-source-audit.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "004-source-audit.stdout.log": "75e240d9b438fd7414eef52f94cf6c8c4b66d8c5dde871cdfb8316fd306e0522",
+        "005-source-audit-match.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "005-source-audit-match.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "006-selection-reconstruct.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "006-selection-reconstruct.stdout.log": "0a75a68da09f8a66bf7a1a6defac31fb2a9d3762b0d064b5774c94a24b8d5f57",
+        "007-selection-match.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "007-selection-match.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "008-issue-literals.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "008-issue-literals.stdout.log": "e9b243ae93c2c4c0b5aa3027aefa8bb14198335bd57a21915476ece02356417e",
+        "009-whitespace.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "009-whitespace.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "010-candidate-identity.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "010-candidate-identity.stdout.log": "0ffb13dab7780d81a429e11f805a2220bdec53997dabd1a836f3c574c5ae541e",
+        "011-reservation-literals.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "011-reservation-literals.stdout.log": "da587b6f748f0e3e658bd9643ceef00382dd74fcc3c207b716c8c0eb11828a24",
+        "progress.jsonl": "2ddfc4186e97e26264515460ee1b7a68faddbbd709a9f7625045a9cf7a980983",
+        "selection.json": "d281962993f7f1992bc1d1a49e849cafbe3fc7c01bd5b1458752621c96f05d81",
+        "source-audit.json": "727040f81e75a54a7df4142152dd65867a6d5094bf319c7f42cb52adb7da19ff",
+        "summary.json": "66516b5fce398b1a3de43bc04c6184e13a8849a7a252e3cf16d554d37d2af58d"
+      },
+      "path": "/tmp/u4-b-component-native-final-checks-04",
+      "summary": {
+        "complete": true,
+        "elapsed_s": 6.865543593012262,
+        "memory_note": "Linux child RSS high-water mark across completed stages, not summed RAM",
+        "passed": true,
+        "stages": [
+          {
+            "argv": [
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+              "check",
+              "docs/reviews/U4-B-component-native-audit-v1"
+            ],
+            "children_high_water_rss_kib": 18688,
+            "elapsed_s": 0.016370315017411485,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "ruff",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.013470999999999999,
+            "user_cpu_s": 0.002994
+          },
+          {
+            "argv": [
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+              "format",
+              "--check",
+              "docs/reviews/U4-B-component-native-audit-v1"
+            ],
+            "children_high_water_rss_kib": 18688,
+            "elapsed_s": 0.01617857298697345,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "format",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.018312000000000002,
+            "user_cpu_s": 0.0
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/check_receipts.py"
+            ],
+            "children_high_water_rss_kib": 37748,
+            "elapsed_s": 0.21473322800011374,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "receipt-joins",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.019840999999999998,
+            "user_cpu_s": 0.186506
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/source_audit.py",
+              "/tmp/u4-b-component-native-final-checks-04/source-audit.json",
+              "--candidate",
+              "64837bea3724919facbc27be1c7f5644a6354cfa"
+            ],
+            "children_high_water_rss_kib": 45720,
+            "elapsed_s": 0.5660768699890468,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "source-audit",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.08549699999999999,
+            "user_cpu_s": 0.472796
+          },
+          {
+            "argv": [
+              "cmp",
+              "docs/reviews/U4-B-component-native-audit-v1/source-audit-final.json",
+              "/tmp/u4-b-component-native-final-checks-04/source-audit.json"
+            ],
+            "children_high_water_rss_kib": 45720,
+            "elapsed_s": 0.0017325519875157624,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "source-audit-match",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.0,
+            "user_cpu_s": 0.0009239999999999249
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/freeze_selection.py",
+              "/tmp/u4-b-component-native-final-checks-04/selection.json",
+              "--candidate",
+              "64837bea3724919facbc27be1c7f5644a6354cfa"
+            ],
+            "children_high_water_rss_kib": 68736,
+            "elapsed_s": 5.882185625989223,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "selection-reconstruct",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.05624299999999999,
+            "user_cpu_s": 5.853322
+          },
+          {
+            "argv": [
+              "cmp",
+              "docs/reviews/U4-B-component-native-audit-v1/first-use-selection-final.json",
+              "/tmp/u4-b-component-native-final-checks-04/selection.json"
+            ],
+            "children_high_water_rss_kib": 68736,
+            "elapsed_s": 0.0021009180054534227,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "selection-match",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.0,
+            "user_cpu_s": 0.0009579999999997924
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/issue-gap-literals.py"
+            ],
+            "children_high_water_rss_kib": 68736,
+            "elapsed_s": 0.03233465098310262,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "issue-literals",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.0040060000000000096,
+            "user_cpu_s": 0.012017999999999418
+          },
+          {
+            "argv": [
+              "git",
+              "diff",
+              "--check"
+            ],
+            "children_high_water_rss_kib": 68736,
+            "elapsed_s": 0.03324809900368564,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "whitespace",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.015945999999999988,
+            "user_cpu_s": 0.011389000000000316
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/a_candidate_bindings.py"
+            ],
+            "children_high_water_rss_kib": 68736,
+            "elapsed_s": 0.06448589701903984,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "candidate-identity",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.011712,
+            "user_cpu_s": 0.033657999999999966
+          },
+          {
+            "argv": [
+              "/usr/bin/env",
+              "PYTHONPATH=contract:src:.",
+              "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+              "docs/reviews/U4-B-component-native-audit-v1/issue_reservations.py"
+            ],
+            "children_high_water_rss_kib": 68736,
+            "elapsed_s": 0.03243368800031021,
+            "expected_exit": 0,
+            "launch_error": null,
+            "missing_diagnostics": [],
+            "name": "reservation-literals",
+            "outcome": "passed",
+            "returncode": 0,
+            "system_cpu_s": 0.007336000000000009,
+            "user_cpu_s": 0.011003999999999792
+          }
+        ]
+      }
+    }
+  ],
+  "full_suite_or_F6_repeated": false,
+  "human_install": "3949b104d0eaae95a7452f976c2afa048fa82ff1",
+  "independent_adversarial_verdict": false,
+  "pending": [
+    "versioned issue alignment and reservation/job-start/allocation semantics",
+    "strict construction read-audit coverage/reviewer disposition",
+    "human P2/NoC and actual L1 workings at acceptance",
+    "genuine component runtime deployment/HostRecord/selector and public first-use authority",
+    "D3 exact refusal-only transport separately reviewed implementation/release",
+    "R/TPU separate milestone"
+  ],
+  "protected_installation": false,
+  "source_candidate": "64837bea3724919facbc27be1c7f5644a6354cfa",
+  "status": "owned verification handoff complete; admitted issue-gap and construction read coverage remain incomplete",
+  "unchanged_checks_reused": {
+    "O2_D01_forgeries": "saved actual result bytes and installed checker files exact",
+    "collision_guard": "admission bytes exact at final source; final positive additionally passes real validator",
+    "historical_K2_campaign": "798 calls inherited; no rerun",
+    "python21": "same installed Python inputs; no repeat after final native-only sort",
+    "schemas": "both exports passed in batch03; bytes unchanged by final native sort"
+  }
+}
