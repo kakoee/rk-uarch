@@ -18,7 +18,7 @@ files, and these immutable packages:
 - Combined unapplied patch, in A's package:
   `81b81c6c2680a17e7d106dedb4a11dc07891b331f3323319fb0192b852bdebe3`.
 - `combined-postimages.json` byte SHA256:
-  `4a3f531ad11f4426f6f2d61a2eabb509d9b973bafd3ff3324f08a4ee0b7f8591`.
+  `5d1010aac38f7d04a2935ff48072e418e1e8e9a88d1933758fca4581e2acc845`.
 - Reconstruct from `414a94c35c1588cf13b6fcddc3739203c7f5ec6e` plus that patch, with all
   23 postimages, nine immutable activation inputs and the additional first-use consumer
   sidecar verified. Do not apply to moving main or either author's live clone.
@@ -33,7 +33,10 @@ preservation. These checks are not an independent verdict. A's `reproduce.md` an
 run used `7b972d05a2e351375902cc6553a9c03a77aa8101`; the later preparation base has identical
 23 postimages and nine activation inputs. The sidecar is additional future-consumer input,
 not a claim that it ran in that earlier behavioral selection. B's shared-final-evidence.tar.gz
-retains the logs. The shared 488 passed / 2 human-work skips / 1 native deselection is one
+retains the logs. B's peer_files manifest hash refers to its named earlier A publication
+5b2db59, not the final manifest above; the later manifest records the preparation base and
+sidecar. The coordinator independently checked the identical 23 postimages and activation
+inputs across both bases. The shared 488 passed / 2 human-work skips / 1 native deselection is one
 A-executed run whose bytes B checked. Do not add overlapping counts or call it two runs.
 
 Perform exactly the Stage 3 checks:
