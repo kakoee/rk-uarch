@@ -147,3 +147,27 @@ def test_workflow_runs_full_suite_unless_explicit_docs_result():
     assert jobs["native"]["if"] == "${{ false }}"
     for name in ("contract", "licences-and-patches"):
         assert "if" not in jobs[name]
+
+
+def test_contract_ownership_strict_flags_and_currentness_are_retained():
+    jobs = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())["jobs"]
+    full = next(s for s in jobs["python"]["steps"] if s.get("name", "").startswith("tests ("))
+    assert "--ignore=contract/tests" in full["run"]
+    contract = jobs["contract"]
+    assert "if" not in contract
+    commands = [s["run"] for s in contract["steps"] if "run" in s]
+    suite = next(s for s in commands if "--require-vendor" in s)
+    assert "contract/tests --require-vendor" in suite
+    assert "--pre-contract" not in suite and "--ignore" not in suite
+    assert "-m" not in suite.split("pytest", 1)[1].split()
+    assert any("scripts/vendor_rk.py --check" in s for s in commands)
+    assert any("uarch_contract.generate --check" in s for s in commands)
+    for name in ("python", "contract"):
+        steps = jobs[name]["steps"]
+        sync = next(s["run"] for s in steps if s.get("run", "").startswith("uv sync"))
+        assert sync == "uv sync --locked --extra dev"
+        setup = next(s for s in steps if s.get("uses", "").startswith("astral-sh/setup-uv@"))
+        assert setup["with"]["enable-cache"] is True
+        assert set(setup["with"]["cache-dependency-glob"].split()) == {"uv.lock", "pyproject.toml"}
+        summary = next(s for s in steps if "phase summary" in s.get("name", ""))
+        assert summary["if"] == "always()"
