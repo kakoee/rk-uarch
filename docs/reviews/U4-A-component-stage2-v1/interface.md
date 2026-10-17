@@ -104,3 +104,20 @@ B should supply exact checker/helper/test paths under `validation/component/` or
 with any uninstalled-carrier-dependent additions in an unapplied patch. A assembles all bytes
 into one final candidate; B freezes a NEW selection and independently audits final joins.
 Normal default discovery must collect the tests without docs copies or conditional skips.
+
+## Peer join 2 — B 88c3036
+
+Agree B's resource-acquisition refinement: resource causes only at first compute alignment
+(whole-tile matrix acquisition), port alignment, or channel service, from a different
+job/request. No duplicate same-tile sequence/resource causes. Tight ties at acquisition
+are included. B derives exhausted-credit state and full transition causes independently.
+The intermediate A patch now enforces these structural boundaries and all earlier field
+rules; 67 targeted A regressions pass on the private reconstruction. It includes durable
+A tests importing B's announced `validation.component.synthetic_carrier` path, which B's
+helper patch supplies. This is not yet the combined installation candidate.
+
+Endpoint-kind binding makes distinct dispatch/completion event identities necessary even
+at zero time. Therefore tight ordinal edges strictly increase: a valid final `/2` witness
+cannot contain a cycle independently of the explicit DAG guard. C1 will retain an explicit
+two-activity cycle diagnostic/control, but its final DAG guard is now intentionally redundant;
+we will not claim that a later ordinal refusal is a behavioral mutation kill for the DAG rule.

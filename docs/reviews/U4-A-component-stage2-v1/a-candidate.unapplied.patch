@@ -1,0 +1,2155 @@
+diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.py
+--- a/contract/uarch_contract/mapped.py
++++ b/contract/uarch_contract/mapped.py
+@@ -1014,6 +1014,73 @@
+     critical_path: Observed[CriticalInterval]
+ 
+ 
++class ActivityPredecessor(FrozenModel):
++    activity_id: NonEmpty
++    relation: Literal["sequence", "dependency", "resource", "credit"]
++
++
++class ComponentActivity(FrozenModel):
++    activity_id: NonEmpty
++    job_id: NonEmpty
++    request_id: NonEmpty | None
++    subphase: Literal[
++        "compute_overhead",
++        "compute_stage",
++        "compute_wave",
++        "compute_drain",
++        "request_noc",
++        "response_noc",
++        "unicast_noc",
++        "dram_latency",
++        "channel_service",
++        "read_port",
++        "write_port",
++        "ack",
++        "barrier",
++    ]
++    kind: Literal["service", "alignment"]
++    ready_ps: U64
++    start_ps: U64
++    end_ps: U64
++    owner_id: U64
++    category: Literal["compute", "memory", "noc", "sync", "overhead"]
++    receiving_domain: Literal["core", "noc", "dram"] | None
++    occupies_resource: StrictBool
++    dispatch_ordinal: U64
++    completion_ordinal: U64
++    predecessors: tuple[ActivityPredecessor, ...]
++
++
++class ComponentResourceInterval(ResourceInterval):
++    activity_id: NonEmpty
++
++
++class ComponentCriticalInterval(CriticalInterval):
++    activity_id: NonEmpty
++
++
++class ComponentClockObservation(ClockObservation):
++    activity_id: NonEmpty
++
++
++class ComponentQueueObservation(QueueObservation):
++    activity_id: NonEmpty | None
++
++
++class ComponentObservations(FrozenModel):
++    format: Literal["uarch-native-observations/2"]
++    events: Observed[EventObservation]
++    jobs: Observed[JobObservation]
++    activities: Observed[ComponentActivity]
++    clocks: Observed[ComponentClockObservation]
++    dma: Observed[DmaObservation]
++    transfers: Observed[TransferObservation]
++    allocations: Observed[AllocationObservation]
++    queue_membership: Observed[ComponentQueueObservation]
++    resource_intervals: Observed[ComponentResourceInterval]
++    critical_path: Observed[ComponentCriticalInterval]
++
++
+ class Attribution(FrozenModel):
+     compute: U64
+     memory: U64
+@@ -1077,7 +1144,7 @@
+     simulator_metrics: SimulatorMetrics
+     trace_hash: Hash | None
+     u_c0_duration_ps: None
+-    observations: Observations
++    observations: Annotated[Observations | ComponentObservations, Field(discriminator="format")]
+     owners: tuple[Owner, ...]
+ 
+     @model_validator(mode="after")
+@@ -1220,18 +1287,401 @@
+             all(x.issue_ps <= x.complete_ps <= r.duration_ps for x in dma), "IncompleteObservations"
+         )
+     if job.state_model == "fixed_delay/1":
++        require(
++            isinstance(r.observations, Observations), "IncompleteObservations", "fixed-delay format"
++        )
+         validate_fixed_delay_observations(r, job)
+     else:
+         require(
+             all(x.kind == "service" for x in r.observations.critical_path.records),
+             "AttributionMismatch",
+         )
+-        assert isinstance(r.observations.queue_membership, Observed)
+-        require(
+-            all(x.clock_domain is not None for x in r.observations.queue_membership.records),
++        validate_component_observations(r, job)
++    return r
++
++
++def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
++    """Structural witness joins; independent model-law checks remain required."""
++    obs = r.observations
++    require(isinstance(obs, ComponentObservations), "IncompleteObservations", "component /2")
++    assert isinstance(obs, ComponentObservations)
++    owners = {x.owner_id: x.resource for x in job.owners}
++    tasks = {x.id: x for x in job.mapped_point.task_graph.jobs}
++    declared = {
++        f.request_id: (t, f) for t in tasks.values() if isinstance(t, Dma) for f in t.fragments
++    }
++    engines = int(job.workload_closure.hardware_spec.cores.core_type.dma.engines.value)
++    cols = int(job.workload_closure.hardware_spec.cores.grid.cols.value)
++    activities = {x.activity_id: x for x in obs.activities.records}
++    require(
++        len(activities) == len(obs.activities.records), "IncompleteObservations", "activity IDs"
++    )
++    routes = {x.id: x for x in job.mapped_point.task_graph.routes}
++    summaries = {x.job_id: x for x in obs.jobs.records}
++    phase_orders = {
++        "compute": ("compute_overhead", "compute_stage", "compute_wave", "compute_drain"),
++        "read": ("request_noc", "dram_latency", "channel_service", "response_noc", "read_port"),
++        "write": ("write_port", "request_noc", "dram_latency", "channel_service", "response_noc", "ack"),
++        "barrier": ("barrier",),
++        "noc_transfer": ("unicast_noc",),
++    }
++    sequences: dict[tuple[str, str | None], list[ComponentActivity]] = {}
++    for activity in activities.values():
++        require(activity.job_id in tasks, "InvalidResource", "activity job")
++        sequences.setdefault((activity.job_id, activity.request_id), []).append(activity)
++    previous: dict[str, str] = {}
++    first_ids, last_ids = set(), set()
++    for (tid, _), sequence in sequences.items():
++        task = tasks[tid]
++        phases = phase_orders[task.direction if isinstance(task, Dma) else task.kind]
++        require(all(x.subphase in phases for x in sequence), "IncompleteObservations", "phase inventory")
++        sequence.sort(key=lambda x: (phases.index(x.subphase), x.kind != "alignment"))
++        require(len({(x.subphase, x.kind) for x in sequence}) == len(sequence),
++                "IncompleteObservations", "duplicate phase")
++        first_ids.add(sequence[0].activity_id)
++        last_ids.add(sequence[-1].activity_id)
++        for before, after in zip(sequence, sequence[1:], strict=False):
++            previous[after.activity_id] = before.activity_id
++    for tid, task in tasks.items():
++        row = summaries[tid]
++        if isinstance(task, Compute):
++            expected = f"matrix:{task.core_id}"
++        elif isinstance(task, Dma):
++            expected = f"dma:{task.dma_engine_id // engines}:{task.dma_engine_id % engines}"
++        elif isinstance(task, Barrier):
++            expected = f"barrier:{tid}"
++        else:
++            assert isinstance(task, NocTransfer)
++            buffers = {b.id: b for b in job.mapped_point.task_graph.buffers}
++            core = buffers[task.source.buffer_id].core_id
++            assert core is not None
++            expected = f"router:0:{core // cols}:{core % cols}"
++        require(owners[row.owner_id] == expected, "InvalidResource", "job owner")
++        require(row.release_ps == 0, "IncompleteObservations", "component release")
++        require(not row.blocking_predecessor_ids, "AttributionMismatch", "unrepresented job predecessors")
++        ready = max((summaries[d.before].end_ps for d in job.mapped_point.task_graph.dependencies
++                     if d.after == tid), default=0)
++        require(row.ready_ps == ready, "IncompleteObservations", "job readiness")
++        members = [x for x in activities.values() if x.job_id == tid]
++        require(bool(members), "IncompleteObservations", "job activities")
++        require(row.start_ps == min(x.start_ps for x in members)
++                and row.end_ps == max(x.end_ps for x in members),
++                "IncompleteObservations", "job activity span")
++    events = {x.observation_ordinal: x for x in obs.events.records}
++    require(set(x.job_id for x in activities.values()) == tasks.keys(), "IncompleteObservations")
++    for a in activities.values():
++        require(a.job_id in tasks and a.owner_id in owners, "InvalidResource")
++        task = tasks[a.job_id]
++        resource = owners[a.owner_id]
++        require(a.ready_ps <= a.start_ps <= a.end_ps <= r.duration_ps, "IncompleteObservations")
++        if isinstance(task, Compute):
++            require(
++                a.request_id is None
++                and a.subphase.startswith("compute_")
++                and resource == f"matrix:{task.core_id}",
++                "IncompleteObservations",
++            )
++            category = "overhead" if a.subphase == "compute_overhead" else "compute"
++            domain: str | None = "core"
++        elif isinstance(task, Barrier):
++            require(
++                a.request_id is None
++                and a.subphase == "barrier"
++                and resource == f"barrier:{task.id}",
++                "IncompleteObservations",
++            )
++            category, domain = "sync", "noc"
++        elif isinstance(task, Dma):
++            require(
++                a.request_id in declared and declared[a.request_id][0].id == task.id,
++                "IncompleteObservations",
++                "activity request",
++            )
++            assert a.request_id is not None
++            fragment = declared[a.request_id][1]
++            core_id = task.dma_engine_id // engines
++            allowed = (
++                {"request_noc", "response_noc", "dram_latency", "channel_service", "read_port"}
++                if task.direction == "read"
++                else {
++                    "request_noc",
++                    "response_noc",
++                    "dram_latency",
++                    "channel_service",
++                    "write_port",
++                    "ack",
++                }
++            )
++            require(a.subphase in allowed, "IncompleteObservations")
++            if a.subphase.endswith("_noc"):
++                expected_owner, category, domain = (
++                    f"router:0:{core_id // cols}:{core_id % cols}",
++                    "noc",
++                    "noc",
++                )
++            elif a.subphase in ("dram_latency", "channel_service"):
++                expected_owner, category = f"channel:{fragment.channel_id}", "memory"
++                domain = "dram" if a.subphase == "dram_latency" else None
++            else:
++                expected_owner, category, domain = f"dma_port:{core_id}", "memory", "core"
++            require(resource == expected_owner, "InvalidResource", "activity owner")
++        else:
++            require(isinstance(task, NocTransfer), "IncompleteObservations")
++            assert isinstance(task, NocTransfer)
++            require(
++                a.request_id == task.id and a.subphase == "unicast_noc", "IncompleteObservations"
++            )
++            buffers = {x.id: x for x in job.mapped_point.task_graph.buffers}
++            source_core = buffers[task.source.buffer_id].core_id
++            assert source_core is not None
++            require(
++                resource == f"router:0:{source_core // cols}:{source_core % cols}",
++                "InvalidResource",
++            )
++            category, domain = "noc", "noc"
++        require(a.category == category and a.receiving_domain == domain,
++                "IncompleteObservations", "activity category/domain")
++        occupied = a.kind == "service" and a.subphase not in ("dram_latency", "ack", "barrier")
++        if a.subphase.endswith("_noc"):
++            route_id = (declared[a.request_id][1].route_id if isinstance(task, Dma)
++                        else task.route_id if isinstance(task, NocTransfer) else "")
++            occupied = a.kind == "service" and len(routes[route_id].core_ids) > 1
++        require(a.occupies_resource == occupied, "IncompleteObservations", "phase occupancy")
++        require(
++            a.kind != "alignment" or (domain is not None and not a.occupies_resource),
+             "IncompleteObservations",
+-        )
+-    return r
++            "alignment is not busy",
++        )
++        require(
++            a.subphase not in ("dram_latency", "ack") or not a.occupies_resource,
++            "IncompleteObservations",
++            "latency is not channel service",
++        )
++        for ordinal, time in ((a.dispatch_ordinal, a.start_ps), (a.completion_ordinal, a.end_ps)):
++            require(ordinal in events, "IncompleteObservations", "missing activity dispatch")
++            e = events[ordinal]
++            require(
++                e.job_id == a.job_id and e.target_id == a.owner_id and e.t_ps == time,
++                "IncompleteObservations",
++                "activity dispatch join",
++            )
++        if a.kind == "alignment":
++            kinds = ("TASK_READY", "DEPENDENCY_READY")
++        elif a.subphase.startswith("compute_"):
++            kinds = ("OWNER_GRANT", "COMPUTE_DONE")
++        elif a.subphase.endswith("_noc"):
++            kinds = ("NOC_HEAD", "NOC_TAIL")
++        else:
++            kinds = {
++                "read_port": ("OWNER_GRANT", "DMA_DONE"),
++                "write_port": ("OWNER_GRANT", "MEM_RESP"),
++                "channel_service": ("MEM_REQ", "MEM_RESP"),
++                "dram_latency": ("MEM_REQ", "MEM_RESP"),
++                "ack": ("TASK_READY", "DMA_DONE"),
++                "barrier": ("SYNC_ARRIVE", "BARRIER_RELEASE"),
++            }[a.subphase]
++        require((events[a.dispatch_ordinal].kind, events[a.completion_ordinal].kind) == kinds,
++                "IncompleteObservations", "activity event kind")
++        require(a.dispatch_ordinal <= a.completion_ordinal, "IncompleteObservations", "endpoint order")
++        ordered(a.predecessors, lambda x: (x.activity_id, x.relation), "AttributionMismatch")
++        require(
++            a.start_ps == 0 or bool(a.predecessors), "AttributionMismatch", "missing tight cause"
++        )
++        for link in a.predecessors:
++            require(
++                link.activity_id in activities and link.activity_id != a.activity_id,
++                "AttributionMismatch",
++            )
++            before = activities[link.activity_id]
++            require(
++                before.end_ps == a.start_ps and before.completion_ordinal <= a.dispatch_ordinal,
++                "AttributionMismatch",
++                "non-tight predecessor",
++            )
++            if link.relation == "sequence":
++                require(
++                    previous.get(a.activity_id) == before.activity_id,
++                    "AttributionMismatch", "sequence endpoints",
++                )
++            elif link.relation == "dependency":
++                require(
++                    before.activity_id in last_ids and a.activity_id in first_ids
++                    and before.end_ps == summaries[before.job_id].end_ps
++                    and any(
++                        d.before == before.job_id and d.after == a.job_id
++                        for d in job.mapped_point.task_graph.dependencies
++                    ),
++                    "AttributionMismatch",
++                )
++            elif link.relation == "resource":
++                require(
++                    before.owner_id == a.owner_id and before.occupies_resource
++                    and owners[a.owner_id].startswith(("matrix:", "dma_port:", "channel:"))
++                    and (before.job_id, before.request_id) != (a.job_id, a.request_id)
++                    and ((a.subphase == "compute_overhead" and a.kind == "alignment")
++                         or (a.subphase in ("read_port", "write_port") and a.kind == "alignment")
++                         or (a.subphase == "channel_service" and a.kind == "service")),
++                    "AttributionMismatch", "resource endpoints",
++                )
++            else:
++                require(
++                    before.activity_id in last_ids and a.activity_id in first_ids
++                    and before.request_id != a.request_id
++                    and before.request_id in declared
++                    and a.request_id in declared
++                    and declared[before.request_id][0].dma_engine_id
++                    == declared[a.request_id][0].dma_engine_id,
++                    "AttributionMismatch", "credit endpoints",
++                )
++    # Explicit cycle check includes zero-duration links (timestamps alone cannot prove a DAG).
++    pending = set(activities)
++    while pending:
++        ready = {
++            key
++            for key in pending
++            if not any(p.activity_id in pending for p in activities[key].predecessors)
++        }
++        require(bool(ready), "AttributionMismatch", "activity cycle")
++        pending -= ready
++    require(set(events) == {n for x in activities.values() for n in
++                           (x.dispatch_ordinal, x.completion_ordinal)},
++            "IncompleteObservations", "unreferenced event")
++    represented = set()
++    for interval in obs.resource_intervals.records:
++        require(interval.activity_id in activities, "IncompleteObservations")
++        a = activities[interval.activity_id]
++        require(
++            a.occupies_resource
++            and interval.activity_id not in represented
++            and (
++                interval.owner_id,
++                interval.job_id,
++                interval.start_ps,
++                interval.end_ps,
++                interval.activity,
++                interval.limiting_resource_id,
++            )
++            == (a.owner_id, a.job_id, a.start_ps, a.end_ps, a.subphase, a.owner_id),
++            "IncompleteObservations",
++            "occupied activity join",
++        )
++        represented.add(a.activity_id)
++        lo, hi = interval.service_start_ps_ratio, interval.service_end_ps_ratio
++        require((lo is not None) == (hi is not None), "IncompleteObservations")
++        require((lo is not None) == (a.subphase == "channel_service"), "IncompleteObservations")
++        if lo is not None and hi is not None:
++            start, end = (
++                Fraction(lo.numerator, lo.denominator),
++                Fraction(hi.numerator, hi.denominator),
++            )
++            require(
++                0 <= start <= end
++                and -(-start.numerator // start.denominator) == a.start_ps
++                and -(-end.numerator // end.denominator) == a.end_ps,
++                "IncompleteObservations",
++            )
++    require(
++        represented == {a.activity_id for a in activities.values() if a.occupies_resource},
++        "IncompleteObservations",
++        "missing occupied activity",
++    )
++    for q in obs.queue_membership.records:
++        require(
++            q.owner_id in owners
++            and q.leave_ps is not None
++            and q.enter_ps <= q.leave_ps <= r.duration_ps,
++            "IncompleteObservations",
++        )
++        if q.queue_id.startswith(("channel_service:", "dma_inflight:")):
++            require(
++                q.item_id in declared and q.clock_domain is None and q.activity_id is None,
++                "IncompleteObservations",
++                "nonclocked queue binding",
++            )
++            t, f = declared[q.item_id]
++            if q.queue_id.startswith("channel_service:"):
++                require(
++                    q.queue_id == f"channel_service:{f.channel_id}"
++                    and owners[q.owner_id] == f"channel:{f.channel_id}"
++                    and q.population in ("waiting", "service"),
++                    "IncompleteObservations",
++                )
++            else:
++                require(
++                    q.queue_id == f"dma_inflight:{t.dma_engine_id}"
++                    and owners[q.owner_id]
++                    == f"dma:{t.dma_engine_id // engines}:{t.dma_engine_id % engines}"
++                    and q.population == "inflight",
++                    "IncompleteObservations",
++                )
++        else:
++            require(q.activity_id in activities, "IncompleteObservations", "queue activity")
++            assert q.activity_id is not None
++            a = activities[q.activity_id]
++            require(
++                q.queue_id == f"activity:{a.subphase}:{a.owner_id}"
++                and q.item_id == (a.request_id or a.job_id)
++                and q.owner_id == a.owner_id
++                and q.clock_domain == a.receiving_domain
++                and q.clock_domain is not None
++                and q.population in ("waiting", "service"),
++                "IncompleteObservations",
++            )
++            require(
++                (q.enter_ps, q.leave_ps)
++                == (
++                    (a.ready_ps, a.start_ps)
++                    if q.population == "waiting"
++                    else (a.start_ps, a.end_ps)
++                ),
++                "IncompleteObservations",
++            )
++    for clock in obs.clocks.records:
++        require(clock.activity_id in activities, "IncompleteObservations")
++        a = activities[clock.activity_id]
++        require(
++            clock.job_id == a.job_id
++            and clock.domain == a.receiving_domain
++            and clock.grant_ps == a.start_ps
++            and clock.completion_ps == a.end_ps,
++            "IncompleteObservations",
++            "clock activity join",
++        )
++
++    def tie(a: ComponentActivity) -> tuple[int, str, str, str, str]:
++        return a.owner_id, a.job_id, a.request_id or "", a.subphase, a.activity_id
++
++    terminal = min(
++        (a for a in activities.values() if a.end_ps == r.duration_ps), key=tie, default=None
++    )
++    require(terminal is not None, "AttributionMismatch", "missing makespan activity")
++    assert terminal is not None
++    chain = []
++    current = terminal
++    while True:
++        if current.end_ps > current.start_ps:
++            chain.append((current.activity_id, current.start_ps, current.end_ps))
++        if not current.predecessors:
++            break
++        current = min((activities[p.activity_id] for p in current.predecessors), key=tie)
++    require(
++        [(c.activity_id, c.start_ps, c.end_ps) for c in obs.critical_path.records]
++        == list(reversed(chain)),
++        "AttributionMismatch",
++        "tight canonical activity path",
++    )
++    for c in obs.critical_path.records:
++        require(c.predecessor_id is None, "AttributionMismatch", "unrepresented critical predecessor")
++        require(c.activity_id in activities, "AttributionMismatch")
++        a = activities[c.activity_id]
++        require(
++            c.kind == "service"
++            and c.cause_job_id == a.job_id
++            and c.category == a.category
++            and c.limiting_resource_id == a.owner_id
++            and a.start_ps <= c.start_ps < c.end_ps <= a.end_ps,
++            "AttributionMismatch",
++        )
+ 
+ 
+ def validate_fixed_delay_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
+@@ -1677,9 +2127,43 @@
+                 p.initial_state != "cold" or buf.initial_residency == "uninitialized",
+                 "UnsupportedInitialState",
+             )
++    for buf in g.buffers:
++        if buf.space == "accumulator" and b.mapping_policy.version == "1":
++            require(
++                not buf.final_consumer_ids, "UnsupportedMapping", "transient accumulator policy"
++            )
++        if (
++            buf.space == "accumulator"
++            and b.mapping_policy.version == "2"
++            and buf.producer_id is not None
++        ):
++            require(
++                isinstance(b.scope, ComponentScope) and b.mapping_policy.version == "2",
++                "UnsupportedMapping",
++                "transient accumulators require ws-rowsplit@2",
++            )
++            producer = jobs[buf.producer_id]
++            require(
++                isinstance(producer, Compute) and producer.accumulator_buffer_id == buf.id,
++                "InvalidDependency",
++                "accumulator producer must use this buffer",
++            )
++            assert isinstance(producer, Compute)
++            require(producer.core_id == buf.core_id, "InvalidResource", "accumulator owner")
++            require(buf.initial_residency == "uninitialized", "InvalidDependency")
+     readers: dict[str, set[str]] = {key: set() for key in buffers}
+     for job in g.jobs:
+         if isinstance(job, Compute):
++            acc = buffers.get(job.accumulator_buffer_id)
++            require(acc is not None, "InvalidResource")
++            assert acc is not None
++            if b.mapping_policy.version == "2" and acc.producer_id is not None:
++                require(
++                    acc.producer_id == job.id or acc.producer_id in ancestors[job.id],
++                    "InvalidDependency",
++                    "accumulator use before production",
++                )
++                readers[acc.id].add(job.id)
+             for name in ("X", "W"):
+                 buffer_key = job.operand_buffers.get(name)
+                 require(buffer_key in buffers, "InvalidResource")
+@@ -1738,7 +2222,7 @@
+         )
+         require(
+             b.mapping_policy.name == "ws-rowsplit"
+-            and b.mapping_policy.version == "1"
++            and b.mapping_policy.version in ("1", "2")
+             and b.mapping_policy.buffer_depth == 2,
+             "UnsupportedMapping",
+         )
+diff --git a/contract/schema/mapped/MappedEngineResult.json b/contract/schema/mapped/MappedEngineResult.json
+--- a/contract/schema/mapped/MappedEngineResult.json
++++ b/contract/schema/mapped/MappedEngineResult.json
+@@ -1,5 +1,32 @@
+ {
+   "$defs": {
++    "ActivityPredecessor": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "relation": {
++          "enum": [
++            "sequence",
++            "dependency",
++            "resource",
++            "credit"
++          ],
++          "title": "Relation",
++          "type": "string"
++        }
++      },
++      "required": [
++        "activity_id",
++        "relation"
++      ],
++      "title": "ActivityPredecessor",
++      "type": "object"
++    },
+     "Admission": {
+       "additionalProperties": false,
+       "properties": {
+@@ -281,6 +308,546 @@
+         "completion_ps"
+       ],
+       "title": "ClockObservation",
++      "type": "object"
++    },
++    "ComponentActivity": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "category": {
++          "enum": [
++            "compute",
++            "memory",
++            "noc",
++            "sync",
++            "overhead"
++          ],
++          "title": "Category",
++          "type": "string"
++        },
++        "completion_ordinal": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Completion Ordinal",
++          "type": "integer"
++        },
++        "dispatch_ordinal": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Dispatch Ordinal",
++          "type": "integer"
++        },
++        "end_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "End Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "kind": {
++          "enum": [
++            "service",
++            "alignment"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "occupies_resource": {
++          "title": "Occupies Resource",
++          "type": "boolean"
++        },
++        "owner_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Owner Id",
++          "type": "integer"
++        },
++        "predecessors": {
++          "items": {
++            "$ref": "#/$defs/ActivityPredecessor"
++          },
++          "title": "Predecessors",
++          "type": "array"
++        },
++        "ready_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Ready Ps",
++          "type": "integer"
++        },
++        "receiving_domain": {
++          "anyOf": [
++            {
++              "enum": [
++                "core",
++                "noc",
++                "dram"
++              ],
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Receiving Domain"
++        },
++        "request_id": {
++          "anyOf": [
++            {
++              "minLength": 1,
++              "pattern": "\\S",
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Request Id"
++        },
++        "start_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Start Ps",
++          "type": "integer"
++        },
++        "subphase": {
++          "enum": [
++            "compute_overhead",
++            "compute_stage",
++            "compute_wave",
++            "compute_drain",
++            "request_noc",
++            "response_noc",
++            "unicast_noc",
++            "dram_latency",
++            "channel_service",
++            "read_port",
++            "write_port",
++            "ack",
++            "barrier"
++          ],
++          "title": "Subphase",
++          "type": "string"
++        }
++      },
++      "required": [
++        "activity_id",
++        "job_id",
++        "request_id",
++        "subphase",
++        "kind",
++        "ready_ps",
++        "start_ps",
++        "end_ps",
++        "owner_id",
++        "category",
++        "receiving_domain",
++        "occupies_resource",
++        "dispatch_ordinal",
++        "completion_ordinal",
++        "predecessors"
++      ],
++      "title": "ComponentActivity",
++      "type": "object"
++    },
++    "ComponentClockObservation": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "aligned_start_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Aligned Start Ps"
++        },
++        "completion_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Completion Ps",
++          "type": "integer"
++        },
++        "domain": {
++          "enum": [
++            "core",
++            "noc",
++            "dram"
++          ],
++          "title": "Domain",
++          "type": "string"
++        },
++        "grant_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Grant Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "n_cycles": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "N Cycles",
++          "type": "integer"
++        },
++        "raw_edge_outcome": {
++          "enum": [
++            "success",
++            "TimeOverflow"
++          ],
++          "title": "Raw Edge Outcome",
++          "type": "string"
++        }
++      },
++      "required": [
++        "job_id",
++        "domain",
++        "grant_ps",
++        "n_cycles",
++        "raw_edge_outcome",
++        "aligned_start_ps",
++        "completion_ps",
++        "activity_id"
++      ],
++      "title": "ComponentClockObservation",
++      "type": "object"
++    },
++    "ComponentCriticalInterval": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "category": {
++          "enum": [
++            "compute",
++            "memory",
++            "noc",
++            "sync",
++            "overhead"
++          ],
++          "title": "Category",
++          "type": "string"
++        },
++        "cause_job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Cause Job Id",
++          "type": "string"
++        },
++        "end_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "End Ps",
++          "type": "integer"
++        },
++        "kind": {
++          "enum": [
++            "service",
++            "release_idle"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "limiting_resource_id": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Limiting Resource Id"
++        },
++        "predecessor_id": {
++          "anyOf": [
++            {
++              "minLength": 1,
++              "pattern": "\\S",
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Predecessor Id"
++        },
++        "start_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Start Ps",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "kind",
++        "start_ps",
++        "end_ps",
++        "cause_job_id",
++        "predecessor_id",
++        "limiting_resource_id",
++        "category",
++        "activity_id"
++      ],
++      "title": "ComponentCriticalInterval",
++      "type": "object"
++    },
++    "ComponentObservations": {
++      "additionalProperties": false,
++      "properties": {
++        "activities": {
++          "$ref": "#/$defs/Observed_ComponentActivity_"
++        },
++        "allocations": {
++          "$ref": "#/$defs/Observed_AllocationObservation_"
++        },
++        "clocks": {
++          "$ref": "#/$defs/Observed_ComponentClockObservation_"
++        },
++        "critical_path": {
++          "$ref": "#/$defs/Observed_ComponentCriticalInterval_"
++        },
++        "dma": {
++          "$ref": "#/$defs/Observed_DmaObservation_"
++        },
++        "events": {
++          "$ref": "#/$defs/Observed_EventObservation_"
++        },
++        "format": {
++          "const": "uarch-native-observations/2",
++          "title": "Format",
++          "type": "string"
++        },
++        "jobs": {
++          "$ref": "#/$defs/Observed_JobObservation_"
++        },
++        "queue_membership": {
++          "$ref": "#/$defs/Observed_ComponentQueueObservation_"
++        },
++        "resource_intervals": {
++          "$ref": "#/$defs/Observed_ComponentResourceInterval_"
++        },
++        "transfers": {
++          "$ref": "#/$defs/Observed_TransferObservation_"
++        }
++      },
++      "required": [
++        "format",
++        "events",
++        "jobs",
++        "activities",
++        "clocks",
++        "dma",
++        "transfers",
++        "allocations",
++        "queue_membership",
++        "resource_intervals",
++        "critical_path"
++      ],
++      "title": "ComponentObservations",
++      "type": "object"
++    },
++    "ComponentQueueObservation": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "anyOf": [
++            {
++              "minLength": 1,
++              "pattern": "\\S",
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Activity Id"
++        },
++        "clock_domain": {
++          "anyOf": [
++            {
++              "enum": [
++                "core",
++                "noc",
++                "dram"
++              ],
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Clock Domain"
++        },
++        "enter_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Enter Ps",
++          "type": "integer"
++        },
++        "item_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Item Id",
++          "type": "string"
++        },
++        "leave_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Leave Ps"
++        },
++        "owner_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Owner Id",
++          "type": "integer"
++        },
++        "population": {
++          "enum": [
++            "waiting",
++            "service",
++            "inflight"
++          ],
++          "title": "Population",
++          "type": "string"
++        },
++        "queue_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Queue Id",
++          "type": "string"
++        }
++      },
++      "required": [
++        "queue_id",
++        "item_id",
++        "population",
++        "enter_ps",
++        "leave_ps",
++        "owner_id",
++        "clock_domain",
++        "activity_id"
++      ],
++      "title": "ComponentQueueObservation",
++      "type": "object"
++    },
++    "ComponentResourceInterval": {
++      "additionalProperties": false,
++      "properties": {
++        "activity": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity",
++          "type": "string"
++        },
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "end_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "End Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "limiting_resource_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Limiting Resource Id",
++          "type": "integer"
++        },
++        "owner_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Owner Id",
++          "type": "integer"
++        },
++        "service_end_ps_ratio": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/TimeRatio"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "service_start_ps_ratio": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/TimeRatio"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "start_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Start Ps",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "owner_id",
++        "job_id",
++        "start_ps",
++        "end_ps",
++        "activity",
++        "limiting_resource_id",
++        "service_start_ps_ratio",
++        "service_end_ps_ratio",
++        "activity_id"
++      ],
++      "title": "ComponentResourceInterval",
+       "type": "object"
+     },
+     "CriticalInterval": {
+@@ -1227,6 +1794,121 @@
+       "title": "Observed[ClockObservation]",
+       "type": "object"
+     },
++    "Observed_ComponentActivity_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentActivity"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentActivity]",
++      "type": "object"
++    },
++    "Observed_ComponentClockObservation_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentClockObservation"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentClockObservation]",
++      "type": "object"
++    },
++    "Observed_ComponentCriticalInterval_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentCriticalInterval"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentCriticalInterval]",
++      "type": "object"
++    },
++    "Observed_ComponentQueueObservation_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentQueueObservation"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentQueueObservation]",
++      "type": "object"
++    },
++    "Observed_ComponentResourceInterval_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentResourceInterval"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentResourceInterval]",
++      "type": "object"
++    },
+     "Observed_CriticalInterval_": {
+       "additionalProperties": false,
+       "properties": {
+@@ -1918,7 +2600,22 @@
+       "type": "string"
+     },
+     "observations": {
+-      "$ref": "#/$defs/Observations"
++      "discriminator": {
++        "mapping": {
++          "uarch-native-observations/1": "#/$defs/Observations",
++          "uarch-native-observations/2": "#/$defs/ComponentObservations"
++        },
++        "propertyName": "format"
++      },
++      "oneOf": [
++        {
++          "$ref": "#/$defs/Observations"
++        },
++        {
++          "$ref": "#/$defs/ComponentObservations"
++        }
++      ],
++      "title": "Observations"
+     },
+     "owners": {
+       "items": {
+diff --git a/docs/decisions/U0011-the-native-engine-core.md b/docs/decisions/U0011-the-native-engine-core.md
+--- a/docs/decisions/U0011-the-native-engine-core.md
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -390,3 +390,103 @@
+ event-injection workload carrier is introduced, no obligation is deleted and no private
+ execution is relabelled public. Without acceptance of this exception, literal all-case
+ public coverage remains blocked, even after public clock instrumentation is implemented.
++
++
++## Proposed component lifetime and observation completion (not a release)
++
++This section becomes normative only after human acceptance and protected installation of
++U4-A-component-release-v1's exact combined postimages. It grants neither component native
++implementation/build entry nor runtime execution authority; the separate reconciled K2 and
++scoped B release remain necessary. Human worksheet workings gate applicable L1 acceptance,
++not this preparation. Existing accepted tools, scope and dependencies are not voted again.
++
++Admit explicit ws-rowsplit@2 alongside unchanged @1. @1 retains persistent identical-size
++accumulators (no terminal readers); its mapper/default bytes remain unchanged. Historical
++@1 producer metadata remains inert for accumulator lifetime readers, including installed
++fixtures naming their compute as producer. Only explicit @2 activates transient semantics.
++@2 permits transient exact-size accumulator allocations: producer must be a compute that
++actually names that accumulator, on its core, with uninitialized initial residency. Every
++compute using it is a lifetime reader, follows that producer or is the producer, and remains
++subject to exact FP32 4*M*N size. Terminal consumers are precisely the maximal readers in
++the dependency DAG. Distinct overlapping allocations are legal only if ALL terminal readers
++of one precede the other's producer. Matrix serialization alone is not a lifetime proof.
++An unrelated DMA, barrier or compute using another accumulator cannot manufacture production.
++
++The @2 mapper keeps persistent scratch on cores with only one footprint. Heterogeneous
++cores use exact-size per-compute transient buffers at offset0 and explicit compute-to-compute
++edges in stable topological operator order (ID ties), then tile order. Existing op dependencies
++remain; different cores and DMA may overlap. Imported valid placements need not use this
++strategy. No capacity enlargement, spill, retile, K split, padding or scope waiver follows.
++
++Component results require uarch-native-observations/2; fixed-delay /1 remains byte/shape
++compatible. /2 adds a typed activity table and explicit activity references on clocks,
++resource intervals, ordinary queues and critical intervals. Request identity is a field,
++not a suffix hidden in an activity string. A compute/barrier activity has null request_id;
++DMA activities name an exact declared fragment; unicast uses its declared job ID. Activity
++IDs are unique stable strings and are not parsed to infer causality. Subphase, kind, owner,
++category and receiving domain are explicit. Zero-duration activities remain represented.
++
++Activities record ready, actual start and end, dispatch/completion observation ordinals,
++occupied status and typed tight predecessor links. Both ordinals join actual dispatched
++EventObservation records by job, owner and time. Job observations join the declared graph
++and actual completed state; request observations join declared fragment/job/engine/direction,
++buffers, bytes and route. Aggregate counts derive from completion, never declared work alone.
++Resource records cover precisely occupied activities; alignment/waiting does not invent busy
++intervals. DRAM latency and acknowledgement alignment are not channel/core-port service.
++NoC0 latency and DMA inflight can overlap. Busy time is half-open union, not sum.
++
++Receiving domains are core for compute, read/write ports and acknowledgement; noc for
++request/response/unicast hops and barriers; dram for DRAM latency; null for rational channel
++service. Alignment is a separate nonoccupied activity of the receiving subphase and category.
++Every clocked subphase has one service activity and one separate alignment activity,
++including zero-length alignment, with one exact clock record for each. Rational channel
++service and zero-hop routing have no alignment or clock record. Service ready follows its
++alignment; alignment ready follows the prior subphase (or request issue/job grant for the
++first). Clock records reference the exact activity. Existing E3/E4 next_edge and
++zero-owned-duration laws govern; zero-hop movement stays at arrival without edge alignment.
++Channel exact start/end ratios are reduced; published integer endpoints are ceilings. Never
++feed integer publication rounding back into channel service. Timing formulas remain E3/E4.
++
++Channel queues are channel_service:<channel>, exact declared fragment and channel owner,
++waiting/service only, clock null. DMA queues are dma_inflight:<flattened-engine>, exact
++fragment and DMA owner, inflight only, clock null. Ordinary queues are
++activity:<subphase>:<owner>, reference the exact activity and request (or compute/barrier job),
++use its receiving domain and waiting [ready,start] or service [start,end]. Service population
++means active mechanism, including nonoccupied alignment/latency, not resource busy time;
++only occupies_resource selects busy intervals. Ordinary service rows are explicit; zero
++waiting rows may be omitted, nonempty waits may not. Channel waiting/service and DMA
++inflight each require exactly one row per declared request. The same identity,
++owner and population laws apply before checking domains; nonnull cannot escape validation.
++Finite queue windows clip initial/terminal members, count events at start not end, retain
++separate waiting/service/inflight populations and return null residence for zero flow.
++
++Transfers use boundary IDs request_noc, dram, response_noc and core_port for each DMA
++request (write core_port precedes request_noc; read core_port follows response_noc), and
++unicast_noc for unicast. Direction always remains read/write/unicast from the declared
++request; request/ack control hops carry zero payload/transaction bytes, payload-bearing
++NoC/core-port boundaries carry payload bytes and zero HBM transaction bytes, dram carries
++both declared payload and rounded transaction bytes. Boundary enter joins the first subphase's ready time (before its receiving wait/alignment)
++and leave joins the last service completion; dram spans latency readiness through channel
++completion. Allocation owners are
++sram:<core>, matrix:<core> for accumulator, and channel:0 for HBM
++capacity accounting (HBM allocation is shared address capacity, not channel-local capacity).
++Allocation interval covers every actual use; explicit transient acc begins at its producer
++grant and frees at its last completed terminal reader; persistent scratch/reservations stay
++live through run end. Initial inventory records declared preloaded state.
++
++Causal links are explicit sequence, dependency, resource or credit relations. Every supplied
++predecessor ends at the activity start and is a legal actual cause; historical idle predecessors
++are forbidden. Zero-length links form a DAG and cannot be dropped. Select the terminal
++activity ending at makespan and each tied tight predecessor by ascending
++(owner_id,job_id,request_id-or-empty,subphase,activity_id). Reverse that path and omit only
++zero-length intervals to obtain the critical partition. Waiting follows the actual blocking
++activity, not an invented busy wait. Category follows the receiving mechanism, preserving
++compute overhead separately. Independent checker must verify candidate completeness and
++actual blocker eligibility from transitions, not just the total duration or these strings.
++
++Profile expected_outcome is an admission predicate, not a resource-guard waiver. Retain
++expected-negative profile cases as TestVariantNotAdmitted controls. Public semantic negatives
++require separately reviewed exact input hashes in a success-admission profile and an external
++immutable expected-refusal selection; they must fail resource validation before job execution.
++No mutable caller rehash, embedded trust anchor, bypass flag or hidden trust is authorized.
++Synthetic profiles/results remain unit-only evidence. Their acceptance is not native success.
+diff --git a/src/rkuarch/mapping/component.py b/src/rkuarch/mapping/component.py
+--- a/src/rkuarch/mapping/component.py
++++ b/src/rkuarch/mapping/component.py
+@@ -4,7 +4,9 @@
+ slots; only its first slot is populated. HBM storage is distinct per tile and
+ operand (including replicated W). Accumulator scratch is shared only for an
+ identical footprint on the same exclusive matrix owner. Different footprints
+-reserve disjoint storage: installed lifetime admission cannot yet express reuse.
++reserve disjoint storage under @1. Explicit @2 requires the proposed lifetime contract:
++heterogeneous cores use exact-size transient scratch and ordered compute dependencies.
++The default @1 bytes and identical-footprint persistent convention are unchanged.
+ """
+ 
+ from __future__ import annotations
+@@ -80,13 +82,26 @@
+     hardware_spec: HardwareSpec,
+     *,
+     initial_state: str = "cold",
++    mapping_version: str = "1",
+ ) -> TaskGraph:
+     """Map existing operators. Resident output is explicitly verification-only input.
+ 
+     This pure function neither constructs a profile nor grants admission. Assembly and
+     saved-input admission are separate APIs. Refuse capacity, never retile or spill.
+     """
++    require(mapping_version in ("1", "2"), "UnsupportedMapping")
+     operations = _ops(ops)
++    if mapping_version == "2":
++        # Stable topological order prevents new serialization edges reversing op dependencies.
++        pending = list(operations)
++        ordered_ops = []
++        done: set[str] = set()
++        while pending:
++            selected = next(op for op in pending if set(op.depends_on) <= done)
++            pending.remove(selected)
++            ordered_ops.append(selected)
++            done.add(selected.id)
++        operations = tuple(ordered_ops)
+     spec = HardwareSpec.model_validate(hardware_spec.model_dump(mode="json"))
+     require(spec_hash(spec) == PRODUCTION_HARDWARE, "UnsupportedHardware")
+     require(initial_state in ("cold", "fixture_resident"), "UnsupportedInitialState")
+@@ -108,7 +123,14 @@
+     acc_ends = [0] * ncores
+     acc_ids: dict[tuple[int, int], str] = {}
+     hbm_end = 0
+-    prefixes = {op.id: f"o{i:03}" for i, op in enumerate(operations)}
++    prefixes = {op.id: f"o{i:03}" for i, op in enumerate(sorted(operations, key=lambda x: x.id))}
++    footprints: dict[int, set[int]] = {}
++    for op in operations:
++        for tile_index, start in enumerate(range(0, op.spec.dimensions["M"], 256)):
++            size = 4 * min(256, op.spec.dimensions["M"] - start) * op.spec.dimensions["N"]
++            footprints.setdefault(tile_index, set()).add(size)
++    transient_cores = {c for c, sizes in footprints.items() if len(sizes) > 1}
++    last_compute: dict[int, str] = {}
+     joined = {name for op in operations for name in op.depends_on}
+ 
+     def buffer(
+@@ -282,7 +304,27 @@
+             )
+             acc_size = 4 * m * d["N"]
+             acc_key = (core_id, acc_size)
+-            if acc_key not in acc_ids:
++            transient = mapping_version == "2" and core_id in transient_cores
++            if transient:
++                acc_id = prefix + ".acc"
++                acc_ids[acc_key] = acc_id
++                buffer(
++                    acc_id,
++                    "accumulator",
++                    acc_size,
++                    0,
++                    core_id,
++                    None,
++                    None,
++                    None,
++                    False,
++                    compute_id,
++                    [compute_id],
++                )
++                if core_id in last_compute:
++                    edges.add((last_compute[core_id], compute_id))
++                last_compute[core_id] = compute_id
++            elif acc_key not in acc_ids:
+                 acc_id = f"acc.c{core_id:03}.b{acc_size:06}"
+                 acc_ids[acc_key] = acc_id
+                 buffer(
+diff --git a/src/rkuarch/workload/component.py b/src/rkuarch/workload/component.py
+--- a/src/rkuarch/workload/component.py
++++ b/src/rkuarch/workload/component.py
+@@ -58,6 +58,7 @@
+     assumptions: MappedAssumptions,
+     rank: RankScope,
+     admission: Admission,
++    mapping_version: str = "1",
+ ) -> MappedBundle:
+     """Assemble supplied mappings unchanged; validate resources without inventing trust.
+ 
+@@ -74,7 +75,7 @@
+         assumptions_hash=assumptions.assumptions_hash,
+         rank=rank.model_dump(mode="json"),
+         mapping_scope="task_graph",
+-        mapping_policy=dict(name="ws-rowsplit", version="1", buffer_depth=2),
++        mapping_policy=dict(name="ws-rowsplit", version=mapping_version, buffer_depth=2),
+         scope=dict(
+             kind="component",
+             operator_version="prepared-op/1",
+diff --git a/contract/tests/mapped/test_component_semantics_v2.py b/contract/tests/mapped/test_component_semantics_v2.py
+new file mode 100644
+--- /dev/null
++++ b/contract/tests/mapped/test_component_semantics_v2.py
+@@ -0,0 +1,249 @@
++"""Consistently resealed synthetic carriers; never component outputs/native evidence.
++Inputs independently hand constructed by B; attacks reproduce reviewer M1/M2/M3/M4/V1.
++"""
++from copy import deepcopy
++import pytest
++from uarch_contract.hashing import content_hash
++from uarch_contract.mapped import validate_result
++from validation.component.synthetic_carrier import synthetic_job, synthetic_result, synthetic_port_pair
++
++
++def records(r, section):
++    return r['observations'][section]['records']
++
++
++def act(r, name):
++    return next(a for a in records(r, 'activities') if a['activity_id'] == name)
++
++
++def seal(r):
++    r['result_hash'] = content_hash(r, exclude=('result_hash',))
++    return r
++
++
++def sample(case='D01'):
++    j = synthetic_job(case)
++    r = synthetic_port_pair(j) if case == 'D08' else synthetic_result(j)
++    # Explicit proposed endpoint encoding, independent of production implementation.
++    kinds = {
++        'read_port': ('OWNER_GRANT', 'DMA_DONE'), 'write_port': ('OWNER_GRANT', 'MEM_RESP'),
++        'channel_service': ('MEM_REQ', 'MEM_RESP'), 'dram_latency': ('MEM_REQ', 'MEM_RESP'),
++        'ack': ('TASK_READY', 'DMA_DONE'), 'barrier': ('SYNC_ARRIVE', 'BARRIER_RELEASE'),
++    }
++    ev = {e['observation_ordinal']: e for e in records(r, 'events')}
++    for a in records(r, 'activities'):
++        pair = ('TASK_READY', 'DEPENDENCY_READY') if a['kind'] == 'alignment' else (
++            ('NOC_HEAD', 'NOC_TAIL') if a['subphase'].endswith('_noc') else
++            ('OWNER_GRANT', 'COMPUTE_DONE') if a['subphase'].startswith('compute_') else kinds[a['subphase']])
++        ev[a['dispatch_ordinal']]['kind'], ev[a['completion_ordinal']]['kind'] = pair
++    for c in records(r, 'critical_path'):
++        c['predecessor_id'] = None
++    return j, seal(r)
++
++
++def rebusy(r):
++    for b in r['busy_time_ps']:
++        end = total = 0
++        for lo, hi in sorted((x['start_ps'], x['end_ps']) for x in records(r,'resource_intervals') if x['owner_id']==b['owner_id']):
++            total += max(0, hi-max(lo,end)); end=max(end,hi)
++        b['busy_time_ps']=total
++
++
++@pytest.mark.parametrize('case', ['D01','D08','D10-read'])
++def test_structural_positive(case):
++    j,r=sample(case)
++    validate_result(r,j)
++
++
++@pytest.mark.parametrize('part', ['category', 'domain'])
++def test_M1_relabel(part):
++    j,r=sample('D10-read')
++    a=act(r,'back-a')
++    if part == 'category':
++        a['category']='memory'
++        for c in records(r,'critical_path'):
++            if c['activity_id']=='back-a':
++                c['category']='memory'
++                delta=c['end_ps']-c['start_ps']
++                r['attribution_ps']['noc']-=delta; r['attribution_ps']['memory']+=delta
++    else:
++        a['receiving_domain']='dram'
++        for c in records(r,'clocks'):
++            if c['activity_id']=='back-a': c['domain']='dram'
++        for q in records(r,'queue_membership'):
++            if q['activity_id']=='back-a': q['clock_domain']='dram'
++    with pytest.raises(ValueError,match='^IncompleteObservations: activity category/domain$'):
++        validate_result(seal(r),j)
++
++
++def test_M2_owner_forgery():
++    j,r=sample()
++    port=next(o.owner_id for o in j.owners if o.resource=='dma_port:0')
++    a=act(r,'out'); a['owner_id']=port
++    for e in records(r,'events'):
++        if e['observation_ordinal'] in (a['dispatch_ordinal'],a['completion_ordinal']): e['target_id']=port
++    for x in records(r,'resource_intervals'):
++        if x['activity_id']=='out': x['owner_id']=x['limiting_resource_id']=port
++    for q in records(r,'queue_membership'):
++        if q['activity_id']=='out': q.update(owner_id=port,queue_id=f'activity:request_noc:{port}')
++    for c in records(r,'critical_path'):
++        if c['activity_id']=='out': c['limiting_resource_id']=port
++    rebusy(r)
++    with pytest.raises(ValueError,match='^InvalidResource: activity owner$'):
++        validate_result(seal(r),j)
++
++
++def test_M3_missing_off_chain_cause():
++    j,r=sample('D08')
++    act(r,'r1:back-a')['predecessors']=[]
++    with pytest.raises(ValueError,match='^AttributionMismatch: missing tight cause$'):
++        validate_result(seal(r),j)
++
++
++def test_M4_nonoccupying_channel():
++    j,r=sample()
++    ch,ba=act(r,'channel'),act(r,'back-a')
++    ch.update(occupies_resource=False,end_ps=54500)
++    ba.update(ready_ps=54500,start_ps=54500)
++    r['observations']['resource_intervals']['records']=[x for x in records(r,'resource_intervals') if x['activity_id']!='channel']
++    for e in records(r,'events'):
++        if e['observation_ordinal'] in (ch['completion_ordinal'],ba['dispatch_ordinal']): e['t_ps']=54500
++    for q in records(r,'queue_membership'):
++        if q['queue_id'].startswith('channel_service:') and q['population']=='service': q['leave_ps']=54500
++        if q['activity_id']=='back-a':
++            q['enter_ps']=54500
++            if q['population']=='waiting': q['leave_ps']=54500
++    for t in records(r,'transfers'):
++        if t['boundary_id']=='dram': t['leave_ps']=54500
++        if t['boundary_id']=='response_noc': t['enter_ps']=54500
++    for c in records(r,'clocks'):
++        if c['activity_id']=='back-a': c['grant_ps']=54500
++    for c in records(r,'critical_path'):
++        if c['activity_id']=='channel': c['end_ps']=54500
++        if c['activity_id']=='back-a': c['start_ps']=54500
++    r['attribution_ps']['memory']+=250; r['attribution_ps']['noc']-=250
++    rebusy(r)
++    with pytest.raises(ValueError,match='^IncompleteObservations: phase occupancy$'):
++        validate_result(seal(r),j)
++
++
++def test_V1_credit_only_first_from_last():
++    j,r=sample('D08')
++    a=act(r,'r1:port')
++    a['predecessors'].append(dict(activity_id='r0:port',relation='credit'))
++    a['predecessors'].sort(key=lambda p:(p['activity_id'],p['relation']))
++    with pytest.raises(ValueError,match='^AttributionMismatch: credit endpoints$'):
++        validate_result(seal(r),j)
++
++
++@pytest.mark.parametrize('field,detail', [
++    ('owner','job owner'), ('release','component release'), ('blocking','unrepresented job predecessors'),
++    ('critical','unrepresented critical predecessor'), ('event','activity event kind'),
++])
++def test_F8_resealed_fields(field,detail):
++    j,r=sample('D08')
++    row=records(r,'jobs')[0]
++    if field=='owner': row['owner_id']=next(o.owner_id for o in j.owners if o.resource=='channel:6')
++    if field=='release': row['release_ps']=50000
++    if field=='blocking': row['blocking_predecessor_ids']=['r01']
++    if field=='critical': records(r,'critical_path')[-1]['predecessor_id']='FORGED'
++    if field=='event':
++        next(e for e in records(r,'events') if e['kind']=='DMA_DONE')['kind']='STAT_SAMPLE'
++    with pytest.raises(ValueError,match='^(IncompleteObservations|AttributionMismatch|InvalidResource): '+detail+'$'):
++        validate_result(seal(r),j)
++    validate_result(sample('D08')[1],j)
++
++
++def synthetic():
++    j, r = sample()
++    rows = records(r, 'queue_membership')
++    rows.sort(key=lambda q: not q['queue_id'].startswith('channel_service:'))
++    return j, r
++
++
++def check(job, raw):
++    raw = deepcopy(raw)
++    raw["result_hash"] = content_hash(raw, exclude=("result_hash",))
++    return validate_result(raw, job)
++
++
++def test_synthetic_null_channel_dma_and_clocked_controls():
++    j, r = synthetic()
++    assert check(j, r)
++    q = r["observations"]["queue_membership"]["records"][0]
++    t = next(t for t in j.mapped_point.task_graph.jobs if t.kind == "dma")
++    owner = next(
++        o.owner_id
++        for o in j.owners
++        if o.resource == f"dma:{t.dma_engine_id // 4}:{t.dma_engine_id % 4}"
++    )
++    q.update(queue_id=f"dma_inflight:{t.dma_engine_id}", population="inflight", owner_id=owner)
++    assert check(j, r)
++    a = r["observations"]["activities"]["records"][0]
++    q.update(
++        queue_id=f"activity:{a['subphase']}:{a['owner_id']}",
++        item_id=a["request_id"] or a["job_id"],
++        owner_id=a["owner_id"],
++        population="waiting",
++        clock_domain=a["receiving_domain"],
++        enter_ps=a["ready_ps"], leave_ps=a["start_ps"],
++        activity_id=a["activity_id"],
++    )
++    assert check(j, r)
++
++
++@pytest.mark.parametrize("domain", [None, "dram"])
++@pytest.mark.parametrize(
++    "fault", ["owner", "channel", "engine", "request", "population", "invented_queue"]
++)
++def test_synthetic_queue_attacks_restored(fault, domain):
++    j, r = synthetic()
++    assert check(j, r)
++    bad = deepcopy(r)
++    q = bad["observations"]["queue_membership"]["records"][0]
++    q["clock_domain"] = domain
++    if fault == "owner":
++        q["owner_id"] = 0
++    if fault == "channel":
++        q["queue_id"] = "channel_service:7"
++    if fault == "engine":
++        q.update(queue_id="dma_inflight:15", population="inflight")
++    if fault == "request":
++        q["item_id"] = "undeclared"
++    if fault == "population":
++        q["population"] = "inflight"
++    if fault == "invented_queue":
++        q["queue_id"] = "arbitrary"
++    with pytest.raises(ValueError, match="IncompleteObservations"):
++        check(j, bad)
++    assert check(j, r)
++
++
++def test_synthetic_activity_dispatch_and_cycle_attacks():
++    j, r = synthetic()
++    assert check(j, r)
++    for fault in ("request", "ordinal", "cycle"):
++        bad = deepcopy(r)
++        acts = bad["observations"]["activities"]["records"]
++        a = acts[0]
++        if fault == "request":
++            a["request_id"] = "undeclared"
++        if fault == "ordinal":
++            a["dispatch_ordinal"] = 999
++        if fault == "cycle":
++            a["predecessors"] = [dict(activity_id=a["activity_id"], relation="sequence")]
++        with pytest.raises(ValueError):
++            check(j, bad)
++        assert check(j, r)
++
++
++def test_stale_result_binding_precedes_queue_guard():
++    j, raw = synthetic()
++    good = check(j, raw).model_dump(mode="json")
++    bad = deepcopy(good)
++    bad["observations"]["queue_membership"]["records"][0]["item_id"] = "forged"
++    with pytest.raises(ValueError, match="ArtifactHashMismatch"):
++        validate_result(bad, j)
++    with pytest.raises(ValueError, match="IncompleteObservations"):
++        check(j, bad)
++    assert validate_result(good, j)
+diff --git a/contract/tests/mapped/test_component_lifetimes_v2.py b/contract/tests/mapped/test_component_lifetimes_v2.py
+new file mode 100644
+--- /dev/null
++++ b/contract/tests/mapped/test_component_lifetimes_v2.py
+@@ -0,0 +1,81 @@
++"""A's unmasked lifetime regressions; multi-reader construction attributed to B joins-v2.
++Synthetic resources only. No admission authority or native execution.
++"""
++from copy import deepcopy
++import pytest
++from uarch_contract.mapped import MappedBundle, validate_resources
++from validation.component.corpus import graph
++from validation.component.join_inputs import pair, reseal
++
++
++def check(raw):
++    b = MappedBundle.model_validate(reseal(deepcopy(raw)))
++    validate_resources(b, b.points[0])
++
++
++def multiple_consumers():
++    from validation.component.join_inputs import pair
++
++    b = pair(256, 256)
++    g = graph(b)
++    first = deepcopy(g["jobs"][0])
++    first_buffers = [
++        deepcopy(x) for x in g["buffers"] if not x["id"].startswith("z") and x["space"] == "sram"
++    ]
++    for index, name in enumerate(("d", "e"), 2):
++        op = deepcopy(b["scope"]["ops"][0])
++        op["id"] = "g" + str(index)
++        b["scope"]["ops"].append(op)
++        b["scope"]["op_ids"].append(op["id"])
++        b["points"][0]["identity"]["op_ids"].append(op["id"])
++        j = deepcopy(first)
++        j.update(id=name, op_id=op["id"])
++        j["operand_buffers"] = {k: name + v for k, v in j["operand_buffers"].items()}
++        g["jobs"].append(j)
++        cov = deepcopy(g["coverage"][0])
++        cov.update(job_id=name, op_id=op["id"])
++        g["coverage"].append(cov)
++        for buf in deepcopy(first_buffers):
++            buf["id"] = name + buf["id"]
++            buf["op_id"] = op["id"] if buf["op_id"] is not None else None
++            buf["offset_bytes"] += index * 786432
++            buf["bank"] = buf["offset_bytes"] // 524288
++            buf["producer_id"] = name if buf["producer_id"] == "c" else buf["producer_id"]
++            buf["final_consumer_ids"] = [name if x == "c" else x for x in buf["final_consumer_ids"]]
++            g["buffers"].append(buf)
++    next(x for x in g["buffers"] if x["id"] == "acc")["final_consumer_ids"] = ["d", "e"]
++    g["dependencies"] = [
++        dict(before=a, after=z) for a, z in [("c", "d"), ("c", "e"), ("d", "z"), ("e", "z")]
++    ]
++    g["coverage"].sort(key=lambda x: x["job_id"])
++    b["mapping_policy"]["version"] = "2"
++    return b
++
++
++
++def test_partial_terminal_reuse():
++    good = multiple_consumers()
++    check(good)
++    bad = deepcopy(good)
++    g = graph(bad)
++    next(b for b in g['buffers'] if b['id'] == 'acc')['final_consumer_ids'] = ['d']
++    g['dependencies'].remove(dict(before='e', after='z'))
++    with pytest.raises(ValueError, match='^InvalidDependency: final consumers acc$'):
++        check(bad)
++    check(good)
++
++
++@pytest.mark.parametrize('ordered', [False, True], ids=['A3c-unordered', 'A3b-before-producer'])
++def test_equal_footprint_use_before_production(ordered):
++    good = pair(256, 256)
++    good['mapping_policy']['version'] = '2'
++    check(good)
++    bad = deepcopy(good)
++    g = graph(bad)
++    next(j for j in g['jobs'] if j['id'] == 'z')['accumulator_buffer_id'] = 'acc'
++    g['buffers'] = [b for b in g['buffers'] if b['id'] != 'zacc']
++    next(b for b in g['buffers'] if b['id'] == 'acc')['final_consumer_ids'] = ['c'] if ordered else ['c', 'z']
++    g['dependencies'] = [dict(before='z', after='c')] if ordered else []
++    with pytest.raises(ValueError, match='^InvalidDependency: accumulator use before production$'):
++        check(bad)
++    check(good)
+diff --git a/tests/unit/test_u4_component_mapper_v2.py b/tests/unit/test_u4_component_mapper_v2.py
+new file mode 100644
+--- /dev/null
++++ b/tests/unit/test_u4_component_mapper_v2.py
+@@ -0,0 +1,322 @@
++"""Prospective tests; run only in private candidate export. Synthetic anchors only."""
++
++import json
++from copy import deepcopy
++from pathlib import Path
++
++import pytest
++from uarch_contract.hashing import canonical_json, content_hash
++from uarch_contract.mapped import MappedBundle, validate_resources
++
++from rkuarch.mapping.component import map_component
++from rkuarch.workload.component import component_point, prepare_component_bundle
++from validation.component.corpus import two_tiles
++
++ROOT = next(
++    parent for parent in Path(__file__).resolve().parents
++    if (parent / "pyproject.toml").is_file() and (parent / "contract/fixtures/mapped").is_dir()
++)
++
++
++def baseline():
++    return MappedBundle.model_validate_json(
++        (ROOT / "contract/fixtures/mapped/component.json").read_bytes()
++    )
++
++
++def seal(raw):
++    for p in raw["points"]:
++        g = p["task_graph"]
++        for key in ("buffers", "jobs", "routes"):
++            g[key].sort(key=lambda x: x["id"])
++        g["dependencies"].sort(key=lambda x: (x["before"], x["after"]))
++        g["graph_hash"] = content_hash(g, exclude=("graph_hash",))
++        p["payload_hash"] = content_hash(p, exclude=("payload_hash",))
++    raw["bundle_hash"] = content_hash(raw, exclude=("bundle_hash",))
++    return raw
++
++
++def accept(raw):
++    b = MappedBundle.model_validate(seal(deepcopy(raw)))
++    validate_resources(b, b.points[0])
++    return b
++
++
++def transient():
++    raw = two_tiles(True)
++    raw["mapping_policy"]["version"] = "2"
++    g = raw["points"][0]["task_graph"]
++    for buf in g["buffers"]:
++        if buf["space"] == "accumulator":
++            job = "c" if buf["id"] == "acc" else "z"
++            buf.update(offset_bytes=0, producer_id=job, final_consumer_ids=[job])
++    g["dependencies"] = [dict(before="c", after="z")]
++    return seal(raw)
++
++
++def test_c04_new_and_old():
++    with pytest.raises(ValueError, match="CapacityExceeded"):
++        accept(two_tiles(True))
++    good = transient()
++    assert accept(good)
++    old = deepcopy(good)
++    old["mapping_policy"]["version"] = "1"
++    with pytest.raises(ValueError, match="UnsupportedMapping"):
++        accept(old)
++    assert accept(good)
++
++
++@pytest.mark.parametrize(
++    "fault,reason",
++    [
++        ("independent", "LiveBufferAlias"),
++        ("false_producer", "InvalidDependency"),
++        ("last_use", "InvalidDependency"),
++        ("owner", "InvalidResource"),
++        ("size", "CapacityExceeded"),
++        ("capacity", "CapacityExceeded"),
++    ],
++)
++def test_lifetime_attacks(fault, reason):
++    good = transient()
++    assert accept(good)
++    bad = deepcopy(good)
++    g = bad["points"][0]["task_graph"]
++    a = next(x for x in g["buffers"] if x["id"] == "acc")
++    if fault == "independent":
++        g["dependencies"] = []
++    if fault == "false_producer":
++        a["producer_id"] = "z"
++    if fault == "last_use":
++        a["final_consumer_ids"] = []
++    if fault == "owner":
++        a["core_id"] = 1
++    if fault == "size":
++        a["size_bytes"] -= 4
++    if fault == "capacity":
++        a["size_bytes"] += 4
++    with pytest.raises(ValueError, match=reason):
++        accept(bad)
++    assert accept(good)
++
++
++def test_mapper_versions_and_maximum_pair():
++    b = baseline()
++    raw = b.scope.ops[0].model_dump(mode="json")
++    from uarch_contract.prepared import PreparedOp
++
++    ops = []
++    for name, n in (("a", 255), ("z", 256)):
++        d = deepcopy(raw)
++        d.update(id=name, depends_on=[])
++        d["spec"]["dimensions"] = {"M": 256, "K": 256, "N": n}
++        ops.append(PreparedOp.model_validate(d))
++    with pytest.raises(ValueError, match="CapacityExceeded"):
++        map_component(ops, b.hardware_spec)
++    g = map_component(ops, b.hardware_spec, mapping_version="2")
++    assert [(x.offset_bytes, x.size_bytes) for x in g.buffers if x.space == "accumulator"] == [
++        (0, 261120),
++        (0, 262144),
++    ]
++    p = component_point(ops, g)
++    candidate = prepare_component_bundle(
++        ops,
++        b.hardware_spec,
++        p,
++        producer=b.producer,
++        assumptions=b.assumptions,
++        rank=b.rank,
++        admission=b.admission,
++        mapping_version="2",
++    )
++    assert accept(candidate.model_dump(mode="json"))
++    assert canonical_json(map_component(b.scope.ops, b.hardware_spec)) == canonical_json(
++        map_component(b.scope.ops, b.hardware_spec, mapping_version="1")
++    )
++    stale = candidate.model_dump(mode="json")
++    stale["points"][0]["task_graph"]["dependencies"] = []
++    with pytest.raises(ValueError, match="HashMismatch"):
++        MappedBundle.model_validate(stale)
++    with pytest.raises(ValueError, match="LiveBufferAlias"):
++        accept(stale)
++    assert accept(candidate.model_dump(mode="json"))
++
++
++def test_explicit_activity_schema():
++    from uarch_contract.mapped import ComponentActivity
++
++    value = dict(
++        activity_id="a",
++        job_id="c",
++        request_id=None,
++        subphase="compute_overhead",
++        kind="service",
++        ready_ps=0,
++        start_ps=0,
++        end_ps=32000,
++        owner_id=0,
++        category="overhead",
++        receiving_domain="core",
++        occupies_resource=True,
++        dispatch_ordinal=0,
++        completion_ordinal=1,
++        predecessors=[],
++    )
++    assert ComponentActivity.model_validate(value).request_id is None
++    for update in (
++        {"subphase": "compute:request-string"},
++        {"end_ps": -1},
++        {"request_id": 3},
++        {"kind": "waiting"},
++    ):
++        with pytest.raises(ValueError):
++            ComponentActivity.model_validate(dict(value, **update))
++
++
++@pytest.mark.parametrize("fault", ["operand_access", "input", "output", "barrier"])
++@pytest.mark.parametrize(
++    "entry", ["assembly", "bundle_load", "bundle_export", "prepare_job", "job_load", "job_export"]
++)
++def test_completeness_all_component_entries(fault, entry, tmp_path):
++    from uarch_contract.mapped import MappedPoint, NativeEngineIdentity
++    from uarch_contract.prepared import PreparedOp
++
++    from rkuarch.workload.component import prepare_component_job
++    from rkuarch.workload.mapped import (
++        export_component_bundle,
++        export_component_job,
++        loads_component_bundle,
++        loads_component_job,
++    )
++
++    b = baseline()
++    first = b.scope.ops[0].model_dump(mode="json")
++    first.update(id="a", depends_on=[])
++    second = deepcopy(first)
++    second.update(id="z", depends_on=["a"])
++    ops = [PreparedOp.model_validate(first), PreparedOp.model_validate(second)]
++    point = component_point(ops, map_component(ops, b.hardware_spec))
++    good = prepare_component_bundle(
++        ops,
++        b.hardware_spec,
++        point,
++        producer=b.producer,
++        assumptions=b.assumptions,
++        rank=b.rank,
++        admission=b.admission,
++    )
++    registry = json.loads((ROOT / "contract/fixtures/mapped/registry.json").read_bytes())
++    args = dict(
++        invocation="production",
++        registry=registry,
++        profile=None,
++        trusted_registry_hash=registry["registry_hash"],
++        trusted_profile_hash=None,
++    )
++    template = json.loads((ROOT / "contract/fixtures/mapped/component-job.json").read_bytes())
++    engine = NativeEngineIdentity.model_validate(template["engine"])
++    goodjob = prepare_component_job(
++        good, point_hash=point.payload_hash, expected_engine=engine, **args
++    )
++    raw = good.model_dump(mode="json")
++    g = raw["points"][0]["task_graph"]
++    reason = "InvalidTransfer"
++    if fault == "operand_access":
++        raw["scope"]["ops"][0]["operand_access"].pop("X")
++        reason = "InvalidCoverage"
++    elif fault == "input":
++        dma = next(j for j in g["jobs"] if j["kind"] == "dma" and j["direction"] == "read")
++        dma["source"]["size_bytes"] = dma["destination"]["size_bytes"] = 2
++        dma["fragments"][0]["payload_bytes"] = 2
++    elif fault == "output":
++        dma = next(
++            j
++            for j in g["jobs"]
++            if j["kind"] == "dma" and j["direction"] == "write" and j["op_id"] == "z"
++        )
++        g["jobs"].remove(dma)
++        g["buffers"] = [x for x in g["buffers"] if x["id"] != dma["destination"]["buffer_id"]]
++        next(x for x in g["buffers"] if x["id"] == dma["source"]["buffer_id"])[
++            "final_consumer_ids"
++        ] = []
++        g["dependencies"] = [x for x in g["dependencies"] if x["after"] != dma["id"]]
++    else:
++        next(j for j in g["jobs"] if j["kind"] == "barrier")["owner_id"] = 0
++        reason = "InvalidResource"
++    seal(raw)
++    jobraw = goodjob.model_dump(mode="json")
++    jobraw.update(
++        workload_closure=raw,
++        bundle_hash=raw["bundle_hash"],
++        mapped_point=raw["points"][0],
++        point_hash=raw["points"][0]["payload_hash"],
++    )
++    jobraw["job_hash"] = content_hash(jobraw, exclude=("job_hash",))
++    jobargs = {k: v for k, v in args.items() if k not in ("registry", "profile")}
++    jobargs["expected_engine"] = engine
++    with pytest.raises(ValueError, match=reason):
++        if entry == "assembly":
++            prepare_component_bundle(
++                [PreparedOp.model_validate(x) for x in raw["scope"]["ops"]],
++                b.hardware_spec,
++                MappedPoint.model_validate(raw["points"][0]),
++                producer=b.producer,
++                assumptions=b.assumptions,
++                rank=b.rank,
++                admission=b.admission,
++            )
++        elif entry == "bundle_load":
++            loads_component_bundle(canonical_json(raw), **args)
++        elif entry == "bundle_export":
++            export_component_bundle(raw, tmp_path / "refused.json", **args)
++        elif entry == "prepare_job":
++            prepare_component_job(
++                MappedBundle.model_validate(raw),
++                point_hash=raw["points"][0]["payload_hash"],
++                expected_engine=engine,
++                **args,
++            )
++        elif entry == "job_load":
++            loads_component_job(canonical_json(jobraw), **jobargs)
++        else:
++            export_component_job(jobraw, tmp_path / "refused.json", **jobargs)
++    assert not (tmp_path / "refused.json").exists()
++    assert loads_component_bundle(canonical_json(good), **args) == good
++    assert loads_component_job(canonical_json(goodjob), **jobargs) == goodjob
++
++
++@pytest.mark.parametrize("producer_kind", ["dma", "barrier"])
++def test_false_producer_is_not_merely_an_ancestor(producer_kind):
++    from uarch_contract.prepared import PreparedOp
++
++    b = baseline()
++    first = b.scope.ops[0].model_dump(mode="json")
++    first.update(id="a", depends_on=[])
++    second = deepcopy(first)
++    second.update(id="z", depends_on=["a"])
++    second["spec"]["dimensions"]["M"] = 4
++    ops = [PreparedOp.model_validate(first), PreparedOp.model_validate(second)]
++    g = map_component(ops, b.hardware_spec, mapping_version="2")
++    p = component_point(ops, g)
++    good = prepare_component_bundle(
++        ops,
++        b.hardware_spec,
++        p,
++        producer=b.producer,
++        assumptions=b.assumptions,
++        rank=b.rank,
++        admission=b.admission,
++        mapping_version="2",
++    ).model_dump(mode="json")
++    bad = deepcopy(good)
++    graph = bad["points"][0]["task_graph"]
++    if producer_kind == "dma":
++        acc = next(x for x in graph["buffers"] if x["space"] == "accumulator")
++        producer = next(x for x in graph["jobs"] if x["kind"] == "dma")
++    else:
++        acc = [x for x in graph["buffers"] if x["space"] == "accumulator"][-1]
++        producer = next(x for x in graph["jobs"] if x["kind"] == "barrier")
++    acc["producer_id"] = producer["id"]
++    with pytest.raises(ValueError, match="InvalidDependency.*producer"):
++        accept(bad)
++    assert accept(good)
