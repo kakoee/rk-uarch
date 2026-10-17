@@ -121,3 +121,8 @@ at zero time. Therefore tight ordinal edges strictly increase: a valid final `/2
 cannot contain a cycle independently of the explicit DAG guard. C1 will retain an explicit
 two-activity cycle diagnostic/control, but its final DAG guard is now intentionally redundant;
 we will not claim that a later ordinal refusal is a behavioral mutation kill for the DAG rule.
+
+F11 concrete proposal is now [profile-decision.md](profile-decision.md). P2 supports both
+component and transport_fixture B scopes. Legacy profiles and B historical/new proposal
+fixtures need not be rewritten while this human choice is pending; label their current
+profile/1 promise honestly. P2 additions will be included in A's next exact patch.
