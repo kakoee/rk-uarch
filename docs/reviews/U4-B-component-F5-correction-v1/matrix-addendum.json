@@ -1,0 +1,131 @@
+{
+  "F5": {
+    "disposition": "ESSENTIAL for the clock-consistent D01 attack; removal of ONLY this guard admits through both layers",
+    "guard": "mechanism duration",
+    "identity_tests_counted_as_mutation_kills": false,
+    "law": {
+      "forged_end_ps": 58500,
+      "grant_ps": 55000,
+      "lawful_end_ps": 59000,
+      "n_cycles": 4,
+      "noc_hz": 1000000000,
+      "receiving_alignment_ps": [
+        58500,
+        59000
+      ],
+      "unchanged_makespan_ps": 60000,
+      "unchanged_port_ps": [
+        59000,
+        60000
+      ]
+    },
+    "line": 194,
+    "new_test": "validation/component/test_f5_mechanism_duration.py::test_d01_clock_consistent_response_duration_forgery",
+    "old_masked_test": "test_mechanism_and_field_forgery[duration-mechanism duration]",
+    "old_test_disposition": "n_cycles=2 against one-cycle work is an inconsistent witness; after duration removal clock mechanism binding refuses. Regex mismatch is not unsafe acceptance.",
+    "single_guard_evidence": "restoration.json",
+    "source": "validation/component/observations_v2.py",
+    "source_sha256": "dd9c049b2fb2f28e2b6cbba04e5b3b627a6e7e4dbfcf3cbaf305969587915d62",
+    "test_sha256": "e4f9f8693f20031ccf8b97d24a141b0aa63725e220fb6a754d2275cb5c6b0f8a",
+    "valid_test": "validation/component/test_f5_mechanism_duration.py::test_d01_response_duration_control"
+  },
+  "O1": [
+    {
+      "disposition": "Independent discriminating coverage NOT DEMONSTRATED",
+      "existing_evidence": "Inherited Stage 3 single-removal survivor; historical final_guards entry is an inventory, not behavioral proof.",
+      "expression": "requests.keys() == declared.keys() | unicasts.keys()",
+      "guard": "complete request inventory",
+      "line": 81,
+      "new_execution": "none; no broad sweep requested",
+      "parent_rows": "F1/F2/F8 accepted at row level in Stage 3; unchanged by this observation",
+      "redundancy": "Not established; no redundancy claim made.",
+      "source": "validation/component/observations_v2.py"
+    },
+    {
+      "disposition": "Independent discriminating coverage NOT DEMONSTRATED",
+      "existing_evidence": "Inherited Stage 3 single-removal survivor; historical final_guards entry is an inventory, not behavioral proof.",
+      "expression": "(res['owner_id'], res['job_id'], res['start_ps'], res['end_ps'], res['activity'], res['limiting_resource_id']) == (a['owner_id'], a['job_id'], a['start_ps'], a['end_ps'], a['subphase'], a['owner_id'])",
+      "guard": "occupied row binding",
+      "line": 318,
+      "new_execution": "none; no broad sweep requested",
+      "parent_rows": "F1/F2/F8 accepted at row level in Stage 3; unchanged by this observation",
+      "redundancy": "Not established; no redundancy claim made.",
+      "source": "validation/component/observations_v2.py"
+    },
+    {
+      "disposition": "Independent discriminating coverage NOT DEMONSTRATED",
+      "existing_evidence": "Inherited Stage 3 single-removal survivor; historical final_guards entry is an inventory, not behavioral proof.",
+      "expression": "q['item_id'] in declared",
+      "guard": "nonclocked request binding",
+      "line": 387,
+      "new_execution": "none; no broad sweep requested",
+      "parent_rows": "F1/F2/F8 accepted at row level in Stage 3; unchanged by this observation",
+      "redundancy": "Not established; no redundancy claim made.",
+      "source": "validation/component/observations_v2.py"
+    },
+    {
+      "disposition": "Independent discriminating coverage NOT DEMONSTRATED",
+      "existing_evidence": "Inherited Stage 3 single-removal survivor; historical final_guards entry is an inventory, not behavioral proof.",
+      "expression": "q['activity_id'] in acts and q['population'] in ('waiting', 'service')",
+      "guard": "ordinary queue inventory",
+      "line": 410,
+      "new_execution": "none; no broad sweep requested",
+      "parent_rows": "F1/F2/F8 accepted at row level in Stage 3; unchanged by this observation",
+      "redundancy": "Not established; no redundancy claim made.",
+      "source": "validation/component/observations_v2.py"
+    },
+    {
+      "disposition": "Independent discriminating coverage NOT DEMONSTRATED",
+      "existing_evidence": "Inherited Stage 3 single-removal survivor; historical final_guards entry is an inventory, not behavioral proof.",
+      "expression": "all((a['start_ps'] == 0 or eligible[a['activity_id']] for a in acts.values()))",
+      "guard": "actual nonzero-start cause",
+      "line": 122,
+      "new_execution": "none; no broad sweep requested",
+      "parent_rows": "F1/F2/F8 accepted at row level in Stage 3; unchanged by this observation",
+      "redundancy": "Not established; no redundancy claim made.",
+      "source": "validation/component/transition_checks.py"
+    },
+    {
+      "disposition": "Independent discriminating coverage NOT DEMONSTRATED",
+      "existing_evidence": "Inherited Stage 3 single-removal survivor; historical final_guards entry is an inventory, not behavioral proof.",
+      "expression": "row['ready_ps'] == max((jobs[p]['end_ps'] for p in deps[tid]), default=0)",
+      "guard": "job dependency readiness",
+      "line": 141,
+      "new_execution": "none; no broad sweep requested",
+      "parent_rows": "F1/F2/F8 accepted at row level in Stage 3; unchanged by this observation",
+      "redundancy": "Not established; no redundancy claim made.",
+      "source": "validation/component/transition_checks.py"
+    },
+    {
+      "disposition": "Independent discriminating coverage NOT DEMONSTRATED",
+      "existing_evidence": "Inherited Stage 3 single-removal survivor; historical final_guards entry is an inventory, not behavioral proof.",
+      "expression": "(row['start_ps'], row['end_ps']) == (min((a['start_ps'] for a in firsts[tid])), max((a['end_ps'] for a in lasts[tid])))",
+      "guard": "job transition endpoints",
+      "line": 145,
+      "new_execution": "none; no broad sweep requested",
+      "parent_rows": "F1/F2/F8 accepted at row level in Stage 3; unchanged by this observation",
+      "redundancy": "Not established; no redundancy claim made.",
+      "source": "validation/component/transition_checks.py"
+    },
+    {
+      "disposition": "Independent discriminating coverage NOT DEMONSTRATED",
+      "existing_evidence": "Inherited Stage 3 single-removal survivor; historical final_guards entry is an inventory, not behavioral proof.",
+      "expression": "len(endpoints) == len(set(endpoints)) and set(endpoints) == events.keys()",
+      "guard": "event endpoint inventory",
+      "line": 190,
+      "new_execution": "none; no broad sweep requested",
+      "parent_rows": "F1/F2/F8 accepted at row level in Stage 3; unchanged by this observation",
+      "redundancy": "Not established; no redundancy claim made.",
+      "source": "validation/component/transition_checks.py"
+    }
+  ],
+  "format": "component-F5-matrix-addendum/1",
+  "scope": "F5 correction and O1 wording only; other Stage 3 row outcomes inherited",
+  "supersedes": {
+    "json_pointer": "/groups/ready-and-clock-mechanism/disposition",
+    "path": "docs/reviews/U4-B-component-stage2-v1/guard-matrix.json",
+    "retained_history": "Original matrix and receipts remain byte-identical. The old grouped experiment is real but does not establish single-guard redundancy.",
+    "retracted_claim": "Duration is jointly defended by duration and clock witness",
+    "sha256": "f66f001633c70bc3acad8916599573820fb461909ded4a1bd8b2bbea47bb4bff"
+  }
+}

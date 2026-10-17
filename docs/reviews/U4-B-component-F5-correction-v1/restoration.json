@@ -1,0 +1,121 @@
+{
+  "behavioral_kill": "new forged-carrier test: DID NOT RAISE; valid control passes",
+  "exact_restoration": true,
+  "executed": {
+    "affected-checker-and-identity": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-F5-correction-v1/isolated.py",
+        "/tmp/u4-b-f5-nb6ottn1/candidate",
+        "pytest",
+        "-q",
+        "validation/component/test_f5_mechanism_duration.py",
+        "validation/component/test_consistent_observations.py",
+        "validation/component/test_join_selection.py",
+        "validation/component/test_stage2_selection.py",
+        "-m",
+        "not native"
+      ],
+      "returncode": 0,
+      "sha256": "d43da4ad94feaecea94b3ca021f92c46239b5da1a2a3582a3d298f8eda7b14f0"
+    },
+    "control": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-F5-correction-v1/isolated.py",
+        "/tmp/u4-b-f5-nb6ottn1/candidate",
+        "pytest",
+        "-q",
+        "validation/component/test_f5_mechanism_duration.py"
+      ],
+      "returncode": 0,
+      "sha256": "83dc286ccea52078b02162bc4991d4ad35a1f940bfe1708eed6560a9d91f93b6"
+    },
+    "discovery": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-F5-correction-v1/isolated.py",
+        "/tmp/u4-b-f5-nb6ottn1/candidate",
+        "pytest",
+        "--collect-only",
+        "-q",
+        "validation/component/test_f5_mechanism_duration.py",
+        "-m",
+        "not native and not nightly and not silicon"
+      ],
+      "returncode": 0,
+      "sha256": "9891bb6efbcff11af75a332bef07db5bcc65f6f6c06c1960650b691768c6ec69"
+    },
+    "old-masked-test-guard-removed": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-F5-correction-v1/isolated.py",
+        "/tmp/u4-b-f5-nb6ottn1/candidate",
+        "pytest",
+        "-q",
+        "validation/component/test_consistent_observations.py::test_mechanism_and_field_forgery[duration-mechanism duration]"
+      ],
+      "returncode": 1,
+      "sha256": "d904bc72a49ee72030addadc5d39cfa411847918d5f1125f7818ec1ec547ce91"
+    },
+    "restored-controls": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-F5-correction-v1/isolated.py",
+        "/tmp/u4-b-f5-nb6ottn1/candidate",
+        "pytest",
+        "-q",
+        "validation/component/test_f5_mechanism_duration.py"
+      ],
+      "returncode": 0,
+      "sha256": "6584fd349f38b2dbee4f2acbd324cd25f7d9d98daa7c49205ebc42ac27f658b5"
+    },
+    "reviewer-probe-guard-removed": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-F5-correction-v1/isolated.py",
+        "/tmp/u4-b-f5-nb6ottn1/candidate",
+        "script",
+        "/tmp/u4-b-f5-review-_ez1lnzv/stage3/probe_f5_duration.py"
+      ],
+      "returncode": 0,
+      "sha256": "f022ad3ef64309624f2b4acee35a1067b53573e22cb9dee0e1847ee2379b5f69"
+    },
+    "single-guard-removed": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-F5-correction-v1/isolated.py",
+        "/tmp/u4-b-f5-nb6ottn1/candidate",
+        "pytest",
+        "-q",
+        "validation/component/test_f5_mechanism_duration.py"
+      ],
+      "returncode": 1,
+      "sha256": "f8ecc02c677432aa7e3c11eac1b337493ba9a28db897ec4b390299f78909fd90"
+    }
+  },
+  "mutant_sha256": "b2f9faaa3f7f5b5ce3210038c2fcb0eef3288472ba2508fe5ad53a670de01e44",
+  "mutation": "Delete only the single mechanism duration need call; all other bytes unchanged.",
+  "native_calls": 0,
+  "old_test": "alternative clock mechanism binding refusal; not an unsafe-acceptance kill",
+  "original_sha256": "dd9c049b2fb2f28e2b6cbba04e5b3b627a6e7e4dbfcf3cbaf305969587915d62",
+  "restored_sha256": "dd9c049b2fb2f28e2b6cbba04e5b3b627a6e7e4dbfcf3cbaf305969587915d62",
+  "scope": "one F5 guard, synthetic unit carriers only",
+  "source": "validation/component/observations_v2.py",
+  "test_path": "validation/component/test_f5_mechanism_duration.py",
+  "test_sha256": "e4f9f8693f20031ccf8b97d24a141b0aa63725e220fb6a754d2275cb5c6b0f8a"
+}

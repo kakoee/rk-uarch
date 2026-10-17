@@ -1,0 +1,89 @@
+{
+  "authority": null,
+  "current_main_U0011_unchanged": true,
+  "development_note": "Preparation runner initially had one 101-character lint line; formatted before behavioral execution. Test and production bytes did not change during packaging.",
+  "executed": {
+    "affected": {
+      "behavioral": 47,
+      "executions": 1,
+      "identity": 2,
+      "passed": 49,
+      "skipped": 0
+    },
+    "discovery": {
+      "collected": 2,
+      "default_config": true,
+      "marker_filter": "not native and not nightly and not silicon",
+      "target": "new test file in normal validation/component root"
+    },
+    "exact_restoration": true,
+    "lint": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-F5-correction-v1",
+        "/tmp/u4-b-f5-nb6ottn1/candidate/validation/component/test_f5_mechanism_duration.py"
+      ],
+      "log": "logs/final-lint.log",
+      "summary": "All checks passed!"
+    },
+    "new_control": 2,
+    "old_masked_control": "Executed with only duration removed: alternate clock mechanism binding refusal, not a behavioral kill.",
+    "origin_checks": "Explicit private root/config; project modules asserted under private export; evidence logs contain B-PRIVATE-ORIGINS.",
+    "reconstruction": "Both private exports match all original 23 postimages and the one new test; selection/activation inputs/sidecar verified.",
+    "restored_control": 2,
+    "reviewer_probe": "Reproduced: valid admitted by both; consistent forged carrier structurally admitted, B mechanism duration refusal.",
+    "single_guard_mutation": {
+      "failed": 1,
+      "failure": "DID NOT RAISE",
+      "guards_removed": 1,
+      "passed": 1,
+      "structural_and_independent_forgery_admission": true
+    },
+    "types": {
+      "command": "env -u PYTHONPATH -u MYPYPATH mypy --cache-dir /tmp/u4-b-f5-nb6ottn1/mypy-cache validation/component/test_f5_mechanism_duration.py",
+      "cwd": "/tmp/u4-b-f5-nb6ottn1/candidate",
+      "log": "logs/types.log",
+      "summary": "Success: no issues found in 1 source file"
+    }
+  },
+  "identities": {
+    "evidence-manifest.json": "183d3ae7fc68ce86064a702471f12ffefac35840afae961106a1f25bf6e3eb06",
+    "evidence.tar.gz": "3278a8c44d7980c98d17b36db19e87465aa20af8005663b64551e9c1c9b31d05",
+    "fault_control.py": "e279ef381e40ece73d25f6ed568e2c2c9b9692fcd996d844e8544a56b1ef6c48",
+    "inputs.json": "49d6ced30acd2166ec6d014807a9d673818f8c9534f36306d4c5bb4f54722a9e",
+    "isolated.py": "37f0c6004e7561695800fb3d8121bf73a9a31b2ff38247921fbd15c087e18dc3",
+    "matrix-addendum.json": "2c5733da9074f28d13ffbb274d94a1b802b9d1ed6cadd89368f947ec44ebc941",
+    "obligations.json": "b5d62988c3d6f275fa4586d7bae213ed3eb9605e98c50d2d026a9571e5130904",
+    "proposal.json": "870d097376ce753f7dc339e1120121d056a43c21ac53e5ce859f9a5f1ee1b1a5",
+    "reconstruct.py": "e062ab854ad9e2836f1cbf579d432b0b589067156d3afcac96cc338d649fbc87",
+    "restoration.json": "7c0359f36666fb45f0700012ae991acbc7f904ee941f1e5332e720e7890a7bfa",
+    "test-only.unapplied.patch": "23724b209c73fcfb55c62836570a296817936137111a00dfd2f51862ea0757f3"
+  },
+  "inherited_not_rerun": [
+    "Stage 3 F1\u2013F4 and F6\u2013F11 accepted row outcomes; same reviewer F5-only recheck still pending.",
+    "Completed F6 random revert, including 1334 restored passes; no repetition.",
+    "488 combined selection, all earlier guard sweeps and B 33+4 fault controls; counts not additive.",
+    "Static/schema/support/import evidence for unchanged source/schema bytes; original 56-file zero support delta.",
+    "K2 native campaign/replay and authority evidence; untouched."
+  ],
+  "native_calls": 0,
+  "new_cases": 0,
+  "not_claimed": [
+    "O1 eight guard-level independent discriminators; explicitly not demonstrated.",
+    "O2 transient @2 /2 lifetime verification; B-U4-OBS2-TRANSIENT-LIFETIME-01 pending.",
+    "Native output, protected installation, semantic acceptance, human L1 workings, production authority, G3a or U4 closure."
+  ],
+  "policy_changes": 0,
+  "prior_packages_unchanged": true,
+  "publication_parent": "652d2eb063ff162274fe5f4547e65ffa9bbdd78e",
+  "remaining_dependency": "Same-reviewer focused F5 recheck; no A implementation/aggregate metadata round trip required.",
+  "scope": "B author correction; synthetic results only; same-reviewer focused recheck pending",
+  "selection_cases": 106,
+  "test_postimage": {
+    "base_sha256": null,
+    "kind": "additive test only",
+    "path": "validation/component/test_f5_mechanism_duration.py",
+    "postimage_sha256": "e4f9f8693f20031ccf8b97d24a141b0aa63725e220fb6a754d2275cb5c6b0f8a"
+  }
+}
