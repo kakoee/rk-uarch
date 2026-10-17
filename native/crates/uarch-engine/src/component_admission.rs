@@ -1307,6 +1307,12 @@ fn resources(
                     "InvalidRoute",
                     "unicast route/payload",
                 )?;
+                // /2 uses one request inventory for DMA fragments and unicasts.
+                require(
+                    request_ids.insert(id),
+                    "InvalidTransfer",
+                    "duplicate request",
+                )?;
             }
         }
     }

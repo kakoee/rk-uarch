@@ -299,3 +299,35 @@ fn synthetic_transport_allocations_follow_producer() {
     assert_eq!(initial.len(), 1);
     assert!(initial[0].persistent);
 }
+
+// PRIVATE SYNTHETIC: /2 request inventory shares DMA fragment and unicast IDs.
+#[test]
+fn synthetic_request_identity_collision_rejected_before_runtime() {
+    let v: Value =
+        serde_json::from_str(include_str!("../testdata/synthetic-request-collision.json")).unwrap();
+    refusal(&v, "InvalidTransfer");
+}
+#[test]
+fn synthetic_distinct_transport_request_identity_restores_complete_inventory() {
+    let mut v: Value =
+        serde_json::from_str(include_str!("../testdata/synthetic-request-collision.json")).unwrap();
+    let jobs = v["workload_closure"]["points"][0]["task_graph"]["jobs"]
+        .as_array_mut()
+        .unwrap();
+    let dma = jobs.iter_mut().find(|j| j["kind"] == "dma").unwrap();
+    dma["fragments"][0]["request_id"] = json!("synthetic-distinct-fragment");
+    reseal(&mut v);
+    assert_eq!(check(&v).unwrap().graph.jobs.len(), 2);
+    let result = crate::component::execute(&wire::canonical(&v).unwrap(), &trust(&v)).unwrap();
+    let rows = result["observations"]["dma"]["records"].as_array().unwrap();
+    let ids: BTreeSet<_> = rows
+        .iter()
+        .map(|x| x["request_id"].as_str().unwrap())
+        .collect();
+    assert_eq!(rows.len(), 2);
+    assert_eq!(
+        ids,
+        BTreeSet::from(["r00.00", "synthetic-distinct-fragment"])
+    );
+    assert_eq!(result["completed_jobs"], json!(["r00", "r00.00"]));
+}
