@@ -1,0 +1,60 @@
+{
+  "kind": "UNAPPLIED private native /3 prototype patch",
+  "base_commit": "64837bea3724919facbc27be1c7f5644a6354cfa",
+  "peer_reconciliation": "e259d2d",
+  "public_authority": null,
+  "patch_sha256": "a1be64f5dfa7ddc4c321bb52533465dd5987604686ed647a40d08996f8e97ad3",
+  "files": [
+    {
+      "path": "native/crates/uarch-engine/src/carrier.rs",
+      "preimage_sha256": "38bf74351527b205cf53b4c00da862858ed6e96895535554175819706bd0e5ee",
+      "postimage_sha256": "9b6719a403d1293ddd5cd01e95ce78f1d359a78265b7612eb5bd2db2ee0362c0",
+      "preimage_commit": "64837bea3724919facbc27be1c7f5644a6354cfa"
+    },
+    {
+      "path": "native/crates/uarch-engine/src/component.rs",
+      "preimage_sha256": "279ee5b5c352965cdf30273b26630eda84e272058f8b4f3a4ea225b289ae5c0e",
+      "postimage_sha256": "6e316affb77bf4f42ea2c68d67a8a1cf1cc918d22021263d718c996a61a4bddf",
+      "preimage_commit": "64837bea3724919facbc27be1c7f5644a6354cfa"
+    },
+    {
+      "path": "native/crates/uarch-engine/src/component_admission.rs",
+      "preimage_sha256": "64eb19816d563f16dfee7007279f5c9f91ea13f795cc4846486568f02376e89d",
+      "postimage_sha256": "672b23211949c558f5bfa78297c15837e0ba994bfb9fc7065ef266861067df63",
+      "preimage_commit": "64837bea3724919facbc27be1c7f5644a6354cfa"
+    },
+    {
+      "path": "native/crates/uarch-engine/src/component_accounting.rs",
+      "preimage_sha256": "5eff8d8ade5db5f534051e64c671cb8f21d6e2c03d65c591993bc90dc307542f",
+      "postimage_sha256": "32c4a5e0bcc452d51d93a4bf85725d452a96a14fb778b1561eceff522f153ffd",
+      "preimage_commit": "64837bea3724919facbc27be1c7f5644a6354cfa"
+    },
+    {
+      "path": "native/crates/uarch-engine/src/component_carriers_v3.json",
+      "preimage_sha256": null,
+      "postimage_sha256": "6007bce7b06927b863b3f8881eae2caa751d181462739b9b93cf8780cd1b200b",
+      "preimage_commit": null
+    },
+    {
+      "path": "native/crates/uarch-engine/src/issue_proposal_tests.rs",
+      "preimage_sha256": null,
+      "postimage_sha256": "e6541306074bdf23231d6192ca39ea115e08170beec556654f7c99234f4075a0",
+      "preimage_commit": null
+    }
+  ],
+  "shared_root_owned_exporter": {
+    "path": "native/tools/export_carriers.py",
+    "sha256": "d97593e97f8d066872506ca07daa0f1df0842f4153380187c8567147979a96ff",
+    "note": "root contract patch owns exporter; excluded here to avoid duplicate application"
+  },
+  "apply_check": {
+    "argv": [
+      "git",
+      "apply",
+      "--check",
+      "/tmp/u4-issue-amendment-native/native.patch"
+    ],
+    "exit_code": 0,
+    "all_postimages_verified": true
+  }
+}

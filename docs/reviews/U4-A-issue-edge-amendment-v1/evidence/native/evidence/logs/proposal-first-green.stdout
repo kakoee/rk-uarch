@@ -1,0 +1,23 @@
+
+running 6 tests
+test component::issue_proposal_tests::proposed_raw_gap_has_exact_issue_alignment_and_queues ... FAILED
+test component::issue_proposal_tests::proposed_cap_one_pending_reservation_prevents_double_issue ... ok
+test component::issue_proposal_tests::proposed_model_version_is_explicit_and_legacy_is_unchanged ... ok
+test component::issue_proposal_tests::proposed_zero_alignment_has_no_new_issue_rate_cap ... ok
+test component::issue_proposal_tests::proposed_cap_two_and_independent_engines_reserve_before_issue ... ok
+test component::issue_proposal_tests::proposed_read_write_credit_cause_boundary_is_reservation_time ... ok
+
+failures:
+
+---- component::issue_proposal_tests::proposed_raw_gap_has_exact_issue_alignment_and_queues stdout ----
+
+thread 'component::issue_proposal_tests::proposed_raw_gap_has_exact_issue_alignment_and_queues' (283) panicked at crates/uarch-engine/src/issue_proposal_tests.rs:38:111:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "InvalidCarrier", message: "literal mismatch", pointer: "/engine/model/version" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    component::issue_proposal_tests::proposed_raw_gap_has_exact_issue_alignment_and_queues
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 77 filtered out; finished in 1.11s
+

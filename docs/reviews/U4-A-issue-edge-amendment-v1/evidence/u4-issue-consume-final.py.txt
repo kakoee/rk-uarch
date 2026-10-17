@@ -1,0 +1,26 @@
+import hashlib,json,traceback
+from pathlib import Path
+from uarch_contract.mapped import MappedEngineJob,validate_result
+from validation.component.observations_v3 import check_v3
+root=Path('/tmp/u4-issue-amendment-native')
+expected=json.loads(Path('docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_text())['observation_contract']
+literals={'gap-write':([27000],[86000],[26667]),'gap-cap1':([27000,86000],[86000,146000],[26667,86000]),'gap-cap2':([27000,27000,86000],[86000,89000,146000],[26667,26667,86000]),'gap-cap2-pair':([27000,27000],[86000,89000],[26667,26667]),'gap-independent':([27000,27000],[86000,89000],[26667,26667])}
+records=[]
+for name,wanted in literals.items():
+    path=root/'source/probes'/(name+'.json');result=root/'evidence/target'/('final-'+name+'.json')
+    j=json.loads(path.read_bytes());r=json.loads(result.read_bytes());row={'case':name,'input_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'output_sha256':hashlib.sha256(result.read_bytes()).hexdigest()}
+    for name2,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+        try:fn();row[name2]='pass'
+        except Exception as e:row[name2]=str(e);traceback.print_exc()
+    dma=[x for x in r['observations']['dma']['records'] if x['direction']!='unicast']
+    actual=tuple([x[k] for x in dma] for k in ('issue_ps','complete_ps','reservation_ps'))
+    assert actual==wanted,(name,actual,wanted)
+    if name=='gap-write':
+        assert r['attribution_ps']['memory']==52082
+        assert r['attribution_ps']['noc']==7251
+        assert r['attribution_ps']['sync']==26667
+    row['independent_literals']='pass';row['literal_issue_complete_reservation']=wanted
+    records.append(row)
+print(json.dumps(records,indent=2))
+Path('/tmp/u4-issue-consumption-final.json').write_text(json.dumps(records,indent=2)+'\n')
+raise SystemExit(any(x[k]!='pass' for x in records for k in ('validator','checker')))

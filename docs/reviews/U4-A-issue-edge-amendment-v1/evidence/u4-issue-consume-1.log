@@ -1,0 +1,261 @@
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1391, in validate_result
+    validate_component_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1805, in validate_component_observations
+    validate_issue_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped_issue.py", line 75, in validate_issue_observations
+    require((row.allocate_ps, row.free_ps) == (jobs[buffer.producer_id].start_ps, end), 'IncompleteObservations', 'producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 34, in require
+    raise ValueError(code + ": " + detail)
+ValueError: IncompleteObservations: producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/validation/component/observations_v3.py", line 108, in check_v3
+    check_issue(j, r)
+  File "/tmp/u4-issue-amendment-contract/validation/component/issue_checks.py", line 73, in check_issue
+    need((a['allocate_ps'],a['free_ps']) == (jobs[buf['producer_id']]['start_ps'],end), 'reservation producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/validation/component/checks.py", line 25, in need
+    raise CheckFailure(detail)
+validation.component.checks.CheckFailure: reservation producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1391, in validate_result
+    validate_component_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1805, in validate_component_observations
+    validate_issue_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped_issue.py", line 75, in validate_issue_observations
+    require((row.allocate_ps, row.free_ps) == (jobs[buffer.producer_id].start_ps, end), 'IncompleteObservations', 'producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 34, in require
+    raise ValueError(code + ": " + detail)
+ValueError: IncompleteObservations: producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/validation/component/observations_v3.py", line 108, in check_v3
+    check_issue(j, r)
+  File "/tmp/u4-issue-amendment-contract/validation/component/issue_checks.py", line 73, in check_issue
+    need((a['allocate_ps'],a['free_ps']) == (jobs[buf['producer_id']]['start_ps'],end), 'reservation producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/validation/component/checks.py", line 25, in need
+    raise CheckFailure(detail)
+validation.component.checks.CheckFailure: reservation producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1391, in validate_result
+    validate_component_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1805, in validate_component_observations
+    validate_issue_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped_issue.py", line 75, in validate_issue_observations
+    require((row.allocate_ps, row.free_ps) == (jobs[buffer.producer_id].start_ps, end), 'IncompleteObservations', 'producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 34, in require
+    raise ValueError(code + ": " + detail)
+ValueError: IncompleteObservations: producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/validation/component/observations_v3.py", line 108, in check_v3
+    check_issue(j, r)
+  File "/tmp/u4-issue-amendment-contract/validation/component/issue_checks.py", line 73, in check_issue
+    need((a['allocate_ps'],a['free_ps']) == (jobs[buf['producer_id']]['start_ps'],end), 'reservation producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/validation/component/checks.py", line 25, in need
+    raise CheckFailure(detail)
+validation.component.checks.CheckFailure: reservation producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1391, in validate_result
+    validate_component_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1805, in validate_component_observations
+    validate_issue_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped_issue.py", line 75, in validate_issue_observations
+    require((row.allocate_ps, row.free_ps) == (jobs[buffer.producer_id].start_ps, end), 'IncompleteObservations', 'producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 34, in require
+    raise ValueError(code + ": " + detail)
+ValueError: IncompleteObservations: producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/validation/component/observations_v3.py", line 108, in check_v3
+    check_issue(j, r)
+  File "/tmp/u4-issue-amendment-contract/validation/component/issue_checks.py", line 73, in check_issue
+    need((a['allocate_ps'],a['free_ps']) == (jobs[buf['producer_id']]['start_ps'],end), 'reservation producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/validation/component/checks.py", line 25, in need
+    raise CheckFailure(detail)
+validation.component.checks.CheckFailure: reservation producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1391, in validate_result
+    validate_component_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1805, in validate_component_observations
+    validate_issue_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped_issue.py", line 75, in validate_issue_observations
+    require((row.allocate_ps, row.free_ps) == (jobs[buffer.producer_id].start_ps, end), 'IncompleteObservations', 'producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 34, in require
+    raise ValueError(code + ": " + detail)
+ValueError: IncompleteObservations: producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/validation/component/observations_v3.py", line 108, in check_v3
+    check_issue(j, r)
+  File "/tmp/u4-issue-amendment-contract/validation/component/issue_checks.py", line 73, in check_issue
+    need((a['allocate_ps'],a['free_ps']) == (jobs[buf['producer_id']]['start_ps'],end), 'reservation producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/validation/component/checks.py", line 25, in need
+    raise CheckFailure(detail)
+validation.component.checks.CheckFailure: reservation producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1391, in validate_result
+    validate_component_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1805, in validate_component_observations
+    validate_issue_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped_issue.py", line 75, in validate_issue_observations
+    require((row.allocate_ps, row.free_ps) == (jobs[buffer.producer_id].start_ps, end), 'IncompleteObservations', 'producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 34, in require
+    raise ValueError(code + ": " + detail)
+ValueError: IncompleteObservations: producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/validation/component/observations_v3.py", line 108, in check_v3
+    check_issue(j, r)
+  File "/tmp/u4-issue-amendment-contract/validation/component/issue_checks.py", line 73, in check_issue
+    need((a['allocate_ps'],a['free_ps']) == (jobs[buf['producer_id']]['start_ps'],end), 'reservation producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/validation/component/checks.py", line 25, in need
+    raise CheckFailure(detail)
+validation.component.checks.CheckFailure: reservation producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1391, in validate_result
+    validate_component_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 1805, in validate_component_observations
+    validate_issue_observations(r, job)
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped_issue.py", line 75, in validate_issue_observations
+    require((row.allocate_ps, row.free_ps) == (jobs[buffer.producer_id].start_ps, end), 'IncompleteObservations', 'producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/contract/uarch_contract/mapped.py", line 34, in require
+    raise ValueError(code + ": " + detail)
+ValueError: IncompleteObservations: producer allocation endpoints
+Traceback (most recent call last):
+  File "/tmp/u4-issue-consume.py", line 13, in <module>
+    try:fn();row[name]='pass'
+        ^^^^
+  File "/tmp/u4-issue-consume.py", line 12, in <lambda>
+    for name,fn in [('validator',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('checker',lambda:check_v3(j,r,expected))]:
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-amendment-contract/validation/component/observations_v3.py", line 108, in check_v3
+    check_issue(j, r)
+  File "/tmp/u4-issue-amendment-contract/validation/component/issue_checks.py", line 73, in check_issue
+    need((a['allocate_ps'],a['free_ps']) == (jobs[buf['producer_id']]['start_ps'],end), 'reservation producer allocation endpoints')
+  File "/tmp/u4-issue-amendment-contract/validation/component/checks.py", line 25, in need
+    raise CheckFailure(detail)
+validation.component.checks.CheckFailure: reservation producer allocation endpoints
+[
+  {
+    "case": "C02",
+    "input_sha256": "0b2e3ca3d9114f708a273aac67faf87fa943d630e002ec67b7ca71a36ac7535d",
+    "output_sha256": "c2f56f67c601f9eecba7033110c7870a6182e3af03416c81a164bffeaed46109",
+    "validator": "IncompleteObservations: producer allocation endpoints",
+    "checker": "reservation producer allocation endpoints"
+  },
+  {
+    "case": "D01",
+    "input_sha256": "8b1a926e6a0ebb8308c7d17e2e1b21bb4f25b7e2924d2c543fe12577fed5aaec",
+    "output_sha256": "b041bd00b3099cded45a3f375904035daf9e193c38edf60032c7c1efc79292d3",
+    "validator": "IncompleteObservations: producer allocation endpoints",
+    "checker": "reservation producer allocation endpoints"
+  },
+  {
+    "case": "D02",
+    "input_sha256": "ec4349879bd7a23ca176097000df1b63c1eef58506aeeca941c417c21c49fd00",
+    "output_sha256": "ce2371c7b07a8de29242b5283ed06f42823369aa942a8adb8b4cfe6408b23b0b",
+    "validator": "IncompleteObservations: producer allocation endpoints",
+    "checker": "reservation producer allocation endpoints"
+  },
+  {
+    "case": "D07",
+    "input_sha256": "ebf29cde7d9a01e0bc6a2c739edc0cf4cf644f32e86ba979e16ef5d6849ddde3",
+    "output_sha256": "f111e39620acf2aff9d65946aa9718cb7b300a36412db10388f9f411401f19a8",
+    "validator": "IncompleteObservations: producer allocation endpoints",
+    "checker": "reservation producer allocation endpoints"
+  },
+  {
+    "case": "D14",
+    "input_sha256": "31ffa56aefc37d80017484c78fc30e23ccc88b8400216616819126999f3d27c2",
+    "output_sha256": "34c6f81e74e55e2ac10af662142056763b758700167bf8d542ae2f1c1f4f485f",
+    "validator": "IncompleteObservations: producer allocation endpoints",
+    "checker": "reservation producer allocation endpoints"
+  },
+  {
+    "case": "O2",
+    "input_sha256": "42eaa746fa9b9ce487a5af03b937df3eb0e699ff6feb81e561c9c732b6360a81",
+    "output_sha256": "7a372a99ef46f14b94b461e0fa51025cafb45c3a0f48ecb1af6c29578b63bfa9",
+    "validator": "IncompleteObservations: producer allocation endpoints",
+    "checker": "reservation producer allocation endpoints"
+  },
+  {
+    "case": "issue-gap",
+    "input_sha256": "10411299f1f9b15e04eeed2eb6292752026f8d0a4d093fd702782bc92a69f248",
+    "output_sha256": "c634114bc2db61bf84cf8fe3507b7c272774b5f225256e77686402d84b098d9c",
+    "validator": "IncompleteObservations: producer allocation endpoints",
+    "checker": "reservation producer allocation endpoints"
+  }
+]

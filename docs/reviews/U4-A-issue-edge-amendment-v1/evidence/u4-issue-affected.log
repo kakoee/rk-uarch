@@ -1,0 +1,26 @@
+........................................................................ [ 41%]
+.......................................................................F [ 83%]
+.............................                                            [100%]
+=================================== FAILURES ===================================
+_______________ test_component_refuses_legacy_observation_shape ________________
+
+    def test_component_refuses_legacy_observation_shape() -> None:
+        j, r = sample()
+        obs = r["observations"]
+        obs["format"] = "uarch-native-observations/1"
+        del obs["activities"]
+        for section in ("clocks", "resource_intervals", "queue_membership", "critical_path"):
+            for row in records(r, section):
+                del row["activity_id"]
+>       with pytest.raises(ValueError, match="^IncompleteObservations: component /2$"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: 
+E       - IncompleteObservations: component observation version
+E       ?                                   ^^^^^^^^^^^^^^^^^^^
+E       + IncompleteObservations: component /2
+E       ?                                   ^^
+
+contract/tests/mapped/test_component_semantics_v2.py:605: AssertionError
+=========================== short test summary info ============================
+FAILED contract/tests/mapped/test_component_semantics_v2.py::test_component_refuses_legacy_observation_shape
+1 failed, 172 passed in 16.17s

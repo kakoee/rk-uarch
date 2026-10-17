@@ -1,0 +1,67 @@
+{
+  "argv": [
+    "/usr/bin/docker",
+    "--host",
+    "unix:///var/run/docker.sock",
+    "run",
+    "-i",
+    "--rm",
+    "--pull",
+    "never",
+    "--platform",
+    "linux/amd64",
+    "--network",
+    "none",
+    "--read-only",
+    "--cap-drop",
+    "ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "--entrypoint",
+    "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustfmt",
+    "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+    "--edition",
+    "2024",
+    "--config",
+    "skip_children=true",
+    "--emit",
+    "stdout"
+  ],
+  "records": [
+    {
+      "file": "component.rs",
+      "pre_sha256": "10680f0793b834c33bc749171cc3c9c9eb903d51e767ae2f7d01736e689d8987",
+      "post_sha256": "4dcf7640c1f68bb47b194bb54dcb48fa2d8e0c6480a2cc24b220a40f1df0965f",
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "file": "component_accounting.rs",
+      "pre_sha256": "6220f9c5e0ba734d4bcda5f80322f56f26894a78de16c08afefca6cde2387c30",
+      "post_sha256": "32c4a5e0bcc452d51d93a4bf85725d452a96a14fb778b1561eceff522f153ffd",
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "file": "component_admission.rs",
+      "pre_sha256": "9a0a708ada38ef7855710c6efd662fdf77deb784f15eefb225db13b1d8cef20f",
+      "post_sha256": "672b23211949c558f5bfa78297c15837e0ba994bfb9fc7065ef266861067df63",
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "file": "carrier.rs",
+      "pre_sha256": "9b6719a403d1293ddd5cd01e95ce78f1d359a78265b7612eb5bd2db2ee0362c0",
+      "post_sha256": "9b6719a403d1293ddd5cd01e95ce78f1d359a78265b7612eb5bd2db2ee0362c0",
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "file": "issue_proposal_tests.rs",
+      "pre_sha256": "eb57921b08f349d8f1f13af6cd73d2df67e792bdf40981c32e4fe3f4b009030f",
+      "post_sha256": "62c4684033612803ab2ef22a807c31fbf8040a21c0d8c83c73639ea57e544ee7",
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+from pathlib import Path
+import hashlib,json,subprocess,difflib,tarfile,io
+r=Path('/tmp/u4-issue-amendment-native');repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');base='64837bea3724919facbc27be1c7f5644a6354cfa';names=['carrier.rs','component.rs','component_admission.rs','component_accounting.rs','component_carriers_v3.json','issue_proposal_tests.rs'];records=[];patch=[]
+for name in names:
+ path='native/crates/uarch-engine/src/'+name;post=(r/'source'/path).read_bytes();old=subprocess.run(['git','show',base+':'+path],cwd=repo,capture_output=True);pre=old.stdout if old.returncode==0 else None
+ patch.append('diff --git a/'+path+' b/'+path+'\n')
+ if pre is None:patch.append('new file mode 100644\n')
+ patch.extend(difflib.unified_diff((pre or b'').decode().splitlines(keepends=True),post.decode().splitlines(keepends=True),fromfile='a/'+path if pre is not None else '/dev/null',tofile='b/'+path))
+ records.append({'path':path,'preimage_sha256':None if pre is None else hashlib.sha256(pre).hexdigest(),'postimage_sha256':hashlib.sha256(post).hexdigest(),'preimage_commit':base if pre is not None else None})
+p=r/'native.patch';p.write_text(''.join(patch));check=r/'apply-check';check.mkdir();data=subprocess.check_output(['git','archive',base,'native'],cwd=repo);tarfile.open(fileobj=io.BytesIO(data)).extractall(check,filter='data')
+cmd=['git','apply','--check',str(p)];subprocess.run(cmd,cwd=check,check=True);subprocess.run(['git','apply',str(p)],cwd=check,check=True)
+for item in records:assert hashlib.sha256((check/item['path']).read_bytes()).hexdigest()==item['postimage_sha256']
+manifest={'kind':'UNAPPLIED private native /3 prototype patch','base_commit':base,'peer_reconciliation':'e259d2d','public_authority':None,'patch_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'files':records,'shared_root_owned_exporter':{'path':'native/tools/export_carriers.py','sha256':hashlib.sha256((r/'source/native/tools/export_carriers.py').read_bytes()).hexdigest(),'note':'root contract patch owns exporter; excluded here to avoid duplicate application'},'apply_check':{'argv':cmd,'exit_code':0,'all_postimages_verified':True}}
+(r/'native-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');print('native.patch',manifest['patch_sha256'])

@@ -1,0 +1,38 @@
+{
+  "controls": [
+    {
+      "dependency_ready_ps": 59999,
+      "eligible_tight_causes": [
+        "credit"
+      ],
+      "issue_ps": 60000,
+      "release_ps": 60000,
+      "reservation_start_ps": 60000
+    },
+    {
+      "dependency_ready_ps": 60000,
+      "eligible_tight_causes": [
+        "dependency"
+      ],
+      "issue_ps": 60000,
+      "release_ps": 60000,
+      "reservation_start_ps": 60000
+    },
+    {
+      "dependency_ready_ps": 60001,
+      "eligible_tight_causes": [
+        "dependency"
+      ],
+      "issue_ps": 61000,
+      "release_ps": 60000,
+      "reservation_start_ps": 60001
+    }
+  ],
+  "decision": "preserve strict credit-wait eligibility or explicitly propose/review a broader rule; tightness alone is insufficient",
+  "label": "synthetic proposal boundary evaluation of installed strict-wait predicate; no native execution",
+  "predicate_sources": {
+    "native/crates/uarch-engine/src/component.rs": "279ee5b5c352965cdf30273b26630eda84e272058f8b4f3a4ea225b289ae5c0e",
+    "validation/component/transition_checks.py": "2d8a6486fbf5dfaf49d31601bda214a798f9c281b231836b9f22bd440d24c6fa"
+  },
+  "source_candidate": "64837bea3724919facbc27be1c7f5644a6354cfa"
+}

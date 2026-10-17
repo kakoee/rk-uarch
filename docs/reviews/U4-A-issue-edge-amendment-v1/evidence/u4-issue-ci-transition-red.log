@@ -1,0 +1,14 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_exact_installed_and_component_text_control ________________
+
+    def test_exact_installed_and_component_text_control() -> None:
+        raw = (ROOT / ADR).read_bytes()
+>       assert len(raw) == 32221 + 16073
+E       assert 57768 == (32221 + 16073)
+E        +  where 57768 = len(b"# U0011 \xe2\x80\x94 Progressive native core: bounded component stage and qualification\n\n**Status: design/semantic...eparate. Existing bounded\nconstruction trace gaps remain unaccepted and no trace rebuild is implied by this change.\n")
+
+validation/component/test_installation_identity.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED validation/component/test_installation_identity.py::test_exact_installed_and_component_text_control
+1 failed in 0.09s

@@ -1,0 +1,13 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+warning: unused variable: `pending`
+   --> crates/uarch-engine/src/component.rs:796:21
+    |
+796 |                 let pending = self.pending_issue.get(&engine).map_or(0, BTreeSet::len);
+    |                     ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_pending`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `uarch-engine` (lib test) generated 1 warning (run `cargo fix --lib -p uarch-engine --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.92s
+     Running unittests src/lib.rs (/target/fault-controls/debug/deps/uarch_engine-02caa55ddc47d2af)
+error: test failed, to rerun pass `--lib`

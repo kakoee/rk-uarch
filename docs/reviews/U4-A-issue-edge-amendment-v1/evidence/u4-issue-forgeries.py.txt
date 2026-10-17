@@ -1,0 +1,36 @@
+"""Affected actual-output mutations. Never a generated expected result or public run."""
+import copy,hashlib,json
+from pathlib import Path
+from uarch_contract.hashing import content_hash
+from uarch_contract.mapped import MappedEngineJob, validate_result
+from validation.component.observations_v3 import check_v3
+root=Path('/tmp/u4-issue-amendment-native');expected=json.loads(Path('docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_text())['observation_contract']
+def load(name):return json.loads((root/'source/probes'/f'{name}.json').read_text()),json.loads((root/'evidence/target'/f'{name}.json').read_text())
+def reseal(r):r['result_hash']=content_hash(r,exclude=('result_hash',))
+def issue(r,kind='alignment'):return next(a for a in r['observations']['activities']['records'] if a['subphase']=='dma_issue' and a['kind']==kind)
+def request(r):return next(a for a in r['observations']['dma']['records'] if a['direction']!='unicast')
+def remove_alignment(r):
+ a=issue(r);r['observations']['activities']['records'].remove(a)
+def early_acquire(r):
+ a=request(r);a['credit_acquire_ps']=a['reservation_ps']
+def missing_pending(r):
+ qs=r['observations']['queue_membership']['records'];qs.remove(next(q for q in qs if q['queue_id'].startswith('dma_pending:')))
+def pending_inflight(r):next(q for q in r['observations']['queue_membership']['records'] if q['queue_id'].startswith('dma_pending:'))['population']='inflight'
+def false_busy(r):issue(r)['occupies_resource']=True
+def wrong_owner(r):
+ a=issue(r);a['owner_id']=next(o['owner_id'] for o in r['owners'] if o['resource']=='dma_port:0')
+def wrong_jobstart(r):
+ req=request(r);next(x for x in r['observations']['jobs']['records'] if x['job_id']==req['job_id'])['start_ps']=req['issue_ps']
+def late_allocation(r):
+ req=request(r);next(x for x in r['observations']['allocations']['records'] if x['buffer_id']==req['destination_buffer_id'])['allocate_ps']=req['issue_ps']
+def nonzero_issue(r):issue(r,'service')['end_ps']+=1000
+controls=[('missing-alignment','issue-gap',remove_alignment),('missing-zero-alignment','D01',remove_alignment),('early-acquisition','issue-gap',early_acquire),('missing-pending','issue-gap',missing_pending),('pending-as-inflight','issue-gap',pending_inflight),('false-issue-busy','issue-gap',false_busy),('payload-port-owner','issue-gap',wrong_owner),('job-start-at-issue','issue-gap',wrong_jobstart),('allocation-at-issue','issue-gap',late_allocation),('nonzero-issue-service','issue-gap',nonzero_issue)]
+rows=[]
+for name,case,mutate in controls:
+ j,r=load(case);job=MappedEngineJob.model_validate(j);validate_result(r,job);check_v3(j,r,expected);f=copy.deepcopy(r);mutate(f);reseal(f);row={'name':name,'case':case,'baseline':'pass','control_output_sha256':hashlib.sha256(json.dumps(r,sort_keys=True).encode()).hexdigest()}
+ for consumer,fn in [('validator',lambda:validate_result(f,job)),('checker',lambda:check_v3(j,f,expected))]:
+  try:fn();row[consumer]={'outcome':'UNSAFE_ACCEPT'}
+  except (ValueError,KeyError,TypeError) as e:row[consumer]={'outcome':'refusal','reason':str(e)}
+ validate_result(r,job);check_v3(j,r,expected);row['restored']='pass';rows.append(row)
+Path('/tmp/u4-issue-forgeries.json').write_text(json.dumps(rows,indent=2)+'\n');print(json.dumps(rows,indent=2))
+raise SystemExit(any(v[k]['outcome']!='refusal' for v in rows for k in ('validator','checker')))

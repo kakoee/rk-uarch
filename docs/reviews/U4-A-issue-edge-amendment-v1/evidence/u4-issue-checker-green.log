@@ -1,0 +1,62 @@
+...FF.                                                                   [100%]
+=================================== FAILURES ===================================
+___________________ test_reservation_slots_literal[1-rows0] ____________________
+
+cap = 1, rows = [(26667, 27000, 86000), (86000, 86000, 146000)]
+
+    @pytest.mark.parametrize('cap,rows', [(1,[(26667,27000,86000),(86000,86000,146000)]),(2,[(26667,27000,86000),(26667,27000,89000)])])
+    def test_reservation_slots_literal(cap,rows):
+        m=module(); assert m is not None, 'missing independent issue checker'
+        actual={str(i):dict(job_id=str(i),dma_engine_id=0,reservation_ps=x[0],issue_ps=x[1],complete_ps=x[2]) for i,x in enumerate(rows)}
+        jobs={str(i):{'ready_ps':26667} for i in range(2)}
+        m.check_reservation_order(actual,jobs,cap)
+        actual['1']['reservation_ps']+=1000
+>       with pytest.raises(AssertionError,match='earliest reservation'): m.check_reservation_order(actual,jobs,cap)
+                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../u4-issue-checker-tests.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+validation/component/issue_checks.py:27: in check_reservation_order
+    need(row['reservation_ps'] == earliest, 'earliest reservation / ready tie')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False, detail = 'earliest reservation / ready tie'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           validation.component.checks.CheckFailure: earliest reservation / ready tie
+
+validation/component/checks.py:25: CheckFailure
+___________________ test_reservation_slots_literal[2-rows1] ____________________
+
+cap = 2, rows = [(26667, 27000, 86000), (26667, 27000, 89000)]
+
+    @pytest.mark.parametrize('cap,rows', [(1,[(26667,27000,86000),(86000,86000,146000)]),(2,[(26667,27000,86000),(26667,27000,89000)])])
+    def test_reservation_slots_literal(cap,rows):
+        m=module(); assert m is not None, 'missing independent issue checker'
+        actual={str(i):dict(job_id=str(i),dma_engine_id=0,reservation_ps=x[0],issue_ps=x[1],complete_ps=x[2]) for i,x in enumerate(rows)}
+        jobs={str(i):{'ready_ps':26667} for i in range(2)}
+        m.check_reservation_order(actual,jobs,cap)
+        actual['1']['reservation_ps']+=1000
+>       with pytest.raises(AssertionError,match='earliest reservation'): m.check_reservation_order(actual,jobs,cap)
+                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../u4-issue-checker-tests.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+validation/component/issue_checks.py:27: in check_reservation_order
+    need(row['reservation_ps'] == earliest, 'earliest reservation / ready tie')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False, detail = 'earliest reservation / ready tie'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           validation.component.checks.CheckFailure: earliest reservation / ready tie
+
+validation/component/checks.py:25: CheckFailure
+=========================== short test summary info ============================
+FAILED ../u4-issue-checker-tests.py::test_reservation_slots_literal[1-rows0]
+FAILED ../u4-issue-checker-tests.py::test_reservation_slots_literal[2-rows1]
+2 failed, 4 passed in 0.13s

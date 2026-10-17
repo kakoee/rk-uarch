@@ -1,0 +1,152 @@
+[
+  {
+    "name": "missing-alignment",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "IncompleteObservations: job activity span"
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "issue inventory including zero alignment"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "missing-zero-alignment",
+    "case": "D01",
+    "baseline": "pass",
+    "control_output_sha256": "d2e3ad32635a456a714fba20b55a304a409a17c54d8a01ffd6c7161f1d59b19e",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "AttributionMismatch: "
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "issue inventory including zero alignment"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "early-acquisition",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "IncompleteObservations: acquired credit lifecycle"
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "acquired not pending lifecycle"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "missing-pending",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "IncompleteObservations: issue population inventory"
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "three issue population inventory"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "pending-as-inflight",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "IncompleteObservations: "
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "issue population lifecycle"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "false-issue-busy",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "IncompleteObservations: phase occupancy"
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "required occupancy"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "payload-port-owner",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "InvalidResource: activity owner"
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "activity owner"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "job-start-at-issue",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "IncompleteObservations: job activity span"
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "reservation producer allocation endpoints"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "allocation-at-issue",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "IncompleteObservations: producer allocation endpoints"
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "reservation producer allocation endpoints"
+    },
+    "restored": "pass"
+  },
+  {
+    "name": "nonzero-issue-service",
+    "case": "issue-gap",
+    "baseline": "pass",
+    "control_output_sha256": "f0b6ad1183724d5d76904bb5246621b461fc986a1dc85f053783f3773d03997f",
+    "validator": {
+      "outcome": "refusal",
+      "reason": "IncompleteObservations: activity dispatch join"
+    },
+    "checker": {
+      "outcome": "refusal",
+      "reason": "atomic issue conversion"
+    },
+    "restored": "pass"
+  }
+]

@@ -1,0 +1,79 @@
+FFFFFF                                                                   [100%]
+=================================== FAILURES ===================================
+___________ test_strict_wait_credit_cause[59999-60000-60000-wanted0] ___________
+
+ready = 59999, reservation = 60000, issue = 60000, wanted = {'old'}
+
+    @pytest.mark.parametrize('ready,reservation,issue,wanted', [(59999,60000,60000,{'old'}),(60000,60000,60000,set()),(60001,60001,61000,set())])
+    def test_strict_wait_credit_cause(ready,reservation,issue,wanted):
+>       m=module(); assert m is not None, 'missing independent issue checker'
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: missing independent issue checker
+E       assert None is not None
+
+../u4-issue-checker-tests.py:11: AssertionError
+___________ test_strict_wait_credit_cause[60000-60000-60000-wanted1] ___________
+
+ready = 60000, reservation = 60000, issue = 60000, wanted = set()
+
+    @pytest.mark.parametrize('ready,reservation,issue,wanted', [(59999,60000,60000,{'old'}),(60000,60000,60000,set()),(60001,60001,61000,set())])
+    def test_strict_wait_credit_cause(ready,reservation,issue,wanted):
+>       m=module(); assert m is not None, 'missing independent issue checker'
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: missing independent issue checker
+E       assert None is not None
+
+../u4-issue-checker-tests.py:11: AssertionError
+___________ test_strict_wait_credit_cause[60001-60001-61000-wanted2] ___________
+
+ready = 60001, reservation = 60001, issue = 61000, wanted = set()
+
+    @pytest.mark.parametrize('ready,reservation,issue,wanted', [(59999,60000,60000,{'old'}),(60000,60000,60000,set()),(60001,60001,61000,set())])
+    def test_strict_wait_credit_cause(ready,reservation,issue,wanted):
+>       m=module(); assert m is not None, 'missing independent issue checker'
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: missing independent issue checker
+E       assert None is not None
+
+../u4-issue-checker-tests.py:11: AssertionError
+___________________ test_reservation_slots_literal[1-rows0] ____________________
+
+cap = 1, rows = [(26667, 27000, 86000), (86000, 86000, 146000)]
+
+    @pytest.mark.parametrize('cap,rows', [(1,[(26667,27000,86000),(86000,86000,146000)]),(2,[(26667,27000,86000),(26667,27000,89000)])])
+    def test_reservation_slots_literal(cap,rows):
+>       m=module(); assert m is not None, 'missing independent issue checker'
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: missing independent issue checker
+E       assert None is not None
+
+../u4-issue-checker-tests.py:17: AssertionError
+___________________ test_reservation_slots_literal[2-rows1] ____________________
+
+cap = 2, rows = [(26667, 27000, 86000), (26667, 27000, 89000)]
+
+    @pytest.mark.parametrize('cap,rows', [(1,[(26667,27000,86000),(86000,86000,146000)]),(2,[(26667,27000,86000),(26667,27000,89000)])])
+    def test_reservation_slots_literal(cap,rows):
+>       m=module(); assert m is not None, 'missing independent issue checker'
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: missing independent issue checker
+E       assert None is not None
+
+../u4-issue-checker-tests.py:17: AssertionError
+________________ test_unlimited_same_edge_and_independent_pools ________________
+
+    def test_unlimited_same_edge_and_independent_pools():
+>       m=module(); assert m is not None, 'missing independent issue checker'
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: missing independent issue checker
+E       assert None is not None
+
+../u4-issue-checker-tests.py:25: AssertionError
+=========================== short test summary info ============================
+FAILED ../u4-issue-checker-tests.py::test_strict_wait_credit_cause[59999-60000-60000-wanted0]
+FAILED ../u4-issue-checker-tests.py::test_strict_wait_credit_cause[60000-60000-60000-wanted1]
+FAILED ../u4-issue-checker-tests.py::test_strict_wait_credit_cause[60001-60001-61000-wanted2]
+FAILED ../u4-issue-checker-tests.py::test_reservation_slots_literal[1-rows0]
+FAILED ../u4-issue-checker-tests.py::test_reservation_slots_literal[2-rows1]
+FAILED ../u4-issue-checker-tests.py::test_unlimited_same_edge_and_independent_pools
+6 failed in 0.17s

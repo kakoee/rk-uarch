@@ -1,0 +1,123 @@
+[
+  {
+    "name": "format",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/ruff",
+      "format",
+      "--check",
+      "contract/uarch_contract/mapped.py",
+      "contract/uarch_contract/mapped_issue.py",
+      "contract/tests/mapped/test_component_issue_v3.py",
+      "validation/component/observations_v3.py",
+      "validation/component/transition_checks_v3.py",
+      "validation/component/issue_checks.py",
+      "validation/component/test_issue_checks.py",
+      "validation/component/installation_identity.py",
+      "validation/component/test_installation_identity.py",
+      "native/tools/export_carriers.py"
+    ],
+    "cwd": "/tmp/u4-issue-amendment-contract",
+    "exit_code": 0,
+    "log_sha256": "5b9f70ad96522f492ef846065642c069b5627379aff2ab3f74acd2e3b9ecfe34"
+  },
+  {
+    "name": "lint",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/ruff",
+      "check",
+      "contract/uarch_contract/mapped.py",
+      "contract/uarch_contract/mapped_issue.py",
+      "contract/tests/mapped/test_component_issue_v3.py",
+      "validation/component/observations_v3.py",
+      "validation/component/transition_checks_v3.py",
+      "validation/component/issue_checks.py",
+      "validation/component/test_issue_checks.py",
+      "validation/component/installation_identity.py",
+      "validation/component/test_installation_identity.py",
+      "native/tools/export_carriers.py"
+    ],
+    "cwd": "/tmp/u4-issue-amendment-contract",
+    "exit_code": 0,
+    "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "name": "types",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/mypy",
+      "--strict",
+      "--follow-imports=silent",
+      "contract/uarch_contract/mapped.py",
+      "contract/uarch_contract/mapped_issue.py",
+      "validation/component/observations_v3.py",
+      "validation/component/transition_checks_v3.py",
+      "validation/component/issue_checks.py",
+      "validation/component/installation_identity.py"
+    ],
+    "cwd": "/tmp/u4-issue-amendment-contract",
+    "exit_code": 0,
+    "log_sha256": "ab35ee42183d4d6d3ba483825ab037d18a5a15622d03be01d82220b1564851ff"
+  },
+  {
+    "name": "schema",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-m",
+      "uarch_contract.generate_mapped",
+      "--check"
+    ],
+    "cwd": "/tmp/u4-issue-amendment-contract",
+    "exit_code": 0,
+    "log_sha256": "18de146832ee1e32a203f4f3ad4fe3f08e4d96a3b4bf4e23197afe553f34a164"
+  },
+  {
+    "name": "snapshot-k2",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "native/tools/export_carriers.py",
+      "--check"
+    ],
+    "cwd": "/tmp/u4-issue-amendment-contract",
+    "exit_code": 0,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "snapshot-v2",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "native/tools/export_carriers.py",
+      "--component",
+      "--check"
+    ],
+    "cwd": "/tmp/u4-issue-amendment-contract",
+    "exit_code": 0,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "snapshot-v3",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "native/tools/export_carriers.py",
+      "--component-v3",
+      "--check"
+    ],
+    "cwd": "/tmp/u4-issue-amendment-contract",
+    "exit_code": 0,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "affected",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/pytest",
+      "-q",
+      "validation/component/test_installation_identity.py",
+      "validation/component/test_stage2_selection.py",
+      "contract/tests/mapped/test_component_issue_v3.py",
+      "validation/component/test_issue_checks.py",
+      "contract/tests/mapped/test_component_semantics_v2.py::test_component_refuses_legacy_observation_shape",
+      "--junitxml=/tmp/u4-issue-final-checks/affected.xml"
+    ],
+    "cwd": "/tmp/u4-issue-amendment-contract",
+    "exit_code": 0,
+    "log_sha256": "e623a0c5e856010be8934b10c3ce6ae629c968d835d269f1785b4a685b343236"
+  }
+]

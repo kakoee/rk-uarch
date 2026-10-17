@@ -1,0 +1,71 @@
+from pathlib import Path
+p=Path('/tmp/u4-issue-amendment-native/source/native/crates/uarch-engine/src/component.rs');s=p.read_text()
+s=s.replace('            "ack" => (Kind::TaskReady, Kind::DmaDone),','            "ack" => (Kind::TaskReady, Kind::DmaDone),\n            "dma_issue" => (Kind::TaskReady, Kind::DmaIssue),')
+s=s.replace('                        let mut phases = vec![];','''                        let mut phases = vec![];
+                        if observations == ObservationVersion::V3 {
+                            phases.push(phase("dma_issue", t.owner, "memory", Some(0), 0, false, false));
+                        }''')
+s=s.replace('        self.sequences[s].service_ready = false;','''        if p.name == "dma_issue" {
+            let engine = self.sequences[s].engine.expect("DMA issue engine");
+            if !self.pending_issue.entry(engine).or_default().remove(&s) {
+                return Err(refuse("InternalError", "", "issue without reservation"));
+            }
+            self.inflight.entry(engine).or_default().insert(s);
+            self.sequences[s].issue = Some(self.now);
+        }
+        self.sequences[s].service_ready = false;''')
+s=s.replace('    fn issue(&mut self, v: &Admitted) -> Result<bool> {','''    fn reserve(&mut self, v: &Admitted) -> Result<bool> {
+        let mut ready: Vec<_> = self.sequences.iter().enumerate()
+            .filter(|(_, s)| s.enabled && s.issue.is_none() && s.reservation.is_none() && s.ready <= self.now)
+            .map(|(i,s)| (s.ready, s.engine.unwrap_or(0), s.request.clone().unwrap_or_default(), i)).collect();
+        ready.sort();
+        let mut changed = false;
+        for (_,_,_,s) in ready {
+            if let Some(engine) = self.sequences[s].engine {
+                let acquired = self.inflight.get(&engine).map_or(0, BTreeSet::len);
+                let pending = self.pending_issue.get(&engine).map_or(0, BTreeSet::len);
+                if (acquired + pending) as u64 >= v.hardware.credit_limit { continue; }
+                // Strict eligibility uses reservation time, never the later aligned issue edge.
+                // Equal job-readiness/release is dependency eligibility, not credit waiting.
+                if self.now > self.jobs[self.sequences[s].job].ready.unwrap() {
+                    let before: Vec<_> = self.sequences.iter().enumerate().filter(|(i,x)|
+                        *i != s && x.engine == Some(engine)
+                        && x.reservation.is_some_and(|t| t < self.now)
+                        && x.end.is_none_or(|t| t >= self.now)).collect();
+                    if before.len() as u64 == v.hardware.credit_limit {
+                        self.sequences[s].credit_causes = before.iter()
+                            .filter(|(_,x)| x.issue.is_some_and(|t|t < self.now) && x.end == Some(self.now))
+                            .filter_map(|(_,x)|x.activities.last().copied()).collect();
+                    }
+                }
+                self.pending_issue.entry(engine).or_default().insert(s);
+                self.sequences[s].reservation = Some(self.now);
+            } else {
+                self.sequences[s].issue = Some(self.now);
+                self.sequences[s].ready = self.now;
+            }
+            changed = true;
+        }
+        Ok(changed)
+    }
+    fn issue(&mut self, v: &Admitted) -> Result<bool> {
+        if self.observations == ObservationVersion::V3 { return self.reserve(v); }''')
+s=s.replace('                        s.issue.is_some() && s.end.is_none() && !s.active && s.ready <= self.now','                        (s.issue.is_some() || s.reservation.is_some()) && s.end.is_none() && !s.active && s.ready <= self.now')
+s=s.replace('    let v = component_admission::validate(input, trust)?;\n    let runtime = Runtime::new(&v)?.run(&v)?;\n    crate::component_accounting::construct(&v, &runtime)','    execute_with_observations(input, trust, ObservationVersion::V2)')
+s=s.replace('    let v = component_admission::validate(input, trust)?;\n    let runtime = Runtime::new_version(&v, version)?.run(&v)?;','''    let v = component_admission::validate(input, trust)?;
+    let expected = if version == ObservationVersion::V3 { "2" } else { "1" };
+    if v.raw["engine"]["model"]["name"] != "native-intervals" || v.raw["engine"]["model"]["version"] != expected {
+        return Err(refuse("UnsupportedFidelity", "/engine/model", "explicit observation/model version"));
+    }
+    let runtime = Runtime::new_version(&v, version)?.run(&v)?;''')
+p.write_text(s)
+p=p.with_name('component_accounting.rs');s=p.read_text();s=s.replace('component::{Activity, Counts, Runtime, add, mul}', 'component::{Activity, Counts, ObservationVersion, Runtime, add, mul}');s=s.replace('        "ack" => ("TASK_READY", "DMA_DONE"),','        "ack" => ("TASK_READY", "DMA_DONE"),\n        "dma_issue" => ("TASK_READY", "DMA_ISSUE"),');needle='        if let Some(engine) = s.engine {\n            queues.push';s=s.replace(needle,'''        if r.observations == ObservationVersion::V3 {
+            dma.last_mut().expect("request row")["reservation_ps"] = json!(s.reservation);
+        }
+        if let Some(engine) = s.engine {
+            if r.observations == ObservationVersion::V3 {
+                let reservation = s.reservation.ok_or_else(|| refuse("IncompleteObservations", "", "missing DMA reservation"))?;
+                queues.push(json!({"queue_id":format!("dma_waiting:{engine}"),"item_id":req,"population":"waiting","enter_ps":r.jobs[s.job].ready,"leave_ps":reservation,"owner_id":task.owner,"clock_domain":null,"activity_id":null}));
+                queues.push(json!({"queue_id":format!("dma_pending:{engine}"),"item_id":req,"population":"pending","enter_ps":reservation,"leave_ps":s.issue,"owner_id":task.owner,"clock_domain":null,"activity_id":null}));
+            }
+            queues.push''');s=s.replace('"format":"uarch-native-observations/2","events"','"format":if r.observations==ObservationVersion::V3 {"uarch-native-observations/3"}else{"uarch-native-observations/2"},"events"');p.write_text(s)

@@ -1,0 +1,44 @@
+F.FFF                                                                    [100%]
+=================================== FAILURES ===================================
+____________________ test_v3_issue_is_explicit_new_carrier _____________________
+
+    def test_v3_issue_is_explicit_new_carrier():
+        cls=getattr(m,'ComponentActivityV3',None)
+>       assert cls is not None, 'missing /3 issue carrier'
+E       AssertionError: missing /3 issue carrier
+E       assert None is not None
+
+../u4-issue-schema-tests.py:10: AssertionError
+________________ test_v3_pending_queue_is_explicit_new_carrier _________________
+
+    def test_v3_pending_queue_is_explicit_new_carrier():
+        cls=getattr(m,'ComponentQueueObservationV3',None)
+>       assert cls is not None, 'missing /3 pending carrier'
+E       AssertionError: missing /3 pending carrier
+E       assert None is not None
+
+../u4-issue-schema-tests.py:18: AssertionError
+______________________ test_v3_reservation_field_required ______________________
+
+    def test_v3_reservation_field_required():
+        cls=getattr(m,'DmaObservationV3',None)
+>       assert cls is not None, 'missing /3 reservation carrier'
+E       AssertionError: missing /3 reservation carrier
+E       assert None is not None
+
+../u4-issue-schema-tests.py:25: AssertionError
+__________________ test_observation_versions_remain_disjoint ___________________
+
+    def test_observation_versions_remain_disjoint():
+        cls=getattr(m,'ComponentObservationsV3',None)
+>       assert cls is not None, 'missing /3 observation carrier'
+E       AssertionError: missing /3 observation carrier
+E       assert None is not None
+
+../u4-issue-schema-tests.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED ../u4-issue-schema-tests.py::test_v3_issue_is_explicit_new_carrier - A...
+FAILED ../u4-issue-schema-tests.py::test_v3_pending_queue_is_explicit_new_carrier
+FAILED ../u4-issue-schema-tests.py::test_v3_reservation_field_required - Asse...
+FAILED ../u4-issue-schema-tests.py::test_observation_versions_remain_disjoint
+4 failed, 1 passed in 0.49s

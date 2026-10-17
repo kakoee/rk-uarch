@@ -1,0 +1,47 @@
+"""Private prospective input authoring; original installed inputs are immutable."""
+import copy,json,hashlib,subprocess
+from pathlib import Path
+from uarch_contract.hashing import content_hash,canonical_json
+from uarch_contract.mapped import MappedEngineJob,TaskGraph,canonical_owners,hardware_projection
+from uarch_contract.hardware import HardwareSpec
+from rkuarch.workload.mapped import validate_component_completeness
+r=Path('/tmp/u4-issue-amendment-native');data=r/'source/native/crates/uarch-engine/testdata';original=json.loads((data/'synthetic-component-jobs.json').read_bytes());gap=json.loads((data/'synthetic-issue-core-gap.json').read_bytes());records={}
+for name,base in [('gap-write','D09-write'),('gap-cap1','D05-one'),('gap-cap2','D06-two'),('gap-independent','D05-one'),('gap-cap2-pair','D05-one')]:
+ if (r/'evidence/target'/('final-'+name+'.json')).exists():
+  continue
+ v=copy.deepcopy(original[base]);b=v['workload_closure'];p=b['points'][0];g=p['task_graph'];h=b['hardware_spec'];case='SYNTHETIC-PROSPECTIVE-/3-'+name
+ h['clock_domains']['noc']=copy.deepcopy(gap['workload_closure']['hardware_spec']['clock_domains']['noc'])
+ if name!='gap-write':h['id']='private-unapplied-'+name
+ if name=='gap-cap2-pair':h['cores']['core_type']['dma']['max_outstanding']=copy.deepcopy(original['D06-two']['workload_closure']['hardware_spec']['cores']['core_type']['dma']['max_outstanding'])
+ b['hardware_spec_hash']=content_hash(h)
+ gg=gap['mapped_point']['task_graph']
+ g['jobs'] += copy.deepcopy([x for x in gg['jobs'] if x['kind']!='dma'])
+ for buf in copy.deepcopy([x for x in gg['buffers'] if x['id'].startswith('a-')]):
+  buf['offset_bytes']+=8192;g['buffers'].append(buf)
+ g['routes'] += copy.deepcopy([x for x in gg['routes'] if x['id']=='a-zero'])
+ g['jobs'].sort(key=lambda x:x['id']);g['buffers'].sort(key=lambda x:x['id']);g['routes'].sort(key=lambda x:x['id'])
+ dma=[x for x in g['jobs'] if x['kind']=='dma']
+ if name=='gap-independent':dma[1]['dma_engine_id']=1
+ g['dependencies']=[{'before':'a-unicast','after':'b-barrier'}]+[{'before':'b-barrier','after':x['id']} for x in dma]
+ g['dependencies'].sort(key=lambda x:(x['before'],x['after']))
+ g['graph_hash']=content_hash(g,exclude=('graph_hash',))
+ owners=canonical_owners(HardwareSpec.model_validate(h),TaskGraph.model_validate(g));barrier_owner=next(x.owner_id for x in owners if x.resource=='barrier:b-barrier')
+ next(x for x in g['jobs'] if x['kind']=='barrier')['owner_id']=barrier_owner
+ g['graph_hash']=content_hash(g,exclude=('graph_hash',));p['initial_state']='fixture_resident';p['point_id']=case;p['identity']['fixture_id']=case;p['payload_hash']=content_hash(p,exclude=('payload_hash',))
+ e=v['profile']['entries'][0];e.update(initial_state='fixture_resident',case_id=case,case_selection_revision='PRIVATE-UNAPPLIED-issue-proposal/1',graph_hash=g['graph_hash'],point_hash=p['payload_hash'],allowed_job_kinds=['barrier','dma','noc_transfer'],hardware_spec=h,hardware_spec_hash=b['hardware_spec_hash'],freq_hz=gap['freq_hz'])
+ v['profile']['profile_hash']=content_hash(v['profile'],exclude=('profile_hash',));b['admission'].update(case_id=case,profile_hash=v['profile']['profile_hash'])
+ if not any(x['hardware_spec_hash']==b['hardware_spec_hash'] for x in v['registry']['test_only_specs']):v['registry']['test_only_specs'].append({'hardware_spec_hash':b['hardware_spec_hash'],'rationale':'PRIVATE SYNTHETIC UNAPPLIED issue-edge probe; no production authority'})
+ v['registry']['test_only_specs'].sort(key=lambda x:x['hardware_spec_hash']);v['registry']['registry_hash']=content_hash(v['registry'],exclude=('registry_hash',))
+ b['producer']={'name':'PRIVATE-UNAPPLIED-issue-proposal','version':'1','implementation_hash':'sha256:'+hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+ b['bundle_hash']=content_hash(b,exclude=('bundle_hash',));v.update(initial_state='fixture_resident',bundle_hash=b['bundle_hash'],mapped_point=p,point_hash=p['payload_hash'],admission=b['admission'],owners=[x.model_dump(mode='json') for x in owners],freq_hz=gap['freq_hz'],hardware_spec_hash=b['hardware_spec_hash'],hardware=hardware_projection(HardwareSpec.model_validate(h)).model_dump(mode='json'));v['job_hash']=content_hash(v,exclude=('job_hash',))
+ j=MappedEngineJob.model_validate(v);validate_component_completeness(j.workload_closure)
+ baseline=j.job_hash;v['engine']['model']['version']='2';v['job_hash']=content_hash(v,exclude=('job_hash',));path=r/'source/probes'/(name+'.json');path.write_text(canonical_json(v))
+ tag='raw-final-proposal-'+name
+ subprocess.run(['python3',str(r/'run.py'),tag,'CARGO_TARGET_DIR=/target/final-probes','ISSUE_JOB=/work/probes/'+name+'.json','ISSUE_OUTPUT=/target/final-'+name+'.json','cargo','test','--offline','--locked','--lib','component::issue_proposal_tests::proposal_file_probe','--','--ignored','--exact'],check=True)
+ result=json.loads((r/'evidence/target'/('final-'+name+'.json')).read_bytes());rows=[x for x in result['observations']['dma']['records'] if x['direction']!='unicast']
+ records[name]={'installed_model1_job_and_completeness':True,'model1_job_hash':baseline,'proposed_model2_job_hash':v['job_hash'],'raw_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'issue_ps':[x['issue_ps'] for x in rows],'complete_ps':[x['complete_ps'] for x in rows],'reservation_ps':[x['reservation_ps'] for x in rows],'duration_ps':result['duration_ps'],'attribution_ps':result['attribution_ps']}
+ print(name,records[name],flush=True)
+for name in ['gap-write','gap-cap1','gap-cap2','gap-independent','gap-cap2-pair']:
+ v=json.loads((r/'source/probes'/(name+'.json')).read_bytes());result=json.loads((r/'evidence/target'/('final-'+name+'.json')).read_bytes());assert result['job_hash']==v['job_hash'];rows=[x for x in result['observations']['dma']['records'] if x['direction']!='unicast'];old=copy.deepcopy(v);old['engine']['model']['version']='1';old['job_hash']=content_hash(old,exclude=('job_hash',));j=MappedEngineJob.model_validate(old);validate_component_completeness(j.workload_closure)
+ records[name]={'installed_model1_job_and_completeness':True,'model1_job_hash':old['job_hash'],'proposed_model2_job_hash':v['job_hash'],'raw_sha256':hashlib.sha256((r/'source/probes'/(name+'.json')).read_bytes()).hexdigest(),'issue_ps':[x['issue_ps'] for x in rows],'complete_ps':[x['complete_ps'] for x in rows],'reservation_ps':[x['reservation_ps'] for x in rows],'duration_ps':result['duration_ps'],'attribution_ps':result['attribution_ps']}
+(r/'evidence/mapped-gap-probes.json').write_text(json.dumps(records,indent=2)+'\n')

@@ -1,0 +1,10 @@
+import json,subprocess,os,hashlib
+from pathlib import Path
+from uarch_contract.hashing import content_hash,canonical_json
+r=Path('/tmp/u4-issue-amendment-native');src=r/'source';data=src/'native/crates/uarch-engine/testdata';jobs=json.loads((data/'synthetic-component-jobs.json').read_bytes());selected={k:jobs[k] for k in ['C02','D01','D02','D07','D14']};selected['issue-gap']=json.loads((data/'synthetic-issue-core-gap.json').read_bytes());selected['O2']=json.loads((data/'synthetic-component-transient-job.json').read_bytes());(src/'probes').mkdir(exist_ok=True)
+for key,v in selected.items():
+ v['engine']['model']['version']='2';v['job_hash']=content_hash(v,exclude=('job_hash',));(src/'probes'/(key+'.json')).write_text(canonical_json(v))
+for key in selected:
+ tag='raw-proposal-'+key
+ subprocess.run(['python3',str(r/'run.py'),tag,'ISSUE_JOB=/work/probes/'+key+'.json','ISSUE_OUTPUT=/target/'+key+'.json','cargo','test','--offline','--locked','--lib','component::issue_proposal_tests::proposal_file_probe','--','--ignored','--exact'],check=True)
+(r/'evidence/probe-inputs.json').write_text(json.dumps({k:{'job_hash':v['job_hash'],'raw_sha256':hashlib.sha256((src/'probes'/(k+'.json')).read_bytes()).hexdigest(),'kind':'private synthetic proposed model2 raw input; no public authority'} for k,v in selected.items()},indent=2)+'\n')

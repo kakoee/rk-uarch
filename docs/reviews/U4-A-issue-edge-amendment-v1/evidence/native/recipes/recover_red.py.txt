@@ -1,0 +1,23 @@
+from pathlib import Path
+import subprocess,json,hashlib
+r=Path('/tmp/u4-issue-amendment-native');repo='/home/jjaff/AI-infra-simulation/rk-uarch-u4-a';base='64837bea3724919facbc27be1c7f5644a6354cfa';p='native/crates/uarch-engine/src/component.rs';s=subprocess.check_output(['git','show',base+':'+p],cwd=repo).decode();s=s.replace('#[derive(Clone, Debug)]\npub(crate) struct Sequence', '#[derive(Clone, Copy, Debug, PartialEq, Eq)]\npub(crate) enum ObservationVersion { V2, V3 }\n#[derive(Clone, Debug)]\npub(crate) struct Sequence');s=s.replace('    pub issue: Option<u64>,', '    pub reservation: Option<u64>,\n    pub issue: Option<u64>,');s=s.replace('pub(crate) struct Runtime {','pub(crate) struct Runtime {\n    pub observations: ObservationVersion,\n    pending_issue: BTreeMap<u64, BTreeSet<usize>>,');s=s.replace('    fn new(v: &Admitted) -> Result<Self> {\n        let mut r = Self {','    fn new(v: &Admitted) -> Result<Self> { Self::new_version(v, ObservationVersion::V2) }\n    fn new_version(v: &Admitted, observations: ObservationVersion) -> Result<Self> {\n        let mut r = Self {\n            observations,\n            pending_issue: BTreeMap::new(),');s=s.replace('                issue: None,','                reservation: None,\n                issue: None,');s+='''
+// PRIVATE UNAPPLIED prototype seam; public protocol does not select this version.
+pub(crate) fn execute_with_observations(input: &str, trust: &Trust, version: ObservationVersion) -> Result<Value> {
+    let v = component_admission::validate(input, trust)?;
+    let runtime = Runtime::new_version(&v, version)?.run(&v)?;
+    crate::component_accounting::construct(&v, &runtime)
+}
+#[cfg(test)]
+#[path = "issue_proposal_tests.rs"]
+mod issue_proposal_tests;
+'''
+t=(r/'source/native/crates/uarch-engine/src/issue_proposal_tests.rs').read_text();t=t[:t.index('\n#[test]\nfn proposed_two_simultaneous_pending')];t=t.replace('ObservationVersion::V3).unwrap_err().code,"InvalidCarrier"','ObservationVersion::V3).unwrap_err().code,"UnsupportedFidelity"');t=t.replace('''    let mut new_input=v.clone();model_two(&mut new_input);
+    assert_eq!(execute(&crate::wire::canonical(&new_input).unwrap(),&anchor(&new_input)).unwrap_err().code,"InvalidCarrier");
+''','');t=t.replace('''        assert_eq!(r.events[align.dispatch as usize].phase,2);
+        for (cause,_) in &align.causes { assert!(r.activities[*cause].completion < align.dispatch); let prior=&r.activities[*cause]; assert_eq!(r.events[prior.completion as usize].phase,if prior.end>prior.start {0}else{2}); }
+        assert!(r.activities.iter().filter(|x|x.sequence==1 && x.phase.name!="dma_issue").all(|x|x.start>=r.sequences[1].issue.unwrap()));
+''','')
+record=json.loads((r/'evidence/logs/proposal-test-first-red.json').read_bytes());out=r/'evidence/test-first-source';out.mkdir()
+for name,txt in [('component.rs',s),('issue_proposal_tests.rs',t)]:
+ data=txt.encode();got=hashlib.sha256(data).hexdigest();expected=record['source']['native/crates/uarch-engine/src/'+name];assert got==expected,(name,got,expected);(out/name).write_bytes(data)
+print('Recovered red source bytes exactly match observed red receipt hashes')

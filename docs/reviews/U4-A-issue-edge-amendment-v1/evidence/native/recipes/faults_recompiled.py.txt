@@ -1,0 +1,18 @@
+import json,shutil,subprocess,os,hashlib
+from pathlib import Path
+r=Path('/tmp/u4-issue-amendment-native');src=r/'fault-source-recompiled';shutil.copytree(r/'source',src);d=src/'native/crates/uarch-engine/src';p=d/'component.rs';q=d/'component_accounting.rs';original={x:x.read_bytes() for x in [p,q]}
+controls=[('ignore-pending-capacity',p,'(acquired + pending) as u64 >=','acquired as u64 >=','proposed_cap_one_pending_reservation_prevents_double_issue'),('equal-readiness-credit',p,'if self.now > self.jobs[self.sequences[s].job].ready.unwrap() {','if self.now >= self.jobs[self.sequences[s].job].ready.unwrap() {','proposed_read_write_credit_cause_boundary_is_reservation_time'),('omit-issue-alignment',p,'let clocked = p.domain.is_some() &&','let clocked = p.name != "dma_issue" && p.domain.is_some() &&','proposed_raw_gap_has_exact_issue_alignment_and_queues'),('late-job-allocation',p,'if self.jobs[job].start.is_none() {','if self.jobs[job].start.is_none() && self.activities[index].phase.name != "dma_issue" {','proposed_read_write_credit_cause_boundary_is_reservation_time'),('pending-is-inflight',q,'"population":"pending"','"population":"inflight"','proposed_raw_gap_has_exact_issue_alignment_and_queues')]
+records=[]
+def run(tag,test):
+ env={**os.environ,'COMPONENT_PRIVATE_SOURCE':str(src)}
+ cleaned=subprocess.run(['python3',str(r/'run.py'),tag+'-clean','CARGO_TARGET_DIR=/target/fault-controls','cargo','clean','--offline','--locked','-p','uarch-engine'],env=env,capture_output=True,text=True);assert cleaned.returncode==0,cleaned.stdout
+ a=subprocess.run(['python3',str(r/'run.py'),tag,'CARGO_TARGET_DIR=/target/fault-controls','cargo','test','--offline','--locked','--lib','component::issue_proposal_tests::'+test,'--','--exact'],env=env,capture_output=True,text=True);print(tag,a.returncode,flush=True);assert 'Compiling uarch-engine' in a.stdout,(tag,'no observed recompilation',a.stdout);return a
+baseline=run('proposal2-fault-baseline','proposed_raw_gap_has_exact_issue_alignment_and_queues');assert baseline.returncode==0
+for name,path,old,new,test in controls:
+ s=original[path].decode();assert old in s;path.write_text(s.replace(old,new,1))
+ try:
+  fault=run('proposal2-fault-'+name,test);assert fault.returncode==101 and 'test result: FAILED' in fault.stdout,(name,fault.stdout,fault.stderr)
+ finally:path.write_bytes(original[path])
+ restored=run('proposal2-restored-'+name,test);assert restored.returncode==0,(name,restored.stdout)
+ records.append({'fault':name,'source':str(path.relative_to(src)),'test':test,'fault_exit':fault.returncode,'restored_exit':restored.returncode,'baseline_sha256':hashlib.sha256(original[path]).hexdigest(),'restored_sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
+(r/'evidence/faults-recompiled.json').write_text(json.dumps({'kind':'private unapplied proposed /3 native faults','baseline_exit':baseline.returncode,'controls':records},indent=2)+'\n')

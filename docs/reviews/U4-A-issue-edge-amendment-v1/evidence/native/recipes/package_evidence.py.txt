@@ -1,0 +1,43 @@
+from pathlib import Path
+import hashlib,json,shutil,subprocess
+r=Path('/tmp/u4-issue-amendment-native'); p=r/'package'; p.mkdir(exist_ok=True)
+def sha(f): return hashlib.sha256(f.read_bytes()).hexdigest()
+def copy(src,dst): dst.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(src,dst)
+for name in ['native.patch','native-manifest.json','native-report.md']:copy(r/name,p/name)
+for f in (r/'evidence').rglob('*'):
+ if f.is_file() and 'target' not in f.relative_to(r/'evidence').parts:copy(f,p/f.relative_to(r))
+for f in r.glob('*.py'):copy(f,p/'recipes'/f.name)
+for f in (r/'source/probes').glob('*.json'):copy(f,p/'inputs'/f.name)
+original=['C02','D01','D02','D07','D14','O2','issue-gap']
+new=['gap-write','gap-cap1','gap-cap2','gap-independent','gap-cap2-pair']
+outputs=[]
+for name in original+new:
+ f=r/'evidence/target'/((('final-' if name in new else '')+name)+'.json')
+ dst=p/'outputs'/f.name;copy(f,dst)
+ outputs.append({'case':name,'input':f'inputs/{name}.json','input_sha256':sha(p/'inputs'/f'{name}.json'),'output':str(dst.relative_to(p)),'output_sha256':sha(dst),'native_receipt':f"evidence/logs/raw-{'final-' if name in new else ''}proposal-{name}.json",'kind':'prospective private mapped input, synthetic authority; no public execution'})
+copy(r/'evidence/target/gap-write.json',p/'excluded-stale-output/gap-write.json')
+final=json.loads((r/'native-manifest.json').read_text())
+post={x['path']:x['postimage_sha256'] for x in final['files']}
+checks=[]
+for f in sorted((r/'evidence/logs').glob('*.json')):
+ data=json.loads(f.read_text()); source=data.get('source',{})
+ diffs=[path for path,h in post.items() if source.get(path)!=h]
+ checks.append({'receipt':str(f.relative_to(r)),'exit_code':data.get('exit_code'),'matches_all_final_native_postimages':not diffs,'different_or_absent_final_native_files':diffs})
+(p/'evidence/source-test-bindings.json').write_text(json.dumps({'final_native_postimages':post,'checks':checks},indent=2)+'\n')
+executables=[]
+for mode in ['debug','release']:
+ files=[f for f in (r/f'evidence/target/final-probes/{mode}/deps').glob('uarch_engine-*') if f.is_file() and f.stat().st_mode&0o111]
+ assert len(files)==1,files
+ f=files[0];receipt=json.loads((r/f'evidence/logs/proposal-final-capacity-{mode}.json').read_text())
+ assert all(receipt['source'].get(path)==h for path,h in post.items())
+ executables.append({'mode':mode,'path_at_run':str(f),'sha256':sha(f),'bytes':f.stat().st_size,'receipt':f'evidence/logs/proposal-final-capacity-{mode}.json','result':'9 passed; 1 explicitly ignored file probe; 77 filtered','identity_scope':'private unit test executable, not component production binary or authority; not independently rebuilt'})
+(p/'evidence/unit-executables.json').write_text(json.dumps(executables,indent=2)+'\n')
+(p/'evidence/probe-inventory.json').write_text(json.dumps({'outputs':outputs,'excluded':'excluded-stale-output/gap-write.json: stale mutant executable, not passing evidence'},indent=2)+'\n')
+live=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a'); base=final['base_commit'];continuity=[]
+for rel in ['native/Cargo.toml','native/Cargo.lock','native/crates/uarch-engine/Cargo.toml','native/crates/uarch-engine/src/protocol.rs','native/crates/uarch-engine/src/carriers.json','native/crates/uarch-engine/src/component_carriers.json']:
+ f=r/'source'/rel;b=subprocess.check_output(['git','-C',str(live),'show',f'{base}:{rel}']); assert b==f.read_bytes()
+ continuity.append({'path':rel,'sha256':sha(f),'byte_equal_base_commit':base})
+(p/'evidence/unchanged-build-inputs.json').write_text(json.dumps({'unchanged':continuity,'cache_receipt':'evidence/accepted-cache-check.json','cache_verified_files':1719,'dependency_changes':False,'features':'unchanged Cargo manifests; commands recorded per run','trace_execution':False,'public_execution':False},indent=2)+'\n')
+files=[{'path':str(f.relative_to(p)),'bytes':f.stat().st_size,'sha256':sha(f)} for f in sorted(p.rglob('*')) if f.is_file() and f.name!='package-manifest.json']
+(p/'package-manifest.json').write_text(json.dumps({'kind':'UNAPPLIED native DMA issue-edge proposal and observed private evidence','native_patch_sha256':sha(p/'native.patch'),'files':files},indent=2)+'\n')
+print(json.dumps({'package':str(p),'files':len(files),'bytes':sum(x['bytes'] for x in files),'executables':executables},indent=2))

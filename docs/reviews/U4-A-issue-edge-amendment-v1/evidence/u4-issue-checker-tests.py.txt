@@ -1,0 +1,29 @@
+"""Independent literal proposal controls; synthetic transitions, not mapped results."""
+import importlib
+import pytest
+from validation.component.checks import CheckFailure
+
+def module():
+    try: return importlib.import_module('validation.component.issue_checks')
+    except ModuleNotFoundError: return None
+
+@pytest.mark.parametrize('ready,reservation,issue,wanted', [(59999,60000,60000,{'old'}),(60000,60000,60000,set()),(60001,60001,61000,set())])
+def test_strict_wait_credit_cause(ready,reservation,issue,wanted):
+    m=module(); assert m is not None, 'missing independent issue checker'
+    rows={'old':dict(job_id='a',dma_engine_id=0,reservation_ps=0,issue_ps=0,complete_ps=60000),'new':dict(job_id='b',dma_engine_id=0,reservation_ps=reservation,issue_ps=issue,complete_ps=120000)}
+    assert m.credit_predecessors('new',rows,{'a':{'ready_ps':0},'b':{'ready_ps':ready}},1)==wanted
+
+@pytest.mark.parametrize('cap,rows', [(1,[(26667,27000,86000),(86000,86000,146000)]),(2,[(26667,27000,86000),(26667,27000,89000)])])
+def test_reservation_slots_literal(cap,rows):
+    m=module(); assert m is not None, 'missing independent issue checker'
+    actual={str(i):dict(job_id=str(i),dma_engine_id=0,reservation_ps=x[0],issue_ps=x[1],complete_ps=x[2]) for i,x in enumerate(rows)}
+    jobs={str(i):{'ready_ps':26667} for i in range(2)}
+    m.check_reservation_order(actual,jobs,cap)
+    actual['1']['reservation_ps']+=1000
+    with pytest.raises(CheckFailure,match='earliest reservation'): m.check_reservation_order(actual,jobs,cap)
+
+def test_unlimited_same_edge_and_independent_pools():
+    m=module(); assert m is not None, 'missing independent issue checker'
+    rows={str(i):dict(job_id=str(i),dma_engine_id=i//33,reservation_ps=26667,issue_ps=27000,complete_ps=86000+i*1000) for i in range(66)}
+    jobs={str(i):{'ready_ps':26667} for i in range(66)}
+    m.check_reservation_order(rows,jobs,33)

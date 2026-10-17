@@ -1,0 +1,688 @@
+{
+  "final_native_postimages": {
+    "native/crates/uarch-engine/src/carrier.rs": "9b6719a403d1293ddd5cd01e95ce78f1d359a78265b7612eb5bd2db2ee0362c0",
+    "native/crates/uarch-engine/src/component.rs": "6e316affb77bf4f42ea2c68d67a8a1cf1cc918d22021263d718c996a61a4bddf",
+    "native/crates/uarch-engine/src/component_admission.rs": "672b23211949c558f5bfa78297c15837e0ba994bfb9fc7065ef266861067df63",
+    "native/crates/uarch-engine/src/component_accounting.rs": "32c4a5e0bcc452d51d93a4bf85725d452a96a14fb778b1561eceff522f153ffd",
+    "native/crates/uarch-engine/src/component_carriers_v3.json": "6007bce7b06927b863b3f8881eae2caa751d181462739b9b93cf8780cd1b200b",
+    "native/crates/uarch-engine/src/issue_proposal_tests.rs": "e6541306074bdf23231d6192ca39ea115e08170beec556654f7c99234f4075a0"
+  },
+  "checks": [
+    {
+      "receipt": "evidence/logs/proposal-boundary-restored.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-fault-baseline.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-fault-equal-readiness-credit.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-fault-ignore-pending-capacity.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-fault-omit-issue-alignment.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-final-affected-debug.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-final-affected-release.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-final-capacity-debug.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal-final-capacity-release.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal-final-fmt.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-first-green.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/carrier.rs",
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/component_carriers_v3.json",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-frozen-fmt.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal-restored-equal-readiness-credit.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-restored-ignore-pending-capacity.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-restored-omit-issue-alignment.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-schema-green.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/component_carriers_v3.json",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-strict-schema-green.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal-test-first-red.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/carrier.rs",
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/component_carriers_v3.json",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-baseline-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-baseline.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-equal-readiness-credit-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-equal-readiness-credit.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-ignore-pending-capacity-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-ignore-pending-capacity.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-late-job-allocation-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-late-job-allocation.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-omit-issue-alignment-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-omit-issue-alignment.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-pending-is-inflight-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-fault-pending-is-inflight.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-equal-readiness-credit-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-equal-readiness-credit.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-ignore-pending-capacity-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-ignore-pending-capacity.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-late-job-allocation-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-late-job-allocation.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-omit-issue-alignment-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-omit-issue-alignment.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-pending-is-inflight-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal2-restored-pending-is-inflight.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-baseline-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-baseline.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-equal-readiness-credit-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-equal-readiness-credit.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-ignore-pending-capacity-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-ignore-pending-capacity.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-late-job-allocation-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-late-job-allocation.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-omit-issue-alignment-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-omit-issue-alignment.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-pending-is-inflight-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component_accounting.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-pending-is-inflight.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component_accounting.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-underbudget-new-endpoints-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-fault-underbudget-new-endpoints.json",
+      "exit_code": 101,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-equal-readiness-credit-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-equal-readiness-credit.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-ignore-pending-capacity-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-ignore-pending-capacity.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-late-job-allocation-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-late-job-allocation.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-omit-issue-alignment-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-omit-issue-alignment.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-pending-is-inflight-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-pending-is-inflight.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-underbudget-new-endpoints-clean.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/proposal3-restored-underbudget-new-endpoints.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/raw-final-proposal-gap-cap1.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-final-proposal-gap-cap2-pair.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": true,
+      "different_or_absent_final_native_files": []
+    },
+    {
+      "receipt": "evidence/logs/raw-final-proposal-gap-cap2.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-final-proposal-gap-independent.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-final-proposal-gap-write.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-proposal-C02.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-proposal-D01.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-proposal-D02.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-proposal-D07.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-proposal-D14.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-proposal-O2.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-proposal-gap-write.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    },
+    {
+      "receipt": "evidence/logs/raw-proposal-issue-gap.json",
+      "exit_code": 0,
+      "matches_all_final_native_postimages": false,
+      "different_or_absent_final_native_files": [
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/src/component_admission.rs",
+        "native/crates/uarch-engine/src/component_accounting.rs",
+        "native/crates/uarch-engine/src/issue_proposal_tests.rs"
+      ]
+    }
+  ]
+}

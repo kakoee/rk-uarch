@@ -1,0 +1,90 @@
+{
+  "status": "B-published pre-amendment independent arithmetic; not B review of this patch",
+  "bindings": [
+    {
+      "path": "docs/reviews/U4-B-component-native-audit-v1/issue-gap-literals.json",
+      "sha256": "997a52bf17e5c2c081c17bfbba26192e18a0e2dfbdad40905a39bc3a57996e1e",
+      "package_path": "evidence/issue-gap-literals.json"
+    },
+    {
+      "path": "docs/reviews/U4-B-component-native-audit-v1/issue-reservation-literals.json",
+      "sha256": "da587b6f748f0e3e658bd9643ceef00382dd74fcc3c207b716c8c0eb11828a24",
+      "package_path": "evidence/issue-reservation-literals.json"
+    },
+    {
+      "path": "docs/reviews/U4-B-component-native-reconciliation-v2/reservation-boundaries.json",
+      "sha256": "d1fbe90690821805a01ca16476e8dd1ca70a515357002ced085fdc1296b25ea1",
+      "package_path": "evidence/reservation-boundaries.json"
+    }
+  ],
+  "full_mapped_private_probes": 12,
+  "read_gap": {
+    "reservation_ps": 26667,
+    "issue_ps": 27000,
+    "complete_ps": 86000,
+    "attribution_ps": {
+      "memory": 51749,
+      "noc": 7584,
+      "sync": 26667
+    }
+  },
+  "write_gap": {
+    "reservation_ps": 26667,
+    "issue_ps": 27000,
+    "complete_ps": 86000,
+    "attribution_ps": {
+      "memory": 52082,
+      "noc": 7251,
+      "sync": 26667
+    }
+  },
+  "cap1": {
+    "issue_ps": [
+      27000,
+      86000
+    ],
+    "complete_ps": [
+      86000,
+      146000
+    ]
+  },
+  "cap2": {
+    "issue_ps": [
+      27000,
+      27000
+    ],
+    "complete_ps": [
+      86000,
+      89000
+    ]
+  },
+  "strict_release": {
+    "release_ps": 60000,
+    "core_hz": 1000000000,
+    "controls": [
+      {
+        "ready_ps": 59999,
+        "reservation_ps": 60000,
+        "issue_ps": 60000,
+        "cause": "credit-only"
+      },
+      {
+        "ready_ps": 60000,
+        "reservation_ps": 60000,
+        "issue_ps": 60000,
+        "cause": "dependency-only"
+      },
+      {
+        "ready_ps": 60001,
+        "reservation_ps": 60001,
+        "issue_ps": 61000,
+        "cause": "dependency-only"
+      }
+    ]
+  },
+  "unlimited_same_edge": {
+    "native_requests": 33,
+    "independent_checker_requests": 66,
+    "independent_checker_engines": 2
+  }
+}
