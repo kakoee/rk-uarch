@@ -1,0 +1,40 @@
+from pathlib import Path
+import json,hashlib,traceback,copy
+from uarch_contract.mapped import MappedEngineJob,validate_result
+from uarch_contract.hashing import content_hash,canonical_json
+from validation.component.observations_v3 import check_v3
+n=Path('/tmp/u4-issue-order-native');out=Path('/tmp/u4-issue-order-consumers');out.mkdir(exist_ok=True)
+expected=json.loads(Path('docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_text())['observation_contract'];records=[]
+for dependent in ['r00','r01']:
+ j=json.loads((n/'source/probes'/('inline-dependent-'+dependent+'.json')).read_bytes())
+ for mode in ['debug','release']:
+  p=n/'evidence/target'/('inline-'+dependent+'-'+mode+'.json')
+  if not p.exists():continue
+  result=json.loads(p.read_bytes());r=result.get('result',result)
+  row=dict(case=dependent,mode=mode,input_sha256=hashlib.sha256((n/'source/probes'/('inline-dependent-'+dependent+'.json')).read_bytes()).hexdigest(),output_sha256=hashlib.sha256(p.read_bytes()).hexdigest())
+  for label,fn in [('structural',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('independent',lambda:check_v3(j,r,expected))]:
+   try:fn();row[label]='pass'
+   except Exception as e:row[label]=type(e).__name__+': '+str(e);traceback.print_exc()
+  rows={x['request_id']:x for x in r['observations']['dma']['records'] if x['direction']!='unicast'}
+  first='r01.00' if dependent=='r00' else 'r00.00';second=dependent+'.00'
+  assert [(rows[k]['reservation_ps'],rows[k]['issue_ps'],rows[k]['complete_ps']) for k in [first,second]]==[(0,0,60000),(60000,60000,120000)]
+  opp=r['observations']['reservation_opportunities']['records'];assert [x['t_ps'] for x in opp]==[0,0,26667,60000,120000];assert opp[0]['event_cursor']==0 and opp[0]['granted_request_ids']==[first];assert opp[1]['event_cursor']==2 and opp[1]['granted_request_ids']==[]
+  row['literal_opportunities']='pass';records.append(row)
+(out/'baseline.json').write_text(json.dumps(records,indent=2)+'\n');print(json.dumps(records,indent=2))
+# The paired output is internally consistent with r00 reserving first. Rebind its
+# complete graph identity and dependency causes to B's failing graph. Keep times,
+# grants, capacity, allocations, queues, clocks and actual endpoint joins coherent.
+j=json.loads((n/'source/probes/inline-dependent-r00.json').read_bytes());x=json.loads((n/'evidence/target/inline-r01-debug.json').read_bytes());r=copy.deepcopy(x.get('result',x));r['job_hash']=j['job_hash'];r['admission']=j['admission']
+acts=r['observations']['activities']['records'];terminal=max((a for a in acts if a['job_id']=='a-unicast'),key=lambda a:a['completion_ordinal'])
+for a in acts:
+ if a['subphase']=='dma_issue' and a['kind']=='alignment':
+  a['predecessors']=[p for p in a['predecessors'] if p['relation']!='dependency']
+  if a['job_id']=='r00':a['predecessors'].append(dict(activity_id=terminal['activity_id'],relation='dependency'))
+r['result_hash']=content_hash(r,exclude=('result_hash',));(out/'consistent-ineligible-first.json').write_text(canonical_json(r));row=dict(kind='paired-output rebinding; all reservation clocks/queues/capacity/endpoints coherent',raw_sha256=hashlib.sha256((out/'consistent-ineligible-first.json').read_bytes()).hexdigest())
+for label,fn in [('structural',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('independent',lambda:check_v3(j,r,expected))]:
+ try:fn();row[label]='pass'
+ except Exception as e:row[label]=type(e).__name__+': '+str(e);traceback.print_exc()
+(out/'forgery.json').write_text(json.dumps(row,indent=2)+'\n');print(json.dumps(row,indent=2))
+assert all(x[k]=='pass' for x in records for k in ['structural','independent'])
+assert row['structural']=='pass'
+assert 'opportunity eligible grants' in row['independent']

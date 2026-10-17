@@ -1,0 +1,16 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.03s
+     Running unittests src/lib.rs (/target/fault-controls/debug/deps/uarch_engine-02caa55ddc47d2af)
+
+thread 'component::issue_proposal_tests::proposed_order_inline_dependency_is_later_eligibility' (279) panicked at crates/uarch-engine/src/issue_proposal_tests.rs:367:86:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "IncompleteExecution", message: "no runnable component transition", pointer: "" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'component::issue_proposal_tests::proposed_order_paired_inline_dependency_preserves_initial_grant' (280) panicked at crates/uarch-engine/src/issue_proposal_tests.rs:367:86:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "IncompleteExecution", message: "no runnable component transition", pointer: "" }
+
+thread 'component::issue_proposal_tests::proposed_order_terminal_phase_zero_batch_and_inline_epochs' (281) panicked at crates/uarch-engine/src/issue_proposal_tests.rs:468:9:
+assertion `left == right` failed
+  left: [0]
+ right: [0, 4, 8]
+error: test failed, to rerun pass `-p uarch-engine --lib`

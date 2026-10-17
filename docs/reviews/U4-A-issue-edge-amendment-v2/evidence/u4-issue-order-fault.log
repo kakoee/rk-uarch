@@ -1,0 +1,47 @@
+[
+  {
+    "name": "checker-baseline",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-B",
+      "-c",
+      "import json\nfrom pathlib import Path\nfrom validation.component.observations_v3 import check_v3\nn=Path('/tmp/u4-issue-order-native'); expected=json.loads(Path('docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_text())['observation_contract']; rows={}\nfor label,jpath,rpath in [('paired',n/'source/probes/inline-dependent-r01.json',n/'evidence/target/inline-r01-debug.json'),('forgery',n/'source/probes/inline-dependent-r00.json',Path('/tmp/u4-issue-order-consumers/consistent-ineligible-first.json'))]:\n j=json.loads(jpath.read_bytes()); x=json.loads(rpath.read_bytes());r=x.get('result',x)\n try:check_v3(j,r,expected);rows[label]='pass'\n except Exception as e:rows[label]=type(e).__name__+': '+str(e)\nprint(json.dumps(rows))\n"
+    ],
+    "exit_code": 0,
+    "source_sha256": "7fe2dfff9c8f7db7493ee45fbd5cd55adf4e55fd84f1b6e5d7ce35dd7e55cc89",
+    "observed": {
+      "paired": "pass",
+      "forgery": "CheckFailure: opportunity eligible grants / ready tie"
+    }
+  },
+  {
+    "name": "checker-without-eligibility",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-B",
+      "-c",
+      "import json\nfrom pathlib import Path\nfrom validation.component.observations_v3 import check_v3\nn=Path('/tmp/u4-issue-order-native'); expected=json.loads(Path('docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_text())['observation_contract']; rows={}\nfor label,jpath,rpath in [('paired',n/'source/probes/inline-dependent-r01.json',n/'evidence/target/inline-r01-debug.json'),('forgery',n/'source/probes/inline-dependent-r00.json',Path('/tmp/u4-issue-order-consumers/consistent-ineligible-first.json'))]:\n j=json.loads(jpath.read_bytes()); x=json.loads(rpath.read_bytes());r=x.get('result',x)\n try:check_v3(j,r,expected);rows[label]='pass'\n except Exception as e:rows[label]=type(e).__name__+': '+str(e)\nprint(json.dumps(rows))\n"
+    ],
+    "exit_code": 0,
+    "source_sha256": "89e2c55f172998577633dd975e4c1e7fbc6f21ca9a45fc0105025490726328d6",
+    "observed": {
+      "paired": "pass",
+      "forgery": "pass"
+    }
+  },
+  {
+    "name": "checker-restored",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-B",
+      "-c",
+      "import json\nfrom pathlib import Path\nfrom validation.component.observations_v3 import check_v3\nn=Path('/tmp/u4-issue-order-native'); expected=json.loads(Path('docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_text())['observation_contract']; rows={}\nfor label,jpath,rpath in [('paired',n/'source/probes/inline-dependent-r01.json',n/'evidence/target/inline-r01-debug.json'),('forgery',n/'source/probes/inline-dependent-r00.json',Path('/tmp/u4-issue-order-consumers/consistent-ineligible-first.json'))]:\n j=json.loads(jpath.read_bytes()); x=json.loads(rpath.read_bytes());r=x.get('result',x)\n try:check_v3(j,r,expected);rows[label]='pass'\n except Exception as e:rows[label]=type(e).__name__+': '+str(e)\nprint(json.dumps(rows))\n"
+    ],
+    "exit_code": 0,
+    "source_sha256": "7fe2dfff9c8f7db7493ee45fbd5cd55adf4e55fd84f1b6e5d7ce35dd7e55cc89",
+    "observed": {
+      "paired": "pass",
+      "forgery": "CheckFailure: opportunity eligible grants / ready tie"
+    }
+  }
+]

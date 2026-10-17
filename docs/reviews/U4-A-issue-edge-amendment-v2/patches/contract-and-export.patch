@@ -1,0 +1,1448 @@
+--- a/contract/schema/mapped/MappedEngineJob.json
++++ b/contract/schema/mapped/MappedEngineJob.json
+@@ -2477,7 +2477,10 @@
+           "type": "string"
+         },
+         "version": {
+-          "const": "1",
++          "enum": [
++            "1",
++            "2"
++          ],
+           "title": "Version",
+           "type": "string"
+         }
+--- a/contract/schema/mapped/MappedEngineResult.json
++++ b/contract/schema/mapped/MappedEngineResult.json
+@@ -460,6 +460,157 @@
+       "title": "ComponentActivity",
+       "type": "object"
+     },
++    "ComponentActivityV3": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Activity Id",
++          "type": "string"
++        },
++        "category": {
++          "enum": [
++            "compute",
++            "memory",
++            "noc",
++            "sync",
++            "overhead"
++          ],
++          "title": "Category",
++          "type": "string"
++        },
++        "completion_ordinal": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Completion Ordinal",
++          "type": "integer"
++        },
++        "dispatch_ordinal": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Dispatch Ordinal",
++          "type": "integer"
++        },
++        "end_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "End Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "kind": {
++          "enum": [
++            "service",
++            "alignment"
++          ],
++          "title": "Kind",
++          "type": "string"
++        },
++        "occupies_resource": {
++          "title": "Occupies Resource",
++          "type": "boolean"
++        },
++        "owner_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Owner Id",
++          "type": "integer"
++        },
++        "predecessors": {
++          "items": {
++            "$ref": "#/$defs/ActivityPredecessor"
++          },
++          "title": "Predecessors",
++          "type": "array"
++        },
++        "ready_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Ready Ps",
++          "type": "integer"
++        },
++        "receiving_domain": {
++          "anyOf": [
++            {
++              "enum": [
++                "core",
++                "noc",
++                "dram"
++              ],
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Receiving Domain"
++        },
++        "request_id": {
++          "anyOf": [
++            {
++              "minLength": 1,
++              "pattern": "\\S",
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Request Id"
++        },
++        "start_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Start Ps",
++          "type": "integer"
++        },
++        "subphase": {
++          "enum": [
++            "dma_issue",
++            "compute_overhead",
++            "compute_stage",
++            "compute_wave",
++            "compute_drain",
++            "request_noc",
++            "response_noc",
++            "unicast_noc",
++            "dram_latency",
++            "channel_service",
++            "read_port",
++            "write_port",
++            "ack",
++            "barrier"
++          ],
++          "title": "Subphase",
++          "type": "string"
++        }
++      },
++      "required": [
++        "activity_id",
++        "job_id",
++        "request_id",
++        "subphase",
++        "kind",
++        "ready_ps",
++        "start_ps",
++        "end_ps",
++        "owner_id",
++        "category",
++        "receiving_domain",
++        "occupies_resource",
++        "dispatch_ordinal",
++        "completion_ordinal",
++        "predecessors"
++      ],
++      "title": "ComponentActivityV3",
++      "type": "object"
++    },
+     "ComponentClockObservation": {
+       "additionalProperties": false,
+       "properties": {
+@@ -678,6 +829,65 @@
+       "title": "ComponentObservations",
+       "type": "object"
+     },
++    "ComponentObservationsV3": {
++      "additionalProperties": false,
++      "properties": {
++        "activities": {
++          "$ref": "#/$defs/Observed_ComponentActivityV3_"
++        },
++        "allocations": {
++          "$ref": "#/$defs/Observed_AllocationObservation_"
++        },
++        "clocks": {
++          "$ref": "#/$defs/Observed_ComponentClockObservation_"
++        },
++        "critical_path": {
++          "$ref": "#/$defs/Observed_ComponentCriticalInterval_"
++        },
++        "dma": {
++          "$ref": "#/$defs/Observed_DmaObservationV3_"
++        },
++        "events": {
++          "$ref": "#/$defs/Observed_EventObservation_"
++        },
++        "format": {
++          "const": "uarch-native-observations/3",
++          "title": "Format",
++          "type": "string"
++        },
++        "jobs": {
++          "$ref": "#/$defs/Observed_JobObservation_"
++        },
++        "queue_membership": {
++          "$ref": "#/$defs/Observed_ComponentQueueObservationV3_"
++        },
++        "reservation_opportunities": {
++          "$ref": "#/$defs/Observed_DmaReservationOpportunity_"
++        },
++        "resource_intervals": {
++          "$ref": "#/$defs/Observed_ComponentResourceInterval_"
++        },
++        "transfers": {
++          "$ref": "#/$defs/Observed_TransferObservation_"
++        }
++      },
++      "required": [
++        "format",
++        "events",
++        "jobs",
++        "activities",
++        "clocks",
++        "dma",
++        "reservation_opportunities",
++        "transfers",
++        "allocations",
++        "queue_membership",
++        "resource_intervals",
++        "critical_path"
++      ],
++      "title": "ComponentObservationsV3",
++      "type": "object"
++    },
+     "ComponentQueueObservation": {
+       "additionalProperties": false,
+       "properties": {
+@@ -768,6 +978,99 @@
+         "activity_id"
+       ],
+       "title": "ComponentQueueObservation",
++      "type": "object"
++    },
++    "ComponentQueueObservationV3": {
++      "additionalProperties": false,
++      "properties": {
++        "activity_id": {
++          "anyOf": [
++            {
++              "minLength": 1,
++              "pattern": "\\S",
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Activity Id"
++        },
++        "clock_domain": {
++          "anyOf": [
++            {
++              "enum": [
++                "core",
++                "noc",
++                "dram"
++              ],
++              "type": "string"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Clock Domain"
++        },
++        "enter_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Enter Ps",
++          "type": "integer"
++        },
++        "item_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Item Id",
++          "type": "string"
++        },
++        "leave_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Leave Ps"
++        },
++        "owner_id": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Owner Id",
++          "type": "integer"
++        },
++        "population": {
++          "enum": [
++            "waiting",
++            "service",
++            "inflight",
++            "pending"
++          ],
++          "title": "Population",
++          "type": "string"
++        },
++        "queue_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Queue Id",
++          "type": "string"
++        }
++      },
++      "required": [
++        "queue_id",
++        "item_id",
++        "population",
++        "enter_ps",
++        "leave_ps",
++        "owner_id",
++        "clock_domain",
++        "activity_id"
++      ],
++      "title": "ComponentQueueObservationV3",
+       "type": "object"
+     },
+     "ComponentResourceInterval": {
+@@ -1051,6 +1354,184 @@
+         "route_id"
+       ],
+       "title": "DmaObservation",
++      "type": "object"
++    },
++    "DmaObservationV3": {
++      "additionalProperties": false,
++      "properties": {
++        "complete_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Complete Ps",
++          "type": "integer"
++        },
++        "credit_acquire_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Credit Acquire Ps"
++        },
++        "credit_release_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Credit Release Ps"
++        },
++        "destination_buffer_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Destination Buffer Id",
++          "type": "string"
++        },
++        "direction": {
++          "enum": [
++            "read",
++            "write",
++            "unicast"
++          ],
++          "title": "Direction",
++          "type": "string"
++        },
++        "dma_engine_id": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Dma Engine Id"
++        },
++        "issue_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Issue Ps",
++          "type": "integer"
++        },
++        "job_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Job Id",
++          "type": "string"
++        },
++        "payload_bytes": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Payload Bytes",
++          "type": "integer"
++        },
++        "request_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Request Id",
++          "type": "string"
++        },
++        "reservation_ps": {
++          "anyOf": [
++            {
++              "maximum": 18446744073709551615,
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Reservation Ps"
++        },
++        "route_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Route Id",
++          "type": "string"
++        },
++        "source_buffer_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Source Buffer Id",
++          "type": "string"
++        },
++        "transaction_bytes": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Transaction Bytes",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "request_id",
++        "job_id",
++        "dma_engine_id",
++        "direction",
++        "source_buffer_id",
++        "destination_buffer_id",
++        "payload_bytes",
++        "transaction_bytes",
++        "credit_acquire_ps",
++        "issue_ps",
++        "complete_ps",
++        "credit_release_ps",
++        "route_id",
++        "reservation_ps"
++      ],
++      "title": "DmaObservationV3",
++      "type": "object"
++    },
++    "DmaReservationOpportunity": {
++      "additionalProperties": false,
++      "properties": {
++        "event_cursor": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Event Cursor",
++          "type": "integer"
++        },
++        "granted_request_ids": {
++          "items": {
++            "minLength": 1,
++            "pattern": "\\S",
++            "type": "string"
++          },
++          "title": "Granted Request Ids",
++          "type": "array"
++        },
++        "opportunity_ordinal": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Opportunity Ordinal",
++          "type": "integer"
++        },
++        "t_ps": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "T Ps",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "opportunity_ordinal",
++        "t_ps",
++        "event_cursor",
++        "granted_request_ids"
++      ],
++      "title": "DmaReservationOpportunity",
+       "type": "object"
+     },
+     "EventObservation": {
+@@ -1609,7 +2090,10 @@
+           "type": "string"
+         },
+         "version": {
+-          "const": "1",
++          "enum": [
++            "1",
++            "2"
++          ],
+           "title": "Version",
+           "type": "string"
+         }
+@@ -1794,6 +2278,29 @@
+       "title": "Observed[ClockObservation]",
+       "type": "object"
+     },
++    "Observed_ComponentActivityV3_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentActivityV3"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentActivityV3]",
++      "type": "object"
++    },
+     "Observed_ComponentActivity_": {
+       "additionalProperties": false,
+       "properties": {
+@@ -1863,6 +2370,29 @@
+       "title": "Observed[ComponentCriticalInterval]",
+       "type": "object"
+     },
++    "Observed_ComponentQueueObservationV3_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/ComponentQueueObservationV3"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[ComponentQueueObservationV3]",
++      "type": "object"
++    },
+     "Observed_ComponentQueueObservation_": {
+       "additionalProperties": false,
+       "properties": {
+@@ -1932,6 +2462,29 @@
+       "title": "Observed[CriticalInterval]",
+       "type": "object"
+     },
++    "Observed_DmaObservationV3_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/DmaObservationV3"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[DmaObservationV3]",
++      "type": "object"
++    },
+     "Observed_DmaObservation_": {
+       "additionalProperties": false,
+       "properties": {
+@@ -1953,6 +2506,29 @@
+         "records"
+       ],
+       "title": "Observed[DmaObservation]",
++      "type": "object"
++    },
++    "Observed_DmaReservationOpportunity_": {
++      "additionalProperties": false,
++      "properties": {
++        "records": {
++          "items": {
++            "$ref": "#/$defs/DmaReservationOpportunity"
++          },
++          "title": "Records",
++          "type": "array"
++        },
++        "status": {
++          "const": "observed",
++          "title": "Status",
++          "type": "string"
++        }
++      },
++      "required": [
++        "status",
++        "records"
++      ],
++      "title": "Observed[DmaReservationOpportunity]",
+       "type": "object"
+     },
+     "Observed_EventObservation_": {
+@@ -2603,7 +3179,8 @@
+       "discriminator": {
+         "mapping": {
+           "uarch-native-observations/1": "#/$defs/Observations",
+-          "uarch-native-observations/2": "#/$defs/ComponentObservations"
++          "uarch-native-observations/2": "#/$defs/ComponentObservations",
++          "uarch-native-observations/3": "#/$defs/ComponentObservationsV3"
+         },
+         "propertyName": "format"
+       },
+@@ -2613,6 +3190,9 @@
+         },
+         {
+           "$ref": "#/$defs/ComponentObservations"
++        },
++        {
++          "$ref": "#/$defs/ComponentObservationsV3"
+         }
+       ],
+       "title": "Observations"
+--- /dev/null
++++ b/contract/tests/mapped/test_component_issue_v3.py
+@@ -0,0 +1,84 @@
++"""PRIVATE proposal schema controls; never public execution or authority."""
++
++import pytest
++from uarch_contract import mapped as m
++
++
++def activity():
++    return dict(
++        activity_id="a",
++        job_id="j",
++        request_id="r",
++        subphase="dma_issue",
++        kind="alignment",
++        ready_ps=26667,
++        start_ps=26667,
++        end_ps=27000,
++        owner_id=0,
++        category="memory",
++        receiving_domain="core",
++        occupies_resource=False,
++        dispatch_ordinal=0,
++        completion_ordinal=1,
++        predecessors=[],
++    )
++
++
++def test_v3_issue_is_explicit_new_carrier():
++    cls = getattr(m, "ComponentActivityV3", None)
++    assert cls is not None, "missing /3 issue carrier"
++    assert cls.model_validate(activity()).subphase == "dma_issue"
++
++
++def test_v2_remains_strict():
++    with pytest.raises(ValueError):
++        m.ComponentActivity.model_validate(activity())
++
++
++def test_v3_pending_queue_is_explicit_new_carrier():
++    cls = getattr(m, "ComponentQueueObservationV3", None)
++    assert cls is not None, "missing /3 pending carrier"
++    row = dict(
++        queue_id="dma_pending:0",
++        item_id="r",
++        population="pending",
++        enter_ps=26667,
++        leave_ps=27000,
++        owner_id=0,
++        clock_domain=None,
++        activity_id=None,
++    )
++    assert cls.model_validate(row).population == "pending"
++    with pytest.raises(ValueError):
++        m.ComponentQueueObservation.model_validate(row)
++
++
++def test_v3_reservation_field_required():
++    cls = getattr(m, "DmaObservationV3", None)
++    assert cls is not None, "missing /3 reservation carrier"
++    assert cls.model_fields["reservation_ps"].is_required()
++
++
++def test_observation_versions_remain_disjoint():
++    cls = getattr(m, "ComponentObservationsV3", None)
++    assert cls is not None, "missing /3 observation carrier"
++    assert (
++        cls.model_fields["format"].annotation
++        != m.ComponentObservations.model_fields["format"].annotation
++    )
++
++
++def test_new_model_version_is_component_only():
++    base = dict(version="2", implementation_hash="sha256:" + "1" * 64)
++    assert m.NativeModelIdentity(name="native-intervals", **base).version == "2"
++    with pytest.raises(ValueError, match="component model version"):
++        m.NativeModelIdentity(name="fixed-delay", **base)
++
++
++def test_explicit_reservation_opportunity_carrier_required():
++    cls = getattr(m, "DmaReservationOpportunity", None)
++    assert cls is not None, "missing actual reservation opportunity carrier"
++    row = cls(opportunity_ordinal=0, t_ps=0, event_cursor=0, granted_request_ids=("r01",))
++    assert row.event_cursor == 0 and row.granted_request_ids == ("r01",)
++    assert "reservation_opportunities" in m.ComponentObservationsV3.model_fields
++    assert "reservation_opportunities" not in m.ComponentObservations.model_fields
+--- a/contract/uarch_contract/mapped.py
++++ b/contract/uarch_contract/mapped.py
+@@ -650,8 +650,17 @@
+ 
+ class NativeModelIdentity(FrozenModel):
+     name: Literal["fixed-delay", "native-intervals"]
+-    version: Literal["1"]
++    version: Literal["1", "2"]
+     implementation_hash: Hash
++
++    @model_validator(mode="after")
++    def observation_version(self) -> NativeModelIdentity:
++        require(
++            self.version == "1" or self.name == "native-intervals",
++            "ResultBindingMismatch",
++            "component model version",
++        )
++        return self
+ 
+ 
+ class NativeEngineIdentity(FrozenModel):
+@@ -1100,6 +1109,77 @@
+     critical_path: Observed[ComponentCriticalInterval]
+ 
+ 
++class ComponentActivityV3(FrozenModel):
++    activity_id: NonEmpty
++    job_id: NonEmpty
++    request_id: NonEmpty | None
++    subphase: Literal[
++        "dma_issue",
++        "compute_overhead",
++        "compute_stage",
++        "compute_wave",
++        "compute_drain",
++        "request_noc",
++        "response_noc",
++        "unicast_noc",
++        "dram_latency",
++        "channel_service",
++        "read_port",
++        "write_port",
++        "ack",
++        "barrier",
++    ]
++    kind: Literal["service", "alignment"]
++    ready_ps: U64
++    start_ps: U64
++    end_ps: U64
++    owner_id: U64
++    category: Literal["compute", "memory", "noc", "sync", "overhead"]
++    receiving_domain: Literal["core", "noc", "dram"] | None
++    occupies_resource: StrictBool
++    dispatch_ordinal: U64
++    completion_ordinal: U64
++    predecessors: tuple[ActivityPredecessor, ...]
++
++
++class ComponentQueueObservationV3(FrozenModel):
++    queue_id: NonEmpty
++    item_id: NonEmpty
++    population: Literal["waiting", "service", "inflight", "pending"]
++    enter_ps: U64
++    leave_ps: U64 | None
++    owner_id: U64
++    clock_domain: Literal["core", "noc", "dram"] | None
++
++    activity_id: NonEmpty | None
++
++
++class DmaObservationV3(DmaObservation):
++    reservation_ps: U64 | None
++
++
++class DmaReservationOpportunity(FrozenModel):
++    opportunity_ordinal: U64
++    t_ps: U64
++    event_cursor: U64
++    granted_request_ids: tuple[NonEmpty, ...]
++
++
++class ComponentObservationsV3(FrozenModel):
++    format: Literal["uarch-native-observations/3"]
++    events: Observed[EventObservation]
++    jobs: Observed[JobObservation]
++    activities: Observed[ComponentActivityV3]
++    clocks: Observed[ComponentClockObservation]
++    dma: Observed[DmaObservationV3]
++    reservation_opportunities: Observed[DmaReservationOpportunity]
++    transfers: Observed[TransferObservation]
++    allocations: Observed[AllocationObservation]
++    queue_membership: Observed[ComponentQueueObservationV3]
++    resource_intervals: Observed[ComponentResourceInterval]
++    critical_path: Observed[ComponentCriticalInterval]
++
++
+ class Attribution(FrozenModel):
+     compute: U64
+     memory: U64
+@@ -1163,7 +1243,10 @@
+     simulator_metrics: SimulatorMetrics
+     trace_hash: Hash | None
+     u_c0_duration_ps: None
+-    observations: Annotated[Observations | ComponentObservations, Field(discriminator="format")]
++    observations: Annotated[
++        Observations | ComponentObservations | ComponentObservationsV3,
++        Field(discriminator="format"),
++    ]
+     owners: tuple[Owner, ...]
+ 
+     @model_validator(mode="after")
+@@ -1197,6 +1280,13 @@
+     r = MappedEngineResult.model_validate(value)
+     require(r.job_hash == job.job_hash and r.engine == job.engine, "ResultBindingMismatch")
+     require(r.admission == job.admission, "AdmissionMismatch")
++    if job.state_model == "resource_intervals/1":
++        v3_model = job.engine.model.name == "native-intervals" and job.engine.model.version == "2"
++        require(
++            isinstance(r.observations, ComponentObservationsV3) == v3_model,
++            "ResultBindingMismatch",
++            "component observation/model version",
++        )
+     require(
+         r.fidelity_detail == job.fidelity_detail and r.scope == job.workload_closure.scope.kind,
+         "UnsupportedFidelity",
+@@ -1322,8 +1412,13 @@
+ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
+     """Structural witness joins; independent model-law checks remain required."""
+     obs = r.observations
+-    require(isinstance(obs, ComponentObservations), "IncompleteObservations", "component /2")
+-    assert isinstance(obs, ComponentObservations)
++    require(
++        isinstance(obs, (ComponentObservations, ComponentObservationsV3)),
++        "IncompleteObservations",
++        "component /3" if job.engine.model.version == "2" else "component /2",
++    )
++    assert isinstance(obs, (ComponentObservations, ComponentObservationsV3))
++    v3 = isinstance(obs, ComponentObservationsV3)
+     owners = {x.owner_id: x.resource for x in job.owners}
+     tasks = {x.id: x for x in job.mapped_point.task_graph.jobs}
+     declared = {
+@@ -1361,7 +1456,10 @@
+         "barrier": ("barrier",),
+         "noc_transfer": ("unicast_noc",),
+     }
+-    sequences: dict[tuple[str, str | None], list[ComponentActivity]] = {}
++    if v3:
++        for direction in ("read", "write"):
++            phase_orders[direction] = ("dma_issue", *phase_orders[direction])
++    sequences: dict[tuple[str, str | None], list[ComponentActivity | ComponentActivityV3]] = {}
+     for activity in activities.values():
+         require(activity.job_id in tasks, "InvalidResource", "activity job")
+         sequences.setdefault((activity.job_id, activity.request_id), []).append(activity)
+@@ -1466,8 +1564,16 @@
+                     "ack",
+                 }
+             )
++            if v3:
++                allowed.add("dma_issue")
+             require(a.subphase in allowed, "IncompleteObservations")
+-            if a.subphase.endswith("_noc"):
++            if a.subphase == "dma_issue":
++                expected_owner, category, domain = (
++                    f"dma:{core_id}:{task.dma_engine_id % engines}",
++                    "memory",
++                    "core",
++                )
++            elif a.subphase.endswith("_noc"):
+                 expected_owner, category, domain = (
+                     f"router:0:{core_id // cols}:{core_id % cols}",
+                     "noc",
+@@ -1498,7 +1604,12 @@
+             "IncompleteObservations",
+             "activity category/domain",
+         )
+-        occupied = a.kind == "service" and a.subphase not in ("dram_latency", "ack", "barrier")
++        occupied = a.kind == "service" and a.subphase not in (
++            "dram_latency",
++            "ack",
++            "barrier",
++            "dma_issue",
++        )
+         if a.subphase.endswith("_noc"):
+             if isinstance(task, Dma):
+                 assert a.request_id is not None
+@@ -1534,6 +1645,7 @@
+             kinds = ("NOC_HEAD", "NOC_TAIL")
+         else:
+             kinds = {
++                "dma_issue": ("TASK_READY", "DMA_ISSUE"),
+                 "read_port": ("OWNER_GRANT", "DMA_DONE"),
+                 "write_port": ("OWNER_GRANT", "MEM_RESP"),
+                 "channel_service": ("MEM_REQ", "MEM_RESP"),
+@@ -1659,7 +1771,14 @@
+             and q.enter_ps <= q.leave_ps <= r.duration_ps,
+             "IncompleteObservations",
+         )
+-        if q.queue_id.startswith(("channel_service:", "dma_inflight:")):
++        if q.queue_id.startswith(
++            ("channel_service:", "dma_inflight:", "dma_waiting:", "dma_pending:")
++        ):
++            require(
++                v3 or not q.queue_id.startswith(("dma_waiting:", "dma_pending:")),
++                "IncompleteObservations",
++                "versioned issue queue",
++            )
+             require(
+                 q.item_id in declared and q.clock_domain is None and q.activity_id is None,
+                 "IncompleteObservations",
+@@ -1674,11 +1793,15 @@
+                     "IncompleteObservations",
+                 )
+             else:
++                queue_prefix = {"waiting": "dma_waiting", "pending": "dma_pending"}.get(
++                    q.population, "dma_inflight"
++                )
+                 require(
+-                    q.queue_id == f"dma_inflight:{t.dma_engine_id}"
++                    q.queue_id == f"{queue_prefix}:{t.dma_engine_id}"
+                     and owners[q.owner_id]
+                     == f"dma:{t.dma_engine_id // engines}:{t.dma_engine_id % engines}"
+-                    and q.population == "inflight",
++                    and q.population
++                    in (("waiting", "pending", "inflight") if v3 else ("inflight",)),
+                     "IncompleteObservations",
+                 )
+         else:
+@@ -1715,7 +1838,12 @@
+             "clock activity join",
+         )
+ 
+-    def tie(a: ComponentActivity) -> tuple[int, str, str, str, str]:
++    if v3:
++        from .mapped_issue import validate_issue_observations
++
++        validate_issue_observations(r, job)
++
++    def tie(a: ComponentActivity | ComponentActivityV3) -> tuple[int, str, str, str, str]:
+         return a.owner_id, a.job_id, a.request_id or "", a.subphase, a.activity_id
+ 
+     terminal = min(
+--- /dev/null
++++ b/contract/uarch_contract/mapped_issue.py
+@@ -0,0 +1,185 @@
++"""Structural /3 issue witnesses. Private proposal until exact human installation.
++
++No native execution or independent-checker imports. /2 validation never calls here.
++"""
++
++from typing import Any
++
++from .mapped import require
++
++
++def validate_issue_observations(result: Any, job: Any) -> None:
++    obs = result.observations
++    tasks = {t.id: t for t in job.mapped_point.task_graph.jobs}
++    jobs = {r.job_id: r for r in obs.jobs.records}
++    acts = {a.activity_id: a for a in obs.activities.records}
++    events = {e.observation_ordinal: e for e in obs.events.records}
++    owners = {o.owner_id: o.resource for o in job.owners}
++    declared = {
++        f.request_id: (t, f) for t in tasks.values() if t.kind == "dma" for f in t.fragments
++    }
++    requests = {r.request_id: r for r in obs.dma.records if r.direction != "unicast"}
++    require(requests.keys() == declared.keys(), "IncompleteObservations", "issue request inventory")
++    require(
++        all(r.reservation_ps is None for r in obs.dma.records if r.direction == "unicast"),
++        "IncompleteObservations",
++        "unicast has no credit reservation",
++    )
++    limit = int(job.workload_closure.hardware_spec.cores.core_type.dma.max_outstanding.value)
++    engines = int(job.workload_closure.hardware_spec.cores.core_type.dma.engines.value)
++    firsts = {}
++    lasts = {}
++    for req, row in requests.items():
++        task, _ = declared[req]
++        members = [a for a in acts.values() if a.request_id == req and a.job_id == task.id]
++        issue = [a for a in members if a.subphase == "dma_issue"]
++        alignment = [a for a in issue if a.kind == "alignment"]
++        service = [a for a in issue if a.kind == "service"]
++        require(
++            len(alignment) == len(service) == 1,
++            "IncompleteObservations",
++            "exact issue phase inventory",
++        )
++        a, b = alignment[0], service[0]
++        firsts[req] = a
++        lasts[req] = max(members, key=lambda x: x.completion_ordinal)
++        require(row.reservation_ps is not None, "IncompleteObservations", "missing reservation")
++        require(
++            (a.ready_ps, a.start_ps, a.end_ps)
++            == (jobs[task.id].ready_ps, row.reservation_ps, row.issue_ps),
++            "IncompleteObservations",
++            "issue alignment binding",
++        )
++        require(
++            (b.ready_ps, b.start_ps, b.end_ps) == (row.issue_ps, row.issue_ps, row.issue_ps),
++            "IncompleteObservations",
++            "atomic zero issue service",
++        )
++        require(
++            a.completion_ordinal < b.dispatch_ordinal < b.completion_ordinal,
++            "IncompleteObservations",
++            "atomic issue endpoint order",
++        )
++        require(
++            events[a.dispatch_ordinal].phase
++            == events[b.dispatch_ordinal].phase
++            == events[b.completion_ordinal].phase
++            == 2,
++            "IncompleteObservations",
++            "issue phase2 dispatch",
++        )
++        require(
++            events[a.completion_ordinal].phase == (0 if a.end_ps > a.start_ps else 2),
++            "IncompleteObservations",
++            "alignment completion phase",
++        )
++        require(
++            row.credit_acquire_ps == row.issue_ps <= row.complete_ps == row.credit_release_ps,
++            "IncompleteObservations",
++            "acquired credit lifecycle",
++        )
++        require(
++            jobs[task.id].ready_ps <= row.reservation_ps <= row.issue_ps,
++            "IncompleteObservations",
++            "reservation lifecycle",
++        )
++        for name, population, begin, end in (
++            ("dma_waiting", "waiting", jobs[task.id].ready_ps, row.reservation_ps),
++            ("dma_pending", "pending", row.reservation_ps, row.issue_ps),
++            ("dma_inflight", "inflight", row.issue_ps, row.complete_ps),
++        ):
++            qs = [
++                q
++                for q in obs.queue_membership.records
++                if q.queue_id == f"{name}:{task.dma_engine_id}" and q.item_id == req
++            ]
++            require(len(qs) == 1, "IncompleteObservations", "issue population inventory")
++            q = qs[0]
++            require(
++                (q.population, q.enter_ps, q.leave_ps, q.clock_domain, q.activity_id)
++                == (population, begin, end, None, None),
++                "IncompleteObservations",
++                "issue population lifecycle",
++            )
++            require(
++                owners[q.owner_id]
++                == f"dma:{task.dma_engine_id // engines}:{task.dma_engine_id % engines}",
++                "InvalidResource",
++                "issue population owner",
++            )
++    # A reservation cursor is captured before the grant, independently of issue dispatch.
++    opportunities = obs.reservation_opportunities.records
++    require(bool(opportunities), "IncompleteObservations", "reservation opportunity inventory")
++    granted = set()
++    previous_cursor = -1
++    for index, opportunity in enumerate(opportunities):
++        cursor, time = opportunity.event_cursor, opportunity.t_ps
++        require(
++            opportunity.opportunity_ordinal == index
++            and previous_cursor < cursor <= len(events)
++            and (index != 0 or (cursor, time) == (0, 0)),
++            "IncompleteObservations",
++            "reservation opportunity order",
++        )
++        require(
++            (cursor == 0 or events[cursor - 1].t_ps <= time)
++            and (cursor == len(events) or time <= events[cursor].t_ps),
++            "IncompleteObservations",
++            "reservation cursor time",
++        )
++        for request_id in opportunity.granted_request_ids:
++            require(
++                request_id in requests and request_id not in granted,
++                "IncompleteObservations",
++                "reservation grant inventory",
++            )
++            row = requests[request_id]
++            require(
++                row.reservation_ps == time and cursor <= firsts[request_id].dispatch_ordinal,
++                "IncompleteObservations",
++                "reservation grant binding",
++            )
++            granted.add(request_id)
++        previous_cursor = cursor
++    require(granted == requests.keys(), "IncompleteObservations", "reservation grant inventory")
++    # Reservations consume capacity before acquisition. Half-open intervals include
++    # pending and acquired exactly once; conversion changes neither total nor owner.
++    for engine in {r.dma_engine_id for r in requests.values()}:
++        members = [r for r in requests.values() if r.dma_engine_id == engine]
++        for time in {r.reservation_ps for r in members}:
++            require(
++                sum(r.reservation_ps <= time < r.complete_ps for r in members) <= limit,
++                "IncompleteObservations",
++                "pending plus acquired capacity",
++            )
++    for req, row in requests.items():
++        time = row.reservation_ps
++        old = [
++            r
++            for key, r in requests.items()
++            if key != req
++            and r.dma_engine_id == row.dma_engine_id
++            and r.reservation_ps < time <= r.complete_ps
++        ]
++        eligible = (
++            {lasts[r.request_id].activity_id for r in old if r.complete_ps == time}
++            if time > jobs[row.job_id].ready_ps and len(old) == limit
++            else set()
++        )
++        supplied = {p.activity_id for p in firsts[req].predecessors if p.relation == "credit"}
++        require(supplied == eligible, "AttributionMismatch", "strict waiting credit causes")
++    # /3 makes job-start reservation-based; producer allocations follow that endpoint,
++    # while unchanged terminal-reader laws determine free, including transport buffers.
++    allocations = {a.buffer_id: a for a in obs.allocations.records}
++    for buffer in job.mapped_point.task_graph.buffers:
++        persistent = buffer.producer_id is None or (
++            buffer.space == "accumulator" and job.workload_closure.mapping_policy.version == "1"
++        )
++        if not persistent:
++            row = allocations[buffer.id]
++            end = max((jobs[x].end_ps for x in buffer.final_consumer_ids), default=None)
++            require(
++                (row.allocate_ps, row.free_ps) == (jobs[buffer.producer_id].start_ps, end),
++                "IncompleteObservations",
++                "producer allocation endpoints",
++            )
+--- a/docs/decisions/U0011-the-native-engine-core.md
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -650,3 +650,196 @@
+ build, runtime authority or native result is created by this proposal. If the human retains
+ profile/1, omit the isolated PolicyProfileEntry/profile-format/admission additions and their
+ schema deltas/tests before freezing the accepted candidate; do not silently claim binding.
++
++## Component DMA issue observations /3 — proposed amendment, not installed
++
++This section is normative only after exact human installation of the reviewed amendment
++postimages. It grants no runtime placement, HostRecord, selector, profile authority or
++public campaign. The historical component /2 and fixed-delay /1 contracts and receipts
++remain unchanged. These rules add an observation of the existing E4 core issue edge;
++they add no service-rate cap, channel/port service, workload scope or hardware parameter.
++
++New component model identity `native-intervals`, version `2`, requires observation format
++`uarch-native-observations/3`. A /3 result with another model identity, or model/2 with
++/2 output, is `ResultBindingMismatch`. Native fixed-delay model/1 and component model/1
++continue to use /1 and /2 respectively. Existing protocol `uarch-engine/3`, input graph,
++profile/2 policy promises and admission `U0011-stage2/1` remain unchanged: the new model
++version binds the new output/lifetime law, not a retroactive reinterpretation of old
++input/profile promises. Future execution selections must explicitly bind the new model,
++engine, raw job, schema/ADR/checker bytes and expected observation version. No automatic
++upgrade of historical jobs, outputs, selections or anchors is permitted.
++
++### Waiting, pending and acquired are distinct
++
++Each declared DMA fragment is in one of three states after its job becomes ready:
++(1) unreserved waiting, (2) pending with one reserved engine credit while awaiting the
++core edge, or (3) acquired/inflight from issue through commit/ack. Before job readiness
++it belongs to none. Per flattened DMA engine, acquired plus pending MUST NOT exceed
++max_outstanding. Waiting consumes no credit. Pools are independent between engines;
++shared core payload-port arbitration remains the installed independent mechanism.
++
++At each actual eligibility opportunity, reserve all available credits in ascending
++(job ready time, request ID) order among requests eligible on that engine at THAT
++opportunity. Equal readiness timestamps do not make requests simultaneously eligible:
++a dependency must have actually completed before the opportunity. A request initially
++ready at time0 can reserve before another request becomes ready via an inline zero-time
++predecessor, even if the newly ready request has a smaller ID. Never retrospectively
++sort all requests with the same readiness timestamp into a single opportunity.
++
++An eligibility opportunity occurs initially before phase2 work, then at the first
++reservation pass after one or more terminal sequence completions. A DMA terminal releases
++its credit; terminal job completion can enable dependent jobs. All scheduled phase0
++completions at one timestamp drain before one opportunity. Each inline phase2 terminal
++completion creates a distinct subsequent opportunity, including at the same timestamp.
++Nonterminal completions and pending-to-acquired conversion do not create opportunities.
++Every opportunity is recorded, even if it grants nothing, including the final release.
++Repeated scheduler passes without an eligibility-changing transition are not extra
++opportunities. Native eligibility/reservation timing is otherwise unchanged.
++
++A reservation occurs at the earliest opportunity at which all dependency jobs have
++completed and an unreserved engine credit permits it. Reserving a credit is atomic with
++removing the request from unreserved waiting. Pending consumes capacity immediately but
++creates neither credit_acquire_ps, inflight time, payload traffic nor a busy/resource
++interval. Later-eligible arrivals cannot steal a reserved slot. Across independent engines,
++the witness serializes grants by (job ready time, flattened engine ID, request ID);
++capacity and the ready/request ordering law apply independently to each engine.
++
++At `next_edge(core_hz, reservation_ps, 0)`, atomically convert pending to acquired and
++emit DMA_ISSUE. There is no intermediate double charge and no momentary free slot.
++credit_acquire_ps equals issue_ps; credit_release_ps equals commit/ack completion.
++Neither count nor byte traffic is derived from reservation or declared work. All
++eligible reserved requests may issue on the same core edge; there is no finite issue
++rate or one-issue-per-cycle cap. A refusal/overflow emits no partial successful result.
++
++Positive-duration scheduled completions, including alignment completion, use phase0
++and are processed before phase2 eligibility/grants at the same timestamp. Zero-duration
++endpoints remain distinct inline phase2 events under installed U0011; a zero-duration
++ack release must precede by observation ordinal a subsequent reservation using it.
++Phase2 reaches its existing ready/grant fixed point in canonical owner/request order.
++An issue alignment ending now precedes its zero issue service; conversion precedes the
++first transfer phase. No later event may be used as an earlier cause. Reservation order within an opportunity follows the ready/request tie rule;
++request eligibility at different opportunities is preserved without serializing clocks
++or independent pools. Existing schedule-time event sequence and global ordering survive.
++
++### Exact /3 inventory and endpoints
++
++Every DMA fragment, read or write, prepends exactly two activities, including zero
++alignment: `dma_issue/alignment` followed by `dma_issue/service`. Both use its canonical
++flattened DMA engine owner, category memory, receiving domain core, occupies_resource
++false. Alignment is [reservation_ps, issue_ps], ready_ps is job ready_ps, with endpoint
++kinds TASK_READY / DEPENDENCY_READY. Service is [issue_ps, issue_ps], ready_ps issue_ps,
++with endpoint kinds TASK_READY / DMA_ISSUE. All four endpoint observations are distinct
++and correctly joined; service dispatch follows alignment completion, then service
++completion follows dispatch. Both have exact next_edge clock witnesses with n_cycles0.
++The first former transfer phase becomes ready at issue-service completion. No dma_issue
++transfer boundary or resource/busy interval is added. Existing boundary byte accounting
++and request/response/DRAM/core-port entry/exit laws remain unchanged.
++
++/3 DMA observation extends the existing record with REQUIRED reservation_ps: u64 for
++DMA and null for unicast. Unicast gains neither issue phase nor reservation. /3 has
++separate activity/queue/DMA carriers; /2 enums and required fields remain unchanged.
++Each DMA fragment has exactly one ledger row in EACH of these populations, including
++zero-length rows, with null activity_id and clock_domain and its DMA engine owner:
++
++| queue_id | population | interval |
++| --- | --- | --- |
++| dma_waiting:E | waiting | [job.ready_ps, reservation_ps] |
++| dma_pending:E | pending | [reservation_ps, issue_ps] |
++| dma_inflight:E | inflight | [issue_ps, complete_ps] |
++
++These are separate populations, never summed as duplicate inflight counts. Ordinary
++core-domain activity queues remain attached to each issue activity: waiting [ready,start]
++and service [start,end], with explicit service rows and the installed optional empty
++ordinary waiting row. Ledger rows are always explicit. Half-open population/finite-window
++rules remain installed: zero-length intervals contribute zero residence area, preserve
++endpoint flow counts, and null residence remains restricted to zero flow. Atomic
++conversion prevents capacity double counting even at zero alignment.
++
++### Exact reservation-order witness
++
++/3 additionally requires `reservation_opportunities: Observed[DmaReservationOpportunity]`.
++Each record has `opportunity_ordinal: u64`, `t_ps: u64`, `event_cursor: u64` and
++`granted_request_ids: tuple[NonEmpty,...]`. The ordinal is contiguous from0. The cursor
++is the number of existing endpoint observations already emitted immediately before the
++real reservation pass, and grants are appended as the scheduler actually reserves them.
++It is NOT an issue-alignment dispatch ordinal. This is a separate transition witness,
++not a new activity, clock, event-wheel endpoint, traffic count or resource interval.
++All requests appear in exactly one grant list, and each binds reservation_ps to t_ps.
++Empty lists are required. No successful partial witness is permitted.
++
++The initial witness is ordinal0/time0/cursor0. Each inline terminal completion implies
++cursor=completion_ordinal+1. A scheduled phase0 terminal implies the cursor after the
++entire same-time phase0 completion batch; multiple terminals in that batch imply one
++opportunity. A dependency job is complete at a cursor only when ALL its sequence terminal
++completion ordinals precede the cursor. A credit is available only after its acquired
++request's terminal completion precedes the cursor; earlier pending reservations still
++occupy slots. This distinguishes opportunities at identical timestamps.
++
++The independent checker MUST reconstruct the exact opportunity inventory from terminal
++endpoint transitions, then derive all eligible requests and available credits at each
++cursor. It must verify the complete earliest grant list and ready/request ties against
++that derived set. Trusting the claimed list, using readiness timestamps alone, accepting
++alignment-dispatch order as reservation order, or checking only capacity is insufficient.
++A fully joined forgery that moves a not-yet-eligible request into an earlier opportunity
++must be refused even if its timestamps, grants, queues, causes and capacity agree.
++
++B-ISSUE-ORDER-01 is the discriminator: with cap1 and r00 dependent on inline zero-hop
++unicast, initially ready r01 reserves/issues0 and completes60000; r00 reserves/issues60000
++and completes120000. The paired graph makes r01 dependent, reversing these roles. Both
++ready timestamps remain0, and the unicast completion creates a separate empty opportunity
++while capacity is occupied. The exact historical B inputs remain unchanged.
++
++This revises the UNINSTALLED /3/model2 proposal in place; it does not revise installed
++/1 or /2 semantics. Prior draft /3 results without this required witness are retained
++historical evidence, not accepted as outputs of the revised proposal. Installation and
++future bindings must name the exact revised schema/checker/source hashes. No decoder
++fallback, synthetic retrofit of historical outputs or silent receipt upgrade is allowed.
++
++### Exact causes, job start and allocation
++
++The first issue alignment carries all and only eligible tight dependency/credit causes.
++Dependencies are declared predecessor-job terminal activities at the dependency's actual
++job completion. Credit causes require actual pre-reservation exhaustion of acquired plus
++pending capacity, a releasing acquired request on the same engine completing at the
++reservation instant, and STRICT waiting: reservation_ps > job.ready_ps. Alignment delay
++alone is not credit waiting. In particular simultaneous dependency readiness and credit
++release produce dependency-only attribution, even if the core edge is later. An idle
++older release is not tight; pending reservations cannot themselves be releasing causes.
++All tight eligible releases are included when the strict exhaustion predicate holds.
++
++For release60000 on a1GHz core: ready59999 reserves/issues60000 with credit-only cause;
++ready60000 reserves/issues60000 with dependency-only cause; ready60001 reserves60001,
++issues61000 with dependency-only cause. Both zero alignments remain in the inventory.
++The issue service and first transfer phase use immediate sequence links. No issue phase
++has a resource predecessor; payload ports/channels retain their existing resource causes.
++Canonical critical-path ties, zero-duration causal DAG and complete eligible-cause rules
++remain installed. Issue alignment contributes memory attribution, never busy time.
++
++DMA job.start_ps is the minimum reservation_ps across its fragments, NOT minimum issue_ps;
++ready_ps remains the maximum declared predecessor completion, end_ps maximum commit/ack.
++This follows the installed first-activity summary rule with the new explicit first phase.
++A produced nonpersistent buffer allocates at its producer job.start_ps, so a DMA-produced
++buffer may allocate at reservation before payload service. Allocation does not claim data
++production or work completion. Declared terminal consumers retain exact completion-based
++free endpoints. With no terminal consumers, retained output has free_ps null through run
++end, as before. Initial/no-producer reservations and @1 accumulator persistence remain
++unchanged; @2 exact producer/all-terminal-reader laws remain unchanged. Every actual use
++must still be covered. Compute and unicast job/allocation endpoints do not change.
++
++### Installation and verification boundary
++
++Install ADR, typed carriers, mapped JSON schema mirrors and structural validator together;
++install the independently reviewed /3 checker and exact native schema/runtime changes as
++one reviewed source transition. Keep the old /2 checker, schemas/fixtures/receipt bindings
++as historical controls. Native snapshot exports must explicitly select model/1 for old
++K2/component schemas and model/2 for the new /3 schema, preserving old snapshot bytes.
++New source/model/build identities and future profile/selection joins are mandatory; no
++old fixed-delay or component candidate identity is inherited by the amended model.
++
++Before installation require discriminating read/write issue-gap, cap1/cap2, independent
++engine, same-time release/dependency boundary, zero-alignment and unlimited same-edge
++issue controls, producer allocation endpoints, exact queue inventories, false/missing
++causes, early acquisition, capacity double booking, false issue-rate delay and restored
++baselines. Private exports and synthetic anchors do not install this amendment or create
++authority. Human L1 and later public/D3 acceptance remain separate. Existing bounded
++construction trace gaps remain unaccepted and no trace rebuild is implied by this change.
+--- a/native/tools/export_carriers.py
++++ b/native/tools/export_carriers.py
+@@ -14,8 +14,21 @@
+ parser = argparse.ArgumentParser()
+ parser.add_argument("--check", action="store_true")
+ parser.add_argument("--component", action="store_true")
++parser.add_argument("--component-v3", action="store_true")
+ args = parser.parse_args()
++if args.component and args.component_v3:
++    parser.error("choose one component observation version")
++component = args.component or args.component_v3
+ schema = MappedEngineJob.model_json_schema()
++# Preserve the exact installed /1 and /2 executable schemas. New model/2 is explicit.
++model = schema["$defs"]["NativeModelIdentity"]["properties"]
++model["version"] = {
++    "const": "2" if args.component_v3 else "1",
++    "title": "Version",
++    "type": "string",
++}
++if args.component_v3:
++    model["name"] = {"const": "native-intervals", "title": "Name", "type": "string"}
+ # Restrict the executable's schema to the supported K2 branch, without modifying
+ # the installed DTO or dropping validation of any admitted branch.
+ # Unsupported branches are refused explicitly before shape validation.
+@@ -23,14 +36,14 @@
+     schema["$defs"][name]["properties"]["source"] = {"type": "null"}
+     schema["$defs"][name]["properties"]["scope"] = (
+         {"oneOf": [{"$ref": "#/$defs/ComponentScope"}, {"$ref": "#/$defs/TransportScope"}]}
+-        if args.component
++        if component
+         else {"$ref": "#/$defs/KernelScope"}
+     )
+ 
+ 
+ # K2 retains its installed profile/1 promise; profile/2 is component-only.
+ # This selects the admitted branch explicitly instead of changing old schema bytes.
+-if not args.component:
++if not component:
+     profile = schema["$defs"]["NativeTestProfile"]["properties"]
+     profile["format"] = {
+         "const": "uarch-native-test-profile/1",
+@@ -64,7 +77,13 @@
+ output = (
+     root
+     / "crates/uarch-engine/src"
+-    / ("component_carriers.json" if args.component else "carriers.json")
++    / (
++        "component_carriers_v3.json"
++        if args.component_v3
++        else "component_carriers.json"
++        if component
++        else "carriers.json"
++    )
+ )
+ data = (json.dumps(schema, sort_keys=True, indent=2, ensure_ascii=False) + "\n").encode()
+ if args.check:

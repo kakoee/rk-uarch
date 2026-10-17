@@ -1,0 +1,44 @@
+from pathlib import Path
+import shutil
+r=Path('/tmp/u4-issue-order-native');d=r/'source/native/crates/uarch-engine/src'
+(r/'evidence/test-first-source').mkdir()
+for n in ['component.rs','component_accounting.rs','issue_proposal_tests.rs']:shutil.copy2(d/n,r/'evidence/test-first-source'/n)
+p=d/'component.rs';s=p.read_text();s=s.replace('pub(crate) struct Runtime {','''#[derive(Clone, Debug)]
+pub(crate) struct ReservationOpportunity {
+    pub time: u64,
+    pub event_cursor: u64,
+    pub granted: Vec<usize>,
+}
+pub(crate) struct Runtime {''',1)
+s=s.replace('    pub observations: ObservationVersion,','''    pub observations: ObservationVersion,
+    pub reservation_opportunities: Vec<ReservationOpportunity>,
+    eligibility_dirty: bool,''',1)
+s=s.replace('            pending_issue: BTreeMap::new(),','''            reservation_opportunities: vec![],
+            eligibility_dirty: true,
+            pending_issue: BTreeMap::new(),''',1)
+s=s.replace('        self.sequences[s].end = Some(self.now);','''        self.sequences[s].end = Some(self.now);
+        // Terminal transitions can release a credit or complete a dependency.
+        // A phase-0 batch coalesces before reserve; inline completion is seen next loop.
+        self.eligibility_dirty = true;''',1)
+s=s.replace('    fn reserve(&mut self, v: &Admitted) -> Result<bool> {','''    fn reserve(&mut self, v: &Admitted) -> Result<bool> {
+        if !self.eligibility_dirty {
+            return Ok(false);
+        }
+        self.eligibility_dirty = false;
+        self.reservation_opportunities.push(ReservationOpportunity {
+            time: self.now,
+            event_cursor: self.events.len() as u64,
+            granted: vec![],
+        });''',1)
+s=s.replace('                self.sequences[s].reservation = Some(self.now);','''                self.sequences[s].reservation = Some(self.now);
+                self.reservation_opportunities.last_mut().expect("actual opportunity").granted.push(s);''',1)
+p.write_text(s)
+p=d/'component_accounting.rs';s=p.read_text().replace('    let observations = json!(','    let mut observations = json!(',1)
+needle='    let mut result = json!('
+pos=s.index(needle)
+s=s[:pos]+'''    if r.observations == ObservationVersion::V3 {
+        observations["reservation_opportunities"] = observed(r.reservation_opportunities.iter().enumerate().map(|(ordinal, opportunity)| {
+            json!({"opportunity_ordinal":ordinal,"t_ps":opportunity.time,"event_cursor":opportunity.event_cursor,"granted_request_ids":opportunity.granted.iter().map(|&s|r.sequences[s].request.as_ref().expect("DMA request")).collect::<Vec<_>>()})
+        }).collect());
+    }
+'''+s[pos:];p.write_text(s)

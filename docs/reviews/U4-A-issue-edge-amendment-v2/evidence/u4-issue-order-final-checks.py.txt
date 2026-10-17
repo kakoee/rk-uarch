@@ -1,0 +1,9 @@
+from pathlib import Path
+import subprocess,json,os,hashlib
+root=Path('/tmp/u4-issue-order-contract/source');out=Path('/tmp/u4-issue-order-checks');out.mkdir(exist_ok=True);v='/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/'
+files=['contract/uarch_contract/mapped.py','contract/uarch_contract/mapped_issue.py','contract/tests/mapped/test_component_issue_v3.py','validation/component/issue_checks.py','validation/component/test_issue_checks.py','validation/component/installation_identity.py']
+commands=[('lint',[v+'ruff','check',*files]),('format',[v+'ruff','format','--check',*files]),('types',[v+'mypy','--strict','--follow-imports=silent',files[0],files[1],files[3],files[5]]),('schema',[v+'python','-m','uarch_contract.generate_mapped','--check']),('snapshot-k2',[v+'python','native/tools/export_carriers.py','--check']),('snapshot-v2',[v+'python','native/tools/export_carriers.py','--component','--check']),('snapshot-v3',[v+'python','native/tools/export_carriers.py','--component-v3','--check']),('affected',[v+'pytest','-q','validation/component/test_issue_checks.py','contract/tests/mapped/test_component_issue_v3.py','validation/component/test_installation_identity.py','validation/component/test_stage2_selection.py','contract/tests/mapped/test_component_semantics_v2.py::test_component_refuses_legacy_observation_shape','--junitxml='+str(out/'affected.xml')])]
+records=[]
+for name,argv in commands:
+ p=subprocess.run(argv,cwd=root,env=dict(os.environ,PYTHONPATH='.:contract:src'),stdout=subprocess.PIPE,stderr=subprocess.STDOUT);(out/(name+'.log')).write_bytes(p.stdout);records.append(dict(name=name,argv=argv,cwd=str(root),exit_code=p.returncode,log_sha256=hashlib.sha256(p.stdout).hexdigest()));print(name,p.returncode,p.stdout.decode()[-1200:])
+(out/'receipts.json').write_text(json.dumps(records,indent=2)+'\n');raise SystemExit(any(x['exit_code'] for x in records))

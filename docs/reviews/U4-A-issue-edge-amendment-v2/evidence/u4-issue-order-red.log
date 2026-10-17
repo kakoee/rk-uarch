@@ -1,0 +1,308 @@
+...FFFFFFFFFF......F                                                     [100%]
+=================================== FAILURES ===================================
+_________________ test_inline_actual_eligibility_and_pair[r00] _________________
+
+dependent = 'r00'
+
+    @pytest.mark.parametrize("dependent", ["r00", "r01"])
+    def test_inline_actual_eligibility_and_pair(dependent):
+>       verify(witness(dependent))
+
+validation/component/test_issue_checks.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 60000}, 'r01': {'job_id': 'r01', 'dma_engine_...request_ids': ['r00']}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+_________________ test_inline_actual_eligibility_and_pair[r01] _________________
+
+dependent = 'r01'
+
+    @pytest.mark.parametrize("dependent", ["r00", "r01"])
+    def test_inline_actual_eligibility_and_pair(dependent):
+>       verify(witness(dependent))
+
+validation/component/test_issue_checks.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 0}, 'r01': {'job_id': 'r01', 'dma_engine_id':...request_ids': ['r01']}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+_____________ test_consistent_ineligible_first_opportunity_forgery _____________
+
+    def test_consistent_ineligible_first_opportunity_forgery():
+        w = witness("r01")
+        # All reservation/credit records remain internally joined as the paired control;
+        # only dependency completion makes its initial r00 grant impossible.
+        w["dependencies"] = {"r00": ["unicast"]}
+        with pytest.raises(CheckFailure, match="opportunity eligible grants"):
+>           verify(w)
+
+validation/component/test_issue_checks.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 0}, 'r01': {'job_id': 'r01', 'dma_engine_id':...request_ids': ['r01']}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+_____________ test_opportunity_inventory_and_earliest_grant[omit] ______________
+
+change = 'omit'
+
+    @pytest.mark.parametrize("change", ["omit", "move", "late_grant", "duplicate"])
+    def test_opportunity_inventory_and_earliest_grant(change):
+        w = witness()
+        if change == "omit":
+            del w["opportunities"][1]
+        elif change == "move":
+            w["opportunities"][0]["event_cursor"] = 2
+        elif change == "late_grant":
+            w["opportunities"][0]["granted_request_ids"] = []
+            w["opportunities"][1]["granted_request_ids"] = ["r01"]
+        else:
+            w["opportunities"].insert(1, deepcopy(w["opportunities"][0]))
+        with pytest.raises(CheckFailure, match="opportunity"):
+>           verify(w)
+
+validation/component/test_issue_checks.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 60000}, 'r01': {'job_id': 'r01', 'dma_engine_...request_ids': ['r00']}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+_____________ test_opportunity_inventory_and_earliest_grant[move] ______________
+
+change = 'move'
+
+    @pytest.mark.parametrize("change", ["omit", "move", "late_grant", "duplicate"])
+    def test_opportunity_inventory_and_earliest_grant(change):
+        w = witness()
+        if change == "omit":
+            del w["opportunities"][1]
+        elif change == "move":
+            w["opportunities"][0]["event_cursor"] = 2
+        elif change == "late_grant":
+            w["opportunities"][0]["granted_request_ids"] = []
+            w["opportunities"][1]["granted_request_ids"] = ["r01"]
+        else:
+            w["opportunities"].insert(1, deepcopy(w["opportunities"][0]))
+        with pytest.raises(CheckFailure, match="opportunity"):
+>           verify(w)
+
+validation/component/test_issue_checks.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 60000}, 'r01': {'job_id': 'r01', 'dma_engine_...request_ids': ['r00']}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+__________ test_opportunity_inventory_and_earliest_grant[late_grant] ___________
+
+change = 'late_grant'
+
+    @pytest.mark.parametrize("change", ["omit", "move", "late_grant", "duplicate"])
+    def test_opportunity_inventory_and_earliest_grant(change):
+        w = witness()
+        if change == "omit":
+            del w["opportunities"][1]
+        elif change == "move":
+            w["opportunities"][0]["event_cursor"] = 2
+        elif change == "late_grant":
+            w["opportunities"][0]["granted_request_ids"] = []
+            w["opportunities"][1]["granted_request_ids"] = ["r01"]
+        else:
+            w["opportunities"].insert(1, deepcopy(w["opportunities"][0]))
+        with pytest.raises(CheckFailure, match="opportunity"):
+>           verify(w)
+
+validation/component/test_issue_checks.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 60000}, 'r01': {'job_id': 'r01', 'dma_engine_...request_ids': ['r00']}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+___________ test_opportunity_inventory_and_earliest_grant[duplicate] ___________
+
+change = 'duplicate'
+
+    @pytest.mark.parametrize("change", ["omit", "move", "late_grant", "duplicate"])
+    def test_opportunity_inventory_and_earliest_grant(change):
+        w = witness()
+        if change == "omit":
+            del w["opportunities"][1]
+        elif change == "move":
+            w["opportunities"][0]["event_cursor"] = 2
+        elif change == "late_grant":
+            w["opportunities"][0]["granted_request_ids"] = []
+            w["opportunities"][1]["granted_request_ids"] = ["r01"]
+        else:
+            w["opportunities"].insert(1, deepcopy(w["opportunities"][0]))
+        with pytest.raises(CheckFailure, match="opportunity"):
+>           verify(w)
+
+validation/component/test_issue_checks.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 60000}, 'r01': {'job_id': 'r01', 'dma_engine_...request_ids': ['r00']}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+____________ test_simultaneous_phase_zero_release_and_ready_tie[1] _____________
+
+cap = 1
+
+    @pytest.mark.parametrize("cap", [1, 2])
+    def test_simultaneous_phase_zero_release_and_ready_tie(cap):
+        # Two terminal events at one timestamp are drained before a single opportunity.
+        w = witness()
+        w["dependencies"] = {"r00": ["unicast"], "r01": ["unicast"]}
+        w["events"][0]["phase"] = 0
+        w["events"][1]["phase"] = 0
+        w["job_ends"]["another"] = 0
+        w["limit"] = cap
+        w["request_ends"] = {"r00": 2, "r01": 3}
+        w["job_ends"].update(w["request_ends"])
+        w["rows"]["r00"]["reservation_ps"] = 0
+        w["rows"]["r01"]["reservation_ps"] = 60000 if cap == 1 else 0
+        # Synthetic phase0 at t0 replaces initialization before any phase2 opportunity.
+        w["opportunities"] = [dict(opportunity_ordinal=i, t_ps=t, event_cursor=c, granted_request_ids=g)
+                              for i, (t, c, g) in enumerate([(0, 0, []),
+                                  (0, 2, ["r00"] if cap == 1 else ["r00", "r01"]),
+                                  (60000, 3, ["r01"] if cap == 1 else []), (120000, 4, [])])]
+>       verify(w)
+
+validation/component/test_issue_checks.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 0}, 'r01': {'job_id': 'r01', 'dma_engine_id':...request_ids': ['r01']}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+____________ test_simultaneous_phase_zero_release_and_ready_tie[2] _____________
+
+cap = 2
+
+    @pytest.mark.parametrize("cap", [1, 2])
+    def test_simultaneous_phase_zero_release_and_ready_tie(cap):
+        # Two terminal events at one timestamp are drained before a single opportunity.
+        w = witness()
+        w["dependencies"] = {"r00": ["unicast"], "r01": ["unicast"]}
+        w["events"][0]["phase"] = 0
+        w["events"][1]["phase"] = 0
+        w["job_ends"]["another"] = 0
+        w["limit"] = cap
+        w["request_ends"] = {"r00": 2, "r01": 3}
+        w["job_ends"].update(w["request_ends"])
+        w["rows"]["r00"]["reservation_ps"] = 0
+        w["rows"]["r01"]["reservation_ps"] = 60000 if cap == 1 else 0
+        # Synthetic phase0 at t0 replaces initialization before any phase2 opportunity.
+        w["opportunities"] = [dict(opportunity_ordinal=i, t_ps=t, event_cursor=c, granted_request_ids=g)
+                              for i, (t, c, g) in enumerate([(0, 0, []),
+                                  (0, 2, ["r00"] if cap == 1 else ["r00", "r01"]),
+                                  (60000, 3, ["r01"] if cap == 1 else []), (120000, 4, [])])]
+>       verify(w)
+
+validation/component/test_issue_checks.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'r00': {'job_id': 'r00', 'dma_engine_id': 0, 'reservation_ps': 0}, 'r01': {'job_id': 'r01', 'dma_engine_id':...nted_request_ids': []}, {'opportunity_ordinal': 3, 't_ps': 120000, 'event_cursor': 4, 'granted_request_ids': []}], ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+________________ test_independent_pools_and_unlimited_same_edge ________________
+
+    def test_independent_pools_and_unlimited_same_edge():
+        n = 66
+        w = dict(rows={str(i): dict(job_id=str(i), dma_engine_id=i // 33, reservation_ps=0)
+                       for i in range(n)}, jobs={str(i): {"ready_ps": 0} for i in range(n)},
+                 limit=33, dependencies={},
+                 events=[dict(observation_ordinal=i, t_ps=60000, phase=0) for i in range(n)],
+                 job_ends={str(i): i for i in range(n)}, request_ends={str(i): i for i in range(n)})
+        granted = sorted(w["rows"], key=lambda k: (w["rows"][k]["dma_engine_id"], k))
+        w["opportunities"] = [dict(opportunity_ordinal=0, t_ps=0, event_cursor=0, granted_request_ids=granted),
+                              dict(opportunity_ordinal=1, t_ps=60000, event_cursor=n, granted_request_ids=[])]
+>       verify(w)
+
+validation/component/test_issue_checks.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = {'rows': {'0': {'job_id': '0', 'dma_engine_id': 0, 'reservation_ps': 0}, '1': {'job_id': '1', 'dma_engine_id': 0, 'res..._ps': 0}, '1': {'ready_ps': 0}, '2': {'ready_ps': 0}, '3': {'ready_ps': 0}, ...}, 'limit': 33, 'dependencies': {}, ...}
+
+    def verify(w):
+        fn = getattr(checks, "check_reservation_opportunities", None)
+>       assert fn is not None, "missing actual eligibility opportunity checker"
+E       AssertionError: missing actual eligibility opportunity checker
+E       assert None is not None
+
+validation/component/test_issue_checks.py:43: AssertionError
+____________ test_explicit_reservation_opportunity_carrier_required ____________
+
+    def test_explicit_reservation_opportunity_carrier_required():
+        cls = getattr(m, "DmaReservationOpportunity", None)
+>       assert cls is not None, "missing actual reservation opportunity carrier"
+E       AssertionError: missing actual reservation opportunity carrier
+E       assert None is not None
+
+contract/tests/mapped/test_component_issue_v3.py:80: AssertionError
+=========================== short test summary info ============================
+FAILED validation/component/test_issue_checks.py::test_inline_actual_eligibility_and_pair[r00]
+FAILED validation/component/test_issue_checks.py::test_inline_actual_eligibility_and_pair[r01]
+FAILED validation/component/test_issue_checks.py::test_consistent_ineligible_first_opportunity_forgery
+FAILED validation/component/test_issue_checks.py::test_opportunity_inventory_and_earliest_grant[omit]
+FAILED validation/component/test_issue_checks.py::test_opportunity_inventory_and_earliest_grant[move]
+FAILED validation/component/test_issue_checks.py::test_opportunity_inventory_and_earliest_grant[late_grant]
+FAILED validation/component/test_issue_checks.py::test_opportunity_inventory_and_earliest_grant[duplicate]
+FAILED validation/component/test_issue_checks.py::test_simultaneous_phase_zero_release_and_ready_tie[1]
+FAILED validation/component/test_issue_checks.py::test_simultaneous_phase_zero_release_and_ready_tie[2]
+FAILED validation/component/test_issue_checks.py::test_independent_pools_and_unlimited_same_edge
+FAILED contract/tests/mapped/test_component_issue_v3.py::test_explicit_reservation_opportunity_carrier_required
+11 failed, 9 passed in 0.48s

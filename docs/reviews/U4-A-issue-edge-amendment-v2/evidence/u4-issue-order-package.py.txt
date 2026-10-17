@@ -1,0 +1,44 @@
+from pathlib import Path
+import json,hashlib,subprocess,difflib,tarfile,io,shutil
+repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');source=Path('/tmp/u4-issue-order-contract/source');native=Path('/tmp/u4-issue-order-native');old=repo/'docs/reviews/U4-A-issue-edge-amendment-v1';out=repo/'docs/reviews/U4-A-issue-edge-amendment-v2';out.mkdir(exist_ok=True);(out/'patches').mkdir(exist_ok=True);h=lambda x:hashlib.sha256(x).hexdigest();base=subprocess.check_output(['git','rev-parse','d4ef3bf'],cwd=repo,text=True).strip();previous=json.loads((old/'manifest.json').read_text());nm=json.loads((native/'native-manifest.json').read_text())
+manifest=dict(format='unapplied-component-issue-amendment/2',base_commit=base,resolves='B-ISSUE-ORDER-01',supersedes_package_commit='ddd299ca59a27098da9ce4de1359d43f966aab20',native_candidate='64837bea3724919facbc27be1c7f5644a6354cfa',public_authority=None,installation_status='UNAPPLIED; corrected peer review and human installation pending',patches=[],files=[])
+delta='';groups={}
+for row in previous['files']:
+ if row['patch']=='native.patch':continue
+ groups.setdefault(row['patch'],[]).append(row['path'])
+for patch,paths in groups.items():
+ text=''
+ for path in paths:
+  p=subprocess.run(['git','show',base+':'+path],cwd=repo,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL);before=p.stdout if p.returncode==0 else None;after=(source/path).read_bytes()
+  text+=''.join(difflib.unified_diff((before or b'').decode().splitlines(True),after.decode().splitlines(True),fromfile='a/'+path if before is not None else '/dev/null',tofile='b/'+path))
+  manifest['files'].append(dict(path=path,patch=patch,preimage_sha256=h(before) if before is not None else None,postimage_sha256=h(after)))
+  older=Path('/tmp/u4-issue-amendment-apply')/path;prior=older.read_bytes();oldrow=next(x for x in previous['files'] if x['path']==path);assert h(prior)==oldrow['postimage_sha256']
+  if prior!=after:delta+=''.join(difflib.unified_diff(prior.decode().splitlines(True),after.decode().splitlines(True),fromfile='a/'+path,tofile='b/'+path))
+ (out/'patches'/patch).write_text(text);manifest['patches'].append(dict(path='patches/'+patch,sha256=h(text.encode())))
+shutil.copyfile(native/'native.patch',out/'patches/native.patch');manifest['patches'].append(dict(path='patches/native.patch',sha256=h((native/'native.patch').read_bytes())))
+manifest['files'] += [dict(x,patch='native.patch') for x in nm['files']]
+delta+=(native/'native-order-delta.patch').read_text();(out/'patches/alternative-delta-from-v1.patch').write_text(delta)
+manifest['alternative_delta']=dict(path='patches/alternative-delta-from-v1.patch',sha256=h(delta.encode()),base='exact assembled v1 postimages; NOT applied after full replacement patches')
+applyroot=Path('/tmp/u4-issue-order-apply');assert not applyroot.exists();applyroot.mkdir()
+raw=subprocess.check_output(['git','archive',base],cwd=repo)
+with tarfile.open(fileobj=io.BytesIO(raw)) as t:t.extractall(applyroot,filter='data')
+receipts=[]
+for row in manifest['patches']:
+ p=subprocess.run(['git','apply','--check',str(out/row['path'])],cwd=applyroot,capture_output=True);assert p.returncode==0,p.stderr;subprocess.run(['git','apply',str(out/row['path'])],cwd=applyroot,check=True);receipts.append(dict(path=row['path'],apply_check_exit=0))
+for row in manifest['files']:assert h((applyroot/row['path']).read_bytes())==row['postimage_sha256'],row['path']
+for row in reversed(manifest['patches']):
+ p=subprocess.run(['git','apply','--reverse','--check',str(out/row['path'])],cwd=applyroot,capture_output=True);assert p.returncode==0,p.stderr
+# Alternative route in a distinct disposable export; never touch old evidence root.
+alternative=Path('/tmp/u4-issue-order-delta-apply');alternative.mkdir()
+for row in previous['files']:
+ p=alternative/row['path'];p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes((Path('/tmp/u4-issue-amendment-apply')/row['path']).read_bytes())
+p=out/manifest['alternative_delta']['path'];subprocess.run(['git','apply','--check',str(p)],cwd=alternative,check=True);subprocess.run(['git','apply',str(p)],cwd=alternative,check=True)
+for row in manifest['files']:assert h((alternative/row['path']).read_bytes())==row['postimage_sha256'],row['path']
+subprocess.run(['git','apply','--reverse','--check',str(p)],cwd=alternative,check=True)
+oldcontrols=previous['verification']['historical_controls'];controls=[]
+for row in oldcontrols:
+ assert h((applyroot/row['path']).read_bytes())==row['sha256'];controls.append(row)
+support=json.loads((repo/'docs/reviews/U4-B-component-native-audit-v1/source-audit-final.json').read_text())['selected_support'];assert all(h((applyroot/path).read_bytes())==sha for path,sha in support.items())
+manifest['verification']=dict(private_export=str(applyroot),full_apply_checks=receipts,full_reverse_checks=True,all_postimages_match=True,alternative_apply_reverse_checks=True,alternative_same_postimages=True,historical_controls=controls,unchanged_selected_support_count=len(support))
+(out/'manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+print('Frozen',len(manifest['files']),'postimages;',len(manifest['patches']),'replacement patches plus alternative delta')

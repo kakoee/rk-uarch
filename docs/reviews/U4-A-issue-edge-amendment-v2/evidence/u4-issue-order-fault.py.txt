@@ -1,0 +1,27 @@
+from pathlib import Path
+import subprocess,json,hashlib,os
+root=Path('/tmp/u4-issue-order-contract/source');p=root/'validation/component/issue_checks.py';original=p.read_bytes();out=Path('/tmp/u4-issue-order-consumers');py='/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python'
+code='''import json
+from pathlib import Path
+from validation.component.observations_v3 import check_v3
+n=Path('/tmp/u4-issue-order-native'); expected=json.loads(Path('docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_text())['observation_contract']; rows={}
+for label,jpath,rpath in [('paired',n/'source/probes/inline-dependent-r01.json',n/'evidence/target/inline-r01-debug.json'),('forgery',n/'source/probes/inline-dependent-r00.json',Path('/tmp/u4-issue-order-consumers/consistent-ineligible-first.json'))]:
+ j=json.loads(jpath.read_bytes()); x=json.loads(rpath.read_bytes());r=x.get('result',x)
+ try:check_v3(j,r,expected);rows[label]='pass'
+ except Exception as e:rows[label]=type(e).__name__+': '+str(e)
+print(json.dumps(rows))
+'''
+records=[]
+def run(name):
+ env=dict(os.environ,PYTHONPATH='.:contract:src',PYTHONDONTWRITEBYTECODE='1')
+ result=subprocess.run([py,'-B','-c',code],cwd=root,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+ (out/(name+'.stdout')).write_bytes(result.stdout);(out/(name+'.stderr')).write_bytes(result.stderr)
+ assert result.returncode==0,result.stderr
+ row=dict(name=name,argv=[py,'-B','-c',code],exit_code=result.returncode,source_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),observed=json.loads(result.stdout));records.append(row);return row['observed']
+try:
+ baseline=run('checker-baseline');assert baseline['paired']=='pass' and 'opportunity eligible grants' in baseline['forgery']
+ s=original.decode();needle='and all(job_ends[p] < cursor for p in dependencies.get(row["job_id"], []))';assert s.count(needle)==1;p.write_text(s.replace(needle,'# FAULT: ignore dependency completion at the opportunity'))
+ mutated=run('checker-without-eligibility');assert mutated==dict(paired='pass',forgery='pass')
+finally:p.write_bytes(original)
+restored=run('checker-restored');assert restored==baseline;assert p.read_bytes()==original
+(out/'checker-fault.json').write_text(json.dumps(dict(fault='remove only actual dependency-completion eligibility predicate',records=records,exact_restoration=True),indent=2)+'\n');print(json.dumps(records,indent=2))

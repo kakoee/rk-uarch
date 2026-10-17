@@ -1,0 +1,12 @@
+from pathlib import Path
+import json,hashlib
+from uarch_contract.hashing import canonical_json, content_hash
+r=Path('/tmp/u4-issue-order-native');records=[]
+for name,folder in [('r00','/tmp/u4-b-issue-edge-inline-02'),('r01','/tmp/u4-b-issue-edge-inline-control-01')]:
+ for mode in ['debug','release']:
+  oldpath=Path(folder)/mode/'result.json';newpath=r/f'evidence/target/inline-{name}-{mode}.json'
+  old=json.loads(oldpath.read_text())['result'];new=json.loads(newpath.read_text())
+  del new['observations']['reservation_opportunities'];new['result_hash']=content_hash(new,exclude=('result_hash',))
+  a=canonical_json(old).encode();b=canonical_json(new).encode();assert a==b
+  records.append(dict(case=name,mode=mode,previous_B_wrapper_path=str(oldpath),previous_B_wrapper_sha256=hashlib.sha256(oldpath.read_bytes()).hexdigest(),new_raw_sha256=hashlib.sha256(newpath.read_bytes()).hexdigest(),comparison='Remove only reservation_opportunities; recompute result_hash; full canonical old result byte equality',canonical_sha256=hashlib.sha256(a).hexdigest(),equal=True))
+(r/'evidence/old-result-equivalence.json').write_text(json.dumps(records,indent=2)+'\n');print(json.dumps(records,indent=2))

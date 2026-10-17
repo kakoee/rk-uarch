@@ -1,0 +1,60 @@
+Traceback (most recent call last):
+  File "/tmp/u4-issue-order-consume.py", line 35, in <module>
+    try:fn();row[label]='pass'
+        ^^^^
+  File "/tmp/u4-issue-order-consume.py", line 34, in <lambda>
+    for label,fn in [('structural',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('independent',lambda:check_v3(j,r,expected))]:
+                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-issue-order-contract/source/validation/component/observations_v3.py", line 108, in check_v3
+    check_issue(j, r)
+  File "/tmp/u4-issue-order-contract/source/validation/component/issue_checks.py", line 145, in check_issue
+    check_reservation_opportunities(
+  File "/tmp/u4-issue-order-contract/source/validation/component/issue_checks.py", line 100, in check_reservation_opportunities
+    need(
+  File "/tmp/u4-issue-order-contract/source/validation/component/checks.py", line 25, in need
+    raise CheckFailure(detail)
+validation.component.checks.CheckFailure: opportunity eligible grants / ready tie
+[
+  {
+    "case": "r00",
+    "mode": "debug",
+    "input_sha256": "70494e8cf7476e8906bd148606ff3613f25e5864fc3789c9e13dcdabad2aa38b",
+    "output_sha256": "288ddf5d4d7ccca030da9f4b2bde2f79d34ba40f0dffe08257c6fc2ae0da2195",
+    "structural": "pass",
+    "independent": "pass",
+    "literal_opportunities": "pass"
+  },
+  {
+    "case": "r00",
+    "mode": "release",
+    "input_sha256": "70494e8cf7476e8906bd148606ff3613f25e5864fc3789c9e13dcdabad2aa38b",
+    "output_sha256": "288ddf5d4d7ccca030da9f4b2bde2f79d34ba40f0dffe08257c6fc2ae0da2195",
+    "structural": "pass",
+    "independent": "pass",
+    "literal_opportunities": "pass"
+  },
+  {
+    "case": "r01",
+    "mode": "debug",
+    "input_sha256": "3263938d73234a257434327840e986336f48b37b99159904b6a78b6f8bfd7636",
+    "output_sha256": "000dcdc78bc8fdb462401af1d67e250c65bf48e1fd291dbc43f320412fb13213",
+    "structural": "pass",
+    "independent": "pass",
+    "literal_opportunities": "pass"
+  },
+  {
+    "case": "r01",
+    "mode": "release",
+    "input_sha256": "3263938d73234a257434327840e986336f48b37b99159904b6a78b6f8bfd7636",
+    "output_sha256": "000dcdc78bc8fdb462401af1d67e250c65bf48e1fd291dbc43f320412fb13213",
+    "structural": "pass",
+    "independent": "pass",
+    "literal_opportunities": "pass"
+  }
+]
+{
+  "kind": "paired-output rebinding; all reservation clocks/queues/capacity/endpoints coherent",
+  "raw_sha256": "fb737fff66fd88c65ccb12991252b30c6176247902a2c17e75f5edb0b7c946b4",
+  "structural": "pass",
+  "independent": "CheckFailure: opportunity eligible grants / ready tie"
+}

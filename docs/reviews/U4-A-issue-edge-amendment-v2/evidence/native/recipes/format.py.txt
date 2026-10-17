@@ -1,0 +1,7 @@
+import subprocess,hashlib,json
+from pathlib import Path
+r=Path('/tmp/u4-issue-order-native');d=r/'source/native/crates/uarch-engine/src';files=['component.rs','component_accounting.rs','component_admission.rs','carrier.rs','issue_proposal_tests.rs'];records=[]
+argv=['/usr/bin/docker','--host','unix:///var/run/docker.sock','run','-i','--rm','--pull','never','--platform','linux/amd64','--network','none','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges','--entrypoint','/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustfmt','sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523','--edition','2024','--config','skip_children=true','--emit','stdout']
+for name in files:
+ p=d/name;before=p.read_bytes();run=subprocess.run(argv,input=before,capture_output=True,check=True);p.write_bytes(run.stdout);records.append({'file':name,'pre_sha256':hashlib.sha256(before).hexdigest(),'post_sha256':hashlib.sha256(run.stdout).hexdigest(),'exit_code':run.returncode,'stderr':run.stderr.decode()})
+(r/'evidence/format-receipt.json').write_text(json.dumps({'argv':argv,'records':records},indent=2)+'\n')

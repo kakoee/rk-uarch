@@ -1,0 +1,41 @@
+from pathlib import Path
+import hashlib,json,subprocess,difflib,tarfile,io,shutil
+r=Path('/tmp/u4-issue-order-native');repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');base='64837bea3724919facbc27be1c7f5644a6354cfa';oldroot=Path('/tmp/u4-issue-amendment-native/source')
+paths=['native/crates/uarch-engine/src/'+n for n in ['carrier.rs','component.rs','component_admission.rs','component_accounting.rs','component_carriers_v3.json','issue_proposal_tests.rs']]+['native/crates/uarch-engine/testdata/synthetic-issue-order-'+n+'.json' for n in ['r00','r01']]
+def sha(b):return hashlib.sha256(b).hexdigest()
+for kind in ['native','native-order-delta']:
+ records=[];patch=[]
+ for path in paths:
+  post=(r/'source'/path).read_bytes()
+  if kind=='native':
+   run=subprocess.run(['git','show',base+':'+path],cwd=repo,capture_output=True);pre=run.stdout if run.returncode==0 else None
+  else:pre=(oldroot/path).read_bytes() if (oldroot/path).exists() else None
+  if pre==post:continue
+  patch.append('diff --git a/'+path+' b/'+path+'\n')
+  if pre is None:patch.append('new file mode 100644\n')
+  patch.extend(line if line.endswith('\n') else line+'\n\\ No newline at end of file\n' for line in difflib.unified_diff((pre or b'').decode().splitlines(keepends=True),post.decode().splitlines(keepends=True),fromfile='a/'+path if pre is not None else '/dev/null',tofile='b/'+path))
+  records.append(dict(path=path,preimage_sha256=sha(pre) if pre is not None else None,postimage_sha256=sha(post)))
+ p=r/(kind+'.patch');p.write_text(''.join(patch));check=r/(kind+'-apply-check');check.mkdir(exist_ok=True)
+ if kind=='native':tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive',base,'native'],cwd=repo))).extractall(check,filter='data')
+ else:shutil.copytree(oldroot/'native',check/'native')
+ for args in [['--check'],[]]:subprocess.run(['git','apply',*args,str(p)],cwd=check,check=True)
+ for x in records:assert sha((check/x['path']).read_bytes())==x['postimage_sha256']
+ subprocess.run(['git','apply','--reverse','--check',str(p)],cwd=check,check=True)
+ (r/(kind+'-manifest.json')).write_text(json.dumps(dict(kind='UNAPPLIED B-ISSUE-ORDER-01 native correction',patch_sha256=sha(p.read_bytes()),base_commit=base if kind=='native' else None,previous_native_patch_sha256='a1be64f5dfa7ddc4c321bb52533465dd5987604686ed647a40d08996f8e97ad3',files=records,apply_check=True,reverse_check=True,verified_postimages=True,public_authority=None),indent=2)+'\n')
+ print(kind,sha(p.read_bytes()))
+cache_record=repo/'docs/reviews/U4-A-K2-C1-precise-v1/cache-inventory.json';cache=json.loads(cache_record.read_text());cache_root=Path(cache['private_root'])
+for path,meta in cache['files'].items():
+ b=(cache_root/path).read_bytes();assert sha(b)==meta['sha256'] and len(b)==meta['bytes']
+(r/'evidence/cache-check.json').write_text(json.dumps(dict(record_sha256=sha(cache_record.read_bytes()),root=str(cache_root),exact_files_verified=len(cache['files']),match=True),indent=2)+'\n')
+outputs=[];exe=[]
+for mode in ['debug','release']:
+ for n in ['r00','r01']:
+  f=r/f'evidence/target/inline-{n}-{mode}.json';v=json.loads(f.read_text());outputs.append(dict(case=n,mode=mode,sha256=sha(f.read_bytes()),opportunities=v['observations']['reservation_opportunities']['records']))
+ f=next(f for f in (r/f'evidence/target/{mode}/deps').glob('uarch_engine-*') if f.is_file() and f.stat().st_mode&0o111)
+ exe.append(dict(mode=mode,path=str(f),sha256=sha(f.read_bytes()),bytes=f.stat().st_size,scope='private unit-test executable, no runtime authority, no independent rebuild'))
+for n in ['r00','r01']:assert (r/f'evidence/target/inline-{n}-debug.json').read_bytes()==(r/f'evidence/target/inline-{n}-release.json').read_bytes()
+(r/'evidence/outputs.json').write_text(json.dumps(dict(results=outputs,debug_release_exact=True),indent=2)+'\n');(r/'evidence/unit-executables.json').write_text(json.dumps(exe,indent=2)+'\n')
+continuity=[]
+for path in ['native/Cargo.toml','native/Cargo.lock','native/crates/uarch-engine/Cargo.toml','native/crates/uarch-engine/src/protocol.rs','native/crates/uarch-engine/src/carriers.json','native/crates/uarch-engine/src/component_carriers.json','native/crates/uarch-engine/src/component_carriers_v3.json']:
+ post=(r/'source'/path).read_bytes();assert post==(oldroot/path).read_bytes();continuity.append(dict(path=path,sha256=sha(post),byte_equal_previous_proposal=True))
+(r/'evidence/unchanged-inputs.json').write_text(json.dumps(continuity,indent=2)+'\n')
