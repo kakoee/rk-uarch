@@ -1,0 +1,137 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+warning: function `normalize_component` is never used
+  --> crates/uarch-engine/src/carrier.rs:45:15
+   |
+45 | pub(crate) fn normalize_component(mut value: Value) -> Result<Value> {
+   |               ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `category` and `occupies` are never read
+  --> crates/uarch-engine/src/component.rs:20:66
+   |
+20 | ...uct Phase {pub name:&'static str,pub owner:u64,pub category:&'static str,pub domain:Option<usize>,pub cycles:u64,pub occupies:boo...
+   |        ----- fields in this struct                    ^^^^^^^^                                                          ^^^^^^^^
+   |
+   = note: `Phase` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `job`, `ready`, `start`, `causes`, and `ratio` are never read
+  --> crates/uarch-engine/src/component.rs:22:33
+   |
+22 | ...ct Activity {pub job:usize,pub sequence:usize,pub phase:Phase,pub alignment:bool,pub ready:u64,pub start:u64,pub end:u64,pub dispatch:u64,pub completion:u64,pub causes:Vec<(usize,&'static str)>,pub ratio:Op...
+   |       --------      ^^^                                                                 ^^^^^         ^^^^^                                                         ^^^^^^                               ^^^^^
+   |       |
+   |       fields in this struct
+   |
+   = note: `Activity` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `activity`, `completion`, `time`, `phase`, and `seq` are never read
+  --> crates/uarch-engine/src/component.rs:24:33
+   |
+24 | pub(crate) struct Dispatch {pub activity:usize,pub completion:bool,pub time:u64,pub phase:u8,pub seq:u64}
+   |                   --------      ^^^^^^^^           ^^^^^^^^^^          ^^^^         ^^^^^        ^^^
+   |                   |
+   |                   fields in this struct
+   |
+   = note: `Dispatch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: field `raw` is never read
+ --> crates/uarch-engine/src/component_admission.rs:6:33
+  |
+6 | pub(crate) struct Admitted {pub raw:Value,pub graph:Graph,pub hardware:Hardware,pub owners:BTreeMap<String,u64>}
+  |                   --------      ^^^
+  |                   |
+  |                   field in this struct
+  |
+  = note: `Admitted` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: field `buffers` is never read
+ --> crates/uarch-engine/src/component_admission.rs:8:49
+  |
+8 | pub(crate) struct Graph {pub jobs:Vec<Task>,pub buffers:Vec<Buffer>,pub routes:Vec<Route>,pub dependencies:Vec<(usize,usize)>}
+  |                   ----- field in this struct    ^^^^^^^
+  |
+  = note: `Graph` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: fields `op_id` and `raw` are never read
+  --> crates/uarch-engine/src/component_admission.rs:10:43
+   |
+10 | pub(crate) struct Task {pub id:String,pub op_id:Option<String>,pub owner:u64,pub kind:TaskKind,pub raw:Value}
+   |                   ----                    ^^^^^                                                    ^^^
+   |                   |
+   |                   fields in this struct
+   |
+   = note: `Task` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: variants `Compute`, `Dma`, `Unicast`, and `Barrier` are never constructed
+  --> crates/uarch-engine/src/component_admission.rs:12:27
+   |
+12 | ...um TaskKind {Compute{core:u64,m:u64,k:u64,n:u64},Dma{engine:u64,core:u64,write:bool,source:String,destination:String,fragments:Vec<Fragment>},Unicast{source:String,destination:String,payload:u64,route:usize},Barrier}
+   |       --------  ^^^^^^^                             ^^^                                                                                          ^^^^^^^                                                           ^^^^^^^
+   |       |
+   |       variants in this enum
+   |
+   = note: `TaskKind` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: multiple fields are never read
+  --> crates/uarch-engine/src/component_admission.rs:18:31
+   |
+18 | ...ct Buffer {pub id:String,pub space:String,pub owner:u64,pub offset:u64,pub size:u64,pub producer:Option<usize>,pub consumers:Vec<usize>,pub persistent:bool}
+   |       ------      ^^            ^^^^^            ^^^^^         ^^^^^^         ^^^^         ^^^^^^^^                   ^^^^^^^^^                ^^^^^^^^^^
+   |       |
+   |       fields in this struct
+   |
+   = note: `Buffer` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: field `engines_per_core` is never read
+  --> crates/uarch-engine/src/component_admission.rs:20:214
+   |
+20 | ...ct Hardware {pub freq:[u64;3],pub operand_rate:u64,pub port_rate:u64,pub overhead:u64,pub wave_fill_drain:u64,pub hop_cycles:u64,pub dram_latency:u64,pub barrier_cycles:u64,pub credit_limit:u64,pub engines_per_core:u6...
+   |       -------- field in this struct                                                                                                                                                                      ^^^^^^^^^^^^^^^^
+   |
+   = note: `Hardware` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `uarch-engine` (lib test) generated 10 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.76s
+     Running unittests src/lib.rs (/target/debug/deps/uarch_engine-02caa55ddc47d2af)
+
+thread 'component_admission_tests::synthetic_positive_inventory_is_nonempty' (275) panicked at crates/uarch-engine/src/component_admission_tests.rs:22:264:
+C01: Refusal { code: "UnsupportedCheckpointScope", message: "test-first stub", pointer: "" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'component_admission_tests::synthetic_typed_admission_literals' (280) panicked at crates/uarch-engine/src/component_admission_tests.rs:21:78:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "UnsupportedCheckpointScope", message: "test-first stub", pointer: "" }
+
+thread 'component_admission_tests::synthetic_full_point_resource_validation' (272) panicked at crates/uarch-engine/src/component_admission_tests.rs:20:32:
+assertion `left == right` failed
+  left: "UnsupportedCheckpointScope"
+ right: "CapacityExceeded"
+
+thread 'component_admission_tests::synthetic_terminal_reader_and_capacity' (279) panicked at crates/uarch-engine/src/component_admission_tests.rs:20:32:
+assertion `left == right` failed
+  left: "UnsupportedCheckpointScope"
+ right: "InvalidDependency"
+
+thread 'component_admission_tests::synthetic_schema_rejects_unknown_field' (277) panicked at crates/uarch-engine/src/component_admission_tests.rs:20:32:
+assertion `left == right` failed
+  left: "UnsupportedCheckpointScope"
+ right: "InvalidCarrier"
+
+thread 'component_admission_tests::synthetic_negative_profile_stops_before_resources' (273) panicked at crates/uarch-engine/src/component_admission_tests.rs:20:32:
+assertion `left == right` failed
+  left: "UnsupportedCheckpointScope"
+ right: "TestVariantNotAdmitted"
+
+thread 'component_admission_tests::synthetic_stale_and_external_trust_are_distinct' (278) panicked at crates/uarch-engine/src/component_admission_tests.rs:20:32:
+assertion `left == right` failed
+  left: "UnsupportedCheckpointScope"
+ right: "ContentHashMismatch"
+
+thread 'component_admission_tests::synthetic_profile_two_policy_and_format' (276) panicked at crates/uarch-engine/src/component_admission_tests.rs:27:257:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "UnsupportedCheckpointScope", message: "test-first stub", pointer: "" }
+
+thread 'component_admission_tests::synthetic_operand_access_precondition' (274) panicked at crates/uarch-engine/src/component_admission_tests.rs:20:32:
+assertion `left == right` failed
+  left: "UnsupportedCheckpointScope"
+ right: "InvalidCoverage"
+error: test failed, to rerun pass `-p uarch-engine --lib`

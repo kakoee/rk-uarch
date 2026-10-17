@@ -1,0 +1,23 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+warning: field `wave_fill_drain` is never read
+  --> crates/uarch-engine/src/component_admission.rs:83:9
+   |
+78 | pub(crate) struct Hardware {
+   |                   -------- field in this struct
+...
+83 |     pub wave_fill_drain: u64,
+   |         ^^^^^^^^^^^^^^^
+   |
+   = note: `Hardware` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `uarch-engine` (lib test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.73s
+     Running unittests src/lib.rs (/target/debug/deps/uarch_engine-02caa55ddc47d2af)
+
+thread 'component_tests::synthetic_compute_literals' (278) panicked at crates/uarch-engine/src/component_tests.rs:34:5:
+assertion `left == right` failed
+  left: Number(37000)
+ right: 547000
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p uarch-engine --lib`

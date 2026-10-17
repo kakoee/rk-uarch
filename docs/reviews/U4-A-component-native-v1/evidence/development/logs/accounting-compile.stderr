@@ -1,0 +1,21 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+error[E0425]: cannot find function `resources` in this scope
+   --> crates/uarch-engine/src/component_admission.rs:105:507
+    |
+105 | ...,"UnsupportedFrequency","production clocks")?;}resources(b,point,ancestors)?;}
+    |                                                   ^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `hardware_model` in this scope
+   --> crates/uarch-engine/src/component_admission.rs:106:15
+    |
+106 |  let hardware=hardware_model(&v)?;let graph=typed_graph(b,p,&owners,&hardware)?;Ok(Admitted{raw:v,graph,hardware,owners})
+    |               ^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `typed_graph` in this scope
+   --> crates/uarch-engine/src/component_admission.rs:106:45
+    |
+106 |  let hardware=hardware_model(&v)?;let graph=typed_graph(b,p,&owners,&hardware)?;Ok(Admitted{raw:v,graph,hardware,owners})
+    |                                             ^^^^^^^^^^^ not found in this scope
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `uarch-engine` (lib test) due to 3 previous errors

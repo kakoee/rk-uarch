@@ -1,0 +1,19 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.55s
+     Running unittests src/lib.rs (/target/debug/deps/uarch_engine-02caa55ddc47d2af)
+
+thread 'component_tests::synthetic_replay_is_complete_bytes' (265) panicked at crates/uarch-engine/src/component_tests.rs:13:104:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "UnsupportedCheckpointScope", message: "component implementation test-first baseline", pointer: "" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'component_tests::synthetic_no_external_trust_from_self_hash' (264) panicked at crates/uarch-engine/src/component_tests.rs:25:2:
+assertion `left == right` failed
+  left: "UnsupportedCheckpointScope"
+ right: "TestProfileMismatch"
+
+thread 'component_tests::synthetic_dma_literals' (263) panicked at crates/uarch-engine/src/component_tests.rs:13:104:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "UnsupportedCheckpointScope", message: "component implementation test-first baseline", pointer: "" }
+
+thread 'component_tests::synthetic_compute_literals' (262) panicked at crates/uarch-engine/src/component_tests.rs:13:104:
+called `Result::unwrap()` on an `Err` value: Refusal { code: "UnsupportedCheckpointScope", message: "component implementation test-first baseline", pointer: "" }
+error: test failed, to rerun pass `-p uarch-engine --lib`

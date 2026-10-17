@@ -1,0 +1,101 @@
+    Checking uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+error: field `core` is never read
+  --> crates/uarch-engine/src/component_admission.rs:33:9
+   |
+32 |     Compute {
+   |     ------- field in this variant
+33 |         core: u64,
+   |         ^^^^
+   |
+   = note: `TaskKind` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `-D dead-code` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[expect(dead_code)]` or `#[allow(dead_code)]`
+
+error: this `if` statement can be collapsed
+   --> crates/uarch-engine/src/component.rs:465:9
+    |
+465 | /         if let Some(&previous) = sequence.activities.last() {
+466 | |             if self.activities[previous].end == start {
+467 | |                 causes.push((previous, "sequence"));
+468 | |             }
+469 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#collapsible_if
+    = note: `-D clippy::collapsible-if` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+    |
+465 ~         if let Some(&previous) = sequence.activities.last()
+466 ~             && self.activities[previous].end == start {
+467 |                 causes.push((previous, "sequence"));
+468 ~             }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates/uarch-engine/src/component.rs:470:9
+    |
+470 | /         if let Some(previous) = resource {
+471 | |             if self.activities[previous].end == start {
+472 | |                 causes.push((previous, "resource"));
+473 | |             }
+474 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+470 ~         if let Some(previous) = resource
+471 ~             && self.activities[previous].end == start {
+472 |                 causes.push((previous, "resource"));
+473 ~             }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates/uarch-engine/src/component.rs:497:21
+    |
+497 | /                     if let Some(&a) = self.sequences[seq].activities.last() {
+498 | |                         if self.activities[a].end == start {
+499 | |                             causes.push((a, "dependency"));
+500 | |                         }
+501 | |                     }
+    | |_____________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+497 ~                     if let Some(&a) = self.sequences[seq].activities.last()
+498 ~                         && self.activities[a].end == start {
+499 |                             causes.push((a, "dependency"));
+500 ~                         }
+    |
+
+error: this function has too many arguments (9/7)
+   --> crates/uarch-engine/src/component.rs:506:5
+    |
+506 | /     fn activity(
+507 | |         &mut self,
+508 | |         v: &Admitted,
+509 | |         s: usize,
+...   |
+515 | |         ratio: Option<(Ratio, Ratio)>,
+516 | |     ) -> Result<usize> {
+    | |______________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#too_many_arguments
+    = note: `-D clippy::too-many-arguments` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::too_many_arguments)]`
+
+error: manual implementation of `.is_multiple_of()`
+   --> crates/uarch-engine/src/component_admission.rs:731:52
+    |
+731 |             num(&buf["alignment_bytes"]) == 256 && num(&buf["offset_bytes"]) % 256 == 0,
+    |                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace with: `num(&buf["offset_bytes"]).is_multiple_of(256)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#manual_is_multiple_of
+    = note: `-D clippy::manual-is-multiple-of` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::manual_is_multiple_of)]`
+
+error: could not compile `uarch-engine` (lib) due to 6 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `uarch-engine` (lib test) due to 5 previous errors
