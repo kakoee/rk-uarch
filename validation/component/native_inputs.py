@@ -160,7 +160,7 @@ def private_job(item: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any
     """
     b = MappedBundle.model_validate(item["bundle"])
     point = b.points[0]
-    raw = deepcopy(synthetic_job("C02").model_dump(mode="json"))
+    raw: dict[str, Any] = deepcopy(synthetic_job("C02").model_dump(mode="json"))
     raw.update(
         bundle_hash=b.bundle_hash,
         point_hash=point.payload_hash,

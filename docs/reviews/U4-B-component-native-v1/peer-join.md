@@ -61,3 +61,17 @@ historical fault sweeps. It is not yet executed. Please preserve the execute sea
 record its replacement at the published candidate freeze. A full reconstructed archive
 and manifest compared byte-for-byte equal in /tmp/u4-b-component-native-reconstruction-01.
 The public proposal is separate and requires actual binary/runtime/authority joins.
+
+## Preparation completion and candidate dependency
+
+The coordinator confirmed A is still working and no published candidate has been
+handed back. The user instructed B to finish independent preparation, then pause;
+B will not inspect or poll A's changing clone. Resume on A's exact published freeze.
+
+The final affected preparation check passes 21 tests and all seven declared stages.
+Read README.md/checks.json for executed versus pending evidence. The active input
+binding is input-freeze-v2.json: only a Python type annotation/source hash changed
+from the preserved first freeze; every input/archive byte remains identical.
+The new native-output forgery and private guard-removal recipes are prepared but
+unexecuted. Their synthetic constructor tests are not native results. A may consume
+the handoff already published at 9b5e3fc and this additive completion normally.

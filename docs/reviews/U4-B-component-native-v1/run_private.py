@@ -29,8 +29,11 @@ def main():
     args = parser.parse_args()
     build = args.build.resolve()
     meta = json.loads((build / "build.json").read_text())
-    freeze = json.loads((HERE / "input-freeze.json").read_text())
+    freeze = json.loads((HERE / "input-freeze-v2.json").read_text())
     assert sha(args.archive.read_bytes()) == freeze["archive_sha256"]
+    root = HERE.parents[2]
+    for path, digest in freeze["sources"].items():
+        assert sha((root / path).read_bytes()) == digest
     out = args.output.resolve()
     assert out.is_relative_to(Path("/tmp"))
     out.mkdir(exist_ok=False)
@@ -49,7 +52,7 @@ def main():
         source_commit=meta["source_commit"],
         image=IMAGE,
         build_sha256=sha((build / "build.json").read_bytes()),
-        input_freeze_sha256=sha((HERE / "input-freeze.json").read_bytes()),
+        input_freeze_sha256=sha((HERE / "input-freeze-v2.json").read_bytes()),
         plan_sha256=sha((HERE / "private-run-plan.json").read_bytes()),
         runner_sha256=sha(Path(__file__).read_bytes()),
         development_selection=bool(args.development_cases),

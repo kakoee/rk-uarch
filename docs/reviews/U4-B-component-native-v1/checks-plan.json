@@ -1,0 +1,91 @@
+[
+  {
+    "name": "affected-tests",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "validation/component/test_native_inputs.py",
+      "validation/component/test_native_forgeries.py",
+      "validation/component/test_stage2_selection.py",
+      "validation/component/test_join_selection.py",
+      "--junitxml=/tmp/u4-b-component-preparation-final/tests.xml"
+    ]
+  },
+  {
+    "name": "ruff",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+      "check",
+      "validation/component/native_inputs.py",
+      "validation/component/native_check.py",
+      "validation/component/native_forgeries.py",
+      "validation/component/test_native_inputs.py",
+      "validation/component/test_native_forgeries.py",
+      "docs/reviews/U4-B-component-native-v1/audit_preparation.py",
+      "docs/reviews/U4-B-component-native-v1/build_private.py",
+      "docs/reviews/U4-B-component-native-v1/check_forgeries.py",
+      "docs/reviews/U4-B-component-native-v1/freeze_inputs.py",
+      "docs/reviews/U4-B-component-native-v1/run_private.py"
+    ]
+  },
+  {
+    "name": "format",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+      "format",
+      "--check",
+      "validation/component/native_inputs.py",
+      "validation/component/native_check.py",
+      "validation/component/native_forgeries.py",
+      "validation/component/test_native_inputs.py",
+      "validation/component/test_native_forgeries.py",
+      "docs/reviews/U4-B-component-native-v1/audit_preparation.py",
+      "docs/reviews/U4-B-component-native-v1/build_private.py",
+      "docs/reviews/U4-B-component-native-v1/check_forgeries.py",
+      "docs/reviews/U4-B-component-native-v1/freeze_inputs.py",
+      "docs/reviews/U4-B-component-native-v1/run_private.py"
+    ]
+  },
+  {
+    "name": "mypy-new-helpers",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+      "--follow-imports=silent",
+      "validation/component/native_inputs.py",
+      "validation/component/native_check.py",
+      "validation/component/native_forgeries.py"
+    ]
+  },
+  {
+    "name": "identity-support-audit",
+    "argv": [
+      "/usr/bin/env",
+      "PYTHONPATH=contract:src:.",
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-native-v1/audit_preparation.py",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-native-v1/preparation-audit.json"
+    ]
+  },
+  {
+    "name": "patch-whitespace",
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ]
+  },
+  {
+    "name": "input-byte-reconstruction",
+    "argv": [
+      "cmp",
+      "/tmp/u4-b-component-native-reconstruction-02/inputs.tar.gz",
+      "/tmp/u4-b-component-native-inputs/inputs.tar.gz"
+    ]
+  }
+]

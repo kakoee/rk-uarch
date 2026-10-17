@@ -7,7 +7,7 @@ Human installation 3949b104d0eaae95a7452f976c2afa048fa82ff1 is verified separate
 
 ## Exact inputs and schedule
 
-The new `input-freeze.json` binds 111 prospective case definitions: 106 historical
+The active `input-freeze-v2.json` binds 111 prospective case definitions: 106 historical
 expectations and graph/point placements, genuine transient O2, and four additional
 resource-negative definitions. Each component profile uses /2 and binds the exact
 mapping-policy name/version/depth. Old /1 profiles and selections remain immutable.

@@ -36,7 +36,7 @@ def main():
     out = args.output.resolve()
     assert out.is_relative_to(Path("/tmp"))
     out.mkdir(exist_ok=False)
-    for name in ("receipts", "canary", "docker-config", "source"):
+    for name in ("receipts", "canary", "docker-config", "source", "output"):
         (out / name).mkdir()
     export = subprocess.check_output(["git", "archive", commit, "native"], cwd=ROOT)
     with tarfile.open(fileobj=io.BytesIO(export)) as archive:
@@ -57,6 +57,10 @@ def main():
         if p.is_file()
     }
     assert all(digest(OLD / "cache" / p) == value for p, value in cache.items())
+    accepted_cache = json.loads(
+        (ROOT / "docs/reviews/U4-A-K2-C1-precise-v1/cache-inventory.json").read_text()
+    )["files"]
+    assert cache == {p: value["sha256"] for p, value in accepted_cache.items()}
     lib = source / "native/crates/uarch-engine/src/lib.rs"
     lib.write_bytes(lib.read_bytes() + b"\n#[cfg(test)]\nmod b_private_probe;\n")
     shutil.copyfile(HERE / "private_probe.rs", lib.with_name("b_private_probe.rs"))
