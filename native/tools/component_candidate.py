@@ -175,6 +175,7 @@ def prepare(scratch: Path) -> None:
         shutil.copy2(
             ROOT / "docs/reviews/U4-A-K2-construction-v1/inputs" / name, scratch / "controls" / name
         )
+        (scratch / "controls" / name).chmod(0o555)
     tools = json.loads(TOOLS.read_bytes())
     model_paths = [x for x in sources if x["path"].startswith("native/crates/uarch-engine/src/")]
     build = {
