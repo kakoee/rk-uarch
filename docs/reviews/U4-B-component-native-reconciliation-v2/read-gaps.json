@@ -1,0 +1,916 @@
+{
+  "build_receipt_sha256": "8680d59bf2ac51ae6a3824d786294819b0fea10828097eea6d19dc618e4dfb6e",
+  "postexecution_formatting_AST_equal": true,
+  "published_recipe_sha256": "9e47c9c11cb8a6dd0892bc1c27aaf992fc65c38783df7ee1c2443db2edb59cc3",
+  "raw_logs_modified": false,
+  "recipe_sha256": "a231b578e189e52a48ec31052a541371565d58418d69cd9aa6c0cb83a75ed52a",
+  "reports": [
+    {
+      "CLONE_FS_count": 848,
+      "all_child_logs_present": true,
+      "all_terminal_records_present": true,
+      "bounded_scope": "parseable records only; unknown calls and unfinished outcomes remain gaps",
+      "classifier_recipe_sha256": "ad8582de3e11a183bb0e6a24a57dc88da0dbd63c37f447ef544cf62cc6e5871e",
+      "diagnostic_child_exec_mentions": [],
+      "exec_successes": 264,
+      "gaps": [
+        {
+          "line_1_based": 11,
+          "ordinal": 10,
+          "pid": 450,
+          "raw": "1792268641.783334 ???()                 = ?",
+          "reason": "unparsed record; syscall identity unknown",
+          "trace_file": "/tmp/u4-b-component-candidate-03/receipts/debug/debug.trace.450",
+          "trace_sha256": "bfa6f0d596e06235521fccedc8da46590efed478284d9549e307688d441fe661"
+        },
+        {
+          "line_1_based": 9,
+          "ordinal": 8,
+          "pid": 452,
+          "raw": "1792268641.786417 ???()                 = ?",
+          "reason": "unparsed record; syscall identity unknown",
+          "trace_file": "/tmp/u4-b-component-candidate-03/receipts/debug/debug.trace.452",
+          "trace_sha256": "9a23d9ff1e4b31a4099b9046feb86aa422fbd324538a31b5fdce23a9afc0368a"
+        }
+      ],
+      "inventory_sha256": "1f2a413f48fa66624b86b9fc04135977c0fcb7994489c10e5ff407eca660fb66",
+      "limitations": [
+        "Per-process raw order retained. cwd is inherited at observed clone and changed on observed chdir; CLONE_FS cross-thread cwd changes need separate review.",
+        "-yy decoded paths bind observed fds; IPC/device/anonymous memory and unresolved records are not silently source inputs.",
+        "Read buffer abbreviation is not file-content coverage; stable source/cache hashes are from reverified copies, not proof every byte was read.",
+        "Generated/transient file final hashes cannot recover all historical contents.",
+        "Environment arrays are recorded at exec; no semantic variable-use proof.",
+        "Tracer loader/DSO activity precedes the child tree and is bound by static closure, not these traces.",
+        "Observed access is not semantic dependency; no universal or complete build-input authority assertion."
+      ],
+      "path_classes": {
+        "dynamic/kernel/device": 218,
+        "generated/output/temporary": 1788,
+        "pinned cache": 1319,
+        "pinned source": 76,
+        "tool/image/OS/configuration": 476
+      },
+      "path_count": 3877,
+      "phase": "debug",
+      "process_traces": 1030,
+      "raw_trace_count": 1030,
+      "records_parsed": 230313,
+      "root": [
+        9
+      ],
+      "strict_coverage_accepted": false,
+      "successful_cwd_changes": [
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/chacha20-0.10.2\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 115,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/rand_xorshift-0.5.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 121,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 126,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/itoa-1.0.18\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 131,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/unarray-0.1.4\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 152,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/generic-array-0.14.7\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 182,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/num-traits-0.2.19\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 202,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/memchr-2.8.3\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 220,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/regex-syntax-0.8.11\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 238,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cpufeatures-0.2.17\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 240,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/typenum-1.19.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 26,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/version_check-0.9.5\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 29,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/proc-macro2-1.0.107\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 32,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-ident-1.0.27\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 33,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 35,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/rand_core-0.10.1\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 37,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.4.3\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 40,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/typenum-1.19.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 418,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 42,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 424,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.4.3\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 426,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/proc-macro2-1.0.107\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 427,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/quote-1.0.47\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 430,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/typenum-1.19.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 431,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/zmij-1.0.23\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 435,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/quote-1.0.47\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 44,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 441,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.154\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 446,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 448,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 45,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 460,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/zmij-1.0.23\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 462,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/autocfg-1.5.1\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 47,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 472,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/zmij-1.0.23\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 49,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.154\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 50,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cpufeatures-0.3.1\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 51,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/generic-array-0.14.7\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 515,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 52,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/num-traits-0.2.19\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 520,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/generic-array-0.14.7\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 529,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/core_detect-1.0.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 53,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/proc-macro2-1.0.107\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 570,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/block-buffer-0.10.4\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 574,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crypto-common-0.1.6\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 575,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.4.3\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 583,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/num-traits-0.2.19\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 598,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/digest-0.10.7\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 608,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/rand-0.10.3\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 616,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/quote-1.0.47\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 624,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/sha2-0.10.9\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 634,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.154\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 644,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/syn-3.0.9\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 655,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/proptest-1.12.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 666,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_derive-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 700,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 761,
+          "result": "0"
+        },
+        {
+          "args": "\"/work/native\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 769,
+          "result": "0"
+        }
+      ],
+      "unresolved_fd_records": 0
+    },
+    {
+      "CLONE_FS_count": 728,
+      "all_child_logs_present": true,
+      "all_terminal_records_present": true,
+      "bounded_scope": "parseable records only; unknown calls and unfinished outcomes remain gaps",
+      "classifier_recipe_sha256": "ad8582de3e11a183bb0e6a24a57dc88da0dbd63c37f447ef544cf62cc6e5871e",
+      "diagnostic_child_exec_mentions": [],
+      "exec_successes": 264,
+      "gaps": [
+        {
+          "line_1_based": 10,
+          "ordinal": 9,
+          "pid": 482,
+          "raw": "1792268654.771925 sched_getaffinity(482, 32,  <unfinished ...>) = ?",
+          "reason": "unfinished call at terminal/end",
+          "trace_file": "/tmp/u4-b-component-candidate-03/receipts/release/release.trace.482",
+          "trace_sha256": "d9370f7e307b2669714bf26d511a7f70afad5451fd5aef8e53b8d69de1ae2b37"
+        }
+      ],
+      "inventory_sha256": "33045200800040161d9acf639129499c4e13d9658850b1aac40e5062a567eb36",
+      "limitations": [
+        "Per-process raw order retained. cwd is inherited at observed clone and changed on observed chdir; CLONE_FS cross-thread cwd changes need separate review.",
+        "-yy decoded paths bind observed fds; IPC/device/anonymous memory and unresolved records are not silently source inputs.",
+        "Read buffer abbreviation is not file-content coverage; stable source/cache hashes are from reverified copies, not proof every byte was read.",
+        "Generated/transient file final hashes cannot recover all historical contents.",
+        "Environment arrays are recorded at exec; no semantic variable-use proof.",
+        "Tracer loader/DSO activity precedes the child tree and is bound by static closure, not these traces.",
+        "Observed access is not semantic dependency; no universal or complete build-input authority assertion."
+      ],
+      "path_classes": {
+        "dynamic/kernel/device": 218,
+        "generated/output/temporary": 1551,
+        "pinned cache": 1319,
+        "pinned source": 76,
+        "tool/image/OS/configuration": 476
+      },
+      "path_count": 3640,
+      "phase": "release",
+      "process_traces": 910,
+      "raw_trace_count": 910,
+      "records_parsed": 216813,
+      "root": [
+        9
+      ],
+      "strict_coverage_accepted": false,
+      "successful_cwd_changes": [
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/chacha20-0.10.2\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 121,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/rand_xorshift-0.5.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 124,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/core_detect-1.0.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 133,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/itoa-1.0.18\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 140,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/generic-array-0.14.7\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 182,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/memchr-2.8.3\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 193,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/num-traits-0.2.19\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 205,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cpufeatures-0.2.17\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 227,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/unarray-0.1.4\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 252,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/regex-syntax-0.8.11\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 255,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/typenum-1.19.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 26,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/version_check-0.9.5\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 29,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/proc-macro2-1.0.107\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 30,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/rand_core-0.10.1\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 34,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 36,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 38,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-ident-1.0.27\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 40,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/quote-1.0.47\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 42,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.4.3\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 435,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/typenum-1.19.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 436,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/autocfg-1.5.1\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 44,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/quote-1.0.47\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 442,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/proc-macro2-1.0.107\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 443,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/typenum-1.19.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 446,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 450,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/zmij-1.0.23\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 453,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 459,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.4.3\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 46,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.154\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 464,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 467,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/zmij-1.0.23\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 48,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/zmij-1.0.23\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 480,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 486,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/libc-0.2.190\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 488,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 49,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 50,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.154\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 51,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/cpufeatures-0.3.1\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 53,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/generic-array-0.14.7\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 533,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/num-traits-0.2.19\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 538,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/generic-array-0.14.7\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 553,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 56,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/proc-macro2-1.0.107\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 575,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.4.3\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 582,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/crypto-common-0.1.6\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 596,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/block-buffer-0.10.4\"",
+          "call": "chdir",
+          "ordinal": 6,
+          "pid": 597,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/num-traits-0.2.19\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 606,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/digest-0.10.7\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 652,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/rand-0.10.3\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 662,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/quote-1.0.47\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 674,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.154\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 692,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/sha2-0.10.9\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 698,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/syn-3.0.9\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 712,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/proptest-1.12.0\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 723,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde_derive-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 772,
+          "result": "0"
+        },
+        {
+          "args": "\"/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 850,
+          "result": "0"
+        },
+        {
+          "args": "\"/work/native\"",
+          "call": "chdir",
+          "ordinal": 5,
+          "pid": 860,
+          "result": "0"
+        }
+      ],
+      "unresolved_fd_records": 0
+    }
+  ],
+  "source_commit": "64837bea3724919facbc27be1c7f5644a6354cfa",
+  "strict_coverage_accepted": false
+}
