@@ -157,8 +157,11 @@ human-owned/frozen-prediction hooks ran; no override or force push was used.
 
 Largest remaining recurring groups include public table/artifact loading, stage2 cards,
 companions and refresh/source-policy tests. Profiled A/protected hotspots and bounded proposals
-are recorded separately. A consultation was requested through the coordinator; no A response
-has been received yet, and no A-owned change depends on this handoff. No duplicate checks were
+are recorded separately. The coordinator/user confirmed that no new A response is available. The
+[proposed follow-up](production-proposals.md) now records cumulative versus exclusive timings,
+representative callers, repetition limits and normal-CI contributions, and distinguishes
+existing K2 startup/case-reuse runtime postimages from current canonical code. No A-owned
+implementation change depends on this handoff. No duplicate checks were
 requested from A. Future protected regex/serialization work requires its own approval/review.
 
 One worker remains the measured safe default. CPU time tracks elapsed time; the historical
