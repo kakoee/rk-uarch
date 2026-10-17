@@ -325,6 +325,8 @@ fn synthetic_distinct_transport_request_identity_restores_complete_inventory() {
         .map(|x| x["request_id"].as_str().unwrap())
         .collect();
     assert_eq!(rows.len(), 2);
+    assert_eq!(rows[0]["request_id"], "r00.00");
+    assert_eq!(rows[1]["request_id"], "synthetic-distinct-fragment");
     assert_eq!(
         ids,
         BTreeSet::from(["r00.00", "synthetic-distinct-fragment"])
