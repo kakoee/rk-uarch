@@ -1,7 +1,47 @@
 diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.py
 --- a/contract/uarch_contract/mapped.py
 +++ b/contract/uarch_contract/mapped.py
-@@ -1014,6 +1014,73 @@
+@@ -517,18 +517,37 @@
+     case_selection_revision: NonEmpty
+ 
+ 
++class PolicyProfileEntry(ProfileEntry):
++    """Explicit policy promise for new component profiles; legacy entries stay unchanged."""
++
++    mapping_policy: MappingPolicy
++
++
+ class NativeTestProfile(FrozenModel):
+-    format: Literal["uarch-native-test-profile/1"]
++    format: Literal["uarch-native-test-profile/1", "uarch-native-test-profile/2"]
+     profile_hash: Hash
+     semantics_revision: Literal["U0011-stage2/1"]
+     owner: NonEmpty
+-    entries: Annotated[tuple[ProfileEntry, ...], Field(min_length=1)]
++    entries: Annotated[tuple[PolicyProfileEntry | ProfileEntry, ...], Field(min_length=1)]
+ 
+     @model_validator(mode="after")
+     def identities(self) -> NativeTestProfile:
+         verify_identity(self, "profile_hash")
+         ordered(self.entries, lambda x: x.case_id, "TestProfileMismatch")
+         for entry in self.entries:
++            require(
++                (self.format == "uarch-native-test-profile/2")
++                == isinstance(entry, PolicyProfileEntry)
++                and (
++                    self.format != "uarch-native-test-profile/2"
++                    or (
++                        entry.scope in ("component", "transport_fixture")
++                        and entry.checkpoint == "B"
++                    )
++                ),
++                "TestProfileMismatch",
++                "profile policy format",
++            )
+             require(spec_hash(entry.hardware_spec) == entry.hardware_spec_hash, "HardwareMismatch")
+             ordered(entry.allowed_job_kinds, lambda x: x, "TestProfileMismatch")
+             require(
+@@ -1014,6 +1033,73 @@
      critical_path: Observed[CriticalInterval]
  
  
@@ -75,7 +115,7 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
  class Attribution(FrozenModel):
      compute: U64
      memory: U64
-@@ -1077,7 +1144,7 @@
+@@ -1077,7 +1163,7 @@
      simulator_metrics: SimulatorMetrics
      trace_hash: Hash | None
      u_c0_duration_ps: None
@@ -84,7 +124,7 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
      owners: tuple[Owner, ...]
  
      @model_validator(mode="after")
-@@ -1220,18 +1287,401 @@
+@@ -1220,18 +1306,451 @@
              all(x.issue_ps <= x.complete_ps <= r.duration_ps for x in dma), "IncompleteObservations"
          )
      if job.state_model == "fixed_delay/1":
@@ -120,12 +160,29 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
 +    require(
 +        len(activities) == len(obs.activities.records), "IncompleteObservations", "activity IDs"
 +    )
++    # Explicit cycle check includes zero-duration links (timestamps alone cannot prove a DAG).
++    pending = set(activities)
++    while pending:
++        ready = {
++            key
++            for key in pending
++            if not any(p.activity_id in pending for p in activities[key].predecessors)
++        }
++        require(bool(ready), "AttributionMismatch", "activity cycle")
++        pending -= ready
 +    routes = {x.id: x for x in job.mapped_point.task_graph.routes}
 +    summaries = {x.job_id: x for x in obs.jobs.records}
 +    phase_orders = {
 +        "compute": ("compute_overhead", "compute_stage", "compute_wave", "compute_drain"),
 +        "read": ("request_noc", "dram_latency", "channel_service", "response_noc", "read_port"),
-+        "write": ("write_port", "request_noc", "dram_latency", "channel_service", "response_noc", "ack"),
++        "write": (
++            "write_port",
++            "request_noc",
++            "dram_latency",
++            "channel_service",
++            "response_noc",
++            "ack",
++        ),
 +        "barrier": ("barrier",),
 +        "noc_transfer": ("unicast_noc",),
 +    }
@@ -138,10 +195,17 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
 +    for (tid, _), sequence in sequences.items():
 +        task = tasks[tid]
 +        phases = phase_orders[task.direction if isinstance(task, Dma) else task.kind]
-+        require(all(x.subphase in phases for x in sequence), "IncompleteObservations", "phase inventory")
++        require(
++            all(x.subphase in phases for x in sequence), "IncompleteObservations", "phase inventory"
++        )
 +        sequence.sort(key=lambda x: (phases.index(x.subphase), x.kind != "alignment"))
-+        require(len({(x.subphase, x.kind) for x in sequence}) == len(sequence),
-+                "IncompleteObservations", "duplicate phase")
++        require(
++            len({(x.subphase, x.kind) for x in sequence}) == len(sequence),
+             "IncompleteObservations",
+-        )
+-    return r
++            "duplicate phase",
++        )
 +        first_ids.add(sequence[0].activity_id)
 +        last_ids.add(sequence[-1].activity_id)
 +        for before, after in zip(sequence, sequence[1:], strict=False):
@@ -162,15 +226,28 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
 +            expected = f"router:0:{core // cols}:{core % cols}"
 +        require(owners[row.owner_id] == expected, "InvalidResource", "job owner")
 +        require(row.release_ps == 0, "IncompleteObservations", "component release")
-+        require(not row.blocking_predecessor_ids, "AttributionMismatch", "unrepresented job predecessors")
-+        ready = max((summaries[d.before].end_ps for d in job.mapped_point.task_graph.dependencies
-+                     if d.after == tid), default=0)
-+        require(row.ready_ps == ready, "IncompleteObservations", "job readiness")
++        require(
++            not row.blocking_predecessor_ids,
++            "AttributionMismatch",
++            "unrepresented job predecessors",
++        )
++        job_ready = max(
++            (
++                summaries[d.before].end_ps
++                for d in job.mapped_point.task_graph.dependencies
++                if d.after == tid
++            ),
++            default=0,
++        )
++        require(row.ready_ps == job_ready, "IncompleteObservations", "job readiness")
 +        members = [x for x in activities.values() if x.job_id == tid]
 +        require(bool(members), "IncompleteObservations", "job activities")
-+        require(row.start_ps == min(x.start_ps for x in members)
-+                and row.end_ps == max(x.end_ps for x in members),
-+                "IncompleteObservations", "job activity span")
++        require(
++            row.start_ps == min(x.start_ps for x in members)
++            and row.end_ps == max(x.end_ps for x in members),
++            "IncompleteObservations",
++            "job activity span",
++        )
 +    events = {x.observation_ordinal: x for x in obs.events.records}
 +    require(set(x.job_id for x in activities.values()) == tasks.keys(), "IncompleteObservations")
 +    for a in activities.values():
@@ -243,19 +320,24 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
 +                "InvalidResource",
 +            )
 +            category, domain = "noc", "noc"
-+        require(a.category == category and a.receiving_domain == domain,
-+                "IncompleteObservations", "activity category/domain")
++        require(
++            a.category == category and a.receiving_domain == domain,
++            "IncompleteObservations",
++            "activity category/domain",
++        )
 +        occupied = a.kind == "service" and a.subphase not in ("dram_latency", "ack", "barrier")
 +        if a.subphase.endswith("_noc"):
-+            route_id = (declared[a.request_id][1].route_id if isinstance(task, Dma)
-+                        else task.route_id if isinstance(task, NocTransfer) else "")
++            if isinstance(task, Dma):
++                assert a.request_id is not None
++                route_id = declared[a.request_id][1].route_id
++            else:
++                assert isinstance(task, NocTransfer)
++                route_id = task.route_id
 +            occupied = a.kind == "service" and len(routes[route_id].core_ids) > 1
 +        require(a.occupies_resource == occupied, "IncompleteObservations", "phase occupancy")
 +        require(
 +            a.kind != "alignment" or (domain is not None and not a.occupies_resource),
-             "IncompleteObservations",
--        )
--    return r
++            "IncompleteObservations",
 +            "alignment is not busy",
 +        )
 +        require(
@@ -286,9 +368,14 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
 +                "ack": ("TASK_READY", "DMA_DONE"),
 +                "barrier": ("SYNC_ARRIVE", "BARRIER_RELEASE"),
 +            }[a.subphase]
-+        require((events[a.dispatch_ordinal].kind, events[a.completion_ordinal].kind) == kinds,
-+                "IncompleteObservations", "activity event kind")
-+        require(a.dispatch_ordinal <= a.completion_ordinal, "IncompleteObservations", "endpoint order")
++        require(
++            (events[a.dispatch_ordinal].kind, events[a.completion_ordinal].kind) == kinds,
++            "IncompleteObservations",
++            "activity event kind",
++        )
++        require(
++            a.dispatch_ordinal <= a.completion_ordinal, "IncompleteObservations", "endpoint order"
++        )
 +        ordered(a.predecessors, lambda x: (x.activity_id, x.relation), "AttributionMismatch")
 +        require(
 +            a.start_ps == 0 or bool(a.predecessors), "AttributionMismatch", "missing tight cause"
@@ -307,11 +394,13 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
 +            if link.relation == "sequence":
 +                require(
 +                    previous.get(a.activity_id) == before.activity_id,
-+                    "AttributionMismatch", "sequence endpoints",
++                    "AttributionMismatch",
++                    "sequence endpoints",
 +                )
 +            elif link.relation == "dependency":
 +                require(
-+                    before.activity_id in last_ids and a.activity_id in first_ids
++                    before.activity_id in last_ids
++                    and a.activity_id in first_ids
 +                    and before.end_ps == summaries[before.job_id].end_ps
 +                    and any(
 +                        d.before == before.job_id and d.after == a.job_id
@@ -321,37 +410,36 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
 +                )
 +            elif link.relation == "resource":
 +                require(
-+                    before.owner_id == a.owner_id and before.occupies_resource
++                    before.owner_id == a.owner_id
++                    and before.occupies_resource
 +                    and owners[a.owner_id].startswith(("matrix:", "dma_port:", "channel:"))
 +                    and (before.job_id, before.request_id) != (a.job_id, a.request_id)
-+                    and ((a.subphase == "compute_overhead" and a.kind == "alignment")
-+                         or (a.subphase in ("read_port", "write_port") and a.kind == "alignment")
-+                         or (a.subphase == "channel_service" and a.kind == "service")),
-+                    "AttributionMismatch", "resource endpoints",
++                    and (
++                        (a.subphase == "compute_overhead" and a.kind == "alignment")
++                        or (a.subphase in ("read_port", "write_port") and a.kind == "alignment")
++                        or (a.subphase == "channel_service" and a.kind == "service")
++                    ),
++                    "AttributionMismatch",
++                    "resource endpoints",
 +                )
 +            else:
 +                require(
-+                    before.activity_id in last_ids and a.activity_id in first_ids
++                    before.activity_id in last_ids
++                    and a.activity_id in first_ids
 +                    and before.request_id != a.request_id
 +                    and before.request_id in declared
 +                    and a.request_id in declared
 +                    and declared[before.request_id][0].dma_engine_id
 +                    == declared[a.request_id][0].dma_engine_id,
-+                    "AttributionMismatch", "credit endpoints",
++                    "AttributionMismatch",
++                    "credit endpoints",
 +                )
-+    # Explicit cycle check includes zero-duration links (timestamps alone cannot prove a DAG).
-+    pending = set(activities)
-+    while pending:
-+        ready = {
-+            key
-+            for key in pending
-+            if not any(p.activity_id in pending for p in activities[key].predecessors)
-+        }
-+        require(bool(ready), "AttributionMismatch", "activity cycle")
-+        pending -= ready
-+    require(set(events) == {n for x in activities.values() for n in
-+                           (x.dispatch_ordinal, x.completion_ordinal)},
-+            "IncompleteObservations", "unreferenced event")
++    require(
++        set(events)
++        == {n for x in activities.values() for n in (x.dispatch_ordinal, x.completion_ordinal)},
++        "IncompleteObservations",
++        "unreferenced event",
++    )
 +    represented = set()
 +    for interval in obs.resource_intervals.records:
 +        require(interval.activity_id in activities, "IncompleteObservations")
@@ -477,7 +565,9 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
 +        "tight canonical activity path",
 +    )
 +    for c in obs.critical_path.records:
-+        require(c.predecessor_id is None, "AttributionMismatch", "unrepresented critical predecessor")
++        require(
++            c.predecessor_id is None, "AttributionMismatch", "unrepresented critical predecessor"
++        )
 +        require(c.activity_id in activities, "AttributionMismatch")
 +        a = activities[c.activity_id]
 +        require(
@@ -491,7 +581,20 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
  
  
  def validate_fixed_delay_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
-@@ -1677,9 +2127,43 @@
+@@ -1556,6 +2075,12 @@
+         entries = [e for e in prof.entries if e.case_id == a.case_id]
+         require(len(entries) == 1, "TestProfileMismatch")
+         e = entries[0]
++        if isinstance(e, PolicyProfileEntry):
++            require(
++                b.mapping_policy == e.mapping_policy,
++                "TestVariantNotAdmitted",
++                "profile mapping policy",
++            )
+         require(len(points) == 1, "TestVariantNotAdmitted")
+         p = points[0]
+         require(
+@@ -1677,9 +2202,43 @@
                  p.initial_state != "cold" or buf.initial_residency == "uninitialized",
                  "UnsupportedInitialState",
              )
@@ -535,7 +638,7 @@ diff --git a/contract/uarch_contract/mapped.py b/contract/uarch_contract/mapped.
              for name in ("X", "W"):
                  buffer_key = job.operand_buffers.get(name)
                  require(buffer_key in buffers, "InvalidResource")
-@@ -1738,7 +2222,7 @@
+@@ -1738,7 +2297,7 @@
          )
          require(
              b.mapping_policy.name == "ws-rowsplit"
@@ -1273,10 +1376,2001 @@ diff --git a/contract/schema/mapped/MappedEngineResult.json b/contract/schema/ma
      },
      "owners": {
        "items": {
+diff --git a/contract/schema/mapped/MappedEngineJob.json b/contract/schema/mapped/MappedEngineJob.json
+--- a/contract/schema/mapped/MappedEngineJob.json
++++ b/contract/schema/mapped/MappedEngineJob.json
+@@ -2495,14 +2495,24 @@
+       "properties": {
+         "entries": {
+           "items": {
+-            "$ref": "#/$defs/ProfileEntry"
++            "anyOf": [
++              {
++                "$ref": "#/$defs/PolicyProfileEntry"
++              },
++              {
++                "$ref": "#/$defs/ProfileEntry"
++              }
++            ]
+           },
+           "minItems": 1,
+           "title": "Entries",
+           "type": "array"
+         },
+         "format": {
+-          "const": "uarch-native-test-profile/1",
++          "enum": [
++            "uarch-native-test-profile/1",
++            "uarch-native-test-profile/2"
++          ],
+           "title": "Format",
+           "type": "string"
+         },
+@@ -3062,753 +3072,9 @@
+       "title": "Padding",
+       "type": "object"
+     },
+-    "Precision": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "compute": {
+-          "$ref": "#/$defs/PrecisionFormat",
+-          "default": "fp16"
+-        },
+-        "kv_cache": {
+-          "$ref": "#/$defs/PrecisionFormat",
+-          "default": "fp16"
+-        }
+-      },
+-      "title": "Precision",
+-      "type": "object"
+-    },
+-    "PrecisionFormat": {
+-      "enum": [
+-        "fp32",
+-        "tf32",
+-        "bf16",
+-        "fp16",
+-        "fp8",
+-        "int8",
+-        "fp4",
+-        "int4"
+-      ],
+-      "title": "PrecisionFormat",
+-      "type": "string"
+-    },
+-    "PrefillEnvelope": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "prompt_tokens_max": {
+-          "minimum": 1,
+-          "title": "Prompt Tokens Max",
+-          "type": "integer"
+-        },
+-        "prompts_per_iteration_max": {
+-          "minimum": 1,
+-          "title": "Prompts Per Iteration Max",
+-          "type": "integer"
+-        }
+-      },
+-      "required": [
+-        "prompt_tokens_max",
+-        "prompts_per_iteration_max"
+-      ],
+-      "title": "PrefillEnvelope",
+-      "type": "object"
+-    },
+-    "PrefillGrid": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "L": {
+-          "items": {
+-            "minimum": 1,
+-            "type": "integer"
+-          },
+-          "minItems": 1,
+-          "title": "L",
+-          "type": "array"
+-        },
+-        "n": {
+-          "items": {
+-            "minimum": 1,
+-            "type": "integer"
+-          },
+-          "minItems": 1,
+-          "title": "N",
+-          "type": "array"
+-        }
+-      },
+-      "required": [
+-        "n",
+-        "L"
+-      ],
+-      "title": "PrefillGrid",
+-      "type": "object"
+-    },
+-    "PrefillQuery": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "n_prompts": {
+-          "minimum": 1,
+-          "title": "N Prompts",
+-          "type": "integer"
+-        },
+-        "phase": {
+-          "const": "prefill",
+-          "title": "Phase",
+-          "type": "string"
+-        },
+-        "prompt_tokens": {
+-          "minimum": 1,
+-          "title": "Prompt Tokens",
+-          "type": "integer"
+-        }
+-      },
+-      "required": [
+-        "n_prompts",
+-        "phase",
+-        "prompt_tokens"
+-      ],
+-      "title": "PrefillQuery",
+-      "type": "object"
+-    },
+-    "PrefillVisitWeight": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "n_prompts": {
+-          "minimum": 1,
+-          "title": "N Prompts",
+-          "type": "integer"
+-        },
+-        "prompt_tokens": {
+-          "minimum": 1,
+-          "title": "Prompt Tokens",
+-          "type": "integer"
+-        },
+-        "weight_ratio": {
+-          "exclusiveMinimum": 0,
+-          "title": "Weight Ratio",
+-          "type": "number"
+-        }
+-      },
+-      "required": [
+-        "n_prompts",
+-        "prompt_tokens",
+-        "weight_ratio"
+-      ],
+-      "title": "PrefillVisitWeight",
+-      "type": "object"
+-    },
+-    "PreparedBundle": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "bundle_hash": {
+-          "pattern": "^sha256:[0-9a-f]{64}$",
+-          "title": "Bundle Hash",
+-          "type": "string"
+-        },
+-        "format": {
+-          "const": "uarch-prepared/1",
+-          "title": "Format",
+-          "type": "string"
+-        },
+-        "hardware_spec": {
+-          "$ref": "#/$defs/HardwareSpec"
+-        },
+-        "intent": {
+-          "$ref": "#/$defs/RequestIntent"
+-        },
+-        "intent_hash": {
+-          "pattern": "^sha256:[0-9a-f]{64}$",
+-          "title": "Intent Hash",
+-          "type": "string"
+-        },
+-        "mapping_scope": {
+-          "const": "analytic_ops",
+-          "title": "Mapping Scope",
+-          "type": "string"
+-        },
+-        "points": {
+-          "items": {
+-            "$ref": "#/$defs/PreparedPoint"
+-          },
+-          "minItems": 1,
+-          "title": "Points",
+-          "type": "array"
+-        },
+-        "producer": {
+-          "$ref": "#/$defs/Producer"
+-        },
+-        "rank": {
+-          "$ref": "#/$defs/RankScope"
+-        }
+-      },
+-      "required": [
+-        "bundle_hash",
+-        "format",
+-        "hardware_spec",
+-        "intent",
+-        "intent_hash",
+-        "mapping_scope",
+-        "points",
+-        "producer",
+-        "rank"
+-      ],
+-      "title": "PreparedBundle",
+-      "type": "object"
+-    },
+-    "PreparedBundleV2": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "bundle_hash": {
+-          "pattern": "^sha256:[0-9a-f]{64}$",
+-          "title": "Bundle Hash",
+-          "type": "string"
+-        },
+-        "coefficients": {
+-          "$ref": "#/$defs/RotaryCoefficients"
+-        },
+-        "format": {
+-          "const": "uarch-prepared/2",
+-          "title": "Format",
+-          "type": "string"
+-        },
+-        "hardware_spec": {
+-          "$ref": "#/$defs/HardwareSpec"
+-        },
+-        "intent": {
+-          "$ref": "#/$defs/RequestIntentV3"
+-        },
+-        "intent_hash": {
+-          "pattern": "^sha256:[0-9a-f]{64}$",
+-          "title": "Intent Hash",
+-          "type": "string"
+-        },
+-        "mapping_scope": {
+-          "const": "analytic_ops",
+-          "title": "Mapping Scope",
+-          "type": "string"
+-        },
+-        "points": {
+-          "items": {
+-            "$ref": "#/$defs/PreparedPointV2"
+-          },
+-          "minItems": 1,
+-          "title": "Points",
+-          "type": "array"
+-        },
+-        "producer": {
+-          "$ref": "#/$defs/Producer"
+-        },
+-        "rank": {
+-          "$ref": "#/$defs/RankScope"
+-        }
+-      },
+-      "required": [
+-        "bundle_hash",
+-        "format",
+-        "hardware_spec",
+-        "intent",
+-        "intent_hash",
+-        "mapping_scope",
+-        "points",
+-        "producer",
+-        "rank",
+-        "coefficients"
+-      ],
+-      "title": "PreparedBundleV2",
+-      "type": "object"
+-    },
+-    "PreparedGraph": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "attention_mask": {
+-          "enum": [
+-            "full_square",
+-            "causal"
+-          ],
+-          "title": "Attention Mask",
+-          "type": "string"
+-        },
+-        "groups": {
+-          "items": {
+-            "$ref": "#/$defs/OpGroup"
+-          },
+-          "minItems": 1,
+-          "title": "Groups",
+-          "type": "array"
+-        },
+-        "lm_head_tokens": {
+-          "minimum": 1,
+-          "title": "Lm Head Tokens",
+-          "type": "integer"
+-        },
+-        "omissions": {
+-          "items": {
+-            "minLength": 1,
+-            "type": "string"
+-          },
+-          "minItems": 4,
+-          "title": "Omissions",
+-          "type": "array"
+-        }
+-      },
+-      "required": [
+-        "attention_mask",
+-        "groups",
+-        "lm_head_tokens",
+-        "omissions"
+-      ],
+-      "title": "PreparedGraph",
+-      "type": "object"
+-    },
+-    "PreparedGraphV2": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "attention_mask": {
+-          "enum": [
+-            "full_square",
+-            "causal"
+-          ],
+-          "title": "Attention Mask",
+-          "type": "string"
+-        },
+-        "groups": {
+-          "items": {
+-            "$ref": "#/$defs/OpGroupV2"
+-          },
+-          "minItems": 1,
+-          "title": "Groups",
+-          "type": "array"
+-        },
+-        "kv_key_encoding": {
+-          "$ref": "#/$defs/RotaryEncoding"
+-        },
+-        "lm_head_tokens": {
+-          "minimum": 1,
+-          "title": "Lm Head Tokens",
+-          "type": "integer"
+-        },
+-        "omissions": {
+-          "items": {
+-            "minLength": 1,
+-            "type": "string"
+-          },
+-          "minItems": 4,
+-          "title": "Omissions",
+-          "type": "array"
+-        }
+-      },
+-      "required": [
+-        "attention_mask",
+-        "groups",
+-        "lm_head_tokens",
+-        "omissions",
+-        "kv_key_encoding"
+-      ],
+-      "title": "PreparedGraphV2",
+-      "type": "object"
+-    },
+-    "PreparedOp": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "depends_on": {
+-          "items": {
+-            "minLength": 1,
+-            "type": "string"
+-          },
+-          "minItems": 0,
+-          "title": "Depends On",
+-          "type": "array"
+-        },
+-        "embedding_local_tokens": {
+-          "anyOf": [
+-            {
+-              "minimum": 0,
+-              "type": "integer"
+-            },
+-            {
+-              "type": "null"
+-            }
+-          ],
+-          "title": "Embedding Local Tokens"
+-        },
+-        "fusion": {
+-          "enum": [
+-            "none",
+-            "qk_softmax_av"
+-          ],
+-          "title": "Fusion",
+-          "type": "string"
+-        },
+-        "id": {
+-          "minLength": 1,
+-          "title": "Id",
+-          "type": "string"
+-        },
+-        "kv_access": {
+-          "anyOf": [
+-            {
+-              "$ref": "#/$defs/KvAccess"
+-            },
+-            {
+-              "type": "null"
+-            }
+-          ]
+-        },
+-        "operand_access": {
+-          "additionalProperties": {
+-            "enum": [
+-              "read",
+-              "write",
+-              "read_write"
+-            ],
+-            "type": "string"
+-          },
+-          "title": "Operand Access",
+-          "type": "object"
+-        },
+-        "padding": {
+-          "items": {
+-            "$ref": "#/$defs/Padding"
+-          },
+-          "minItems": 0,
+-          "title": "Padding",
+-          "type": "array"
+-        },
+-        "replication": {
+-          "items": {
+-            "$ref": "#/$defs/Replication"
+-          },
+-          "minItems": 0,
+-          "title": "Replication",
+-          "type": "array"
+-        },
+-        "spec": {
+-          "$ref": "#/$defs/OpSpec"
+-        },
+-        "weight_copies": {
+-          "minimum": 1,
+-          "title": "Weight Copies",
+-          "type": "integer"
+-        },
+-        "work_repeat": {
+-          "minimum": 1,
+-          "title": "Work Repeat",
+-          "type": "integer"
+-        }
+-      },
+-      "required": [
+-        "depends_on",
+-        "embedding_local_tokens",
+-        "fusion",
+-        "id",
+-        "kv_access",
+-        "operand_access",
+-        "padding",
+-        "replication",
+-        "spec",
+-        "weight_copies",
+-        "work_repeat"
+-      ],
+-      "title": "PreparedOp",
+-      "type": "object"
+-    },
+-    "PreparedOpV2": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "depends_on": {
+-          "items": {
+-            "minLength": 1,
+-            "type": "string"
+-          },
+-          "minItems": 0,
+-          "title": "Depends On",
+-          "type": "array"
+-        },
+-        "embedding_local_tokens": {
+-          "anyOf": [
+-            {
+-              "minimum": 0,
+-              "type": "integer"
+-            },
+-            {
+-              "type": "null"
+-            }
+-          ],
+-          "title": "Embedding Local Tokens"
+-        },
+-        "fusion": {
+-          "enum": [
+-            "none",
+-            "qk_softmax_av"
+-          ],
+-          "title": "Fusion",
+-          "type": "string"
+-        },
+-        "id": {
+-          "minLength": 1,
+-          "title": "Id",
+-          "type": "string"
+-        },
+-        "kv_access": {
+-          "anyOf": [
+-            {
+-              "$ref": "#/$defs/KvAccess"
+-            },
+-            {
+-              "type": "null"
+-            }
+-          ]
+-        },
+-        "operand_access": {
+-          "additionalProperties": {
+-            "enum": [
+-              "read",
+-              "write",
+-              "read_write"
+-            ],
+-            "type": "string"
+-          },
+-          "title": "Operand Access",
+-          "type": "object"
+-        },
+-        "padding": {
+-          "items": {
+-            "$ref": "#/$defs/Padding"
+-          },
+-          "minItems": 0,
+-          "title": "Padding",
+-          "type": "array"
+-        },
+-        "replication": {
+-          "items": {
+-            "$ref": "#/$defs/Replication"
+-          },
+-          "minItems": 0,
+-          "title": "Replication",
+-          "type": "array"
+-        },
+-        "rotary": {
+-          "anyOf": [
+-            {
+-              "$ref": "#/$defs/RotaryBinding"
+-            },
+-            {
+-              "type": "null"
+-            }
+-          ]
+-        },
+-        "spec": {
+-          "anyOf": [
+-            {
+-              "$ref": "#/$defs/OpSpec"
+-            },
+-            {
+-              "$ref": "#/$defs/RotaryOpSpec"
+-            }
+-          ],
+-          "title": "Spec"
+-        },
+-        "weight_copies": {
+-          "minimum": 1,
+-          "title": "Weight Copies",
+-          "type": "integer"
+-        },
+-        "work_repeat": {
+-          "minimum": 1,
+-          "title": "Work Repeat",
+-          "type": "integer"
+-        }
+-      },
+-      "required": [
+-        "depends_on",
+-        "embedding_local_tokens",
+-        "fusion",
+-        "id",
+-        "kv_access",
+-        "operand_access",
+-        "padding",
+-        "replication",
+-        "spec",
+-        "weight_copies",
+-        "work_repeat",
+-        "rotary"
+-      ],
+-      "title": "PreparedOpV2",
+-      "type": "object"
+-    },
+-    "PreparedPoint": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "embedding_hits": {
+-          "items": {
+-            "minimum": 0,
+-            "type": "integer"
+-          },
+-          "minItems": 1,
+-          "title": "Embedding Hits",
+-          "type": "array"
+-        },
+-        "frequency_ratio": {
+-          "gt": 0,
+-          "title": "Frequency Ratio",
+-          "type": "number"
+-        },
+-        "graph": {
+-          "$ref": "#/$defs/PreparedGraph"
+-        },
+-        "hit_source": {
+-          "enum": [
+-            "provided_counts",
+-            "synthetic_balanced_assignment",
+-            "tp1_trivial"
+-          ],
+-          "title": "Hit Source",
+-          "type": "string"
+-        },
+-        "initial_state": {
+-          "enum": [
+-            "steady",
+-            "cold"
+-          ],
+-          "title": "Initial State",
+-          "type": "string"
+-        },
+-        "payload_hash": {
+-          "pattern": "^sha256:[0-9a-f]{64}$",
+-          "title": "Payload Hash",
+-          "type": "string"
+-        },
+-        "query": {
+-          "discriminator": {
+-            "mapping": {
+-              "decode": "#/$defs/DecodeQuery",
+-              "prefill": "#/$defs/PrefillQuery"
+-            },
+-            "propertyName": "phase"
+-          },
+-          "oneOf": [
+-            {
+-              "$ref": "#/$defs/DecodeQuery"
+-            },
+-            {
+-              "$ref": "#/$defs/PrefillQuery"
+-            }
+-          ],
+-          "title": "Query"
+-        }
+-      },
+-      "required": [
+-        "embedding_hits",
+-        "frequency_ratio",
+-        "graph",
+-        "hit_source",
+-        "initial_state",
+-        "payload_hash",
+-        "query"
+-      ],
+-      "title": "PreparedPoint",
+-      "type": "object"
+-    },
+-    "PreparedPointV2": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "embedding_hits": {
+-          "items": {
+-            "minimum": 0,
+-            "type": "integer"
+-          },
+-          "minItems": 1,
+-          "title": "Embedding Hits",
+-          "type": "array"
+-        },
+-        "frequency_ratio": {
+-          "gt": 0,
+-          "title": "Frequency Ratio",
+-          "type": "number"
+-        },
+-        "graph": {
+-          "$ref": "#/$defs/PreparedGraphV2"
+-        },
+-        "hit_source": {
+-          "enum": [
+-            "provided_counts",
+-            "synthetic_balanced_assignment",
+-            "tp1_trivial"
+-          ],
+-          "title": "Hit Source",
+-          "type": "string"
+-        },
+-        "initial_state": {
+-          "enum": [
+-            "steady",
+-            "cold"
+-          ],
+-          "title": "Initial State",
+-          "type": "string"
+-        },
+-        "payload_hash": {
+-          "pattern": "^sha256:[0-9a-f]{64}$",
+-          "title": "Payload Hash",
+-          "type": "string"
+-        },
+-        "query": {
+-          "discriminator": {
+-            "mapping": {
+-              "decode": "#/$defs/DecodeQuery",
+-              "prefill": "#/$defs/PrefillQuery"
+-            },
+-            "propertyName": "phase"
+-          },
+-          "oneOf": [
+-            {
+-              "$ref": "#/$defs/DecodeQuery"
+-            },
+-            {
+-              "$ref": "#/$defs/PrefillQuery"
+-            }
+-          ],
+-          "title": "Query"
+-        }
+-      },
+-      "required": [
+-        "embedding_hits",
+-        "frequency_ratio",
+-        "graph",
+-        "hit_source",
+-        "initial_state",
+-        "payload_hash",
+-        "query"
+-      ],
+-      "title": "PreparedPointV2",
+-      "type": "object"
+-    },
+-    "Producer": {
+-      "additionalProperties": false,
+-      "properties": {
+-        "implementation_hash": {
+-          "pattern": "^sha256:[0-9a-f]{64}$",
+-          "title": "Implementation Hash",
+-          "type": "string"
+-        },
+-        "name": {
+-          "minLength": 1,
+-          "title": "Name",
+-          "type": "string"
+-        },
+-        "version": {
+-          "minLength": 1,
+-          "title": "Version",
+-          "type": "string"
+-        }
+-      },
+-      "required": [
+-        "implementation_hash",
+-        "name",
+-        "version"
+-      ],
+-      "title": "Producer",
+-      "type": "object"
+-    },
+-    "ProfileEntry": {
+-      "additionalProperties": false,
++    "PolicyProfileEntry": {
++      "additionalProperties": false,
++      "description": "Explicit policy promise for new component profiles; legacy entries stay unchanged.",
+       "properties": {
+         "allowed_job_kinds": {
+           "items": {
+@@ -3923,6 +3189,920 @@
+           "title": "Initial State",
+           "type": "string"
+         },
++        "mapping_policy": {
++          "$ref": "#/$defs/MappingPolicy"
++        },
++        "point_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Point Hash",
++          "type": "string"
++        },
++        "priming_iterations": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Priming Iterations",
++          "type": "integer"
++        },
++        "scope": {
++          "enum": [
++            "component",
++            "prepared_model",
++            "kernel_fixture",
++            "transport_fixture"
++          ],
++          "title": "Scope",
++          "type": "string"
++        },
++        "seed": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Seed",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "case_id",
++        "checkpoint",
++        "scope",
++        "initial_state",
++        "priming_iterations",
++        "hardware_spec_hash",
++        "hardware_spec",
++        "frequency_ratio",
++        "freq_hz",
++        "graph_hash",
++        "point_hash",
++        "allowed_job_kinds",
++        "clock_setup_hash",
++        "expected_outcome",
++        "seed",
++        "case_selection_revision",
++        "mapping_policy"
++      ],
++      "title": "PolicyProfileEntry",
++      "type": "object"
++    },
++    "Precision": {
++      "additionalProperties": false,
++      "properties": {
++        "compute": {
++          "$ref": "#/$defs/PrecisionFormat",
++          "default": "fp16"
++        },
++        "kv_cache": {
++          "$ref": "#/$defs/PrecisionFormat",
++          "default": "fp16"
++        }
++      },
++      "title": "Precision",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "PrefillEnvelope": {
++      "additionalProperties": false,
++      "properties": {
++        "prompt_tokens_max": {
++          "minimum": 1,
++          "title": "Prompt Tokens Max",
++          "type": "integer"
++        },
++        "prompts_per_iteration_max": {
++          "minimum": 1,
++          "title": "Prompts Per Iteration Max",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "prompt_tokens_max",
++        "prompts_per_iteration_max"
++      ],
++      "title": "PrefillEnvelope",
++      "type": "object"
++    },
++    "PrefillGrid": {
++      "additionalProperties": false,
++      "properties": {
++        "L": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "L",
++          "type": "array"
++        },
++        "n": {
++          "items": {
++            "minimum": 1,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "N",
++          "type": "array"
++        }
++      },
++      "required": [
++        "n",
++        "L"
++      ],
++      "title": "PrefillGrid",
++      "type": "object"
++    },
++    "PrefillQuery": {
++      "additionalProperties": false,
++      "properties": {
++        "n_prompts": {
++          "minimum": 1,
++          "title": "N Prompts",
++          "type": "integer"
++        },
++        "phase": {
++          "const": "prefill",
++          "title": "Phase",
++          "type": "string"
++        },
++        "prompt_tokens": {
++          "minimum": 1,
++          "title": "Prompt Tokens",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "n_prompts",
++        "phase",
++        "prompt_tokens"
++      ],
++      "title": "PrefillQuery",
++      "type": "object"
++    },
++    "PrefillVisitWeight": {
++      "additionalProperties": false,
++      "properties": {
++        "n_prompts": {
++          "minimum": 1,
++          "title": "N Prompts",
++          "type": "integer"
++        },
++        "prompt_tokens": {
++          "minimum": 1,
++          "title": "Prompt Tokens",
++          "type": "integer"
++        },
++        "weight_ratio": {
++          "exclusiveMinimum": 0,
++          "title": "Weight Ratio",
++          "type": "number"
++        }
++      },
++      "required": [
++        "n_prompts",
++        "prompt_tokens",
++        "weight_ratio"
++      ],
++      "title": "PrefillVisitWeight",
++      "type": "object"
++    },
++    "PreparedBundle": {
++      "additionalProperties": false,
++      "properties": {
++        "bundle_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Bundle Hash",
++          "type": "string"
++        },
++        "format": {
++          "const": "uarch-prepared/1",
++          "title": "Format",
++          "type": "string"
++        },
++        "hardware_spec": {
++          "$ref": "#/$defs/HardwareSpec"
++        },
++        "intent": {
++          "$ref": "#/$defs/RequestIntent"
++        },
++        "intent_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Intent Hash",
++          "type": "string"
++        },
++        "mapping_scope": {
++          "const": "analytic_ops",
++          "title": "Mapping Scope",
++          "type": "string"
++        },
++        "points": {
++          "items": {
++            "$ref": "#/$defs/PreparedPoint"
++          },
++          "minItems": 1,
++          "title": "Points",
++          "type": "array"
++        },
++        "producer": {
++          "$ref": "#/$defs/Producer"
++        },
++        "rank": {
++          "$ref": "#/$defs/RankScope"
++        }
++      },
++      "required": [
++        "bundle_hash",
++        "format",
++        "hardware_spec",
++        "intent",
++        "intent_hash",
++        "mapping_scope",
++        "points",
++        "producer",
++        "rank"
++      ],
++      "title": "PreparedBundle",
++      "type": "object"
++    },
++    "PreparedBundleV2": {
++      "additionalProperties": false,
++      "properties": {
++        "bundle_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Bundle Hash",
++          "type": "string"
++        },
++        "coefficients": {
++          "$ref": "#/$defs/RotaryCoefficients"
++        },
++        "format": {
++          "const": "uarch-prepared/2",
++          "title": "Format",
++          "type": "string"
++        },
++        "hardware_spec": {
++          "$ref": "#/$defs/HardwareSpec"
++        },
++        "intent": {
++          "$ref": "#/$defs/RequestIntentV3"
++        },
++        "intent_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Intent Hash",
++          "type": "string"
++        },
++        "mapping_scope": {
++          "const": "analytic_ops",
++          "title": "Mapping Scope",
++          "type": "string"
++        },
++        "points": {
++          "items": {
++            "$ref": "#/$defs/PreparedPointV2"
++          },
++          "minItems": 1,
++          "title": "Points",
++          "type": "array"
++        },
++        "producer": {
++          "$ref": "#/$defs/Producer"
++        },
++        "rank": {
++          "$ref": "#/$defs/RankScope"
++        }
++      },
++      "required": [
++        "bundle_hash",
++        "format",
++        "hardware_spec",
++        "intent",
++        "intent_hash",
++        "mapping_scope",
++        "points",
++        "producer",
++        "rank",
++        "coefficients"
++      ],
++      "title": "PreparedBundleV2",
++      "type": "object"
++    },
++    "PreparedGraph": {
++      "additionalProperties": false,
++      "properties": {
++        "attention_mask": {
++          "enum": [
++            "full_square",
++            "causal"
++          ],
++          "title": "Attention Mask",
++          "type": "string"
++        },
++        "groups": {
++          "items": {
++            "$ref": "#/$defs/OpGroup"
++          },
++          "minItems": 1,
++          "title": "Groups",
++          "type": "array"
++        },
++        "lm_head_tokens": {
++          "minimum": 1,
++          "title": "Lm Head Tokens",
++          "type": "integer"
++        },
++        "omissions": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 4,
++          "title": "Omissions",
++          "type": "array"
++        }
++      },
++      "required": [
++        "attention_mask",
++        "groups",
++        "lm_head_tokens",
++        "omissions"
++      ],
++      "title": "PreparedGraph",
++      "type": "object"
++    },
++    "PreparedGraphV2": {
++      "additionalProperties": false,
++      "properties": {
++        "attention_mask": {
++          "enum": [
++            "full_square",
++            "causal"
++          ],
++          "title": "Attention Mask",
++          "type": "string"
++        },
++        "groups": {
++          "items": {
++            "$ref": "#/$defs/OpGroupV2"
++          },
++          "minItems": 1,
++          "title": "Groups",
++          "type": "array"
++        },
++        "kv_key_encoding": {
++          "$ref": "#/$defs/RotaryEncoding"
++        },
++        "lm_head_tokens": {
++          "minimum": 1,
++          "title": "Lm Head Tokens",
++          "type": "integer"
++        },
++        "omissions": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 4,
++          "title": "Omissions",
++          "type": "array"
++        }
++      },
++      "required": [
++        "attention_mask",
++        "groups",
++        "lm_head_tokens",
++        "omissions",
++        "kv_key_encoding"
++      ],
++      "title": "PreparedGraphV2",
++      "type": "object"
++    },
++    "PreparedOp": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "embedding_local_tokens": {
++          "anyOf": [
++            {
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Embedding Local Tokens"
++        },
++        "fusion": {
++          "enum": [
++            "none",
++            "qk_softmax_av"
++          ],
++          "title": "Fusion",
++          "type": "string"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kv_access": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/KvAccess"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "operand_access": {
++          "additionalProperties": {
++            "enum": [
++              "read",
++              "write",
++              "read_write"
++            ],
++            "type": "string"
++          },
++          "title": "Operand Access",
++          "type": "object"
++        },
++        "padding": {
++          "items": {
++            "$ref": "#/$defs/Padding"
++          },
++          "minItems": 0,
++          "title": "Padding",
++          "type": "array"
++        },
++        "replication": {
++          "items": {
++            "$ref": "#/$defs/Replication"
++          },
++          "minItems": 0,
++          "title": "Replication",
++          "type": "array"
++        },
++        "spec": {
++          "$ref": "#/$defs/OpSpec"
++        },
++        "weight_copies": {
++          "minimum": 1,
++          "title": "Weight Copies",
++          "type": "integer"
++        },
++        "work_repeat": {
++          "minimum": 1,
++          "title": "Work Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "embedding_local_tokens",
++        "fusion",
++        "id",
++        "kv_access",
++        "operand_access",
++        "padding",
++        "replication",
++        "spec",
++        "weight_copies",
++        "work_repeat"
++      ],
++      "title": "PreparedOp",
++      "type": "object"
++    },
++    "PreparedOpV2": {
++      "additionalProperties": false,
++      "properties": {
++        "depends_on": {
++          "items": {
++            "minLength": 1,
++            "type": "string"
++          },
++          "minItems": 0,
++          "title": "Depends On",
++          "type": "array"
++        },
++        "embedding_local_tokens": {
++          "anyOf": [
++            {
++              "minimum": 0,
++              "type": "integer"
++            },
++            {
++              "type": "null"
++            }
++          ],
++          "title": "Embedding Local Tokens"
++        },
++        "fusion": {
++          "enum": [
++            "none",
++            "qk_softmax_av"
++          ],
++          "title": "Fusion",
++          "type": "string"
++        },
++        "id": {
++          "minLength": 1,
++          "title": "Id",
++          "type": "string"
++        },
++        "kv_access": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/KvAccess"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "operand_access": {
++          "additionalProperties": {
++            "enum": [
++              "read",
++              "write",
++              "read_write"
++            ],
++            "type": "string"
++          },
++          "title": "Operand Access",
++          "type": "object"
++        },
++        "padding": {
++          "items": {
++            "$ref": "#/$defs/Padding"
++          },
++          "minItems": 0,
++          "title": "Padding",
++          "type": "array"
++        },
++        "replication": {
++          "items": {
++            "$ref": "#/$defs/Replication"
++          },
++          "minItems": 0,
++          "title": "Replication",
++          "type": "array"
++        },
++        "rotary": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/RotaryBinding"
++            },
++            {
++              "type": "null"
++            }
++          ]
++        },
++        "spec": {
++          "anyOf": [
++            {
++              "$ref": "#/$defs/OpSpec"
++            },
++            {
++              "$ref": "#/$defs/RotaryOpSpec"
++            }
++          ],
++          "title": "Spec"
++        },
++        "weight_copies": {
++          "minimum": 1,
++          "title": "Weight Copies",
++          "type": "integer"
++        },
++        "work_repeat": {
++          "minimum": 1,
++          "title": "Work Repeat",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "depends_on",
++        "embedding_local_tokens",
++        "fusion",
++        "id",
++        "kv_access",
++        "operand_access",
++        "padding",
++        "replication",
++        "spec",
++        "weight_copies",
++        "work_repeat",
++        "rotary"
++      ],
++      "title": "PreparedOpV2",
++      "type": "object"
++    },
++    "PreparedPoint": {
++      "additionalProperties": false,
++      "properties": {
++        "embedding_hits": {
++          "items": {
++            "minimum": 0,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Embedding Hits",
++          "type": "array"
++        },
++        "frequency_ratio": {
++          "gt": 0,
++          "title": "Frequency Ratio",
++          "type": "number"
++        },
++        "graph": {
++          "$ref": "#/$defs/PreparedGraph"
++        },
++        "hit_source": {
++          "enum": [
++            "provided_counts",
++            "synthetic_balanced_assignment",
++            "tp1_trivial"
++          ],
++          "title": "Hit Source",
++          "type": "string"
++        },
++        "initial_state": {
++          "enum": [
++            "steady",
++            "cold"
++          ],
++          "title": "Initial State",
++          "type": "string"
++        },
++        "payload_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Payload Hash",
++          "type": "string"
++        },
++        "query": {
++          "discriminator": {
++            "mapping": {
++              "decode": "#/$defs/DecodeQuery",
++              "prefill": "#/$defs/PrefillQuery"
++            },
++            "propertyName": "phase"
++          },
++          "oneOf": [
++            {
++              "$ref": "#/$defs/DecodeQuery"
++            },
++            {
++              "$ref": "#/$defs/PrefillQuery"
++            }
++          ],
++          "title": "Query"
++        }
++      },
++      "required": [
++        "embedding_hits",
++        "frequency_ratio",
++        "graph",
++        "hit_source",
++        "initial_state",
++        "payload_hash",
++        "query"
++      ],
++      "title": "PreparedPoint",
++      "type": "object"
++    },
++    "PreparedPointV2": {
++      "additionalProperties": false,
++      "properties": {
++        "embedding_hits": {
++          "items": {
++            "minimum": 0,
++            "type": "integer"
++          },
++          "minItems": 1,
++          "title": "Embedding Hits",
++          "type": "array"
++        },
++        "frequency_ratio": {
++          "gt": 0,
++          "title": "Frequency Ratio",
++          "type": "number"
++        },
++        "graph": {
++          "$ref": "#/$defs/PreparedGraphV2"
++        },
++        "hit_source": {
++          "enum": [
++            "provided_counts",
++            "synthetic_balanced_assignment",
++            "tp1_trivial"
++          ],
++          "title": "Hit Source",
++          "type": "string"
++        },
++        "initial_state": {
++          "enum": [
++            "steady",
++            "cold"
++          ],
++          "title": "Initial State",
++          "type": "string"
++        },
++        "payload_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Payload Hash",
++          "type": "string"
++        },
++        "query": {
++          "discriminator": {
++            "mapping": {
++              "decode": "#/$defs/DecodeQuery",
++              "prefill": "#/$defs/PrefillQuery"
++            },
++            "propertyName": "phase"
++          },
++          "oneOf": [
++            {
++              "$ref": "#/$defs/DecodeQuery"
++            },
++            {
++              "$ref": "#/$defs/PrefillQuery"
++            }
++          ],
++          "title": "Query"
++        }
++      },
++      "required": [
++        "embedding_hits",
++        "frequency_ratio",
++        "graph",
++        "hit_source",
++        "initial_state",
++        "payload_hash",
++        "query"
++      ],
++      "title": "PreparedPointV2",
++      "type": "object"
++    },
++    "Producer": {
++      "additionalProperties": false,
++      "properties": {
++        "implementation_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Implementation Hash",
++          "type": "string"
++        },
++        "name": {
++          "minLength": 1,
++          "title": "Name",
++          "type": "string"
++        },
++        "version": {
++          "minLength": 1,
++          "title": "Version",
++          "type": "string"
++        }
++      },
++      "required": [
++        "implementation_hash",
++        "name",
++        "version"
++      ],
++      "title": "Producer",
++      "type": "object"
++    },
++    "ProfileEntry": {
++      "additionalProperties": false,
++      "properties": {
++        "allowed_job_kinds": {
++          "items": {
++            "enum": [
++              "compute",
++              "dma",
++              "noc_transfer",
++              "barrier",
++              "fixed_delay"
++            ],
++            "type": "string"
++          },
++          "title": "Allowed Job Kinds",
++          "type": "array"
++        },
++        "case_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Case Id",
++          "type": "string"
++        },
++        "case_selection_revision": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Case Selection Revision",
++          "type": "string"
++        },
++        "checkpoint": {
++          "enum": [
++            "K2",
++            "B"
++          ],
++          "title": "Checkpoint",
++          "type": "string"
++        },
++        "clock_setup_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Clock Setup Hash",
++          "type": "string"
++        },
++        "expected_outcome": {
++          "enum": [
++            "success",
++            "UnsupportedProtocol",
++            "UnsupportedWorkloadScope",
++            "UnsupportedPrecision",
++            "UnsupportedRankScope",
++            "UnsupportedOperator",
++            "InvalidOperatorSchema",
++            "UnsupportedInitialState",
++            "UnsupportedShape",
++            "UnsupportedScope",
++            "UnsupportedMapping",
++            "SramCapacityExceeded",
++            "LiveBufferAlias",
++            "InvalidResource",
++            "InvalidRoute",
++            "InvalidTransfer",
++            "InvalidDependency",
++            "InvalidCoverage",
++            "ContentHashMismatch",
++            "CoefficientHashMismatch",
++            "HardwareMismatch",
++            "MissingCoverage",
++            "TestOnlyScope",
++            "IncompleteExecution",
++            "UnsupportedFidelity",
++            "UnsupportedHardware",
++            "UnsupportedCapability",
++            "IncompleteObservations",
++            "UnsupportedFrequency",
++            "TimeOverflow",
++            "TestProfileMismatch",
++            "TestVariantNotAdmitted",
++            "UnsupportedCheckpointScope",
++            "TestOnlyHardware",
++            "AdmissionMismatch",
++            "CapacityExceeded",
++            "InvalidBank"
++          ],
++          "title": "Expected Outcome",
++          "type": "string"
++        },
++        "freq_hz": {
++          "$ref": "#/$defs/Frequencies"
++        },
++        "frequency_ratio": {
++          "gt": 0,
++          "title": "Frequency Ratio",
++          "type": "number"
++        },
++        "graph_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Graph Hash",
++          "type": "string"
++        },
++        "hardware_spec": {
++          "$ref": "#/$defs/HardwareSpec"
++        },
++        "hardware_spec_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Hardware Spec Hash",
++          "type": "string"
++        },
++        "initial_state": {
++          "enum": [
++            "cold",
++            "steady",
++            "fixture_cold",
++            "fixture_resident"
++          ],
++          "title": "Initial State",
++          "type": "string"
++        },
+         "point_hash": {
+           "pattern": "^sha256:[0-9a-f]{64}$",
+           "title": "Point Hash",
+diff --git a/contract/schema/mapped/NativeTestProfile.json b/contract/schema/mapped/NativeTestProfile.json
+--- a/contract/schema/mapped/NativeTestProfile.json
++++ b/contract/schema/mapped/NativeTestProfile.json
+@@ -714,6 +714,36 @@
+       "title": "Interleave",
+       "type": "object"
+     },
++    "MappingPolicy": {
++      "additionalProperties": false,
++      "properties": {
++        "buffer_depth": {
++          "maximum": 18446744073709551615,
++          "minimum": 1,
++          "title": "Buffer Depth",
++          "type": "integer"
++        },
++        "name": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Name",
++          "type": "string"
++        },
++        "version": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Version",
++          "type": "string"
++        }
++      },
++      "required": [
++        "name",
++        "version",
++        "buffer_depth"
++      ],
++      "title": "MappingPolicy",
++      "type": "object"
++    },
+     "MatrixEngine": {
+       "additionalProperties": false,
+       "properties": {
+@@ -856,22 +886,9 @@
+       "title": "NumericFormat",
+       "type": "object"
+     },
+-    "PrecisionFormat": {
+-      "enum": [
+-        "fp32",
+-        "tf32",
+-        "bf16",
+-        "fp16",
+-        "fp8",
+-        "int8",
+-        "fp4",
+-        "int4"
+-      ],
+-      "title": "PrecisionFormat",
+-      "type": "string"
+-    },
+-    "ProfileEntry": {
+-      "additionalProperties": false,
++    "PolicyProfileEntry": {
++      "additionalProperties": false,
++      "description": "Explicit policy promise for new component profiles; legacy entries stay unchanged.",
+       "properties": {
+         "allowed_job_kinds": {
+           "items": {
+@@ -986,6 +1003,189 @@
+           "title": "Initial State",
+           "type": "string"
+         },
++        "mapping_policy": {
++          "$ref": "#/$defs/MappingPolicy"
++        },
++        "point_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Point Hash",
++          "type": "string"
++        },
++        "priming_iterations": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Priming Iterations",
++          "type": "integer"
++        },
++        "scope": {
++          "enum": [
++            "component",
++            "prepared_model",
++            "kernel_fixture",
++            "transport_fixture"
++          ],
++          "title": "Scope",
++          "type": "string"
++        },
++        "seed": {
++          "maximum": 18446744073709551615,
++          "minimum": 0,
++          "title": "Seed",
++          "type": "integer"
++        }
++      },
++      "required": [
++        "case_id",
++        "checkpoint",
++        "scope",
++        "initial_state",
++        "priming_iterations",
++        "hardware_spec_hash",
++        "hardware_spec",
++        "frequency_ratio",
++        "freq_hz",
++        "graph_hash",
++        "point_hash",
++        "allowed_job_kinds",
++        "clock_setup_hash",
++        "expected_outcome",
++        "seed",
++        "case_selection_revision",
++        "mapping_policy"
++      ],
++      "title": "PolicyProfileEntry",
++      "type": "object"
++    },
++    "PrecisionFormat": {
++      "enum": [
++        "fp32",
++        "tf32",
++        "bf16",
++        "fp16",
++        "fp8",
++        "int8",
++        "fp4",
++        "int4"
++      ],
++      "title": "PrecisionFormat",
++      "type": "string"
++    },
++    "ProfileEntry": {
++      "additionalProperties": false,
++      "properties": {
++        "allowed_job_kinds": {
++          "items": {
++            "enum": [
++              "compute",
++              "dma",
++              "noc_transfer",
++              "barrier",
++              "fixed_delay"
++            ],
++            "type": "string"
++          },
++          "title": "Allowed Job Kinds",
++          "type": "array"
++        },
++        "case_id": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Case Id",
++          "type": "string"
++        },
++        "case_selection_revision": {
++          "minLength": 1,
++          "pattern": "\\S",
++          "title": "Case Selection Revision",
++          "type": "string"
++        },
++        "checkpoint": {
++          "enum": [
++            "K2",
++            "B"
++          ],
++          "title": "Checkpoint",
++          "type": "string"
++        },
++        "clock_setup_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Clock Setup Hash",
++          "type": "string"
++        },
++        "expected_outcome": {
++          "enum": [
++            "success",
++            "UnsupportedProtocol",
++            "UnsupportedWorkloadScope",
++            "UnsupportedPrecision",
++            "UnsupportedRankScope",
++            "UnsupportedOperator",
++            "InvalidOperatorSchema",
++            "UnsupportedInitialState",
++            "UnsupportedShape",
++            "UnsupportedScope",
++            "UnsupportedMapping",
++            "SramCapacityExceeded",
++            "LiveBufferAlias",
++            "InvalidResource",
++            "InvalidRoute",
++            "InvalidTransfer",
++            "InvalidDependency",
++            "InvalidCoverage",
++            "ContentHashMismatch",
++            "CoefficientHashMismatch",
++            "HardwareMismatch",
++            "MissingCoverage",
++            "TestOnlyScope",
++            "IncompleteExecution",
++            "UnsupportedFidelity",
++            "UnsupportedHardware",
++            "UnsupportedCapability",
++            "IncompleteObservations",
++            "UnsupportedFrequency",
++            "TimeOverflow",
++            "TestProfileMismatch",
++            "TestVariantNotAdmitted",
++            "UnsupportedCheckpointScope",
++            "TestOnlyHardware",
++            "AdmissionMismatch",
++            "CapacityExceeded",
++            "InvalidBank"
++          ],
++          "title": "Expected Outcome",
++          "type": "string"
++        },
++        "freq_hz": {
++          "$ref": "#/$defs/Frequencies"
++        },
++        "frequency_ratio": {
++          "gt": 0,
++          "title": "Frequency Ratio",
++          "type": "number"
++        },
++        "graph_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Graph Hash",
++          "type": "string"
++        },
++        "hardware_spec": {
++          "$ref": "#/$defs/HardwareSpec"
++        },
++        "hardware_spec_hash": {
++          "pattern": "^sha256:[0-9a-f]{64}$",
++          "title": "Hardware Spec Hash",
++          "type": "string"
++        },
++        "initial_state": {
++          "enum": [
++            "cold",
++            "steady",
++            "fixture_cold",
++            "fixture_resident"
++          ],
++          "title": "Initial State",
++          "type": "string"
++        },
+         "point_hash": {
+           "pattern": "^sha256:[0-9a-f]{64}$",
+           "title": "Point Hash",
+@@ -1240,14 +1440,24 @@
+   "properties": {
+     "entries": {
+       "items": {
+-        "$ref": "#/$defs/ProfileEntry"
++        "anyOf": [
++          {
++            "$ref": "#/$defs/PolicyProfileEntry"
++          },
++          {
++            "$ref": "#/$defs/ProfileEntry"
++          }
++        ]
+       },
+       "minItems": 1,
+       "title": "Entries",
+       "type": "array"
+     },
+     "format": {
+-      "const": "uarch-native-test-profile/1",
++      "enum": [
++        "uarch-native-test-profile/1",
++        "uarch-native-test-profile/2"
++      ],
+       "title": "Format",
+       "type": "string"
+     },
 diff --git a/docs/decisions/U0011-the-native-engine-core.md b/docs/decisions/U0011-the-native-engine-core.md
 --- a/docs/decisions/U0011-the-native-engine-core.md
 +++ b/docs/decisions/U0011-the-native-engine-core.md
-@@ -390,3 +390,103 @@
+@@ -390,3 +390,213 @@
  event-injection workload carrier is introduced, no obligation is deleted and no private
  execution is relabelled public. Without acceptance of this exception, literal all-case
  public coverage remains blocked, even after public clock instrumentation is implemented.
@@ -1285,7 +3379,7 @@ diff --git a/docs/decisions/U0011-the-native-engine-core.md b/docs/decisions/U00
 +## Proposed component lifetime and observation completion (not a release)
 +
 +This section becomes normative only after human acceptance and protected installation of
-+U4-A-component-release-v1's exact combined postimages. It grants neither component native
++U4-A-component-stage2-v1's exact combined postimages. It grants neither component native
 +implementation/build entry nor runtime execution authority; the separate reconciled K2 and
 +scoped B release remain necessary. Human worksheet workings gate applicable L1 acceptance,
 +not this preparation. Existing accepted tools, scope and dependencies are not voted again.
@@ -1302,7 +3396,12 @@ diff --git a/docs/decisions/U0011-the-native-engine-core.md b/docs/decisions/U00
 +of one precede the other's producer. Matrix serialization alone is not a lifetime proof.
 +An unrelated DMA, barrier or compute using another accumulator cannot manufacture production.
 +
-+The @2 mapper keeps persistent scratch on cores with only one footprint. Heterogeneous
++The @2 mapper allocates ALL SRAM and HBM operands in min-ID Kahn topological operator
++order, then tile order; stable operator prefixes still derive from sorted operator IDs.
++This changes operand offsets even on uniform-footprint cores when dependency order differs
++from ID order. For two uniform 256³ ops a→(depends on b), b's operands are allocated before
++a's under @2; @1 retains a-before-b ID placement. The @2 mapper keeps persistent scratch
++on cores with only one footprint. Heterogeneous
 +cores use exact-size per-compute transient buffers at offset0 and explicit compute-to-compute
 +edges in stable topological operator order (ID ties), then tile order. Existing op dependencies
 +remain; different cores and DMA may overlap. Imported valid placements need not use this
@@ -1318,7 +3417,7 @@ diff --git a/docs/decisions/U0011-the-native-engine-core.md b/docs/decisions/U00
 +
 +Activities record ready, actual start and end, dispatch/completion observation ordinals,
 +occupied status and typed tight predecessor links. Both ordinals join actual dispatched
-+EventObservation records by job, owner and time. Job observations join the declared graph
++EventObservation records by job, owner, time and the endpoint kinds specified below. Job observations join the declared graph
 +and actual completed state; request observations join declared fragment/job/engine/direction,
 +buffers, bytes and route. Aggregate counts derive from completion, never declared work alone.
 +Resource records cover precisely occupied activities; alignment/waiting does not invent busy
@@ -1331,8 +3430,8 @@ diff --git a/docs/decisions/U0011-the-native-engine-core.md b/docs/decisions/U00
 +Every clocked subphase has one service activity and one separate alignment activity,
 +including zero-length alignment, with one exact clock record for each. Rational channel
 +service and zero-hop routing have no alignment or clock record. Service ready follows its
-+alignment; alignment ready follows the prior subphase (or request issue/job grant for the
-+first). Clock records reference the exact activity. Existing E3/E4 next_edge and
++alignment; alignment ready follows the prior subphase (or request issue/job dependency readiness for
++the first). Actual resource acquisition may occur later than that readiness. Clock records reference the exact activity. Existing E3/E4 next_edge and
 +zero-owned-duration laws govern; zero-hop movement stays at arrival without edge alignment.
 +Channel exact start/end ratios are reduced; published integer endpoints are ceilings. Never
 +feed integer publication rounding back into channel service. Timing formulas remain E3/E4.
@@ -1380,6 +3479,111 @@ diff --git a/docs/decisions/U0011-the-native-engine-core.md b/docs/decisions/U00
 +immutable expected-refusal selection; they must fail resource validation before job execution.
 +No mutable caller rehash, embedded trust anchor, bypass flag or hidden trust is authorized.
 +Synthetic profiles/results remain unit-only evidence. Their acceptance is not native success.
++
++### Proposed Stage 2 structural completion
++
++All alignment records are nonoccupying, with the same owner/category/receiving domain as
++their service. Alignment dispatch/completion kinds are TASK_READY / DEPENDENCY_READY.
++No alignment exists for channel service or zero-hop NoC. Each service has these properties:
++
++| Subphase | Owner | Category | Domain | Occupies | Dispatch / completion event |
++| --- | --- | --- | --- | --- | --- |
++| compute_overhead | matrix:core | overhead | core | true | OWNER_GRANT / COMPUTE_DONE |
++| compute_stage, compute_wave, compute_drain | matrix:core | compute | core | true | OWNER_GRANT / COMPUTE_DONE |
++| read_port | dma_port:core | memory | core | true | OWNER_GRANT / DMA_DONE |
++| write_port | dma_port:core | memory | core | true | OWNER_GRANT / MEM_RESP |
++| channel_service | fragment channel | memory | null | true | MEM_REQ / MEM_RESP |
++| dram_latency | fragment channel | memory | dram | false | MEM_REQ / MEM_RESP |
++| request_noc, response_noc, unicast_noc | local/source router | noc | noc | hops > 0 | NOC_HEAD / NOC_TAIL |
++| ack | dma_port:core | memory | core | false | TASK_READY / DMA_DONE |
++| barrier | canonical barrier owner | sync | noc | false | SYNC_ARRIVE / BARRIER_RELEASE |
++
++Occupancy is determined from declared phase/route, never from claimed duration. Compute and
++ports have an occupied row even for zero duration. Positive-hop NoC occupancy reports the
++union of in-flight router-attributed latency; it does NOT serialize hops or introduce a
++bandwidth resource. Zero-hop service remains a nonoccupying zero-duration causal record.
++This NoC convention is proposed for explicit human semantic acceptance with D1. The independent checker must check channel
++and port arithmetic/arbitration directly over service activities even if a row is omitted.
++Structural checks independently require the exact occupied-row bijection. Rational channel
++endpoints remain on those mandatory rows; published integer endpoints are their ceilings.
++
++Event references require exact job/owner/time/kind joins, separate dispatch and completion
++ordinals, including zero duration. Every event must be referenced by a phase endpoint; no
++unconstrained STAT_SAMPLE records. Global event ordering remains the existing observation
++order law. The phase value retains its scheduler ordering role; it is not a substitute for
++endpoint kind. No new service-duration law follows from endpoint encoding.
++
++## Transitions and structural eligibility (F2/F3)
++
++Phase sequences: compute overhead→stage→wave→drain; DMA read request_noc→dram_latency→
++channel_service→response_noc→read_port; DMA write write_port→request_noc→dram_latency→
++channel_service→response_noc→ack; unicast and barrier each have one phase. Expand each phase
++as alignment then service when alignment is present. Phase identities must be unique per
++(job, request, subphase, kind); The independent checker independently requires the exact admitted inventory.
++
++A `sequence` link is only from the immediate preceding activity in this expanded sequence.
++A `dependency` link is from a terminal activity of a declared predecessor job to a first
++activity of the dependent job (for DMA, a request's first activity), with predecessor end
++also equal to predecessor job completion. A `credit` link is only from a different request's
++last activity to a request's first activity on the same DMA engine. A `resource` link has the
++same owner and an occupying predecessor from a different job/request. Its successor is
++the first compute alignment (whole-tile ownership), port alignment, or channel service.
++Only matrix, port and channel owners are contended; same-tile phases use sequence links. No NoC resource links.
++All links remain tight (predecessor end = successor start), with preceding completion ordinal
++no greater than dispatch ordinal. Cycles, including zero-duration multi-activity cycles,
++are refused. Nonzero-start activities require a tight cause even off the critical chain.
++
++Structural eligibility is necessary but not sufficient. The independent checker derives the COMPLETE tight cause
++set from transitions, declared dependencies, actual previous resource occupant and exhausted
++credit release. Merely sharing engine/owner/time is insufficient. Credit completeness uses
++issue/release state at the engine limit; first/last eligibility alone does not prove exhaustion.
++Resource causes must actually gate the grant, and cannot be borrowed from a later activity.
++Preserve same-time ties and zero-duration links. Canonical chosen path uses existing stable
++(owner, job, request-or-empty, subphase, activity) order among eligible causes.
++
++## Job summaries and legacy fields (F8)
++
++Canonical job owners: Compute matrix:core; DMA dma:core:engine; NocTransfer source router;
++Barrier barrier:job. Component tasks declare no delayed release: release_ps MUST be 0.
++ready_ps is max declared predecessor job completion (0 with none); start/end are min first
++activity start / max final activity end across that job's request sequences. DMA summaries
++also join issue/complete records. Job readiness may precede credit acquisition.
++
++The `/1` scalar causal fields cannot express `/2` activity/request transitions. In `/2`,
++job.blocking_predecessor_ids MUST be empty and critical.predecessor_id MUST be null. They
++are explicitly unrepresented; typed activity.predecessors is the causal witness. `/1`
++meaning/validation is unchanged. No new schema field is needed for this decision.
++
++
++Ports arbitrate by existing E4 FIFO (ready time, flattened DMA engine ID, request ID).
++Zero-duration endpoints retain separate dispatch/completion events. The explicit cycle
++check gives a stable early refusal; strict endpoint ordering also precludes a valid cycle.
++
++### Proposed optional profile-version binding decision
++
++Current profile/1 promises graph and point identity, not the bundle mapping policy. A policy
++relabel with unchanged graph/point remains admissible under that historical promise. Hashing
++the whole request elsewhere does not enlarge that promise. Human decision F11 may retain
++this behavior, relying on a separately authenticated execution selection that explicitly
++binds policy, or accept the following minimal extension for new B admissions.
++
++Recommended profile/2 retains the profile carrier and required fields and extends each entry
++with required `mapping_policy: {name, version, buffer_depth}`. Entries must be checkpoint B
++and scope component or transport_fixture. All three policy fields must equal the bundle
++before other profile variant checks (`TestVariantNotAdmitted: profile mapping policy`).
++Format/entry mixing is `TestProfileMismatch: profile policy format`. The existing external
++profile hash authenticates these bytes. A caller cannot promote a rehashed profile into a
++trusted one. Profile/1 entries and serialization remain unchanged, including historical K2
++and @1 anchors. A profile/2 entry can bind either @1 or @2 for a new reviewed case.
++
++This proposed implementation accepts both formats; it cannot infer whether authority is old
++or newly approved. Future component authority/selection must explicitly require profile/2
++if that option is chosen. No fallback to profile/1 is allowed for such a selection. Current
++historical controls retain profile/1 and graph/point-only meaning. Profile/2 needs new profile
++hashes, bundle/job hashes and future external anchors; graph/point need not change. No engine,
++build, runtime authority or native result is created by this proposal. If the human retains
++profile/1, omit the isolated PolicyProfileEntry/profile-format/admission additions and their
++schema deltas/tests before freezing the accepted candidate; do not silently claim binding.
 diff --git a/src/rkuarch/mapping/component.py b/src/rkuarch/mapping/component.py
 --- a/src/rkuarch/mapping/component.py
 +++ b/src/rkuarch/mapping/component.py
@@ -1490,177 +3694,233 @@ diff --git a/contract/tests/mapped/test_component_semantics_v2.py b/contract/tes
 new file mode 100644
 --- /dev/null
 +++ b/contract/tests/mapped/test_component_semantics_v2.py
-@@ -0,0 +1,249 @@
+@@ -0,0 +1,792 @@
 +"""Consistently resealed synthetic carriers; never component outputs/native evidence.
 +Inputs independently hand constructed by B; attacks reproduce reviewer M1/M2/M3/M4/V1.
 +"""
++
 +from copy import deepcopy
++from typing import Any
++
 +import pytest
 +from uarch_contract.hashing import content_hash
 +from uarch_contract.mapped import validate_result
-+from validation.component.synthetic_carrier import synthetic_job, synthetic_result, synthetic_port_pair
++
++from validation.component import synthetic_carrier
++
++synthetic_job: Any = synthetic_carrier.synthetic_job
++synthetic_result: Any = synthetic_carrier.synthetic_result
++synthetic_port_pair: Any = synthetic_carrier.synthetic_port_pair
 +
 +
-+def records(r, section):
-+    return r['observations'][section]['records']
++def records(r: Any, section: Any) -> Any:
++    return r["observations"][section]["records"]
 +
 +
-+def act(r, name):
-+    return next(a for a in records(r, 'activities') if a['activity_id'] == name)
++def act(r: Any, name: Any) -> Any:
++    return next(a for a in records(r, "activities") if a["activity_id"] == name)
 +
 +
-+def seal(r):
-+    r['result_hash'] = content_hash(r, exclude=('result_hash',))
++def seal(r: Any) -> Any:
++    r["result_hash"] = content_hash(r, exclude=("result_hash",))
 +    return r
 +
 +
-+def sample(case='D01'):
++def sample(case: Any = "D01") -> Any:
 +    j = synthetic_job(case)
-+    r = synthetic_port_pair(j) if case == 'D08' else synthetic_result(j)
++    r = synthetic_port_pair(j) if case == "D08" else synthetic_result(j)
 +    # Explicit proposed endpoint encoding, independent of production implementation.
 +    kinds = {
-+        'read_port': ('OWNER_GRANT', 'DMA_DONE'), 'write_port': ('OWNER_GRANT', 'MEM_RESP'),
-+        'channel_service': ('MEM_REQ', 'MEM_RESP'), 'dram_latency': ('MEM_REQ', 'MEM_RESP'),
-+        'ack': ('TASK_READY', 'DMA_DONE'), 'barrier': ('SYNC_ARRIVE', 'BARRIER_RELEASE'),
++        "read_port": ("OWNER_GRANT", "DMA_DONE"),
++        "write_port": ("OWNER_GRANT", "MEM_RESP"),
++        "channel_service": ("MEM_REQ", "MEM_RESP"),
++        "dram_latency": ("MEM_REQ", "MEM_RESP"),
++        "ack": ("TASK_READY", "DMA_DONE"),
++        "barrier": ("SYNC_ARRIVE", "BARRIER_RELEASE"),
 +    }
-+    ev = {e['observation_ordinal']: e for e in records(r, 'events')}
-+    for a in records(r, 'activities'):
-+        pair = ('TASK_READY', 'DEPENDENCY_READY') if a['kind'] == 'alignment' else (
-+            ('NOC_HEAD', 'NOC_TAIL') if a['subphase'].endswith('_noc') else
-+            ('OWNER_GRANT', 'COMPUTE_DONE') if a['subphase'].startswith('compute_') else kinds[a['subphase']])
-+        ev[a['dispatch_ordinal']]['kind'], ev[a['completion_ordinal']]['kind'] = pair
-+    for c in records(r, 'critical_path'):
-+        c['predecessor_id'] = None
++    ev = {e["observation_ordinal"]: e for e in records(r, "events")}
++    for a in records(r, "activities"):
++        pair = (
++            ("TASK_READY", "DEPENDENCY_READY")
++            if a["kind"] == "alignment"
++            else (
++                ("NOC_HEAD", "NOC_TAIL")
++                if a["subphase"].endswith("_noc")
++                else ("OWNER_GRANT", "COMPUTE_DONE")
++                if a["subphase"].startswith("compute_")
++                else kinds[a["subphase"]]
++            )
++        )
++        ev[a["dispatch_ordinal"]]["kind"], ev[a["completion_ordinal"]]["kind"] = pair
++    for c in records(r, "critical_path"):
++        c["predecessor_id"] = None
 +    return j, seal(r)
 +
 +
-+def rebusy(r):
-+    for b in r['busy_time_ps']:
++def rebusy(r: Any) -> Any:
++    for b in r["busy_time_ps"]:
 +        end = total = 0
-+        for lo, hi in sorted((x['start_ps'], x['end_ps']) for x in records(r,'resource_intervals') if x['owner_id']==b['owner_id']):
-+            total += max(0, hi-max(lo,end)); end=max(end,hi)
-+        b['busy_time_ps']=total
++        for lo, hi in sorted(
++            (x["start_ps"], x["end_ps"])
++            for x in records(r, "resource_intervals")
++            if x["owner_id"] == b["owner_id"]
++        ):
++            total += max(0, hi - max(lo, end))
++            end = max(end, hi)
++        b["busy_time_ps"] = total
 +
 +
-+@pytest.mark.parametrize('case', ['D01','D08','D10-read'])
-+def test_structural_positive(case):
-+    j,r=sample(case)
-+    validate_result(r,j)
++@pytest.mark.parametrize("case", ["D01", "D08", "D10-read"])
++def test_structural_positive(case: Any) -> None:
++    j, r = sample(case)
++    validate_result(r, j)
 +
 +
-+@pytest.mark.parametrize('part', ['category', 'domain'])
-+def test_M1_relabel(part):
-+    j,r=sample('D10-read')
-+    a=act(r,'back-a')
-+    if part == 'category':
-+        a['category']='memory'
-+        for c in records(r,'critical_path'):
-+            if c['activity_id']=='back-a':
-+                c['category']='memory'
-+                delta=c['end_ps']-c['start_ps']
-+                r['attribution_ps']['noc']-=delta; r['attribution_ps']['memory']+=delta
++@pytest.mark.parametrize("part", ["category", "domain"])
++def test_M1_relabel(part: Any) -> None:
++    j, r = sample("D10-read")
++    a = act(r, "back-a")
++    if part == "category":
++        a["category"] = "memory"
++        for c in records(r, "critical_path"):
++            if c["activity_id"] == "back-a":
++                c["category"] = "memory"
++                delta = c["end_ps"] - c["start_ps"]
++                r["attribution_ps"]["noc"] -= delta
++                r["attribution_ps"]["memory"] += delta
 +    else:
-+        a['receiving_domain']='dram'
-+        for c in records(r,'clocks'):
-+            if c['activity_id']=='back-a': c['domain']='dram'
-+        for q in records(r,'queue_membership'):
-+            if q['activity_id']=='back-a': q['clock_domain']='dram'
-+    with pytest.raises(ValueError,match='^IncompleteObservations: activity category/domain$'):
-+        validate_result(seal(r),j)
++        a["receiving_domain"] = "dram"
++        for c in records(r, "clocks"):
++            if c["activity_id"] == "back-a":
++                c["domain"] = "dram"
++        for q in records(r, "queue_membership"):
++            if q["activity_id"] == "back-a":
++                q["clock_domain"] = "dram"
++    with pytest.raises(ValueError, match="^IncompleteObservations: activity category/domain$"):
++        validate_result(seal(r), j)
 +
 +
-+def test_M2_owner_forgery():
-+    j,r=sample()
-+    port=next(o.owner_id for o in j.owners if o.resource=='dma_port:0')
-+    a=act(r,'out'); a['owner_id']=port
-+    for e in records(r,'events'):
-+        if e['observation_ordinal'] in (a['dispatch_ordinal'],a['completion_ordinal']): e['target_id']=port
-+    for x in records(r,'resource_intervals'):
-+        if x['activity_id']=='out': x['owner_id']=x['limiting_resource_id']=port
-+    for q in records(r,'queue_membership'):
-+        if q['activity_id']=='out': q.update(owner_id=port,queue_id=f'activity:request_noc:{port}')
-+    for c in records(r,'critical_path'):
-+        if c['activity_id']=='out': c['limiting_resource_id']=port
-+    rebusy(r)
-+    with pytest.raises(ValueError,match='^InvalidResource: activity owner$'):
-+        validate_result(seal(r),j)
-+
-+
-+def test_M3_missing_off_chain_cause():
-+    j,r=sample('D08')
-+    act(r,'r1:back-a')['predecessors']=[]
-+    with pytest.raises(ValueError,match='^AttributionMismatch: missing tight cause$'):
-+        validate_result(seal(r),j)
-+
-+
-+def test_M4_nonoccupying_channel():
-+    j,r=sample()
-+    ch,ba=act(r,'channel'),act(r,'back-a')
-+    ch.update(occupies_resource=False,end_ps=54500)
-+    ba.update(ready_ps=54500,start_ps=54500)
-+    r['observations']['resource_intervals']['records']=[x for x in records(r,'resource_intervals') if x['activity_id']!='channel']
-+    for e in records(r,'events'):
-+        if e['observation_ordinal'] in (ch['completion_ordinal'],ba['dispatch_ordinal']): e['t_ps']=54500
-+    for q in records(r,'queue_membership'):
-+        if q['queue_id'].startswith('channel_service:') and q['population']=='service': q['leave_ps']=54500
-+        if q['activity_id']=='back-a':
-+            q['enter_ps']=54500
-+            if q['population']=='waiting': q['leave_ps']=54500
-+    for t in records(r,'transfers'):
-+        if t['boundary_id']=='dram': t['leave_ps']=54500
-+        if t['boundary_id']=='response_noc': t['enter_ps']=54500
-+    for c in records(r,'clocks'):
-+        if c['activity_id']=='back-a': c['grant_ps']=54500
-+    for c in records(r,'critical_path'):
-+        if c['activity_id']=='channel': c['end_ps']=54500
-+        if c['activity_id']=='back-a': c['start_ps']=54500
-+    r['attribution_ps']['memory']+=250; r['attribution_ps']['noc']-=250
-+    rebusy(r)
-+    with pytest.raises(ValueError,match='^IncompleteObservations: phase occupancy$'):
-+        validate_result(seal(r),j)
-+
-+
-+def test_V1_credit_only_first_from_last():
-+    j,r=sample('D08')
-+    a=act(r,'r1:port')
-+    a['predecessors'].append(dict(activity_id='r0:port',relation='credit'))
-+    a['predecessors'].sort(key=lambda p:(p['activity_id'],p['relation']))
-+    with pytest.raises(ValueError,match='^AttributionMismatch: credit endpoints$'):
-+        validate_result(seal(r),j)
-+
-+
-+@pytest.mark.parametrize('field,detail', [
-+    ('owner','job owner'), ('release','component release'), ('blocking','unrepresented job predecessors'),
-+    ('critical','unrepresented critical predecessor'), ('event','activity event kind'),
-+])
-+def test_F8_resealed_fields(field,detail):
-+    j,r=sample('D08')
-+    row=records(r,'jobs')[0]
-+    if field=='owner': row['owner_id']=next(o.owner_id for o in j.owners if o.resource=='channel:6')
-+    if field=='release': row['release_ps']=50000
-+    if field=='blocking': row['blocking_predecessor_ids']=['r01']
-+    if field=='critical': records(r,'critical_path')[-1]['predecessor_id']='FORGED'
-+    if field=='event':
-+        next(e for e in records(r,'events') if e['kind']=='DMA_DONE')['kind']='STAT_SAMPLE'
-+    with pytest.raises(ValueError,match='^(IncompleteObservations|AttributionMismatch|InvalidResource): '+detail+'$'):
-+        validate_result(seal(r),j)
-+    validate_result(sample('D08')[1],j)
-+
-+
-+def synthetic():
++def test_M2_owner_forgery() -> None:
 +    j, r = sample()
-+    rows = records(r, 'queue_membership')
-+    rows.sort(key=lambda q: not q['queue_id'].startswith('channel_service:'))
++    port = next(o.owner_id for o in j.owners if o.resource == "dma_port:0")
++    a = act(r, "out")
++    a["owner_id"] = port
++    for e in records(r, "events"):
++        if e["observation_ordinal"] in (a["dispatch_ordinal"], a["completion_ordinal"]):
++            e["target_id"] = port
++    for x in records(r, "resource_intervals"):
++        if x["activity_id"] == "out":
++            x["owner_id"] = x["limiting_resource_id"] = port
++    for q in records(r, "queue_membership"):
++        if q["activity_id"] == "out":
++            q.update(owner_id=port, queue_id=f"activity:request_noc:{port}")
++    for c in records(r, "critical_path"):
++        if c["activity_id"] == "out":
++            c["limiting_resource_id"] = port
++    rebusy(r)
++    with pytest.raises(ValueError, match="^InvalidResource: activity owner$"):
++        validate_result(seal(r), j)
++
++
++def test_M3_missing_off_chain_cause() -> None:
++    j, r = sample("D08")
++    act(r, "r1:back-a")["predecessors"] = []
++    with pytest.raises(ValueError, match="^AttributionMismatch: missing tight cause$"):
++        validate_result(seal(r), j)
++
++
++def test_M4_nonoccupying_channel() -> None:
++    j, r = sample()
++    ch, ba = act(r, "channel"), act(r, "back-a")
++    ch.update(occupies_resource=False, end_ps=54500)
++    ba.update(ready_ps=54500, start_ps=54500)
++    r["observations"]["resource_intervals"]["records"] = [
++        x for x in records(r, "resource_intervals") if x["activity_id"] != "channel"
++    ]
++    for e in records(r, "events"):
++        if e["observation_ordinal"] in (ch["completion_ordinal"], ba["dispatch_ordinal"]):
++            e["t_ps"] = 54500
++    for q in records(r, "queue_membership"):
++        if q["queue_id"].startswith("channel_service:") and q["population"] == "service":
++            q["leave_ps"] = 54500
++        if q["activity_id"] == "back-a":
++            q["enter_ps"] = 54500
++            if q["population"] == "waiting":
++                q["leave_ps"] = 54500
++    for t in records(r, "transfers"):
++        if t["boundary_id"] == "dram":
++            t["leave_ps"] = 54500
++        if t["boundary_id"] == "response_noc":
++            t["enter_ps"] = 54500
++    for c in records(r, "clocks"):
++        if c["activity_id"] == "back-a":
++            c["grant_ps"] = 54500
++    for c in records(r, "critical_path"):
++        if c["activity_id"] == "channel":
++            c["end_ps"] = 54500
++        if c["activity_id"] == "back-a":
++            c["start_ps"] = 54500
++    r["attribution_ps"]["memory"] += 250
++    r["attribution_ps"]["noc"] -= 250
++    rebusy(r)
++    with pytest.raises(ValueError, match="^IncompleteObservations: phase occupancy$"):
++        validate_result(seal(r), j)
++
++
++def test_V1_credit_only_first_from_last() -> None:
++    j, r = sample("D08")
++    a = act(r, "r1:port")
++    a["predecessors"].append(dict(activity_id="r0:port", relation="credit"))
++    a["predecessors"].sort(key=lambda p: (p["activity_id"], p["relation"]))
++    with pytest.raises(ValueError, match="^AttributionMismatch: credit endpoints$"):
++        validate_result(seal(r), j)
++
++
++@pytest.mark.parametrize(
++    "field,detail",
++    [
++        ("owner", "job owner"),
++        ("release", "component release"),
++        ("blocking", "unrepresented job predecessors"),
++        ("critical", "unrepresented critical predecessor"),
++        ("event", "activity event kind"),
++    ],
++)
++def test_F8_resealed_fields(field: Any, detail: Any) -> None:
++    j, r = sample("D08")
++    row = records(r, "jobs")[0]
++    if field == "owner":
++        row["owner_id"] = next(o.owner_id for o in j.owners if o.resource == "channel:6")
++    if field == "release":
++        row["release_ps"] = 50000
++    if field == "blocking":
++        row["blocking_predecessor_ids"] = ["r01"]
++    if field == "critical":
++        records(r, "critical_path")[-1]["predecessor_id"] = "FORGED"
++    if field == "event":
++        next(e for e in records(r, "events") if e["kind"] == "DMA_DONE")["kind"] = "STAT_SAMPLE"
++    with pytest.raises(
++        ValueError,
++        match="^(IncompleteObservations|AttributionMismatch|InvalidResource): " + detail + "$",
++    ):
++        validate_result(seal(r), j)
++    validate_result(sample("D08")[1], j)
++
++
++def synthetic() -> Any:
++    j, r = sample()
++    rows = records(r, "queue_membership")
++    rows.sort(key=lambda q: not q["queue_id"].startswith("channel_service:"))
 +    return j, r
 +
 +
-+def check(job, raw):
++def check(job: Any, raw: Any) -> Any:
 +    raw = deepcopy(raw)
 +    raw["result_hash"] = content_hash(raw, exclude=("result_hash",))
 +    return validate_result(raw, job)
 +
 +
-+def test_synthetic_null_channel_dma_and_clocked_controls():
++def test_synthetic_null_channel_dma_and_clocked_controls() -> None:
 +    j, r = synthetic()
 +    assert check(j, r)
 +    q = r["observations"]["queue_membership"]["records"][0]
@@ -1679,7 +3939,8 @@ new file mode 100644
 +        owner_id=a["owner_id"],
 +        population="waiting",
 +        clock_domain=a["receiving_domain"],
-+        enter_ps=a["ready_ps"], leave_ps=a["start_ps"],
++        enter_ps=a["ready_ps"],
++        leave_ps=a["start_ps"],
 +        activity_id=a["activity_id"],
 +    )
 +    assert check(j, r)
@@ -1689,7 +3950,7 @@ new file mode 100644
 +@pytest.mark.parametrize(
 +    "fault", ["owner", "channel", "engine", "request", "population", "invented_queue"]
 +)
-+def test_synthetic_queue_attacks_restored(fault, domain):
++def test_synthetic_queue_attacks_restored(fault: Any, domain: Any) -> None:
 +    j, r = synthetic()
 +    assert check(j, r)
 +    bad = deepcopy(r)
@@ -1712,7 +3973,7 @@ new file mode 100644
 +    assert check(j, r)
 +
 +
-+def test_synthetic_activity_dispatch_and_cycle_attacks():
++def test_synthetic_activity_dispatch_and_cycle_attacks() -> None:
 +    j, r = synthetic()
 +    assert check(j, r)
 +    for fault in ("request", "ordinal", "cycle"):
@@ -1730,7 +3991,7 @@ new file mode 100644
 +        assert check(j, r)
 +
 +
-+def test_stale_result_binding_precedes_queue_guard():
++def test_stale_result_binding_precedes_queue_guard() -> None:
 +    j, raw = synthetic()
 +    good = check(j, raw).model_dump(mode="json")
 +    bad = deepcopy(good)
@@ -1740,27 +4001,517 @@ new file mode 100644
 +    with pytest.raises(ValueError, match="IncompleteObservations"):
 +        check(j, bad)
 +    assert validate_result(good, j)
++
++
++def test_C1_two_activity_zero_duration_cycle() -> None:
++    """A genuine two-node cycle. Final endpoint eligibility also excludes it (redundant)."""
++    j, r = sample("D08")
++    left, right = act(r, "r0:out-a"), act(r, "r1:out-a")
++    assert left["start_ps"] == left["end_ps"] == right["start_ps"] == right["end_ps"] == 0
++    left["predecessors"] = [dict(activity_id=right["activity_id"], relation="resource")]
++    right["predecessors"] = [dict(activity_id=left["activity_id"], relation="resource")]
++    with pytest.raises(ValueError, match="^AttributionMismatch: activity cycle$"):
++        validate_result(seal(r), j)
++    validate_result(sample("D08")[1], j)
++
++
++@pytest.mark.parametrize(
++    "fault",
++    [
++        "duplicate_id",
++        "duplicate_phase",
++        "event_join",
++        "endpoint_order",
++        "occupied_join",
++        "missing_occupied",
++        "ratio_pair",
++        "ratio_required",
++        "ratio_rounding",
++        "queue_times",
++        "clock_join",
++        "canonical_chain",
++        "critical_fields",
++        "sequence",
++        "dependency",
++    ],
++)
++def test_additional_consistent_structural_witnesses(fault: Any) -> None:
++    j, r = sample("D08" if fault in ("canonical_chain", "critical_fields", "dependency") else "D01")
++    if fault == "duplicate_id":
++        records(r, "activities").append(deepcopy(act(r, "out-a")))
++    elif fault == "duplicate_phase":
++        clone = deepcopy(act(r, "out-a"))
++        clone["activity_id"] = "zz:clone"
++        records(r, "activities").append(clone)
++        for section in ("clocks", "queue_membership"):
++            for row in list(records(r, section)):
++                if row["activity_id"] == "out-a":
++                    clone_row = deepcopy(row)
++                    clone_row["activity_id"] = "zz:clone"
++                    records(r, section).append(clone_row)
++        act(r, "out")["predecessors"] = [dict(activity_id="zz:clone", relation="sequence")]
++    elif fault == "event_join":
++        a = act(r, "out")
++        next(e for e in records(r, "events") if e["observation_ordinal"] == a["dispatch_ordinal"])[
++            "job_id"
++        ] = "FORGED"
++    elif fault == "endpoint_order":
++        a = act(r, "out-a")
++        a["dispatch_ordinal"], a["completion_ordinal"] = (
++            a["completion_ordinal"],
++            a["dispatch_ordinal"],
++        )
++        ev = {e["observation_ordinal"]: e for e in records(r, "events")}
++        ev[a["dispatch_ordinal"]]["kind"] = "TASK_READY"
++        ev[a["completion_ordinal"]]["kind"] = "DEPENDENCY_READY"
++    elif fault == "occupied_join":
++        x = next(x for x in records(r, "resource_intervals") if x["activity_id"] == "out")
++        x["job_id"] = "FORGED"
++    elif fault == "missing_occupied":
++        r["observations"]["resource_intervals"]["records"] = [
++            x for x in records(r, "resource_intervals") if x["activity_id"] != "out"
++        ]
++        rebusy(r)
++    elif fault.startswith("ratio_"):
++        row = next(x for x in records(r, "resource_intervals") if x["activity_id"] == "channel")
++        if fault == "ratio_pair":
++            row["service_end_ps_ratio"] = None
++        elif fault == "ratio_required":
++            row["service_end_ps_ratio"] = row["service_start_ps_ratio"] = None
++        else:
++            row["service_end_ps_ratio"] = dict(numerator=54500, denominator=1)
++    elif fault == "queue_times":
++        next(q for q in records(r, "queue_membership") if q["activity_id"] == "out")["leave_ps"] = (
++            3999
++        )
++    elif fault == "clock_join":
++        next(c for c in records(r, "clocks") if c["activity_id"] == "out")["grant_ps"] = 1
++    elif fault == "canonical_chain":
++        row = next(c for c in records(r, "critical_path") if c["activity_id"] == "r0:out")
++        row["activity_id"] = "r1:out"
++        row["cause_job_id"] = "r01"
++    elif fault == "critical_fields":
++        next(c for c in records(r, "critical_path") if c["activity_id"] == "r0:out")[
++            "cause_job_id"
++        ] = "r01"
++    elif fault == "sequence":
++        act(r, "port")["predecessors"] = [dict(activity_id="back", relation="sequence")]
++    elif fault == "dependency":
++        next(p for p in act(r, "r1:port-a")["predecessors"] if p["relation"] == "resource")[
++            "relation"
++        ] = "dependency"
++    code = (
++        "AttributionMismatch"
++        if fault in ("canonical_chain", "critical_fields", "sequence", "dependency")
++        else "IncompleteObservations"
++    )
++    with pytest.raises(ValueError, match="^" + code + "(:|$)"):
++        validate_result(seal(r), j)
++    validate_result(
++        sample("D08" if fault in ("canonical_chain", "critical_fields", "dependency") else "D01")[
++            1
++        ],
++        j,
++    )
++
++
++@pytest.mark.parametrize(
++    "fault",
++    [
++        "job_readiness",
++        "job_span",
++        "activity_ready",
++        "unreferenced_event",
++        "queue_window",
++        "nonclocked_domain",
++        "ordinary_name",
++        "tight_ordinal",
++        "resource_boundary",
++    ],
++)
++def test_summary_boundary_and_population_guards(fault: Any) -> None:
++    from validation.component import consistent_carriers
++
++    pair_control: Any = consistent_carriers.pair_control
++    j, r = (
++        pair_control("D05-one")
++        if fault == "job_readiness"
++        else sample("D08" if fault == "resource_boundary" else "D01")
++    )
++    if fault == "job_readiness":
++        records(r, "jobs")[1]["ready_ps"] = 1
++    elif fault == "job_span":
++        records(r, "jobs")[0]["start_ps"] = 1
++    elif fault == "activity_ready":
++        act(r, "out-a")["ready_ps"] = 1
++    elif fault == "unreferenced_event":
++        e = deepcopy(records(r, "events")[-1])
++        e.update(observation_ordinal=999, event_seq=999, kind="STAT_SAMPLE")
++        records(r, "events").append(e)
++        r["simulator_metrics"]["event_count"] += 1
++    elif fault == "queue_window":
++        q = next(
++            q
++            for q in records(r, "queue_membership")
++            if q["queue_id"].startswith("channel_service:")
++        )
++        q["leave_ps"] = q["enter_ps"] - 1
++    elif fault == "nonclocked_domain":
++        next(
++            q
++            for q in records(r, "queue_membership")
++            if q["queue_id"].startswith("channel_service:")
++        )["clock_domain"] = "dram"
++    elif fault == "ordinary_name":
++        next(q for q in records(r, "queue_membership") if q["activity_id"] == "out")["queue_id"] = (
++            "activity:FORGED"
++        )
++    elif fault == "tight_ordinal":
++        before, after = act(r, "port-a"), act(r, "port")
++        b, a = before["completion_ordinal"], after["dispatch_ordinal"]
++        ev = {e["observation_ordinal"]: e for e in records(r, "events")}
++        ev[b]["kind"], ev[a]["kind"] = ev[a]["kind"], ev[b]["kind"]
++        before["completion_ordinal"], after["dispatch_ordinal"] = a, b
++    elif fault == "resource_boundary":
++        # Same-time, same-owner port service is not an acquisition alignment boundary.
++        act(r, "r1:port")["predecessors"] = [dict(activity_id="r0:port", relation="resource")]
++    with pytest.raises(ValueError, match="^(IncompleteObservations|AttributionMismatch)(:|$)"):
++        validate_result(seal(r), j)
++
++
++@pytest.mark.parametrize("fault", ["request", "owner"])
++def test_compute_binding_consistent_forgery(fault: Any) -> None:
++    from validation.component import consistent_carriers
++
++    control: Any = consistent_carriers.control
++    synchronize: Any = consistent_carriers.synchronize
++    j, r = control("C02")
++    validate_result(r, j)
++    port = next(o.owner_id for o in j.owners if o.resource == "dma_port:0")
++    for a in records(r, "activities"):
++        if fault == "request":
++            a["request_id"] = "FORGED"
++        else:
++            a["owner_id"] = port
++    if fault == "request":
++        for q in records(r, "queue_membership"):
++            q["item_id"] = "FORGED"
++    with pytest.raises(ValueError, match="^IncompleteObservations(:|$)"):
++        validate_result(synchronize(r), j)
++
++
++def test_request_belongs_to_declared_job() -> None:
++    from validation.component import consistent_carriers
++
++    pair_control: Any = consistent_carriers.pair_control
++    j, r = pair_control("D05-two")
++    validate_result(r, j)
++    request = next(a["request_id"] for a in records(r, "activities") if a["job_id"] == "r01")
++    changed = set()
++    for a in records(r, "activities"):
++        if a["job_id"] == "r00":
++            a["request_id"] = request
++            changed.add(a["activity_id"])
++    for q in records(r, "queue_membership"):
++        if q["activity_id"] in changed:
++            q["item_id"] = request
++    with pytest.raises(ValueError, match="^IncompleteObservations: activity request$"):
++        validate_result(seal(r), j)
++
++
++def test_unclocked_channel_cannot_acquire_alignment() -> None:
++    from validation.component import consistent_carriers
++
++    synchronize: Any = consistent_carriers.synchronize
++    j, r = sample()
++    service = act(r, "channel")
++    alignment = deepcopy(service)
++    alignment.update(
++        activity_id="channel-a",
++        kind="alignment",
++        occupies_resource=False,
++        end_ps=service["start_ps"],
++        dispatch_ordinal=1000,
++        completion_ordinal=1001,
++    )
++    service["predecessors"] = [dict(activity_id="channel-a", relation="sequence")]
++    records(r, "activities").append(alignment)
++    for ordinal, kind in [(1000, "TASK_READY"), (1001, "DEPENDENCY_READY")]:
++        e = deepcopy(records(r, "events")[0])
++        e.update(
++            observation_ordinal=ordinal,
++            event_seq=ordinal,
++            kind=kind,
++            t_ps=alignment["start_ps"],
++            target_id=alignment["owner_id"],
++            job_id=alignment["job_id"],
++        )
++        records(r, "events").append(e)
++    r["simulator_metrics"]["event_count"] += 2
++    with pytest.raises(ValueError, match="^IncompleteObservations: alignment is not busy$"):
++        validate_result(synchronize(r), j)
++
++
++@pytest.mark.parametrize(
++    "fault,code",
++    [
++        ("activity_job", "InvalidResource"),
++        ("activity_owner", "InvalidResource"),
++        ("request", "IncompleteObservations"),
++        ("dispatch", "IncompleteObservations"),
++        ("link", "AttributionMismatch"),
++        ("interval", "IncompleteObservations"),
++        ("queue", "IncompleteObservations"),
++        ("clock", "IncompleteObservations"),
++        ("missing_job_activities", "IncompleteObservations"),
++    ],
++)
++def test_malformed_witness_refuses_without_lookup_crash(fault: Any, code: Any) -> None:
++    """Totality/error-order controls, not unsafe-admission mutation evidence."""
++    j, r = sample()
++    if fault == "activity_job":
++        act(r, "out")["job_id"] = "unknown"
++    elif fault == "activity_owner":
++        act(r, "out")["owner_id"] = 2**63
++    elif fault == "request":
++        act(r, "out")["request_id"] = "unknown"
++    elif fault == "dispatch":
++        act(r, "out")["dispatch_ordinal"] = 999
++    elif fault == "link":
++        act(r, "out")["predecessors"] = [dict(activity_id="unknown", relation="sequence")]
++    elif fault == "interval":
++        records(r, "resource_intervals")[0]["activity_id"] = "unknown"
++    elif fault == "queue":
++        records(r, "queue_membership")[0]["activity_id"] = "unknown"
++    elif fault == "clock":
++        records(r, "clocks")[0]["activity_id"] = "unknown"
++    elif fault == "missing_job_activities":
++        records(r, "activities").clear()
++    with pytest.raises(ValueError, match="^" + code + "(:|$)"):
++        validate_result(seal(r), j)
++
++
++def test_component_refuses_legacy_observation_shape() -> None:
++    j, r = sample()
++    obs = r["observations"]
++    obs["format"] = "uarch-native-observations/1"
++    del obs["activities"]
++    for section in ("clocks", "resource_intervals", "queue_membership", "critical_path"):
++        for row in records(r, section):
++            del row["activity_id"]
++    with pytest.raises(ValueError, match="^IncompleteObservations: component /2$"):
++        validate_result(seal(r), j)
++
++
++def zero_transport_shell(case: Any) -> Any:
++    """Zero-time STRUCTURAL shell only: deliberately no E4 mechanism/inventory claim."""
++    j = synthetic_job(case)
++    _, r = sample()
++    raw = j.model_dump(mode="json")
++    owners = {o.resource: o.owner_id for o in j.owners}
++    graph = raw["mapped_point"]["task_graph"]
++    buffers = {b["id"]: b for b in graph["buffers"]}
++    routes = {p["id"]: p for p in graph["routes"]}
++    obs = r["observations"]
++    template = deepcopy(records(r, "jobs")[0])
++    for section in obs.values():
++        if isinstance(section, dict):
++            section["records"] = []
++    traffic = {k: 0 if isinstance(v, int) else v for k, v in r["traffic_counts"].items()}
++    for task in graph["jobs"]:
++        if task["kind"] == "dma":
++            core = task["dma_engine_id"] // 4
++            owner = owners[f"dma_port:{core}"]
++            summary_owner = owners[f"dma:{core}:{task['dma_engine_id'] % 4}"]
++            phase, category, domain, occupied = "read_port", "memory", "core", True
++            kinds = ("OWNER_GRANT", "DMA_DONE")
++            requests = [f["request_id"] for f in task["fragments"]]
++            for f in task["fragments"]:
++                records(r, "dma").append(
++                    dict(
++                        request_id=f["request_id"],
++                        job_id=task["id"],
++                        dma_engine_id=task["dma_engine_id"],
++                        direction=task["direction"],
++                        source_buffer_id=task["source"]["buffer_id"],
++                        destination_buffer_id=task["destination"]["buffer_id"],
++                        payload_bytes=f["payload_bytes"],
++                        transaction_bytes=f["transaction_bytes"],
++                        credit_acquire_ps=0,
++                        issue_ps=0,
++                        complete_ps=0,
++                        credit_release_ps=0,
++                        route_id=f["route_id"],
++                    )
++                )
++                traffic[task["direction"] + "_payload_bytes"] += f["payload_bytes"]
++                traffic[task["direction"] + "_transaction_bytes"] += f["transaction_bytes"]
++        elif task["kind"] == "barrier":
++            owner = summary_owner = owners[f"barrier:{task['id']}"]
++            phase, category, domain, occupied = "barrier", "sync", "noc", False
++            kinds, requests = ("SYNC_ARRIVE", "BARRIER_RELEASE"), [None]
++        else:
++            assert task["kind"] == "noc_transfer"
++            core = buffers[task["source"]["buffer_id"]]["core_id"]
++            cols = int(j.workload_closure.hardware_spec.cores.grid.cols.value)
++            owner = summary_owner = owners[f"router:0:{core // cols}:{core % cols}"]
++            phase, category, domain = "unicast_noc", "noc", "noc"
++            occupied = len(routes[task["route_id"]]["core_ids"]) > 1
++            kinds, requests = ("NOC_HEAD", "NOC_TAIL"), [task["id"]]
++        row = deepcopy(template)
++        row.update(
++            job_id=task["id"],
++            op_id=task.get("op_id"),
++            owner_id=summary_owner,
++            release_ps=0,
++            ready_ps=0,
++            start_ps=0,
++            end_ps=0,
++            blocking_predecessor_ids=[],
++        )
++        records(r, "jobs").append(row)
++        for request in requests:
++            ordinal = len(records(r, "events"))
++            aid = "SYNTHETIC-STRUCTURAL:" + (request or task["id"])
++            records(r, "activities").append(
++                dict(
++                    activity_id=aid,
++                    job_id=task["id"],
++                    request_id=request,
++                    subphase=phase,
++                    kind="service",
++                    ready_ps=0,
++                    start_ps=0,
++                    end_ps=0,
++                    owner_id=owner,
++                    category=category,
++                    receiving_domain=domain,
++                    occupies_resource=occupied,
++                    dispatch_ordinal=ordinal,
++                    completion_ordinal=ordinal + 1,
++                    predecessors=[],
++                )
++            )
++            for index, kind in enumerate(kinds, ordinal):
++                records(r, "events").append(
++                    dict(
++                        event_seq=index,
++                        observation_ordinal=index,
++                        t_ps=0,
++                        phase=1,
++                        target_id=owner,
++                        kind=kind,
++                        job_id=task["id"],
++                    )
++                )
++            if occupied:
++                records(r, "resource_intervals").append(
++                    dict(
++                        activity_id=aid,
++                        owner_id=owner,
++                        job_id=task["id"],
++                        start_ps=0,
++                        end_ps=0,
++                        activity=phase,
++                        limiting_resource_id=owner,
++                        service_start_ps_ratio=None,
++                        service_end_ps_ratio=None,
++                    )
++                )
++    r.update(
++        job_hash=j.job_hash,
++        engine=raw["engine"],
++        scope=raw["workload_closure"]["scope"]["kind"],
++        admission=raw["admission"],
++        fidelity_detail=raw["fidelity_detail"],
++        owners=raw["owners"],
++        duration_ps=0,
++        completed_jobs=[t["id"] for t in graph["jobs"]],
++        traffic_counts=traffic,
++        unrepresented=["SYNTHETIC-ZERO-STRUCTURAL-SHELL-NOT-MODEL-EVIDENCE"],
++    )
++    r["counts"].update(
++        memory_read_bytes=float(traffic["read_payload_bytes"]),
++        memory_write_bytes=float(traffic["write_payload_bytes"]),
++    )
++    r["busy_time_ps"] = [dict(owner_id=o.owner_id, busy_time_ps=0) for o in j.owners]
++    r["attribution_ps"] = {k: 0 for k in r["attribution_ps"]}
++    r["simulator_metrics"].update(
++        event_count=len(records(r, "events")), completed_job_count=len(graph["jobs"])
++    )
++    return j, seal(r)
++
++
++@pytest.mark.parametrize(
++    "case, fault",
++    [
++        ("D13-barrier", "owner"),
++        ("D13-barrier", "request"),
++        ("D13-hop", "owner"),
++        ("D13-hop", "request"),
++    ],
++)
++def test_barrier_unicast_structural_bindings(case: Any, fault: Any) -> None:
++    j, r = zero_transport_shell(case)
++    validate_result(r, j)
++    a = next(a for a in records(r, "activities") if a["subphase"] in ("barrier", "unicast_noc"))
++    if fault == "request":
++        a["request_id"] = "FORGED"
++    else:
++        owner = next(o.owner_id for o in j.owners if o.resource == "dma_port:0")
++        a["owner_id"] = owner
++        for e in records(r, "events"):
++            if e["observation_ordinal"] in (a["dispatch_ordinal"], a["completion_ordinal"]):
++                e["target_id"] = owner
++        for row in records(r, "resource_intervals"):
++            if row["activity_id"] == a["activity_id"]:
++                row["owner_id"] = row["limiting_resource_id"] = owner
++    code = "InvalidResource" if case == "D13-hop" and fault == "owner" else "IncompleteObservations"
++    with pytest.raises(ValueError, match="^" + code + "(:|$)"):
++        validate_result(seal(r), j)
++    validate_result(zero_transport_shell(case)[1], j)
++
++
++def test_missing_makespan_activity_is_a_public_refusal() -> None:
++    j, r = sample()
++    r["duration_ps"] += 1
++    last = records(r, "critical_path")[-1]
++    last["end_ps"] += 1
++    r["attribution_ps"][last["category"]] += 1
++    with pytest.raises(ValueError, match="^AttributionMismatch: missing makespan activity$"):
++        validate_result(seal(r), j)
++
++
++def test_phase_outside_declared_task_is_a_public_refusal() -> None:
++    j, r = sample()
++    act(r, "out")["subphase"] = "compute_wave"
++    with pytest.raises(ValueError, match="^IncompleteObservations: phase inventory$"):
++        validate_result(seal(r), j)
 diff --git a/contract/tests/mapped/test_component_lifetimes_v2.py b/contract/tests/mapped/test_component_lifetimes_v2.py
 new file mode 100644
 --- /dev/null
 +++ b/contract/tests/mapped/test_component_lifetimes_v2.py
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,86 @@
 +"""A's unmasked lifetime regressions; multi-reader construction attributed to B joins-v2.
 +Synthetic resources only. No admission authority or native execution.
 +"""
++
 +from copy import deepcopy
++from typing import Any
++
 +import pytest
 +from uarch_contract.mapped import MappedBundle, validate_resources
++
 +from validation.component.corpus import graph
 +from validation.component.join_inputs import pair, reseal
 +
 +
-+def check(raw):
++def check(raw: Any) -> Any:
 +    b = MappedBundle.model_validate(reseal(deepcopy(raw)))
 +    validate_resources(b, b.points[0])
 +
 +
-+def multiple_consumers():
++def multiple_consumers() -> Any:
 +    from validation.component.join_inputs import pair
 +
 +    b = pair(256, 256)
@@ -1799,38 +4550,131 @@ new file mode 100644
 +    return b
 +
 +
-+
-+def test_partial_terminal_reuse():
++def test_partial_terminal_reuse() -> None:
 +    good = multiple_consumers()
 +    check(good)
 +    bad = deepcopy(good)
 +    g = graph(bad)
-+    next(b for b in g['buffers'] if b['id'] == 'acc')['final_consumer_ids'] = ['d']
-+    g['dependencies'].remove(dict(before='e', after='z'))
-+    with pytest.raises(ValueError, match='^InvalidDependency: final consumers acc$'):
++    next(b for b in g["buffers"] if b["id"] == "acc")["final_consumer_ids"] = ["d"]
++    g["dependencies"].remove(dict(before="e", after="z"))
++    with pytest.raises(ValueError, match="^InvalidDependency: final consumers acc$"):
 +        check(bad)
 +    check(good)
 +
 +
-+@pytest.mark.parametrize('ordered', [False, True], ids=['A3c-unordered', 'A3b-before-producer'])
-+def test_equal_footprint_use_before_production(ordered):
++@pytest.mark.parametrize("ordered", [False, True], ids=["A3c-unordered", "A3b-before-producer"])
++def test_equal_footprint_use_before_production(ordered: Any) -> None:
 +    good = pair(256, 256)
-+    good['mapping_policy']['version'] = '2'
++    good["mapping_policy"]["version"] = "2"
 +    check(good)
 +    bad = deepcopy(good)
 +    g = graph(bad)
-+    next(j for j in g['jobs'] if j['id'] == 'z')['accumulator_buffer_id'] = 'acc'
-+    g['buffers'] = [b for b in g['buffers'] if b['id'] != 'zacc']
-+    next(b for b in g['buffers'] if b['id'] == 'acc')['final_consumer_ids'] = ['c'] if ordered else ['c', 'z']
-+    g['dependencies'] = [dict(before='z', after='c')] if ordered else []
-+    with pytest.raises(ValueError, match='^InvalidDependency: accumulator use before production$'):
++    next(j for j in g["jobs"] if j["id"] == "z")["accumulator_buffer_id"] = "acc"
++    g["buffers"] = [b for b in g["buffers"] if b["id"] != "zacc"]
++    next(b for b in g["buffers"] if b["id"] == "acc")["final_consumer_ids"] = (
++        ["c"] if ordered else ["c", "z"]
++    )
++    g["dependencies"] = [dict(before="z", after="c")] if ordered else []
++    with pytest.raises(ValueError, match="^InvalidDependency: accumulator use before production$"):
 +        check(bad)
 +    check(good)
+diff --git a/contract/tests/mapped/test_component_profile_v2.py b/contract/tests/mapped/test_component_profile_v2.py
+new file mode 100644
+--- /dev/null
++++ b/contract/tests/mapped/test_component_profile_v2.py
+@@ -0,0 +1,87 @@
++"""Proposed profile/2 choice only; synthetic anchors, no accepted authority."""
++
++from copy import deepcopy
++from typing import Any
++
++import pytest
++from uarch_contract.hashing import content_hash
++from uarch_contract.mapped import NativeTestProfile, admit
++
++from validation.component.corpus import build
++from validation.component.join_inputs import reseal
++
++
++def inputs(versioned: Any = False) -> Any:
++    c = build()
++    item = deepcopy(c["items"]["D01"])
++    if versioned:
++        p = item["profile"]
++        p["format"] = "uarch-native-test-profile/2"
++        p["entries"][0]["mapping_policy"] = deepcopy(item["bundle"]["mapping_policy"])
++        p["profile_hash"] = content_hash(p, exclude=("profile_hash",))
++        item["bundle"]["admission"]["profile_hash"] = p["profile_hash"]
++        reseal(item["bundle"])
++    return item, c["registry"]
++
++
++def admit_item(item: Any, reg: Any, anchor: Any = None) -> Any:
++    return admit(
++        item["bundle"],
++        invocation="test",
++        checkpoint="B",
++        registry=reg,
++        trusted_registry_hash=reg["registry_hash"],
++        profile=item["profile"],
++        trusted_profile_hash=anchor or item["profile"]["profile_hash"],
++    )
++
++
++def test_legacy_graph_point_profile_does_not_bind_policy() -> None:
++    item, reg = inputs()
++    admit_item(item, reg)
++    before = deepcopy(item)
++    item["bundle"]["mapping_policy"]["version"] = "2"
++    reseal(item["bundle"])
++    assert item["bundle"]["points"] == before["bundle"]["points"]
++    assert item["profile"] == before["profile"]
++    assert item["bundle"]["bundle_hash"] != before["bundle"]["bundle_hash"]
++    admit_item(item, reg)  # Honest current promise: accepted, no policy-version binding.
++
++
++@pytest.mark.parametrize("field,value", [("version", "2"), ("name", "other"), ("buffer_depth", 1)])
++def test_new_profile_exact_policy_binding(field: Any, value: Any) -> None:
++    item, reg = inputs(True)
++    NativeTestProfile.model_validate(item["profile"])
++    admit_item(item, reg)
++    bad = deepcopy(item)
++    bad["bundle"]["mapping_policy"][field] = value
++    reseal(bad["bundle"])
++    with pytest.raises(ValueError, match="^TestVariantNotAdmitted: profile mapping policy$"):
++        admit_item(bad, reg)
++    admit_item(item, reg)
++
++
++def test_profile_edit_cannot_replace_external_anchor() -> None:
++    item, reg = inputs(True)
++    anchor = item["profile"]["profile_hash"]
++    item["profile"]["entries"][0]["mapping_policy"]["version"] = "2"
++    item["profile"]["profile_hash"] = content_hash(item["profile"], exclude=("profile_hash",))
++    item["bundle"]["admission"]["profile_hash"] = item["profile"]["profile_hash"]
++    reseal(item["bundle"])
++    with pytest.raises(ValueError, match="^TestProfileMismatch"):
++        admit_item(item, reg, anchor)
++
++
++@pytest.mark.parametrize("fault", ["missing", "legacy_extension", "kernel"])
++def test_profile_format_and_scope_cannot_be_mixed(fault: Any) -> None:
++    item, _ = inputs(True)
++    p = item["profile"]
++    if fault == "missing":
++        del p["entries"][0]["mapping_policy"]
++    if fault == "legacy_extension":
++        p["format"] = "uarch-native-test-profile/1"
++    if fault == "kernel":
++        p["entries"][0]["scope"] = "kernel_fixture"
++    p["profile_hash"] = content_hash(p, exclude=("profile_hash",))
++    with pytest.raises(ValueError, match="TestProfileMismatch: profile policy format"):
++        NativeTestProfile.model_validate(p)
 diff --git a/tests/unit/test_u4_component_mapper_v2.py b/tests/unit/test_u4_component_mapper_v2.py
 new file mode 100644
 --- /dev/null
 +++ b/tests/unit/test_u4_component_mapper_v2.py
-@@ -0,0 +1,322 @@
+@@ -0,0 +1,347 @@
 +"""Prospective tests; run only in private candidate export. Synthetic anchors only."""
 +
 +import json
@@ -1846,7 +4690,8 @@ new file mode 100644
 +from validation.component.corpus import two_tiles
 +
 +ROOT = next(
-+    parent for parent in Path(__file__).resolve().parents
++    parent
++    for parent in Path(__file__).resolve().parents
 +    if (parent / "pyproject.toml").is_file() and (parent / "contract/fixtures/mapped").is_dir()
 +)
 +
@@ -2153,3 +4998,27 @@ new file mode 100644
 +    with pytest.raises(ValueError, match="InvalidDependency.*producer"):
 +        accept(bad)
 +    assert accept(good)
++
++
++def test_uniform_reverse_id_dependency_uses_topological_operand_placement():
++    from uarch_contract.prepared import PreparedOp
++
++    b = baseline()
++    ops = []
++    for name, dependencies in [("a", ["b"]), ("b", [])]:
++        raw = b.scope.ops[0].model_dump(mode="json")
++        raw.update(id=name, depends_on=dependencies)
++        raw["spec"]["dimensions"] = dict(M=256, K=256, N=256)
++        ops.append(PreparedOp.model_validate(raw))
++    old = map_component(ops, b.hardware_spec, mapping_version="1")
++    new = map_component(ops, b.hardware_spec, mapping_version="2")
++    assert old == map_component(ops, b.hardware_spec)
++    assert old.dependencies == new.dependencies
++    assert all(x.producer_id is None for x in new.buffers if x.space == "accumulator")
++    before = {x.id: x.offset_bytes for x in old.buffers}
++    after = {x.id: x.offset_bytes for x in new.buffers}
++    assert sum(before[key] != after[key] for key in before) == 14
++    assert old.graph_hash != new.graph_hash
++    assert min(x.offset_bytes for x in new.buffers if x.space == "hbm" and x.op_id == "b") < min(
++        x.offset_bytes for x in new.buffers if x.space == "hbm" and x.op_id == "a"
++    )

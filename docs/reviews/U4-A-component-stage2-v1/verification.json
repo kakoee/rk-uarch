@@ -1,0 +1,94 @@
+{
+  "status": "preparation verification only; not native/human acceptance",
+  "candidate_patch_sha256": "81b81c6c2680a17e7d106dedb4a11dc07891b331f3323319fb0192b852bdebe3",
+  "base_commit": "7b972d05a2e351375902cc6553a9c03a77aa8101",
+  "final_export": "/tmp/u4-a-stage2-freeze",
+  "module_origins": "isolated.py removes editable-install project paths and asserts every loaded rkuarch/uarch_contract/validation/scripts module lies in the export",
+  "final_combined": {
+    "command": "pytest -q tests/unit/test_u4_a_component_mapper.py tests/unit/test_u4_a_mapped_loader.py tests/unit/test_u4_component_mapper_v2.py contract/tests/mapped validation/component -m 'not native'",
+    "executions": 1,
+    "passed": 488,
+    "skipped": 2,
+    "deselected": 1,
+    "seconds": 50.37,
+    "skips": [
+      "H-L1-DMA-01: actual human working absent; applicable L1 acceptance blocked",
+      "H-L1-GEMM-01: actual human working absent; applicable L1 acceptance blocked"
+    ],
+    "deselection": "native-marked first-use test; no engine/build/authority/results supplied"
+  },
+  "restored_union": "The final affected run covers all new structural/lifetime/profile mutation witnesses on exact restored source; B did not repeat this combined selection.",
+  "checks": {
+    "final_combined": {
+      "log_sha256": "1f36839409c7cc1cebc1a1b4b169eeab0e77a701340ea7d547c592adda6fc6ce",
+      "summary": "488 passed, 2 skipped, 1 deselected in 50.37s"
+    },
+    "default_collection": {
+      "log_sha256": "aa07ecaba3d4645785ac41468df5ecfb11a824951c5180b841611133b78e561c",
+      "summary": "2386/2663 tests collected (277 deselected) in 1.59s"
+    },
+    "source_types": {
+      "log_sha256": "7aebc3c9c840c3e075d7701a826136c2571eab60a0ce5c94514098ba0869deaa",
+      "summary": "Success: no issues found in 88 source files"
+    },
+    "contract_test_types": {
+      "log_sha256": "60f28b94716a9681d0ca533e2fe42680ae0961635c17d3110675fc53df4ea115",
+      "summary": "Success: no issues found in 36 source files"
+    },
+    "combined_lint": {
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "summary": "All checks passed!"
+    },
+    "repository_lint": {
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "summary": "All checks passed!"
+    },
+    "schema_base": {
+      "log_sha256": "8aaf0d1dbe1002fb1181e9145739bc5e1ecd35a068b2387de485beed3807243b",
+      "summary": "Contract schemas are fresh."
+    },
+    "schema_rotary": {
+      "log_sha256": "34a8d416e208fba52f520365eb791062a29cb93d1ebf2bf816a3d4e2ffb701f2",
+      "summary": "Rotary-v2 schemas are fresh."
+    },
+    "schema_mapped": {
+      "log_sha256": "18de146832ee1e32a203f4f3ad4fe3f08e4d96a3b4bf4e23197afe553f34a164",
+      "summary": "Mapped schemas are fresh."
+    },
+    "imports": {
+      "log_sha256": "8b1d95b0224c82cb27c86088ea686bea3f2a4247147e003657ca90b69050cb95",
+      "summary": "Contracts: 2 kept, 0 broken."
+    },
+    "vendor_currentness": {
+      "log_sha256": "922c5fba13c2a19d6b639c88d5e2abe9dcaa6f37a4170934a455fde5fcb23f6c",
+      "summary": "snapshot manifest, matrix and current compatibility verified: /tmp/u4-a-stage2/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963"
+    },
+    "selected_support_runtime_closures": {
+      "log_sha256": "7984cbabd0de7a666ae752cf2d83baa1d07c1d277ed52c5a9e3879ac1eb4bbb6",
+      "summary": "native unchanged files 22"
+    },
+    "independent_checker_types": {
+      "log_sha256": "e317872697c2cbfdefa321527a6efe73290dff3a390b0fa8723b87092eccba6a",
+      "summary": "Success: no issues found in 5 source files"
+    }
+  },
+  "native_execution": "not_run",
+  "b_selection_hash": "sha256:4b9e73cf9ef11456e216acba58c9496c242169e2a40efcf0aa9e3f36bf0dbbc0",
+  "b_evidence_commit": "7b972d0",
+  "non_additivity": "Development selections and peer counts overlap; never sum them.",
+  "reused_static_checks": "Checks ran on the same final code/schema postimages in /tmp/u4-a-stage2; final export verifies all 23 identities and repeats neither a broad suite nor native replay.",
+  "preparation_base_commit": "414a94c35c1588cf13b6fcddc3739203c7f5ec6e",
+  "behavioral_test_base_commit": "7b972d05a2e351375902cc6553a9c03a77aa8101",
+  "final_preparation_export": "/tmp/u4-a-stage2-publish",
+  "postimage_equivalence": {
+    "all_23_source_test_schema_text_files_identical": true,
+    "nine_activation_inputs_identical": true,
+    "preparation_only_correction": {
+      "path": "docs/reviews/U4-B-component-stage2-v1/freeze_selection.py",
+      "sha256": "89bd15b8e78c111833974d3486ae24899460d657dddfca3a69c5ff93b5d47754",
+      "meaning": "Stable parent-module import; no candidate or selection byte changed"
+    },
+    "no_combined_rerun_for_document_helper_change": true
+  },
+  "scope_of_guard_controls": "A validate_result/resource/admit boundaries and B independent check_v2 are tested separately, never counted as native acceptance."
+}

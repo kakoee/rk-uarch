@@ -121,3 +121,93 @@ at zero time. Therefore tight ordinal edges strictly increase: a valid final `/2
 cannot contain a cycle independently of the explicit DAG guard. C1 will retain an explicit
 two-activity cycle diagnostic/control, but its final DAG guard is now intentionally redundant;
 we will not claim that a later ordinal refusal is a behavioral mutation kill for the DAG rule.
+
+F11 concrete proposal is now [profile-decision.md](profile-decision.md). P2 supports both
+component and transport_fixture B scopes. Legacy profiles and B historical/new proposal
+fixtures need not be rewritten while this human choice is pending; label their current
+profile/1 promise honestly. P2 additions will be included in A's next exact patch.
+
+## Peer join 3 — B daac675
+
+A reconstructed B's seven-path candidate (patch 8fa0bc58…ca2) alongside the corrected A
+source. The 90-test join passed, including B's 38 checker tests, seven independently anchored
+lifetime tests and A's current structural selection. A's later 24 structural boundary tests
+also pass; counts overlap, not additive. B's disjoint writer and partial-terminal inputs
+reach the stated InvalidDependency layer independently of negative-profile short circuits.
+
+Ordinary integration correction for B: durable contract tests import the new synthetic and
+consistent carrier helpers, so normal `mypy --no-explicit-package-bases contract/tests`
+follows those helper modules. Please include function annotations (Any at deliberately loose
+synthetic dictionary boundaries is sufficient) and explicit empty-list annotations in both
+helpers in the final B postimages. No type-check waiver or discovery exclusion is proposed.
+A's production source typecheck passes 88 files; this remaining imported-helper issue is not
+a semantic or authority dependency. A is completing the 59-guard structural matrix and
+final exact patch including profile/2 support and its two additional schema mirrors.
+
+## A exact candidate revision 4
+
+`a-candidate.unapplied.patch` now includes the final proposed phase/causal/field rules,
+explicit @2 operand placement wording, recommended (unaccepted) P2 profile support, its
+NativeTestProfile/MappedEngineJob mirrors and durable profile tests. A's contract tests are
+`test_component_semantics_v2.py`, `test_component_lifetimes_v2.py`, and
+`test_component_profile_v2.py`; mapper/replay tests are `tests/unit/test_u4_component_mapper_v2.py`.
+The historical shell tests were migrated onto B's durable D01 synthetic carrier, retaining
+queue attacks and restored positives without a docs-only helper or runtime file copying.
+
+The 59 structural `require` guards are being dispositioned as semantic invariants or explicit
+redundancy/totality checks. Current controls demonstrate unsafe acceptance on removal of
+36 distinct essential guards; three further targeted witnesses and two lifetime rules are
+being checked separately to avoid earlier error-order tests masking them. Cycle deletion
+alone can cause nontermination in the Kahn loop; that is NOT counted as unsafe acceptance.
+Removing the whole cycle pass still leaves endpoint/eligibility rejection, which is an
+explicit redundant-defense disposition. The real C1 test has TWO zero-duration nodes.
+
+B may now freeze against these A postimages, subject to any concrete join corrections.
+Please preserve full accepted component scope, including barrier/unicast/zero-hop controls,
+and the default-discoverable selection integrity test when supplying the final delta.
+
+## Combined source/test freeze — B 75a1710
+
+`combined.unapplied.patch` and `combined-postimages.json` contain all 21 A/B implementation,
+schema, normative and durable test/helper paths. A's additions since revision 4 are regression
+witnesses and malformed-reference controls only; B's ten postimages match exactly. All 59
+contract guards are dispositioned: 42 have consistent unsafe-admission controls; 17 are
+explicit redundancy, admitted-structure or public-refusal/totality boundaries. A1/A3b/A3c
+and the proposed profile binding also have separate restored unsafe-admission controls.
+The complete matrix/receipts accompany the final handoff, not a source-hash score.
+
+B: freeze the 106-row /3 selection against THIS combined patch/files and publish final joins.
+Normal discovery will require your historical checker snapshot, seven new fixtures and
+selection JSON as explicit immutable activation inputs already published on main. They are
+not rewritten into the patch (the selection binds that patch; embedding it would create a
+hash cycle). After B publishes them, A will set the reconstruction base to that exact commit,
+verify every unchanged source preimage again and list activation-input digests separately.
+Changing only that preparation base does not change the patch bytes or candidate_files.
+The one final affected run follows that publication; no tests are conditionally skipped.
+
+Final text correction before B's selection freeze: the inherited phrase "job grant" for a
+non-DMA first alignment's ready time is now "job dependency readiness". Actual resource
+acquisition may occur later. This agrees with B's phase-ready-transition check and existing
+whole-tile resource waiting; no timing formula or implementation changed. The exact combined
+patch digest in combined-postimages.json is authoritative; use the latest digest for /3.
+
+Combined freeze updated for B 24a5cfd: all 23 paths now include the two final ordinary test
+migrations and extra waiting/alignment witnesses. B implementation/helper postimages remain
+unchanged; no further A source/test edits are planned. Please bind the exact latest patch
+and manifest in /3. A's final affected run is still reserved for that published selection.
+
+## Final combined receipts
+
+Reconstruction from B 7b972d0 verified all 23 source/test postimages plus nine immutable
+activation inputs. The ONE final affected run: 488 passed, 2 explicit human-work skips,
+1 native deselection. Default pytest roots collected 233 candidate nodes across 11 test
+paths (2386 total after normal fast markers). Final production/contract-test/checker mypy:
+88/36/5 files pass. All schema mirrors and both import boundaries pass.
+
+A routine proposal-helper correction is needed for repository-wide lint: ruff classifies
+`validation.component.lifetime_inputs` differently before versus after its proposed module
+exists. `freeze_selection.py` now imports the stable parent module and calls the same builder;
+no output algorithm, fixture, selection, checker or candidate postimage changes. A will use
+the published preparation commit containing that helper correction as the final reconstruction
+base and verify identical 23 postimages/activation inputs; no combined-suite replay for this
+document/tooling-only correction. The original successful run remains attributed to 7b972d0.

@@ -1,0 +1,32 @@
+{
+  "authority": null,
+  "native_status": "not_run",
+  "negative_consumer": "No success result can consume an expected refusal; resource negatives require the separately reviewed unimplemented D3 case-ID/raw-byte mechanism.",
+  "observation_contract": {
+    "format": "uarch-native-observations/2",
+    "unrepresented": [
+      "diagnostics/dram_row_hit_ratio",
+      "diagnostics/energy_pj",
+      "diagnostics/noc_max_link_util_ratio",
+      "diagnostics/sram_bank_conflict_stall_ratio",
+      "diagnostics/vector_util_ratio",
+      "ext_counts/noc_flit_hop_count",
+      "u_c0_duration_ps"
+    ]
+  },
+  "observation_contract_source": {
+    "json_member": "observation_contract",
+    "path": "docs/reviews/U4-B-component-joins-v2/execution-selection.json",
+    "selection_hash": "sha256:3e11c5c4753503691bb9f4b2fccaab2e57f5e3f6aed5b802e9124300f7b97bc3"
+  },
+  "positive_consumer": "assert_case(real_job, real_validated_result, exact_selected_item, observation_contract)",
+  "required_order": [
+    "external authority binds selection and all source/build/host/profile identities",
+    "exact selected bundle/profile/raw input binding",
+    "real validate_result",
+    "independent check_v2 through consume",
+    "literal case assertions and debug/release byte comparisons"
+  ],
+  "selection_byte_sha256": "a8b94f0d83f429e5101b2b62ba5ed91d9b98d0d228330f5185acc37aab29319c",
+  "selection_hash": "sha256:4b9e73cf9ef11456e216acba58c9496c242169e2a40efcf0aa9e3f36bf0dbbc0"
+}

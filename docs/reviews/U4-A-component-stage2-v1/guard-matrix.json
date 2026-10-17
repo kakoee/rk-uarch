@@ -1,0 +1,938 @@
+{
+  "reviewed_source_sha256": "fbc8f697d383ae39bc8280ebdab07960de313846ba9a3c57acf94bf3d78cca95",
+  "reviewed_guard_count": 46,
+  "final_source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+  "final_guard_count": 59,
+  "essential_unsafe_admission_controls": 42,
+  "other_dispositioned_guards": 17,
+  "excluded_from_scores": [
+    "source hashes",
+    "selection hashes",
+    "message-only failures",
+    "lookup crashes",
+    "nontermination",
+    "downstream incidental refusal"
+  ],
+  "restoration": "Each mutation restored exact source bytes. Six focused controls reran restored tests immediately. Other batches use the final affected freeze run as the restored behavioral union; original per-mutant logs remain outside Git.",
+  "reviewed_guards": [
+    {
+      "line": 1306,
+      "condition": "isinstance(obs, ComponentObservations)"
+    },
+    {
+      "line": 1316,
+      "condition": "len(activities) == len(obs.activities.records)"
+    },
+    {
+      "line": 1320,
+      "condition": "set((x.job_id for x in activities.values())) == tasks.keys()"
+    },
+    {
+      "line": 1322,
+      "condition": "a.job_id in tasks and a.owner_id in owners"
+    },
+    {
+      "line": 1325,
+      "condition": "a.ready_ps <= a.start_ps <= a.end_ps <= r.duration_ps"
+    },
+    {
+      "line": 1327,
+      "condition": "a.request_id is None and a.subphase.startswith('compute_') and (resource == f'matrix:{task.core_id}')"
+    },
+    {
+      "line": 1336,
+      "condition": "a.request_id is None and a.subphase == 'barrier' and (resource == f'barrier:{task.id}')"
+    },
+    {
+      "line": 1344,
+      "condition": "a.request_id in declared and declared[a.request_id][0].id == task.id"
+    },
+    {
+      "line": 1364,
+      "condition": "a.subphase in allowed"
+    },
+    {
+      "line": 1376,
+      "condition": "resource == expected_owner"
+    },
+    {
+      "line": 1378,
+      "condition": "isinstance(task, NocTransfer)"
+    },
+    {
+      "line": 1380,
+      "condition": "a.request_id == task.id and a.subphase == 'unicast_noc'"
+    },
+    {
+      "line": 1386,
+      "condition": "resource == f'router:0:{source_core // cols}:{source_core % cols}'"
+    },
+    {
+      "line": 1391,
+      "condition": "a.category == category and a.receiving_domain == domain"
+    },
+    {
+      "line": 1392,
+      "condition": "a.kind != 'alignment' or (domain is not None and (not a.occupies_resource))"
+    },
+    {
+      "line": 1397,
+      "condition": "a.subphase not in ('dram_latency', 'ack') or not a.occupies_resource"
+    },
+    {
+      "line": 1403,
+      "condition": "ordinal in events"
+    },
+    {
+      "line": 1405,
+      "condition": "e.job_id == a.job_id and e.target_id == a.owner_id and (e.t_ps == time)"
+    },
+    {
+      "line": 1410,
+      "condition": "a.dispatch_ordinal <= a.completion_ordinal"
+    },
+    {
+      "line": 1412,
+      "condition": "a.start_ps == 0 or bool(a.predecessors)"
+    },
+    {
+      "line": 1416,
+      "condition": "link.activity_id in activities and link.activity_id != a.activity_id"
+    },
+    {
+      "line": 1421,
+      "condition": "before.end_ps == a.start_ps and before.completion_ordinal <= a.dispatch_ordinal"
+    },
+    {
+      "line": 1427,
+      "condition": "(before.job_id, before.request_id) == (a.job_id, a.request_id)"
+    },
+    {
+      "line": 1432,
+      "condition": "any((d.before == before.job_id and d.after == a.job_id for d in job.mapped_point.task_graph.dependencies))"
+    },
+    {
+      "line": 1440,
+      "condition": "before.owner_id == a.owner_id and before.occupies_resource"
+    },
+    {
+      "line": 1445,
+      "condition": "before.request_id in declared and a.request_id in declared and (declared[before.request_id][0].dma_engine_id == declared[a.request_id][0].dma_engine_id)"
+    },
+    {
+      "line": 1460,
+      "condition": "bool(ready)"
+    },
+    {
+      "line": 1464,
+      "condition": "interval.activity_id in activities"
+    },
+    {
+      "line": 1466,
+      "condition": "a.occupies_resource and interval.activity_id not in represented and ((interval.owner_id, interval.job_id, interval.start_ps, interval.end_ps, interval.activity, interval.limiting_resource_id) == (a.owner_id, a.job_id, a.start_ps, a.end_ps, a.subphase, a.owner_id))"
+    },
+    {
+      "line": 1483,
+      "condition": "(lo is not None) == (hi is not None)"
+    },
+    {
+      "line": 1484,
+      "condition": "(lo is not None) == (a.subphase == 'channel_service')"
+    },
+    {
+      "line": 1490,
+      "condition": "0 <= start <= end and -(-start.numerator // start.denominator) == a.start_ps and (-(-end.numerator // end.denominator) == a.end_ps)"
+    },
+    {
+      "line": 1496,
+      "condition": "represented == {a.activity_id for a in activities.values() if a.occupies_resource}"
+    },
+    {
+      "line": 1502,
+      "condition": "q.owner_id in owners and q.leave_ps is not None and (q.enter_ps <= q.leave_ps <= r.duration_ps)"
+    },
+    {
+      "line": 1509,
+      "condition": "q.item_id in declared and q.clock_domain is None and (q.activity_id is None)"
+    },
+    {
+      "line": 1516,
+      "condition": "q.queue_id == f'channel_service:{f.channel_id}' and owners[q.owner_id] == f'channel:{f.channel_id}' and (q.population in ('waiting', 'service'))"
+    },
+    {
+      "line": 1523,
+      "condition": "q.queue_id == f'dma_inflight:{t.dma_engine_id}' and owners[q.owner_id] == f'dma:{t.dma_engine_id // engines}:{t.dma_engine_id % engines}' and (q.population == 'inflight')"
+    },
+    {
+      "line": 1531,
+      "condition": "q.activity_id in activities"
+    },
+    {
+      "line": 1534,
+      "condition": "q.queue_id == f'activity:{a.subphase}:{a.owner_id}' and q.item_id == (a.request_id or a.job_id) and (q.owner_id == a.owner_id) and (q.clock_domain == a.receiving_domain) and (q.clock_domain is not None) and (q.population in ('waiting', 'service'))"
+    },
+    {
+      "line": 1543,
+      "condition": "(q.enter_ps, q.leave_ps) == ((a.ready_ps, a.start_ps) if q.population == 'waiting' else (a.start_ps, a.end_ps))"
+    },
+    {
+      "line": 1553,
+      "condition": "clock.activity_id in activities"
+    },
+    {
+      "line": 1555,
+      "condition": "clock.job_id == a.job_id and clock.domain == a.receiving_domain and (clock.grant_ps == a.start_ps) and (clock.completion_ps == a.end_ps)"
+    },
+    {
+      "line": 1570,
+      "condition": "terminal is not None"
+    },
+    {
+      "line": 1580,
+      "condition": "[(c.activity_id, c.start_ps, c.end_ps) for c in obs.critical_path.records] == list(reversed(chain))"
+    },
+    {
+      "line": 1587,
+      "condition": "c.activity_id in activities"
+    },
+    {
+      "line": 1589,
+      "condition": "c.kind == 'service' and c.cause_job_id == a.job_id and (c.category == a.category) and (c.limiting_resource_id == a.owner_id) and (a.start_ps <= c.start_ps < c.end_ps <= a.end_ps)"
+    }
+  ],
+  "final_guards": [
+    {
+      "id": "A00",
+      "line": 1325,
+      "condition": "isinstance(obs, ComponentObservations)",
+      "detail": "'component /2'",
+      "classification": "public refusal / type precondition",
+      "disposition": "Legacy /1 ComponentObservations mismatch also fails the following isinstance assert; test_component_refuses_legacy_observation_shape pins the public error. Not an unsafe admission kill."
+    },
+    {
+      "id": "A01",
+      "line": 1335,
+      "condition": "len(activities) == len(obs.activities.records)",
+      "detail": "'activity IDs'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[duplicate_id]",
+        "mutant_log_sha256": "7d06125eaae33ea15494d5a304956aeb809806b035cb78e8f7b2ef3f66980cc3",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A02",
+      "line": 1346,
+      "condition": "bool(ready)",
+      "detail": "'activity cycle'",
+      "classification": "redundant semantics / termination",
+      "disposition": "Exact cycle-redundancy.json: whole Kahn pass removal still refuses the two-activity zero-time cycle at non-tight ordinal predecessor. Single require removal loops without progress; not scored as unsafe acceptance. Distinct endpoint kinds require dispatch ordinal < completion ordinal; predecessor completion <= next dispatch makes a cycle impossible in a valid witness."
+    },
+    {
+      "id": "A03",
+      "line": 1366,
+      "condition": "activity.job_id in tasks",
+      "detail": "'activity job'",
+      "classification": "public refusal / lookup precondition",
+      "disposition": "Unknown activity job otherwise indexes tasks with an absent key. malformed_witness[activity_job] pins InvalidResource; no unsafe admission claim."
+    },
+    {
+      "id": "A04",
+      "line": 1373,
+      "condition": "all((x.subphase in phases for x in sequence))",
+      "detail": "'phase inventory'",
+      "classification": "public refusal / phase precondition",
+      "disposition": "Direction/type phase inventory precedes tuple.index sorting. Invalid phases otherwise fail lookup or later type-specific phase checks. phase_outside_declared_task pins the public error."
+    },
+    {
+      "id": "A05",
+      "line": 1377,
+      "condition": "len({(x.subphase, x.kind) for x in sequence}) == len(sequence)",
+      "detail": "'duplicate phase'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[duplicate_phase]",
+        "mutant_log_sha256": "6d5353aa5b57c45c65f47b875d19056823f89ad90e5b4ded25f98139ad1e8201",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A06",
+      "line": 1400,
+      "condition": "owners[row.owner_id] == expected",
+      "detail": "'job owner'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_F8_resealed_fields[owner-job owner]",
+        "mutant_log_sha256": "da928dc90c8824d26257b7d610bb4fd54aa6e5d47e13867e580fc6c8e729c35c",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A07",
+      "line": 1401,
+      "condition": "row.release_ps == 0",
+      "detail": "'component release'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_F8_resealed_fields[release-component release]",
+        "mutant_log_sha256": "5c60609721ebabf0257ebcc3f8fc56a6793f79d89e525af39134b3501a5621d6",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A08",
+      "line": 1402,
+      "condition": "not row.blocking_predecessor_ids",
+      "detail": "'unrepresented job predecessors'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_F8_resealed_fields[blocking-unrepresented job predecessors]",
+        "mutant_log_sha256": "d3db979d2a078a7c71951aa4ffde50aa676761a3b4e8f31d5e7fdf9a2dee29b4",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A09",
+      "line": 1415,
+      "condition": "row.ready_ps == job_ready",
+      "detail": "'job readiness'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[job_readiness]",
+        "mutant_log_sha256": "0e37419fa5423397548b5d51d6e2492f5f41430a9acb609d1c8af1cb2b4da9ab",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A10",
+      "line": 1417,
+      "condition": "bool(members)",
+      "detail": "'job activities'",
+      "classification": "public refusal / empty-set precondition",
+      "disposition": "Missing activity inventory otherwise makes min/max empty. malformed_witness[missing_job_activities] pins the public error."
+    },
+    {
+      "id": "A11",
+      "line": 1418,
+      "condition": "row.start_ps == min((x.start_ps for x in members)) and row.end_ps == max((x.end_ps for x in members))",
+      "detail": "'job activity span'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[job_span]",
+        "mutant_log_sha256": "583f37df4088c47d949bb42d14a5e2e2bdb35a9006f00e4fcb231f25f16db3ae",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A12",
+      "line": 1425,
+      "condition": "set((x.job_id for x in activities.values())) == tasks.keys()",
+      "detail": null,
+      "classification": "redundant invariant",
+      "disposition": "Earlier activity.job_id in tasks gives subset; nonempty members for every declared task gives superset. Equality follows before this guard."
+    },
+    {
+      "id": "A13",
+      "line": 1427,
+      "condition": "a.job_id in tasks and a.owner_id in owners",
+      "detail": null,
+      "classification": "public refusal / owner lookup precondition",
+      "disposition": "Activity job membership is already checked; unknown owner otherwise fails owners lookup. malformed_witness[activity_owner] pins InvalidResource."
+    },
+    {
+      "id": "A14",
+      "line": 1430,
+      "condition": "a.ready_ps <= a.start_ps <= a.end_ps <= r.duration_ps",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[activity_ready]",
+        "mutant_log_sha256": "afb7d6f6fe50d9f9e5a3d7b9b320824b01de9d5bc9f1224c769ef9e575bfc08f",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A15",
+      "line": 1432,
+      "condition": "a.request_id is None and a.subphase.startswith('compute_') and (resource == f'matrix:{task.core_id}')",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_compute_binding_consistent_forgery[request]",
+        "mutant_log_sha256": "7a30372718188aa537e3d90ed15f370e106d0870f04e716842159a3511f11abb",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A16",
+      "line": 1441,
+      "condition": "a.request_id is None and a.subphase == 'barrier' and (resource == f'barrier:{task.id}')",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_barrier_unicast_structural_bindings[D13-barrier-owner]",
+        "mutant_log_sha256": "1b747d23e7c9e7a0e19c18643cf546ee94a6a709f82fb60c7d0ddf319bc11e02",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A17",
+      "line": 1449,
+      "condition": "a.request_id in declared and declared[a.request_id][0].id == task.id",
+      "detail": "'activity request'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "invariant": "request job ownership",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_request_belongs_to_declared_job",
+        "condition": "a.request_id in declared and declared[a.request_id][0].id == task.id",
+        "mutant_unsafe_admission": true,
+        "restored_pass": true,
+        "mutant_log_sha256": "d102c7f3517107f578c448f644cab94ad2cffb8f371085be6c220fe5f275f085",
+        "restored_log_sha256": "faa6fbf2c36cbfd5fcd2722fbc0a0bf355b513efd3012ae1c4563fdc4127b14f",
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe"
+      }
+    },
+    {
+      "id": "A18",
+      "line": 1469,
+      "condition": "a.subphase in allowed",
+      "detail": null,
+      "classification": "redundant invariant",
+      "disposition": "Direction-specific phase_orders membership (guard 4) is exactly this DMA allowed set; no separate unsafe admission is possible."
+    },
+    {
+      "id": "A19",
+      "line": 1481,
+      "condition": "resource == expected_owner",
+      "detail": "'activity owner'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_M2_owner_forgery",
+        "mutant_log_sha256": "2ecf459612a80142b2a20730d2429be7ee71cd9e90e277628f3236b5b37f581e",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A20",
+      "line": 1483,
+      "condition": "isinstance(task, NocTransfer)",
+      "detail": null,
+      "classification": "unreachable under admitted structure",
+      "disposition": "Component/transport validated jobs contain Compute, Barrier, Dma or NocTransfer. Earlier branches exhaust first three; FixedDelay belongs to kernel fixed_delay/1 and cannot enter this helper through validate_result on an admitted component job. The following assert also retains type precondition."
+    },
+    {
+      "id": "A21",
+      "line": 1485,
+      "condition": "a.request_id == task.id and a.subphase == 'unicast_noc'",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_barrier_unicast_structural_bindings[D13-hop-request]",
+        "mutant_log_sha256": "8030885ea075deac18778516d2181f57fa478b1159297fba8d2ac3f1b429f9d3",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A22",
+      "line": 1491,
+      "condition": "resource == f'router:0:{source_core // cols}:{source_core % cols}'",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_barrier_unicast_structural_bindings[D13-hop-owner]",
+        "mutant_log_sha256": "ac6d5727d37f1327bf3d664cec29477ff7af9a63193cee6d61c024a093aafa7d",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A23",
+      "line": 1496,
+      "condition": "a.category == category and a.receiving_domain == domain",
+      "detail": "'activity category/domain'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_M1_relabel[category]",
+        "mutant_log_sha256": "d7d277c447493889ce7cb423d2a26dcfbe6e74971325e3789cca9f4e250f474d",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A24",
+      "line": 1510,
+      "condition": "a.occupies_resource == occupied",
+      "detail": "'phase occupancy'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_M4_nonoccupying_channel",
+        "mutant_log_sha256": "63d87a0b2bbd73546366b010de0ce77bfd56a0666b56fb1e9a80eb1d963c9861",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A25",
+      "line": 1511,
+      "condition": "a.kind != 'alignment' or (domain is not None and (not a.occupies_resource))",
+      "detail": "'alignment is not busy'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "invariant": "channel has no alignment",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_unclocked_channel_cannot_acquire_alignment",
+        "condition": "a.kind != 'alignment' or (domain is not None and (not a.occupies_resource))",
+        "mutant_unsafe_admission": true,
+        "restored_pass": true,
+        "mutant_log_sha256": "593875cff7ecd0aa8615232c90035ddd44db7eeb3eddd1075d38492b8266f4f7",
+        "restored_log_sha256": "0fc44b226b21cdd63f1f4daf26c2593d72af191b3b773e774dd40f1980fb3cc2",
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe"
+      }
+    },
+    {
+      "id": "A26",
+      "line": 1516,
+      "condition": "a.subphase not in ('dram_latency', 'ack') or not a.occupies_resource",
+      "detail": "'latency is not channel service'",
+      "classification": "redundant invariant",
+      "disposition": "Mandatory phase occupancy guard already requires false for dram_latency/ack, for both service and alignment. This explanatory check cannot independently admit a forgery."
+    },
+    {
+      "id": "A27",
+      "line": 1522,
+      "condition": "ordinal in events",
+      "detail": "'missing activity dispatch'",
+      "classification": "public refusal / event lookup precondition",
+      "disposition": "Missing ordinal otherwise raises KeyError in endpoint lookup. malformed_witness[dispatch] and migrated dispatch controls pin IncompleteObservations."
+    },
+    {
+      "id": "A28",
+      "line": 1524,
+      "condition": "e.job_id == a.job_id and e.target_id == a.owner_id and (e.t_ps == time)",
+      "detail": "'activity dispatch join'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[event_join]",
+        "mutant_log_sha256": "e1b6d0856fe8b5f82b73c159e312967ed6cb80875cd67fabed50d3ea6da32b20",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A29",
+      "line": 1544,
+      "condition": "(events[a.dispatch_ordinal].kind, events[a.completion_ordinal].kind) == kinds",
+      "detail": "'activity event kind'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_F8_resealed_fields[event-activity event kind]",
+        "mutant_log_sha256": "3b2843437a7ac32552651a59449cf1e514bf03b7cd62982ce1b6cdff4866d1af",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A30",
+      "line": 1549,
+      "condition": "a.dispatch_ordinal <= a.completion_ordinal",
+      "detail": "'endpoint order'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[endpoint_order]",
+        "mutant_log_sha256": "f73d009dfe151e568b47008f9c6d77f1d6753d3a066fd8138507fba5fd799b8c",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A31",
+      "line": 1553,
+      "condition": "a.start_ps == 0 or bool(a.predecessors)",
+      "detail": "'missing tight cause'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_M3_missing_off_chain_cause",
+        "mutant_log_sha256": "9ff5aea009fc27a0ca4d5248f74640b5a100677135ea555e1a74bb1a8e280686",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A32",
+      "line": 1557,
+      "condition": "link.activity_id in activities and link.activity_id != a.activity_id",
+      "detail": null,
+      "classification": "public refusal / link lookup precondition",
+      "disposition": "Unknown predecessor otherwise raises KeyError; malformed_witness[link] pins AttributionMismatch. Self-links are already cycles and refused by the explicit cycle pass."
+    },
+    {
+      "id": "A33",
+      "line": 1562,
+      "condition": "before.end_ps == a.start_ps and before.completion_ordinal <= a.dispatch_ordinal",
+      "detail": "'non-tight predecessor'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[tight_ordinal]",
+        "mutant_log_sha256": "01da9c7428b02d6599a69af7b821cfdc8ce71bb0c3386fa3e5bb4684003451fb",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A34",
+      "line": 1568,
+      "condition": "previous.get(a.activity_id) == before.activity_id",
+      "detail": "'sequence endpoints'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[sequence]",
+        "mutant_log_sha256": "1c7d782f71a172e1c19643c7914ebb27b3aebe9216d3bed8ac706b05ac346da3",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A35",
+      "line": 1574,
+      "condition": "before.activity_id in last_ids and a.activity_id in first_ids and (before.end_ps == summaries[before.job_id].end_ps) and any((d.before == before.job_id and d.after == a.job_id for d in job.mapped_point.task_graph.dependencies))",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[dependency]",
+        "mutant_log_sha256": "6bf0e66ac4f9f8e8dda905072cc6c33ac08264a98d675cfb2732353f92f6e14a",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A36",
+      "line": 1585,
+      "condition": "before.owner_id == a.owner_id and before.occupies_resource and owners[a.owner_id].startswith(('matrix:', 'dma_port:', 'channel:')) and ((before.job_id, before.request_id) != (a.job_id, a.request_id)) and (a.subphase == 'compute_overhead' and a.kind == 'alignment' or (a.subphase in ('read_port', 'write_port') and a.kind == 'alignment') or (a.subphase == 'channel_service' and a.kind == 'service'))",
+      "detail": "'resource endpoints'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[resource_boundary]",
+        "mutant_log_sha256": "1eb2c4058a42aa69527860de9f927d68cf2335d5deb6982761c5509d9fd2f1ec",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A37",
+      "line": 1599,
+      "condition": "before.activity_id in last_ids and a.activity_id in first_ids and (before.request_id != a.request_id) and (before.request_id in declared) and (a.request_id in declared) and (declared[before.request_id][0].dma_engine_id == declared[a.request_id][0].dma_engine_id)",
+      "detail": "'credit endpoints'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_V1_credit_only_first_from_last",
+        "mutant_log_sha256": "f38fb236e2899210840adef282fda14f314fdf0f407b2b4c85401e06dfbf8899",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A38",
+      "line": 1610,
+      "condition": "set(events) == {n for x in activities.values() for n in (x.dispatch_ordinal, x.completion_ordinal)}",
+      "detail": "'unreferenced event'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[unreferenced_event]",
+        "mutant_log_sha256": "2170853384e21831a6ec495f86732a3370df3ca5ae220b0146fb779a40367f42",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A39",
+      "line": 1618,
+      "condition": "interval.activity_id in activities",
+      "detail": null,
+      "classification": "public refusal / resource lookup precondition",
+      "disposition": "Unknown resource activity otherwise raises KeyError; malformed_witness[interval] pins IncompleteObservations."
+    },
+    {
+      "id": "A40",
+      "line": 1620,
+      "condition": "a.occupies_resource and interval.activity_id not in represented and ((interval.owner_id, interval.job_id, interval.start_ps, interval.end_ps, interval.activity, interval.limiting_resource_id) == (a.owner_id, a.job_id, a.start_ps, a.end_ps, a.subphase, a.owner_id))",
+      "detail": "'occupied activity join'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[occupied_join]",
+        "mutant_log_sha256": "ee7e8b1a6a769f8fb1267697c391673c412ee86003da9998efe916bfbee220b0",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A41",
+      "line": 1637,
+      "condition": "(lo is not None) == (hi is not None)",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[ratio_pair]",
+        "mutant_log_sha256": "8c3f2884126360da99cec410f74bfc6955c57a8963b3262270ff2c6e96d4b223",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A42",
+      "line": 1638,
+      "condition": "(lo is not None) == (a.subphase == 'channel_service')",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[ratio_required]",
+        "mutant_log_sha256": "728e6b8bcbb195e0dd7b1c9e91224272dd815188780b417c6921b8c591ef690a",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A43",
+      "line": 1644,
+      "condition": "0 <= start <= end and -(-start.numerator // start.denominator) == a.start_ps and (-(-end.numerator // end.denominator) == a.end_ps)",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[ratio_rounding]",
+        "mutant_log_sha256": "0781c5e8d8b7f17d92f447ddc04df9b5afaf9a313be8f9dfdbfd7a3ec729b7fa",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A44",
+      "line": 1650,
+      "condition": "represented == {a.activity_id for a in activities.values() if a.occupies_resource}",
+      "detail": "'missing occupied activity'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[missing_occupied]",
+        "mutant_log_sha256": "cc0ef658b2c6dbd1d934427887d3356b1d0def9788133e227e6c9d84e4edece1",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A45",
+      "line": 1656,
+      "condition": "q.owner_id in owners and q.leave_ps is not None and (q.enter_ps <= q.leave_ps <= r.duration_ps)",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[queue_window]",
+        "mutant_log_sha256": "be1b25dbfdda85cb548b565c82ccf9689f32ac3889d4ecb55cb8d8634d1cd1dc",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A46",
+      "line": 1663,
+      "condition": "q.item_id in declared and q.clock_domain is None and (q.activity_id is None)",
+      "detail": "'nonclocked queue binding'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "invariant": "nonclocked domain",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[nonclocked_domain]",
+        "condition": "q.item_id in declared and q.clock_domain is None and (q.activity_id is None)",
+        "mutant_unsafe_admission": true,
+        "restored_pass": true,
+        "mutant_log_sha256": "880f3019b19c884bbbf8402110d55e6c42d118727ac4c0edd5621a670e004cc0",
+        "restored_log_sha256": "057a4f811934a7c8e0413d700e4be6b0e9bcd24fc5edea4612ed45c4e19a021e",
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe"
+      }
+    },
+    {
+      "id": "A47",
+      "line": 1670,
+      "condition": "q.queue_id == f'channel_service:{f.channel_id}' and owners[q.owner_id] == f'channel:{f.channel_id}' and (q.population in ('waiting', 'service'))",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_synthetic_queue_attacks_restored[owner-None]",
+        "mutant_log_sha256": "e8663ffd2eaf8a16f4d226737e1733832075b9ea1820e8ee70576b1812aea2f5",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A48",
+      "line": 1677,
+      "condition": "q.queue_id == f'dma_inflight:{t.dma_engine_id}' and owners[q.owner_id] == f'dma:{t.dma_engine_id // engines}:{t.dma_engine_id % engines}' and (q.population == 'inflight')",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_synthetic_queue_attacks_restored[engine-None]",
+        "mutant_log_sha256": "b44ebf571da1b0e3f5b67a87b5e497aa98cfc6152ef75aa770a8dbd853e804d7",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A49",
+      "line": 1685,
+      "condition": "q.activity_id in activities",
+      "detail": "'queue activity'",
+      "classification": "public refusal / queue lookup precondition",
+      "disposition": "Unknown ordinary queue activity otherwise raises KeyError; malformed_witness[queue] pins IncompleteObservations."
+    },
+    {
+      "id": "A50",
+      "line": 1688,
+      "condition": "q.queue_id == f'activity:{a.subphase}:{a.owner_id}' and q.item_id == (a.request_id or a.job_id) and (q.owner_id == a.owner_id) and (q.clock_domain == a.receiving_domain) and (q.clock_domain is not None) and (q.population in ('waiting', 'service'))",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_summary_boundary_and_population_guards[ordinary_name]",
+        "mutant_log_sha256": "21f048b7feee2658903da438bddc71323b34926f05db76fca2f6ad462bd064b9",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A51",
+      "line": 1697,
+      "condition": "(q.enter_ps, q.leave_ps) == ((a.ready_ps, a.start_ps) if q.population == 'waiting' else (a.start_ps, a.end_ps))",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[queue_times]",
+        "mutant_log_sha256": "2b3945af566090c301a252b1325fb3b090c8945e03cbf76513abb77e5f986616",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A52",
+      "line": 1707,
+      "condition": "clock.activity_id in activities",
+      "detail": null,
+      "classification": "public refusal / clock lookup precondition",
+      "disposition": "Unknown clock activity otherwise raises KeyError; malformed_witness[clock] pins IncompleteObservations."
+    },
+    {
+      "id": "A53",
+      "line": 1709,
+      "condition": "clock.job_id == a.job_id and clock.domain == a.receiving_domain and (clock.grant_ps == a.start_ps) and (clock.completion_ps == a.end_ps)",
+      "detail": "'clock activity join'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[clock_join]",
+        "mutant_log_sha256": "283d22201b6c72f70e31395cc4374c5ff67cd28c684dc730753a97e6e82cb0a3",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A54",
+      "line": 1724,
+      "condition": "terminal is not None",
+      "detail": "'missing makespan activity'",
+      "classification": "public refusal / terminal precondition",
+      "disposition": "No makespan terminal otherwise fails the following assertion; missing_makespan_activity pins AttributionMismatch. Job spans alone do not equate duration with makespan."
+    },
+    {
+      "id": "A55",
+      "line": 1734,
+      "condition": "[(c.activity_id, c.start_ps, c.end_ps) for c in obs.critical_path.records] == list(reversed(chain))",
+      "detail": "'tight canonical activity path'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[canonical_chain]",
+        "mutant_log_sha256": "516e2b90d310ee0d0167aae711270ce65c10c7714fcf0591443c93684eacbf52",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A56",
+      "line": 1741,
+      "condition": "c.predecessor_id is None",
+      "detail": "'unrepresented critical predecessor'",
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "623f82f00ebf78672ffe9b5b3431aa9e4f7f16cffe42499ac0b5f81895f0a3fe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_F8_resealed_fields[critical-unrepresented critical predecessor]",
+        "mutant_log_sha256": "17cfab688a12c8c2ae57ceec98bd645e906a863a41a9167faa80cc6d0897b971",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    },
+    {
+      "id": "A57",
+      "line": 1744,
+      "condition": "c.activity_id in activities",
+      "detail": null,
+      "classification": "redundant invariant",
+      "disposition": "The earlier canonical path equality compares every critical activity ID to a path drawn from the activities dictionary, so membership follows."
+    },
+    {
+      "id": "A58",
+      "line": 1746,
+      "condition": "c.kind == 'service' and c.cause_job_id == a.job_id and (c.category == a.category) and (c.limiting_resource_id == a.owner_id) and (a.start_ps <= c.start_ps < c.end_ps <= a.end_ps)",
+      "detail": null,
+      "classification": "essential semantic invariant; unsafe admission observed with guard removed",
+      "control": {
+        "source_sha256": "bd344b011d618ad906f55bac8cb46d8dc14cf2538016e75a64c21b2680f83dfe",
+        "test": "contract/tests/mapped/test_component_semantics_v2.py::test_additional_consistent_structural_witnesses[critical_fields]",
+        "mutant_log_sha256": "a6008a690e18a8ee53e91879baf7a1784476cb4194f9ac2fd2ecc8f66d5c9158",
+        "mutant_unsafe_admission": true,
+        "restored_bytes": true
+      }
+    }
+  ]
+}
