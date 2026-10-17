@@ -1,0 +1,54 @@
+{
+  "ADR": {
+    "component_suffix_bytes": 16073,
+    "component_suffix_sha256": "ad9b5369073403fa8a881a04e628db620c89f21d66ec062e90c3bc753c7eadba",
+    "historical_prefix_bytes": 28596,
+    "historical_prefix_sha256": "e36cba4e3fa00d9da5bdfe527a5728977066e1ff721e338f0bfdad44ed136cba",
+    "historical_reviewed_sha256": "4f7a90b201c0425a9906d746e4235ec4df362c15ffe91138f827edf2529f6140",
+    "installed_bytes": 32221,
+    "installed_sha256": "afae0ebea7dfdfe761ec76ae374a35441db989f866a4ca4f5c29f0169a49e69b",
+    "path": "docs/decisions/U0011-the-native-engine-core.md",
+    "proof": "reconciled bytes == exact installed main bytes + exact original reviewed component suffix; each shares the exact 28596-byte historical prefix",
+    "reconciled_sha256": "edf565f9094c524b280888feaf29bcecc63b176aa573393c136b3494c7c640fd"
+  },
+  "allowed_transition": "Only exact old-to-reconciled ADR and changed identity test replace historical candidate entries; explicit additions have an exact required inventory. All other historical candidates and 106 case/input bytes retain their identity.",
+  "authority": null,
+  "binding": {
+    "additions": {
+      "validation/component/installation_identity.py": "84aa11f4d55d73181a075efc92c0854634dd0eda2f72ea0787ee2fa6864d6517",
+      "validation/component/test_f5_mechanism_duration.py": "e4f9f8693f20031ccf8b97d24a141b0aa63725e220fb6a754d2275cb5c6b0f8a",
+      "validation/component/test_installation_identity.py": "f7be54987f0929c1b8881be2aa4500c3f6140fc0ed268048f0a84043c08cb90b",
+      "validation/component/test_transient_lifetime.py": "3c7cc9dceb935c8378dc67ecdcf84e9752b1a7d2e180ebdd7c78b6caf9468c8b",
+      "validation/component/transient_carrier.py": "14cf1e5c3bbdca45ad1d3d9e9697c556010496bbcb05673c10ed82f397b78598"
+    },
+    "path": "validation/component/installation-binding.json",
+    "replacements": {
+      "docs/decisions/U0011-the-native-engine-core.md": {
+        "after": "edf565f9094c524b280888feaf29bcecc63b176aa573393c136b3494c7c640fd",
+        "before": "4f7a90b201c0425a9906d746e4235ec4df362c15ffe91138f827edf2529f6140"
+      },
+      "validation/component/test_stage2_selection.py": {
+        "after": "ea511c6a43f9d31e97eb7a0de529d7e9eb1f420d5295f56ef83350223ec37849",
+        "before": "b7fb959ee27df2542c8bb60e13b3932a1218257e28610bc603d980da1d167d95"
+      }
+    },
+    "sha256": "a1d6ac18f52295aaf63a6c23b2dbf4815a8bfbef437c2e67782463a7e05f4f8b"
+  },
+  "format": "component-installation-identity-transition/1",
+  "hash_graph": "Externally pinned postimages.json -> installation-binding.json -> exact file hashes including identity helper, changed test, F5 and O2. Tests read the record but embed no digest of it. No hash cycle. The record does not self-authenticate or grant authority.",
+  "historical_review": {
+    "A": "941e882d76419aee0dd297ffd6b997c9807fc49e",
+    "B": "354420fb8c75cb6fb922db82b9eec6bca644fefc",
+    "F5_patch_sha256": "23724b209c73fcfb55c62836570a296817936137111a00dfd2f51862ea0757f3",
+    "original_patch_sha256": "81b81c6c2680a17e7d106dedb4a11dc07891b331f3323319fb0192b852bdebe3",
+    "selection": {
+      "case_or_input_changes": 0,
+      "cases": 106,
+      "path": "docs/reviews/U4-B-component-stage2-v1/execution-selection.json",
+      "selection_hash": "sha256:4b9e73cf9ef11456e216acba58c9496c242169e2a40efcf0aa9e3f36bf0dbbc0",
+      "sha256": "a8b94f0d83f429e5101b2b62ba5ed91d9b98d0d228330f5185acc37aab29319c"
+    },
+    "verdict": "ACCEPTED inherited; not reopened"
+  },
+  "later_changes": "Publish a new prospective version/transition, old-to-new path hashes, test/behavior evidence and an externally pinned proposal root. Revise explicit allowed transitions as part of that reviewed proposal. Never edit historical selections, accepted patches, reports or receipts; no acceptance of arbitrary current hashes."
+}

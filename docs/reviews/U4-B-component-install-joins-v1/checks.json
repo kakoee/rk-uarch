@@ -1,0 +1,103 @@
+{
+  "accepted_preview_paths_unchanged_except_identity_test": 23,
+  "all_case_input_bytes_unchanged": true,
+  "authority": null,
+  "executed": {
+    "CI_identity": "Three direct guard experiments: K2 suffix 1 DID NOT RAISE, component suffix 1 DID NOT RAISE, file-postimage 4 DID NOT RAISE. Identity-only; full-file source identity is separate.",
+    "O2": "Five intact and restored tests pass; only endpoint removal gives three DID NOT RAISE failures and two passes.",
+    "O2_alternative": "Remove only access guard: early-free still refuses at exact endpoint guard; not unsafe acceptance.",
+    "baseline_identity": "One expected failure: reconciled ADR versus historical whole-ADR pin.",
+    "corrected_identity": "15 passed before final combined selection; overlapping counts not additive.",
+    "discovery": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-install-joins-v1/isolated.py",
+        "/tmp/u4-b-joins-uw8crd5w/candidate",
+        "pytest",
+        "--collect-only",
+        "-q",
+        "-m",
+        "not native and not nightly and not silicon"
+      ],
+      "exit_code": 0,
+      "sha256": "2b8631f6f04336694a26bf311326f0298ab7621e876418d42beb3bb813b25099",
+      "summary": "2407/2684 tests collected (277 deselected) in 1.71s"
+    },
+    "exact_mutation_restoration": true,
+    "final_combined": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-install-joins-v1/isolated.py",
+        "/tmp/u4-b-joins-uw8crd5w/candidate",
+        "pytest",
+        "-q",
+        "validation/component/test_stage2_selection.py",
+        "validation/component/test_installation_identity.py",
+        "validation/component/test_transient_lifetime.py",
+        "validation/component/test_f5_mechanism_duration.py",
+        "validation/component/test_join_selection.py",
+        "validation/component/test_consistent_observations.py::test_positive_controls[C02]",
+        "-m",
+        "not native"
+      ],
+      "exit_code": 0,
+      "sha256": "f6fc454a68c473c91ae5f36422127a7ae6ab88cb5cd09858448e0c63d1fea2a4",
+      "summary": "24 passed in 4.42s"
+    },
+    "lint": {
+      "command": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-install-joins-v1",
+        "/tmp/u4-b-joins-uw8crd5w/candidate/validation/component/installation_identity.py",
+        "/tmp/u4-b-joins-uw8crd5w/candidate/validation/component/test_installation_identity.py",
+        "/tmp/u4-b-joins-uw8crd5w/candidate/validation/component/test_stage2_selection.py",
+        "/tmp/u4-b-joins-uw8crd5w/candidate/validation/component/test_transient_lifetime.py",
+        "/tmp/u4-b-joins-uw8crd5w/candidate/validation/component/transient_carrier.py"
+      ],
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "result": "All checks passed!"
+    },
+    "origin_checks": "Every counted Python check uses explicit private root/config and asserts project module file origins.",
+    "reconstruction": "Both combined and preview+delta routes verify all 29 pre/postimages and preserved activation/selection/sidecar identities; reverse check passes.",
+    "types": {
+      "clean_environment": "PYTHONPATH/MYPYPATH unset; fresh private cache",
+      "cwd": "/tmp/u4-b-joins-uw8crd5w/candidate",
+      "log_sha256": "e317872697c2cbfdefa321527a6efe73290dff3a390b0fa8723b87092eccba6a",
+      "result": "Success: no issues found in 5 source files"
+    }
+  },
+  "historical_selection_unchanged": true,
+  "human_L1": "pending actual human workings",
+  "identities": {
+    "discovery.json": "7d80ff672cc8070788a13103eae2f7c2deb281113f74a34efc187a5bec4694e8",
+    "evidence-manifest.json": "470db041f52501495936122cfd088a2f9959066beb6e34d906671bd94330d48d",
+    "evidence.tar.gz": "6cd73f4aab75e86b4cd0f567c92964b80083cd4cdf724c3bffaf6c9a9d70b71b",
+    "helper-formatting.json": "d5fded2e87cdc48a11d507ce724b1fe35b513700f4a0f9a0433f29a8996a8078",
+    "inputs.json": "d6a194ef0ca76fb55b91e275dd3b15420b23cae9ad403fe1bb3c71c463dfeb58",
+    "install-with-joins.unapplied.patch": "008dc61147431cc6be3d78656a482512e17fd6d0f84a6beaf0920fe1bf641b70",
+    "joins.unapplied.patch": "af055995c3896b827d7bdd6a6c2419b7bbcdd27a38422be06a9c84cbabe83465",
+    "obligation-disposition.json": "693d100b1a4e20955c570e36bf65961fa3673751e005f283dd4fd6a2c7d4bd75",
+    "postimages.json": "e8cef2bcbfc04a29c27c0e22a8f4156665a399df11f372841e1a99877e8defb9",
+    "restoration.json": "e2f520279e866dee6ae9356d56c6006c0c6537417bb0eff2e3695ba9ac19137b",
+    "transition.json": "5ed3f4dabe45095702a1b1399d1cdf6ee61dc50aa1d212fd3dc50a7974addd0a"
+  },
+  "inherited_not_rerun": [
+    "Accepted same-reviewer Stage 3 plus F5 verdict; no re-review or new verdict.",
+    "F6 random revert and all previous broad guard sweeps.",
+    "Broad 488 test selection, unchanged source/schema/import/vendor/support evidence.",
+    "K2 runtime/campaign/authority evidence, preserved and untouched."
+  ],
+  "native_calls": 0,
+  "new_delta_paths": 6,
+  "new_effective_paths": 29,
+  "protected_live_installation": false,
+  "reference_suite": "unchanged prospective readiness, no measurements",
+  "remaining": "Coordinator reconciliation of this exact identity/O2 proposal; human P2/NoC/protected-install decisions remain pending. Distinct future component runtime identities and authority still absent.",
+  "runtime_source_delta": 0,
+  "scope": "B author preparation only; coordinator reconciliation next"
+}

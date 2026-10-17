@@ -1,0 +1,43 @@
+{
+  "command": [
+    "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+    "-I",
+    "-B",
+    "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-install-joins-v1/isolated.py",
+    "/tmp/u4-b-joins-uw8crd5w/candidate",
+    "pytest",
+    "--collect-only",
+    "-q",
+    "-m",
+    "not native and not nightly and not silicon"
+  ],
+  "log_sha256": "2b8631f6f04336694a26bf311326f0298ab7621e876418d42beb3bb813b25099",
+  "missing_file_skips": false,
+  "new_nodes": {
+    "validation/component/test_installation_identity.py": [
+      "validation/component/test_installation_identity.py::test_exact_installed_and_component_text_control",
+      "validation/component/test_installation_identity.py::test_adr_stream_tamper[K2-installed K2 ADR prefix]",
+      "validation/component/test_installation_identity.py::test_adr_stream_tamper[component-reviewed component suffix]",
+      "validation/component/test_installation_identity.py::test_adr_omission_and_arbitrary_later_edits[omit_component]",
+      "validation/component/test_installation_identity.py::test_adr_omission_and_arbitrary_later_edits[append]",
+      "validation/component/test_installation_identity.py::test_adr_omission_and_arbitrary_later_edits[drop_K2_suffix]",
+      "validation/component/test_installation_identity.py::test_binding_transition_inventory_is_exact[missing_F5]",
+      "validation/component/test_installation_identity.py::test_binding_transition_inventory_is_exact[missing_self]",
+      "validation/component/test_installation_identity.py::test_binding_transition_inventory_is_exact[extra_override]",
+      "validation/component/test_installation_identity.py::test_binding_transition_inventory_is_exact[arbitrary_ADR]",
+      "validation/component/test_installation_identity.py::test_f5_and_changed_identity_test_are_bound[edit-validation/component/test_f5_mechanism_duration.py]",
+      "validation/component/test_installation_identity.py::test_f5_and_changed_identity_test_are_bound[edit-validation/component/test_stage2_selection.py]",
+      "validation/component/test_installation_identity.py::test_f5_and_changed_identity_test_are_bound[omit-validation/component/test_f5_mechanism_duration.py]",
+      "validation/component/test_installation_identity.py::test_f5_and_changed_identity_test_are_bound[omit-validation/component/test_stage2_selection.py]"
+    ],
+    "validation/component/test_transient_lifetime.py": [
+      "validation/component/test_transient_lifetime.py::test_transient_two_final_consumers_control",
+      "validation/component/test_transient_lifetime.py::test_transient_overlong_lifetime_is_not_persistent[allocate_ps-0]",
+      "validation/component/test_transient_lifetime.py::test_transient_overlong_lifetime_is_not_persistent[free_ps-2735000]",
+      "validation/component/test_transient_lifetime.py::test_transient_overlong_lifetime_is_not_persistent[free_ps-None]",
+      "validation/component/test_transient_lifetime.py::test_transient_free_at_first_final_consumer_is_too_early"
+    ]
+  },
+  "old_F6_execution": "inherited; not repeated",
+  "summary": "2407/2684 tests collected (277 deselected) in 1.71s"
+}

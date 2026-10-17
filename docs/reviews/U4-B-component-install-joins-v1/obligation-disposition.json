@@ -1,0 +1,29 @@
+{
+  "actual_semantic_or_model_defect_found": false,
+  "allocation_ps": [
+    547000,
+    2188000
+  ],
+  "final_consumers": [
+    "c",
+    "d"
+  ],
+  "guard_scope": "Exact endpoint guard essential for overlong lifetimes. Access and exact endpoint checks overlap on early-free case only; no general redundancy claim.",
+  "human_workings": "not supplied; still pending at L1 boundary",
+  "makespan_ps": 2735000,
+  "mapping_version": "2",
+  "native_execution": "not_run",
+  "observation_format": "uarch-native-observations/2",
+  "owner": "B",
+  "producer": "b",
+  "results": {
+    "access_guard_removed": "early-free still refused by accumulator lifetime mechanism; alternative refusal, not unsafe acceptance",
+    "early_free": "structural admits; allocation access lifetime refuses",
+    "overlong": "structural admits; B exact accumulator lifetime mechanism refuses",
+    "single_endpoint_guard_removed": "all three overlong regressions DID NOT RAISE; positive and early-free control pass",
+    "valid": "real job admission, structural result validator and independent checker pass"
+  },
+  "status": "author verification evidence supplied; coordinator reconciliation pending",
+  "synthetic_only": true,
+  "task": "B-U4-OBS2-TRANSIENT-LIFETIME-01"
+}

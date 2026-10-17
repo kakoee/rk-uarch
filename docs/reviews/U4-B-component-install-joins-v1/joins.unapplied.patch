@@ -1,0 +1,502 @@
+diff --git a/validation/component/test_stage2_selection.py b/validation/component/test_stage2_selection.py
+--- a/validation/component/test_stage2_selection.py
++++ b/validation/component/test_stage2_selection.py
+@@ -6,11 +6,13 @@
+ 
+ from uarch_contract.hashing import content_hash
+ 
++from validation.component.installation_identity import installation_bindings, verify_postimages
++
+ ROOT = Path(__file__).resolve().parents[2]
+ PACKAGE = ROOT / "docs/reviews/U4-B-component-stage2-v1"
+ 
+ 
+-def test_current_selection_and_historical_mapping():
++def test_current_selection_and_historical_mapping() -> None:
+     s = json.loads((PACKAGE / "execution-selection.json").read_text())
+     old = json.loads(
+         (ROOT / "docs/reviews/U4-B-component-joins-v2/execution-selection.json").read_text()
+@@ -24,12 +26,14 @@
+     assert {row["old"]: row["new"] for row in s["old_to_new"]} == {
+         row["case_id"]: row["case_id"] for row in old["cases"]
+     }
++    installed = installation_bindings(ROOT, s)
+     for path, digest in (s["checker_bindings"] | s["test_bindings"]).items():
+-        assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == digest
++        assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == installed.get(path, digest)
+     for row in s["candidate_files"]:
+         assert (
+-            hashlib.sha256((ROOT / row["path"]).read_bytes()).hexdigest() == row["postimage_sha256"]
++            hashlib.sha256((ROOT / row["path"]).read_bytes()).hexdigest() == installed[row["path"]]
+         )
++    verify_postimages(ROOT, installed)
+     for row in s["cases"]:
+         assert row["native_status"] == "not_run"
+         for key in ("engine_identity", "build_identity", "authority", "job_hash"):
+diff --git a/validation/component/installation_identity.py b/validation/component/installation_identity.py
+new file mode 100644
+--- /dev/null
++++ b/validation/component/installation_identity.py
+@@ -0,0 +1,78 @@
++"""Exact CI-C1 identity transition; no authority, optional fallback or current-hash adoption.
++
++The external proposal pins installation-binding.json; that record pins this helper and
++all changed tests. The code never embeds that record's digest: the hash graph is acyclic.
++"""
++
++import hashlib
++import json
++from pathlib import Path
++from typing import Any
++
++ADR = "docs/decisions/U0011-the-native-engine-core.md"
++SELF_TEST = "validation/component/test_stage2_selection.py"
++F5_TEST = "validation/component/test_f5_mechanism_duration.py"
++BINDING = "validation/component/installation-binding.json"
++SELECTION = "docs/reviews/U4-B-component-stage2-v1/execution-selection.json"
++SELECTION_SHA = "a8b94f0d83f429e5101b2b62ba5ed91d9b98d0d228330f5185acc37aab29319c"
++OLD_ADR = "4f7a90b201c0425a9906d746e4235ec4df362c15ffe91138f827edf2529f6140"
++NEW_ADR = "edf565f9094c524b280888feaf29bcecc63b176aa573393c136b3494c7c640fd"
++OLD_TEST = "b7fb959ee27df2542c8bb60e13b3932a1218257e28610bc603d980da1d167d95"
++F5_SHA = "e4f9f8693f20031ccf8b97d24a141b0aa63725e220fb6a754d2275cb5c6b0f8a"
++INSTALLED_BYTES = 32221
++INSTALLED_SHA = "afae0ebea7dfdfe761ec76ae374a35441db989f866a4ca4f5c29f0169a49e69b"
++COMPONENT_SHA = "ad9b5369073403fa8a881a04e628db620c89f21d66ec062e90c3bc753c7eadba"
++ADDITIONS = {
++    F5_TEST,
++    "validation/component/installation_identity.py",
++    "validation/component/test_installation_identity.py",
++    "validation/component/transient_carrier.py",
++    "validation/component/test_transient_lifetime.py",
++}
++
++
++def digest(raw: bytes) -> str:
++    return hashlib.sha256(raw).hexdigest()
++
++
++def verify_adr(raw: bytes) -> None:
++    assert digest(raw[:INSTALLED_BYTES]) == INSTALLED_SHA, "installed K2 ADR prefix"
++    assert digest(raw[INSTALLED_BYTES:]) == COMPONENT_SHA, "reviewed component suffix"
++
++
++def installation_bindings(
++    root: Path, selection: dict[str, Any], record: Any = None
++) -> dict[str, str]:
++    raw_selection = (root / SELECTION).read_bytes()
++    assert digest(raw_selection) == SELECTION_SHA, "historical selection bytes"
++    assert json.loads(raw_selection) == selection, "historical selection value"
++    if record is None:
++        record = json.loads((root / BINDING).read_text())
++    assert record["format"] == "component-installation-binding/1"
++    assert record["historical_selection_sha256"] == SELECTION_SHA
++    assert record["authority"] is None
++    expected = {row["path"]: row["postimage_sha256"] for row in selection["candidate_files"]}
++    assert len(expected) == len(selection["candidate_files"]) == 23, "candidate inventory"
++    replacements = record["replacements"]
++    assert set(replacements) == {ADR, SELF_TEST}, "exact transition inventory"
++    assert replacements[ADR] == dict(before=OLD_ADR, after=NEW_ADR), "exact ADR transition"
++    assert replacements[SELF_TEST]["before"] == OLD_TEST, "historical identity test"
++    for path, transition in replacements.items():
++        assert expected[path] == transition["before"], "transition preimage"
++        expected[path] = transition["after"]
++    additions = record["additions"]
++    assert set(additions) == ADDITIONS, "exact added inventory"
++    assert additions[F5_TEST] == F5_SHA, "reviewed F5 identity"
++    assert not (set(additions) & set(expected)), "duplicate added path"
++    expected.update(additions)
++    assert all(
++        len(value) == 64 and all(c in "0123456789abcdef" for c in value)
++        for value in expected.values()
++    ), "SHA256 shape"
++    verify_adr((root / ADR).read_bytes())
++    return expected
++
++
++def verify_postimages(root: Path, expected: dict[str, str]) -> None:
++    for path, value in expected.items():
++        assert digest((root / path).read_bytes()) == value, f"installed postimage: {path}"
+diff --git a/validation/component/test_installation_identity.py b/validation/component/test_installation_identity.py
+new file mode 100644
+--- /dev/null
++++ b/validation/component/test_installation_identity.py
+@@ -0,0 +1,90 @@
++"""CI-C1 identity controls, explicitly not behavioral checker mutation scores."""
++
++import json
++from copy import deepcopy
++from pathlib import Path
++
++import pytest
++
++from validation.component.installation_identity import (
++    ADR,
++    BINDING,
++    COMPONENT_SHA,
++    F5_TEST,
++    INSTALLED_BYTES,
++    INSTALLED_SHA,
++    NEW_ADR,
++    SELECTION,
++    SELF_TEST,
++    digest,
++    installation_bindings,
++    verify_adr,
++    verify_postimages,
++)
++
++ROOT = Path(__file__).resolve().parents[2]
++
++
++def test_exact_installed_and_component_text_control() -> None:
++    raw = (ROOT / ADR).read_bytes()
++    assert len(raw) == 32221 + 16073
++    assert digest(raw) == NEW_ADR
++    assert digest(raw[:INSTALLED_BYTES]) == INSTALLED_SHA
++    assert digest(raw[INSTALLED_BYTES:]) == COMPONENT_SHA
++    verify_adr(raw)
++    selection = json.loads((ROOT / SELECTION).read_text())
++    verify_postimages(ROOT, installation_bindings(ROOT, selection))
++
++
++@pytest.mark.parametrize(
++    "part,detail", [("K2", "installed K2 ADR prefix"), ("component", "reviewed component suffix")]
++)
++def test_adr_stream_tamper(part: str, detail: str) -> None:
++    raw = bytearray((ROOT / ADR).read_bytes())
++    raw[INSTALLED_BYTES - 10 if part == "K2" else INSTALLED_BYTES + 10] ^= 1
++    with pytest.raises(AssertionError, match=detail):
++        verify_adr(bytes(raw))
++
++
++@pytest.mark.parametrize("change", ["omit_component", "append", "drop_K2_suffix"])
++def test_adr_omission_and_arbitrary_later_edits(change: str) -> None:
++    raw = (ROOT / ADR).read_bytes()
++    forged = {
++        "omit_component": raw[:INSTALLED_BYTES],
++        "append": raw + b"later edit\n",
++        "drop_K2_suffix": raw[:28596] + raw[INSTALLED_BYTES:],
++    }[change]
++    with pytest.raises(AssertionError):
++        verify_adr(forged)
++
++
++@pytest.mark.parametrize(
++    "change", ["missing_F5", "missing_self", "extra_override", "arbitrary_ADR"]
++)
++def test_binding_transition_inventory_is_exact(change: str) -> None:
++    record = json.loads((ROOT / BINDING).read_text())
++    record = deepcopy(record)
++    if change == "missing_F5":
++        del record["additions"][F5_TEST]
++    elif change == "missing_self":
++        del record["replacements"][SELF_TEST]
++    elif change == "extra_override":
++        record["replacements"]["contract/uarch_contract/mapped.py"] = dict(
++            before="0" * 64, after="1" * 64
++        )
++    else:
++        record["replacements"][ADR]["after"] = "0" * 64
++    with pytest.raises(AssertionError):
++        installation_bindings(ROOT, json.loads((ROOT / SELECTION).read_text()), record)
++
++
++@pytest.mark.parametrize("path", [F5_TEST, SELF_TEST])
++@pytest.mark.parametrize("change", ["edit", "omit"])
++def test_f5_and_changed_identity_test_are_bound(tmp_path: Path, path: str, change: str) -> None:
++    expected = installation_bindings(ROOT, json.loads((ROOT / SELECTION).read_text()))
++    target = tmp_path / path
++    target.parent.mkdir(parents=True)
++    if change == "edit":
++        target.write_bytes((ROOT / path).read_bytes() + b"\n# changed\n")
++    with pytest.raises((AssertionError, FileNotFoundError)):
++        verify_postimages(tmp_path, {path: expected[path]})
+diff --git a/validation/component/transient_carrier.py b/validation/component/transient_carrier.py
+new file mode 100644
+--- /dev/null
++++ b/validation/component/transient_carrier.py
+@@ -0,0 +1,184 @@
++"""Literal O2 transient @2 /2 carrier; SYNTHETIC unit evidence, no native execution."""
++
++from copy import deepcopy
++from typing import Any
++
++from uarch_contract.hashing import content_hash
++from uarch_contract.mapped import MappedBundle, MappedEngineJob, canonical_owners
++
++from validation.component.consistent_carriers import control, synchronize
++from validation.component.corpus import graph, materialize, resident_input
++from validation.component.synthetic_carrier import synthetic_job
++
++# Five 3x5x7 bf16 tiles: 32 + 1 + 513 + 1 cycles each at 1 GHz.
++ORDER = ("a", "b", "c", "d", "e")
++SPANS = {name: (i * 547000, (i + 1) * 547000) for i, name in enumerate(ORDER)}
++READY = dict(a=0, b=547000, c=1094000, d=1094000, e=2188000)
++
++
++def transient_control() -> tuple[Any, Any]:
++    bundle = resident_input(3, 5, 7)
++    template = deepcopy(bundle)
++    g = graph(bundle)
++    g.update(jobs=[], buffers=[], coverage=[], dependencies=[])
++    bundle["scope"]["ops"] = []
++    bundle["scope"]["op_ids"] = []
++    bundle["points"][0]["identity"]["op_ids"] = []
++    bundle["mapping_policy"]["version"] = "2"
++    for i, name in enumerate(ORDER):
++        op = deepcopy(template["scope"]["ops"][0])
++        op["id"] = f"g{i}"
++        bundle["scope"]["ops"].append(op)
++        bundle["scope"]["op_ids"].append(op["id"])
++        bundle["points"][0]["identity"]["op_ids"].append(op["id"])
++        t = deepcopy(graph(template)["jobs"][0])
++        t.update(
++            id=name,
++            op_id=op["id"],
++            accumulator_buffer_id=("bacc" if name in "bcd" else name + "acc"),
++        )
++        t["operand_buffers"] = {k: name + v for k, v in t["operand_buffers"].items()}
++        g["jobs"].append(t)
++        cover = deepcopy(graph(template)["coverage"][0])
++        cover.update(job_id=name, op_id=op["id"])
++        g["coverage"].append(cover)
++        for buf in deepcopy(graph(template)["buffers"]):
++            if buf["space"] == "accumulator" and name in "cd":
++                continue
++            buf["id"] = name + buf["id"]
++            if buf["op_id"] is not None:
++                buf["op_id"] = op["id"]
++            buf["producer_id"] = name if buf["producer_id"] == "c" else buf["producer_id"]
++            buf["final_consumer_ids"] = [name if x == "c" else x for x in buf["final_consumer_ids"]]
++            if buf["space"] == "accumulator":
++                buf.update(
++                    producer_id=name, final_consumer_ids=["c", "d"] if name == "b" else [name]
++                )
++                buf["offset_bytes"] = {"a": 0, "b": 256, "e": 512}[name]
++            else:
++                buf["offset_bytes"] += i * 2048
++                buf["bank"] = buf["offset_bytes"] // 524288
++            g["buffers"].append(buf)
++    g["dependencies"] = [
++        dict(before=x, after=y)
++        for x, y in [("a", "b"), ("b", "c"), ("b", "d"), ("c", "e"), ("d", "e")]
++    ]
++    item = materialize("SYNTHETIC-O2-TRANSIENT-UNIT", bundle, dict(outcome="success"))
++    b = MappedBundle.model_validate(item["bundle"])
++    point = b.points[0]
++    raw = synthetic_job("C02").model_dump(mode="json")
++    raw.update(
++        bundle_hash=b.bundle_hash,
++        point_hash=point.payload_hash,
++        mapped_point=point.model_dump(mode="json"),
++        workload_closure=b.model_dump(mode="json"),
++        admission=b.admission.model_dump(mode="json"),
++        profile=item["profile"],
++        owners=[
++            o.model_dump(mode="json") for o in canonical_owners(b.hardware_spec, point.task_graph)
++        ],
++    )
++    raw["job_hash"] = content_hash(raw, exclude=("job_hash",))
++    job = MappedEngineJob.model_validate(raw)
++    _, base = control("C02")
++    result = deepcopy(base)
++    for key in result["observations"]:
++        if key != "format":
++            result["observations"][key]["records"] = []
++    result["per_op"] = []
++    for i, name in enumerate(ORDER):
++        piece = deepcopy(base)
++        offset = SPANS[name][0]
++        obs = piece["observations"]
++        for table in (
++            "activities",
++            "clocks",
++            "resource_intervals",
++            "queue_membership",
++            "events",
++            "jobs",
++        ):
++            for row in obs[table]["records"]:
++                if "job_id" in row:
++                    row["job_id"] = name
++                if "op_id" in row:
++                    row["op_id"] = f"g{i}"
++                if "activity_id" in row:
++                    row["activity_id"] = name + ":" + row["activity_id"]
++                if "item_id" in row:
++                    row["item_id"] = name
++                for key in ("ready_ps", "start_ps", "end_ps", "enter_ps", "leave_ps", "t_ps"):
++                    if key in row:
++                        row[key] += offset
++                for key in (
++                    "dispatch_ordinal",
++                    "completion_ordinal",
++                    "observation_ordinal",
++                    "event_seq",
++                ):
++                    if key in row:
++                        row[key] += i * 16
++                for pred in row.get("predecessors", []):
++                    pred["activity_id"] = name + ":" + pred["activity_id"]
++            result["observations"][table]["records"] += obs[table]["records"]
++        first = obs["activities"]["records"][0]
++        first["ready_ps"] = READY[name]
++        if i:
++            prior = ORDER[i - 1] + ":compute_drain:service"
++            first["predecessors"] = [dict(activity_id=prior, relation="resource")]
++            if name != "d":
++                first["predecessors"].append(dict(activity_id=prior, relation="dependency"))
++        if name == "d":
++            waiting = deepcopy(obs["queue_membership"]["records"][0])
++            waiting["population"] = "waiting"
++            result["observations"]["queue_membership"]["records"].append(waiting)
++        obs["jobs"]["records"][0]["ready_ps"] = READY[name]
++        per = deepcopy(base["per_op"][0])
++        per["op_id"] = f"g{i}"
++        result["per_op"].append(per)
++    for field in ("counts", "ext_counts", "work_counts", "traffic_counts"):
++        for key, value in result[field].items():
++            if isinstance(value, (int, float)):
++                result[field][key] = value * 5
++    owners = {o.resource: o.owner_id for o in job.owners}
++    for buf in job.mapped_point.task_graph.buffers:
++        acc = buf.space == "accumulator"
++        if acc:
++            assert buf.producer_id is not None
++            begin, end = (547000, 2188000) if buf.id == "bacc" else SPANS[buf.producer_id]
++        else:
++            begin, end = 0, None
++        result["observations"]["allocations"]["records"].append(
++            dict(
++                buffer_id=buf.id,
++                space=buf.space,
++                owner_id=owners["matrix:0" if acc else "sram:0"],
++                offset_bytes=buf.offset_bytes,
++                size_bytes=buf.size_bytes,
++                allocate_ps=begin,
++                free_ps=end,
++                initially_live=buf.initial_residency == "preloaded",
++                last_consumer_ids=list(buf.final_consumer_ids),
++            )
++        )
++    result.update(
++        job_hash=job.job_hash,
++        admission=raw["admission"],
++        owners=raw["owners"],
++        completed_jobs=list(ORDER),
++    )
++    result["busy_time_ps"] = [dict(owner_id=o.owner_id, busy_time_ps=0) for o in job.owners]
++    result["simulator_metrics"].update(event_count=80, completed_job_count=5)
++    for a in result["observations"]["activities"]["records"]:
++        a["predecessors"].sort(key=lambda p: (p["activity_id"], p["relation"]))
++    return job, synchronize(result)
++
++
++def transient_attack(field: str, value: int | None) -> tuple[Any, Any]:
++    job, result = transient_control()
++    row = next(
++        a for a in result["observations"]["allocations"]["records"] if a["buffer_id"] == "bacc"
++    )
++    row[field] = value
++    result["result_hash"] = content_hash(result, exclude=("result_hash",))
++    return job, result
+diff --git a/validation/component/test_transient_lifetime.py b/validation/component/test_transient_lifetime.py
+new file mode 100644
+--- /dev/null
++++ b/validation/component/test_transient_lifetime.py
+@@ -0,0 +1,65 @@
++"""O2: independent synthetic /2 transient @2 lifetime controls, never native output."""
++
++from copy import deepcopy
++
++import pytest
++from uarch_contract.mapped import validate_result
++
++from validation.component.checks import CheckFailure
++from validation.component.consistent_carriers import EXPECTED
++from validation.component.observations_v2 import check_v2
++from validation.component.transient_carrier import READY, SPANS, transient_attack, transient_control
++
++
++def test_transient_two_final_consumers_control() -> None:
++    job, result = transient_control()
++    assert job.workload_closure.mapping_policy.version == "2"
++    buf = next(b for b in job.mapped_point.task_graph.buffers if b.id == "bacc")
++    assert (buf.producer_id, list(buf.final_consumer_ids)) == ("b", ["c", "d"])
++    assert (buf.size_bytes, buf.offset_bytes) == (84, 256)
++    row = next(
++        a for a in result["observations"]["allocations"]["records"] if a["buffer_id"] == "bacc"
++    )
++    assert (row["allocate_ps"], row["free_ps"], row["initially_live"]) == (547000, 2188000, False)
++    assert result["duration_ps"] == 2735000
++    assert {
++        j["job_id"]: (j["start_ps"], j["end_ps"]) for j in result["observations"]["jobs"]["records"]
++    } == SPANS
++    assert {j["job_id"]: j["ready_ps"] for j in result["observations"]["jobs"]["records"]} == READY
++    assert result["counts"]["matrix_ops"] == 1050
++    assert result["work_counts"]["issued_matrix_ops"] == 1966080
++    assert (result["ext_counts"]["sram_read_bytes"], result["ext_counts"]["sram_write_bytes"]) == (
++        500,
++        210,
++    )
++    assert result["counts"]["memory_read_bytes"] == result["counts"]["memory_write_bytes"] == 0
++    validate_result(deepcopy(result), job)
++    check_v2(job.model_dump(mode="json"), deepcopy(result), EXPECTED)
++
++
++@pytest.mark.parametrize(
++    "field,value", [("allocate_ps", 0), ("free_ps", 2735000), ("free_ps", None)]
++)
++def test_transient_overlong_lifetime_is_not_persistent(field: str, value: int | None) -> None:
++    job, result = transient_attack(field, value)
++    _, valid = transient_control()
++    # All timing, consumer inventory, useful work and traffic joins are truthful;
++    # only the named allocation endpoint and integrity seal differ.
++    expected = deepcopy(valid)
++    next(a for a in expected["observations"]["allocations"]["records"] if a["buffer_id"] == "bacc")[
++        field
++    ] = value
++    expected["result_hash"] = result["result_hash"]
++    assert result == expected
++    validate_result(deepcopy(result), job)
++    with pytest.raises(CheckFailure, match="^accumulator lifetime mechanism$"):
++        check_v2(job.model_dump(mode="json"), result, EXPECTED)
++
++
++def test_transient_free_at_first_final_consumer_is_too_early() -> None:
++    job, result = transient_attack("free_ps", 1641000)
++    validate_result(deepcopy(result), job)
++    # The second terminal consumer d ends at 2188000. Access bounds refuse first;
++    # this is not an essential-guard witness for accumulator lifetime mechanism.
++    with pytest.raises(CheckFailure, match="^allocation access lifetime$"):
++        check_v2(job.model_dump(mode="json"), result, EXPECTED)
+diff --git a/validation/component/installation-binding.json b/validation/component/installation-binding.json
+new file mode 100644
+--- /dev/null
++++ b/validation/component/installation-binding.json
+@@ -0,0 +1,25 @@
++{
++  "additions": {
++    "validation/component/installation_identity.py": "84aa11f4d55d73181a075efc92c0854634dd0eda2f72ea0787ee2fa6864d6517",
++    "validation/component/test_f5_mechanism_duration.py": "e4f9f8693f20031ccf8b97d24a141b0aa63725e220fb6a754d2275cb5c6b0f8a",
++    "validation/component/test_installation_identity.py": "f7be54987f0929c1b8881be2aa4500c3f6140fc0ed268048f0a84043c08cb90b",
++    "validation/component/test_transient_lifetime.py": "3c7cc9dceb935c8378dc67ecdcf84e9752b1a7d2e180ebdd7c78b6caf9468c8b",
++    "validation/component/transient_carrier.py": "14cf1e5c3bbdca45ad1d3d9e9697c556010496bbcb05673c10ed82f397b78598"
++  },
++  "authority": null,
++  "format": "component-installation-binding/1",
++  "historical_component_suffix_sha256": "ad9b5369073403fa8a881a04e628db620c89f21d66ec062e90c3bc753c7eadba",
++  "historical_selection_sha256": "a8b94f0d83f429e5101b2b62ba5ed91d9b98d0d228330f5185acc37aab29319c",
++  "installed_K2_ADR_sha256": "afae0ebea7dfdfe761ec76ae374a35441db989f866a4ca4f5c29f0169a49e69b",
++  "replacements": {
++    "docs/decisions/U0011-the-native-engine-core.md": {
++      "after": "edf565f9094c524b280888feaf29bcecc63b176aa573393c136b3494c7c640fd",
++      "before": "4f7a90b201c0425a9906d746e4235ec4df362c15ffe91138f827edf2529f6140"
++    },
++    "validation/component/test_stage2_selection.py": {
++      "after": "ea511c6a43f9d31e97eb7a0de529d7e9eb1f420d5295f56ef83350223ec37849",
++      "before": "b7fb959ee27df2542c8bb60e13b3932a1218257e28610bc603d980da1d167d95"
++    }
++  },
++  "scope": "Prospective installation identity only. External proposal pins this record; no execution authority."
++}
