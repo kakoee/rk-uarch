@@ -4,7 +4,9 @@
 slots; only its first slot is populated. HBM storage is distinct per tile and
 operand (including replicated W). Accumulator scratch is shared only for an
 identical footprint on the same exclusive matrix owner. Different footprints
-reserve disjoint storage: installed lifetime admission cannot yet express reuse.
+reserve disjoint storage under @1. Explicit @2 requires the proposed lifetime contract:
+heterogeneous cores use exact-size transient scratch and ordered compute dependencies.
+The default @1 bytes and identical-footprint persistent convention are unchanged.
 """
 
 from __future__ import annotations
@@ -80,13 +82,26 @@ def map_component(
     hardware_spec: HardwareSpec,
     *,
     initial_state: str = "cold",
+    mapping_version: str = "1",
 ) -> TaskGraph:
     """Map existing operators. Resident output is explicitly verification-only input.
 
     This pure function neither constructs a profile nor grants admission. Assembly and
     saved-input admission are separate APIs. Refuse capacity, never retile or spill.
     """
+    require(mapping_version in ("1", "2"), "UnsupportedMapping")
     operations = _ops(ops)
+    if mapping_version == "2":
+        # Stable topological order prevents new serialization edges reversing op dependencies.
+        pending = list(operations)
+        ordered_ops = []
+        done: set[str] = set()
+        while pending:
+            selected = next(op for op in pending if set(op.depends_on) <= done)
+            pending.remove(selected)
+            ordered_ops.append(selected)
+            done.add(selected.id)
+        operations = tuple(ordered_ops)
     spec = HardwareSpec.model_validate(hardware_spec.model_dump(mode="json"))
     require(spec_hash(spec) == PRODUCTION_HARDWARE, "UnsupportedHardware")
     require(initial_state in ("cold", "fixture_resident"), "UnsupportedInitialState")
@@ -108,7 +123,14 @@ def map_component(
     acc_ends = [0] * ncores
     acc_ids: dict[tuple[int, int], str] = {}
     hbm_end = 0
-    prefixes = {op.id: f"o{i:03}" for i, op in enumerate(operations)}
+    prefixes = {op.id: f"o{i:03}" for i, op in enumerate(sorted(operations, key=lambda x: x.id))}
+    footprints: dict[int, set[int]] = {}
+    for op in operations:
+        for tile_index, start in enumerate(range(0, op.spec.dimensions["M"], 256)):
+            size = 4 * min(256, op.spec.dimensions["M"] - start) * op.spec.dimensions["N"]
+            footprints.setdefault(tile_index, set()).add(size)
+    transient_cores = {c for c, sizes in footprints.items() if len(sizes) > 1}
+    last_compute: dict[int, str] = {}
     joined = {name for op in operations for name in op.depends_on}
 
     def buffer(
@@ -282,7 +304,27 @@ def map_component(
             )
             acc_size = 4 * m * d["N"]
             acc_key = (core_id, acc_size)
-            if acc_key not in acc_ids:
+            transient = mapping_version == "2" and core_id in transient_cores
+            if transient:
+                acc_id = prefix + ".acc"
+                acc_ids[acc_key] = acc_id
+                buffer(
+                    acc_id,
+                    "accumulator",
+                    acc_size,
+                    0,
+                    core_id,
+                    None,
+                    None,
+                    None,
+                    False,
+                    compute_id,
+                    [compute_id],
+                )
+                if core_id in last_compute:
+                    edges.add((last_compute[core_id], compute_id))
+                last_compute[core_id] = compute_id
+            elif acc_key not in acc_ids:
                 acc_id = f"acc.c{core_id:03}.b{acc_size:06}"
                 acc_ids[acc_key] = acc_id
                 buffer(

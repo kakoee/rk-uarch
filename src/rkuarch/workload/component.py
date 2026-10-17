@@ -58,6 +58,7 @@ def prepare_component_bundle(
     assumptions: MappedAssumptions,
     rank: RankScope,
     admission: Admission,
+    mapping_version: str = "1",
 ) -> MappedBundle:
     """Assemble supplied mappings unchanged; validate resources without inventing trust.
 
@@ -74,7 +75,7 @@ def prepare_component_bundle(
         assumptions_hash=assumptions.assumptions_hash,
         rank=rank.model_dump(mode="json"),
         mapping_scope="task_graph",
-        mapping_policy=dict(name="ws-rowsplit", version="1", buffer_depth=2),
+        mapping_policy=dict(name="ws-rowsplit", version=mapping_version, buffer_depth=2),
         scope=dict(
             kind="component",
             operator_version="prepared-op/1",

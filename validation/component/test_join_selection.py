@@ -22,7 +22,14 @@ def test_exact_future_selection_and_historical_identity():
     for name, old in historical.items():
         assert all(rows[name][k] == v for k, v in old.items())
     for path, digest in selection["checker_bindings"].items():
-        assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == digest
+        # Revision /2 binds the historical checker. Its sole changed file is archived
+        # byte-for-byte; revision /3 below activates the corrected current bindings.
+        source = (
+            ROOT / "docs/reviews/U4-B-component-stage2-v1/historical-observations_v2.py.txt"
+            if path == "validation/component/observations_v2.py"
+            else ROOT / path
+        )
+        assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
     for row in rows.values():
         assert row["native_status"] == "not_run"
         assert all(

@@ -517,18 +517,37 @@ class ProfileEntry(FrozenModel):
     case_selection_revision: NonEmpty
 
 
+class PolicyProfileEntry(ProfileEntry):
+    """Explicit policy promise for new component profiles; legacy entries stay unchanged."""
+
+    mapping_policy: MappingPolicy
+
+
 class NativeTestProfile(FrozenModel):
-    format: Literal["uarch-native-test-profile/1"]
+    format: Literal["uarch-native-test-profile/1", "uarch-native-test-profile/2"]
     profile_hash: Hash
     semantics_revision: Literal["U0011-stage2/1"]
     owner: NonEmpty
-    entries: Annotated[tuple[ProfileEntry, ...], Field(min_length=1)]
+    entries: Annotated[tuple[PolicyProfileEntry | ProfileEntry, ...], Field(min_length=1)]
 
     @model_validator(mode="after")
     def identities(self) -> NativeTestProfile:
         verify_identity(self, "profile_hash")
         ordered(self.entries, lambda x: x.case_id, "TestProfileMismatch")
         for entry in self.entries:
+            require(
+                (self.format == "uarch-native-test-profile/2")
+                == isinstance(entry, PolicyProfileEntry)
+                and (
+                    self.format != "uarch-native-test-profile/2"
+                    or (
+                        entry.scope in ("component", "transport_fixture")
+                        and entry.checkpoint == "B"
+                    )
+                ),
+                "TestProfileMismatch",
+                "profile policy format",
+            )
             require(spec_hash(entry.hardware_spec) == entry.hardware_spec_hash, "HardwareMismatch")
             ordered(entry.allowed_job_kinds, lambda x: x, "TestProfileMismatch")
             require(
@@ -1014,6 +1033,73 @@ class Observations(FrozenModel):
     critical_path: Observed[CriticalInterval]
 
 
+class ActivityPredecessor(FrozenModel):
+    activity_id: NonEmpty
+    relation: Literal["sequence", "dependency", "resource", "credit"]
+
+
+class ComponentActivity(FrozenModel):
+    activity_id: NonEmpty
+    job_id: NonEmpty
+    request_id: NonEmpty | None
+    subphase: Literal[
+        "compute_overhead",
+        "compute_stage",
+        "compute_wave",
+        "compute_drain",
+        "request_noc",
+        "response_noc",
+        "unicast_noc",
+        "dram_latency",
+        "channel_service",
+        "read_port",
+        "write_port",
+        "ack",
+        "barrier",
+    ]
+    kind: Literal["service", "alignment"]
+    ready_ps: U64
+    start_ps: U64
+    end_ps: U64
+    owner_id: U64
+    category: Literal["compute", "memory", "noc", "sync", "overhead"]
+    receiving_domain: Literal["core", "noc", "dram"] | None
+    occupies_resource: StrictBool
+    dispatch_ordinal: U64
+    completion_ordinal: U64
+    predecessors: tuple[ActivityPredecessor, ...]
+
+
+class ComponentResourceInterval(ResourceInterval):
+    activity_id: NonEmpty
+
+
+class ComponentCriticalInterval(CriticalInterval):
+    activity_id: NonEmpty
+
+
+class ComponentClockObservation(ClockObservation):
+    activity_id: NonEmpty
+
+
+class ComponentQueueObservation(QueueObservation):
+    activity_id: NonEmpty | None
+
+
+class ComponentObservations(FrozenModel):
+    format: Literal["uarch-native-observations/2"]
+    events: Observed[EventObservation]
+    jobs: Observed[JobObservation]
+    activities: Observed[ComponentActivity]
+    clocks: Observed[ComponentClockObservation]
+    dma: Observed[DmaObservation]
+    transfers: Observed[TransferObservation]
+    allocations: Observed[AllocationObservation]
+    queue_membership: Observed[ComponentQueueObservation]
+    resource_intervals: Observed[ComponentResourceInterval]
+    critical_path: Observed[ComponentCriticalInterval]
+
+
 class Attribution(FrozenModel):
     compute: U64
     memory: U64
@@ -1077,7 +1163,7 @@ class MappedEngineResult(FrozenModel):
     simulator_metrics: SimulatorMetrics
     trace_hash: Hash | None
     u_c0_duration_ps: None
-    observations: Observations
+    observations: Annotated[Observations | ComponentObservations, Field(discriminator="format")]
     owners: tuple[Owner, ...]
 
     @model_validator(mode="after")
@@ -1220,18 +1306,451 @@ def validate_result(value: object, job: MappedEngineJob) -> MappedEngineResult:
             all(x.issue_ps <= x.complete_ps <= r.duration_ps for x in dma), "IncompleteObservations"
         )
     if job.state_model == "fixed_delay/1":
+        require(
+            isinstance(r.observations, Observations), "IncompleteObservations", "fixed-delay format"
+        )
         validate_fixed_delay_observations(r, job)
     else:
         require(
             all(x.kind == "service" for x in r.observations.critical_path.records),
             "AttributionMismatch",
         )
-        assert isinstance(r.observations.queue_membership, Observed)
+        validate_component_observations(r, job)
+    return r
+
+
+def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
+    """Structural witness joins; independent model-law checks remain required."""
+    obs = r.observations
+    require(isinstance(obs, ComponentObservations), "IncompleteObservations", "component /2")
+    assert isinstance(obs, ComponentObservations)
+    owners = {x.owner_id: x.resource for x in job.owners}
+    tasks = {x.id: x for x in job.mapped_point.task_graph.jobs}
+    declared = {
+        f.request_id: (t, f) for t in tasks.values() if isinstance(t, Dma) for f in t.fragments
+    }
+    engines = int(job.workload_closure.hardware_spec.cores.core_type.dma.engines.value)
+    cols = int(job.workload_closure.hardware_spec.cores.grid.cols.value)
+    activities = {x.activity_id: x for x in obs.activities.records}
+    require(
+        len(activities) == len(obs.activities.records), "IncompleteObservations", "activity IDs"
+    )
+    # Explicit cycle check includes zero-duration links (timestamps alone cannot prove a DAG).
+    pending = set(activities)
+    while pending:
+        ready = {
+            key
+            for key in pending
+            if not any(p.activity_id in pending for p in activities[key].predecessors)
+        }
+        require(bool(ready), "AttributionMismatch", "activity cycle")
+        pending -= ready
+    routes = {x.id: x for x in job.mapped_point.task_graph.routes}
+    summaries = {x.job_id: x for x in obs.jobs.records}
+    phase_orders = {
+        "compute": ("compute_overhead", "compute_stage", "compute_wave", "compute_drain"),
+        "read": ("request_noc", "dram_latency", "channel_service", "response_noc", "read_port"),
+        "write": (
+            "write_port",
+            "request_noc",
+            "dram_latency",
+            "channel_service",
+            "response_noc",
+            "ack",
+        ),
+        "barrier": ("barrier",),
+        "noc_transfer": ("unicast_noc",),
+    }
+    sequences: dict[tuple[str, str | None], list[ComponentActivity]] = {}
+    for activity in activities.values():
+        require(activity.job_id in tasks, "InvalidResource", "activity job")
+        sequences.setdefault((activity.job_id, activity.request_id), []).append(activity)
+    previous: dict[str, str] = {}
+    first_ids, last_ids = set(), set()
+    for (tid, _), sequence in sequences.items():
+        task = tasks[tid]
+        phases = phase_orders[task.direction if isinstance(task, Dma) else task.kind]
         require(
-            all(x.clock_domain is not None for x in r.observations.queue_membership.records),
+            all(x.subphase in phases for x in sequence), "IncompleteObservations", "phase inventory"
+        )
+        sequence.sort(key=lambda x: (phases.index(x.subphase), x.kind != "alignment"))
+        require(
+            len({(x.subphase, x.kind) for x in sequence}) == len(sequence),
+            "IncompleteObservations",
+            "duplicate phase",
+        )
+        first_ids.add(sequence[0].activity_id)
+        last_ids.add(sequence[-1].activity_id)
+        for before, after in zip(sequence, sequence[1:], strict=False):
+            previous[after.activity_id] = before.activity_id
+    for tid, task in tasks.items():
+        row = summaries[tid]
+        if isinstance(task, Compute):
+            expected = f"matrix:{task.core_id}"
+        elif isinstance(task, Dma):
+            expected = f"dma:{task.dma_engine_id // engines}:{task.dma_engine_id % engines}"
+        elif isinstance(task, Barrier):
+            expected = f"barrier:{tid}"
+        else:
+            assert isinstance(task, NocTransfer)
+            buffers = {b.id: b for b in job.mapped_point.task_graph.buffers}
+            core = buffers[task.source.buffer_id].core_id
+            assert core is not None
+            expected = f"router:0:{core // cols}:{core % cols}"
+        require(owners[row.owner_id] == expected, "InvalidResource", "job owner")
+        require(row.release_ps == 0, "IncompleteObservations", "component release")
+        require(
+            not row.blocking_predecessor_ids,
+            "AttributionMismatch",
+            "unrepresented job predecessors",
+        )
+        job_ready = max(
+            (
+                summaries[d.before].end_ps
+                for d in job.mapped_point.task_graph.dependencies
+                if d.after == tid
+            ),
+            default=0,
+        )
+        require(row.ready_ps == job_ready, "IncompleteObservations", "job readiness")
+        members = [x for x in activities.values() if x.job_id == tid]
+        require(bool(members), "IncompleteObservations", "job activities")
+        require(
+            row.start_ps == min(x.start_ps for x in members)
+            and row.end_ps == max(x.end_ps for x in members),
+            "IncompleteObservations",
+            "job activity span",
+        )
+    events = {x.observation_ordinal: x for x in obs.events.records}
+    require(set(x.job_id for x in activities.values()) == tasks.keys(), "IncompleteObservations")
+    for a in activities.values():
+        require(a.job_id in tasks and a.owner_id in owners, "InvalidResource")
+        task = tasks[a.job_id]
+        resource = owners[a.owner_id]
+        require(a.ready_ps <= a.start_ps <= a.end_ps <= r.duration_ps, "IncompleteObservations")
+        if isinstance(task, Compute):
+            require(
+                a.request_id is None
+                and a.subphase.startswith("compute_")
+                and resource == f"matrix:{task.core_id}",
+                "IncompleteObservations",
+            )
+            category = "overhead" if a.subphase == "compute_overhead" else "compute"
+            domain: str | None = "core"
+        elif isinstance(task, Barrier):
+            require(
+                a.request_id is None
+                and a.subphase == "barrier"
+                and resource == f"barrier:{task.id}",
+                "IncompleteObservations",
+            )
+            category, domain = "sync", "noc"
+        elif isinstance(task, Dma):
+            require(
+                a.request_id in declared and declared[a.request_id][0].id == task.id,
+                "IncompleteObservations",
+                "activity request",
+            )
+            assert a.request_id is not None
+            fragment = declared[a.request_id][1]
+            core_id = task.dma_engine_id // engines
+            allowed = (
+                {"request_noc", "response_noc", "dram_latency", "channel_service", "read_port"}
+                if task.direction == "read"
+                else {
+                    "request_noc",
+                    "response_noc",
+                    "dram_latency",
+                    "channel_service",
+                    "write_port",
+                    "ack",
+                }
+            )
+            require(a.subphase in allowed, "IncompleteObservations")
+            if a.subphase.endswith("_noc"):
+                expected_owner, category, domain = (
+                    f"router:0:{core_id // cols}:{core_id % cols}",
+                    "noc",
+                    "noc",
+                )
+            elif a.subphase in ("dram_latency", "channel_service"):
+                expected_owner, category = f"channel:{fragment.channel_id}", "memory"
+                domain = "dram" if a.subphase == "dram_latency" else None
+            else:
+                expected_owner, category, domain = f"dma_port:{core_id}", "memory", "core"
+            require(resource == expected_owner, "InvalidResource", "activity owner")
+        else:
+            require(isinstance(task, NocTransfer), "IncompleteObservations")
+            assert isinstance(task, NocTransfer)
+            require(
+                a.request_id == task.id and a.subphase == "unicast_noc", "IncompleteObservations"
+            )
+            buffers = {x.id: x for x in job.mapped_point.task_graph.buffers}
+            source_core = buffers[task.source.buffer_id].core_id
+            assert source_core is not None
+            require(
+                resource == f"router:0:{source_core // cols}:{source_core % cols}",
+                "InvalidResource",
+            )
+            category, domain = "noc", "noc"
+        require(
+            a.category == category and a.receiving_domain == domain,
+            "IncompleteObservations",
+            "activity category/domain",
+        )
+        occupied = a.kind == "service" and a.subphase not in ("dram_latency", "ack", "barrier")
+        if a.subphase.endswith("_noc"):
+            if isinstance(task, Dma):
+                assert a.request_id is not None
+                route_id = declared[a.request_id][1].route_id
+            else:
+                assert isinstance(task, NocTransfer)
+                route_id = task.route_id
+            occupied = a.kind == "service" and len(routes[route_id].core_ids) > 1
+        require(a.occupies_resource == occupied, "IncompleteObservations", "phase occupancy")
+        require(
+            a.kind != "alignment" or (domain is not None and not a.occupies_resource),
+            "IncompleteObservations",
+            "alignment is not busy",
+        )
+        require(
+            a.subphase not in ("dram_latency", "ack") or not a.occupies_resource,
+            "IncompleteObservations",
+            "latency is not channel service",
+        )
+        for ordinal, time in ((a.dispatch_ordinal, a.start_ps), (a.completion_ordinal, a.end_ps)):
+            require(ordinal in events, "IncompleteObservations", "missing activity dispatch")
+            e = events[ordinal]
+            require(
+                e.job_id == a.job_id and e.target_id == a.owner_id and e.t_ps == time,
+                "IncompleteObservations",
+                "activity dispatch join",
+            )
+        if a.kind == "alignment":
+            kinds = ("TASK_READY", "DEPENDENCY_READY")
+        elif a.subphase.startswith("compute_"):
+            kinds = ("OWNER_GRANT", "COMPUTE_DONE")
+        elif a.subphase.endswith("_noc"):
+            kinds = ("NOC_HEAD", "NOC_TAIL")
+        else:
+            kinds = {
+                "read_port": ("OWNER_GRANT", "DMA_DONE"),
+                "write_port": ("OWNER_GRANT", "MEM_RESP"),
+                "channel_service": ("MEM_REQ", "MEM_RESP"),
+                "dram_latency": ("MEM_REQ", "MEM_RESP"),
+                "ack": ("TASK_READY", "DMA_DONE"),
+                "barrier": ("SYNC_ARRIVE", "BARRIER_RELEASE"),
+            }[a.subphase]
+        require(
+            (events[a.dispatch_ordinal].kind, events[a.completion_ordinal].kind) == kinds,
+            "IncompleteObservations",
+            "activity event kind",
+        )
+        require(
+            a.dispatch_ordinal <= a.completion_ordinal, "IncompleteObservations", "endpoint order"
+        )
+        ordered(a.predecessors, lambda x: (x.activity_id, x.relation), "AttributionMismatch")
+        require(
+            a.start_ps == 0 or bool(a.predecessors), "AttributionMismatch", "missing tight cause"
+        )
+        for link in a.predecessors:
+            require(
+                link.activity_id in activities and link.activity_id != a.activity_id,
+                "AttributionMismatch",
+            )
+            before = activities[link.activity_id]
+            require(
+                before.end_ps == a.start_ps and before.completion_ordinal <= a.dispatch_ordinal,
+                "AttributionMismatch",
+                "non-tight predecessor",
+            )
+            if link.relation == "sequence":
+                require(
+                    previous.get(a.activity_id) == before.activity_id,
+                    "AttributionMismatch",
+                    "sequence endpoints",
+                )
+            elif link.relation == "dependency":
+                require(
+                    before.activity_id in last_ids
+                    and a.activity_id in first_ids
+                    and before.end_ps == summaries[before.job_id].end_ps
+                    and any(
+                        d.before == before.job_id and d.after == a.job_id
+                        for d in job.mapped_point.task_graph.dependencies
+                    ),
+                    "AttributionMismatch",
+                )
+            elif link.relation == "resource":
+                require(
+                    before.owner_id == a.owner_id
+                    and before.occupies_resource
+                    and owners[a.owner_id].startswith(("matrix:", "dma_port:", "channel:"))
+                    and (before.job_id, before.request_id) != (a.job_id, a.request_id)
+                    and (
+                        (a.subphase == "compute_overhead" and a.kind == "alignment")
+                        or (a.subphase in ("read_port", "write_port") and a.kind == "alignment")
+                        or (a.subphase == "channel_service" and a.kind == "service")
+                    ),
+                    "AttributionMismatch",
+                    "resource endpoints",
+                )
+            else:
+                require(
+                    before.activity_id in last_ids
+                    and a.activity_id in first_ids
+                    and before.request_id != a.request_id
+                    and before.request_id in declared
+                    and a.request_id in declared
+                    and declared[before.request_id][0].dma_engine_id
+                    == declared[a.request_id][0].dma_engine_id,
+                    "AttributionMismatch",
+                    "credit endpoints",
+                )
+    require(
+        set(events)
+        == {n for x in activities.values() for n in (x.dispatch_ordinal, x.completion_ordinal)},
+        "IncompleteObservations",
+        "unreferenced event",
+    )
+    represented = set()
+    for interval in obs.resource_intervals.records:
+        require(interval.activity_id in activities, "IncompleteObservations")
+        a = activities[interval.activity_id]
+        require(
+            a.occupies_resource
+            and interval.activity_id not in represented
+            and (
+                interval.owner_id,
+                interval.job_id,
+                interval.start_ps,
+                interval.end_ps,
+                interval.activity,
+                interval.limiting_resource_id,
+            )
+            == (a.owner_id, a.job_id, a.start_ps, a.end_ps, a.subphase, a.owner_id),
+            "IncompleteObservations",
+            "occupied activity join",
+        )
+        represented.add(a.activity_id)
+        lo, hi = interval.service_start_ps_ratio, interval.service_end_ps_ratio
+        require((lo is not None) == (hi is not None), "IncompleteObservations")
+        require((lo is not None) == (a.subphase == "channel_service"), "IncompleteObservations")
+        if lo is not None and hi is not None:
+            start, end = (
+                Fraction(lo.numerator, lo.denominator),
+                Fraction(hi.numerator, hi.denominator),
+            )
+            require(
+                0 <= start <= end
+                and -(-start.numerator // start.denominator) == a.start_ps
+                and -(-end.numerator // end.denominator) == a.end_ps,
+                "IncompleteObservations",
+            )
+    require(
+        represented == {a.activity_id for a in activities.values() if a.occupies_resource},
+        "IncompleteObservations",
+        "missing occupied activity",
+    )
+    for q in obs.queue_membership.records:
+        require(
+            q.owner_id in owners
+            and q.leave_ps is not None
+            and q.enter_ps <= q.leave_ps <= r.duration_ps,
             "IncompleteObservations",
         )
-    return r
+        if q.queue_id.startswith(("channel_service:", "dma_inflight:")):
+            require(
+                q.item_id in declared and q.clock_domain is None and q.activity_id is None,
+                "IncompleteObservations",
+                "nonclocked queue binding",
+            )
+            t, f = declared[q.item_id]
+            if q.queue_id.startswith("channel_service:"):
+                require(
+                    q.queue_id == f"channel_service:{f.channel_id}"
+                    and owners[q.owner_id] == f"channel:{f.channel_id}"
+                    and q.population in ("waiting", "service"),
+                    "IncompleteObservations",
+                )
+            else:
+                require(
+                    q.queue_id == f"dma_inflight:{t.dma_engine_id}"
+                    and owners[q.owner_id]
+                    == f"dma:{t.dma_engine_id // engines}:{t.dma_engine_id % engines}"
+                    and q.population == "inflight",
+                    "IncompleteObservations",
+                )
+        else:
+            require(q.activity_id in activities, "IncompleteObservations", "queue activity")
+            assert q.activity_id is not None
+            a = activities[q.activity_id]
+            require(
+                q.queue_id == f"activity:{a.subphase}:{a.owner_id}"
+                and q.item_id == (a.request_id or a.job_id)
+                and q.owner_id == a.owner_id
+                and q.clock_domain == a.receiving_domain
+                and q.clock_domain is not None
+                and q.population in ("waiting", "service"),
+                "IncompleteObservations",
+            )
+            require(
+                (q.enter_ps, q.leave_ps)
+                == (
+                    (a.ready_ps, a.start_ps)
+                    if q.population == "waiting"
+                    else (a.start_ps, a.end_ps)
+                ),
+                "IncompleteObservations",
+            )
+    for clock in obs.clocks.records:
+        require(clock.activity_id in activities, "IncompleteObservations")
+        a = activities[clock.activity_id]
+        require(
+            clock.job_id == a.job_id
+            and clock.domain == a.receiving_domain
+            and clock.grant_ps == a.start_ps
+            and clock.completion_ps == a.end_ps,
+            "IncompleteObservations",
+            "clock activity join",
+        )
+
+    def tie(a: ComponentActivity) -> tuple[int, str, str, str, str]:
+        return a.owner_id, a.job_id, a.request_id or "", a.subphase, a.activity_id
+
+    terminal = min(
+        (a for a in activities.values() if a.end_ps == r.duration_ps), key=tie, default=None
+    )
+    require(terminal is not None, "AttributionMismatch", "missing makespan activity")
+    assert terminal is not None
+    chain = []
+    current = terminal
+    while True:
+        if current.end_ps > current.start_ps:
+            chain.append((current.activity_id, current.start_ps, current.end_ps))
+        if not current.predecessors:
+            break
+        current = min((activities[p.activity_id] for p in current.predecessors), key=tie)
+    require(
+        [(c.activity_id, c.start_ps, c.end_ps) for c in obs.critical_path.records]
+        == list(reversed(chain)),
+        "AttributionMismatch",
+        "tight canonical activity path",
+    )
+    for c in obs.critical_path.records:
+        require(
+            c.predecessor_id is None, "AttributionMismatch", "unrepresented critical predecessor"
+        )
+        require(c.activity_id in activities, "AttributionMismatch")
+        a = activities[c.activity_id]
+        require(
+            c.kind == "service"
+            and c.cause_job_id == a.job_id
+            and c.category == a.category
+            and c.limiting_resource_id == a.owner_id
+            and a.start_ps <= c.start_ps < c.end_ps <= a.end_ps,
+            "AttributionMismatch",
+        )
 
 
 def validate_fixed_delay_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
@@ -1556,6 +2075,12 @@ def admit(
         entries = [e for e in prof.entries if e.case_id == a.case_id]
         require(len(entries) == 1, "TestProfileMismatch")
         e = entries[0]
+        if isinstance(e, PolicyProfileEntry):
+            require(
+                b.mapping_policy == e.mapping_policy,
+                "TestVariantNotAdmitted",
+                "profile mapping policy",
+            )
         require(len(points) == 1, "TestVariantNotAdmitted")
         p = points[0]
         require(
@@ -1677,9 +2202,43 @@ def validate_resources(b: MappedBundle, p: MappedPoint) -> None:
                 p.initial_state != "cold" or buf.initial_residency == "uninitialized",
                 "UnsupportedInitialState",
             )
+    for buf in g.buffers:
+        if buf.space == "accumulator" and b.mapping_policy.version == "1":
+            require(
+                not buf.final_consumer_ids, "UnsupportedMapping", "transient accumulator policy"
+            )
+        if (
+            buf.space == "accumulator"
+            and b.mapping_policy.version == "2"
+            and buf.producer_id is not None
+        ):
+            require(
+                isinstance(b.scope, ComponentScope) and b.mapping_policy.version == "2",
+                "UnsupportedMapping",
+                "transient accumulators require ws-rowsplit@2",
+            )
+            producer = jobs[buf.producer_id]
+            require(
+                isinstance(producer, Compute) and producer.accumulator_buffer_id == buf.id,
+                "InvalidDependency",
+                "accumulator producer must use this buffer",
+            )
+            assert isinstance(producer, Compute)
+            require(producer.core_id == buf.core_id, "InvalidResource", "accumulator owner")
+            require(buf.initial_residency == "uninitialized", "InvalidDependency")
     readers: dict[str, set[str]] = {key: set() for key in buffers}
     for job in g.jobs:
         if isinstance(job, Compute):
+            acc = buffers.get(job.accumulator_buffer_id)
+            require(acc is not None, "InvalidResource")
+            assert acc is not None
+            if b.mapping_policy.version == "2" and acc.producer_id is not None:
+                require(
+                    acc.producer_id == job.id or acc.producer_id in ancestors[job.id],
+                    "InvalidDependency",
+                    "accumulator use before production",
+                )
+                readers[acc.id].add(job.id)
             for name in ("X", "W"):
                 buffer_key = job.operand_buffers.get(name)
                 require(buffer_key in buffers, "InvalidResource")
@@ -1738,7 +2297,7 @@ def validate_resources(b: MappedBundle, p: MappedPoint) -> None:
         )
         require(
             b.mapping_policy.name == "ws-rowsplit"
-            and b.mapping_policy.version == "1"
+            and b.mapping_policy.version in ("1", "2")
             and b.mapping_policy.buffer_depth == 2,
             "UnsupportedMapping",
         )

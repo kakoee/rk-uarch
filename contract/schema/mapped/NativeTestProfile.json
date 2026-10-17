@@ -714,6 +714,36 @@
       "title": "Interleave",
       "type": "object"
     },
+    "MappingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "buffer_depth": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Buffer Depth",
+          "type": "integer"
+        },
+        "name": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "buffer_depth"
+      ],
+      "title": "MappingPolicy",
+      "type": "object"
+    },
     "MatrixEngine": {
       "additionalProperties": false,
       "properties": {
@@ -854,6 +884,176 @@
         "block_scale_bytes"
       ],
       "title": "NumericFormat",
+      "type": "object"
+    },
+    "PolicyProfileEntry": {
+      "additionalProperties": false,
+      "description": "Explicit policy promise for new component profiles; legacy entries stay unchanged.",
+      "properties": {
+        "allowed_job_kinds": {
+          "items": {
+            "enum": [
+              "compute",
+              "dma",
+              "noc_transfer",
+              "barrier",
+              "fixed_delay"
+            ],
+            "type": "string"
+          },
+          "title": "Allowed Job Kinds",
+          "type": "array"
+        },
+        "case_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_selection_revision": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Case Selection Revision",
+          "type": "string"
+        },
+        "checkpoint": {
+          "enum": [
+            "K2",
+            "B"
+          ],
+          "title": "Checkpoint",
+          "type": "string"
+        },
+        "clock_setup_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Clock Setup Hash",
+          "type": "string"
+        },
+        "expected_outcome": {
+          "enum": [
+            "success",
+            "UnsupportedProtocol",
+            "UnsupportedWorkloadScope",
+            "UnsupportedPrecision",
+            "UnsupportedRankScope",
+            "UnsupportedOperator",
+            "InvalidOperatorSchema",
+            "UnsupportedInitialState",
+            "UnsupportedShape",
+            "UnsupportedScope",
+            "UnsupportedMapping",
+            "SramCapacityExceeded",
+            "LiveBufferAlias",
+            "InvalidResource",
+            "InvalidRoute",
+            "InvalidTransfer",
+            "InvalidDependency",
+            "InvalidCoverage",
+            "ContentHashMismatch",
+            "CoefficientHashMismatch",
+            "HardwareMismatch",
+            "MissingCoverage",
+            "TestOnlyScope",
+            "IncompleteExecution",
+            "UnsupportedFidelity",
+            "UnsupportedHardware",
+            "UnsupportedCapability",
+            "IncompleteObservations",
+            "UnsupportedFrequency",
+            "TimeOverflow",
+            "TestProfileMismatch",
+            "TestVariantNotAdmitted",
+            "UnsupportedCheckpointScope",
+            "TestOnlyHardware",
+            "AdmissionMismatch",
+            "CapacityExceeded",
+            "InvalidBank"
+          ],
+          "title": "Expected Outcome",
+          "type": "string"
+        },
+        "freq_hz": {
+          "$ref": "#/$defs/Frequencies"
+        },
+        "frequency_ratio": {
+          "gt": 0,
+          "title": "Frequency Ratio",
+          "type": "number"
+        },
+        "graph_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Graph Hash",
+          "type": "string"
+        },
+        "hardware_spec": {
+          "$ref": "#/$defs/HardwareSpec"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "initial_state": {
+          "enum": [
+            "cold",
+            "steady",
+            "fixture_cold",
+            "fixture_resident"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "mapping_policy": {
+          "$ref": "#/$defs/MappingPolicy"
+        },
+        "point_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Point Hash",
+          "type": "string"
+        },
+        "priming_iterations": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Priming Iterations",
+          "type": "integer"
+        },
+        "scope": {
+          "enum": [
+            "component",
+            "prepared_model",
+            "kernel_fixture",
+            "transport_fixture"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "seed": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "case_id",
+        "checkpoint",
+        "scope",
+        "initial_state",
+        "priming_iterations",
+        "hardware_spec_hash",
+        "hardware_spec",
+        "frequency_ratio",
+        "freq_hz",
+        "graph_hash",
+        "point_hash",
+        "allowed_job_kinds",
+        "clock_setup_hash",
+        "expected_outcome",
+        "seed",
+        "case_selection_revision",
+        "mapping_policy"
+      ],
+      "title": "PolicyProfileEntry",
       "type": "object"
     },
     "PrecisionFormat": {
@@ -1240,14 +1440,24 @@
   "properties": {
     "entries": {
       "items": {
-        "$ref": "#/$defs/ProfileEntry"
+        "anyOf": [
+          {
+            "$ref": "#/$defs/PolicyProfileEntry"
+          },
+          {
+            "$ref": "#/$defs/ProfileEntry"
+          }
+        ]
       },
       "minItems": 1,
       "title": "Entries",
       "type": "array"
     },
     "format": {
-      "const": "uarch-native-test-profile/1",
+      "enum": [
+        "uarch-native-test-profile/1",
+        "uarch-native-test-profile/2"
+      ],
       "title": "Format",
       "type": "string"
     },

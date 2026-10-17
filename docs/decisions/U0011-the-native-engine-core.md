@@ -440,3 +440,213 @@ includes startup, processing and final checks. No additional processing allowanc
 granted. The separately proposed bounded retry option requires its own actual confirmation
 and concrete fresh-output handoff before any retry. U0002 gains only the supplied narrow
 cross-reference; canonical currentness and lifecycle requirements are unchanged.
+
+
+## Proposed component lifetime and observation completion (not a release)
+
+This section becomes normative only after human acceptance and protected installation of
+U4-A-component-stage2-v1's exact combined postimages. It grants neither component native
+implementation/build entry nor runtime execution authority; the separate reconciled K2 and
+scoped B release remain necessary. Human worksheet workings gate applicable L1 acceptance,
+not this preparation. Existing accepted tools, scope and dependencies are not voted again.
+
+Admit explicit ws-rowsplit@2 alongside unchanged @1. @1 retains persistent identical-size
+accumulators (no terminal readers); its mapper/default bytes remain unchanged. Historical
+@1 producer metadata remains inert for accumulator lifetime readers, including installed
+fixtures naming their compute as producer. Only explicit @2 activates transient semantics.
+@2 permits transient exact-size accumulator allocations: producer must be a compute that
+actually names that accumulator, on its core, with uninitialized initial residency. Every
+compute using it is a lifetime reader, follows that producer or is the producer, and remains
+subject to exact FP32 4*M*N size. Terminal consumers are precisely the maximal readers in
+the dependency DAG. Distinct overlapping allocations are legal only if ALL terminal readers
+of one precede the other's producer. Matrix serialization alone is not a lifetime proof.
+An unrelated DMA, barrier or compute using another accumulator cannot manufacture production.
+
+The @2 mapper allocates ALL SRAM and HBM operands in min-ID Kahn topological operator
+order, then tile order; stable operator prefixes still derive from sorted operator IDs.
+This changes operand offsets even on uniform-footprint cores when dependency order differs
+from ID order. For two uniform 256³ ops a→(depends on b), b's operands are allocated before
+a's under @2; @1 retains a-before-b ID placement. The @2 mapper keeps persistent scratch
+on cores with only one footprint. Heterogeneous
+cores use exact-size per-compute transient buffers at offset0 and explicit compute-to-compute
+edges in stable topological operator order (ID ties), then tile order. Existing op dependencies
+remain; different cores and DMA may overlap. Imported valid placements need not use this
+strategy. No capacity enlargement, spill, retile, K split, padding or scope waiver follows.
+
+Component results require uarch-native-observations/2; fixed-delay /1 remains byte/shape
+compatible. /2 adds a typed activity table and explicit activity references on clocks,
+resource intervals, ordinary queues and critical intervals. Request identity is a field,
+not a suffix hidden in an activity string. A compute/barrier activity has null request_id;
+DMA activities name an exact declared fragment; unicast uses its declared job ID. Activity
+IDs are unique stable strings and are not parsed to infer causality. Subphase, kind, owner,
+category and receiving domain are explicit. Zero-duration activities remain represented.
+
+Activities record ready, actual start and end, dispatch/completion observation ordinals,
+occupied status and typed tight predecessor links. Both ordinals join actual dispatched
+EventObservation records by job, owner, time and the endpoint kinds specified below. Job observations join the declared graph
+and actual completed state; request observations join declared fragment/job/engine/direction,
+buffers, bytes and route. Aggregate counts derive from completion, never declared work alone.
+Resource records cover precisely occupied activities; alignment/waiting does not invent busy
+intervals. DRAM latency and acknowledgement alignment are not channel/core-port service.
+NoC0 latency and DMA inflight can overlap. Busy time is half-open union, not sum.
+
+Receiving domains are core for compute, read/write ports and acknowledgement; noc for
+request/response/unicast hops and barriers; dram for DRAM latency; null for rational channel
+service. Alignment is a separate nonoccupied activity of the receiving subphase and category.
+Every clocked subphase has one service activity and one separate alignment activity,
+including zero-length alignment, with one exact clock record for each. Rational channel
+service and zero-hop routing have no alignment or clock record. Service ready follows its
+alignment; alignment ready follows the prior subphase (or request issue/job dependency readiness for
+the first). Actual resource acquisition may occur later than that readiness. Clock records reference the exact activity. Existing E3/E4 next_edge and
+zero-owned-duration laws govern; zero-hop movement stays at arrival without edge alignment.
+Channel exact start/end ratios are reduced; published integer endpoints are ceilings. Never
+feed integer publication rounding back into channel service. Timing formulas remain E3/E4.
+
+Channel queues are channel_service:<channel>, exact declared fragment and channel owner,
+waiting/service only, clock null. DMA queues are dma_inflight:<flattened-engine>, exact
+fragment and DMA owner, inflight only, clock null. Ordinary queues are
+activity:<subphase>:<owner>, reference the exact activity and request (or compute/barrier job),
+use its receiving domain and waiting [ready,start] or service [start,end]. Service population
+means active mechanism, including nonoccupied alignment/latency, not resource busy time;
+only occupies_resource selects busy intervals. Ordinary service rows are explicit; zero
+waiting rows may be omitted, nonempty waits may not. Channel waiting/service and DMA
+inflight each require exactly one row per declared request. The same identity,
+owner and population laws apply before checking domains; nonnull cannot escape validation.
+Finite queue windows clip initial/terminal members, count events at start not end, retain
+separate waiting/service/inflight populations and return null residence for zero flow.
+
+Transfers use boundary IDs request_noc, dram, response_noc and core_port for each DMA
+request (write core_port precedes request_noc; read core_port follows response_noc), and
+unicast_noc for unicast. Direction always remains read/write/unicast from the declared
+request; request/ack control hops carry zero payload/transaction bytes, payload-bearing
+NoC/core-port boundaries carry payload bytes and zero HBM transaction bytes, dram carries
+both declared payload and rounded transaction bytes. Boundary enter joins the first subphase's ready time (before its receiving wait/alignment)
+and leave joins the last service completion; dram spans latency readiness through channel
+completion. Allocation owners are
+sram:<core>, matrix:<core> for accumulator, and channel:0 for HBM
+capacity accounting (HBM allocation is shared address capacity, not channel-local capacity).
+Allocation interval covers every actual use; explicit transient acc begins at its producer
+grant and frees at its last completed terminal reader; persistent scratch/reservations stay
+live through run end. Initial inventory records declared preloaded state.
+
+Causal links are explicit sequence, dependency, resource or credit relations. Every supplied
+predecessor ends at the activity start and is a legal actual cause; historical idle predecessors
+are forbidden. Zero-length links form a DAG and cannot be dropped. Select the terminal
+activity ending at makespan and each tied tight predecessor by ascending
+(owner_id,job_id,request_id-or-empty,subphase,activity_id). Reverse that path and omit only
+zero-length intervals to obtain the critical partition. Waiting follows the actual blocking
+activity, not an invented busy wait. Category follows the receiving mechanism, preserving
+compute overhead separately. Independent checker must verify candidate completeness and
+actual blocker eligibility from transitions, not just the total duration or these strings.
+
+Profile expected_outcome is an admission predicate, not a resource-guard waiver. Retain
+expected-negative profile cases as TestVariantNotAdmitted controls. Public semantic negatives
+require separately reviewed exact input hashes in a success-admission profile and an external
+immutable expected-refusal selection; they must fail resource validation before job execution.
+No mutable caller rehash, embedded trust anchor, bypass flag or hidden trust is authorized.
+Synthetic profiles/results remain unit-only evidence. Their acceptance is not native success.
+
+### Proposed Stage 2 structural completion
+
+All alignment records are nonoccupying, with the same owner/category/receiving domain as
+their service. Alignment dispatch/completion kinds are TASK_READY / DEPENDENCY_READY.
+No alignment exists for channel service or zero-hop NoC. Each service has these properties:
+
+| Subphase | Owner | Category | Domain | Occupies | Dispatch / completion event |
+| --- | --- | --- | --- | --- | --- |
+| compute_overhead | matrix:core | overhead | core | true | OWNER_GRANT / COMPUTE_DONE |
+| compute_stage, compute_wave, compute_drain | matrix:core | compute | core | true | OWNER_GRANT / COMPUTE_DONE |
+| read_port | dma_port:core | memory | core | true | OWNER_GRANT / DMA_DONE |
+| write_port | dma_port:core | memory | core | true | OWNER_GRANT / MEM_RESP |
+| channel_service | fragment channel | memory | null | true | MEM_REQ / MEM_RESP |
+| dram_latency | fragment channel | memory | dram | false | MEM_REQ / MEM_RESP |
+| request_noc, response_noc, unicast_noc | local/source router | noc | noc | hops > 0 | NOC_HEAD / NOC_TAIL |
+| ack | dma_port:core | memory | core | false | TASK_READY / DMA_DONE |
+| barrier | canonical barrier owner | sync | noc | false | SYNC_ARRIVE / BARRIER_RELEASE |
+
+Occupancy is determined from declared phase/route, never from claimed duration. Compute and
+ports have an occupied row even for zero duration. Positive-hop NoC occupancy reports the
+union of in-flight router-attributed latency; it does NOT serialize hops or introduce a
+bandwidth resource. Zero-hop service remains a nonoccupying zero-duration causal record.
+This NoC convention is proposed for explicit human semantic acceptance with D1. The independent checker must check channel
+and port arithmetic/arbitration directly over service activities even if a row is omitted.
+Structural checks independently require the exact occupied-row bijection. Rational channel
+endpoints remain on those mandatory rows; published integer endpoints are their ceilings.
+
+Event references require exact job/owner/time/kind joins, separate dispatch and completion
+ordinals, including zero duration. Every event must be referenced by a phase endpoint; no
+unconstrained STAT_SAMPLE records. Global event ordering remains the existing observation
+order law. The phase value retains its scheduler ordering role; it is not a substitute for
+endpoint kind. No new service-duration law follows from endpoint encoding.
+
+## Transitions and structural eligibility (F2/F3)
+
+Phase sequences: compute overhead→stage→wave→drain; DMA read request_noc→dram_latency→
+channel_service→response_noc→read_port; DMA write write_port→request_noc→dram_latency→
+channel_service→response_noc→ack; unicast and barrier each have one phase. Expand each phase
+as alignment then service when alignment is present. Phase identities must be unique per
+(job, request, subphase, kind); The independent checker independently requires the exact admitted inventory.
+
+A `sequence` link is only from the immediate preceding activity in this expanded sequence.
+A `dependency` link is from a terminal activity of a declared predecessor job to a first
+activity of the dependent job (for DMA, a request's first activity), with predecessor end
+also equal to predecessor job completion. A `credit` link is only from a different request's
+last activity to a request's first activity on the same DMA engine. A `resource` link has the
+same owner and an occupying predecessor from a different job/request. Its successor is
+the first compute alignment (whole-tile ownership), port alignment, or channel service.
+Only matrix, port and channel owners are contended; same-tile phases use sequence links. No NoC resource links.
+All links remain tight (predecessor end = successor start), with preceding completion ordinal
+no greater than dispatch ordinal. Cycles, including zero-duration multi-activity cycles,
+are refused. Nonzero-start activities require a tight cause even off the critical chain.
+
+Structural eligibility is necessary but not sufficient. The independent checker derives the COMPLETE tight cause
+set from transitions, declared dependencies, actual previous resource occupant and exhausted
+credit release. Merely sharing engine/owner/time is insufficient. Credit completeness uses
+issue/release state at the engine limit; first/last eligibility alone does not prove exhaustion.
+Resource causes must actually gate the grant, and cannot be borrowed from a later activity.
+Preserve same-time ties and zero-duration links. Canonical chosen path uses existing stable
+(owner, job, request-or-empty, subphase, activity) order among eligible causes.
+
+## Job summaries and legacy fields (F8)
+
+Canonical job owners: Compute matrix:core; DMA dma:core:engine; NocTransfer source router;
+Barrier barrier:job. Component tasks declare no delayed release: release_ps MUST be 0.
+ready_ps is max declared predecessor job completion (0 with none); start/end are min first
+activity start / max final activity end across that job's request sequences. DMA summaries
+also join issue/complete records. Job readiness may precede credit acquisition.
+
+The `/1` scalar causal fields cannot express `/2` activity/request transitions. In `/2`,
+job.blocking_predecessor_ids MUST be empty and critical.predecessor_id MUST be null. They
+are explicitly unrepresented; typed activity.predecessors is the causal witness. `/1`
+meaning/validation is unchanged. No new schema field is needed for this decision.
+
+
+Ports arbitrate by existing E4 FIFO (ready time, flattened DMA engine ID, request ID).
+Zero-duration endpoints retain separate dispatch/completion events. The explicit cycle
+check gives a stable early refusal; strict endpoint ordering also precludes a valid cycle.
+
+### Proposed optional profile-version binding decision
+
+Current profile/1 promises graph and point identity, not the bundle mapping policy. A policy
+relabel with unchanged graph/point remains admissible under that historical promise. Hashing
+the whole request elsewhere does not enlarge that promise. Human decision F11 may retain
+this behavior, relying on a separately authenticated execution selection that explicitly
+binds policy, or accept the following minimal extension for new B admissions.
+
+Recommended profile/2 retains the profile carrier and required fields and extends each entry
+with required `mapping_policy: {name, version, buffer_depth}`. Entries must be checkpoint B
+and scope component or transport_fixture. All three policy fields must equal the bundle
+before other profile variant checks (`TestVariantNotAdmitted: profile mapping policy`).
+Format/entry mixing is `TestProfileMismatch: profile policy format`. The existing external
+profile hash authenticates these bytes. A caller cannot promote a rehashed profile into a
+trusted one. Profile/1 entries and serialization remain unchanged, including historical K2
+and @1 anchors. A profile/2 entry can bind either @1 or @2 for a new reviewed case.
+
+This proposed implementation accepts both formats; it cannot infer whether authority is old
+or newly approved. Future component authority/selection must explicitly require profile/2
+if that option is chosen. No fallback to profile/1 is allowed for such a selection. Current
+historical controls retain profile/1 and graph/point-only meaning. Profile/2 needs new profile
+hashes, bundle/job hashes and future external anchors; graph/point need not change. No engine,
+build, runtime authority or native result is created by this proposal. If the human retains
+profile/1, omit the isolated PolicyProfileEntry/profile-format/admission additions and their
+schema deltas/tests before freezing the accepted candidate; do not silently claim binding.

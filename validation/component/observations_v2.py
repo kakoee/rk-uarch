@@ -20,6 +20,7 @@ from validation.component.checks import (
     unique,
 )
 from validation.component.phase_laws import channel
+from validation.component.transition_checks import check_transitions, phase_binding
 
 
 def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> dict[str, Any]:
@@ -48,7 +49,7 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
         need(key not in target, "duplicate mechanism")
         target[key] = a
         need(
-            jobs[a["job_id"]]["start_ps"]
+            jobs[a["job_id"]]["ready_ps"]
             <= a["ready_ps"]
             <= a["end_ps"]
             <= jobs[a["job_id"]]["end_ps"],
@@ -76,6 +77,33 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
         {k for k, v in requests.items() if v["direction"] != "unicast"} == declared.keys(),
         "declared request inventory",
     )
+    unicasts = {t["id"]: t for t in tasks.values() if t["kind"] == "noc_transfer"}
+    need(requests.keys() == declared.keys() | unicasts.keys(), "complete request inventory")
+    for req, task in unicasts.items():
+        row = requests[req]
+        need(
+            (
+                row["job_id"],
+                row["direction"],
+                row["dma_engine_id"],
+                row["source_buffer_id"],
+                row["destination_buffer_id"],
+                row["payload_bytes"],
+                row["transaction_bytes"],
+                row["route_id"],
+            )
+            == (
+                req,
+                "unicast",
+                None,
+                task["source"]["buffer_id"],
+                task["destination"]["buffer_id"],
+                task["payload_bytes"],
+                0,
+                task["route_id"],
+            ),
+            "unicast request binding",
+        )
     check_credits(list(requests.values()), val(core["dma"]["max_outstanding"]))
     phase_specs: dict[tuple[str, str | None, str], tuple[int | None, str | None]] = {}
     sequences: list[list[tuple[str, str | None, str]]] = []
@@ -156,7 +184,7 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
         need(align is not None, "missing receiving alignment")
         assert align is not None and cycles is not None
         need(a["ready_ps"] == align["end_ps"], "service readiness after alignment")
-        if key[2] not in ("read_port", "write_port"):
+        if key[2] not in ("read_port", "write_port", "compute_overhead"):
             need(align["start_ps"] == align["ready_ps"], "uncontended alignment grant")
         hz = j["freq_hz"][domain]
         need(
@@ -190,7 +218,7 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
     need(set(aligns) <= set(phase_specs), "alignment inventory")
     for sequence in sequences:
         tid, req, _ = sequence[0]
-        start = requests[req]["issue_ps"] if req in requests else jobs[tid]["start_ps"]
+        start = requests[req]["issue_ps"] if req in requests else jobs[tid]["ready_ps"]
         for key in sequence:
             a = aligns.get(key, services[key])
             need(a["ready_ps"] == start, "phase ready transition")
@@ -200,63 +228,127 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
         else:
             need(start == jobs[tid]["end_ps"], "job completion mechanism")
     owners = {x["owner_id"]: x["resource"] for x in j["owners"]}
-    resources = obs["resource_intervals"]["records"]
+    resources = unique(obs["resource_intervals"]["records"], "activity_id")
+    # Derive service laws from the complete input inventory, never occupancy flags/rows.
     groups: dict[int, list[Any]] = defaultdict(list)
-    for res in resources:
-        groups[res["owner_id"]].append(res)
+    required = set()
+    for a in acts.values():
+        owner_name, category, domain, occupied = phase_binding(j, a)
+        need(owners[a["owner_id"]] == owner_name, "activity owner")
+        need(
+            (a["category"], a["receiving_domain"]) == (category, domain), "activity category/domain"
+        )
+        if occupied:
+            required.add(a["activity_id"])
+            groups[a["owner_id"]].append(a)
     for owner, pieces in groups.items():
         if owners[owner].startswith(("matrix:", "dma_port:")):
-            ordered = sorted(pieces, key=lambda x: (x["start_ps"], x["end_ps"], x["activity_id"]))
+            ordered = sorted(pieces, key=lambda x: (x["start_ps"], x["dispatch_ordinal"]))
             need(
                 all(
                     a["end_ps"] <= b["start_ps"] for a, b in zip(ordered, ordered[1:], strict=False)
                 ),
-                "exclusive occupied intervals",
+                "exclusive mechanism intervals",
             )
-        elif owners[owner].startswith("channel:"):
-            exact = []
-            for res in pieces:
-                lo, hi = (
-                    Fraction(res[k]["numerator"], res[k]["denominator"])
-                    for k in ("service_start_ps_ratio", "service_end_ps_ratio")
+            if owners[owner].startswith("dma_port:"):
+
+                def port_ready(a: Any) -> Any:
+                    return aligns[a["job_id"], a["request_id"], a["subphase"]]
+
+                ready_order = sorted(
+                    pieces,
+                    key=lambda a: (
+                        port_ready(a)["ready_ps"],
+                        declared[a["request_id"]][0]["dma_engine_id"],
+                        a["request_id"],
+                    ),
                 )
-                a = acts[res["activity_id"]]
-                task, fragment = declared[a["request_id"]]
-                channel(lo, hi, fragment["transaction_bytes"], bandwidth)
-                exact.append((lo, hi, a))
-            observed_order = sorted(exact, key=lambda x: (x[0], x[2]["request_id"]))
+                need(
+                    [a["activity_id"] for a in ordered] == [a["activity_id"] for a in ready_order],
+                    "port FIFO tie",
+                )
+                previous = 0
+                for a in ordered:
+                    alignment = port_ready(a)
+                    need(
+                        alignment["start_ps"] == max(alignment["ready_ps"], previous),
+                        "port eligible grant",
+                    )
+                    previous = a["end_ps"]
+        elif owners[owner].startswith("channel:"):
             ready_order = sorted(
-                exact,
-                key=lambda x: (
-                    services[x[2]["job_id"], x[2]["request_id"], "dram_latency"]["end_ps"],
-                    declared[x[2]["request_id"]][0]["dma_engine_id"],
-                    x[2]["request_id"],
+                pieces,
+                key=lambda a: (
+                    a["ready_ps"],
+                    declared[a["request_id"]][0]["dma_engine_id"],
+                    a["request_id"],
                 ),
             )
+            observed_order = sorted(pieces, key=lambda a: (a["start_ps"], a["dispatch_ordinal"]))
             need(
-                [x[2]["activity_id"] for x in observed_order]
-                == [x[2]["activity_id"] for x in ready_order],
+                [a["activity_id"] for a in observed_order]
+                == [a["activity_id"] for a in ready_order],
                 "channel FIFO tie",
             )
-            previous = Fraction(0)
-            for lo, hi, a in sorted(exact, key=lambda x: (x[0], x[2]["request_id"])):
-                latency = services[a["job_id"], a["request_id"], "dram_latency"]["end_ps"]
-                need(lo == max(Fraction(latency), previous), "rational channel carry/readiness")
-                previous = hi
-    for key, a in aligns.items():
-        if key[2] in ("read_port", "write_port"):
-            prior = [
-                x["end_ps"]
-                for x in groups[a["owner_id"]]
-                if x["end_ps"] <= a["start_ps"] and x["activity_id"] != services[key]["activity_id"]
-            ]
-            need(a["start_ps"] == max(a["ready_ps"], max(prior, default=0)), "port eligible grant")
+            previous_exact = Fraction(0)
+            for a in observed_order:
+                _, fragment = declared[a["request_id"]]
+                lo = max(Fraction(a["ready_ps"]), previous_exact)
+                hi = lo + fragment["transaction_bytes"] * 10**12 / bandwidth
+                need(
+                    (a["start_ps"], a["end_ps"]) == (ceil(lo), ceil(hi)),
+                    "channel integer mechanism",
+                )
+                res = resources.get(a["activity_id"])
+                if res is not None:
+                    supplied_lo, supplied_hi = (
+                        Fraction(res[k]["numerator"], res[k]["denominator"])
+                        for k in ("service_start_ps_ratio", "service_end_ps_ratio")
+                    )
+                    channel(supplied_lo, supplied_hi, fragment["transaction_bytes"], bandwidth)
+                    need(supplied_lo == lo, "rational channel carry/readiness")
+                previous_exact = hi
+    need(
+        all(a["occupies_resource"] == (a["activity_id"] in required) for a in acts.values()),
+        "required occupancy",
+    )
+    need(resources.keys() == required, "occupied row inventory")
+    for aid, res in resources.items():
+        a = acts[aid]
+        need(
+            (
+                res["owner_id"],
+                res["job_id"],
+                res["start_ps"],
+                res["end_ps"],
+                res["activity"],
+                res["limiting_resource_id"],
+            )
+            == (
+                a["owner_id"],
+                a["job_id"],
+                a["start_ps"],
+                a["end_ps"],
+                a["subphase"],
+                a["owner_id"],
+            ),
+            "occupied row binding",
+        )
     for busy in r["busy_time_ps"]:
         need(
             busy["busy_time_ps"]
-            == union_time((x["start_ps"], x["end_ps"]) for x in groups[busy["owner_id"]]),
+            == union_time((a["start_ps"], a["end_ps"]) for a in groups[busy["owner_id"]]),
             "busy union",
         )
+    expanded = [
+        [
+            a
+            for key in seq
+            for a in ([aligns[key], services[key]] if key in aligns else [services[key]])
+        ]
+        for seq in sequences
+    ]
+    check_transitions(j, r, expanded)
     queues = obs["queue_membership"]["records"]
     keys = [(q["queue_id"], q["item_id"], q["population"], q["activity_id"]) for q in queues]
     need(len(set(keys)) == len(keys), "queue population uniqueness")
@@ -287,6 +379,37 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
                 len(matches) == 1
                 and (matches[0]["enter_ps"], matches[0]["leave_ps"]) == (begin, end),
                 "channel population lifecycle",
+            )
+    engines = val(core["dma"]["engines"])
+    populations: tuple[str, ...]
+    for q in queues:
+        if q["activity_id"] is None:
+            need(q["item_id"] in declared, "nonclocked request binding")
+            queue_task, fragment = declared[q["item_id"]]
+            if q["queue_id"].startswith("channel_service:"):
+                name, resource, populations = (
+                    f"channel_service:{fragment['channel_id']}",
+                    f"channel:{fragment['channel_id']}",
+                    ("waiting", "service"),
+                )
+            else:
+                engine = queue_task["dma_engine_id"]
+                name, resource, populations = (
+                    f"dma_inflight:{engine}",
+                    f"dma:{engine // engines}:{engine % engines}",
+                    ("inflight",),
+                )
+            need(
+                q["queue_id"] == name
+                and owners[q["owner_id"]] == resource
+                and q["population"] in populations
+                and q["clock_domain"] is None,
+                "nonclocked exact binding",
+            )
+        else:
+            need(
+                q["activity_id"] in acts and q["population"] in ("waiting", "service"),
+                "ordinary queue inventory",
             )
     for a in acts.values():
         if a["receiving_domain"] is not None:
@@ -356,6 +479,11 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
         need(a["start_ps"] == cursor, "causal gap")
         cursor = a["end_ps"]
     need(cursor == r["duration_ps"], "causal makespan")
+    totals = {
+        key: sum(a["end_ps"] - a["start_ps"] for a in chain if a["category"] == key)
+        for key in ("compute", "memory", "noc", "sync", "overhead")
+    }
+    need(r["attribution_ps"] == totals, "causal attribution totals")
     transfers = obs["transfers"]["records"]
     observed_transfers = {(t["request_id"], t["boundary_id"]): t for t in transfers}
     need(len(observed_transfers) == len(transfers), "transfer uniqueness")
@@ -533,6 +661,20 @@ def check_v2(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
         r["u_c0_duration_ps"] is None
         and r["fidelity_detail"] == dict(compute=1, noc=0, dram=0, sync="exact", layer_reuse=False),
         "fidelity/null floor",
+    )
+    need(
+        all(
+            r["diagnostics"][key] is None
+            for key in (
+                "energy_pj",
+                "dram_row_hit_ratio",
+                "sram_bank_conflict_stall_ratio",
+                "noc_max_link_util_ratio",
+                "vector_util_ratio",
+            )
+        )
+        and r["ext_counts"]["noc_flit_hop_count"] is None,
+        "unmodeled diagnostics",
     )
     windows = {}
     for t in transfers:
