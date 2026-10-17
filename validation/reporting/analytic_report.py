@@ -577,9 +577,32 @@ def validate_inputs(cell, bundles):
         require(high.hardware_spec == hw and high.points == low.points, "Mode transformation")
 
 
-def expected_jobs(cell, bundles):
+class _ValidationPreparation:
+    """Bounded job preparation for ONE synchronous report validation.
+
+    Keys contain full current bundle, assumptions and engine bytes, not a caller's
+    claimed hash. Copies keep cases independent. This never caches a response,
+    domain verdict or report acceptance; discovery and replay still execute all calls.
+    """
+
+    def __init__(self):
+        self._jobs = {}
+
+    def jobs(self, bundle):
+        key = canonical_json(
+            [as_json(bundle), as_json(physical_assumptions()), as_json(core.engine_identity())]
+        )
+        if key not in self._jobs:
+            prepared = jobs(bundle)
+            if len(self._jobs) >= 64:
+                self._jobs.pop(next(iter(self._jobs)))
+            self._jobs[key] = copy.deepcopy(prepared)
+        return copy.deepcopy(self._jobs[key])
+
+
+def expected_jobs(cell, bundles, *, preparation=None):
     name = relation_name(cell)
-    groups = [list(jobs(b)) for b in bundles]
+    groups = [list(jobs(b) if preparation is None else preparation.jobs(b)) for b in bundles]
     if name.startswith("producer."):
         return [next(j for j in group if j.point.query.phase == "decode") for group in groups]
     if len(groups) == 2:
@@ -1144,7 +1167,7 @@ def validate_objects(entries):
     return store
 
 
-def validate_case(case, cell, ledger, ordinal, objects, control=None):
+def validate_case(case, cell, ledger, ordinal, objects, control=None, *, preparation=None):
     keys(
         case,
         "case_id cell_id ordinal stage origin_case_id status reason inputs results calls "
@@ -1169,7 +1192,7 @@ def validate_case(case, cell, ledger, ordinal, objects, control=None):
     for identity in case["inputs"]:
         objects.get(identity)
     validate_inputs(cell, bundles)
-    bound_jobs = expected_jobs(cell, bundles)
+    bound_jobs = expected_jobs(cell, bundles, preparation=preparation)
     require(len(case["calls"]) <= len(bound_jobs), "Unexpected engine calls")
     returned = []
     for index, call in enumerate(case["calls"]):
@@ -1351,6 +1374,7 @@ def validate_report(
         "Missing/duplicate cases",
     )
     objects = validate_objects(r["objects"])
+    preparation = _ValidationPreparation()
     cells = {c["cell_id"]: c for c in r["plan"]["cells"]}
     all_cases = {}
     raw_cases = {c["case_id"]: c for group in r["cases"].values() for c in group}
@@ -1371,6 +1395,7 @@ def validate_report(
                 index,
                 objects,
                 controls_by_fault.get(case["case_id"]),
+                preparation=preparation,
             )
             if ledger == "discovery":
                 require(case["origin_case_id"] is None, "Discovery origin")

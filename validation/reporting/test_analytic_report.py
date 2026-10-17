@@ -55,6 +55,22 @@ def test_populated_controls_both_modes_and_two_replays(sample):
     assert all(m["status"] == "killed" for m in first["mutants"])
 
 
+def test_public_validation_reuses_only_preparation_within_one_call(monkeypatch, sample):
+    original = report.jobs
+    calls = []
+
+    def observed(bundle):
+        calls.append(canonical_json(report.as_json(bundle)))
+        return original(bundle)
+
+    monkeypatch.setattr(report, "jobs", observed)
+    validate(sample[0])
+    first = list(calls)
+    assert first and len(first) == len(set(first))
+    validate(sample[0])
+    assert calls == first + first  # A second public validation prepares afresh.
+
+
 def test_fixed_replay_has_no_producer(monkeypatch, sample):
     import rkuarch.workload.prepare as producer
 
