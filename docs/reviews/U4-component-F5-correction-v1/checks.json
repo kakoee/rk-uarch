@@ -1,0 +1,55 @@
+{
+  "scope": "coordinator preservation and triage only; no reviewer tests rerun",
+  "review_verdict": "NOT ACCEPTED",
+  "row_at_fault": "F5",
+  "owner": "B",
+  "other_rows_passed": [
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F6",
+    "F7",
+    "F8",
+    "F9",
+    "F10",
+    "F11"
+  ],
+  "original_report_prefix_bytes": 22848,
+  "original_report_prefix_sha256": "3cc7e9111dd2f4863e11f346c7a8717e0be3a2ab30d3280a91e7588402c592f9",
+  "current_report": {
+    "bytes": 34826,
+    "sha256": "fbf1efbcf74b07bb3df33e852d8f5ecaa07d40856d7f0d6349971b83504af23f"
+  },
+  "preserved_files": 40,
+  "archive_sha256": "7842e0c112069299b3cb6c45760cadf99d7e0e5bfd8f4b0aa85ccbbd3ea8f985",
+  "reviewer_log_hashes_verified": 17,
+  "published_script_hashes_verified": 7,
+  "script_execution_vs_publication_note": "Reviewer records docstring-only differences with AST equivalence. Coordinator verified published hashes; did not independently rerun AST comparison or their execution.",
+  "subject": {
+    "A_response": "941e882d76419aee0dd297ffd6b997c9807fc49e",
+    "B_response": "9678d492d01efeeaced007aa69e1d01d01269963",
+    "activation_inputs_verified": 9,
+    "base_tree": "4524cfe749c8263e50ad944a4e58188970086027",
+    "behavioral_base_7b972d0_preimages_and_inputs_identical": true,
+    "combined_patch_sha256": "81b81c6c2680a17e7d106dedb4a11dc07891b331f3323319fb0192b852bdebe3",
+    "manifest_sha256": "5d1010aac38f7d04a2935ff48072e418e1e8e9a88d1933758fca4581e2acc845",
+    "postimages_verified": 23,
+    "preimages_verified": 23,
+    "preparation_base": "414a94c35c1588cf13b6fcddc3739203c7f5ec6e",
+    "response_file_sha256": {
+      "docs/reviews/U4-A-component-stage2-v1/README.md@941e882": "af332f15984553ff3360848f19afbed71fd7851c926a815b72f10f2ee0d5f19f",
+      "docs/reviews/U4-B-component-stage2-v1/README.md@9678d49": "72004084fc5a5d09bfa8ed04515e2afd07ad31937f9f6360d5f8b1d99127316b",
+      "docs/reviews/U4-component-lane-A-response.md@941e882": "8e3a8270680421135a99ad0485d924315d53efe7ee6d0e821225e71608125b29",
+      "docs/reviews/U4-component-lane-B-response.md@9678d49": "83f92093c2cb80d2d542687e1f8cf4e51d90c54130e5d9f928ac0d3742a493e6"
+    },
+    "selection_cases": 106,
+    "selection_file_sha256": "a8b94f0d83f429e5101b2b62ba5ed91d9b98d0d228330f5185acc37aab29319c",
+    "selection_hash": "sha256:4b9e73cf9ef11456e216acba58c9496c242169e2a40efcf0aa9e3f36bf0dbbc0",
+    "selection_hash_recomputed": true,
+    "sidecar_verified": 1
+  },
+  "F6": "Passed reviewer revert: 1102 pass without new tests/with planted defects; restored tests catch five behavioral failures plus one uncounted identity failure; final restored 1334 pass. No repeat requested.",
+  "inherited_not_rerun": "All reviewer execution counts, fault sweeps and underlying behavior; coordinator verifies and preserves receipt identities only.",
+  "not_authorized": "No component semantic choice, protected installation, native execution, current K2 runtime modification or U4 closure."
+}
