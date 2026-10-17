@@ -43,7 +43,7 @@ jobs:
         run: >-
           uv run python -m pytest -q -rs --durations=30
           -p tests.verification_timing --timing-jsonl=${{ runner.temp }}/python-phases.jsonl
-          --junitxml=${{ runner.temp }}/python-results.xml --ignore=contract/tests
+          --junitxml=${{ runner.temp }}/python-results.xml tests validation
           -m "not nightly and not silicon and not native and not golden and not determinism"
       - name: Python phase summary (including failures)
         if: always()
