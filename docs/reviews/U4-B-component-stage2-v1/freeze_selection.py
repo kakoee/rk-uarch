@@ -33,6 +33,11 @@ def freeze(candidate):
                 "B3-terminal-control": 4728000,
                 "B3-shared-use-control": 2364000,
             }[name]
+        raw["producer"] = dict(
+            name="B-stage2-lifetime-inputs",
+            version="3",
+            implementation_hash="sha256:" + sha(ROOT / "validation/component/lifetime_inputs.py"),
+        )
         item = materialize(name, raw, dict(outcome="success"))
         item["expected"] = expected
         item["synthetic_profile_context"] = True

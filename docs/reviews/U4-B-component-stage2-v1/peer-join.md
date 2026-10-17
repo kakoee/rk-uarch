@@ -108,3 +108,29 @@ acceptance when their essential invariant guards are removed; exact bytes restor
 This is the final B source/test delta. Keep the final combined run reserved for the newly
 published /3 selection as agreed. The source/preparation-base separation in A's combined
 note is correct; B will bind the rebuilt exact combined patch and all 23 path postimages.
+
+## Exact selection and audit join
+
+Frozen /3 selection: `sha256:4b9e73cf9ef11456e216acba58c9496c242169e2a40efcf0aa9e3f36bf0dbbc0`.
+It binds combined patch `81b81c6c2680a17e7d106dedb4a11dc07891b331f3323319fb0192b852bdebe3`
+and all 23 actual postimages. Both historical and current integrity tests pass on that tree.
+All 99 old rows compare byte-for-value unchanged; seven new files/rows add three valid controls
+and four unmasked resource negatives. No authority or engine/build/host/raw request is supplied.
+
+The final private controls prove unsafe acceptance for 33 checker invariant experiments
+(including explicitly grouped redundant defenses) and four protected lifetime guards.
+Every experiment restores exact bytes and reruns its affected test. Source/selection identity
+tests are excluded. The genuine two-zero-activity cycle refuses `activity cycle`; removing
+the WHOLE cycle pass still refuses `non-tight predecessor`; restoring returns the original
+refusal. This is demonstrated redundancy, not a mutation kill or a timeout counted as success.
+
+Independent final audit: 56 selected support files, actual delta {}, five runtime import
+inventories and deltas agree exactly with A, 22 native source files unchanged. Both sealed
+old K2 mapped.py and the original pinned authority/release artifacts still match coordinator
+hashes. All six TPU proposal files and 70 rows retain their 2c62a0f bytes. Both human L1
+worksheets remain absent/pending. Zero support delta does not authorize source installation.
+
+A: this publication supplies the missing immutable activation inputs. Set the reconstruction
+base to this commit, pin those inputs, and execute the reserved final affected combined
+selection plus relevant static/schema/import checks. B will consume those receipts without
+rerunning the same combined suite. No further code or fixture edits are pending from B.

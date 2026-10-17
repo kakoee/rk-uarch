@@ -1,0 +1,910 @@
+{
+  "behavioral_receipts": "restoration.json",
+  "final_guards": {
+    "validation/component/observations_v2.py": [
+      {
+        "detail": "component observation version",
+        "expression": "obs['format'] == 'uarch-native-observations/2'",
+        "line": 28
+      },
+      {
+        "detail": "work totals",
+        "expression": "(r['counts']['matrix_ops'], r['work_counts']['issued_matrix_ops']) == (useful, issued)",
+        "line": 32
+      },
+      {
+        "detail": "completion inventory",
+        "expression": "r['completed_jobs'] == sorted(tasks)",
+        "line": 36
+      },
+      {
+        "detail": "job makespan",
+        "expression": "max((x['end_ps'] for x in jobs.values())) == r['duration_ps']",
+        "line": 37
+      },
+      {
+        "detail": "dependency completion",
+        "expression": "jobs[edge['before']]['end_ps'] <= jobs[edge['after']]['ready_ps']",
+        "line": 39
+      },
+      {
+        "detail": "duplicate mechanism",
+        "expression": "key not in target",
+        "line": 49
+      },
+      {
+        "detail": "phase job lifetime",
+        "expression": "jobs[a['job_id']]['ready_ps'] <= a['ready_ps'] <= a['end_ps'] <= jobs[a['job_id']]['end_ps']",
+        "line": 51
+      },
+      {
+        "detail": "declared request inventory",
+        "expression": "{k for k, v in requests.items() if v['direction'] != 'unicast'} == declared.keys()",
+        "line": 76
+      },
+      {
+        "detail": "complete request inventory",
+        "expression": "requests.keys() == declared.keys() | unicasts.keys()",
+        "line": 81
+      },
+      {
+        "detail": "unicast request binding",
+        "expression": "(row['job_id'], row['direction'], row['dma_engine_id'], row['source_buffer_id'], row['destination_buffer_id'], row['payload_bytes'], row['transaction_bytes'], row['route_id']) == (req, 'unicast', None, task['source']['buffer_id'], task['destination']['buffer_id'], task['payload_bytes'], 0, task['route_id'])",
+        "line": 84
+      },
+      {
+        "detail": "request input binding",
+        "expression": "all((row[k] == v for k, v in fields.items()))",
+        "line": 147
+      },
+      {
+        "detail": "complete mechanism inventory",
+        "expression": "services.keys() == phase_specs.keys()",
+        "line": 172
+      },
+      {
+        "detail": "unclocked or zero-hop alignment",
+        "expression": "align is None",
+        "line": 180
+      },
+      {
+        "detail": "zero-hop time",
+        "expression": "a['start_ps'] == a['end_ps'] and (not a['occupies_resource'])",
+        "line": 182
+      },
+      {
+        "detail": "missing receiving alignment",
+        "expression": "align is not None",
+        "line": 184
+      },
+      {
+        "detail": "service readiness after alignment",
+        "expression": "a['ready_ps'] == align['end_ps']",
+        "line": 186
+      },
+      {
+        "detail": "uncontended alignment grant",
+        "expression": "align['start_ps'] == align['ready_ps']",
+        "line": 188
+      },
+      {
+        "detail": "receiving-clock alignment",
+        "expression": "align['end_ps'] == edge_after(hz, align['start_ps'], 0) == a['start_ps']",
+        "line": 190
+      },
+      {
+        "detail": "mechanism duration",
+        "expression": "a['end_ps'] == edge_after(hz, a['start_ps'], cycles)",
+        "line": 194
+      },
+      {
+        "detail": "missing clock witness",
+        "expression": "c is not None",
+        "line": 198
+      },
+      {
+        "detail": "clock mechanism binding",
+        "expression": "(c['domain'], c['grant_ps'], c['n_cycles'], c['aligned_start_ps'], c['completion_ps']) == (domain, activity['start_ps'], n, edge_after(hz, activity['start_ps'], 0), activity['end_ps'])",
+        "line": 200
+      },
+      {
+        "detail": "clock witness inventory",
+        "expression": "clocks.keys() == expected_clocks",
+        "line": 217
+      },
+      {
+        "detail": "alignment inventory",
+        "expression": "set(aligns) <= set(phase_specs)",
+        "line": 218
+      },
+      {
+        "detail": "phase ready transition",
+        "expression": "a['ready_ps'] == start",
+        "line": 224
+      },
+      {
+        "detail": "request completion mechanism",
+        "expression": "start == requests[req]['complete_ps']",
+        "line": 227
+      },
+      {
+        "detail": "job completion mechanism",
+        "expression": "start == jobs[tid]['end_ps']",
+        "line": 229
+      },
+      {
+        "detail": "activity owner",
+        "expression": "owners[a['owner_id']] == owner_name",
+        "line": 237
+      },
+      {
+        "detail": "activity category/domain",
+        "expression": "(a['category'], a['receiving_domain']) == (category, domain)",
+        "line": 238
+      },
+      {
+        "detail": "exclusive mechanism intervals",
+        "expression": "all((a['end_ps'] <= b['start_ps'] for a, b in zip(ordered, ordered[1:], strict=False)))",
+        "line": 247
+      },
+      {
+        "detail": "port FIFO tie",
+        "expression": "[a['activity_id'] for a in ordered] == [a['activity_id'] for a in ready_order]",
+        "line": 266
+      },
+      {
+        "detail": "port eligible grant",
+        "expression": "alignment['start_ps'] == max(alignment['ready_ps'], previous)",
+        "line": 273
+      },
+      {
+        "detail": "channel FIFO tie",
+        "expression": "[a['activity_id'] for a in observed_order] == [a['activity_id'] for a in ready_order]",
+        "line": 288
+      },
+      {
+        "detail": "channel integer mechanism",
+        "expression": "(a['start_ps'], a['end_ps']) == (ceil(lo), ceil(hi))",
+        "line": 298
+      },
+      {
+        "detail": "rational channel carry/readiness",
+        "expression": "supplied_lo == lo",
+        "line": 309
+      },
+      {
+        "detail": "required occupancy",
+        "expression": "all((a['occupies_resource'] == (a['activity_id'] in required) for a in acts.values()))",
+        "line": 311
+      },
+      {
+        "detail": "occupied row inventory",
+        "expression": "resources.keys() == required",
+        "line": 315
+      },
+      {
+        "detail": "occupied row binding",
+        "expression": "(res['owner_id'], res['job_id'], res['start_ps'], res['end_ps'], res['activity'], res['limiting_resource_id']) == (a['owner_id'], a['job_id'], a['start_ps'], a['end_ps'], a['subphase'], a['owner_id'])",
+        "line": 318
+      },
+      {
+        "detail": "busy union",
+        "expression": "busy['busy_time_ps'] == union_time(((a['start_ps'], a['end_ps']) for a in groups[busy['owner_id']]))",
+        "line": 338
+      },
+      {
+        "detail": "queue population uniqueness",
+        "expression": "len(set(keys)) == len(keys)",
+        "line": 354
+      },
+      {
+        "detail": "inflight lifecycle",
+        "expression": "len(inflight) == 1 and (inflight[0]['enter_ps'], inflight[0]['leave_ps']) == (row['issue_ps'], row['complete_ps'])",
+        "line": 360
+      },
+      {
+        "detail": "channel population lifecycle",
+        "expression": "len(matches) == 1 and (matches[0]['enter_ps'], matches[0]['leave_ps']) == (begin, end)",
+        "line": 378
+      },
+      {
+        "detail": "nonclocked request binding",
+        "expression": "q['item_id'] in declared",
+        "line": 387
+      },
+      {
+        "detail": "nonclocked exact binding",
+        "expression": "q['queue_id'] == name and owners[q['owner_id']] == resource and (q['population'] in populations) and (q['clock_domain'] is None)",
+        "line": 402
+      },
+      {
+        "detail": "ordinary queue inventory",
+        "expression": "q['activity_id'] in acts and q['population'] in ('waiting', 'service')",
+        "line": 410
+      },
+      {
+        "detail": "ordinary queue exact binding",
+        "expression": "(len(matches) == 1 or (not matches and population == 'waiting' and (begin == end))) and all(((q['queue_id'], q['item_id'], q['owner_id'], q['clock_domain'], q['enter_ps'], q['leave_ps']) == (f\"activity:{a['subphase']}:{a['owner_id']}\", a['request_id'] or a['job_id'], a['owner_id'], a['receiving_domain'], begin, end) for q in matches))",
+        "line": 426
+      },
+      {
+        "detail": "causal activity cycle",
+        "expression": "terminal['activity_id'] not in seen",
+        "line": 460
+      },
+      {
+        "detail": "tight causal witness",
+        "expression": "all((p['end_ps'] == terminal['start_ps'] for p in predecessors))",
+        "line": 465
+      },
+      {
+        "detail": "causal root",
+        "expression": "terminal['start_ps'] == 0",
+        "line": 467
+      },
+      {
+        "detail": "mechanism causal partition",
+        "expression": "[(c['activity_id'], c['start_ps'], c['end_ps'], c['category']) for c in critical] == [(a['activity_id'], a['start_ps'], a['end_ps'], a['category']) for a in chain]",
+        "line": 472
+      },
+      {
+        "detail": "causal gap",
+        "expression": "a['start_ps'] == cursor",
+        "line": 479
+      },
+      {
+        "detail": "causal makespan",
+        "expression": "cursor == r['duration_ps']",
+        "line": 481
+      },
+      {
+        "detail": "causal attribution totals",
+        "expression": "r['attribution_ps'] == totals",
+        "line": 486
+      },
+      {
+        "detail": "transfer uniqueness",
+        "expression": "len(observed_transfers) == len(transfers)",
+        "line": 489
+      },
+      {
+        "detail": "transfer mechanism binding",
+        "expression": "t is not None and (t['direction'], t['payload_bytes'], t['transaction_bytes'], t['enter_ps'], t['leave_ps']) == (direction, payload, txn, begin, end)",
+        "line": 527
+      },
+      {
+        "detail": "unicast transfer binding",
+        "expression": "t is not None and (t['enter_ps'], t['leave_ps'], t['payload_bytes'], t['transaction_bytes']) == (jobs[req]['start_ps'], a['end_ps'], task['payload_bytes'], 0)",
+        "line": 546
+      },
+      {
+        "detail": "transfer boundary inventory",
+        "expression": "observed_transfers.keys() == wanted",
+        "line": 552
+      },
+      {
+        "detail": "allocation inventory",
+        "expression": "unique(allocations, 'buffer_id').keys() == unique(g['buffers'], 'id').keys()",
+        "line": 554
+      },
+      {
+        "detail": "allocation input binding",
+        "expression": "owners[a['owner_id']] == resource and all((a[k] == b[k] for k in ('space', 'offset_bytes', 'size_bytes')))",
+        "line": 566
+      },
+      {
+        "detail": "allocation consumer/initial inventory",
+        "expression": "a['last_consumer_ids'] == b['final_consumer_ids'] and a['initially_live'] == (b['initial_residency'] == 'preloaded')",
+        "line": 571
+      },
+      {
+        "detail": "allocation access lifetime",
+        "expression": "all((a['allocate_ps'] <= jobs[u]['start_ps'] <= jobs[u]['end_ps'] <= end for u in users))",
+        "line": 600
+      },
+      {
+        "detail": "accumulator lifetime mechanism",
+        "expression": "(a['allocate_ps'], end) == ((jobs[b['producer_id']]['start_ps'], max((jobs[u]['end_ps'] for u in b['final_consumer_ids']))) if transient else (0, r['duration_ps']))",
+        "line": 609
+      },
+      {
+        "detail": "completed traffic totals",
+        "expression": "r['traffic_counts'][direction + '_' + quantity + '_bytes'] == sum((x[quantity + '_bytes'] for x in requests.values() if x['direction'] == direction))",
+        "line": 626
+      },
+      {
+        "detail": "observed metric inventory",
+        "expression": "r['simulator_metrics']['event_count'] == len(obs['events']['records']) and r['simulator_metrics']['completed_job_count'] == len(jobs)",
+        "line": 633
+      },
+      {
+        "detail": "per-op inventory",
+        "expression": "per_op.keys() == op_ids",
+        "line": 640
+      },
+      {
+        "detail": "per-op work",
+        "expression": "per_op[op]['counts']['matrix_ops'] == sum((x['useful_matrix_ops'] for x in observed_jobs)) and per_op[op]['work_counts']['issued_matrix_ops'] == sum((x['issued_matrix_ops'] for x in observed_jobs))",
+        "line": 643
+      },
+      {
+        "detail": "whole matrix tile ownership",
+        "expression": "all((a[1] <= b[0] for a, b in zip(spans, spans[1:], strict=False)))",
+        "line": 655
+      },
+      {
+        "detail": "unrepresented paths",
+        "expression": "r['unrepresented'] == expected['unrepresented']",
+        "line": 659
+      },
+      {
+        "detail": "fidelity/null floor",
+        "expression": "r['u_c0_duration_ps'] is None and r['fidelity_detail'] == dict(compute=1, noc=0, dram=0, sync='exact', layer_reuse=False)",
+        "line": 660
+      },
+      {
+        "detail": "unmodeled diagnostics",
+        "expression": "all((r['diagnostics'][key] is None for key in ('energy_pj', 'dram_row_hit_ratio', 'sram_bank_conflict_stall_ratio', 'noc_max_link_util_ratio', 'vector_util_ratio'))) and r['ext_counts']['noc_flit_hop_count'] is None",
+        "line": 665
+      }
+    ],
+    "validation/component/transition_checks.py": [
+      {
+        "detail": "complete eligible causes",
+        "expression": "len(supplied) == len(set(supplied)) and set(supplied) == eligible[a['activity_id']]",
+        "line": 118
+      },
+      {
+        "detail": "actual nonzero-start cause",
+        "expression": "all((a['start_ps'] == 0 or eligible[a['activity_id']] for a in acts.values()))",
+        "line": 122
+      },
+      {
+        "detail": "causal activity cycle",
+        "expression": "bool(ready)",
+        "line": 130
+      },
+      {
+        "detail": "job owner binding",
+        "expression": "row['owner_id'] == owner",
+        "line": 138
+      },
+      {
+        "detail": "job release binding",
+        "expression": "row['release_ps'] == 0",
+        "line": 139
+      },
+      {
+        "detail": "unrepresented job blockers",
+        "expression": "row['blocking_predecessor_ids'] == []",
+        "line": 140
+      },
+      {
+        "detail": "job dependency readiness",
+        "expression": "row['ready_ps'] == max((jobs[p]['end_ps'] for p in deps[tid]), default=0)",
+        "line": 141
+      },
+      {
+        "detail": "job transition endpoints",
+        "expression": "(row['start_ps'], row['end_ps']) == (min((a['start_ps'] for a in firsts[tid])), max((a['end_ps'] for a in lasts[tid])))",
+        "line": 145
+      },
+      {
+        "detail": "unrepresented critical predecessor",
+        "expression": "all((c['predecessor_id'] is None for c in obs['critical_path']['records']))",
+        "line": 150
+      },
+      {
+        "detail": "event transition binding",
+        "expression": "e is not None and (e['kind'], e['job_id'], e['target_id'], e['t_ps']) == (kind, a['job_id'], a['owner_id'], time)",
+        "line": 184
+      },
+      {
+        "detail": "event endpoint inventory",
+        "expression": "len(endpoints) == len(set(endpoints)) and set(endpoints) == events.keys()",
+        "line": 190
+      }
+    ]
+  },
+  "groups": {
+    "allocation-lifetimes": {
+      "details": [
+        "allocation inventory",
+        "allocation input binding",
+        "allocation consumer/initial inventory",
+        "allocation access lifetime",
+        "accumulator lifetime mechanism",
+        "whole matrix tile ownership"
+      ],
+      "disposition": "Input offsets/owners/consumers/capacity join actual access spans. Observed access and accumulator mechanism jointly defend persistent lifetime (group removal admits). Structural transient writer/use/terminal controls are separately unmasked; old alias/error-order witnesses remain historical. Whole-tile ownership complements phase exclusivity.",
+      "tests": [
+        "test_transition_and_population_forgery[allocation_lifetime-allocation access lifetime]",
+        "test_independent_mechanism_discrimination[allocation_owner]",
+        "test_unmasked_lifetime",
+        "test_all_terminal_consumers_before_reuse",
+        "test_independent_cores_overlap_without_dependency"
+      ]
+    },
+    "causal-witness": {
+      "details": [
+        "causal activity cycle",
+        "tight causal witness",
+        "mechanism causal partition",
+        "causal makespan",
+        "causal gap",
+        "causal root"
+      ],
+      "disposition": "Complete eligible causes now precede chain selection. Tight chain/gap/root guards are consequences of eligibility plus nonzero-start cause and are retained defense; strict distinct endpoint ordinals make cycles impossible under the real carrier. A C1 two-node control demonstrates this redundancy; no source-hash or loop nontermination counted as a kill.",
+      "tests": [
+        "test_consistent_checker_forgery[M3-complete eligible causes]",
+        "test_consistent_checker_forgery[V1-complete eligible causes]",
+        "test_consistent_checker_forgery[V2-complete eligible causes]",
+        "test_credit_requires_exhaustion_at_first_transition",
+        "test_zero_hop_dependency_control",
+        "test_barrier_complete_terminal_dependencies",
+        "test_causal_attribution_totals"
+      ]
+    },
+    "honesty-and-unmodeled-fields": {
+      "details": [
+        "unrepresented paths",
+        "fidelity/null floor"
+      ],
+      "disposition": "Independent behavior controls require exact unrepresented paths, C1, null floor and unmodeled diagnostics. Numeric zero is not accepted for an unmodeled quantity.",
+      "tests": [
+        "test_mechanism_and_field_forgery[unrepresented-unrepresented paths]",
+        "test_mechanism_and_field_forgery[fidelity-fidelity/null floor]",
+        "test_mechanism_and_field_forgery[null_floor-fidelity/null floor]",
+        "test_mechanism_and_field_forgery[diagnostic-unmodeled diagnostics]"
+      ]
+    },
+    "identity-work-inventory": {
+      "details": [
+        "component observation version",
+        "work totals",
+        "completion inventory",
+        "job makespan",
+        "observed metric inventory",
+        "per-op inventory",
+        "per-op work",
+        "completed traffic totals"
+      ],
+      "disposition": "Retained defense shared with typed result counts/inventories and common check_work. No claim of individual mutation kills; common boundary checks are required before check_v2.",
+      "tests": [
+        "test_positive_controls",
+        "test_independent_mechanisms_on_real_synthetic_carrier",
+        "validation/component/test_checks.py"
+      ]
+    },
+    "owner-occupancy-arbitration": {
+      "details": [
+        "exclusive occupied intervals",
+        "port eligible grant",
+        "busy union",
+        "channel FIFO tie",
+        "rational channel carry/readiness"
+      ],
+      "disposition": "Replaced caller-row iteration with required input service inventory. Port exclusivity/grant and occupancy/row/busy joins are redundant defenses of overlap/omission: grouped controls prove actual acceptance only after all named defenses are removed. FIFO, rational carry, owner and busy have separate essential controls.",
+      "tests": [
+        "test_consistent_checker_forgery[port_overlap-exclusive mechanism intervals]",
+        "test_consistent_checker_forgery[port_reverse-port FIFO tie]",
+        "test_consistent_checker_forgery[M4b-channel integer mechanism]",
+        "test_transition_and_population_forgery[channel_fifo-channel FIFO tie]",
+        "test_mechanism_and_field_forgery[carry-rational channel carry/readiness]"
+      ]
+    },
+    "phase-and-clock-inventory": {
+      "details": [
+        "duplicate mechanism",
+        "complete mechanism inventory",
+        "clock witness inventory",
+        "alignment inventory",
+        "missing receiving alignment",
+        "missing clock witness",
+        "unclocked or zero-hop alignment",
+        "zero-hop time"
+      ],
+      "disposition": "Complete declared inventory and distinct endpoint structure. Carrier and checker overlap intentionally; missing-clock raw-checker test remains discoverable. Zero-hop control proves no fabricated receiving edge or busy row.",
+      "tests": [
+        "test_independent_mechanism_discrimination[drop_clock]",
+        "test_zero_hop_dependency_control",
+        "test_phase_binding_and_restoration"
+      ]
+    },
+    "queue-populations": {
+      "details": [
+        "queue population uniqueness",
+        "inflight lifecycle",
+        "channel population lifecycle",
+        "ordinary queue exact binding"
+      ],
+      "disposition": "Clocked and null-clock populations independently join exact request, engine/channel, owner, interval and population. Actual raw-checker unsafe-acceptance controls supplement structural queue controls; duplicate rows cannot evade lifecycle counts.",
+      "tests": [
+        "test_queue_bindings_and_restoration",
+        "test_transition_and_population_forgery[channel_population-channel population lifecycle]",
+        "test_transition_and_population_forgery[ordinary_population-ordinary queue exact binding]",
+        "test_mechanism_and_field_forgery[queue_clock-nonclocked exact binding]",
+        "test_independent_mechanism_discrimination[inflight_end]"
+      ]
+    },
+    "ready-and-clock-mechanism": {
+      "details": [
+        "phase job lifetime",
+        "dependency completion",
+        "service readiness after alignment",
+        "receiving-clock alignment",
+        "mechanism duration",
+        "uncontended alignment grant",
+        "clock mechanism binding",
+        "phase ready transition",
+        "request completion mechanism",
+        "job completion mechanism"
+      ],
+      "disposition": "Behavioral local laws with independent literal controls. Duration is jointly defended by duration and clock witness; receiving edge similarly has two defenses. Group removals admit the consistent forgery. Endpoint summaries and lifetime bounds additionally overlap transition and carrier joins.",
+      "tests": [
+        "test_mechanism_and_field_forgery[duration-mechanism duration]",
+        "test_waiting_ready_cannot_be_invented_under_port_blocking",
+        "test_receiving_alignment_cannot_end_between_edges",
+        "test_transition_and_population_forgery[readiness-service readiness after alignment]",
+        "test_channel_and_credit_controls"
+      ]
+    },
+    "request-transfer-inputs": {
+      "details": [
+        "declared request inventory",
+        "request input binding",
+        "transfer uniqueness",
+        "transfer mechanism binding",
+        "unicast transfer binding",
+        "transfer boundary inventory"
+      ],
+      "disposition": "Actual admitted request inventory, source/destination, payload/transaction and transfer windows. Typed structural uniqueness is an overlapping defense; mechanism boundaries remain independent and have a direct raw-checker control.",
+      "tests": [
+        "test_independent_mechanism_discrimination[transfer_control_bytes]",
+        "test_unicast_request_inventory_and_ownership",
+        "test_zero_hop_dependency_control",
+        "test_channel_and_credit_controls"
+      ]
+    }
+  },
+  "historical_checker_guards": [
+    {
+      "detail": "component observation version",
+      "expression": "obs['format'] == 'uarch-native-observations/2'",
+      "invariant_group": "identity-work-inventory",
+      "line": 27
+    },
+    {
+      "detail": "work totals",
+      "expression": "(r['counts']['matrix_ops'], r['work_counts']['issued_matrix_ops']) == (useful, issued)",
+      "invariant_group": "identity-work-inventory",
+      "line": 31
+    },
+    {
+      "detail": "completion inventory",
+      "expression": "r['completed_jobs'] == sorted(tasks)",
+      "invariant_group": "identity-work-inventory",
+      "line": 35
+    },
+    {
+      "detail": "job makespan",
+      "expression": "max((x['end_ps'] for x in jobs.values())) == r['duration_ps']",
+      "invariant_group": "identity-work-inventory",
+      "line": 36
+    },
+    {
+      "detail": "dependency completion",
+      "expression": "jobs[edge['before']]['end_ps'] <= jobs[edge['after']]['ready_ps']",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 38
+    },
+    {
+      "detail": "duplicate mechanism",
+      "expression": "key not in target",
+      "invariant_group": "phase-and-clock-inventory",
+      "line": 48
+    },
+    {
+      "detail": "phase job lifetime",
+      "expression": "jobs[a['job_id']]['start_ps'] <= a['ready_ps'] <= a['end_ps'] <= jobs[a['job_id']]['end_ps']",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 50
+    },
+    {
+      "detail": "declared request inventory",
+      "expression": "{k for k, v in requests.items() if v['direction'] != 'unicast'} == declared.keys()",
+      "invariant_group": "request-transfer-inputs",
+      "line": 75
+    },
+    {
+      "detail": "request input binding",
+      "expression": "all((row[k] == v for k, v in fields.items()))",
+      "invariant_group": "request-transfer-inputs",
+      "line": 119
+    },
+    {
+      "detail": "complete mechanism inventory",
+      "expression": "services.keys() == phase_specs.keys()",
+      "invariant_group": "phase-and-clock-inventory",
+      "line": 144
+    },
+    {
+      "detail": "unclocked or zero-hop alignment",
+      "expression": "align is None",
+      "invariant_group": "phase-and-clock-inventory",
+      "line": 152
+    },
+    {
+      "detail": "zero-hop time",
+      "expression": "a['start_ps'] == a['end_ps'] and (not a['occupies_resource'])",
+      "invariant_group": "phase-and-clock-inventory",
+      "line": 154
+    },
+    {
+      "detail": "missing receiving alignment",
+      "expression": "align is not None",
+      "invariant_group": "phase-and-clock-inventory",
+      "line": 156
+    },
+    {
+      "detail": "service readiness after alignment",
+      "expression": "a['ready_ps'] == align['end_ps']",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 158
+    },
+    {
+      "detail": "uncontended alignment grant",
+      "expression": "align['start_ps'] == align['ready_ps']",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 160
+    },
+    {
+      "detail": "receiving-clock alignment",
+      "expression": "align['end_ps'] == edge_after(hz, align['start_ps'], 0) == a['start_ps']",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 162
+    },
+    {
+      "detail": "mechanism duration",
+      "expression": "a['end_ps'] == edge_after(hz, a['start_ps'], cycles)",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 166
+    },
+    {
+      "detail": "missing clock witness",
+      "expression": "c is not None",
+      "invariant_group": "phase-and-clock-inventory",
+      "line": 170
+    },
+    {
+      "detail": "clock mechanism binding",
+      "expression": "(c['domain'], c['grant_ps'], c['n_cycles'], c['aligned_start_ps'], c['completion_ps']) == (domain, activity['start_ps'], n, edge_after(hz, activity['start_ps'], 0), activity['end_ps'])",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 172
+    },
+    {
+      "detail": "clock witness inventory",
+      "expression": "clocks.keys() == expected_clocks",
+      "invariant_group": "phase-and-clock-inventory",
+      "line": 189
+    },
+    {
+      "detail": "alignment inventory",
+      "expression": "set(aligns) <= set(phase_specs)",
+      "invariant_group": "phase-and-clock-inventory",
+      "line": 190
+    },
+    {
+      "detail": "phase ready transition",
+      "expression": "a['ready_ps'] == start",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 196
+    },
+    {
+      "detail": "request completion mechanism",
+      "expression": "start == requests[req]['complete_ps']",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 199
+    },
+    {
+      "detail": "job completion mechanism",
+      "expression": "start == jobs[tid]['end_ps']",
+      "invariant_group": "ready-and-clock-mechanism",
+      "line": 201
+    },
+    {
+      "detail": "exclusive occupied intervals",
+      "expression": "all((a['end_ps'] <= b['start_ps'] for a, b in zip(ordered, ordered[1:], strict=False)))",
+      "invariant_group": "owner-occupancy-arbitration",
+      "line": 210
+    },
+    {
+      "detail": "channel FIFO tie",
+      "expression": "[x[2]['activity_id'] for x in observed_order] == [x[2]['activity_id'] for x in ready_order]",
+      "invariant_group": "owner-occupancy-arbitration",
+      "line": 236
+    },
+    {
+      "detail": "rational channel carry/readiness",
+      "expression": "lo == max(Fraction(latency), previous)",
+      "invariant_group": "owner-occupancy-arbitration",
+      "line": 244
+    },
+    {
+      "detail": "port eligible grant",
+      "expression": "a['start_ps'] == max(a['ready_ps'], max(prior, default=0))",
+      "invariant_group": "owner-occupancy-arbitration",
+      "line": 253
+    },
+    {
+      "detail": "busy union",
+      "expression": "busy['busy_time_ps'] == union_time(((x['start_ps'], x['end_ps']) for x in groups[busy['owner_id']]))",
+      "invariant_group": "owner-occupancy-arbitration",
+      "line": 255
+    },
+    {
+      "detail": "queue population uniqueness",
+      "expression": "len(set(keys)) == len(keys)",
+      "invariant_group": "queue-populations",
+      "line": 262
+    },
+    {
+      "detail": "inflight lifecycle",
+      "expression": "len(inflight) == 1 and (inflight[0]['enter_ps'], inflight[0]['leave_ps']) == (row['issue_ps'], row['complete_ps'])",
+      "invariant_group": "queue-populations",
+      "line": 268
+    },
+    {
+      "detail": "channel population lifecycle",
+      "expression": "len(matches) == 1 and (matches[0]['enter_ps'], matches[0]['leave_ps']) == (begin, end)",
+      "invariant_group": "queue-populations",
+      "line": 286
+    },
+    {
+      "detail": "ordinary queue exact binding",
+      "expression": "(len(matches) == 1 or (not matches and population == 'waiting' and (begin == end))) and all(((q['queue_id'], q['item_id'], q['owner_id'], q['clock_domain'], q['enter_ps'], q['leave_ps']) == (f\"activity:{a['subphase']}:{a['owner_id']}\", a['request_id'] or a['job_id'], a['owner_id'], a['receiving_domain'], begin, end) for q in matches))",
+      "invariant_group": "queue-populations",
+      "line": 303
+    },
+    {
+      "detail": "causal activity cycle",
+      "expression": "terminal['activity_id'] not in seen",
+      "invariant_group": "causal-witness",
+      "line": 337
+    },
+    {
+      "detail": "tight causal witness",
+      "expression": "all((p['end_ps'] == terminal['start_ps'] for p in predecessors))",
+      "invariant_group": "causal-witness",
+      "line": 342
+    },
+    {
+      "detail": "causal root",
+      "expression": "terminal['start_ps'] == 0",
+      "invariant_group": "causal-witness",
+      "line": 344
+    },
+    {
+      "detail": "mechanism causal partition",
+      "expression": "[(c['activity_id'], c['start_ps'], c['end_ps'], c['category']) for c in critical] == [(a['activity_id'], a['start_ps'], a['end_ps'], a['category']) for a in chain]",
+      "invariant_group": "causal-witness",
+      "line": 349
+    },
+    {
+      "detail": "causal gap",
+      "expression": "a['start_ps'] == cursor",
+      "invariant_group": "causal-witness",
+      "line": 356
+    },
+    {
+      "detail": "causal makespan",
+      "expression": "cursor == r['duration_ps']",
+      "invariant_group": "causal-witness",
+      "line": 358
+    },
+    {
+      "detail": "transfer uniqueness",
+      "expression": "len(observed_transfers) == len(transfers)",
+      "invariant_group": "request-transfer-inputs",
+      "line": 361
+    },
+    {
+      "detail": "transfer mechanism binding",
+      "expression": "t is not None and (t['direction'], t['payload_bytes'], t['transaction_bytes'], t['enter_ps'], t['leave_ps']) == (direction, payload, txn, begin, end)",
+      "invariant_group": "request-transfer-inputs",
+      "line": 399
+    },
+    {
+      "detail": "unicast transfer binding",
+      "expression": "t is not None and (t['enter_ps'], t['leave_ps'], t['payload_bytes'], t['transaction_bytes']) == (jobs[req]['start_ps'], a['end_ps'], task['payload_bytes'], 0)",
+      "invariant_group": "request-transfer-inputs",
+      "line": 418
+    },
+    {
+      "detail": "transfer boundary inventory",
+      "expression": "observed_transfers.keys() == wanted",
+      "invariant_group": "request-transfer-inputs",
+      "line": 424
+    },
+    {
+      "detail": "allocation inventory",
+      "expression": "unique(allocations, 'buffer_id').keys() == unique(g['buffers'], 'id').keys()",
+      "invariant_group": "allocation-lifetimes",
+      "line": 426
+    },
+    {
+      "detail": "allocation input binding",
+      "expression": "owners[a['owner_id']] == resource and all((a[k] == b[k] for k in ('space', 'offset_bytes', 'size_bytes')))",
+      "invariant_group": "allocation-lifetimes",
+      "line": 438
+    },
+    {
+      "detail": "allocation consumer/initial inventory",
+      "expression": "a['last_consumer_ids'] == b['final_consumer_ids'] and a['initially_live'] == (b['initial_residency'] == 'preloaded')",
+      "invariant_group": "allocation-lifetimes",
+      "line": 443
+    },
+    {
+      "detail": "allocation access lifetime",
+      "expression": "all((a['allocate_ps'] <= jobs[u]['start_ps'] <= jobs[u]['end_ps'] <= end for u in users))",
+      "invariant_group": "allocation-lifetimes",
+      "line": 472
+    },
+    {
+      "detail": "accumulator lifetime mechanism",
+      "expression": "(a['allocate_ps'], end) == ((jobs[b['producer_id']]['start_ps'], max((jobs[u]['end_ps'] for u in b['final_consumer_ids']))) if transient else (0, r['duration_ps']))",
+      "invariant_group": "allocation-lifetimes",
+      "line": 481
+    },
+    {
+      "detail": "completed traffic totals",
+      "expression": "r['traffic_counts'][direction + '_' + quantity + '_bytes'] == sum((x[quantity + '_bytes'] for x in requests.values() if x['direction'] == direction))",
+      "invariant_group": "identity-work-inventory",
+      "line": 498
+    },
+    {
+      "detail": "observed metric inventory",
+      "expression": "r['simulator_metrics']['event_count'] == len(obs['events']['records']) and r['simulator_metrics']['completed_job_count'] == len(jobs)",
+      "invariant_group": "identity-work-inventory",
+      "line": 505
+    },
+    {
+      "detail": "per-op inventory",
+      "expression": "per_op.keys() == op_ids",
+      "invariant_group": "identity-work-inventory",
+      "line": 512
+    },
+    {
+      "detail": "per-op work",
+      "expression": "per_op[op]['counts']['matrix_ops'] == sum((x['useful_matrix_ops'] for x in observed_jobs)) and per_op[op]['work_counts']['issued_matrix_ops'] == sum((x['issued_matrix_ops'] for x in observed_jobs))",
+      "invariant_group": "identity-work-inventory",
+      "line": 515
+    },
+    {
+      "detail": "whole matrix tile ownership",
+      "expression": "all((a[1] <= b[0] for a, b in zip(spans, spans[1:], strict=False)))",
+      "invariant_group": "allocation-lifetimes",
+      "line": 527
+    },
+    {
+      "detail": "unrepresented paths",
+      "expression": "r['unrepresented'] == expected['unrepresented']",
+      "invariant_group": "honesty-and-unmodeled-fields",
+      "line": 531
+    },
+    {
+      "detail": "fidelity/null floor",
+      "expression": "r['u_c0_duration_ps'] is None and r['fidelity_detail'] == dict(compute=1, noc=0, dram=0, sync='exact', layer_reuse=False)",
+      "invariant_group": "honesty-and-unmodeled-fields",
+      "line": 532
+    }
+  ],
+  "identity_only_tests": [
+    "validation/component/test_join_selection.py",
+    "validation/component/test_stage2_selection.py"
+  ],
+  "identity_tests_excluded_from_behavioral_scoring": true,
+  "limitations": "No native outputs; unit carriers and profile anchors are explicitly synthetic. Retained structural/totality checks are not counted as individual unsafe-admission controls.",
+  "scope": "guard-to-invariant matrix, not a per-line mutation score",
+  "structural_contract_matrix": "A companion final guard matrix covers 46 historical / 59 corrected require guards; B does not relabel A evidence as independent."
+}
