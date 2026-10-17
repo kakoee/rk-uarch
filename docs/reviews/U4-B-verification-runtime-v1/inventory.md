@@ -40,3 +40,12 @@ it must never reuse test acceptance, a result token or an executable for changed
 No new module is added under scripts/: the closed import guard and both support inventories
 bind that directory. Helpers under .github/ and tests/ avoid changing the adopted generator
 closure. Actual vendor currentness must still pass on the resulting checkout.
+
+## Publication reconciliation
+
+While the final measured run completed on `5a9232e`, main advanced to `149fc32`, including
+human-approved component installation `3949b10`. Merge `23c26c2` preserves both histories.
+All optimization postimages match the measured subject exactly. Focused integration,
+installation identity, actual CI collection, strict contract and static/currentness checks
+on that merge are separate from the one full measured run; timings are not transferred to
+the changed component source. Component-owned files and frozen evidence are preserved.
