@@ -3694,7 +3694,7 @@ diff --git a/contract/tests/mapped/test_component_semantics_v2.py b/contract/tes
 new file mode 100644
 --- /dev/null
 +++ b/contract/tests/mapped/test_component_semantics_v2.py
-@@ -0,0 +1,555 @@
+@@ -0,0 +1,792 @@
 +"""Consistently resealed synthetic carriers; never component outputs/native evidence.
 +Inputs independently hand constructed by B; attacks reproduce reviewer M1/M2/M3/M4/V1.
 +"""
@@ -4250,6 +4250,243 @@ new file mode 100644
 +    r["simulator_metrics"]["event_count"] += 2
 +    with pytest.raises(ValueError, match="^IncompleteObservations: alignment is not busy$"):
 +        validate_result(synchronize(r), j)
++
++
++@pytest.mark.parametrize(
++    "fault,code",
++    [
++        ("activity_job", "InvalidResource"),
++        ("activity_owner", "InvalidResource"),
++        ("request", "IncompleteObservations"),
++        ("dispatch", "IncompleteObservations"),
++        ("link", "AttributionMismatch"),
++        ("interval", "IncompleteObservations"),
++        ("queue", "IncompleteObservations"),
++        ("clock", "IncompleteObservations"),
++        ("missing_job_activities", "IncompleteObservations"),
++    ],
++)
++def test_malformed_witness_refuses_without_lookup_crash(fault: Any, code: Any) -> None:
++    """Totality/error-order controls, not unsafe-admission mutation evidence."""
++    j, r = sample()
++    if fault == "activity_job":
++        act(r, "out")["job_id"] = "unknown"
++    elif fault == "activity_owner":
++        act(r, "out")["owner_id"] = 2**63
++    elif fault == "request":
++        act(r, "out")["request_id"] = "unknown"
++    elif fault == "dispatch":
++        act(r, "out")["dispatch_ordinal"] = 999
++    elif fault == "link":
++        act(r, "out")["predecessors"] = [dict(activity_id="unknown", relation="sequence")]
++    elif fault == "interval":
++        records(r, "resource_intervals")[0]["activity_id"] = "unknown"
++    elif fault == "queue":
++        records(r, "queue_membership")[0]["activity_id"] = "unknown"
++    elif fault == "clock":
++        records(r, "clocks")[0]["activity_id"] = "unknown"
++    elif fault == "missing_job_activities":
++        records(r, "activities").clear()
++    with pytest.raises(ValueError, match="^" + code + "(:|$)"):
++        validate_result(seal(r), j)
++
++
++def test_component_refuses_legacy_observation_shape() -> None:
++    j, r = sample()
++    obs = r["observations"]
++    obs["format"] = "uarch-native-observations/1"
++    del obs["activities"]
++    for section in ("clocks", "resource_intervals", "queue_membership", "critical_path"):
++        for row in records(r, section):
++            del row["activity_id"]
++    with pytest.raises(ValueError, match="^IncompleteObservations: component /2$"):
++        validate_result(seal(r), j)
++
++
++def zero_transport_shell(case: Any) -> Any:
++    """Zero-time STRUCTURAL shell only: deliberately no E4 mechanism/inventory claim."""
++    j = synthetic_job(case)
++    _, r = sample()
++    raw = j.model_dump(mode="json")
++    owners = {o.resource: o.owner_id for o in j.owners}
++    graph = raw["mapped_point"]["task_graph"]
++    buffers = {b["id"]: b for b in graph["buffers"]}
++    routes = {p["id"]: p for p in graph["routes"]}
++    obs = r["observations"]
++    template = deepcopy(records(r, "jobs")[0])
++    for section in obs.values():
++        if isinstance(section, dict):
++            section["records"] = []
++    traffic = {k: 0 if isinstance(v, int) else v for k, v in r["traffic_counts"].items()}
++    for task in graph["jobs"]:
++        if task["kind"] == "dma":
++            core = task["dma_engine_id"] // 4
++            owner = owners[f"dma_port:{core}"]
++            summary_owner = owners[f"dma:{core}:{task['dma_engine_id'] % 4}"]
++            phase, category, domain, occupied = "read_port", "memory", "core", True
++            kinds = ("OWNER_GRANT", "DMA_DONE")
++            requests = [f["request_id"] for f in task["fragments"]]
++            for f in task["fragments"]:
++                records(r, "dma").append(
++                    dict(
++                        request_id=f["request_id"],
++                        job_id=task["id"],
++                        dma_engine_id=task["dma_engine_id"],
++                        direction=task["direction"],
++                        source_buffer_id=task["source"]["buffer_id"],
++                        destination_buffer_id=task["destination"]["buffer_id"],
++                        payload_bytes=f["payload_bytes"],
++                        transaction_bytes=f["transaction_bytes"],
++                        credit_acquire_ps=0,
++                        issue_ps=0,
++                        complete_ps=0,
++                        credit_release_ps=0,
++                        route_id=f["route_id"],
++                    )
++                )
++                traffic[task["direction"] + "_payload_bytes"] += f["payload_bytes"]
++                traffic[task["direction"] + "_transaction_bytes"] += f["transaction_bytes"]
++        elif task["kind"] == "barrier":
++            owner = summary_owner = owners[f"barrier:{task['id']}"]
++            phase, category, domain, occupied = "barrier", "sync", "noc", False
++            kinds, requests = ("SYNC_ARRIVE", "BARRIER_RELEASE"), [None]
++        else:
++            assert task["kind"] == "noc_transfer"
++            core = buffers[task["source"]["buffer_id"]]["core_id"]
++            cols = int(j.workload_closure.hardware_spec.cores.grid.cols.value)
++            owner = summary_owner = owners[f"router:0:{core // cols}:{core % cols}"]
++            phase, category, domain = "unicast_noc", "noc", "noc"
++            occupied = len(routes[task["route_id"]]["core_ids"]) > 1
++            kinds, requests = ("NOC_HEAD", "NOC_TAIL"), [task["id"]]
++        row = deepcopy(template)
++        row.update(
++            job_id=task["id"],
++            op_id=task.get("op_id"),
++            owner_id=summary_owner,
++            release_ps=0,
++            ready_ps=0,
++            start_ps=0,
++            end_ps=0,
++            blocking_predecessor_ids=[],
++        )
++        records(r, "jobs").append(row)
++        for request in requests:
++            ordinal = len(records(r, "events"))
++            aid = "SYNTHETIC-STRUCTURAL:" + (request or task["id"])
++            records(r, "activities").append(
++                dict(
++                    activity_id=aid,
++                    job_id=task["id"],
++                    request_id=request,
++                    subphase=phase,
++                    kind="service",
++                    ready_ps=0,
++                    start_ps=0,
++                    end_ps=0,
++                    owner_id=owner,
++                    category=category,
++                    receiving_domain=domain,
++                    occupies_resource=occupied,
++                    dispatch_ordinal=ordinal,
++                    completion_ordinal=ordinal + 1,
++                    predecessors=[],
++                )
++            )
++            for index, kind in enumerate(kinds, ordinal):
++                records(r, "events").append(
++                    dict(
++                        event_seq=index,
++                        observation_ordinal=index,
++                        t_ps=0,
++                        phase=1,
++                        target_id=owner,
++                        kind=kind,
++                        job_id=task["id"],
++                    )
++                )
++            if occupied:
++                records(r, "resource_intervals").append(
++                    dict(
++                        activity_id=aid,
++                        owner_id=owner,
++                        job_id=task["id"],
++                        start_ps=0,
++                        end_ps=0,
++                        activity=phase,
++                        limiting_resource_id=owner,
++                        service_start_ps_ratio=None,
++                        service_end_ps_ratio=None,
++                    )
++                )
++    r.update(
++        job_hash=j.job_hash,
++        engine=raw["engine"],
++        scope=raw["workload_closure"]["scope"]["kind"],
++        admission=raw["admission"],
++        fidelity_detail=raw["fidelity_detail"],
++        owners=raw["owners"],
++        duration_ps=0,
++        completed_jobs=[t["id"] for t in graph["jobs"]],
++        traffic_counts=traffic,
++        unrepresented=["SYNTHETIC-ZERO-STRUCTURAL-SHELL-NOT-MODEL-EVIDENCE"],
++    )
++    r["counts"].update(
++        memory_read_bytes=float(traffic["read_payload_bytes"]),
++        memory_write_bytes=float(traffic["write_payload_bytes"]),
++    )
++    r["busy_time_ps"] = [dict(owner_id=o.owner_id, busy_time_ps=0) for o in j.owners]
++    r["attribution_ps"] = {k: 0 for k in r["attribution_ps"]}
++    r["simulator_metrics"].update(
++        event_count=len(records(r, "events")), completed_job_count=len(graph["jobs"])
++    )
++    return j, seal(r)
++
++
++@pytest.mark.parametrize(
++    "case, fault",
++    [
++        ("D13-barrier", "owner"),
++        ("D13-barrier", "request"),
++        ("D13-hop", "owner"),
++        ("D13-hop", "request"),
++    ],
++)
++def test_barrier_unicast_structural_bindings(case: Any, fault: Any) -> None:
++    j, r = zero_transport_shell(case)
++    validate_result(r, j)
++    a = next(a for a in records(r, "activities") if a["subphase"] in ("barrier", "unicast_noc"))
++    if fault == "request":
++        a["request_id"] = "FORGED"
++    else:
++        owner = next(o.owner_id for o in j.owners if o.resource == "dma_port:0")
++        a["owner_id"] = owner
++        for e in records(r, "events"):
++            if e["observation_ordinal"] in (a["dispatch_ordinal"], a["completion_ordinal"]):
++                e["target_id"] = owner
++        for row in records(r, "resource_intervals"):
++            if row["activity_id"] == a["activity_id"]:
++                row["owner_id"] = row["limiting_resource_id"] = owner
++    code = "InvalidResource" if case == "D13-hop" and fault == "owner" else "IncompleteObservations"
++    with pytest.raises(ValueError, match="^" + code + "(:|$)"):
++        validate_result(seal(r), j)
++    validate_result(zero_transport_shell(case)[1], j)
++
++
++def test_missing_makespan_activity_is_a_public_refusal() -> None:
++    j, r = sample()
++    r["duration_ps"] += 1
++    last = records(r, "critical_path")[-1]
++    last["end_ps"] += 1
++    r["attribution_ps"][last["category"]] += 1
++    with pytest.raises(ValueError, match="^AttributionMismatch: missing makespan activity$"):
++        validate_result(seal(r), j)
++
++
++def test_phase_outside_declared_task_is_a_public_refusal() -> None:
++    j, r = sample()
++    act(r, "out")["subphase"] = "compute_wave"
++    with pytest.raises(ValueError, match="^IncompleteObservations: phase inventory$"):
++        validate_result(seal(r), j)
 diff --git a/contract/tests/mapped/test_component_lifetimes_v2.py b/contract/tests/mapped/test_component_lifetimes_v2.py
 new file mode 100644
 --- /dev/null

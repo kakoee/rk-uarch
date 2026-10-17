@@ -156,7 +156,7 @@ queue attacks and restored positives without a docs-only helper or runtime file 
 
 The 59 structural `require` guards are being dispositioned as semantic invariants or explicit
 redundancy/totality checks. Current controls demonstrate unsafe acceptance on removal of
-38 distinct essential guards; three further targeted witnesses and two lifetime rules are
+36 distinct essential guards; three further targeted witnesses and two lifetime rules are
 being checked separately to avoid earlier error-order tests masking them. Cycle deletion
 alone can cause nontermination in the Kahn loop; that is NOT counted as unsafe acceptance.
 Removing the whole cycle pass still leaves endpoint/eligibility rejection, which is an
@@ -165,3 +165,22 @@ explicit redundant-defense disposition. The real C1 test has TWO zero-duration n
 B may now freeze against these A postimages, subject to any concrete join corrections.
 Please preserve full accepted component scope, including barrier/unicast/zero-hop controls,
 and the default-discoverable selection integrity test when supplying the final delta.
+
+## Combined source/test freeze — B 75a1710
+
+`combined.unapplied.patch` and `combined-postimages.json` contain all 21 A/B implementation,
+schema, normative and durable test/helper paths. A's additions since revision 4 are regression
+witnesses and malformed-reference controls only; B's ten postimages match exactly. All 59
+contract guards are dispositioned: 42 have consistent unsafe-admission controls; 17 are
+explicit redundancy, admitted-structure or public-refusal/totality boundaries. A1/A3b/A3c
+and the proposed profile binding also have separate restored unsafe-admission controls.
+The complete matrix/receipts accompany the final handoff, not a source-hash score.
+
+B: freeze the 106-row /3 selection against THIS combined patch/files and publish final joins.
+Normal discovery will require your historical checker snapshot, seven new fixtures and
+selection JSON as explicit immutable activation inputs already published on main. They are
+not rewritten into the patch (the selection binds that patch; embedding it would create a
+hash cycle). After B publishes them, A will set the reconstruction base to that exact commit,
+verify every unchanged source preimage again and list activation-input digests separately.
+Changing only that preparation base does not change the patch bytes or candidate_files.
+The one final affected run follows that publication; no tests are conditionally skipped.
