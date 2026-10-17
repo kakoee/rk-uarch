@@ -1,0 +1,19 @@
+"""Private synthetic seam probe, no authority or public execution."""
+import copy,json
+from pathlib import Path
+from uarch_contract.hashing import content_hash,canonical_json
+from uarch_contract.mapped import MappedEngineJob,TaskGraph,canonical_owners
+from uarch_contract.hardware import HardwareSpec
+from rkuarch.workload.mapped import validate_component_completeness
+root=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a')
+v=json.loads((root/'native/crates/uarch-engine/testdata/synthetic-component-jobs.json').read_bytes())['D09-read']
+b=v['workload_closure'];p=b['points'][0];g=p['task_graph'];p['initial_state']='fixture_resident';sr=next(x for x in g['buffers'] if x['space']=='sram')
+for name,offset,pre,producer,consumers in [('a-src',1024,True,None,['a-unicast']),('a-dst',1280,False,'a-unicast',[])]:
+ x=copy.deepcopy(sr);x.update(id=name,offset_bytes=offset,initial_residency='preloaded' if pre else 'uninitialized',producer_id=producer,final_consumer_ids=consumers);g['buffers'].append(x)
+g['routes'].append(dict(id='a-zero',noc_index=0,source_core_id=0,destination_core_id=0,core_ids=[0]))
+g['jobs'] += [dict(kind='noc_transfer',id='a-unicast',op_id=None,source=dict(buffer_id='a-src',offset_bytes=0,size_bytes=256),destination=dict(buffer_id='a-dst',offset_bytes=0,size_bytes=256),payload_bytes=256,route_id='a-zero',multicast=False),dict(kind='barrier',id='b-barrier',participant_job_ids=['a-unicast'],owner_id=0)]
+g['dependencies']=[dict(before='a-unicast',after='b-barrier'),dict(before='b-barrier',after='r00')]
+for field in ('jobs','buffers','routes'):g[field].sort(key=lambda x:x['id'])
+g['graph_hash']=content_hash(g,exclude=('graph_hash',));spec=HardwareSpec.model_validate(b['hardware_spec']);owners=canonical_owners(spec,TaskGraph.model_validate(g));barrier=next(x for x in g['jobs'] if x['kind']=='barrier');barrier['owner_id']=next(o.owner_id for o in owners if o.resource=='barrier:b-barrier')
+g['graph_hash']=content_hash(g,exclude=('graph_hash',));p['payload_hash']=content_hash(p,exclude=('payload_hash',));entry=v['profile']['entries'][0];entry.update(case_id='SYNTHETIC-issue-core-gap',case_selection_revision='SYNTHETIC-PROSPECTIVE-issue-gap/1',initial_state=p['initial_state'],graph_hash=g['graph_hash'],point_hash=p['payload_hash'],allowed_job_kinds=['barrier','dma','noc_transfer'],mapping_policy=b['mapping_policy']);v['profile']['format']='uarch-native-test-profile/2';v['profile']['profile_hash']=content_hash(v['profile'],exclude=('profile_hash',));b['admission'].update(case_id=entry['case_id'],profile_hash=v['profile']['profile_hash']);b['bundle_hash']=content_hash(b,exclude=('bundle_hash',));v.update(bundle_hash=b['bundle_hash'],mapped_point=p,point_hash=p['payload_hash'],initial_state=p['initial_state'],admission=b['admission'],owners=[o.model_dump(mode='json') for o in owners]);v['job_hash']=content_hash(v,exclude=('job_hash',));job=MappedEngineJob.model_validate(v);validate_component_completeness(job.workload_closure)
+path=Path('/tmp/u4-a-native-parent-audit/synthetic-issue-core-gap.json');path.write_text(canonical_json(job));print('installed admission and completeness passed',job.job_hash);print('clocks',job.freq_hz,'barrier cycles',b['hardware_spec']['sync']['barrier_latency_cycles']['value'])

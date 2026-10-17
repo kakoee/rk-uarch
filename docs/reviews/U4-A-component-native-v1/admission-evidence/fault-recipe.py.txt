@@ -1,0 +1,21 @@
+from pathlib import Path
+import shutil,subprocess,json,hashlib
+root=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a'); audit=Path('/tmp/u4-a-native-parent-audit'); export=audit/'fault-export';export.mkdir();shutil.copytree(root/'native',export/'native',ignore=shutil.ignore_patterns('target'))
+p=export/'native/crates/uarch-engine/src/component_admission.rs';original=p.read_text()
+s=(audit/'run.py').read_text().replace("root=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a')",f"root=Path('{export}')");(audit/'run-fault.py').write_text(s)
+faults=[
+('profile-policy','require(e["mapping_policy"]==b["mapping_policy"],','require(true,','synthetic_profile_two_policy_and_format'),
+('full-point','for (point,ancestors) in arr(&b["points"]).iter().zip(&closures){','for (point,ancestors) in arr(&b["points"]).iter().zip(&closures){if point!=p{continue;}','synthetic_full_point_resource_validation'),
+('terminal-readers','require(strings(&buf["final_consumer_ids"])==terminal,','require(true,','synthetic_terminal_reader_and_capacity'),
+('complete-operand','&&producer["destination"]["size_bytes"]==buf["size_bytes"]','', 'synthetic_complete_operand_and_cold_output'),
+('true-producer','require(producer["kind"]=="compute"&&producer["accumulator_buffer_id"]==buf["id"],','require(true,','synthetic_policy_two_lifetime_inventory'),
+]
+results=[]
+for name,before,after,test in faults:
+ assert original.count(before)==1,(name,original.count(before));mutant=original.replace(before,after);p.write_text(mutant)
+ tag='fault-'+name;args=['python3',str(audit/'run-fault.py'),tag,'cargo','test','--offline','--locked','-p','uarch-engine','--lib','component_admission_tests::'+test,'--','--exact','--nocapture'];r=subprocess.run(args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT);(audit/(tag+'.driver')).write_bytes(r.stdout)
+ stdout=(audit/'logs'/f'{tag}.stdout').read_text();killed=r.returncode==101 and 'running 1 test' in stdout and '1 failed' in stdout
+ results.append({'fault':name,'test':test,'exit_code':r.returncode,'behaviorally_killed':killed,'before':before,'after':after,'original_sha256':hashlib.sha256(original.encode()).hexdigest(),'mutant_sha256':hashlib.sha256(mutant.encode()).hexdigest()});p.write_text(original);print(name,r.returncode,killed,flush=True)
+ assert killed,(name,r.stdout.decode()[-4000:])
+restore=subprocess.run(['python3',str(audit/'run-fault.py'),'admission-fault-restored','cargo','test','--offline','--locked','-p','uarch-engine','--lib','component_admission_tests','--','--nocapture'],stdout=subprocess.PIPE,stderr=subprocess.STDOUT);(audit/'restored.driver').write_bytes(restore.stdout)
+result={'scope':'private synthetic focused Rust guard faults; no public execution','faults':results,'restored_exit_code':restore.returncode,'exact_source_restored':p.read_text()==original,'export':str(export)};(audit/'admission-fault-controls.json').write_text(json.dumps(result,indent=2)+'\n');print('restored',restore.returncode,flush=True);assert restore.returncode==0

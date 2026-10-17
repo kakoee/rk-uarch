@@ -1,0 +1,21 @@
+//! Independent component admission. No caller prevalidation or computed delays.
+use crate::{admission::Trust, carrier::{Result, refuse}};
+use serde_json::Value;
+use std::collections::BTreeMap;
+#[derive(Clone,Debug)]
+pub(crate) struct Admitted {pub raw:Value,pub graph:Graph,pub hardware:Hardware,pub owners:BTreeMap<String,u64>}
+#[derive(Clone,Debug)]
+pub(crate) struct Graph {pub jobs:Vec<Task>,pub buffers:Vec<Buffer>,pub routes:Vec<Route>,pub dependencies:Vec<(usize,usize)>}
+#[derive(Clone,Debug)]
+pub(crate) struct Task {pub id:String,pub op_id:Option<String>,pub owner:u64,pub kind:TaskKind,pub raw:Value}
+#[derive(Clone,Debug)]
+pub(crate) enum TaskKind {Compute{core:u64,m:u64,k:u64,n:u64},Dma{engine:u64,core:u64,write:bool,source:String,destination:String,fragments:Vec<Fragment>},Unicast{source:String,destination:String,payload:u64,route:usize},Barrier}
+#[derive(Clone,Debug)]
+pub(crate) struct Fragment {pub id:String,pub payload:u64,pub channel:u64,pub route:usize}
+#[derive(Clone,Debug)]
+pub(crate) struct Route {pub hops:u64,pub owner:u64}
+#[derive(Clone,Debug)]
+pub(crate) struct Buffer {pub id:String,pub space:String,pub owner:u64,pub offset:u64,pub size:u64,pub producer:Option<usize>,pub consumers:Vec<usize>,pub persistent:bool}
+#[derive(Clone,Debug)]
+pub(crate) struct Hardware {pub freq:[u64;3],pub operand_rate:u64,pub port_rate:u64,pub overhead:u64,pub wave_fill_drain:u64,pub hop_cycles:u64,pub dram_latency:u64,pub barrier_cycles:u64,pub credit_limit:u64,pub engines_per_core:u64,pub channel_step_num:u128,pub channel_step_den:u128}
+pub(crate) fn validate(_input:&str,_trust:&Trust)->Result<Admitted>{Err(refuse("UnsupportedCheckpointScope","","test-first stub"))}

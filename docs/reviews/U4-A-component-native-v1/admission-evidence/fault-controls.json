@@ -1,0 +1,58 @@
+{
+  "scope": "private synthetic focused Rust guard faults; no public execution",
+  "faults": [
+    {
+      "fault": "profile-policy",
+      "test": "synthetic_profile_two_policy_and_format",
+      "exit_code": 101,
+      "behaviorally_killed": true,
+      "before": "require(e[\"mapping_policy\"]==b[\"mapping_policy\"],",
+      "after": "require(true,",
+      "original_sha256": "c97891d2d7745e6ee99007dd3a20953bb87bc9f913c8d1607d5b748562fd4a91",
+      "mutant_sha256": "a69a028f3ec1212fd2e5433096839e48d8a3ae0a12c87c45d5838fcd0bfbdd36"
+    },
+    {
+      "fault": "full-point",
+      "test": "synthetic_full_point_resource_validation",
+      "exit_code": 101,
+      "behaviorally_killed": true,
+      "before": "for (point,ancestors) in arr(&b[\"points\"]).iter().zip(&closures){",
+      "after": "for (point,ancestors) in arr(&b[\"points\"]).iter().zip(&closures){if point!=p{continue;}",
+      "original_sha256": "c97891d2d7745e6ee99007dd3a20953bb87bc9f913c8d1607d5b748562fd4a91",
+      "mutant_sha256": "9ce510d9cdb2e6a1f86e477495a78e67cdb0c093d73d405d929b8da3e40d7567"
+    },
+    {
+      "fault": "terminal-readers",
+      "test": "synthetic_terminal_reader_and_capacity",
+      "exit_code": 101,
+      "behaviorally_killed": true,
+      "before": "require(strings(&buf[\"final_consumer_ids\"])==terminal,",
+      "after": "require(true,",
+      "original_sha256": "c97891d2d7745e6ee99007dd3a20953bb87bc9f913c8d1607d5b748562fd4a91",
+      "mutant_sha256": "305b59562d5a223e11cc5cc3a758a3a3cbe9bc60119e40bad2e510cf7fbf5421"
+    },
+    {
+      "fault": "complete-operand",
+      "test": "synthetic_complete_operand_and_cold_output",
+      "exit_code": 101,
+      "behaviorally_killed": true,
+      "before": "&&producer[\"destination\"][\"size_bytes\"]==buf[\"size_bytes\"]",
+      "after": "",
+      "original_sha256": "c97891d2d7745e6ee99007dd3a20953bb87bc9f913c8d1607d5b748562fd4a91",
+      "mutant_sha256": "aa1dd841eff439273fa58115cc5ba8cacbdc349605198225c99bb3966fbe6752"
+    },
+    {
+      "fault": "true-producer",
+      "test": "synthetic_policy_two_lifetime_inventory",
+      "exit_code": 101,
+      "behaviorally_killed": true,
+      "before": "require(producer[\"kind\"]==\"compute\"&&producer[\"accumulator_buffer_id\"]==buf[\"id\"],",
+      "after": "require(true,",
+      "original_sha256": "c97891d2d7745e6ee99007dd3a20953bb87bc9f913c8d1607d5b748562fd4a91",
+      "mutant_sha256": "a78bbd51372e66f2036a07f71be7654f6a0859bcfe14e7f96eb870cfc826b107"
+    }
+  ],
+  "restored_exit_code": 0,
+  "exact_source_restored": true,
+  "export": "/tmp/u4-a-native-parent-audit/fault-export"
+}

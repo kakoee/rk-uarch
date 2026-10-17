@@ -1,0 +1,11 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.05s
+     Running unittests src/lib.rs (/target/debug/deps/uarch_engine-02caa55ddc47d2af)
+
+thread 'component_admission_tests::synthetic_true_producer_precedes_size_and_terminal_checks' (284) panicked at crates/uarch-engine/src/component_admission_tests.rs:31:710:
+writer control must contain a noncompute false producer
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'component_admission_tests::synthetic_positive_inventory_is_nonempty' (279) panicked at crates/uarch-engine/src/component_admission_tests.rs:22:264:
+D13-barrier: Refusal { code: "InvalidResource", message: "canonical barrier owner", pointer: "" }
+error: test failed, to rerun pass `-p uarch-engine --lib`
