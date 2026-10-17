@@ -1,0 +1,95 @@
+{
+  "reviewed_helper_commit": "0c4afcfa0ab314724afa869ac2d5736a22fb0e89",
+  "decision_commit": "026d365e0bee9da1ff1ea1a8717e12ab1dfe23e8",
+  "placement_commit": "b11bf3add519085608adb9f69d2969423de65fd6",
+  "human_placement_helper_commit": "96cc29a630f11d59d6182b72a2223f6887dd6e61",
+  "candidate_sha256": "ecc0dfafea975701bd933beda08735d0def9c7a3e76c03616a543a98664c9b81",
+  "output_root": "/tmp/u4-k2-combined-campaign-v2",
+  "scope": "Local fixed-delay K2 first-use campaign and saved-output replay only",
+  "status": "campaign and required replay completed",
+  "mapped_calls": 798,
+  "outcomes": {
+    "0": 780,
+    "2": 18
+  },
+  "six_way_comparison": true,
+  "workers": 11,
+  "campaign_seconds": 259.99124447102076,
+  "replay_seconds": 194.25394552998478,
+  "worker_timing": {
+    "case_processing": 173.87124002800556,
+    "entrypoint_total_before_final_receipt": 258.4075242209947,
+    "final_checks": 2.012014875013847,
+    "genuine_authority_resolution": 79.77248246900854,
+    "initial_input_snapshot": 0.40001752800890245,
+    "runtime_preflight": 2.239384224987589
+  },
+  "saved_replays": [
+    {
+      "case": "K06-02",
+      "controls_refused": [
+        "missing",
+        "duplicated",
+        "extra-LF",
+        "nonzero",
+        "foreign-status",
+        "foreign-job",
+        "stale-engine",
+        "incomplete",
+        "busy-drift",
+        "event-order",
+        "queue-domain",
+        "phase",
+        "clock-law"
+      ],
+      "restored_pass": true
+    },
+    {
+      "case": "S08-zero-bridge",
+      "controls_refused": [
+        "missing",
+        "duplicated",
+        "extra-LF",
+        "nonzero",
+        "foreign-status",
+        "foreign-job",
+        "stale-engine",
+        "incomplete",
+        "busy-drift",
+        "event-order",
+        "queue-domain",
+        "phase",
+        "causal-link"
+      ],
+      "restored_pass": true
+    }
+  ],
+  "replay_new_native_calls": 0,
+  "post_run_seal_verified": true,
+  "campaign_input_snapshots_identical": true,
+  "replay_snapshot_check": "Executed in reviewed runtime before complete operational receipt; snapshot bytes are not separately emitted",
+  "coordinator_audit_correction": "Initial post-run audit expected standalone parallel-replay-inputs.json. Reviewed runtime_entry uses an in-memory snapshot check and replay-operational.json. Corrected audit only; no native or replay rerun.",
+  "raw_evidence": {
+    "local_archive": "/home/jjaff/AI-infra-simulation/rk-uarch/tables/U4-K2-completed-first-use-v2/evidence.tar.gz",
+    "bytes": 6512052,
+    "sha256": "f10e60d56c6749e8b142bb256ce2e4c387f762f0af093e3b2353af21e5bc67e0",
+    "original_directory": "/tmp/u4-k2-combined-campaign-v2",
+    "files": 2012,
+    "uncompressed_bytes": 287116356,
+    "raw_blobs_published_to_git": false,
+    "temporary_archive": "/tmp/u4-k2-completed-first-use-v2-evidence.tar.gz"
+  },
+  "published_receipts": {
+    "path": "receipts.tar.gz",
+    "bytes": 747574,
+    "sha256": "9a61bda2ca38bbdc16315b60d045e868466b40897d4d0b0f42193f739109a6aa",
+    "excludes": "blobs/ only; every real blob is retained locally and bound by raw-manifest.json"
+  },
+  "limitations": [
+    "Local WSL2/Docker evidence under U0024; no hosted/native performance qualification",
+    "Fixed-delay kernel fixtures only; no component implementation or first use",
+    "No canonical runtime source installation or artifact regeneration",
+    "No final independent U4 review, G3a/U4 closure or tag"
+  ],
+  "archive_roundtrip_verified": true
+}
