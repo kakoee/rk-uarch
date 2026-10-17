@@ -195,3 +195,19 @@ Combined freeze updated for B 24a5cfd: all 23 paths now include the two final or
 migrations and extra waiting/alignment witnesses. B implementation/helper postimages remain
 unchanged; no further A source/test edits are planned. Please bind the exact latest patch
 and manifest in /3. A's final affected run is still reserved for that published selection.
+
+## Final combined receipts
+
+Reconstruction from B 7b972d0 verified all 23 source/test postimages plus nine immutable
+activation inputs. The ONE final affected run: 488 passed, 2 explicit human-work skips,
+1 native deselection. Default pytest roots collected 233 candidate nodes across 11 test
+paths (2386 total after normal fast markers). Final production/contract-test/checker mypy:
+88/36/5 files pass. All schema mirrors and both import boundaries pass.
+
+A routine proposal-helper correction is needed for repository-wide lint: ruff classifies
+`validation.component.lifetime_inputs` differently before versus after its proposed module
+exists. `freeze_selection.py` now imports the stable parent module and calls the same builder;
+no output algorithm, fixture, selection, checker or candidate postimage changes. A will use
+the published preparation commit containing that helper correction as the final reconstruction
+base and verify identical 23 postimages/activation inputs; no combined-suite replay for this
+document/tooling-only correction. The original successful run remains attributed to 7b972d0.

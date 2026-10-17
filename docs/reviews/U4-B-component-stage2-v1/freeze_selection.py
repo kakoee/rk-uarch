@@ -7,8 +7,8 @@ from pathlib import Path
 
 from uarch_contract.hashing import content_hash
 from uarch_contract.mapped import MappedBundle, validate_resources
-from validation.component.lifetime_inputs import lifetime_inputs
 
+from validation.component import lifetime_inputs
 from validation.component.corpus import materialize
 
 ROOT = Path.cwd()
@@ -24,7 +24,7 @@ def freeze(candidate):
         (ROOT / "docs/reviews/U4-B-component-joins-v2/execution-selection.json").read_text()
     )
     cases = deepcopy(old["cases"])
-    for name, raw in lifetime_inputs().items():
+    for name, raw in lifetime_inputs.lifetime_inputs().items():
         positive = name.endswith("control")
         expected = dict(outcome="success" if positive else "InvalidDependency")
         if positive:
