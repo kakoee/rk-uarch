@@ -1,0 +1,4 @@
+import difflib,json,hashlib,shutil
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');w=Path('/tmp/u4-b-runtime-final-audit-01');p=r/'docs/reviews/U4-B-component-runtime-final-v1';s=w/'source';name='native/tools/component_runtime_candidate.py';before=(r/name).read_text();old='binding(root, root / B / "consumer-bindings-v2.json")';new='binding(\n            root,\n            root / "docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json",\n        )';assert before.count(old)==1;after=before.replace(old,new);patch=''.join(difflib.unified_diff(before.splitlines(True),after.splitlines(True),fromfile='a/'+name,tofile='b/'+name));(p/'A-binding3-unapplied.patch').write_text(patch);(s/name).write_text(after);shutil.copytree(p,s/p.relative_to(r))
+print(hashlib.sha256(patch.encode()).hexdigest())
