@@ -1,0 +1,1431 @@
+{
+  "authority_created": false,
+  "commands": {
+    "debug": {
+      "argv": [
+        "/usr/bin/docker",
+        "--host",
+        "unix:///var/run/docker.sock",
+        "run",
+        "--name",
+        "u4-b-audit-54111d6a58194de68f461a345b77f849",
+        "--rm",
+        "--pull",
+        "never",
+        "--platform",
+        "linux/amd64",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "1000:1000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--tmpfs",
+        "/tmp",
+        "--workdir",
+        "/work/native",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/source,dst=/work,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/cache,dst=/cargo-home,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/controls,dst=/controls,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/diagnostics,dst=/diagnostics,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/canary,dst=/canary,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/debug-target,dst=/target",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/receipts/debug,dst=/receipts",
+        "--entrypoint",
+        "/usr/bin/env",
+        "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+        "-i",
+        "PATH=/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+        "CARGO_HOME=/cargo-home",
+        "CARGO_TARGET_DIR=/target",
+        "RUSTC=/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "RUSTUP_AUTO_INSTALL=0",
+        "CARGO_NET_OFFLINE=true",
+        "CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse",
+        "LC_ALL=C",
+        "RUSTFLAGS=-C debuginfo=1 -C linker=/controls/linker.sh",
+        "RUSTC_WRAPPER=/controls/rustc-wrapper.sh",
+        "C2_RUN_TAG=debug",
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--lib",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "cleanup": null,
+      "complete_observation_claim": false,
+      "container_name": "u4-b-audit-54111d6a58194de68f461a345b77f849",
+      "elapsed_seconds": 7.473631159984507,
+      "environment": {
+        "DOCKER_CONFIG": "/tmp/u4-b-issue-v2-build-01/docker-config",
+        "PATH": "/usr/bin:/bin"
+      },
+      "exit_code": 0,
+      "files": {
+        "debug.linker.1018.argv": {
+          "bytes": 27112,
+          "sha256": "7b1206ab369d4dece0267dbfee42daea33939acaf968b31e9d999613bf9ed766"
+        },
+        "debug.linker.1018.env": {
+          "bytes": 1425,
+          "sha256": "6a30e9ccf02e85142ce2e2ce380edfa975dadaa5ba4d94a642108fa55dce0c48"
+        },
+        "debug.linker.152.argv": {
+          "bytes": 3511,
+          "sha256": "6948ef9b366a3a873b3d271df565b7f6a08bd52a07b7a69dda0b32219684d14a"
+        },
+        "debug.linker.152.env": {
+          "bytes": 1651,
+          "sha256": "71d3cb31bc425437222f62eaa1a3e9e90fcc26c9c07f6ccb42377a2ef7fa5108"
+        },
+        "debug.linker.156.argv": {
+          "bytes": 3481,
+          "sha256": "ade0d970ae2896b937b0940ee69c45250dda2ec8687c57b4ea063c08be15233d"
+        },
+        "debug.linker.156.env": {
+          "bytes": 1673,
+          "sha256": "3750bfa31fc16748cd72edc2883e09a8ba50c7a35c6e98f3fbdbd9922308a6f6"
+        },
+        "debug.linker.166.argv": {
+          "bytes": 3486,
+          "sha256": "38f1f76c9f7c26267418afee24941af762c57198282c7e4a3e61d41a494e2d7c"
+        },
+        "debug.linker.166.env": {
+          "bytes": 1657,
+          "sha256": "7462dbfead6df54011b70af7322b71035ebae85e29a55741ccf930cefa2fa2d1"
+        },
+        "debug.linker.180.argv": {
+          "bytes": 3506,
+          "sha256": "a54fdc0830bd430e1211c5db8211323ccadab0b868b54b633f872302dea6d3e5"
+        },
+        "debug.linker.180.env": {
+          "bytes": 1716,
+          "sha256": "68ffe2f22dcabea7ec400f17f04b58d9a2189f081c6c02f68fdb8c2c00356ee1"
+        },
+        "debug.linker.188.argv": {
+          "bytes": 3516,
+          "sha256": "705d1365d9cc242aa976db002601986d862f1fedab55c8380cc85f34df3cfb0d"
+        },
+        "debug.linker.188.env": {
+          "bytes": 1831,
+          "sha256": "47c88f7940322358ed4b817a45ad605dfd123de9aaa31648eb3d668eb723b3d8"
+        },
+        "debug.linker.189.argv": {
+          "bytes": 3511,
+          "sha256": "c679fd14fe5bb3c8ab5aff283a31053d8df827e4f9ee6e49b17f7ae2c5bcefb2"
+        },
+        "debug.linker.189.env": {
+          "bytes": 1790,
+          "sha256": "d1f50f8571046b5e813f211cd1682f2a47d4d116ad613905072e26eb8802e314"
+        },
+        "debug.linker.192.argv": {
+          "bytes": 3486,
+          "sha256": "a963d5c295e7b28952c2e2efb6f43bf410bec612beef52ddc03d02dd80393264"
+        },
+        "debug.linker.192.env": {
+          "bytes": 1744,
+          "sha256": "cc7e0d4d10334e48f73b6e9242510a71ddd2e1afc8fde0798f27def2af1468b4"
+        },
+        "debug.linker.210.argv": {
+          "bytes": 3495,
+          "sha256": "4a60a9133b04b82c42b169ed5de2f13a73fb9f466148703120c20e3b29cc41f4"
+        },
+        "debug.linker.210.env": {
+          "bytes": 1926,
+          "sha256": "8a62c43c5e5ea8f1df45abb1942ebec61a145f1ff887e2e680839a47d39e7e4e"
+        },
+        "debug.linker.373.argv": {
+          "bytes": 3862,
+          "sha256": "04374fb05789d309639d8ffdb1784e4fdb4779c43596718b703c7aaae7ed3531"
+        },
+        "debug.linker.373.env": {
+          "bytes": 1645,
+          "sha256": "39bdb825b1fe163c143133c8e339da747f0c56659fa4efa27bd7d032ebf2223c"
+        },
+        "debug.linker.377.argv": {
+          "bytes": 3584,
+          "sha256": "f13fbbf830404caec2d70404d6d3661e881592de036590af55a4f69c80271d86"
+        },
+        "debug.linker.377.env": {
+          "bytes": 1745,
+          "sha256": "919736ab60273153d415590f40d0d9d2a96f6398396acab459c8b5e44c4a699c"
+        },
+        "debug.linker.487.argv": {
+          "bytes": 3563,
+          "sha256": "093681853dcd28a8d59cd28c0f683c2363d2bdc5c943103cd5f4854b329c9fe2"
+        },
+        "debug.linker.487.env": {
+          "bytes": 1723,
+          "sha256": "8b229009d331071175fdcf47b5d83a3ef7a4d583e60b3a9fa84ef763e25cb283"
+        },
+        "debug.linker.730.argv": {
+          "bytes": 5369,
+          "sha256": "355e17fdc0b086cba4eab790d624bc5acd9c5e7ac1651a34f27fbd12728c2951"
+        },
+        "debug.linker.730.env": {
+          "bytes": 1779,
+          "sha256": "9701943f404c53350987f1792f1c54622e9083bcc78a57912ea6ade38eedbddc"
+        },
+        "debug.rustc.10.argv": {
+          "bytes": 357,
+          "sha256": "9c7cb0b9a79b884faf7081efd8d79168f662b0bf5c7c362e1a34c6b9dedae2fc"
+        },
+        "debug.rustc.10.env": {
+          "bytes": 526,
+          "sha256": "421b6c3c34c0b5df57e60d1777b0d68a61ec288d4a538e8d34e6eeb8020c2464"
+        },
+        "debug.rustc.106.argv": {
+          "bytes": 609,
+          "sha256": "c34c2d8fae9e77f5c8c9daf23e948be97e14bc28a1dc429ba642c21d442f3901"
+        },
+        "debug.rustc.106.env": {
+          "bytes": 1419,
+          "sha256": "4a29cf3aa0a090bb8c1b71a0555b1c998059d88fd16d1e04377e7ea202e42114"
+        },
+        "debug.rustc.108.argv": {
+          "bytes": 687,
+          "sha256": "9ea4bf2f7e6a3929d925b167f63bde5a8836bfa8fddf974d4327f2e3930b2227"
+        },
+        "debug.rustc.108.env": {
+          "bytes": 1513,
+          "sha256": "e6645ee3ed6d9d4d9ffe8fd7119eb8d5b8c8de2f068937c7fc0d9b7fa7a452b8"
+        },
+        "debug.rustc.147.argv": {
+          "bytes": 697,
+          "sha256": "a39adb2fbdad5a43130cbcc2dfa49d441f7d4e809520a874d696609a020430b1"
+        },
+        "debug.rustc.147.env": {
+          "bytes": 1510,
+          "sha256": "5b6b72b40e21518b06deaf38454ff3f2b64cfab40f2fa22bd4f737259113dc6b"
+        },
+        "debug.rustc.15.argv": {
+          "bytes": 75,
+          "sha256": "42681b3e07633430f0ba771ede7e2a52ad3a8f556b985da0fd65daf448bc1654"
+        },
+        "debug.rustc.15.env": {
+          "bytes": 603,
+          "sha256": "37aac99100ccbef88562136f0df9bcfff7a5e4bc8dfb3559030c21d68d2912bf"
+        },
+        "debug.rustc.164.argv": {
+          "bytes": 727,
+          "sha256": "ad75f9df9ba6584ee0a1ccedd8fd475f9d47333a16f13e8db76dca2ab4111cf8"
+        },
+        "debug.rustc.164.env": {
+          "bytes": 1559,
+          "sha256": "2ed7c95c64c5db718cd6cc5a4c002081afeca9b2c38face87b2d533ddcc1a437"
+        },
+        "debug.rustc.165.argv": {
+          "bytes": 905,
+          "sha256": "66bbd8cb3e676a689f9755821a3189220ee21f69be4fb50dde34bcc1f5e20390"
+        },
+        "debug.rustc.165.env": {
+          "bytes": 1745,
+          "sha256": "d1e34caa1fe7466d7e2921e85358b30497c99645e6797971e13e1145bd4a8ecb"
+        },
+        "debug.rustc.20.argv": {
+          "bytes": 717,
+          "sha256": "8d2023aa6a82d648244ca3da2d4e438beccf8f9af14f9c4a3798f35fa90a90a3"
+        },
+        "debug.rustc.20.env": {
+          "bytes": 1695,
+          "sha256": "e44ca3095d1fa2628d04d125052adb1ea159d3c2a797002b1b61ad394459ac48"
+        },
+        "debug.rustc.201.argv": {
+          "bytes": 613,
+          "sha256": "d2e6ab244963fb912344fbc7c2115c1de9c000525511745a93f445191148a4c3"
+        },
+        "debug.rustc.201.env": {
+          "bytes": 1570,
+          "sha256": "4f3e64ba06b0dbead0cd9fedf0341f62bf42eb93cb51f6a3c9510be1dbd7a3bc"
+        },
+        "debug.rustc.219.argv": {
+          "bytes": 681,
+          "sha256": "fac3cdf049bbb75f57639de9b057545d56f1f720a65a9d5664030ec7402b9f88"
+        },
+        "debug.rustc.219.env": {
+          "bytes": 1493,
+          "sha256": "8f01c1526305e08fdf47f2af365defd59cb80b9de78b4d557d8a058396b9c59e"
+        },
+        "debug.rustc.222.argv": {
+          "bytes": 604,
+          "sha256": "e954d84d214bbe369a9981a61802ff646c05c9db29b9a2b87fc3b3da9be59e2e"
+        },
+        "debug.rustc.222.env": {
+          "bytes": 1404,
+          "sha256": "552d04307d31908c459f0b4d7c7e25e20382b934a3e0359a407601c5f9edd35e"
+        },
+        "debug.rustc.25.argv": {
+          "bytes": 601,
+          "sha256": "81c682503fc90cc3c0b2964c42c26d36c4aa216f5235ffccb5a7a833ba3c7023"
+        },
+        "debug.rustc.25.env": {
+          "bytes": 1484,
+          "sha256": "4928da0bdbaeaca14d0772270817fa2efc2ea4ffc12a06efbd0dbefee4a852f9"
+        },
+        "debug.rustc.27.argv": {
+          "bytes": 704,
+          "sha256": "6fef99dbe9620a4466ba4ccf0be9fe3fd44cc6099c60a26286a48dc5c116f695"
+        },
+        "debug.rustc.27.env": {
+          "bytes": 1600,
+          "sha256": "ea10bd1dc708a9a71b599438b4fa16b045415a4f6787b7a55c39842e649ed107"
+        },
+        "debug.rustc.30.argv": {
+          "bytes": 730,
+          "sha256": "cae0ddec82708cc9a677a7943bf559ebd6e2136a1d87885e652d4d9ee7591c54"
+        },
+        "debug.rustc.30.env": {
+          "bytes": 1414,
+          "sha256": "d65904286f469e8975c08d132724b4bada36e55dbaf6bba547e9beb34c7e63b3"
+        },
+        "debug.rustc.32.argv": {
+          "bytes": 662,
+          "sha256": "ea54c0661dba981622bd48ad634e3d3e0bdd78f3326837cbdef8af7e1b8dcfc7"
+        },
+        "debug.rustc.32.env": {
+          "bytes": 1426,
+          "sha256": "5cc2b60ff7a2e64302fa812e7de405b4fdf14e0b4671d8ea5630bb0824228e87"
+        },
+        "debug.rustc.35.argv": {
+          "bytes": 609,
+          "sha256": "1652778265c13a25c2ee4a37011f7c6463176434d0bbef75126dd38576aafec3"
+        },
+        "debug.rustc.35.env": {
+          "bytes": 1505,
+          "sha256": "9af562ab0ef198473cc715394c8556a433887694397e3412a005443075356944"
+        },
+        "debug.rustc.363.argv": {
+          "bytes": 772,
+          "sha256": "cea81575e88b2581035021bbd0273a5e12561ebf48cbb0a8eddf0641df913f86"
+        },
+        "debug.rustc.363.env": {
+          "bytes": 1514,
+          "sha256": "9cf6e8f6d13344ca738d9c8847f228fd1cca8bc8590bc28a9c9d692cc0cbc669"
+        },
+        "debug.rustc.38.argv": {
+          "bytes": 628,
+          "sha256": "e06f1c839f202d6297accc67330e0ebf1ff0eb5f77adc1d99e42356584fcd426"
+        },
+        "debug.rustc.38.env": {
+          "bytes": 1571,
+          "sha256": "073eea67655aa9df32885f33302d932521a902ddc92bac5be9b5817af50b6626"
+        },
+        "debug.rustc.44.argv": {
+          "bytes": 690,
+          "sha256": "f74c6c79004255c98d30107dba6e52c1eae27f9fa7f5a6e92a3e1b0d2c2fd052"
+        },
+        "debug.rustc.44.env": {
+          "bytes": 1485,
+          "sha256": "1c0ca6868a8d6b80673666f1971b906185a0d9972049782b1fd23d2f805fb86c"
+        },
+        "debug.rustc.444.argv": {
+          "bytes": 743,
+          "sha256": "a331a9b4913e13410364356ef31b02f55c79fb1e82d87054f395cf9594699f37"
+        },
+        "debug.rustc.444.env": {
+          "bytes": 1492,
+          "sha256": "29296e2b41420be102b56f4156811b9fc60ce9ce1d235adccd2659b1a2db6c0f"
+        },
+        "debug.rustc.445.argv": {
+          "bytes": 377,
+          "sha256": "1cd33acaa29e8496b6aa926e68836c66c5138f73d4c6ddbeb19e697085237579"
+        },
+        "debug.rustc.445.env": {
+          "bytes": 2379,
+          "sha256": "c32827a89cf482c2fd51c2d238abc6775768599bf3014bb079193159503b48df"
+        },
+        "debug.rustc.448.argv": {
+          "bytes": 723,
+          "sha256": "d7076457cab04e763556e0a4ac03c47149742d27dfebfbe529ab31766e7ab874"
+        },
+        "debug.rustc.448.env": {
+          "bytes": 1482,
+          "sha256": "6f1103170997237cef60d3736b1c4229535ebfc8cd816511851198ca996fe589"
+        },
+        "debug.rustc.454.argv": {
+          "bytes": 81,
+          "sha256": "a94db3c783427069a1e74ceafb846ed0159f64d4609af5a20967bcdb6c29b6b5"
+        },
+        "debug.rustc.454.env": {
+          "bytes": 2148,
+          "sha256": "ac4186db4f0d6d3330c7f93864ec642febb06f2cfcfa33c1f020e59d767477c4"
+        },
+        "debug.rustc.455.argv": {
+          "bytes": 706,
+          "sha256": "4b939edca94ca155505d7d27e6fe9ec3492204acbad60074ee182d1030cf2086"
+        },
+        "debug.rustc.455.env": {
+          "bytes": 1741,
+          "sha256": "d88059c7b60f903244bd1aa5066d826d7a808884b639a81e722cc9b03a4c81c9"
+        },
+        "debug.rustc.46.argv": {
+          "bytes": 589,
+          "sha256": "ae219dea9df4062173abe59b02f4a7826c11986c5ebf7df43f324c2abb85bf18"
+        },
+        "debug.rustc.46.env": {
+          "bytes": 1426,
+          "sha256": "0dfe9e561083eb388921d527841be87187dc81fabeada74a47a73ee044d4844a"
+        },
+        "debug.rustc.469.argv": {
+          "bytes": 1060,
+          "sha256": "372bec967d2f63f19f4bc83d81471bd550574852324b71b9a235d3da1e5d8c9a"
+        },
+        "debug.rustc.469.env": {
+          "bytes": 1611,
+          "sha256": "d825f99aa5a32cc28b4a8534c6dd71e35512b8445115085f8da726cfbac38df8"
+        },
+        "debug.rustc.478.argv": {
+          "bytes": 1658,
+          "sha256": "77a8f5f7686efa4d3cf5a95448bea61a0adf34c3a0bc91b230b1cb6a2a9320ee"
+        },
+        "debug.rustc.478.env": {
+          "bytes": 1454,
+          "sha256": "003702bf2e5dd5786712a7f5ba3ed10f51c433135ac5552a6ed6149242b2893f"
+        },
+        "debug.rustc.48.argv": {
+          "bytes": 719,
+          "sha256": "44433e26baa473ece25fecc1fe1e0242d131afa7a9be30dd53f85a5e999a95ec"
+        },
+        "debug.rustc.48.env": {
+          "bytes": 1559,
+          "sha256": "15e8d74bb6c433e1342308c461d7470d54f236b653f5bc462c454bd45d45d133"
+        },
+        "debug.rustc.507.argv": {
+          "bytes": 386,
+          "sha256": "ca720c8f599a73b1a6fa77d3656c3189f7e70bff4e3bba8923a6d645765a92fb"
+        },
+        "debug.rustc.507.env": {
+          "bytes": 2379,
+          "sha256": "c32827a89cf482c2fd51c2d238abc6775768599bf3014bb079193159503b48df"
+        },
+        "debug.rustc.511.argv": {
+          "bytes": 382,
+          "sha256": "9675cde3f06e66e31a14c3c6accc9d4684b11f16898b121df2d22956499b8e7f"
+        },
+        "debug.rustc.511.env": {
+          "bytes": 2379,
+          "sha256": "c32827a89cf482c2fd51c2d238abc6775768599bf3014bb079193159503b48df"
+        },
+        "debug.rustc.515.argv": {
+          "bytes": 91,
+          "sha256": "ec70bdc9cd0fc16dfa70846a776cb6eceaa24623a918bc168814583830f2a3c0"
+        },
+        "debug.rustc.515.env": {
+          "bytes": 2255,
+          "sha256": "4a507b3b06a9d88e9eaa0832e71157de45f7d82d828ea68943ffdd0d1b4a8f09"
+        },
+        "debug.rustc.52.argv": {
+          "bytes": 602,
+          "sha256": "211fccebdb94fcab58bea771f50578458721f0c53f8a1846ce905113f8258970"
+        },
+        "debug.rustc.52.env": {
+          "bytes": 1562,
+          "sha256": "8623deb30a7b61f3d066966dd4807c57776beda989ec951390fbf59f1132cb30"
+        },
+        "debug.rustc.520.argv": {
+          "bytes": 286,
+          "sha256": "b62db7c72e243812d31442b70475b0d3b959b5a4913fb39c99515dc8c41628d7"
+        },
+        "debug.rustc.520.env": {
+          "bytes": 2255,
+          "sha256": "4a507b3b06a9d88e9eaa0832e71157de45f7d82d828ea68943ffdd0d1b4a8f09"
+        },
+        "debug.rustc.523.argv": {
+          "bytes": 1418,
+          "sha256": "f45e71cea76a71c93ee111744f497ae5cd9bd93b2ec9158b5f32aa2aa53258f4"
+        },
+        "debug.rustc.523.env": {
+          "bytes": 1654,
+          "sha256": "813b44c4e9df47ae4efdc8476600f9f76502c75972253de828e8737dc95087eb"
+        },
+        "debug.rustc.532.argv": {
+          "bytes": 286,
+          "sha256": "9a5ad8fc168b6b0a9ea8ddf1d342e5907b7f73dcb496adf0231193b73b03eb58"
+        },
+        "debug.rustc.532.env": {
+          "bytes": 2255,
+          "sha256": "4a507b3b06a9d88e9eaa0832e71157de45f7d82d828ea68943ffdd0d1b4a8f09"
+        },
+        "debug.rustc.540.argv": {
+          "bytes": 714,
+          "sha256": "7673f270fb914cf6a61c24d1989cc1b7e0f2dcca8c6cfffcf90eea30107410eb"
+        },
+        "debug.rustc.540.env": {
+          "bytes": 1544,
+          "sha256": "17d0e5c9d12868cf7f4837a05351e04fe81aabff58937aab2904d40fd7a550de"
+        },
+        "debug.rustc.555.argv": {
+          "bytes": 755,
+          "sha256": "b5a05458bea258ed4845341e2935ba15eab0721fe1e27ab4a608f9ad7b0f6d8d"
+        },
+        "debug.rustc.555.env": {
+          "bytes": 1468,
+          "sha256": "28076bd0a58b202d352988cb1f5faae5b2bbe59fa384e324b797a5ad3c9c03c7"
+        },
+        "debug.rustc.564.argv": {
+          "bytes": 774,
+          "sha256": "35743d861166ae842c444acab021e0c44e1b3490fc2301bb2c9010e2d90b3b68"
+        },
+        "debug.rustc.564.env": {
+          "bytes": 1572,
+          "sha256": "f29bfdd7620059f02f5659efde1aa65795a41da2daea262335ad5ed362c3bfa3"
+        },
+        "debug.rustc.57.argv": {
+          "bytes": 840,
+          "sha256": "65cac6d1a497b041e67b7d881dc4b1e6aea29d6081e2e980cd3c40f290c496a7"
+        },
+        "debug.rustc.57.env": {
+          "bytes": 1420,
+          "sha256": "5a682066c46e2de1a96c11d9919af25fe2d6226556204648a2a03bf53c20d9dd"
+        },
+        "debug.rustc.575.argv": {
+          "bytes": 1067,
+          "sha256": "92b6ab356046055c5b7538d19728696713f9d38a2663d5953b3e12ebcadece1a"
+        },
+        "debug.rustc.575.env": {
+          "bytes": 1392,
+          "sha256": "256de6220af80474b56104e40e9e6166c7da2ac802820aa10d67d940c186981d"
+        },
+        "debug.rustc.587.argv": {
+          "bytes": 697,
+          "sha256": "4e29219a7af2b5fbddcdcd3230b379223c152a954bd3776227f9d8f612363f32"
+        },
+        "debug.rustc.587.env": {
+          "bytes": 1445,
+          "sha256": "a42c2d1f623a51639b041b8c5bad4c72983a067b010a4eae5631acad4281d4b3"
+        },
+        "debug.rustc.589.argv": {
+          "bytes": 819,
+          "sha256": "ad2862b53ad5e11a5c092e0d604a591491a79ba22fa0d168168871aacf77c1b7"
+        },
+        "debug.rustc.589.env": {
+          "bytes": 1433,
+          "sha256": "41ae7ea7797285150cd1d702f828504e9b287fb53ea5bb545a82cb1561131e5a"
+        },
+        "debug.rustc.59.argv": {
+          "bytes": 620,
+          "sha256": "c01be45e4dea2b9e498b9ef6bf1ec5ba2facc0b2a5597227e831194aa95da1a2"
+        },
+        "debug.rustc.59.env": {
+          "bytes": 1442,
+          "sha256": "a8b34d14dff2ff91200cdad1176ac4a03155fe1b5befd934f89c97678ccac5d5"
+        },
+        "debug.rustc.595.argv": {
+          "bytes": 885,
+          "sha256": "0ac992380eabb9137ba925944c9fa67d7b5f124a245a67cb8907ad541c2014a6"
+        },
+        "debug.rustc.595.env": {
+          "bytes": 1535,
+          "sha256": "756d4db509eb0a477d202e7ef10c3f78a7699931c40a201f7d82603803e4492e"
+        },
+        "debug.rustc.61.argv": {
+          "bytes": 612,
+          "sha256": "e4dca6fe7b526ce11683a86e1b1b5a636d5de7cba1fb76ebddcfda5111afd4a7"
+        },
+        "debug.rustc.61.env": {
+          "bytes": 1568,
+          "sha256": "fe1570c4fc2c92e1a419a0a9bbedf7cb47e9201cd1f4e063f5b749c37165fee4"
+        },
+        "debug.rustc.610.argv": {
+          "bytes": 1005,
+          "sha256": "46567d96eed161b1f127ed408dca823c9b66f05e239b73929d379c5bfab1619d"
+        },
+        "debug.rustc.610.env": {
+          "bytes": 1448,
+          "sha256": "ecf282394bb8e340a7f386bc67b01a1e4270e16eb06072a99f4be15832e239a3"
+        },
+        "debug.rustc.618.argv": {
+          "bytes": 928,
+          "sha256": "0c6430cea30b1e8493c51267ef5018b853e25d18b5d0d76a263ee90e9ac76b32"
+        },
+        "debug.rustc.618.env": {
+          "bytes": 1498,
+          "sha256": "a800a69943b3d098f435d160ccb29195c7220e1c83ab4bc6d7898228bcf8956b"
+        },
+        "debug.rustc.626.argv": {
+          "bytes": 984,
+          "sha256": "4fced104464e0020ffbb11311dd798a32c5dd8e1aee56e5c9f5b8f8e395494c4"
+        },
+        "debug.rustc.626.env": {
+          "bytes": 1475,
+          "sha256": "1ab427725e1573f0654f7a3ba2f645c563769e53baa4947c3a243ee32df3a7a3"
+        },
+        "debug.rustc.655.argv": {
+          "bytes": 1488,
+          "sha256": "787ae94628b35ea30c89ba3f41a08527f89904d3498a80e74f6ef3a30b4bf690"
+        },
+        "debug.rustc.655.env": {
+          "bytes": 1496,
+          "sha256": "dd90eb1347c32bf711b40c0716c997e9101632402617a9c30c8af94ca110a072"
+        },
+        "debug.rustc.66.argv": {
+          "bytes": 754,
+          "sha256": "8937bb7e6cae3b217fd07400945815a86add7c807f50195dde3c82aeb2a6ba63"
+        },
+        "debug.rustc.66.env": {
+          "bytes": 1513,
+          "sha256": "0cc4e6fb50e9d0d9bc4e65c51a9c244bbdde32b1f6432367b730d222aa583722"
+        },
+        "debug.rustc.663.argv": {
+          "bytes": 1181,
+          "sha256": "73c6a889e96ee90dc19d3d6ee47cb9d3a3b410a566aeac7d789c170d781dbe1c"
+        },
+        "debug.rustc.663.env": {
+          "bytes": 1472,
+          "sha256": "7dc837f5449715096ff76f0dee653386477c92045e38751e60c5b4f08a96081f"
+        },
+        "debug.rustc.687.argv": {
+          "bytes": 897,
+          "sha256": "08479e0ec92ee9a28d63ebbb78a8074df649bee0c9469291b18f92819f77f12d"
+        },
+        "debug.rustc.687.env": {
+          "bytes": 1548,
+          "sha256": "483941de3babfb236709f9750945883cfd7f3e0415910fc7bff486cb53825ca6"
+        },
+        "debug.rustc.7.argv": {
+          "bytes": 75,
+          "sha256": "42681b3e07633430f0ba771ede7e2a52ad3a8f556b985da0fd65daf448bc1654"
+        },
+        "debug.rustc.7.env": {
+          "bytes": 603,
+          "sha256": "37aac99100ccbef88562136f0df9bcfff7a5e4bc8dfb3559030c21d68d2912bf"
+        },
+        "debug.rustc.75.argv": {
+          "bytes": 1050,
+          "sha256": "d0d2cbe87eaa2e5deeab19787528adea73eecbeff6e4f8f51bf5216b49e08c6e"
+        },
+        "debug.rustc.75.env": {
+          "bytes": 1536,
+          "sha256": "1e4bb070a7b718191bba2de678107d1c344e5ded4d79769756f542d02904ee76"
+        },
+        "debug.rustc.755.argv": {
+          "bytes": 1326,
+          "sha256": "aa4c7eff1a7cc4cdf258661f3ce9fa8e459978cbed51e554932bbc5e15633440"
+        },
+        "debug.rustc.755.env": {
+          "bytes": 1555,
+          "sha256": "30b15448680c5264cf02cab4600dc90b6cc483b4fdc9f33b73961ce7e712e8c3"
+        },
+        "debug.rustc.766.argv": {
+          "bytes": 835,
+          "sha256": "7bff842294c2aa50a5a84e57ec24d11063aef8a4bb25661f635351b018d19d8e"
+        },
+        "debug.rustc.766.env": {
+          "bytes": 1194,
+          "sha256": "bdeda099ec2a848cfdc3fe744ce68dfc95fa406ca4bcdc25c2b9dfd51f3e76c6"
+        },
+        "stderr": {
+          "bytes": 1173,
+          "sha256": "ec709a05496ec2025ae7eeab92a1a72b16989e8614fd02ca38049ae7b459d90f"
+        },
+        "stdout": {
+          "bytes": 35833,
+          "sha256": "6d4e0ca1cc63ea23858a8d8778a7597df33425677a35ea74430579dba5c28046"
+        }
+      },
+      "finished_ns": 1792281603354214526,
+      "limit_note": "Polling can detect overshoot; any hit/overshoot is retained as incomplete, never truncated into success.",
+      "limits": {
+        "bytes": 536870912,
+        "poll_seconds": 0.05,
+        "seconds": 600
+      },
+      "observed_output_bytes": 258498,
+      "phase": "debug",
+      "started_ns": 1792281595875998234,
+      "stop_reason": null,
+      "test_executable": "debug/deps/uarch_engine-fc7dbe81740183ca",
+      "test_executable_sha256": "f9d250f589ddfd517786cfc150d088ddaed454c8f61a6e01a6768d36f4a872f1"
+    },
+    "release": {
+      "argv": [
+        "/usr/bin/docker",
+        "--host",
+        "unix:///var/run/docker.sock",
+        "run",
+        "--name",
+        "u4-b-audit-840ca4b004e24b91ae7c9d2d27f23387",
+        "--rm",
+        "--pull",
+        "never",
+        "--platform",
+        "linux/amd64",
+        "--network",
+        "none",
+        "--read-only",
+        "--user",
+        "1000:1000",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--tmpfs",
+        "/tmp",
+        "--workdir",
+        "/work/native",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/source,dst=/work,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/cache,dst=/cargo-home,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/controls,dst=/controls,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/diagnostics,dst=/diagnostics,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/canary,dst=/canary,readonly",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/release-target,dst=/target",
+        "--mount",
+        "type=bind,src=/tmp/u4-b-issue-v2-build-01/receipts/release,dst=/receipts",
+        "--entrypoint",
+        "/usr/bin/env",
+        "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+        "-i",
+        "PATH=/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+        "CARGO_HOME=/cargo-home",
+        "CARGO_TARGET_DIR=/target",
+        "RUSTC=/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "RUSTUP_AUTO_INSTALL=0",
+        "CARGO_NET_OFFLINE=true",
+        "CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse",
+        "LC_ALL=C",
+        "RUSTFLAGS=-C debuginfo=1 -C linker=/controls/linker.sh",
+        "RUSTC_WRAPPER=/controls/rustc-wrapper.sh",
+        "C2_RUN_TAG=release",
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--lib",
+        "--no-run",
+        "--message-format=json",
+        "--release"
+      ],
+      "cleanup": null,
+      "complete_observation_claim": false,
+      "container_name": "u4-b-audit-840ca4b004e24b91ae7c9d2d27f23387",
+      "elapsed_seconds": 10.686168530024588,
+      "environment": {
+        "DOCKER_CONFIG": "/tmp/u4-b-issue-v2-build-01/docker-config",
+        "PATH": "/usr/bin:/bin"
+      },
+      "exit_code": 0,
+      "files": {
+        "release.linker.128.argv": {
+          "bytes": 3539,
+          "sha256": "932a42d77bb97ecc7ddca3624b111f31ecf3a64779f1e66a295e1c3552a9a306"
+        },
+        "release.linker.128.env": {
+          "bytes": 1655,
+          "sha256": "d1c27cdddd8c610e0c6f0829f8bf56726ddc4f745a8f205659e4b6d729eaf263"
+        },
+        "release.linker.165.argv": {
+          "bytes": 3534,
+          "sha256": "745b10223882476062680d912a4fcd52ab882b7af7143103fce50133a5b42646"
+        },
+        "release.linker.165.env": {
+          "bytes": 1720,
+          "sha256": "02faf2e4716324e1403a5b5dd5e802dd03105d76fd1dab9be8f26a23ca04a0ef"
+        },
+        "release.linker.197.argv": {
+          "bytes": 3514,
+          "sha256": "29d2f35028de2b1b3fb70ded12c687dd07b8b10a4930d1dd50d97d998c30687a"
+        },
+        "release.linker.197.env": {
+          "bytes": 1661,
+          "sha256": "8d9a083acfcd4a462b775ac9d3d3d5117cff3a1dae0e34ecec5542933328b555"
+        },
+        "release.linker.219.argv": {
+          "bytes": 3509,
+          "sha256": "d0d4207534d2892dd79f569d6bd642e85c7119e538b34e3d1173ee42c2f73345"
+        },
+        "release.linker.219.env": {
+          "bytes": 1677,
+          "sha256": "a5ab19319111254f580c065d6de42b214871ef45d397488820d5377c3ae99b3b"
+        },
+        "release.linker.227.argv": {
+          "bytes": 3514,
+          "sha256": "9e2d11b1ec86f5ce574cd1a71feb5bb68933f2c2f3088b5362529ec154e98dc2"
+        },
+        "release.linker.227.env": {
+          "bytes": 1748,
+          "sha256": "ab3b7b628125c6019545acd904bfe55df742110e3c9bb608db59408a6d2a68fc"
+        },
+        "release.linker.245.argv": {
+          "bytes": 3539,
+          "sha256": "43ea907f0a2fc38ddf8911ed7405b6c25d1874148434d2271a2958cf7efd3557"
+        },
+        "release.linker.245.env": {
+          "bytes": 1794,
+          "sha256": "8d5117ab0eecef2834bf7611eb5bdc4028cd37ec6f83328ab0c6a8b3d7f9bb9b"
+        },
+        "release.linker.272.argv": {
+          "bytes": 3544,
+          "sha256": "e4f9b098ad0611473c5f31e75ed366cf74a64ab9b00406a88b48b18b53ba528e"
+        },
+        "release.linker.272.env": {
+          "bytes": 1835,
+          "sha256": "3f31ebbae61638b39ba6fa284cc21c4cf6be3dd8fea6ff9e40ab07f81f73e9e9"
+        },
+        "release.linker.343.argv": {
+          "bytes": 3524,
+          "sha256": "7d2a769da1a4abc588455fc7cde39cfb4882d95ef64866acb51c9156391b4ace"
+        },
+        "release.linker.343.env": {
+          "bytes": 1930,
+          "sha256": "4f800fccc7145f5139c757b53e5be01b798e09a50532a5cbee51c62fa5ac7068"
+        },
+        "release.linker.431.argv": {
+          "bytes": 3638,
+          "sha256": "06028f3b2ad6d469fcdec1d71338adb4b663d3ad86902a6059c381ffadff370e"
+        },
+        "release.linker.431.env": {
+          "bytes": 1649,
+          "sha256": "98a7b2d025687dbbd3815f2cb2b40e96d084eb51c60a3a84e2c1a5b4408f7849"
+        },
+        "release.linker.461.argv": {
+          "bytes": 3614,
+          "sha256": "f5fc3e09bd1506c9aac8e6accd43cb805ebb933762a4ac977e35c9c9025d8c7a"
+        },
+        "release.linker.461.env": {
+          "bytes": 1749,
+          "sha256": "20d260b59ea7d16ec5547117f8eed3bb023d9b7567396bf71b1879778db4eb84"
+        },
+        "release.linker.497.argv": {
+          "bytes": 3593,
+          "sha256": "e5a80ebb7b10ea64193074bb98aeea455b524015b4e71afb97ad894f1ed20b1e"
+        },
+        "release.linker.497.env": {
+          "bytes": 1727,
+          "sha256": "29d8f0fb32556c6b83c6b221ec940d4712deba3a264280e54af10255ef138c61"
+        },
+        "release.linker.791.argv": {
+          "bytes": 5439,
+          "sha256": "e04456f075de73bf22081d2a025497905cecd77518efc0d1a994a16c83faf8ab"
+        },
+        "release.linker.791.env": {
+          "bytes": 1783,
+          "sha256": "c7a923e83b994cac8c41b73a2cfcd1300dd9595d2b6fc1df4f4a03895010792a"
+        },
+        "release.linker.896.argv": {
+          "bytes": 6566,
+          "sha256": "e5d64978ad40c5028ffd9b2143f2c265c90963edf8d3103b9132cdd5e9066052"
+        },
+        "release.linker.896.env": {
+          "bytes": 1429,
+          "sha256": "90d8b0434df9d7e804bfaf4d38558234bd189a9c857478681b61a14f31850cff"
+        },
+        "release.rustc.10.argv": {
+          "bytes": 357,
+          "sha256": "9c7cb0b9a79b884faf7081efd8d79168f662b0bf5c7c362e1a34c6b9dedae2fc"
+        },
+        "release.rustc.10.env": {
+          "bytes": 528,
+          "sha256": "3c2b710562713e45002e645acde185dd2498ca685c057f4c58a7e4cad244efe5"
+        },
+        "release.rustc.115.argv": {
+          "bytes": 1073,
+          "sha256": "f9a0f4acd0cb345b6604de07022e3420b7500bea1f842298946286e68df7e3fc"
+        },
+        "release.rustc.115.env": {
+          "bytes": 1540,
+          "sha256": "6fca22d2586ceff74c3d098ebe0bea714533e59faf0a672e2b3e73d363a1fdf0"
+        },
+        "release.rustc.123.argv": {
+          "bytes": 636,
+          "sha256": "5ee71d0374f367af11a30549f8a4fe2cacef62a9159b804cc35c1a730e8987ef"
+        },
+        "release.rustc.123.env": {
+          "bytes": 1574,
+          "sha256": "11212d67347a1d5c05aecba45d939a141e6a1c567f8964cad73b41cad47237ad"
+        },
+        "release.rustc.130.argv": {
+          "bytes": 710,
+          "sha256": "04e8f23cd815115f1450c7840a5114067473431f56fb673909bbe5c59b1820bf"
+        },
+        "release.rustc.130.env": {
+          "bytes": 1517,
+          "sha256": "06caf9894f85bb3dcde052c8003c2a67f31bf3999b2956d1da77f2dd3893c314"
+        },
+        "release.rustc.15.argv": {
+          "bytes": 75,
+          "sha256": "42681b3e07633430f0ba771ede7e2a52ad3a8f556b985da0fd65daf448bc1654"
+        },
+        "release.rustc.15.env": {
+          "bytes": 605,
+          "sha256": "a86ddc967390f32785ce039b6d137feb8e7960feff3f5c5a1b0511b38e5f048d"
+        },
+        "release.rustc.185.argv": {
+          "bytes": 704,
+          "sha256": "e899a1abb3cb2e0516d88b54528c8fdec96735e362cb9dfe53091ac69e7e2c9b"
+        },
+        "release.rustc.185.env": {
+          "bytes": 1497,
+          "sha256": "2c7f79cd79a3f2d44bd90ad8a210aa286bbfe00865896165b0e4e72801f0c22c"
+        },
+        "release.rustc.208.argv": {
+          "bytes": 722,
+          "sha256": "1425bcd7d5d902a1d32091d146f9ee37139a4cb6bbc9234f21956f820015b2e7"
+        },
+        "release.rustc.208.env": {
+          "bytes": 1514,
+          "sha256": "f13d4039072979293c34c0b508117947c70b0c203c758202badabb30bf4d247c"
+        },
+        "release.rustc.21.argv": {
+          "bytes": 648,
+          "sha256": "38eae93e3800ee91945885a7070580e3f8c7a0e735ee4fe26e0272f63066d0e5"
+        },
+        "release.rustc.21.env": {
+          "bytes": 1488,
+          "sha256": "cc3c102e13ae69119aa84354d1c587c6377238ddb4885f7137aaba8f3b920688"
+        },
+        "release.rustc.24.argv": {
+          "bytes": 764,
+          "sha256": "4b4129ad857187d56b0675147a804767288cbeae85c6ccccb93129ebb67e1f3f"
+        },
+        "release.rustc.24.env": {
+          "bytes": 1699,
+          "sha256": "48cf47377fb9f90d26545ab23e447fd4e8e9b6c30057bc3dea7fac2b9d54a5dc"
+        },
+        "release.rustc.243.argv": {
+          "bytes": 934,
+          "sha256": "9997a965ba1eed610028bb7d8ca8ee1cf30544c4b479ed26733992145f47110a"
+        },
+        "release.rustc.243.env": {
+          "bytes": 1749,
+          "sha256": "625b45601f26f9089c95e94d13863fdc8b95e9003695a5a32f7790095435c755"
+        },
+        "release.rustc.28.argv": {
+          "bytes": 751,
+          "sha256": "fcf56a1dca52ca4c063b66b85bdb5a3d35890b508de5fdd78375bf4d9fdb5f52"
+        },
+        "release.rustc.28.env": {
+          "bytes": 1604,
+          "sha256": "725c6f21035d332b48a83c8cc701bf23d85cb584a8bcaba4db146f22394ad03c"
+        },
+        "release.rustc.30.argv": {
+          "bytes": 649,
+          "sha256": "dbf111cea9a5de7a0119552c006d5fc24c4969a25f9a14363984ffa0c17a7c7c"
+        },
+        "release.rustc.30.env": {
+          "bytes": 1566,
+          "sha256": "1b6fb6f34ac56d71e9f9b3f9fab1a7f461b9763f9c8f442130f03d123f57eb3f"
+        },
+        "release.rustc.315.argv": {
+          "bytes": 632,
+          "sha256": "9f0e838c109c6431d7e3706eca9fd71476ce3a69c30c483cfb04f3540351e9e6"
+        },
+        "release.rustc.315.env": {
+          "bytes": 1423,
+          "sha256": "0319300d90fc2511256ceb9aa6ff7d5582e55f999ea2546dfa9e1ad47ac41dd7"
+        },
+        "release.rustc.32.argv": {
+          "bytes": 777,
+          "sha256": "295fbdf5eb68d287f0a07d5ec4bc1aef8e82999de235245c3e36592dbc6ecb60"
+        },
+        "release.rustc.32.env": {
+          "bytes": 1418,
+          "sha256": "6edb59b2bad0b049ecf9bc69fc2b0a9bb588c197e3e78f89f26f838c0c105270"
+        },
+        "release.rustc.34.argv": {
+          "bytes": 709,
+          "sha256": "cc733facabd07d71c538115f9bb6210e430db3a0e571470af2a8096a7bc6e140"
+        },
+        "release.rustc.34.env": {
+          "bytes": 1430,
+          "sha256": "f51af194c6de344a53e1166b2a44186d8f4980604c523f0f952d3b2217453767"
+        },
+        "release.rustc.356.argv": {
+          "bytes": 627,
+          "sha256": "6cece9cc8e4d06c0a428e281ad618e7f89bcd2ef2c0d914da66426ccbf2ab6da"
+        },
+        "release.rustc.356.env": {
+          "bytes": 1408,
+          "sha256": "71c66d876144bd39163f382f63f8741c3fce3bd9a7128ca09b9ff6322736c900"
+        },
+        "release.rustc.376.argv": {
+          "bytes": 746,
+          "sha256": "7bf48bd8a36966c0698546b31723ff245dc092d0577ffc3c3ea93851e20f257a"
+        },
+        "release.rustc.376.env": {
+          "bytes": 1488,
+          "sha256": "2b2d4ee2d9f0a4f50587268235fbb7438981cee194be5bc484e7f383fd932ab3"
+        },
+        "release.rustc.39.argv": {
+          "bytes": 632,
+          "sha256": "acba6621a521cc40c8fe4d0486f9f6ecba555c2124b052710829af7410e1b18e"
+        },
+        "release.rustc.39.env": {
+          "bytes": 1509,
+          "sha256": "6c778d3bd667e3b5f6bb0a1a21e4fe6696ab7948533436bae7dba01eb0524279"
+        },
+        "release.rustc.395.argv": {
+          "bytes": 1083,
+          "sha256": "a3f3175bb1639a9699c7d280bb0aa3d770a44ad77d161c9f46fb95ae263d90b1"
+        },
+        "release.rustc.395.env": {
+          "bytes": 1617,
+          "sha256": "fe2234f6f511fd23af1f5b5d8afe7b7f7e16412eae74d20e606554be5cfcd131"
+        },
+        "release.rustc.404.argv": {
+          "bytes": 379,
+          "sha256": "8eae817fd2ab2e229c40f92a427d61c57ae4bb5a66160b190b8a90b98280e5f2"
+        },
+        "release.rustc.404.env": {
+          "bytes": 2361,
+          "sha256": "3917d9446d6c0c950dfcc67bc5f48771180ebbb41e9c56c8fe49c6a7ef854082"
+        },
+        "release.rustc.417.argv": {
+          "bytes": 821,
+          "sha256": "8a7bd639914d8f6e106fd456e98e512b6d147fbfc6869179cfb7694345d0a107"
+        },
+        "release.rustc.417.env": {
+          "bytes": 1518,
+          "sha256": "d1762c3b7fbb9525fecbca4efc2598f108d4cdd222316bf8f60610371b732985"
+        },
+        "release.rustc.424.argv": {
+          "bytes": 729,
+          "sha256": "d4ec18e3dbaa12ae26faf3627b84728b351c58a2ebf861fc4b823ad780d5c153"
+        },
+        "release.rustc.424.env": {
+          "bytes": 1747,
+          "sha256": "3a85669dcc96d47afdb30d95d02d26e1e8f2b608e4d5c6e68f059ec01cb08633"
+        },
+        "release.rustc.426.argv": {
+          "bytes": 388,
+          "sha256": "12e65be09a619943dcc6b95f0e6b590c380fea446b6cf146836f249b4ef5d57a"
+        },
+        "release.rustc.426.env": {
+          "bytes": 2361,
+          "sha256": "3917d9446d6c0c950dfcc67bc5f48771180ebbb41e9c56c8fe49c6a7ef854082"
+        },
+        "release.rustc.43.argv": {
+          "bytes": 737,
+          "sha256": "825c11210e77b5ec16cbe85f16debdd58d5cebb51602bef129afeb4aaea83760"
+        },
+        "release.rustc.43.env": {
+          "bytes": 1489,
+          "sha256": "7f7d76bdc08a7c1853c8cf05896fb534bee223bc924cc0dc930a879320e0e5cc"
+        },
+        "release.rustc.45.argv": {
+          "bytes": 651,
+          "sha256": "449cb6d476e943fb60c666143389a81879543be8a3e452b741b71f3f27d5aade"
+        },
+        "release.rustc.45.env": {
+          "bytes": 1575,
+          "sha256": "fa11081eef8d859a123bed0a6766f695c4281091cd62540f9c2549a08a9ab8eb"
+        },
+        "release.rustc.459.argv": {
+          "bytes": 792,
+          "sha256": "951445d55aded4b42cccf18e0c1b58260c4096343f0943f473655862f5015e0f"
+        },
+        "release.rustc.459.env": {
+          "bytes": 1496,
+          "sha256": "fe19a4c0382ec513587fb9cbf4c7aeb0ed32bfb9330b7774b4998bdcbdf39f58"
+        },
+        "release.rustc.463.argv": {
+          "bytes": 384,
+          "sha256": "cc41baadd32f27f60502214c979d0c1321b42369450542928dc62ccb4a446fa0"
+        },
+        "release.rustc.463.env": {
+          "bytes": 2361,
+          "sha256": "3917d9446d6c0c950dfcc67bc5f48771180ebbb41e9c56c8fe49c6a7ef854082"
+        },
+        "release.rustc.47.argv": {
+          "bytes": 766,
+          "sha256": "8d5fb529a580becf6279d2f1c4407e375bfcc30b036147e92914509a5392cd0e"
+        },
+        "release.rustc.47.env": {
+          "bytes": 1563,
+          "sha256": "50be3fec18d1f2c7435f8987bfaa2229f90498bc4d56ab6fa36e68e6725a1bfc"
+        },
+        "release.rustc.493.argv": {
+          "bytes": 1467,
+          "sha256": "46eb07d9acfac3536d89e8e2ca8ddf25f0163fcba27ee4f894a7ecb3030b0801"
+        },
+        "release.rustc.493.env": {
+          "bytes": 1660,
+          "sha256": "e9fb036d405f67ffda5bb049914a28e111d7425fe1543d3c499149f7a20aa626"
+        },
+        "release.rustc.499.argv": {
+          "bytes": 81,
+          "sha256": "a94db3c783427069a1e74ceafb846ed0159f64d4609af5a20967bcdb6c29b6b5"
+        },
+        "release.rustc.499.env": {
+          "bytes": 2131,
+          "sha256": "35510b10a46cfe98851c36e63a03b5f4bc3811c73d0277f7440dc86a63a1928c"
+        },
+        "release.rustc.516.argv": {
+          "bytes": 1681,
+          "sha256": "318c5cdd4d357d03c45c872394d39dc1865d86760709d904ddfb943b2e84319c"
+        },
+        "release.rustc.516.env": {
+          "bytes": 1460,
+          "sha256": "14c806c442edf0ffff7b02881fd13814e3a4e55f1c0dd8068d272e3421fa717d"
+        },
+        "release.rustc.52.argv": {
+          "bytes": 636,
+          "sha256": "f5451f73dbf7e0531899dfdf58406eb0e11136947db072e675d3d05953ea90e1"
+        },
+        "release.rustc.52.env": {
+          "bytes": 1430,
+          "sha256": "a1d4cb2503ed41405e94a4fdbfa207636852fbc4fb08b1f7d402b99322bc653c"
+        },
+        "release.rustc.540.argv": {
+          "bytes": 91,
+          "sha256": "ec70bdc9cd0fc16dfa70846a776cb6eceaa24623a918bc168814583830f2a3c0"
+        },
+        "release.rustc.540.env": {
+          "bytes": 2238,
+          "sha256": "8a44c2f301e3cf424324f79146e1dd7f0610821bfe3d7e9a126178c9d9f95ed9"
+        },
+        "release.rustc.546.argv": {
+          "bytes": 288,
+          "sha256": "d33ed4953f894eb27417c27efc106c39ad821321b5ac5151a549d72b1b35bac3"
+        },
+        "release.rustc.546.env": {
+          "bytes": 2238,
+          "sha256": "8a44c2f301e3cf424324f79146e1dd7f0610821bfe3d7e9a126178c9d9f95ed9"
+        },
+        "release.rustc.55.argv": {
+          "bytes": 635,
+          "sha256": "a00b2799b5b74182e989823db6c27c47ae8054b6b78ba4a1386d715a475aa78a"
+        },
+        "release.rustc.55.env": {
+          "bytes": 1572,
+          "sha256": "4929957baed5267afe4744e38b9e898a289a9851485f7b2724f832cf9089e51a"
+        },
+        "release.rustc.553.argv": {
+          "bytes": 288,
+          "sha256": "a6c29920c758c64d9b694c8487c774abcb994a73897bb2660f32a7baf8be620a"
+        },
+        "release.rustc.553.env": {
+          "bytes": 2238,
+          "sha256": "8a44c2f301e3cf424324f79146e1dd7f0610821bfe3d7e9a126178c9d9f95ed9"
+        },
+        "release.rustc.563.argv": {
+          "bytes": 737,
+          "sha256": "2c50edf492e4f5b1ecac782136bba6088b3a395022be14df168ba5acf0f232bc"
+        },
+        "release.rustc.563.env": {
+          "bytes": 1550,
+          "sha256": "1af78c014c423395c6ab1c061c93606c4eb938b1b7abe3dbef9a04a227a160aa"
+        },
+        "release.rustc.574.argv": {
+          "bytes": 804,
+          "sha256": "ce46822fc55aa6b4c1d9cd608ee6fb1c7700d45e9c7f219e6329a412111fcdaf"
+        },
+        "release.rustc.574.env": {
+          "bytes": 1474,
+          "sha256": "ddb468df91e4f5a606b8dc6765454764ea08b6a8d192af84bba998c1f707dda1"
+        },
+        "release.rustc.589.argv": {
+          "bytes": 799,
+          "sha256": "568f4cb379b62314a29778eab3859cc5da3ce32ad45f3cfcbc40d41f8cea29a2"
+        },
+        "release.rustc.589.env": {
+          "bytes": 1578,
+          "sha256": "b28a26fe1d1488a1490d3ea56737c293b39db54194c5be51bd569b95df7926d3"
+        },
+        "release.rustc.599.argv": {
+          "bytes": 1120,
+          "sha256": "6a9ec96667b5dde6510ab5782409f59988cc1178e6b10636b3e3b3cfa3ebb986"
+        },
+        "release.rustc.599.env": {
+          "bytes": 1396,
+          "sha256": "ef9df5db6b898362820076de2326817151abd82ee53ee997d62ecde43c1dae1d"
+        },
+        "release.rustc.612.argv": {
+          "bytes": 914,
+          "sha256": "6633ee572bfb9599232053362fb834ed89475dc7790d5524b4bc567004416880"
+        },
+        "release.rustc.612.env": {
+          "bytes": 1541,
+          "sha256": "c53a74279e78f85750d8084f166ca912651cd41f914fd3d955b277f14acf317b"
+        },
+        "release.rustc.62.argv": {
+          "bytes": 887,
+          "sha256": "35d1abd57c69301fcf33abb11af988a48d4e7da5066ab4df3d4f0fc9169a097e"
+        },
+        "release.rustc.62.env": {
+          "bytes": 1424,
+          "sha256": "e91c1a763daa5caea023387b926d9cfe168b64aeb0470e0a8b7a96b7c85d6ab2"
+        },
+        "release.rustc.623.argv": {
+          "bytes": 722,
+          "sha256": "ff93001e7b1d62f2be9f802d4e499d28941436e84482abc2e10ac2078939f18e"
+        },
+        "release.rustc.623.env": {
+          "bytes": 1449,
+          "sha256": "e0e994e0e6f367e591a712a12fbd9d2e62617114d1dbed82e7e97058abfd8712"
+        },
+        "release.rustc.625.argv": {
+          "bytes": 846,
+          "sha256": "b69de2d52c8f81187f7b59852c403dc820200608ddad6802c2536b316d8e5190"
+        },
+        "release.rustc.625.env": {
+          "bytes": 1437,
+          "sha256": "3988c39ef7f37eff2c7775f788b20e268cc49ecad54b440df9d250d8efe23e7f"
+        },
+        "release.rustc.63.argv": {
+          "bytes": 667,
+          "sha256": "91aebb55fc793c6099a54da9d66ed76a9e783601153c1d8b26e000f2432b351d"
+        },
+        "release.rustc.63.env": {
+          "bytes": 1446,
+          "sha256": "454bafb8b05092672b3f14dc04b4da756a466759f9eca00e4105418d1641655b"
+        },
+        "release.rustc.642.argv": {
+          "bytes": 1032,
+          "sha256": "21a076865dfc1d85d1a22cf3a75b3262be245860f4141cd3b444d36fce0f7d45"
+        },
+        "release.rustc.642.env": {
+          "bytes": 1452,
+          "sha256": "4d06f976f8e17dc9afa2c77fd30106164c9a01c24a4a16727d74ce9f3a2b2720"
+        },
+        "release.rustc.652.argv": {
+          "bytes": 955,
+          "sha256": "87eaf240bd3d4fdf5d313069f237c94e544ef69bd3deadc3a7d991d2b8597f13"
+        },
+        "release.rustc.652.env": {
+          "bytes": 1502,
+          "sha256": "e1e132ed4f42327983023c98f49fae09fbd3885dbdfcc93d1070f9d72f5986ee"
+        },
+        "release.rustc.662.argv": {
+          "bytes": 1013,
+          "sha256": "c8612a6bc6e0f43f093757019fc20be0d5605c8223032f640e41d841a1c0973f"
+        },
+        "release.rustc.662.env": {
+          "bytes": 1479,
+          "sha256": "c65c5df81dbeecd8c211e892c5e571bdd40a329fff7d78f8eba597d39a4b66b8"
+        },
+        "release.rustc.679.argv": {
+          "bytes": 1527,
+          "sha256": "4e1b02da403d8e0dd44dbebfb9063f35851615b38208703ad2a5b10740cd2991"
+        },
+        "release.rustc.679.env": {
+          "bytes": 1500,
+          "sha256": "976bcfbf99646157894b6aa869942040a119a5f304b62ce41b56a5290fe09867"
+        },
+        "release.rustc.68.argv": {
+          "bytes": 750,
+          "sha256": "3c340f7ca7bda0b66dfd9d0af22564d0077ae1eea80657219db495f98235d735"
+        },
+        "release.rustc.68.env": {
+          "bytes": 1563,
+          "sha256": "113d1f48475774c5c4c3f1e2f7d8704fc092aa2fa6444a7962778a34804baa47"
+        },
+        "release.rustc.7.argv": {
+          "bytes": 75,
+          "sha256": "42681b3e07633430f0ba771ede7e2a52ad3a8f556b985da0fd65daf448bc1654"
+        },
+        "release.rustc.7.env": {
+          "bytes": 605,
+          "sha256": "a86ddc967390f32785ce039b6d137feb8e7960feff3f5c5a1b0511b38e5f048d"
+        },
+        "release.rustc.710.argv": {
+          "bytes": 1212,
+          "sha256": "f2e8dea1bbd43127be6c31d8813d49846628b4f58c2d0a7e7aaf58e23bbc3f46"
+        },
+        "release.rustc.710.env": {
+          "bytes": 1478,
+          "sha256": "b889d2f3ef809f094367cb168439527d4111927c264e479cd3524e6deafa19cf"
+        },
+        "release.rustc.748.argv": {
+          "bytes": 950,
+          "sha256": "ec6c65e616c22a4de1bb46ce2dbfe026cb11e51b6c153ab7349fd66cdb2c83c3"
+        },
+        "release.rustc.748.env": {
+          "bytes": 1552,
+          "sha256": "3b31dcef843e7532ead3314337c68b3a76c518e9ab129c9d2fe0e6b3978183d6"
+        },
+        "release.rustc.75.argv": {
+          "bytes": 801,
+          "sha256": "0f700f96ba4095039b0171ea50e8bd5546cbcec282a4d1774f5210d8f1e88d01"
+        },
+        "release.rustc.75.env": {
+          "bytes": 1517,
+          "sha256": "75c808dbb642225eaf16b7095711944ed6e885fbec3322561861212b8051bdf8"
+        },
+        "release.rustc.812.argv": {
+          "bytes": 1353,
+          "sha256": "69b144b4d8e49bf187e5241cebdd5f0586f7e4e5b6457f090abd724be7eb69c1"
+        },
+        "release.rustc.812.env": {
+          "bytes": 1561,
+          "sha256": "59f6dd18bf91e7b0d61b157fd9e2f708521ca0fa64f21fe9e84cfa7ae49ca803"
+        },
+        "release.rustc.857.argv": {
+          "bytes": 825,
+          "sha256": "2b0f614929c015f119199c481aa936fc5bf01063efbe47ac6bd5cbd716062804"
+        },
+        "release.rustc.857.env": {
+          "bytes": 1198,
+          "sha256": "d0d4298c2512477ea18ee8dfa750f3ed7f014fe5ac8d4598f4355a585e5079a2"
+        },
+        "stderr": {
+          "bytes": 1163,
+          "sha256": "e659444b2d134b46a7f8f4557bdb07647033b8e5bca08f6ef4a3f7a5da98ebe7"
+        },
+        "stdout": {
+          "bytes": 36107,
+          "sha256": "3464cbfd5bcc3fbb7c6758a798d15f669f50486b07e430677dbb34c55db5c33d"
+        }
+      },
+      "finished_ns": 1792281614164971243,
+      "limit_note": "Polling can detect overshoot; any hit/overshoot is retained as incomplete, never truncated into success.",
+      "limits": {
+        "bytes": 536870912,
+        "poll_seconds": 0.05,
+        "seconds": 600
+      },
+      "observed_output_bytes": 240040,
+      "phase": "release",
+      "started_ns": 1792281603408142925,
+      "stop_reason": null,
+      "test_executable": "release/deps/uarch_engine-709eb067406bf3f2",
+      "test_executable_sha256": "f32918c920f09b2fc613942253d35cb373a8bb27961168dcdf3cc60f12317432"
+    }
+  },
+  "controls": {
+    "linker.sh": "d938fcde76c4b9ac1ae01e5363ca10f37c4ac78af9cc637ea5a4085060a59ced",
+    "rustc-wrapper.sh": "fcaf7605dee7773f5b635c4e12eaddd46cbaaf63919d8d13aab98ead28fe52a9"
+  },
+  "image": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+  "monitor_sha256": "e81af649c664b6bf75690a8126e25df9b223c1d3a561b4794275ce38723d8115",
+  "private_postimages": {
+    "native/Cargo.lock": "cbe9a580e0c6209abdb34be23965c2fe2f75b5970819d2021c943e2e02d939be",
+    "native/Cargo.toml": "707748415914b62d281084193635c3300c598422fec88229b85ae68587cb33c3",
+    "native/README.md": "b067f29398201cf4d09b170a867cb504641497113d455211711572d3e72bb892",
+    "native/clippy.toml": "c0cf8ceebaa6d88830c380c9eaae942cc4fcb18499aafe7b0b52f163583d6b99",
+    "native/crates/uarch-engine/Cargo.toml": "60299ba9498e506010a5c908ef8017beb2279d1aedab409a7fc21601d3b35ee0",
+    "native/crates/uarch-engine/src/accounting.rs": "728db6916c100c9c45f6333dcfa1ba75e762f2f9e08ff493b4570a0513451bb8",
+    "native/crates/uarch-engine/src/admission.rs": "4ec470c9c84d0b629d722245fef0d484206662826c2cd7ae9073473ee7817825",
+    "native/crates/uarch-engine/src/b_private_probe.rs": "6f6f8a48296a96110420f3990d1257ff16000efe2496100ffb84804cb5f24f64",
+    "native/crates/uarch-engine/src/carrier.rs": "9b6719a403d1293ddd5cd01e95ce78f1d359a78265b7612eb5bd2db2ee0362c0",
+    "native/crates/uarch-engine/src/carriers.json": "07669db2d1cf013bd69be4b49abfddb5b1403f0b6f3f0100f1a5b7cfaf477059",
+    "native/crates/uarch-engine/src/component.rs": "66c59aba87dca0221dcfba6388a160fa05db5db3d54598246ca913fbe94b8bd8",
+    "native/crates/uarch-engine/src/component_accounting.rs": "c9fcfff1885953afa52215e767ebe5c17cb050c6acf39e7f346c8584c76feff1",
+    "native/crates/uarch-engine/src/component_admission.rs": "672b23211949c558f5bfa78297c15837e0ba994bfb9fc7065ef266861067df63",
+    "native/crates/uarch-engine/src/component_admission_tests.rs": "fc89cd4308c3bb6ea7f083834a301a9b0d9aea6a828f98dfb4c4e0e7a74c9320",
+    "native/crates/uarch-engine/src/component_carriers.json": "d03fb46330049ea58a163bff6987e0b544e3102ef051be618dedc347390f767d",
+    "native/crates/uarch-engine/src/component_carriers_v3.json": "6007bce7b06927b863b3f8881eae2caa751d181462739b9b93cf8780cd1b200b",
+    "native/crates/uarch-engine/src/component_tests.rs": "21d070293324e122a4d17d698f5589435ec882cebccbd41248e9fcf5913961c9",
+    "native/crates/uarch-engine/src/event.rs": "3cd2c60b52bbc6da093cf076457b879761fff580f978d4a3d6a5e358c4d9d8e5",
+    "native/crates/uarch-engine/src/hardware.rs": "2c99e172a4bf6b20306e1302540e3dacc3ba96680459ee7c7d7a8eded7128860",
+    "native/crates/uarch-engine/src/issue_proposal_tests.rs": "4e7de2a6c3d015fc70f269c3d83c177159d22d574a7f2aa3aa0508197e44fb47",
+    "native/crates/uarch-engine/src/lib.rs": "2d6546caeff46f8a3898feac1adbbea93965141a0931f78911953b5327b384bf",
+    "native/crates/uarch-engine/src/main.rs": "af9f2c4aeccdc823e81ead6b17af45a3013234f38964efb6792027e09aabe15f",
+    "native/crates/uarch-engine/src/peer_dto_tests.rs": "eb76f60b7c5b5c4222290cd95664214fe480307faa7276c71eaa91494044da7f",
+    "native/crates/uarch-engine/src/protocol.rs": "39f154f55815a81d517c587c004fa49b0f04317b055bcf1a3e2f3ad5234bc249",
+    "native/crates/uarch-engine/src/release_tests.rs": "5e699a3c60269ad35d3c82cf85853516421cc2c1466f31402dd799e30300168c",
+    "native/crates/uarch-engine/src/simulation.rs": "25e061869d0c560b3e52e7a0a3f1146b2190e1bf98f5e6f2f174ddcc82e6e737",
+    "native/crates/uarch-engine/src/stage2_tests.rs": "3200a0bb0756b20094f25b0126c72fd053b4a715ffea2ce8d309f7b0193f5ebf",
+    "native/crates/uarch-engine/src/tests.rs": "6745019a5b481b0705b390148ac4dc3886e73255642e02d63d37b6c2b7d44ce7",
+    "native/crates/uarch-engine/src/time.rs": "98d27024173d6a8c9a35658773456fee8d951b5ba0b709ec7092cd98208b6ad1",
+    "native/crates/uarch-engine/src/topology.rs": "011fa76278b0bd2fbf3f1336ddde10d61b05b3a3c3458d3d4218cd511a2ee1e5",
+    "native/crates/uarch-engine/src/wire.rs": "de12e06dd72b593c93707f2a881777db7db79833986e4b9bb6a17acf094e8b18",
+    "native/crates/uarch-engine/testdata/private-release-witnesses.json": "6a145271eef0d7fd501ea92576f82428df13c14d14e4b0261519badc65bf8efb",
+    "native/crates/uarch-engine/testdata/synthetic-component-admission-jobs.json": "af63d3f0a0f35cb8d7532518da3ff7b84b8cb3752eeeced0c7ff1f3b24d84a0c",
+    "native/crates/uarch-engine/testdata/synthetic-component-jobs.json": "057520a91316d55f5e9cc6c851e0813b3164a97d08bb11875a22906523483c2f",
+    "native/crates/uarch-engine/testdata/synthetic-component-transient-job.json": "53999a7ff3a3568a4e2f38361332882d8709a49581de066af675629071a32d3c",
+    "native/crates/uarch-engine/testdata/synthetic-issue-core-gap.json": "92ae24d10fe3eaea7ba0373a397c0bb43c348874c07221043ee9b6bf26e3e72e",
+    "native/crates/uarch-engine/testdata/synthetic-issue-order-r00.json": "70494e8cf7476e8906bd148606ff3613f25e5864fc3789c9e13dcdabad2aa38b",
+    "native/crates/uarch-engine/testdata/synthetic-issue-order-r01.json": "3263938d73234a257434327840e986336f48b37b99159904b6a78b6f8bfd7636",
+    "native/crates/uarch-engine/testdata/synthetic-kernel-job.json": "9ad1a1e379d0de1eb71a1eba593513b2746e39c078b6113b15fc974ae27d66c1",
+    "native/crates/uarch-engine/testdata/synthetic-request-collision.json": "8ddfa3446d4fc052d133c85e4e0436878640b25b7505814170d2d59f045e5fe2",
+    "native/crates/uarch-engine/testdata/synthetic-unselected-point.json": "2c084469fde1057867a78d677091781c98a7e58707c5bfcc443aff51ea7770cb",
+    "native/deny.toml": "2de819d7ddc5a0a612c892818038ba3a529754ad51928aacdd975236b5ecefae",
+    "native/include/uarch/.keep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native/rust-toolchain.toml": "4958c3ef154e69bd2e5a74474652755d6f7cd148d7a6f7902985b2c5bd36a55d",
+    "native/src/.keep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native/test_register_linkage.py": "27494d7488dffa9107b4275c8f5056aa8c4124e79dc87209dabd00e96c3c8f2e",
+    "native/tests/.keep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native/tools/build_candidate.py": "ad26ec28a63811e41cbbbebfc829ad3262e0f99860c14d08722c342256719bb7",
+    "native/tools/check_refusals.py": "bfaef5d41af26d10d18460c63830309b8f5c99e89a845ec5402351eb688fa5fc",
+    "native/tools/component_candidate.py": "361a306200534cd5ff4ce501c36d150c5e8d6b02e005f32b4d6b7484eff06884",
+    "native/tools/export_carriers.py": "d97593e97f8d066872506ca07daa0f1df0842f4153380187c8567147979a96ff",
+    "native/tools/freeze_inputs.py": "6fc3ecd322b5263c711aeaa73cf5326309e8f818f43e63b607fa817db7e7b509",
+    "native/tools/generate_identity.py": "71ee825cddc3723c19b5ac38e54e6944bcf51e49373d2d719167a917a215e24d",
+    "native/tools/prepare_corpus.py": "fe46f61a9520f462700a14116275d7f42d1800fa72e58d131427eaff735eb725"
+  },
+  "public_executable_built": false,
+  "source_commit": "7d61d6a02644519d4a7b8b1ce9287e60cd03ca13 plus exact manifest patches",
+  "source_preimages": {
+    "native/Cargo.lock": "cbe9a580e0c6209abdb34be23965c2fe2f75b5970819d2021c943e2e02d939be",
+    "native/Cargo.toml": "707748415914b62d281084193635c3300c598422fec88229b85ae68587cb33c3",
+    "native/README.md": "b067f29398201cf4d09b170a867cb504641497113d455211711572d3e72bb892",
+    "native/clippy.toml": "c0cf8ceebaa6d88830c380c9eaae942cc4fcb18499aafe7b0b52f163583d6b99",
+    "native/crates/uarch-engine/Cargo.toml": "60299ba9498e506010a5c908ef8017beb2279d1aedab409a7fc21601d3b35ee0",
+    "native/crates/uarch-engine/src/accounting.rs": "728db6916c100c9c45f6333dcfa1ba75e762f2f9e08ff493b4570a0513451bb8",
+    "native/crates/uarch-engine/src/admission.rs": "4ec470c9c84d0b629d722245fef0d484206662826c2cd7ae9073473ee7817825",
+    "native/crates/uarch-engine/src/carrier.rs": "9b6719a403d1293ddd5cd01e95ce78f1d359a78265b7612eb5bd2db2ee0362c0",
+    "native/crates/uarch-engine/src/carriers.json": "07669db2d1cf013bd69be4b49abfddb5b1403f0b6f3f0100f1a5b7cfaf477059",
+    "native/crates/uarch-engine/src/component.rs": "66c59aba87dca0221dcfba6388a160fa05db5db3d54598246ca913fbe94b8bd8",
+    "native/crates/uarch-engine/src/component_accounting.rs": "c9fcfff1885953afa52215e767ebe5c17cb050c6acf39e7f346c8584c76feff1",
+    "native/crates/uarch-engine/src/component_admission.rs": "672b23211949c558f5bfa78297c15837e0ba994bfb9fc7065ef266861067df63",
+    "native/crates/uarch-engine/src/component_admission_tests.rs": "fc89cd4308c3bb6ea7f083834a301a9b0d9aea6a828f98dfb4c4e0e7a74c9320",
+    "native/crates/uarch-engine/src/component_carriers.json": "d03fb46330049ea58a163bff6987e0b544e3102ef051be618dedc347390f767d",
+    "native/crates/uarch-engine/src/component_carriers_v3.json": "6007bce7b06927b863b3f8881eae2caa751d181462739b9b93cf8780cd1b200b",
+    "native/crates/uarch-engine/src/component_tests.rs": "21d070293324e122a4d17d698f5589435ec882cebccbd41248e9fcf5913961c9",
+    "native/crates/uarch-engine/src/event.rs": "3cd2c60b52bbc6da093cf076457b879761fff580f978d4a3d6a5e358c4d9d8e5",
+    "native/crates/uarch-engine/src/hardware.rs": "2c99e172a4bf6b20306e1302540e3dacc3ba96680459ee7c7d7a8eded7128860",
+    "native/crates/uarch-engine/src/issue_proposal_tests.rs": "4e7de2a6c3d015fc70f269c3d83c177159d22d574a7f2aa3aa0508197e44fb47",
+    "native/crates/uarch-engine/src/lib.rs": "7d0f024f56e34d1d7b9f89a229affed8c5b5130d63eb8b2f7ae4fba82db398e2",
+    "native/crates/uarch-engine/src/main.rs": "af9f2c4aeccdc823e81ead6b17af45a3013234f38964efb6792027e09aabe15f",
+    "native/crates/uarch-engine/src/peer_dto_tests.rs": "eb76f60b7c5b5c4222290cd95664214fe480307faa7276c71eaa91494044da7f",
+    "native/crates/uarch-engine/src/protocol.rs": "39f154f55815a81d517c587c004fa49b0f04317b055bcf1a3e2f3ad5234bc249",
+    "native/crates/uarch-engine/src/release_tests.rs": "5e699a3c60269ad35d3c82cf85853516421cc2c1466f31402dd799e30300168c",
+    "native/crates/uarch-engine/src/simulation.rs": "25e061869d0c560b3e52e7a0a3f1146b2190e1bf98f5e6f2f174ddcc82e6e737",
+    "native/crates/uarch-engine/src/stage2_tests.rs": "3200a0bb0756b20094f25b0126c72fd053b4a715ffea2ce8d309f7b0193f5ebf",
+    "native/crates/uarch-engine/src/tests.rs": "6745019a5b481b0705b390148ac4dc3886e73255642e02d63d37b6c2b7d44ce7",
+    "native/crates/uarch-engine/src/time.rs": "98d27024173d6a8c9a35658773456fee8d951b5ba0b709ec7092cd98208b6ad1",
+    "native/crates/uarch-engine/src/topology.rs": "011fa76278b0bd2fbf3f1336ddde10d61b05b3a3c3458d3d4218cd511a2ee1e5",
+    "native/crates/uarch-engine/src/wire.rs": "de12e06dd72b593c93707f2a881777db7db79833986e4b9bb6a17acf094e8b18",
+    "native/crates/uarch-engine/testdata/private-release-witnesses.json": "6a145271eef0d7fd501ea92576f82428df13c14d14e4b0261519badc65bf8efb",
+    "native/crates/uarch-engine/testdata/synthetic-component-admission-jobs.json": "af63d3f0a0f35cb8d7532518da3ff7b84b8cb3752eeeced0c7ff1f3b24d84a0c",
+    "native/crates/uarch-engine/testdata/synthetic-component-jobs.json": "057520a91316d55f5e9cc6c851e0813b3164a97d08bb11875a22906523483c2f",
+    "native/crates/uarch-engine/testdata/synthetic-component-transient-job.json": "53999a7ff3a3568a4e2f38361332882d8709a49581de066af675629071a32d3c",
+    "native/crates/uarch-engine/testdata/synthetic-issue-core-gap.json": "92ae24d10fe3eaea7ba0373a397c0bb43c348874c07221043ee9b6bf26e3e72e",
+    "native/crates/uarch-engine/testdata/synthetic-issue-order-r00.json": "70494e8cf7476e8906bd148606ff3613f25e5864fc3789c9e13dcdabad2aa38b",
+    "native/crates/uarch-engine/testdata/synthetic-issue-order-r01.json": "3263938d73234a257434327840e986336f48b37b99159904b6a78b6f8bfd7636",
+    "native/crates/uarch-engine/testdata/synthetic-kernel-job.json": "9ad1a1e379d0de1eb71a1eba593513b2746e39c078b6113b15fc974ae27d66c1",
+    "native/crates/uarch-engine/testdata/synthetic-request-collision.json": "8ddfa3446d4fc052d133c85e4e0436878640b25b7505814170d2d59f045e5fe2",
+    "native/crates/uarch-engine/testdata/synthetic-unselected-point.json": "2c084469fde1057867a78d677091781c98a7e58707c5bfcc443aff51ea7770cb",
+    "native/deny.toml": "2de819d7ddc5a0a612c892818038ba3a529754ad51928aacdd975236b5ecefae",
+    "native/include/uarch/.keep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native/rust-toolchain.toml": "4958c3ef154e69bd2e5a74474652755d6f7cd148d7a6f7902985b2c5bd36a55d",
+    "native/src/.keep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native/test_register_linkage.py": "27494d7488dffa9107b4275c8f5056aa8c4124e79dc87209dabd00e96c3c8f2e",
+    "native/tests/.keep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native/tools/build_candidate.py": "ad26ec28a63811e41cbbbebfc829ad3262e0f99860c14d08722c342256719bb7",
+    "native/tools/check_refusals.py": "bfaef5d41af26d10d18460c63830309b8f5c99e89a845ec5402351eb688fa5fc",
+    "native/tools/component_candidate.py": "361a306200534cd5ff4ce501c36d150c5e8d6b02e005f32b4d6b7484eff06884",
+    "native/tools/export_carriers.py": "d97593e97f8d066872506ca07daa0f1df0842f4153380187c8567147979a96ff",
+    "native/tools/freeze_inputs.py": "6fc3ecd322b5263c711aeaa73cf5326309e8f818f43e63b607fa817db7e7b509",
+    "native/tools/generate_identity.py": "71ee825cddc3723c19b5ac38e54e6944bcf51e49373d2d719167a917a215e24d",
+    "native/tools/prepare_corpus.py": "fe46f61a9520f462700a14116275d7f42d1800fa72e58d131427eaff735eb725"
+  },
+  "synthetic_harness_sha256": "6f6f8a48296a96110420f3990d1257ff16000efe2496100ffb84804cb5f24f64",
+  "cache_verified_files": 1719,
+  "full_private_build_receipt": {
+    "path": "/tmp/u4-b-issue-v2-build-01/build.json",
+    "sha256": "f63a6fb30dca88ca4da32f888f26bbca255d9c140ebb4316f9073de9ba92ec2e"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "recipe_sha256": "4c8cad3d0df4658a8b6ec1613f2622ff53ecb8751e60297854ff267c1fc124e5",
+  "rows": [
+    {
+      "label": "baseline",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-review-v2/eligibility_fault.py",
+        "/tmp/u4-b-issue-v2-01/full",
+        "/tmp/u4-b-issue-v2-runs-01",
+        "/tmp/u4-b-issue-v2-consume-01",
+        "/tmp/u4-b-issue-v2-fault-02",
+        "--worker"
+      ],
+      "source_sha256": "7fe2dfff9c8f7db7493ee45fbd5cd55adf4e55fd84f1b6e5d7ce35dd7e55cc89",
+      "observed": {
+        "r00": "pass",
+        "r01": "pass",
+        "forgery": "CheckFailure: opportunity eligible grants / ready tie"
+      },
+      "stdout_sha256": "f0e23bc454d73023f87ebdd00bea3a39a7b9138dc5728bc46a4afa69b370c52c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "without-dependency-completion",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-review-v2/eligibility_fault.py",
+        "/tmp/u4-b-issue-v2-01/full",
+        "/tmp/u4-b-issue-v2-runs-01",
+        "/tmp/u4-b-issue-v2-consume-01",
+        "/tmp/u4-b-issue-v2-fault-02",
+        "--worker"
+      ],
+      "source_sha256": "0e424480d18820d6fa1ac3e76a585e4d34cc5cd649d6f1955cba9ef451a5602b",
+      "observed": {
+        "r00": "CheckFailure: opportunity eligible grants / ready tie",
+        "r01": "pass",
+        "forgery": "pass"
+      },
+      "stdout_sha256": "de5fb91eb03b9fe7d0e64e4587d1cf0b40d89678232c6b2ef48fa87c817ef191",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-B",
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-review-v2/eligibility_fault.py",
+        "/tmp/u4-b-issue-v2-01/full",
+        "/tmp/u4-b-issue-v2-runs-01",
+        "/tmp/u4-b-issue-v2-consume-01",
+        "/tmp/u4-b-issue-v2-fault-02",
+        "--worker"
+      ],
+      "source_sha256": "7fe2dfff9c8f7db7493ee45fbd5cd55adf4e55fd84f1b6e5d7ce35dd7e55cc89",
+      "observed": {
+        "r00": "pass",
+        "r01": "pass",
+        "forgery": "CheckFailure: opportunity eligible grants / ready tie"
+      },
+      "stdout_sha256": "f0e23bc454d73023f87ebdd00bea3a39a7b9138dc5728bc46a4afa69b370c52c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "exact_restoration": true,
+  "unsafe_acceptance": "consistent early-eligibility forgery passes full checker with only dependency predicate removed",
+  "private_synthetic_only": true
+}

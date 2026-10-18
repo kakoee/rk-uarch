@@ -1,0 +1,175 @@
+"""B's independent reproduction, old-result preservation and opportunity attacks."""
+
+import argparse
+import hashlib
+import importlib
+import json
+from copy import deepcopy
+from pathlib import Path
+
+from uarch_contract.hashing import canonical_json, content_hash
+from uarch_contract.mapped import MappedEngineJob, validate_result
+from validation.component.observations_v3 import check_v3
+
+ROOT = Path(__file__).resolve().parents[3]
+PACKAGE = ROOT / "docs/reviews/U4-A-issue-edge-amendment-v2"
+
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def result(fn):
+    try:
+        fn()
+        return "pass"
+    except Exception as error:
+        return type(error).__name__ + ": " + str(error)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("source", type=Path)
+    parser.add_argument("runs", type=Path)
+    parser.add_argument("out", type=Path)
+    args = parser.parse_args()
+    args.out.mkdir(exist_ok=False)
+    expected = json.loads(
+        (ROOT / "docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json").read_text()
+    )["observation_contract"]
+    report = dict(recipe_sha256=sha(Path(__file__)), source_origins={}, baselines=[], attacks=[])
+    for name in (
+        "uarch_contract.mapped",
+        "uarch_contract.mapped_issue",
+        "validation.component.issue_checks",
+        "validation.component.observations_v3",
+    ):
+        p = Path(importlib.import_module(name).__file__).resolve()
+        assert p.is_relative_to(args.source.resolve())
+        report["source_origins"][name] = dict(path=str(p), sha256=sha(p))
+    cases = {}
+    old = {"r00": "/tmp/u4-b-issue-edge-inline-02", "r01": "/tmp/u4-b-issue-edge-inline-control-01"}
+    for dependent in ("r00", "r01"):
+        path = args.runs / "jobs" / (dependent + ".json")
+        j = json.loads(path.read_text())
+        old_path = Path(old[dependent]) / "jobs/inline.json"
+        assert path.read_bytes() == old_path.read_bytes()
+        for mode in ("debug", "release"):
+            raw_path = args.runs / (dependent + "-" + mode) / "result.json"
+            r = json.loads(raw_path.read_text())["result"]
+            validate_result(r, MappedEngineJob.model_validate(j))
+            check_v3(j, r, expected)
+            assert r == json.loads(
+                (PACKAGE / "private-probes" / dependent / (mode + ".json")).read_text()
+            )
+            first = "r01.00" if dependent == "r00" else "r00.00"
+            second = dependent + ".00"
+            dma = {x["request_id"]: x for x in r["observations"]["dma"]["records"]}
+            assert [
+                (dma[key]["reservation_ps"], dma[key]["issue_ps"], dma[key]["complete_ps"])
+                for key in (first, second)
+            ] == [(0, 0, 60000), (60000, 60000, 120000)]
+            opportunities = r["observations"]["reservation_opportunities"]["records"]
+            # Derived from B's original endpoint stream: initialization; inline unicast;
+            # barrier terminal; first DMA terminal; final DMA terminal. No align cursor.
+            assert [o["t_ps"] for o in opportunities] == [0, 0, 26667, 60000, 120000]
+            assert [o["granted_request_ids"] for o in opportunities] == [
+                [first],
+                [],
+                [],
+                [second],
+                [],
+            ]
+            assert [o["event_cursor"] for o in opportunities][:2] == [0, 2]
+            restored = deepcopy(r)
+            del restored["observations"]["reservation_opportunities"]
+            restored["result_hash"] = content_hash(restored, exclude=("result_hash",))
+            old_result = json.loads((Path(old[dependent]) / mode / "result.json").read_text())[
+                "result"
+            ]
+            assert canonical_json(restored) == canonical_json(old_result)
+            report["baselines"].append(
+                dict(
+                    case=dependent,
+                    mode=mode,
+                    input_sha256=sha(path),
+                    output_sha256=sha(raw_path),
+                    result_hash=r["result_hash"],
+                    old_full_result_equal_without_only_new_witness=True,
+                    structural="pass",
+                    independent="pass",
+                    opportunities=opportunities,
+                )
+            )
+            cases[dependent] = (j, r)
+    j, good = cases["r00"]
+    _, paired = cases["r01"]
+    forged = deepcopy(paired)
+    forged.update(job_hash=j["job_hash"], admission=j["admission"])
+    acts = forged["observations"]["activities"]["records"]
+    terminal = max(
+        (a for a in acts if a["job_id"] == "a-unicast"), key=lambda a: a["completion_ordinal"]
+    )
+    for activity in acts:
+        if activity["subphase"] == "dma_issue" and activity["kind"] == "alignment":
+            activity["predecessors"] = [
+                p for p in activity["predecessors"] if p["relation"] != "dependency"
+            ]
+            if activity["job_id"] == "r00":
+                activity["predecessors"].append(
+                    dict(activity_id=terminal["activity_id"], relation="dependency")
+                )
+    forged["result_hash"] = content_hash(forged, exclude=("result_hash",))
+    raw = canonical_json(forged).encode()
+    assert raw == (PACKAGE / "private-probes/consistent-ineligible-first.json").read_bytes()
+    (args.out / "consistent-ineligible-first.json").write_bytes(raw)
+    controls = {"consistent-ineligible-first": forged}
+    for name in (
+        "omit-empty-inline",
+        "omit-final-release",
+        "add-nonterminal-opportunity",
+        "late-initial-grant",
+    ):
+        r = deepcopy(good)
+        opp = r["observations"]["reservation_opportunities"]["records"]
+        if name == "omit-empty-inline":
+            del opp[1]
+        elif name == "omit-final-release":
+            opp.pop()
+        elif name == "add-nonterminal-opportunity":
+            # Cursor1 is after unicast dispatch, before its terminal completion.
+            opp.insert(
+                1, dict(opportunity_ordinal=1, t_ps=0, event_cursor=1, granted_request_ids=[])
+            )
+        else:
+            opp[1]["granted_request_ids"] = opp[0]["granted_request_ids"]
+            opp[0]["granted_request_ids"] = []
+        for i, row in enumerate(opp):
+            row["opportunity_ordinal"] = i
+        r["result_hash"] = content_hash(r, exclude=("result_hash",))
+        controls[name] = r
+    for name, r in controls.items():
+        path = args.out / (name + ".json")
+        path.write_text(canonical_json(r))
+        row = dict(
+            name=name,
+            sha256=sha(path),
+            structural=result(lambda r=r: validate_result(r, MappedEngineJob.model_validate(j))),
+            independent=result(lambda r=r: check_v3(j, r, expected)),
+        )
+        report["attacks"].append(row)
+        assert row["structural"] == "pass", row
+        assert row["independent"] != "pass", row
+    assert (
+        report["attacks"][0]["independent"]
+        == "CheckFailure: opportunity eligible grants / ready tie"
+    )
+    (args.out / "checks.json").write_text(json.dumps(report, indent=2) + "\n")
+    print(
+        "Four native outputs pass; exact B inputs/history preserved; five joined forgeries "
+        "pass structural validation and fail independent opportunity checks"
+    )
+
+
+if __name__ == "__main__":
+    main()
