@@ -494,7 +494,7 @@ def test_component_envelope_keeps_strict_framing(stdout, stderr, status):
 def test_current_independent_binding_is_prepared(prepared_payload):
     root, binding, payload, _ = prepared_payload
     assert payload["consumers"]["independent_binding"]["path"] == (
-        "docs/reviews/U4-A-component-runtime-stage2-v1/prospective-consumer-bindings-v1.json"
+        "docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2/consumer-bindings.json"
     )
     prepared = component_host._prepare_payload(root, binding, mode="debug")
     assert {

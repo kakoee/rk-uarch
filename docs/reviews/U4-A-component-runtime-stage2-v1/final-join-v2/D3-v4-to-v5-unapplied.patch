@@ -1,0 +1,35 @@
+--- a/src/rkuarch/engines/native/component_negative.py
++++ b/src/rkuarch/engines/native/component_negative.py
+@@ -1,4 +1,4 @@
+-"""UNAPPLIED Stage 2 exact-envelope successor. No native-site proof is inferred.
++"""UNAPPLIED Stage 2 source-bound expectation successor. No native-site proof is inferred.
+ 
+ Finite refusal-only transport. Requires a separately installed D3 decision.
+ 
+@@ -81,6 +81,26 @@
+     _require(
+         value["registry"] == strict_json_loads(_read(prepared.root, prepared.payload.registry)),
+         "D3 independent registry join",
++    )
++    provenance = strict_json_loads(_read(prepared.root, case.expectation_provenance))
++    _require(
++        provenance["case_id"] == case.case_id
++        and provenance["input_sha256"] == case.raw.byte_hash.split(":")[1]
++        and provenance["job_hash"] == value["job_hash"]
++        and provenance["engine"] == value["engine"]
++        and provenance["envelope"] == case.expected_envelope.model_dump(mode="json")
++        and provenance["runtime_entries_required"] == 0,
++        "D3 expectation input/envelope binding",
++    )
++    guard = provenance["native_guard_source"]
++    try:
++        guard_bytes = _read(prepared.root, FileBinding(path=guard["path"], byte_hash="sha256:" + guard["sha256"]))
++    except ValueError as error:
++        raise ValueError("D3 expectation guard source") from error
++    _require(
++        sha256(guard_bytes)
++        == "sha256:" + guard["sha256"],
++        "D3 expectation guard source",
+     )
+     # No Python resource-success preflight: the finite independently bound refusal is the test.
+     # This function supplies no native prevalidation flag and computes no delays.
