@@ -379,3 +379,97 @@ def test_partial_independent_closure_is_not_a_pin_refresh(prepared_payload):
     binding = FileBinding.model_validate(put("partial-payload.json", payload))
     with pytest.raises(ValueError, match="complete matching consumer/structural closure"):
         component_host._prepare_payload(root, binding, mode="debug")
+
+
+@pytest.mark.parametrize("kind", ["K2", "stale"])
+def test_wrong_or_stale_selector_stops_before_dispatch(tmp_path, monkeypatch, kind):
+    """Synthetic ownership model only; no real root-owned selector is constructed."""
+    from types import SimpleNamespace
+
+    selector = tmp_path / "synthetic-selector.json"
+    (tmp_path / "record.json").write_bytes(b"{}")
+    selector.write_text(
+        json.dumps(
+            {
+                "format": "uarch-k2-host-selector/1"
+                if kind == "K2"
+                else "uarch-component-host-selector/1",
+                "repository": str(tmp_path),
+                "acceptance_commit": "0" * 40,
+                "record_path": "record.json",
+                "record_byte_hash": "sha256:" + "f" * 64,
+            }
+        )
+    )
+    monkeypatch.setattr(component_host, "_SELECTOR", selector)
+    original = component_host.os.fstat
+
+    def synthetic_owner(fd):
+        value = original(fd)
+        return SimpleNamespace(st_uid=0, st_mode=value.st_mode)
+
+    def no_dispatch(*args, **kwargs):
+        pytest.fail("wrong/stale selector reached dispatch")
+
+    monkeypatch.setattr(component_host.os, "fstat", synthetic_owner)
+    monkeypatch.setattr(component_runner, "_exchange", no_dispatch)
+    with pytest.raises(ValueError, match="literal_error" if kind == "K2" else "digest mismatch"):
+        component_host.prepare_component(mode="debug")
+
+
+def test_changed_session_authority_stops_before_dispatch(prepared_payload, monkeypatch):
+    from rkuarch.engines.native.records import FileBinding
+
+    root, binding, _, put = prepared_payload
+    prepared = component_host._prepare_payload(root, binding, mode="debug")
+    authority = FileBinding.model_validate(
+        put("synthetic-session-binding.json", {"synthetic": True})
+    )
+    session = component_host.ComponentSession(
+        prepared, ((root, authority),), token=component_host._AUTHORITY
+    )
+    session.check()
+    (root / authority.path).write_bytes(b"changed")
+
+    def no_dispatch(*args, **kwargs):
+        pytest.fail("changed session authority reached dispatch")
+
+    monkeypatch.setattr(component_runner, "_exchange", no_dispatch)
+    with pytest.raises(ValueError, match="digest mismatch"):
+        component_runner.run_component(root / "job.json", session=session)
+
+
+@pytest.mark.parametrize(
+    "code",
+    [
+        "SramCapacityExceeded",
+        "LiveBufferAlias",
+        "InvalidTransfer",
+        "TestOnlyHardware",
+        "UnsupportedMapping",
+    ],
+)
+def test_component_refusal_codes_do_not_expand_k2(code):
+    from rkuarch.engines.native.runner import ProtocolViolation, _decode_envelope as k2_decode
+
+    value = {"code": code, "pointer": None, "message": "synthetic component refusal"}
+    raw = canonical_json(value).encode()
+    assert component_runner._decode_envelope(b"", raw, 2) == value
+    with pytest.raises(ProtocolViolation):
+        k2_decode(b"", raw, 2)
+
+
+@pytest.mark.parametrize(
+    "stdout,stderr,status",
+    [
+        (b"{}", b"error", 0),
+        (b"{}", b"error", 2),
+        (b"{}\n", b"", 0),
+        (b'{"a":1,"a":2}', b"", 0),
+        (b"[]", b"", 0),
+        (b"", b'{"code":"InventedError","message":"x","pointer":null}', 2),
+    ],
+)
+def test_component_envelope_keeps_strict_framing(stdout, stderr, status):
+    with pytest.raises(component_runner.ProtocolViolation):
+        component_runner._decode_envelope(stdout, stderr, status)

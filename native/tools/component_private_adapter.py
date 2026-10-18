@@ -16,10 +16,10 @@ from typing import Any
 from uarch_contract.hashing import sha256, strict_json_loads
 
 from rkuarch.engines.native.component_host import _prepare_payload
-from rkuarch.engines.native.component_runner import _consume
+from rkuarch.engines.native.component_runner import _consume, _decode_envelope
 from rkuarch.engines.native.host import _read, _require
 from rkuarch.engines.native.records import FileBinding
-from rkuarch.engines.native.runner import Limits, _decode_envelope, _exchange
+from rkuarch.engines.native.runner import Limits, _exchange
 
 IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
 TEST = "protocol::component_runtime_tests::private_selected_transport_probe"

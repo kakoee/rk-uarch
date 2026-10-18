@@ -1,0 +1,419 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_____ test_component_refusal_codes_do_not_expand_k2[SramCapacityExceeded] ______
+
+stdout = b''
+stderr = b'{"code":"SramCapacityExceeded","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+>               raise ValueError("invalid component refusal fields/code")
+E               ValueError: invalid component refusal fields/code
+
+src/rkuarch/engines/native/component_runner.py:46: ValueError
+
+The above exception was the direct cause of the following exception:
+
+code = 'SramCapacityExceeded'
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            "SramCapacityExceeded",
+            "LiveBufferAlias",
+            "InvalidTransfer",
+            "TestOnlyHardware",
+            "UnsupportedMapping",
+        ],
+    )
+    def test_component_refusal_codes_do_not_expand_k2(code):
+        from rkuarch.engines.native.runner import ProtocolViolation, _decode_envelope as k2_decode
+    
+        value = {"code": code, "pointer": None, "message": "synthetic component refusal"}
+        raw = canonical_json(value).encode()
+>       assert component_runner._decode_envelope(b"", raw, 2) == value
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:457: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stdout = b''
+stderr = b'{"code":"SramCapacityExceeded","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+                raise ValueError("invalid component refusal fields/code")
+        except (ValueError, TypeError, UnicodeError, OverflowError) as error:
+>           raise ProtocolViolation("invalid complete canonical component envelope") from error
+E           rkuarch.engines.native.runner.ProtocolViolation: invalid complete canonical component envelope
+
+src/rkuarch/engines/native/component_runner.py:48: ProtocolViolation
+________ test_component_refusal_codes_do_not_expand_k2[LiveBufferAlias] ________
+
+stdout = b''
+stderr = b'{"code":"LiveBufferAlias","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+>               raise ValueError("invalid component refusal fields/code")
+E               ValueError: invalid component refusal fields/code
+
+src/rkuarch/engines/native/component_runner.py:46: ValueError
+
+The above exception was the direct cause of the following exception:
+
+code = 'LiveBufferAlias'
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            "SramCapacityExceeded",
+            "LiveBufferAlias",
+            "InvalidTransfer",
+            "TestOnlyHardware",
+            "UnsupportedMapping",
+        ],
+    )
+    def test_component_refusal_codes_do_not_expand_k2(code):
+        from rkuarch.engines.native.runner import ProtocolViolation, _decode_envelope as k2_decode
+    
+        value = {"code": code, "pointer": None, "message": "synthetic component refusal"}
+        raw = canonical_json(value).encode()
+>       assert component_runner._decode_envelope(b"", raw, 2) == value
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:457: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stdout = b''
+stderr = b'{"code":"LiveBufferAlias","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+                raise ValueError("invalid component refusal fields/code")
+        except (ValueError, TypeError, UnicodeError, OverflowError) as error:
+>           raise ProtocolViolation("invalid complete canonical component envelope") from error
+E           rkuarch.engines.native.runner.ProtocolViolation: invalid complete canonical component envelope
+
+src/rkuarch/engines/native/component_runner.py:48: ProtocolViolation
+________ test_component_refusal_codes_do_not_expand_k2[InvalidTransfer] ________
+
+stdout = b''
+stderr = b'{"code":"InvalidTransfer","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+>               raise ValueError("invalid component refusal fields/code")
+E               ValueError: invalid component refusal fields/code
+
+src/rkuarch/engines/native/component_runner.py:46: ValueError
+
+The above exception was the direct cause of the following exception:
+
+code = 'InvalidTransfer'
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            "SramCapacityExceeded",
+            "LiveBufferAlias",
+            "InvalidTransfer",
+            "TestOnlyHardware",
+            "UnsupportedMapping",
+        ],
+    )
+    def test_component_refusal_codes_do_not_expand_k2(code):
+        from rkuarch.engines.native.runner import ProtocolViolation, _decode_envelope as k2_decode
+    
+        value = {"code": code, "pointer": None, "message": "synthetic component refusal"}
+        raw = canonical_json(value).encode()
+>       assert component_runner._decode_envelope(b"", raw, 2) == value
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:457: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stdout = b''
+stderr = b'{"code":"InvalidTransfer","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+                raise ValueError("invalid component refusal fields/code")
+        except (ValueError, TypeError, UnicodeError, OverflowError) as error:
+>           raise ProtocolViolation("invalid complete canonical component envelope") from error
+E           rkuarch.engines.native.runner.ProtocolViolation: invalid complete canonical component envelope
+
+src/rkuarch/engines/native/component_runner.py:48: ProtocolViolation
+_______ test_component_refusal_codes_do_not_expand_k2[TestOnlyHardware] ________
+
+stdout = b''
+stderr = b'{"code":"TestOnlyHardware","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+>               raise ValueError("invalid component refusal fields/code")
+E               ValueError: invalid component refusal fields/code
+
+src/rkuarch/engines/native/component_runner.py:46: ValueError
+
+The above exception was the direct cause of the following exception:
+
+code = 'TestOnlyHardware'
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            "SramCapacityExceeded",
+            "LiveBufferAlias",
+            "InvalidTransfer",
+            "TestOnlyHardware",
+            "UnsupportedMapping",
+        ],
+    )
+    def test_component_refusal_codes_do_not_expand_k2(code):
+        from rkuarch.engines.native.runner import ProtocolViolation, _decode_envelope as k2_decode
+    
+        value = {"code": code, "pointer": None, "message": "synthetic component refusal"}
+        raw = canonical_json(value).encode()
+>       assert component_runner._decode_envelope(b"", raw, 2) == value
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:457: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stdout = b''
+stderr = b'{"code":"TestOnlyHardware","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+                raise ValueError("invalid component refusal fields/code")
+        except (ValueError, TypeError, UnicodeError, OverflowError) as error:
+>           raise ProtocolViolation("invalid complete canonical component envelope") from error
+E           rkuarch.engines.native.runner.ProtocolViolation: invalid complete canonical component envelope
+
+src/rkuarch/engines/native/component_runner.py:48: ProtocolViolation
+______ test_component_refusal_codes_do_not_expand_k2[UnsupportedMapping] _______
+
+stdout = b''
+stderr = b'{"code":"UnsupportedMapping","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+>               raise ValueError("invalid component refusal fields/code")
+E               ValueError: invalid component refusal fields/code
+
+src/rkuarch/engines/native/component_runner.py:46: ValueError
+
+The above exception was the direct cause of the following exception:
+
+code = 'UnsupportedMapping'
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            "SramCapacityExceeded",
+            "LiveBufferAlias",
+            "InvalidTransfer",
+            "TestOnlyHardware",
+            "UnsupportedMapping",
+        ],
+    )
+    def test_component_refusal_codes_do_not_expand_k2(code):
+        from rkuarch.engines.native.runner import ProtocolViolation, _decode_envelope as k2_decode
+    
+        value = {"code": code, "pointer": None, "message": "synthetic component refusal"}
+        raw = canonical_json(value).encode()
+>       assert component_runner._decode_envelope(b"", raw, 2) == value
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:457: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stdout = b''
+stderr = b'{"code":"UnsupportedMapping","message":"synthetic component refusal","pointer":null}'
+returncode = 2
+
+    def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+        """Exact component framing; operational exits never become semantic refusals."""
+        if returncode < 0 or returncode == 1:
+            raise OperationalFailure(f"NativeExit:{returncode}")
+        if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+            raise ProtocolViolation("status/stream mismatch")
+        raw = stdout if returncode == 0 else stderr
+        try:
+            value = strict_json_loads(raw.decode("utf-8"))
+            if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+                raise ValueError("noncanonical envelope")
+            if returncode == 2 and (
+                set(value) != {"code", "message", "pointer"}
+                or type(value["code"]) is not str
+                or value["code"] not in _COMPONENT_CODES
+                or type(value["message"]) is not str
+                or (value["pointer"] is not None and type(value["pointer"]) is not str)
+            ):
+                raise ValueError("invalid component refusal fields/code")
+        except (ValueError, TypeError, UnicodeError, OverflowError) as error:
+>           raise ProtocolViolation("invalid complete canonical component envelope") from error
+E           rkuarch.engines.native.runner.ProtocolViolation: invalid complete canonical component envelope
+
+src/rkuarch/engines/native/component_runner.py:48: ProtocolViolation
+=========================== short test summary info ============================
+FAILED tests/unit/test_component_runtime.py::test_component_refusal_codes_do_not_expand_k2[SramCapacityExceeded]
+FAILED tests/unit/test_component_runtime.py::test_component_refusal_codes_do_not_expand_k2[LiveBufferAlias]
+FAILED tests/unit/test_component_runtime.py::test_component_refusal_codes_do_not_expand_k2[InvalidTransfer]
+FAILED tests/unit/test_component_runtime.py::test_component_refusal_codes_do_not_expand_k2[TestOnlyHardware]
+FAILED tests/unit/test_component_runtime.py::test_component_refusal_codes_do_not_expand_k2[UnsupportedMapping]
+5 failed, 24 deselected in 0.37s

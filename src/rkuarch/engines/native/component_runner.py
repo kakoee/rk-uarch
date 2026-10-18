@@ -3,22 +3,59 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, get_args
 
 from uarch_contract.hashing import canonical_json, sha256, strict_json_loads
-from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, validate_result
+from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, ProfileEntry, validate_result
 
 from .component_host import ComponentSession, _PreparedComponent, loads_runtime_job
 from .component_records import CHECKER, OBSERVATIONS
 from .host import _read
 from .runner import (
+    REFUSAL_CODES,
     Limits,
     NativeRefusal,
     OperationalFailure,
     ProtocolViolation,
-    _decode_envelope,
     _exchange,
 )
+
+# Installed profile outcomes plus independent native structural admission refusals.
+# The K2 decoder and its accepted code set remain unchanged.
+_COMPONENT_CODES = (
+    REFUSAL_CODES
+    | frozenset(get_args(ProfileEntry.model_fields["expected_outcome"].annotation))
+    | {
+        "InvalidBank",
+        "InvalidPreparedGraph",
+        "UnexpectedClosure",
+        "TestOnlyHardware",
+    }
+) - {"success"}
+
+
+def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
+    """Exact component framing; operational exits never become semantic refusals."""
+    if returncode < 0 or returncode == 1:
+        raise OperationalFailure(f"NativeExit:{returncode}")
+    if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
+        raise ProtocolViolation("status/stream mismatch")
+    raw = stdout if returncode == 0 else stderr
+    try:
+        value = strict_json_loads(raw.decode("utf-8"))
+        if not isinstance(value, dict) or canonical_json(value).encode() != raw:
+            raise ValueError("noncanonical envelope")
+        if returncode == 2 and (
+            set(value) != {"code", "message", "pointer"}
+            or type(value["code"]) is not str
+            or value["code"] not in _COMPONENT_CODES
+            or type(value["message"]) is not str
+            or (value["pointer"] is not None and type(value["pointer"]) is not str)
+        ):
+            raise ValueError("invalid component refusal fields/code")
+    except (ValueError, TypeError, UnicodeError, OverflowError) as error:
+        raise ProtocolViolation("invalid complete canonical component envelope") from error
+    return value
 
 
 def require_route(job: dict[str, Any], result: dict[str, Any]) -> None:
