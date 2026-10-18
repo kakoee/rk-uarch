@@ -1,0 +1,13 @@
+import json
+from pathlib import Path
+from validation.component.runtime_checks import verify_sources
+root=Path('/tmp/u4-b-runtime-registry-01/source')
+repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b')
+base=repo/'docs/reviews/U4-B-component-runtime-preparation-v1'
+new=repo/'docs/reviews/U4-B-component-runtime-preparation-v2'
+verify_sources(root,json.loads((new/'consumer-bindings-v2.json').read_bytes())['files'])
+try:verify_sources(root,json.loads((base/'consumer-bindings-v1.json').read_bytes())['files'])
+except ValueError as error:
+ assert str(error)=='consumer source mismatch: validation/component/runtime_selection.py'
+else:raise AssertionError('stale closure accepted')
+print('Matching51-file closure passes; stale v1 closure refuses changed selection source. Identity control only.')

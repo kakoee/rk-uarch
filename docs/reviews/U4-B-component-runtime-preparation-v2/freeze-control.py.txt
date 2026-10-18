@@ -1,0 +1,7 @@
+import json
+from pathlib import Path
+from validation.component.runtime_selection import definitions
+root=Path('/tmp/u4-b-runtime-registry-final-01/source')
+expected=json.loads((root/'docs/reviews/U4-B-component-runtime-preparation-v2/selection.json').read_bytes())
+assert definitions()['selection']==expected
+print('Final maintained source reproduces complete exact v2 definition freeze; 124 rows unchanged except explicit registry/raw identity transition.')
