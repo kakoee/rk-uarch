@@ -1,0 +1,178 @@
+.............FF.....F.FF...F.................                            [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 50, "sample": {"uarch_contract.mapped": "/tmp/u4-b-runtime-final-audit-01/source/contract/uarch_contract/mapped.py", "uarch_contract.mapped_issue": "/tmp/u4-b-runtime-final-audit-01/source/contract/uarch_contract/mapped_issue.py", "validation.component.issue_checks": "/tmp/u4-b-runtime-final-audit-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-runtime-final-audit-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-runtime-final-audit-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_____________ test_complete_private_preparation_and_echo_transport _____________
+
+prepared_payload = (PosixPath('/tmp/pytest-of-jjaff/pytest-550/test_complete_private_preparat0'), FileBinding(path='payload.json', byte_h...ef4eddf9b69a5ac7abca0862b73789210285ea330e2ff17e05'}, ...}, <function prepared_payload.<locals>.put at 0x73c33ebcd440>)
+
+    def test_complete_private_preparation_and_echo_transport(prepared_payload):
+        root, binding, _, _ = prepared_payload
+>       prepared = component_host._prepare_payload(root, binding, mode="debug")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:258: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/engines/native/component_host.py:340: in _prepare_payload
+    verify_sources(Path(payload.consumers.import_root), consumer_pins)
+validation/component/runtime_checks.py:41: in verify_sources
+    need(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False
+detail = 'consumer source mismatch: validation/component/runtime_checks.py'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           validation.component.checks.CheckFailure: consumer source mismatch: validation/component/runtime_checks.py
+
+validation/component/checks.py:25: CheckFailure
+___________ test_prepared_current_bytes_and_executable_are_rechecked ___________
+
+prepared_payload = (PosixPath('/tmp/pytest-of-jjaff/pytest-550/test_prepared_current_bytes_an0'), FileBinding(path='payload.json', byte_h...ef4eddf9b69a5ac7abca0862b73789210285ea330e2ff17e05'}, ...}, <function prepared_payload.<locals>.put at 0x73c33e60a700>)
+
+    def test_prepared_current_bytes_and_executable_are_rechecked(prepared_payload):
+        root, binding, _, _ = prepared_payload
+>       prepared = component_host._prepare_payload(root, binding, mode="debug")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:274: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/engines/native/component_host.py:340: in _prepare_payload
+    verify_sources(Path(payload.consumers.import_root), consumer_pins)
+validation/component/runtime_checks.py:41: in verify_sources
+    need(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False
+detail = 'consumer source mismatch: validation/component/runtime_checks.py'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           validation.component.checks.CheckFailure: consumer source mismatch: validation/component/runtime_checks.py
+
+validation/component/checks.py:25: CheckFailure
+________________________ test_budget_and_token_controls ________________________
+
+prepared_payload = (PosixPath('/tmp/pytest-of-jjaff/pytest-550/test_budget_and_token_controls0'), FileBinding(path='payload.json', byte_h...ef4eddf9b69a5ac7abca0862b73789210285ea330e2ff17e05'}, ...}, <function prepared_payload.<locals>.put at 0x73c33e9c5440>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73c33e6b3830>
+
+    def test_budget_and_token_controls(prepared_payload, monkeypatch):
+        from types import SimpleNamespace
+    
+        root, binding, payload, _ = prepared_payload
+>       prepared = component_host._prepare_payload(root, binding, mode="debug")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:315: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/engines/native/component_host.py:340: in _prepare_payload
+    verify_sources(Path(payload.consumers.import_root), consumer_pins)
+validation/component/runtime_checks.py:41: in verify_sources
+    need(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False
+detail = 'consumer source mismatch: validation/component/runtime_checks.py'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           validation.component.checks.CheckFailure: consumer source mismatch: validation/component/runtime_checks.py
+
+validation/component/checks.py:25: CheckFailure
+_____________ test_import_origin_is_checked_even_when_bytes_match ______________
+
+prepared_payload = (PosixPath('/tmp/pytest-of-jjaff/pytest-550/test_import_origin_is_checked_0'), FileBinding(path='payload.json', byte_h...ef4eddf9b69a5ac7abca0862b73789210285ea330e2ff17e05'}, ...}, <function prepared_payload.<locals>.put at 0x73c33e624cc0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73c33eb40290>
+
+    def test_import_origin_is_checked_even_when_bytes_match(prepared_payload, monkeypatch):
+        root, binding, _, _ = prepared_payload
+>       prepared = component_host._prepare_payload(root, binding, mode="debug")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:350: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/engines/native/component_host.py:340: in _prepare_payload
+    verify_sources(Path(payload.consumers.import_root), consumer_pins)
+validation/component/runtime_checks.py:41: in verify_sources
+    need(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False
+detail = 'consumer source mismatch: validation/component/runtime_checks.py'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           validation.component.checks.CheckFailure: consumer source mismatch: validation/component/runtime_checks.py
+
+validation/component/checks.py:25: CheckFailure
+_________________ test_bound_independent_wrapper_is_mandatory __________________
+
+prepared_payload = (PosixPath('/tmp/pytest-of-jjaff/pytest-550/test_bound_independent_wrapper0'), FileBinding(path='payload.json', byte_h...ef4eddf9b69a5ac7abca0862b73789210285ea330e2ff17e05'}, ...}, <function prepared_payload.<locals>.put at 0x73c33eb12fc0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73c33e52a9c0>
+
+    def test_bound_independent_wrapper_is_mandatory(prepared_payload, monkeypatch):
+        import validation.component.runtime_checks as independent
+    
+        root, binding, _, _ = prepared_payload
+>       prepared = component_host._prepare_payload(root, binding, mode="debug")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:362: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/engines/native/component_host.py:340: in _prepare_payload
+    verify_sources(Path(payload.consumers.import_root), consumer_pins)
+validation/component/runtime_checks.py:41: in verify_sources
+    need(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False
+detail = 'consumer source mismatch: validation/component/runtime_checks.py'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           validation.component.checks.CheckFailure: consumer source mismatch: validation/component/runtime_checks.py
+
+validation/component/checks.py:25: CheckFailure
+_____________ test_changed_session_authority_stops_before_dispatch _____________
+
+prepared_payload = (PosixPath('/tmp/pytest-of-jjaff/pytest-550/test_changed_session_authority0'), FileBinding(path='payload.json', byte_h...ef4eddf9b69a5ac7abca0862b73789210285ea330e2ff17e05'}, ...}, <function prepared_payload.<locals>.put at 0x73c33e719bc0>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73c33ec1dc40>
+
+    def test_changed_session_authority_stops_before_dispatch(prepared_payload, monkeypatch):
+        from rkuarch.engines.native.records import FileBinding
+    
+        root, binding, _, put = prepared_payload
+>       prepared = component_host._prepare_payload(root, binding, mode="debug")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:424: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/engines/native/component_host.py:340: in _prepare_payload
+    verify_sources(Path(payload.consumers.import_root), consumer_pins)
+validation/component/runtime_checks.py:41: in verify_sources
+    need(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False
+detail = 'consumer source mismatch: validation/component/runtime_checks.py'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           validation.component.checks.CheckFailure: consumer source mismatch: validation/component/runtime_checks.py
+
+validation/component/checks.py:25: CheckFailure
+=========================== short test summary info ============================
+FAILED tests/unit/test_component_runtime.py::test_complete_private_preparation_and_echo_transport
+FAILED tests/unit/test_component_runtime.py::test_prepared_current_bytes_and_executable_are_rechecked
+FAILED tests/unit/test_component_runtime.py::test_budget_and_token_controls
+FAILED tests/unit/test_component_runtime.py::test_import_origin_is_checked_even_when_bytes_match
+FAILED tests/unit/test_component_runtime.py::test_bound_independent_wrapper_is_mandatory
+FAILED tests/unit/test_component_runtime.py::test_changed_session_authority_stops_before_dispatch
+6 failed, 39 passed in 6.58s

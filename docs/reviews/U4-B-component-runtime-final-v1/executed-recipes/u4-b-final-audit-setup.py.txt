@@ -1,0 +1,23 @@
+import hashlib,json,subprocess,tarfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b'); p=r/'docs/reviews/U4-A-component-runtime-v1'; w=Path('/tmp/u4-b-runtime-final-audit-01'); w.mkdir(); e=w/'evidence';e.mkdir();s=w/'source';s.mkdir()
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+m=json.loads((p/'package-manifest.json').read_bytes())
+for row in m['files']:
+ b=(p/row['path']).read_bytes();assert h(b)==row['byte_hash'] and len(b)==row['bytes'],row['path']
+i=json.loads((p/'final-evidence-files.json').read_bytes());a=p/i['archive']['path'];assert h(a.read_bytes())==i['archive']['byte_hash'];rows={x['path']:x for x in i['members']}
+with tarfile.open(a) as t:
+ assert len(t.getmembers())==len(rows) and set(t.getnames())==set(rows)
+ for f in t.getmembers():
+  assert f.isfile() and not Path(f.name).is_absolute() and '..' not in Path(f.name).parts
+  b=t.extractfile(f).read();assert h(b)==rows[f.name]['byte_hash'] and len(b)==rows[f.name]['bytes']
+ t.extractall(e,filter='data')
+subprocess.run(['git','archive','-o',str(w/'source.tar'),'8356856bfba98f0942428d85c2f23d4b0e8f8de1'],cwd=r,check=True)
+with tarfile.open(w/'source.tar') as t:t.extractall(s,filter='data')
+build=json.loads((e/'final/source/private-component/BuildInputs.json').read_bytes())
+for row in build['source_files']:assert h((s/row['path']).read_bytes())==row['byte_hash'],row['path']
+ids=json.loads((p/'source-build-identities.json').read_bytes())
+for mode,bind in ids['modes'].items():
+ for key in ['executable','test_executable']:assert h(Path(bind[key]).read_bytes())==bind[key+'_byte_hash']
+report={'package_commit':'8356856bfba98f0942428d85c2f23d4b0e8f8de1','package_files':len(m['files']),'archive':i['archive'],'archive_members':len(rows),'build_source_files':len(build['source_files']),'four_binary_bytes':'matched original A locations; no rebinding','export':str(s),'extraction':str(e)}
+(w/'verification.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

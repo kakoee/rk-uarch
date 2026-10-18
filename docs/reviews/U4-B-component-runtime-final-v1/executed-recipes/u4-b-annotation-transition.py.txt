@@ -1,0 +1,19 @@
+import ast,hashlib,json,subprocess
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');w=Path('/tmp/u4-b-runtime-final-audit-01');p=r/'docs/reviews/U4-B-component-runtime-final-v1';p.mkdir();(p/'evidence').mkdir();(p/'executed-recipes').mkdir()
+name='validation/component/runtime_checks.py';before=(r/name).read_bytes();assert before.count(b'def population(t):')==1;after=before.replace(b'def population(t):',b'def population(t: int) -> int:')
+def h(b):return hashlib.sha256(b).hexdigest()
+def strip(raw):
+ tree=ast.parse(raw)
+ for node in ast.walk(tree):
+  if isinstance(node,ast.arg):node.annotation=None
+  if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):node.returns=None
+ return ast.dump(tree,include_attributes=False)
+assert strip(before)==strip(after)
+(r/name).write_bytes(after);(w/'source'/name).write_bytes(after)
+oldpath='docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json';old=json.loads((r/oldpath).read_bytes());new={'format':'B-component-consumer-bindings/3','authority':None,'predecessor':{'path':oldpath,'sha256':h((r/oldpath).read_bytes())},'changed_files':[name],'files':dict(old['files']),'scope':'prospective annotation-only consumer closure; requires subsequent A source/build/payload join'};assert new['files'][name]==h(before);new['files'][name]=h(after)
+(p/'consumer-bindings-v3.json').write_text(json.dumps(new,indent=2)+'\n')
+patch=subprocess.check_output(['git','diff','--',name],cwd=r);(p/'annotation.patch').write_bytes(patch)
+build=json.loads((w/'evidence/final/source/private-component/BuildInputs.json').read_bytes());assert next(x for x in build['source_files'] if x['path']==name)['byte_hash']=='sha256:'+h(before)
+record={'source_path':name,'preimage_sha256':h(before),'postimage_sha256':h(after),'change':'population(t: int) -> int; function body unchanged','annotation_erased_ast_equal':True,'old_binding':new['predecessor'],'new_binding':{'path':'docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json','sha256':h((p/'consumer-bindings-v3.json').read_bytes())},'unchanged_consumer_files':50,'A_implementation_source':'c67d558d61690bb346c86eb38cf0a170c03611e7','old_implementation_hash':'sha256:fe87474ef44cffec21c6484806ffbe7f4c5a921de66f78a806fb7932659e99f9','BuildInputs_contains_changed_path':True,'new_BuildInputs':None,'new_binaries':None,'new_payload':None,'dependency':'A must freeze joined source, regenerate BuildInputs and generated identity, explicitly bind resulting binaries/receipts and engine-bound jobs/payload to binding/3. Existing binaries remain bound exclusively to c67d558. No silent same-binary relabel.','authority':None}
+(p/'annotation-transition.json').write_text(json.dumps(record,indent=2)+'\n');print(json.dumps(record,indent=2))
