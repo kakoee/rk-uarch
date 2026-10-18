@@ -54,3 +54,17 @@ protected-file workflow. Do not update the binding alone or rerun artifact gener
 proposal. No full suite, native execution or hosted CI polling was performed.
 The contract CI command remains failing on live main until the protected proposal is
 installed; the production CI command reported by the user is corrected.
+
+## Approved installation and peer join
+
+Javid approved publication and the exact four-file correction with `yes`; see
+[acceptance.json](acceptance.json). B independently published the identical runtime
+annotation at `097577b`. Its prospective consumer-bindings-v3 files map is identical
+to this package's 51-file map; both histories were merged normally.
+
+[human-install.py](human-install.py) defaults to read-only preflight. With the human
+`UARCH_HUMAN=1` environment and `--install`, it verifies the pinned helper and approved
+proposal, checks the exact four preimages, tests a clean private export, then applies
+and commits those four paths using normal hooks. Unrelated untracked review files
+are preserved. It never pushes or runs native jobs. Return its commit receipt for
+coordinator publication. No new decision is requested.
