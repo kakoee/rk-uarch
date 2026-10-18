@@ -1,0 +1,29 @@
+import importlib.util,json,shutil
+from pathlib import Path
+from uarch_contract.hashing import sha256
+from rkuarch.engines.native.component_records import ComponentBuildReceipt,ComponentPayload
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.records import FileBinding
+r=Path.cwd();o=r.parent;p=r/'private-component';old=Path('/tmp/u4-a-runtime-build-c67d558');oldp=old/'source/private-component'
+spec=importlib.util.spec_from_file_location('f',r/'native/tools/component_runtime_candidate.py');f=importlib.util.module_from_spec(spec);spec.loader.exec_module(f);f.verify(o)
+engine=json.loads((p/'engine.json').read_bytes());trust=json.loads((p/'BuildTrust.json').read_bytes());summary=json.loads((o/'build-summary.json').read_bytes());exes=[]
+for mode,record in summary['modes'].items():
+ out=p/'receipts'/mode;out.mkdir(parents=True);binary=p/'bin'/mode/'uarch-engine';binary.parent.mkdir(parents=True);shutil.copy2(record['executable'],binary);binary.chmod(0o555)
+ for name in ('build.stderr','build.json','loader.stdout','elf.stdout','dso-hashes.stdout'):shutil.copy2(o/'commands'/(mode+'-'+name),out/name)
+ f.write(out/'loader-observations.json',{'loader_list':f.binding(r,out/'loader.stdout'),'elf':f.binding(r,out/'elf.stdout'),'DSO_hashes':f.binding(r,out/'dso-hashes.stdout'),'status':'actual accepted-image observations; not exhaustive construction reads'})
+ receipt=ComponentBuildReceipt.model_validate({'format':'uarch-component-build-receipt/1','build_input_hash':engine['implementation_hash'],'engine':engine,'mode':mode,'executable':f.binding(r,binary),'image_digest':f.IMAGE,'generated_identity':f.binding(r,r/'native/crates/uarch-engine/generated/identity.rs'),'build_log':f.binding(r,out/'build.stderr'),'environment':f.binding(r,out/'build.json'),'loader_observations':f.binding(r,out/'loader-observations.json'),'limitations':['private construction trust rejects public execution','three inherited construction read gaps remain unresolved; no complete read audit','no same-input production reproducibility rebuild','B review of this actual joined source/build/payload remains pending; prior author audit is inherited']})
+ f.write(out/'BuildReceipt.json',receipt);exes.append({'mode':mode,'executable':receipt.executable.model_dump(mode='json'),'receipt':f.binding(r,out/'BuildReceipt.json')})
+consumers=f.imports(r);f.write(p/'consumer-bindings.json',consumers)
+payload=ComponentPayload.model_validate({'format':'uarch-component-runtime-payload/1','engine':engine,'build_inputs':f.binding(r,p/'BuildInputs.json'),'registry':trust['registry_file'],'profiles':trust['profiles'],'jobs':json.loads((p/'positive-inventory.json').read_bytes()),'executables':exes,'consumers':consumers,'budget':{'calls':1000,'session_seconds':3600,'timeout_s':30,'stdin_bytes':64*1024*1024,'stdout_bytes':64*1024*1024,'stderr_bytes':1024*1024}});f.write(p/'prospective-payload.json',payload)
+prepared=_prepare_payload(r,FileBinding.model_validate(f.binding(r,p/'prospective-payload.json')),mode='debug');prepared.refresh();f.write(p/'preparation-verdict.json',{'status':'complete private payload preparation passed','positive_cases':len(prepared.payload.jobs),'file_checks':len(prepared.checks),'authority':None})
+rows=json.loads((p/'selection.json').read_bytes())['rows'];previous={v['case_id']:v for v in json.loads((oldp/'negative-inventory.json').read_bytes())['cases']};neg=[];origins=[];job_transitions=[]
+assert (p/'selection.json').read_bytes()==(oldp/'selection.json').read_bytes()
+for row in rows:
+ name=row['case_id'];raw=p/'jobs'/(name+'.json');job=json.loads(raw.read_bytes());prior=json.loads((oldp/'jobs'/(name+'.json')).read_bytes());before={k:v for k,v in prior.items() if k not in ('job_hash','engine')};after={k:v for k,v in job.items() if k not in ('job_hash','engine')};assert before==after
+ job_transitions.append({'case_id':name,'old_raw_byte_hash':sha256((oldp/'jobs'/(name+'.json')).read_bytes()),'new_raw_byte_hash':sha256(raw.read_bytes()),'old_job_hash':prior['job_hash'],'new_job_hash':job['job_hash'],'only_changed_fields':['engine.implementation_hash','job_hash']})
+ if row['expected_layer']=='result':continue
+ profile=p/'negative-profiles'/(name+'.json');f.write(profile,job['profile']);oldcase=previous[name];assert sha256(profile.read_bytes())==oldcase['profile']['byte_hash']
+ observed=old/'outputs/debug/selected'/(name+'.json');error=json.loads(observed.read_bytes());assert error['code']==oldcase['expected_code']==row['expected_code'] and error['pointer']==oldcase['expected_pointer']
+ neg.append({'case_id':name,'raw':f.binding(r,raw),'profile':f.binding(r,profile),'expected_code':error['code'],'expected_pointer':error['pointer'],'layer':row['expected_layer']})
+ origins.append({'case_id':name,'expectation_source':'inherited c67d558 native envelope; not a new cc899d2 execution','old_envelope_path':str(observed),'old_envelope_byte_hash':sha256(observed.read_bytes())})
+f.write(p/'negative-inventory.json',{'format':'uarch-component-negative-inventory/1','cases':neg});f.write(p/'negative-expectation-provenance.json',origins);f.write(p/'previous-candidate-job-transition.json',job_transitions);f.verify(o);print('104 positive closures prepared;124 explicit raw-job transitions;20 prospective negative bindings with inherited expectation provenance')

@@ -1,0 +1,25 @@
+import json
+from pathlib import Path
+from uarch_contract.hashing import canonical_json,sha256
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.records import FileBinding
+from validation.component.checks import CheckFailure
+r=Path.cwd();o=r.parent;p=r/'private-component';out=o/'binding-controls';out.mkdir();base=json.loads((p/'prospective-payload.json').read_bytes());cases=[]
+# Full final payload matching-binding acceptance and explicit prospective bad bindings.
+for kind in ('matching','stale','wrong'):
+ payload=json.loads(canonical_json(base))
+ if kind=='stale':
+  file=r/'docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json';payload['consumers']['independent_binding']={'path':str(file.relative_to(r)),'byte_hash':sha256(file.read_bytes())}
+ elif kind=='wrong':
+  pins=json.loads((r/payload['consumers']['independent_binding']['path']).read_bytes());pins['files']['validation/component/runtime_checks.py']='0'*64
+  file=p/'wrong-binding-control.json';file.write_text(canonical_json(pins));payload['consumers']['independent_binding']={'path':str(file.relative_to(r)),'byte_hash':sha256(file.read_bytes())}
+ file=p/('control-'+kind+'-payload.json');file.write_text(canonical_json(payload));binding=FileBinding(path=str(file.relative_to(r)),byte_hash=sha256(file.read_bytes()))
+ try:
+  prepared=_prepare_payload(r,binding,mode='debug');prepared.refresh()
+ except CheckFailure as error:
+  assert kind!='matching' and str(error)=='consumer source mismatch: validation/component/runtime_checks.py'
+  result={'kind':kind,'payload_byte_hash':binding.byte_hash,'verdict':'expected exact identity refusal','message':str(error)}
+ else:
+  assert kind=='matching';result={'kind':kind,'payload_byte_hash':binding.byte_hash,'verdict':'complete104-positive preparation accepted','file_checks':len(prepared.checks)}
+ cases.append(result)
+(out/'checks.json').write_text(json.dumps({'scope':'actual final payload variants; no executable dispatch or authority','cases':cases},indent=2)+'\n');print('matching final payload accepted; stale/wrong exact source refusals before dispatch')

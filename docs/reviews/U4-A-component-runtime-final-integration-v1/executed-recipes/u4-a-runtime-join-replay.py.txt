@@ -1,0 +1,27 @@
+import importlib.util,sys,json,tempfile,subprocess
+from pathlib import Path
+from uarch_contract.hashing import canonical_json,sha256
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.component_runner import _consume
+from rkuarch.engines.native.records import FileBinding
+import rkuarch.workload.mapped as producer
+r=Path.cwd();o=r.parent;p=r/'private-component';file=p/'prospective-payload.json';prepared=_prepare_payload(r,FileBinding(path=str(file.relative_to(r)),byte_hash=sha256(file.read_bytes())),mode='debug')
+def unavailable(*a,**k):raise AssertionError('producer preparation unavailable')
+producer.export_component_job=unavailable;producer.export_component_bundle=unavailable
+rows={v['case_id']:v for v in json.loads((p/'selection.json').read_bytes())['rows']};probes=json.loads((o/'native-probes.json').read_bytes());checks=[]
+# Apply the unchanged historical D3 patch only into another fresh private export.
+export=Path(tempfile.mkdtemp(prefix='u4-a-join-D3-'));patch=r/'docs/reviews/U4-A-component-runtime-v1/proposals/D3-v3-unapplied.patch';subprocess.run(['git','apply',str(patch)],cwd=export,check=True);path=export/'src/rkuarch/engines/native/component_negative.py';assert path.read_bytes()==(r/'docs/reviews/U4-A-component-runtime-v1/proposals/component_negative-v3.py.txt').read_bytes()
+spec=importlib.util.spec_from_file_location('unapplied_negative_join',path);m=importlib.util.module_from_spec(spec);sys.modules[spec.name]=m;spec.loader.exec_module(m);inventory=m.NegativeInventory.model_validate_json((p/'negative-inventory.json').read_bytes());negative={v.case_id:v for v in inventory.cases}
+for mode in ('debug','release'):
+ for output in sorted((o/'outputs'/mode/'focused').glob('*.json')):
+  name=output.stem;raw=(p/'jobs'/(name+'.json')).read_bytes();data=output.read_bytes();row=rows[name]
+  entry={'case_id':name,'mode':mode,'raw_byte_hash':sha256(raw),'output_byte_hash':sha256(data)}
+  if row['expected_layer']=='result':
+   result=_consume(prepared,json.loads(raw),data,b'',0);assert canonical_json(result).encode()==data
+   literal={'v3:cc0-v3':121000,'v3:B-native-O2':2735000}[name];assert result.duration_ps==literal;entry.update(verdict='saved-output replay through structural,check_v3,B binding3 consumer/literals; producers unavailable',duration_ps=result.duration_ps)
+  else:
+   case=negative[name];assert m._selected_raw(prepared,case)==raw;error=m._consume_negative(b'',data,2,case)
+   process=next(v for v in probes['cases'] if v['slot']['case_id']==name and v['slot']['mode']==mode);receipt=json.loads(Path(process['zero_dispatch_evidence']).read_bytes())
+   entry.update(verdict='exact new native envelope consumed by unchanged unapplied D3 v3',code=error['code'],pointer=error['pointer'],zero_entry_receipt=process['zero_dispatch_evidence'],zero_entry_receipt_byte_hash=sha256(Path(process['zero_dispatch_evidence']).read_bytes()))
+  checks.append(entry)
+prepared.refresh();report={'scope':'4 new saved-output replays and4 new native-envelope D3 checks; no execution/authority','source_commit':probes['source_commit'],'payload_byte_hash':sha256(file.read_bytes()),'consumer_binding':probes['consumer_binding'],'D3_private_export':str(export),'D3_postimage_byte_hash':sha256(path.read_bytes()),'checks':checks};(o/'replay-D3-checks.json').write_text(json.dumps(report,indent=2)+'\n');print('4 saved-output independent replays and4 new D3 envelope/profile controls passed')

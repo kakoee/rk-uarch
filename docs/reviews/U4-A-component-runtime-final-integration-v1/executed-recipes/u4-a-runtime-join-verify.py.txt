@@ -1,0 +1,42 @@
+import hashlib,json,subprocess,tarfile,tempfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');d=r/'docs/reviews/U4-A-component-runtime-final-integration-v1';o=Path('/tmp/u4-a-runtime-build-cc899d2');s=o/'source';work=Path(tempfile.mkdtemp(prefix='u4-a-runtime-join-verify-'));commands=[]
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+def run(argv,cwd=r):
+ p=subprocess.run(argv,cwd=cwd,capture_output=True);commands.append({'argv':argv,'cwd':str(cwd),'exit_code':p.returncode,'stdout_byte_hash':h(p.stdout),'stderr_byte_hash':h(p.stderr)});assert p.returncode==0,p.stderr.decode();return p.stdout
+index=json.loads((d/'evidence-files.json').read_bytes());archive=d/index['archive']['path'];assert h(archive.read_bytes())==index['archive']['byte_hash'];members={v['path']:v for v in index['members']};export=work/'evidence';export.mkdir()
+with tarfile.open(archive) as tar:
+ assert set(tar.getnames())==set(members) and len(tar.getmembers())==len(members)
+ for item in tar.getmembers():
+  assert item.isfile() and not item.name.startswith('/') and '..' not in Path(item.name).parts
+  raw=tar.extractfile(item).read();assert h(raw)==members[item.name]['byte_hash'] and len(raw)==members[item.name]['bytes']
+ tar.extractall(export,filter='data')
+summary=json.loads((d/'identities.json').read_bytes());build=json.loads((s/'private-component/BuildInputs.json').read_bytes());source=summary['source_commit'];assert run(['git','rev-parse','cc899d2']).decode().strip()==source
+for row in build['source_files']:assert h((r/row['path']).read_bytes())==h((s/row['path']).read_bytes())==row['byte_hash']
+for revision in ['c67d558','07af1a9']:
+ root=work/revision;root.mkdir();a=work/(revision+'.tar');run(['git','archive','-o',str(a),revision]);
+ with tarfile.open(a) as tar:tar.extractall(root,filter='data')
+ patch=d/('complete-build-input-delta.patch' if revision=='c67d558' else 'A-owned-source.patch');run(['git','apply','--check',str(patch)],root);run(['git','apply',str(patch)],root)
+ paths=[v['path'] for v in summary['changed_BuildInputs']] if revision=='c67d558' else ['native/tools/component_runtime_candidate.py','tests/unit/test_component_runtime.py']
+ for path in paths:assert (root/path).read_bytes()==(s/path).read_bytes()
+# Independently reconcile B's exact original patch against its original preimage.
+peer=work/'B-patch';(peer/'native/tools').mkdir(parents=True);name='native/tools/component_runtime_candidate.py';(peer/name).write_bytes(run(['git','show','07af1a9:'+name]));run(['git','apply',str(r/'docs/reviews/U4-B-component-runtime-final-v1/A-binding3-unapplied.patch')],peer);assert (peer/name).read_bytes()==(s/name).read_bytes()
+pre=json.loads((d/'preflight.json').read_bytes())
+for path,row in pre['human_postimages_verified'].items():assert h((r/path).read_bytes())=='sha256:'+row['after_sha256']
+oldp=r/'docs/reviews/U4-A-component-runtime-v1';oldm=json.loads((oldp/'package-manifest.json').read_bytes())
+for row in oldm['files']:assert h((oldp/row['path']).read_bytes())==row['byte_hash'],row['path']
+oldroot=Path('/tmp/u4-a-runtime-build-c67d558');oldbuild=json.loads((oldroot/'source/private-component/BuildInputs.json').read_bytes())
+for row in oldbuild['source_files']:assert h((oldroot/'source'/row['path']).read_bytes())==row['byte_hash']
+for mode in ('debug','release'):
+ for group in [summary['modes'],summary['previous_candidate']['modes']]:
+  for key in ['executable','test_executable']:assert h(Path(group[mode][key]).read_bytes())==group[mode][key+'_byte_hash']
+assert h((oldroot/'source/private-component/prospective-payload-v2.json').read_bytes())==summary['previous_candidate']['payload_byte_hash']
+for source_dir in ['native/crates/uarch-engine/src','src/rkuarch/engines/native','contract/uarch_contract']:
+ for path in (s/source_dir).rglob('*'):
+  if path.is_file() and path.suffix in ('.py','.rs'):assert path.read_bytes()==(oldroot/'source'/path.relative_to(s)).read_bytes(),path
+# Actual git source archive and both schema/selection predecessors remain exact.
+a=work/'cc899d2.tar';run(['git','archive','-o',str(a),source]);preparation=json.loads((o/'preparation.json').read_bytes());assert h(a.read_bytes())==preparation['source_archive']['byte_hash']
+assert (s/'private-component/selection.json').read_bytes()==(oldroot/'source/private-component/selection.json').read_bytes()
+new_probes=json.loads((o/'native-probes.json').read_bytes());assert len({v['process_identity'] for v in new_probes['cases']})==12
+report={'scope':'actual identity/reconstruction/preservation checks; no native rerun','source_commit':source,'archive_members_verified':len(members),'source_files_verified':len(build['source_files']),'old_package_leaves_preserved':len(oldm['files']),'old_source_files_preserved':len(oldbuild['source_files']),'old_and_new_actual_binaries_verified':8,'human_four_postimages_unchanged':True,'exact_B_patch_postimage':h((peer/name).read_bytes()),'same_Rust_host_runner_contract_source_bytes':True,'source_archive':preparation['source_archive'],'private_verification_root':str(work),'commands':commands,'verdict':'passed'}
+(d/'verification.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({k:v for k,v in report.items() if k!='commands'}))

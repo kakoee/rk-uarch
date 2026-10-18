@@ -1,0 +1,41 @@
+import gzip,hashlib,io,json,subprocess,tarfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');d=r/'docs/reviews/U4-A-component-runtime-final-integration-v1';o=Path('/tmp/u4-a-runtime-build-cc899d2');s=o/'source';p=s/'private-component';old=Path('/tmp/u4-a-runtime-build-c67d558');files={}
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+def write(path,v):path.write_text(json.dumps(v,indent=2)+'\n')
+def add(path,name):assert path.is_file(),path;files[name]=path.read_bytes()
+def tree(path,name,exclude=()):
+ for q in sorted(path.rglob('*')):
+  if q.is_file() and not any(v in q.relative_to(path).parts for v in exclude):add(q,name+'/'+str(q.relative_to(path)))
+for name in ['commands','receipts','controls','outputs','native-probes','python-checks','binding-controls']:tree(o/name,'final/'+name)
+for q in sorted(o.iterdir()):
+ if q.is_file() and q.name!='source.tar':add(q,'final/'+q.name)
+tree(p,'final/source/private-component',('bin',));add(s/'native/crates/uarch-engine/generated/identity.rs','final/source/native/crates/uarch-engine/generated/identity.rs')
+for path in ['docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json','docs/reviews/U4-B-component-runtime-final-v1/A-binding3-unapplied.patch','docs/reviews/U4-B-component-runtime-preparation-v1/read-audit-remaining.json']:add(s/path,'frozen-inputs/'+Path(path).name)
+archive=d/'evidence.tar.gz'
+with archive.open('wb') as raw:
+ with gzip.GzipFile(fileobj=raw,mode='wb',filename='',mtime=0) as gz:
+  with tarfile.open(fileobj=gz,mode='w',format=tarfile.PAX_FORMAT) as tar:
+   for name,b in sorted(files.items()):
+    info=tarfile.TarInfo(name);info.size=len(b);info.mode=0o644;tar.addfile(info,io.BytesIO(b))
+write(d/'evidence-files.json',{'archive':{'path':archive.name,'byte_hash':h(archive.read_bytes())},'members':[{'path:n':None} for n in []] if False else [{'path':n,'byte_hash':h(b),'bytes':len(b)} for n,b in sorted(files.items())],'exclusions':['actual binaries and Cargo targets/cache; local actual paths/hashes retained','whole git source archive; reconstruct at cc899d2','authority records; none created']})
+summary=json.loads((o/'build-summary.json').read_bytes());oldsummary=json.loads((old/'build-summary.json').read_bytes());payload=json.loads((p/'prospective-payload.json').read_bytes());oldpayload=old/'source/private-component/prospective-payload-v2.json'
+for mode in ('debug','release'):
+ for key in ('executable','test_executable'):
+  assert h(Path(summary['modes'][mode][key]).read_bytes())==summary['modes'][mode][key+'_byte_hash']
+  assert h(Path(oldsummary['modes'][mode][key]).read_bytes())==oldsummary['modes'][mode][key+'_byte_hash']
+probes=json.loads((o/'native-probes.json').read_bytes());assert len(probes['cases'])==12
+for row in probes['cases']:
+ receipt=o/'native-probes'/f"{row['slot']['ordinal']:05}"/'receipt.json';v=json.loads(receipt.read_bytes());assert v['runtime_entries']==(1 if row['outcome']=='success' else 0);assert v['harness_exit_code']==0 and v['semantic_status']==(0 if row['outcome']=='success' else 2)
+ids={**summary,'consumer3':payload['consumers']['independent_binding'],'payload':{'path':'private-component/prospective-payload-v2.json','byte_hash':h((p/'prospective-payload.json').read_bytes())},'previous_candidate':{'source_commit':oldsummary['source_commit'],'engine':oldsummary['engine'],'modes':oldsummary['modes'],'payload_byte_hash':h(oldpayload.read_bytes()),'old_bytes_verified_unchanged':True},'schema_versions':{'build_inputs':'uarch-component-build-inputs/2','trust':'uarch-component-build-trust/2','payload':'uarch-component-runtime-payload/1','profile':'uarch-native-test-profile/2','observations':'uarch-native-observations/3'},'archive':{'path':archive.name,'byte_hash':h(archive.read_bytes())}}
+write(d/'identities.json',ids)
+write(d/'checks.json',{'source_commit':summary['source_commit'],'new_executions':{'before_amendment_pytest':{'failed':7,'passed':2,'known_stale_controls_failed':6},'after_amendment_focused_pytest':{'passed':9},'final_tracked_export_pytest':{'passed':38,'runtime':32,'unchanged_D3_proposal':6},'cold_clean_env_mypy':{'passed':True,'source_files':4},'root_ruff':{'passed':True,'tracked_export':True},'actual_build_modes':['debug','release'],'fresh_cfg_test_processes':12,'native_initial_positive':4,'native_saved_input_replay':4,'native_resource_refusals':2,'native_profile_refusals':2,'new_saved_output_consumer_replays':4,'new_D3_envelope_checks':4,'ordinary_executable_refusal_processes':8,'private_payload_positive_definitions':104,'explicit_raw_job_identity_transitions':124,'current_file_checks':1297,'actual_final_payload_binding_controls':3},'inherited_not_rerun':{'original_A_semantic_outputs':94,'original_A_python_K2_compatibility_tests':36,'original_A_D3_envelope_checks':40,'original_native_unit_assertions':8,'B_original_candidate_processes':12,'B_offline_original_positive_consumptions':54,'B_original_checker_call_and_digest_guard_faults':2,'native_Clippy_and_rustfmt':'exact unchanged Rust bytes','a1_A7_A1b_and_F2_laws':'unchanged installed behavior; prior evidence retains source labels'},'not_run':['444-call private campaign','1368-call public campaign','historical full suites','new construction trace capture','same-input production reproducibility rebuild'],'read_gaps_unresolved':['debug.trace.450:11','debug.trace.452:9','release.trace.482:10'],'authority':None})
+(d/'A-owned-source.patch').write_bytes(subprocess.check_output(['git','diff','07af1a9','cc899d2','--','native/tools/component_runtime_candidate.py','tests/unit/test_component_runtime.py'],cwd=r))
+(d/'complete-build-input-delta.patch').write_bytes(subprocess.check_output(['git','diff','c67d558','cc899d2','--',*[v['path'] for v in summary['changed_BuildInputs']]],cwd=r))
+recipes=[Path('/tmp/u4-a-runtime-join-'+n+'.py') for n in ['build','python','bind','process','probes','replay','binding-controls','package']]
+recipes += [s/'docs/reviews/U4-A-component-runtime-v1/executed-recipes/u4-runtime-import-audit.py.txt',s/'docs/reviews/U4-A-component-runtime-v1/executed-recipes/u4-runtime-close-dependencies.py.txt']
+rd=d/'executed-recipes';rd.mkdir(exist_ok=True);mapping=[]
+for q in recipes:
+ target=rd/(q.name if q.suffix=='.txt' else q.name+'.txt');target.write_bytes(q.read_bytes());mapping.append({'executed_path':str(q),'preserved_path':str(target.relative_to(d)),'byte_hash':h(q.read_bytes())})
+write(d/'recipe-paths.json',mapping)
+print(json.dumps({'archive_hash':h(archive.read_bytes()),'members':len(files),'bytes':archive.stat().st_size,'engine':summary['engine']['implementation_hash'],'payload':ids['payload']}))

@@ -1,0 +1,5 @@
+import hashlib,json,subprocess,tarfile,tempfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');d=r/'docs/reviews/U4-A-component-runtime-final-integration-v1';o=Path(tempfile.mkdtemp(prefix='u4-a-join-final-lint-'));source=o/'source';source.mkdir();tree=subprocess.check_output(['git','write-tree'],cwd=r).decode().strip();archive=o/'source.tar';subprocess.run(['git','archive','-o',str(archive),tree],cwd=r,check=True)
+with tarfile.open(archive) as tar:tar.extractall(source,filter='data')
+cmd=[str(r/'.venv/bin/ruff'),'check','.'];p=subprocess.run(cmd,cwd=source,capture_output=True);(d/'final-lint.stdout').write_bytes(p.stdout);(d/'final-lint.stderr').write_bytes(p.stderr);(d/'final-lint.json').write_text(json.dumps({'scope':'clean staged tracked export before publication; subsequent metadata adds only this receipt, recipe transcript and manifest','tree':tree,'cwd':str(source),'argv':cmd,'exit_code':p.returncode,'stdout_byte_hash':'sha256:'+hashlib.sha256(p.stdout).hexdigest(),'stderr_byte_hash':'sha256:'+hashlib.sha256(p.stderr).hexdigest()},indent=2)+'\n');print(p.stdout.decode());assert p.returncode==0

@@ -1,0 +1,11 @@
+import hashlib,json,os,subprocess,tempfile
+from pathlib import Path
+r=Path.cwd();o=r.parent/'python-checks';o.mkdir();venv=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin');env={**os.environ,'PYTHONPATH':str(r)+':'+str(r/'src')+':'+str(r/'contract'),'PYTHONDONTWRITEBYTECODE':'1'}
+checks={}
+for name,cmd in [('ruff',[str(venv/'ruff'),'check','.']),('affected-integration',[str(venv/'python'),'-m','pytest','-q','tests/unit/test_component_runtime.py','tests/unit/test_component_negative_proposal.py'])]:
+ p=subprocess.run(cmd,cwd=r,env=env,capture_output=True);(o/(name+'.stdout')).write_bytes(p.stdout);(o/(name+'.stderr')).write_bytes(p.stderr);checks[name]={'argv':cmd,'cwd':str(r),'exit_code':p.returncode};assert p.returncode==0,p.stdout.decode()
+# Exact historical D3 proposal is applied only to a fresh private directory for typing.
+d3=Path(tempfile.mkdtemp(prefix='u4-a-join-d3-types-'));file=d3/'component_negative.py';file.write_bytes((r/'docs/reviews/U4-A-component-runtime-v1/proposals/component_negative-v3.py.txt').read_bytes())
+clean={k:v for k,v in env.items() if k!='PYTHONPATH'};cmd=[str(venv/'mypy'),'--no-incremental','src/rkuarch/engines/native/component_host.py','src/rkuarch/engines/native/component_runner.py','src/rkuarch/engines/native/component_records.py',str(file)]
+p=subprocess.run(cmd,cwd=r,env=clean,capture_output=True);(o/'cold-types.stdout').write_bytes(p.stdout);(o/'cold-types.stderr').write_bytes(p.stderr);checks['cold-types']={'argv':cmd,'cwd':str(r),'PYTHONPATH':'unset','exit_code':p.returncode,'D3_proposal_byte_hash':'sha256:'+hashlib.sha256(file.read_bytes()).hexdigest()};assert p.returncode==0,p.stdout.decode()
+(o/'checks.json').write_text(json.dumps({'scope':'fresh tracked source, affected32 runtime+6 D3 controls; no K2/law campaign rerun','checks':checks},indent=2)+'\n');print(json.dumps(checks))

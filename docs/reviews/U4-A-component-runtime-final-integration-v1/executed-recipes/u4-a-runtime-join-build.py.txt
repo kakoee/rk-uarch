@@ -1,0 +1,22 @@
+import importlib.util,json
+from pathlib import Path
+r=Path.cwd();o=r.parent
+spec=importlib.util.spec_from_file_location('frozen_recipe',r/'native/tools/component_runtime_candidate.py');f=importlib.util.module_from_spec(spec);spec.loader.exec_module(f);c=f.wrapper(r)
+f.verify(o);build=json.loads((r/'private-component/BuildInputs.json').read_bytes());oldroot=Path('/tmp/u4-a-runtime-build-c67d558');old=json.loads((oldroot/'source/private-component/BuildInputs.json').read_bytes());oldmap={v['path']:v for v in old['source_files']};newmap={v['path']:v for v in build['source_files']};assert set(oldmap)==set(newmap)
+changed=[{'path':p,'before':oldmap[p]['byte_hash'],'after':newmap[p]['byte_hash']} for p in sorted(oldmap) if oldmap[p]!=newmap[p]]
+assert [v['path'] for v in changed]==['native/tools/component_runtime_candidate.py','validation/component/issue-amendment-binding.json','validation/component/runtime_checks.py']
+assert build['model_inputs_hash']==old['model_inputs_hash']
+for p in (r/'native').rglob('*.rs'):
+ if 'generated' not in p.parts:assert p.read_bytes()==(oldroot/'source'/p.relative_to(r)).read_bytes()
+report={'source_commit':build['source_commit'],'engine':json.loads((r/'private-component/engine.json').read_bytes()),'changed_BuildInputs':changed,'all_other_BuildInputs_unchanged':len(oldmap)-len(changed),'modes':{},'trace_capture':False,'read_audit_complete':False,'authority':None}
+oldsummary=json.loads((oldroot/'build-summary.json').read_bytes())
+for mode in ('debug','release'):
+ f.build(o,mode)
+ binary=o/'targets'/mode/mode/'uarch-engine'
+ rows=[json.loads(v) for v in (o/'commands'/(mode+'-test-build.stdout')).read_text().splitlines() if v.startswith('{')];exes=[v['executable'] for v in rows if v.get('reason')=='compiler-artifact' and v.get('executable') and v['target']['name']=='uarch_engine'];assert len(exes)==1
+ testpath=o/'targets'/mode/str(Path(exes[0]).relative_to('/target'));unit_hash=c.digest(testpath.read_bytes());assert unit_hash==oldsummary['modes'][mode]['test_executable_byte_hash']
+ assert c.digest(binary.read_bytes())!=oldsummary['modes'][mode]['executable_byte_hash']
+ for tag,argv in [('elf',['/usr/bin/readelf','-l','-d','/target/'+mode+'/uarch-engine']),('loader',['/lib64/ld-linux-x86-64.so.2','--list','/target/'+mode+'/uarch-engine']),('dso-hashes',['/usr/bin/sha256sum','/lib/x86_64-linux-gnu/libgcc_s.so.1','/lib/x86_64-linux-gnu/libc.so.6','/lib64/ld-linux-x86-64.so.2'])]:assert c.command(o,mode+'-'+tag,c.docker(o,mode,mode+'-'+tag)+argv)==0
+ report['modes'][mode]={'executable':str(binary),'executable_byte_hash':c.digest(binary.read_bytes()),'test_executable':str(testpath),'test_executable_byte_hash':unit_hash,'unit_assertions':'inherited exact Rust/unit executable bytes; no unit assertion rerun','native_unit_filters':oldsummary['modes'][mode]['native_unit_filters']}
+ (o/'build-summary.json').write_text(json.dumps(report,indent=2)+'\n');f.verify(o);print(mode,'built',report['modes'][mode]['executable_byte_hash'],flush=True)
+assert c.inventory(o/'cache')==json.loads(c.CACHE_RECORD.read_bytes())['files'];print('source,generated and accepted1719-file cache postchecks passed')

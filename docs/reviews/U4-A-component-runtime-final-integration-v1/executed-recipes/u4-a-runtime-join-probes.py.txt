@@ -1,0 +1,30 @@
+import importlib.util,json
+from pathlib import Path
+from uarch_contract.hashing import sha256
+from validation.component.runtime_campaign import POLICY,schedule
+root=Path.cwd();o=root.parent;out=o/'native-probes';old=Path('/tmp/u4-a-runtime-build-c67d558')
+spec=importlib.util.spec_from_file_location('frozen_private_adapter',root/'native/tools/component_private_adapter.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);adapter=m.PrivateAdapter(o,out)
+selection=json.loads((root/'private-component/selection.json').read_bytes());rows={r['case_id']:r for r in selection['rows']};ids=['v3:cc0-v3','v3:B-native-O2','v3:B-native-resource-C07-sram-1'];ids += [next(n for n in sorted(adapter.allowed) if rows[n]['expected_layer']=='profile')]
+setup=adapter.preflight(dict(selection,rows=[rows[n] for n in ids]),POLICY);slots=schedule(selection,ids)
+report={'scope':'A new-source binding3 bounded12-process private cfg(test) initial/replay; no campaign/public execution','source_commit':json.loads((root/'private-component/BuildInputs.json').read_bytes())['source_commit'],'payload':setup['execution_binding'],'consumer_binding':json.loads((root/'private-component/prospective-payload.json').read_bytes())['consumers']['independent_binding'],'cases':[]};seen={}
+for n in ids:
+ for mode in ('debug','release'):
+  phases=['initial','replay'] if rows[n]['expected_layer']=='result' else ['initial']
+  for phase in phases:
+   slot=next(s for s in slots if s['case_id']==n and s['mode']==mode and s['phase']==phase and s['repetition']==0);result=adapter.call(slot,rows[n],seen.get((n,mode)),POLICY)
+   entry={k:v for k,v in result.items() if not isinstance(v,bytes)};entry['slot']=slot;entry.update({k+'_byte_hash':sha256(result[k]) for k in ('raw_input','stdout','stderr')})
+   actual=result['stdout'] or result['stderr'];prior=(old/'outputs'/mode/'selected'/(n+'.json')).read_bytes()
+   if result['outcome']=='success':
+    current=json.loads(actual);previous=json.loads(prior)
+    assert {k:v for k,v in current.items() if k not in ('engine','job_hash','result_hash')}=={k:v for k,v in previous.items() if k not in ('engine','job_hash','result_hash')}
+    assert current['job_hash']==json.loads(result['raw_input'])['job_hash'] and current['engine']==json.loads(result['raw_input'])['engine']
+    entry['historical_comparison']='all observation bytes/values unchanged after excluding only engine/job_hash/result_hash; not old result rebinding'
+   else:assert actual==prior;entry['historical_comparison']='exact error bytes unchanged'
+   if phase=='initial':
+    dest=o/'outputs'/mode/'focused';dest.mkdir(parents=True,exist_ok=True);(dest/(n+'.json')).write_bytes(actual)
+   else:assert actual==(o/'outputs'/mode/'focused'/(n+'.json')).read_bytes()
+   if mode=='release':assert actual==(o/'outputs/debug/focused'/(n+'.json')).read_bytes()
+   report['cases'].append(entry)
+   if phase=='initial' and result['outcome']=='success':seen[n,mode]={'outcome':'success','raw_input_sha256':sha256(result['raw_input']).split(':')[1],'execution_binding':setup['execution_binding']}
+   (o/'native-probes.json').write_text(json.dumps(report,indent=2)+'\n');print(n,mode,phase,result['outcome'],flush=True)
+assert len(report['cases'])==12 and len({v['process_identity'] for v in report['cases']})==12

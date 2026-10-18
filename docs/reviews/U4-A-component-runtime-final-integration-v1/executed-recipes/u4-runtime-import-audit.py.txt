@@ -1,0 +1,21 @@
+import json,sys
+from pathlib import Path
+from uarch_contract.hashing import sha256
+from rkuarch.engines.native.component_host import _prepare_payload,_PROJECT,_EXTERNAL
+from rkuarch.engines.native.records import FileBinding
+import rkuarch.engines.native.component_runner
+import validation.component.runtime_checks
+r=Path.cwd();o=r.parent;p=r/'private-component/prospective-payload.json';x=_prepare_payload(r,FileBinding(path=str(p.relative_to(r)),byte_hash=sha256(p.read_bytes())),mode='debug');x.refresh();rows=[]
+for name,m in sorted(sys.modules.items()):
+ top=name.split('.')[0]
+ if top not in (*_PROJECT,*_EXTERNAL) and top not in sys.stdlib_module_names:continue
+ raw=getattr(m,'__file__',None)
+ if raw:
+  path=Path(raw).resolve();rows.append({'module':name,'path':str(path),'byte_hash':sha256(path.read_bytes())})
+libs={}
+for line in Path('/proc/self/maps').read_text().splitlines():
+ parts=line.split()
+ if len(parts)>=6 and parts[-1].startswith('/'):
+  path=Path(parts[-1])
+  if path.is_file():libs[str(path.resolve())]=sha256(path.read_bytes())
+(o/'import-observations.json').write_text(json.dumps({'status':'observed module origins/current bytes in private payload preparation; not exhaustive read trace','python_executable':str(Path(sys.executable).resolve()),'modules':rows,'host_python_mapped_files':libs,'image_native_DSOs':'separate debug/release loader and dso-hashes command receipts','prepared_files':len(x.checks)},indent=2)+'\n');print(len(rows),'loaded module origins verified; host Python mappings recorded separately from image native DSOs')
