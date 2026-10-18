@@ -1,0 +1,15 @@
+import hashlib,json,os,subprocess,tarfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');o=Path('/tmp/u4-runtime-tests-56bbc83');o.mkdir();source=o/'source';source.mkdir();commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=r).decode().strip();archive=o/'source.tar';subprocess.run(['git','archive','-o',str(archive),commit],cwd=r,check=True)
+with tarfile.open(archive) as tar:tar.extractall(source,filter='data')
+build=json.loads(Path('/tmp/u4-a-runtime-build-c67d558/source/private-component/BuildInputs.json').read_bytes())
+for entry in build['source_files']:
+ assert 'sha256:'+hashlib.sha256((source/entry['path']).read_bytes()).hexdigest()==entry['byte_hash'],entry['path']
+report={'test_proposal_commit':commit,'implementation_commit':build['source_commit'],'implementation_files_unchanged':len(build['source_files']),'commands':{}}
+env={**os.environ,'PYTHONPATH':str(source)+':'+str(source/'src')+':'+str(source/'contract'),'PYTHONDONTWRITEBYTECODE':'1'}
+commands={'ruff':[str(r/'.venv/bin/ruff'),'check','.'],'cold-types':[str(r/'.venv/bin/mypy'),'--no-incremental','src/rkuarch/engines/native/component_host.py','src/rkuarch/engines/native/component_runner.py','src/rkuarch/engines/native/component_records.py'],'affected-integration':[str(r/'.venv/bin/python'),'-m','pytest','-q','tests/unit/test_component_runtime.py','tests/unit/test_component_negative_proposal.py','tests/unit/test_u4_k2_host_paths.py','tests/unit/test_u4_k2_host_records.py','tests/unit/test_u4_k2_process.py']}
+for tag,cmd in commands.items():
+ run=subprocess.run(cmd,cwd=source,env=env,capture_output=True);(o/(tag+'.stdout')).write_bytes(run.stdout);(o/(tag+'.stderr')).write_bytes(run.stderr);report['commands'][tag]={'argv':cmd,'cwd':str(source),'exit_code':run.returncode};print(tag,run.returncode,flush=True)
+ if tag=='cold-types':assert run.returncode==1 and b'Found 3 errors in 1 file' in run.stdout
+ else:assert run.returncode==0,run.stdout.decode()
+(o/'receipt.json').write_text(json.dumps(report,indent=2)+'\n')

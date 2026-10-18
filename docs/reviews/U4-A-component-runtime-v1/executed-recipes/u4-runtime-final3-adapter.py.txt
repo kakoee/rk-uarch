@@ -1,0 +1,15 @@
+import importlib.util,json
+from pathlib import Path
+from uarch_contract.hashing import sha256
+from validation.component.runtime_campaign import POLICY,schedule
+r=Path.cwd();o=r.parent
+path=r/'native/tools/component_private_adapter.py';spec=importlib.util.spec_from_file_location('private_adapter',path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);assert Path(m.__file__).resolve()==path
+adapter=m.PrivateAdapter(o,o/'adapter-smoke');selection=json.loads((r/'private-component/selection.json').read_bytes());ids=['v3:B-native-resource-C07-sram-1','v3:B2-lifetime-no-order','v3:cc0-v3'];rows={x['case_id']:x for x in selection['rows']};subset=dict(selection,rows=[rows[x] for x in ids]);setup=adapter.preflight(subset,POLICY);plan=schedule(selection,ids)
+report={'kind':'4 private cfg(test) fresh-process adapter controls; not a campaign','source':str(path),'source_byte_hash':sha256(path.read_bytes()),'cases':[]};initial=None
+for case,phase in [('v3:cc0-v3','initial'),('v3:cc0-v3','replay'),('v3:B-native-resource-C07-sram-1','initial'),('v3:B2-lifetime-no-order','initial')]:
+ slot=next(x for x in plan if x['case_id']==case and x['phase']==phase and x['mode']=='debug' and x['repetition']==0)
+ result=adapter.call(slot,rows[case],initial,POLICY)
+ entry={k:v for k,v in result.items() if not isinstance(v,bytes)};entry['slot']=slot
+ entry.update({k+'_byte_hash':sha256(result[k]) for k in ['raw_input','stdout','stderr']});report['cases'].append(entry)
+ if phase=='initial' and result['outcome']=='success':initial={'outcome':result['outcome'],'raw_input_sha256':sha256(result['raw_input']).split(':')[1],'execution_binding':setup['execution_binding']}
+(o/'adapter-smoke.json').write_text(json.dumps(report,indent=2)+'\n');print('4 fresh cfg(test) processes: positive, producer-disabled replay, resource refusal; no public authority')

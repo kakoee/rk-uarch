@@ -1,0 +1,9 @@
+import shutil,subprocess,json,os
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');o=Path('/tmp/u4-a-runtime-a67pm31q/type-proposal');o.mkdir()
+for n in ('src','contract/uarch_contract','validation'):shutil.copytree(r/n,o/n,ignore=shutil.ignore_patterns('__pycache__'))
+shutil.copy2(r/'pyproject.toml',o/'pyproject.toml')
+patch=r/'docs/reviews/U4-A-component-runtime-v1/proposals/B-consumer-types.patch'
+subprocess.run(['git','apply',str(patch)],cwd=o,check=True)
+cmd=[str(r/'.venv/bin/mypy'),'src/rkuarch/engines/native/component_host.py','src/rkuarch/engines/native/component_runner.py','src/rkuarch/engines/native/component_records.py']
+a=subprocess.run(cmd,cwd=o,capture_output=True,env={**os.environ,'PYTHONPATH':str(o)+':'+str(o/'src')+':'+str(o/'contract')});(o/'stdout').write_bytes(a.stdout);(o/'stderr').write_bytes(a.stderr);(o/'receipt.json').write_text(json.dumps({'argv':cmd,'cwd':str(o),'exit_code':a.returncode,'scope':'unapplied B annotation patch only; no live B changes or pin refresh'},indent=2)+'\n');print(a.stdout.decode());assert a.returncode==0

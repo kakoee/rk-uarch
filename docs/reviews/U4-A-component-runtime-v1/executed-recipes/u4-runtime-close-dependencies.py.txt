@@ -1,0 +1,27 @@
+import json,shutil
+from pathlib import Path
+from uarch_contract.hashing import canonical_json,sha256
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.records import FileBinding
+from validation.component.runtime_campaign import HELPERS
+r=Path.cwd();o=r.parent;p=r/'private-component';old=p/'prospective-payload.json';v=json.loads(old.read_bytes());new=json.loads(old.read_bytes());pins={x['path']:x for x in new['consumers']['external_files']};added=[]
+observations=json.loads((o/'import-observations.json').read_bytes())
+actual={**observations['host_python_mapped_files']}
+for name,digest in HELPERS.items():
+ path=r/'docs/reviews/U4-B-K2-parallel-first-use-v1'/name;assert sha256(path.read_bytes())=='sha256:'+digest;actual[str(path)]='sha256:'+digest
+for name,digest in sorted(actual.items()):
+ path=Path(name);assert sha256(path.read_bytes())==digest
+ relative=str(path.relative_to('/'))
+ if relative not in pins:
+  pins[relative]={'path':relative,'byte_hash':digest};added.append(pins[relative])
+ else:assert pins[relative]['byte_hash']==digest
+new['consumers']['external_files']=[pins[k] for k in sorted(pins)]
+shutil.copy2(old,p/'prospective-payload-v1.json');shutil.copy2(p/'consumer-bindings.json',p/'consumer-bindings-v1.json')
+(p/'consumer-bindings-v2.json').write_text(canonical_json(new['consumers']))
+(p/'prospective-payload-v2.json').write_text(canonical_json(new))
+# Explicit prospective discovery transition; old bytes survive under their versioned path.
+shutil.copy2(p/'prospective-payload-v2.json',old)
+shutil.copy2(p/'consumer-bindings-v2.json',p/'consumer-bindings.json')
+transition={'scope':'private data-only runtime closure completion; no source/job/executable change or authority','old':{'path':'private-component/prospective-payload-v1.json','byte_hash':sha256((p/'prospective-payload-v1.json').read_bytes())},'new':{'path':'private-component/prospective-payload-v2.json','byte_hash':sha256(old.read_bytes())},'discovery_alias':'private-component/prospective-payload.json','added_runtime_files':added,'reason':'current-byte pins for observed host Python mappings and B hash-bound orchestration helpers; not an exhaustive construction-read claim'}
+(p/'payload-transition.json').write_text(json.dumps(transition,indent=2)+'\n')
+prepared=_prepare_payload(r,FileBinding(path='private-component/prospective-payload.json',byte_hash=sha256(old.read_bytes())),mode='debug');prepared.refresh();(p/'preparation-verdict-v2.json').write_text(json.dumps({'status':'private complete payload preparation passed','positive_cases':len(prepared.payload.jobs),'file_checks':len(prepared.checks),'payload_byte_hash':sha256(old.read_bytes()),'authority':None},indent=2)+'\n');print(len(added),'runtime dependency files added explicitly;',len(prepared.checks),'current-byte checks')

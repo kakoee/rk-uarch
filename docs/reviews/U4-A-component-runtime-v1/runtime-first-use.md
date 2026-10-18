@@ -61,7 +61,9 @@ positive control of one entry; it is neither a production observation nor a timi
    finite raw bytes; mode is explicit. K2 records and synthetic private preparation refuse.
 7. Separately authorize the finite public campaign and the D3 negative path. The complete
    later gate remains B's124 definitions/1368 calls; private subsets do not fill those slots.
-   Session call/time/byte ceilings must be the reviewed campaign values, not an implicit
+   Session time bounds call start; each call has a separate timeout. The outer campaign
+   must enforce a strict total deadline. Session call/time/byte ceilings must be reviewed,
+   not an implicit
    unlimited capability. B's orchestration enforces bounded workers, case/session time,
    file descriptors, receipt retention and incomplete-attempt handling. A private adapter
    enforces per-call container CPU/RAM/PID and framed harness output limits; aggregate

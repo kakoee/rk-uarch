@@ -1,0 +1,17 @@
+import importlib.util,sys,json
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
+from uarch_contract.hashing import sha256
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.records import FileBinding
+r=Path.cwd();o=r.parent;p=r/'private-component';path=Path('/tmp/u4-a-runtime-a67pm31q/d3-v3-export/src/rkuarch/engines/native/component_negative.py')
+loader=SourceFileLoader('unapplied_negative',str(path));spec=importlib.util.spec_from_loader(loader.name,loader);m=importlib.util.module_from_spec(spec);sys.modules[loader.name]=m;loader.exec_module(m)
+file=p/'prospective-payload.json';prepared=_prepare_payload(r,FileBinding(path=str(file.relative_to(r)),byte_hash=sha256(file.read_bytes())),mode='debug')
+inv=m.NegativeInventory.model_validate_json((p/'negative-inventory.json').read_bytes());checks=[]
+for case in inv.cases:
+ raw=m._selected_raw(prepared,case)
+ for mode in ('debug','release'):
+  error=(o/'outputs'/mode/'selected'/(case.case_id+'.json')).read_bytes();value=m._consume_negative(b'',error,2,case)
+  assert (o/'outputs'/mode/'selected'/(case.case_id+'.runtime-entries')).read_text()=='0'
+  checks.append({'case_id':case.case_id,'mode':mode,'raw_byte_hash':sha256(raw),'error_byte_hash':sha256(error),'code':value['code'],'pointer':value['pointer'],'runtime_entries':0})
+(o/'d3-proposal-checks.json').write_text(json.dumps({'status':'40 native unit refusals consumed by exact unapplied adapter; not public calls','proposal_byte_hash':sha256(path.read_bytes()),'checks':checks},indent=2)+'\n');print('40 exact D3 envelopes/profile joins; adapter remains unapplied')

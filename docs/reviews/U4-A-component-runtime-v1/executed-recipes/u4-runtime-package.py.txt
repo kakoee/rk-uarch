@@ -1,0 +1,59 @@
+import ast,gzip,hashlib,io,json,subprocess,tarfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');d=r/'docs/reviews/U4-A-component-runtime-v1';f=Path('/tmp/u4-a-runtime-build-c67d558');t=Path('/tmp/u4-runtime-tests-56bbc83');scratch=Path('/tmp/u4-a-runtime-a67pm31q')
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+def write(p,x):p.write_text(json.dumps(x,indent=2)+'\n')
+files={}
+def add(p,n):
+ assert p.is_file(),p
+ files[n]=p.read_bytes()
+def tree(p,n,exclude=()):
+ for q in sorted(p.rglob('*')):
+  if q.is_file() and not any(x in q.relative_to(p).parts for x in exclude):add(q,n+'/'+str(q.relative_to(p)))
+for name in ['commands','receipts','controls','outputs','adapter-smoke','python-checks']:tree(f/name,'final/'+name)
+for p in sorted(f.iterdir()):
+ if p.is_file() and p.name!='source.tar':add(p,'final/'+p.name)
+tree(f/'source/private-component','final/source/private-component',('bin',))
+add(f/'source/native/crates/uarch-engine/generated/identity.rs','final/source/native/crates/uarch-engine/generated/identity.rs')
+for p in sorted(t.iterdir()):
+ if p.is_file() and p.name!='source.tar':add(p,'final-python/'+p.name)
+for n in ['cold-clean-env.stdout','cold-clean-env.stderr','cold-d3.stdout','cold-d3.stderr']:
+ add(scratch/'type-proposal'/n,'proposed-B-type/'+n)
+add(scratch/'preparation.json','preparation/review-verification.json')
+for label,root in [('d20df7b',Path('/tmp/u4-a-runtime-build-d20df7b')),('a06c364',Path('/tmp/u4-a-runtime-build-a06c364'))]:
+ for n in ['build-summary.json','preparation.json']:
+  add(root/n,'superseded/'+label+'/'+n)
+ tree(root/'commands','superseded/'+label+'/commands')
+ for n in ['consumption.json','adapter-smoke.json']:
+  if (root/n).exists():add(root/n,'superseded/'+label+'/'+n)
+recipes=['/tmp/u4-runtime-final3-build.py','/tmp/u4-runtime-final3-process.py','/tmp/u4-runtime-bind-final.py','/tmp/u4-runtime-final3-consume.py','/tmp/u4-runtime-final-d3-v3.py','/tmp/u4-runtime-final3-adapter.py','/tmp/u4-runtime-import-audit.py','/tmp/u4-runtime-close-dependencies.py','/tmp/u4-runtime-payload-v2-check.py','/tmp/u4-runtime-payload-v2-check-original.py','/tmp/u4-runtime-final-export-checks.py','/tmp/u4-runtime-type-proposal.py']
+recipe_dir=d/'executed-recipes';recipe_dir.mkdir(exist_ok=True)
+for name in recipes:
+ p=Path(name);q=recipe_dir/(p.name+'.txt');q.write_bytes(p.read_bytes())
+write(d/'recipe-paths.json',[{'executed_path':p,'preserved_path':str((recipe_dir/(Path(p).name+'.txt')).relative_to(d)),'byte_hash':h(Path(p).read_bytes())} for p in recipes])
+archive=d/'final-evidence.tar.gz'
+with archive.open('wb') as out:
+ with gzip.GzipFile(fileobj=out,mode='wb',mtime=0,filename='') as gz:
+  with tarfile.open(fileobj=gz,mode='w',format=tarfile.PAX_FORMAT) as tar:
+   for n,b in sorted(files.items()):
+    item=tarfile.TarInfo(n);item.size=len(b);item.mode=0o644;item.mtime=0;tar.addfile(item,io.BytesIO(b))
+write(d/'final-evidence-files.json',{'format':'A-component-runtime-evidence/1','archive':{'path':archive.name,'byte_hash':h(archive.read_bytes())},'members':[{'path':n,'byte_hash':h(b),'bytes':len(b)} for n,b in sorted(files.items())],'exclusions':['actual binaries (hashes/path receipts retained)','Cargo targets/cache','entire git source archive (reconstruct from c67d558)','real authority records (none created)']})
+# Exact ordinary delta includes no B/protected changes. New proposal test version separate.
+paths=['native/crates/uarch-engine/src/component.rs','native/crates/uarch-engine/src/protocol.rs','native/crates/uarch-engine/testdata/synthetic-runtime-cc0-v3.json','native/tools/component_private_adapter.py','native/tools/component_runtime_candidate.py','src/rkuarch/engines/native/component_host.py','src/rkuarch/engines/native/component_records.py','src/rkuarch/engines/native/component_runner.py','tests/unit/test_component_runtime.py','tests/unit/test_component_negative_proposal.py']
+base=subprocess.check_output(['git','rev-parse','12383b4'],cwd=r).decode().strip();source='c67d558d61690bb346c86eb38cf0a170c03611e7';test='56bbc830a91c53bf0281220c02b2394f3a8a34fb'
+(d/'ordinary-source.patch').write_bytes(subprocess.check_output(['git','diff','--binary',base,source,'--',*paths],cwd=r))
+(d/'test-proposal-delta.patch').write_bytes(subprocess.check_output(['git','diff','--binary',source,test,'--','tests/unit/test_component_negative_proposal.py'],cwd=r))
+build=json.loads((f/'source/private-component/BuildInputs.json').read_bytes());summary=json.loads((f/'build-summary.json').read_bytes())
+for row in build['source_files']:assert h((t/'source'/row['path']).read_bytes())==row['byte_hash'],row
+for mode,info in summary['modes'].items():
+ for key in ['executable','test_executable']:assert h(Path(info[key]).read_bytes())==info[key+'_byte_hash']
+ old=json.loads(Path('/tmp/u4-a-runtime-build-d20df7b/build-summary.json').read_bytes())
+ assert info['test_executable_byte_hash']==old['modes'][mode]['test_executable_byte_hash']
+ for p in (f/'source/native').rglob('*.rs'):
+  if 'generated' not in p.parts:assert p.read_bytes()==(Path('/tmp/u4-a-runtime-build-d20df7b/source')/p.relative_to(f/'source')).read_bytes()
+write(d/'source-build-identities.json',{'source_commit':source,'test_proposal_commit':test,'ordinary_delta_base':base,'preserved_installation':'4e5f9714cb9c2bee8dca12182af05fd7c38d0e78','engine':summary['engine'],'modes':summary['modes'],'implementation_files_unchanged_at_test_freeze':len(build['source_files']),'payload_transition':json.loads((f/'source/private-component/payload-transition.json').read_bytes()),'source_postimages':[{'path':p,'byte_hash':h((f/'source'/p).read_bytes())} for p in paths],'authority':None})
+tests=[]
+for path in ['tests/unit/test_component_runtime.py','tests/unit/test_component_negative_proposal.py','tests/unit/test_u4_k2_host_paths.py','tests/unit/test_u4_k2_host_records.py','tests/unit/test_u4_k2_process.py']:
+ p=t/'source'/path;tree_=ast.parse(p.read_text());tests.append({'path':path,'byte_hash':h(p.read_bytes()),'tests':[n.name for n in ast.walk(tree_) if isinstance(n,ast.FunctionDef) and n.name.startswith('test_')]})
+write(d/'test-inventory.json',{'test_source_commit':test,'implementation_commit':source,'tests':tests,'observed_final_python_cases':71,'native_selected_cases_per_mode':47,'native_result_invocations':94,'positive_saved_output_replays':54,'native_refusals':40,'D3_proposal_envelope_checks':40,'ordinary_executable_refusal_processes':8,'fresh_cfg_test_adapter_processes':4,'extra_payload_v2_saved_replay':1,'inherited_native_unit_assertions_per_mode':4,'future_B_private_plan_calls_not_run':444,'future_public_gate_calls_not_run':1368,'strict_mypy':'blocked on B-owned annotation; exact unapplied fix passes cold clean-env checking of 4 source files'})
+print(json.dumps({'archive':str(archive),'archive_bytes':archive.stat().st_size,'archive_hash':h(archive.read_bytes()),'members':len(files),'source_files':len(build['source_files'])}))

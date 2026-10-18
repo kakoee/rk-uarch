@@ -1,0 +1,14 @@
+import importlib.util,json
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');o=Path('/tmp/u4-a-runtime-build-c67d558');s=o/'source'
+spec=importlib.util.spec_from_file_location('c',s/'native/tools/component_candidate.py');c=importlib.util.module_from_spec(spec);spec.loader.exec_module(c)
+raw=(s/'private-component/affected-inputs/v3:A-C02-cold.json').read_bytes();old=(s/'native/crates/uarch-engine/testdata/synthetic-kernel-job.json').read_bytes()
+for mode in ('debug','release'):
+ for name,data,code in [('malformed',b'\xff','InvalidJson'),('protocol',b'{}','UnsupportedProtocol'),('component',raw,'TestProfileMismatch'),('k2-substitution',old,'TestProfileMismatch')]:
+  tag=mode+'-process-corrected-'+name;prefix=c.docker(o,mode,tag);prefix.insert(prefix.index('run')+1,'-i')
+  assert c.command(o,tag,prefix+['/target/'+mode+'/uarch-engine','--protocol','uarch-engine/3'],data)==2
+  assert not (o/'commands'/(tag+'.stdout')).read_bytes()
+  refusal=json.loads((o/'commands'/(tag+'.stderr')).read_bytes());assert refusal['code']==code,refusal
+  if name=='malformed':assert 'UTF' in refusal['message'] or 'utf' in refusal['message']
+  if name=='component':assert refusal['message']=='component public authority absent'
+# No rebuild or successful public mapped invocation.
