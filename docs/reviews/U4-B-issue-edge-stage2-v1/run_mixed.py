@@ -1,6 +1,7 @@
 """Run B probe or named unit tests in the pinned image against the verified build.
 
-Usage: python -I run.py BUILD OUT probe NAME JOB.json TRUST.json VERSION   (VERSION: 2|3; private synthetic anchors only)
+Usage: python -I run.py BUILD OUT probe NAME JOB.json TRUST.json VERSION
+VERSION: 2|3; private synthetic anchors only.
        python -I run.py BUILD OUT tests NAME FILTER
 Each run: --network none, read-only root, binary hash re-verified, debug and release.
 """

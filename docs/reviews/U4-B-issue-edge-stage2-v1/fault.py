@@ -75,7 +75,8 @@ assert all(
 )
 report["restored_sha256"] = hashlib.sha256(p.read_bytes()).hexdigest()
 report["structural_layer"] = (
-    "Recorded separately: old structural consumer still accepts A7; this fault targets only independent defense"
+    "Recorded separately: old structural consumer still accepts A7; "
+    "this fault targets only independent defense"
 )
 (out / "report.json").write_text(json.dumps(report, indent=2) + "\n")
 print(json.dumps(report, indent=2))

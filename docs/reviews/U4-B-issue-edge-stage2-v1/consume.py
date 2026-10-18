@@ -8,6 +8,7 @@ import json
 import sys
 from copy import deepcopy
 from pathlib import Path
+
 from uarch_contract.hashing import content_hash
 from uarch_contract.mapped import MappedEngineJob, validate_result
 from validation.component.observations_v3 import check_v3
