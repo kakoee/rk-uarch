@@ -1,0 +1,90 @@
+{
+  "decision": "U4-issue-edge-reviewed-install-v1",
+  "approval_status": "pending human approval",
+  "current_main": "0025cef8c871b0193e06d68872faeef4c6c79984",
+  "author_candidate": "26dc2619aa784685681d51ceec518c12af155701",
+  "author_integration": "0dc59299a5378d57955f02cc2093cdf116150a1f",
+  "b_final": "0025cef8c871b0193e06d68872faeef4c6c79984",
+  "reviewed_manifest_sha256": "e7c8241c191f663f3b4b874b6e6e71316d52b95ecbfe02987924378dd0be6c80",
+  "install_patch_sha256": "5dee8fd749a3fc38f02546c49902077955bc61116e6acaa0968dc97394a0b541",
+  "patch_order": [
+    {
+      "path": "patches/contract-and-export.patch",
+      "sha256": "8593edac84465fbffe0dec27e5a2910d1238e5208a8605677e4d1ae8d068010a"
+    },
+    {
+      "path": "patches/checker-and-identity.patch",
+      "sha256": "97a5e36210d12e904f865c4d6cdfad6b3005be274198fe79ec60757c114f8b0a"
+    },
+    {
+      "path": "patches/native.patch",
+      "sha256": "eb69f163fee4b4228e840e868f7f1837ac05ad155c89529c0b6c276f45b95b5c"
+    }
+  ],
+  "paths": 29,
+  "all_preimages_match_current_main": true,
+  "all_postimages_match_accepted_manifest": true,
+  "nine_historical_controls": true,
+  "six_prospective_dependencies": true,
+  "full_patch_path_inventory_exact": true,
+  "read_only_checks": [
+    {
+      "name": "strict-currentness",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "scripts/vendor_rk.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.533,
+      "stdout": "snapshot manifest, matrix and current compatibility verified: /tmp/u4-issue-install-preview-4_0mqrb6/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963\n",
+      "stderr": ""
+    },
+    {
+      "name": "mapped-schema",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate_mapped",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.362,
+      "stdout": "Mapped schemas are fresh.\n",
+      "stderr": ""
+    }
+  ],
+  "review_readme_sha256": "e3f7263cc6d234e1cfb54d58b2e2c1c331d850973ae0cb93fa541933aa1d968c",
+  "review_prefixes": {
+    "17360": "0bcaf93461e43205cb1e580e6944d3ed337e481bccdb6ec783ac6c96cef393e6",
+    "30933": "648ad1a5c595893702f00b4afa75e3aced839206f66ca17be7d38d8863f87197"
+  },
+  "review_archive_sha256": "06677ef214a7cb520c45824e18a56317cbefb34777e750297a824f0814c329d4",
+  "review_files": 33,
+  "tests_native_builds_trace_captures_by_coordinator": 0,
+  "inherited_evidence": "Same-reviewer final F2/F3 acceptance, prior F1/F4 acceptance, author/B tests and fault controls; not rerun",
+  "remaining": "F2 restriction, unresolved read-audit limitations, genuine L1, new build/runtime identity/authority and public first use, G3a/U4 closure",
+  "patch_whitespace_note": {
+    "context_blank_lines": [
+      939,
+      954,
+      955,
+      959,
+      960,
+      1045,
+      1166,
+      1175,
+      1723,
+      1724,
+      1752,
+      1779,
+      1783,
+      1791,
+      1792,
+      1801,
+      2846,
+      3564
+    ],
+    "explanation": "git diff --check on the new patch artifact flags unified-diff blank context markers. Preserve reviewed patch bytes; these are not added source whitespace."
+  }
+}
