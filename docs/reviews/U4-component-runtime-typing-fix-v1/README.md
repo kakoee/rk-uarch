@@ -68,3 +68,18 @@ proposal, checks the exact four preimages, tests a clean private export, then ap
 and commits those four paths using normal hooks. Unrelated untracked review files
 are preserved. It never pushes or runs native jobs. Return its commit receipt for
 coordinator publication. No new decision is requested.
+
+Read-only helper preflight passed both CI mypy scopes (92 and 39 files), 36 affected
+and identity tests, and six positive/refusal/restoration helper checks. Protected
+preimages remain unchanged. See [helper-preflight.json](helper-preflight.json) and
+[helper-guards.json](helper-guards.json).
+
+Run the approved human installation:
+
+```bash
+cd /home/jjaff/AI-infra-simulation/rk-uarch
+UARCH_HUMAN=1 .venv/bin/python -I -B \
+  docs/reviews/U4-component-runtime-typing-fix-v1/human-install.py \
+  --helper-commit ec009fdace13abef7c0e08f469ab60573d1f81e1 \
+  --install
+```
