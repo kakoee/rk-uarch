@@ -1,0 +1,15 @@
+import json,hashlib,os,subprocess
+from pathlib import Path
+repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');pkg=repo/'docs/reviews/U4-B-issue-edge-stage2-final-v1';source=Path('/tmp/u4-b-stage2-final-source-01/full');runs=Path('/tmp/u4-b-stage2-final-runs-01');out=Path('/tmp/u4-b-stage2-final-checks-01');out.mkdir(exist_ok=False)
+venv=Path('/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin');runner=Path('/tmp/u4-b-stage2-review-01/probes/runner.py');py=[str(venv/'python'),'-I',str(runner),str(source)]
+changed=['contract/uarch_contract/mapped_issue.py','contract/tests/mapped/test_component_credit_cursor_v3.py','validation/component/installation_identity.py']
+cmds=[('source',py+['script',str(pkg/'audit_source.py'),str(source),str(repo),str(out/'source.json')]),('consumers',py+['script',str(pkg/'final_consume.py'),str(source),str(repo),str(runs),str(out/'consumers')]),('literal',[str(venv/'python'),'-I',str(repo/'docs/reviews/U4-B-issue-edge-stage2-v1/literal.py'),str(runs),str(out/'literal.json')]),('affected',py+['pytest','-q','contract/tests/mapped/test_component_credit_cursor_v3.py','validation/component/test_installation_identity.py','validation/component/test_stage2_selection.py','--junitxml='+str(out/'affected.xml')]),('lint',[str(venv/'ruff'),'check',*changed]),('format',[str(venv/'ruff'),'format','--check',*changed]),('types',[str(venv/'mypy'),'--strict','--follow-imports=silent',changed[0],changed[2]])]
+records=[]
+for name,argv in cmds:
+ env=dict(os.environ,PYTHONDONTWRITEBYTECODE='1');env.pop('PYTHONPATH',None)
+ p=subprocess.run(argv,cwd=source,env=env,capture_output=True,timeout=120)
+ (out/(name+'.stdout')).write_bytes(p.stdout);(out/(name+'.stderr')).write_bytes(p.stderr)
+ records.append(dict(name=name,argv=argv,cwd=str(source),exit_code=p.returncode,stdout_sha256=hashlib.sha256(p.stdout).hexdigest(),stderr_sha256=hashlib.sha256(p.stderr).hexdigest()))
+ (out/'checks.json').write_text(json.dumps(records,indent=2)+'\n')
+ assert p.returncode==0,(name,p.stdout,p.stderr)
+ print(name,'pass',p.stdout.decode()[-140:],flush=True)

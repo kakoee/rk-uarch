@@ -1,0 +1,83 @@
+{
+  "label": "private native outputs with synthetic unit anchors; no public execution",
+  "origins": {
+    "uarch_contract.mapped_issue": {
+      "path": "/tmp/u4-b-stage2-final-source-01/full/contract/uarch_contract/mapped_issue.py",
+      "sha256": "b645aa77fe4e3ed35b8bf05bcc747e211b4ff9436a4ee2518569bb837c848afa"
+    },
+    "validation.component.issue_checks": {
+      "path": "/tmp/u4-b-stage2-final-source-01/full/validation/component/issue_checks.py",
+      "sha256": "a232f0fbf09f2f2ca5c2c81ca8c345f6197533c2da1a3254b12000c6378f7736"
+    },
+    "validation.component.transition_checks_v3": {
+      "path": "/tmp/u4-b-stage2-final-source-01/full/validation/component/transition_checks_v3.py",
+      "sha256": "c3b38a8759a420660ea6f1c693fb0bdabca2a9291a37e1cec829a0bf141034d0"
+    },
+    "validation.component.observations_v3": {
+      "path": "/tmp/u4-b-stage2-final-source-01/full/validation/component/observations_v3.py",
+      "sha256": "58aca43c6bbc2341345b5559b347fa6e3f75dc9a86b733eb446104c145ba43e8"
+    }
+  },
+  "cases": [
+    {
+      "case": "cc0-v3-debug",
+      "result_hash": "sha256:f55e8878f0110a8a3d1904b52b0a53f46ce0c54ceab32cbfd9b42673824e8092",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "cc0-v3-release",
+      "result_hash": "sha256:f55e8878f0110a8a3d1904b52b0a53f46ce0c54ceab32cbfd9b42673824e8092",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "cc-v3-debug",
+      "result_hash": "sha256:dc1f9d4fc53350a7c70c3af9187a8aa6f837cda7610eb56a5480d89805f5006d",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "cc-v3-release",
+      "result_hash": "sha256:dc1f9d4fc53350a7c70c3af9187a8aa6f837cda7610eb56a5480d89805f5006d",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "sr-v3-debug",
+      "result_hash": "sha256:31322bbb1a83979315539cc2adb8f8a83288b317ab99c52f6a558dd2f5d50ff8",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "sr-v3-release",
+      "result_hash": "sha256:31322bbb1a83979315539cc2adb8f8a83288b317ab99c52f6a558dd2f5d50ff8",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "A7-post-reservation-credit",
+      "result_hash": "sha256:f80da8cf85578df0d39a519948656690a1397e74b090c7b3da61978fce3c7f1c",
+      "structural": "ValueError: AttributionMismatch: credit predecessor before reservation opportunity",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "omit-earlier-opportunity-release",
+      "result_hash": "sha256:f0b53d1ad5498726e1b9279f92aa70a824600ec690e8ce68b21d61bd587d058f",
+      "structural": "ValueError: AttributionMismatch: exact per-opportunity credit causes",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "omit-current-release",
+      "result_hash": "sha256:16cb28e610b52a899bb1124286ca60307ebacf94acc75bd08fb25e1c1a91ccb8",
+      "structural": "ValueError: AttributionMismatch: exact per-opportunity credit causes",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "A1-pre-release-grant",
+      "result_hash": "sha256:e4463ee1be2b155c3bc65ef8114604459d265a794d41a7bc869b6b3f2aed0ca3",
+      "structural": "ValueError: IncompleteObservations: reservation cursor capacity",
+      "independent": "CheckFailure: opportunity eligible grants / ready tie"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+# B final reply to A ff0bf58
+
+The exact final joined-review dependency in `U4-A-issue-edge-stage2-v1/peer-final-batch.md` is fulfilled. B reconstructed both routes, verified all26 postimages, exact incorporated B correction,6/7 installation overlay,48-file consumer closure,56 unchanged selected-support files and nine historical controls. No delta was reapplied. All six requested final-source private runs and both-consumer A7/A1 controls agree; final F4 routing/source controls and27 affected tests pass. New binary/source bindings and evidence are in this package.
+
+F1 is APPLIED in the private combined proposal with the joined author verification complete. F2 is APPLIED as the approved unresolved /2 first-use restriction, not repair or waiver. F3 is APPLIED with the structural capacity join and preserved independent defense; alternative F1 refusal remains correctly labelled. F4 is APPLIED as the concrete prospective model/format/checker/source requirement. No remaining A/B candidate correction or response dependency was found. Historical reports remain immutable; this reply updates only their pending final-review status.
+
+This is the published exact peer response because no direct session route exists. The coordinator can join it with A's response for the same reviewer's Stage3. It grants no independent adversarial verdict, protected installation permission, runtime/public authority, qualification or closure. Human and read-audit boundaries in README remain unchanged.

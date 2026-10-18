@@ -1,0 +1,115 @@
+[
+  {
+    "name": "source",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-stage2-review-01/probes/runner.py",
+      "/tmp/u4-b-stage2-final-source-01/full",
+      "script",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-stage2-final-v1/audit_source.py",
+      "/tmp/u4-b-stage2-final-source-01/full",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b",
+      "/tmp/u4-b-stage2-final-checks-01/source.json"
+    ],
+    "cwd": "/tmp/u4-b-stage2-final-source-01/full",
+    "exit_code": 0,
+    "stdout_sha256": "1d812e70663f7f368e4858121fb15af7d83f959b1fc0e36d32ceeb6826d7698d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "consumers",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-stage2-review-01/probes/runner.py",
+      "/tmp/u4-b-stage2-final-source-01/full",
+      "script",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-stage2-final-v1/final_consume.py",
+      "/tmp/u4-b-stage2-final-source-01/full",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b",
+      "/tmp/u4-b-stage2-final-runs-01",
+      "/tmp/u4-b-stage2-final-checks-01/consumers"
+    ],
+    "cwd": "/tmp/u4-b-stage2-final-source-01/full",
+    "exit_code": 0,
+    "stdout_sha256": "2bc42c128f6eecfacb176e0de0e002a77065a61f562beab4bc86d83bb1ba4b12",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "literal",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-stage2-v1/literal.py",
+      "/tmp/u4-b-stage2-final-runs-01",
+      "/tmp/u4-b-stage2-final-checks-01/literal.json"
+    ],
+    "cwd": "/tmp/u4-b-stage2-final-source-01/full",
+    "exit_code": 0,
+    "stdout_sha256": "d9da83372f42db99239938049208ba53db9d8d3d24bc8d2f23a01a94376d18b4",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "affected",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-stage2-review-01/probes/runner.py",
+      "/tmp/u4-b-stage2-final-source-01/full",
+      "pytest",
+      "-q",
+      "contract/tests/mapped/test_component_credit_cursor_v3.py",
+      "validation/component/test_installation_identity.py",
+      "validation/component/test_stage2_selection.py",
+      "--junitxml=/tmp/u4-b-stage2-final-checks-01/affected.xml"
+    ],
+    "cwd": "/tmp/u4-b-stage2-final-source-01/full",
+    "exit_code": 0,
+    "stdout_sha256": "407d66aa14a4b878fa42cf492fbe03c4daf427756b6b2b0c12b4b8fe923b82c4",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "lint",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+      "check",
+      "contract/uarch_contract/mapped_issue.py",
+      "contract/tests/mapped/test_component_credit_cursor_v3.py",
+      "validation/component/installation_identity.py"
+    ],
+    "cwd": "/tmp/u4-b-stage2-final-source-01/full",
+    "exit_code": 0,
+    "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "format",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+      "format",
+      "--check",
+      "contract/uarch_contract/mapped_issue.py",
+      "contract/tests/mapped/test_component_credit_cursor_v3.py",
+      "validation/component/installation_identity.py"
+    ],
+    "cwd": "/tmp/u4-b-stage2-final-source-01/full",
+    "exit_code": 0,
+    "stdout_sha256": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "types",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/mypy",
+      "--strict",
+      "--follow-imports=silent",
+      "contract/uarch_contract/mapped_issue.py",
+      "validation/component/installation_identity.py"
+    ],
+    "cwd": "/tmp/u4-b-stage2-final-source-01/full",
+    "exit_code": 0,
+    "stdout_sha256": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]
