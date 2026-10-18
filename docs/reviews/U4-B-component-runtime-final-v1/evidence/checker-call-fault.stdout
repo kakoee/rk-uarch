@@ -1,0 +1,28 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 43, "sample": {"uarch_contract.mapped": "/tmp/u4-b-runtime-final-audit-01/source/contract/uarch_contract/mapped.py", "uarch_contract.mapped_issue": "/tmp/u4-b-runtime-final-audit-01/source/contract/uarch_contract/mapped_issue.py", "validation.component.issue_checks": "/tmp/u4-b-runtime-final-audit-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-runtime-final-audit-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-runtime-final-audit-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+________ test_independent_checker_is_mandatory_for_valid_saved_response ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73acdec06ae0>
+
+    def test_independent_checker_is_mandatory_for_valid_saved_response(monkeypatch):
+        import validation.component.observations_v3 as independent
+    
+        job, result = prospective_pair()
+        expected = json.loads(
+            (ROOT / "docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json").read_bytes()
+        )["observation_contract"]
+    
+        def refuse(*args, **kwargs):
+            raise ValueError("independent consumer sentinel")
+    
+        monkeypatch.setattr(independent, "check_v3", refuse)
+>       with pytest.raises(ValueError, match="independent consumer sentinel"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_component_runtime.py:342: Failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_component_runtime.py::test_independent_checker_is_mandatory_for_valid_saved_response
+1 failed in 0.62s

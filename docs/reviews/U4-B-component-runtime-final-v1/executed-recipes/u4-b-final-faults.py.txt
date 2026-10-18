@@ -1,0 +1,22 @@
+import hashlib,json,os,subprocess
+from pathlib import Path
+w=Path('/tmp/u4-b-runtime-final-audit-01');s=w/'source';py='/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python';runner='/tmp/u4-b-runtime-review-01/probes/runner.py';report=[]
+def h(b):return hashlib.sha256(b).hexdigest()
+def call(tag,args):
+ p=subprocess.run([py,'-I',runner,str(s),*args],cwd=s,env={k:v for k,v in os.environ.items() if k not in ['PYTHONPATH','MYPYPATH']},capture_output=True);(w/(tag+'.stdout')).write_bytes(p.stdout);(w/(tag+'.stderr')).write_bytes(p.stderr);return p
+# Invocation discrimination only: checker sentinel is not a forged-timing law control.
+f=s/'src/rkuarch/engines/native/component_runner.py';pre=f.read_bytes();old=b'    check_v3(job, value, observation_contract)';assert pre.count(old)==1;post=pre.replace(old,b'    # private B fault: independent checker call disconnected')
+try:
+ f.write_bytes(post);r=call('checker-call-fault',['pytest','-q','tests/unit/test_component_runtime.py::test_independent_checker_is_mandatory_for_valid_saved_response']);assert r.returncode==1 and b'DID NOT RAISE' in r.stdout
+finally:f.write_bytes(pre)
+r2=call('checker-call-restored',['pytest','-q','tests/unit/test_component_runtime.py::test_independent_checker_is_mandatory_for_valid_saved_response']);assert r2.returncode==0 and f.read_bytes()==pre
+report.append({'guard':'component_runner.check_v3 invocation','kind':'consumer invocation sentinel; not a semantic forgery kill','preimage':h(pre),'fault_postimage':h(post),'restored':h(f.read_bytes()),'fault':'DID NOT RAISE expected checker refusal','restored_pass':True})
+# Narrow identity-only guard removal: old pin acceptance after annotation is unsafe binding acceptance.
+probe=w/'stale-binding-control.py';probe.write_text('''import json\nfrom pathlib import Path\nfrom validation.component.runtime_checks import verify_sources\nfrom validation.component.checks import CheckFailure\ns=Path.cwd();pins=json.loads((s/"docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json").read_bytes())["files"]\ntry:verify_sources(s,pins)\nexcept CheckFailure as e:\n assert str(e)=="consumer source mismatch: validation/component/runtime_checks.py"\n print("EXPECTED IDENTITY REFUSAL",str(e))\nelse:raise AssertionError("UNSAFE ACCEPTANCE: stale binding/2 accepted annotated source")\n''')
+f=s/'validation/component/runtime_checks.py';pre=f.read_bytes();old=b'        need(\n            hashlib.sha256(path.read_bytes()).hexdigest() == wanted,\n            "consumer source mismatch: " + name,\n        )';assert pre.count(old)==1;post=pre.replace(old,b'        # private identity fault: source digest guard disconnected')
+try:
+ f.write_bytes(post);r=call('source-pin-fault',['script',str(probe)]);assert r.returncode==1 and b'UNSAFE ACCEPTANCE' in r.stderr
+finally:f.write_bytes(pre)
+r2=call('source-pin-restored',['script',str(probe)]);assert r2.returncode==0 and f.read_bytes()==pre
+report.append({'guard':'runtime_checks.verify_sources byte equality','kind':'identity-only; not a timing/structural checker kill','preimage':h(pre),'fault_postimage':h(post),'restored':h(f.read_bytes()),'fault':'UNSAFE ACCEPTANCE of stale binding/2','restored_pass':True})
+(w/'fault-restoration.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

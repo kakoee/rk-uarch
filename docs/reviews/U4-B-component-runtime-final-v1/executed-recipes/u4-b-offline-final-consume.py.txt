@@ -1,0 +1,29 @@
+import hashlib,json
+from pathlib import Path
+from validation.component.runtime_checks import consume_case,verify_sources
+from validation.component.checks import CheckFailure
+from uarch_contract.hashing import content_hash
+root=Path.cwd();w=Path('/tmp/u4-b-runtime-final-audit-01');e=w/'evidence/final';p=root/'docs/reviews/U4-B-component-runtime-final-v1';pins=json.loads((p/'consumer-bindings-v3.json').read_bytes())['files'];old=json.loads((root/'docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json').read_bytes())['files'];expected=json.loads((e/'source/private-component/observation-contract.json').read_bytes());selection=json.loads((e/'source/private-component/selection.json').read_bytes());rows={r['case_id']:r for r in selection['rows']};report={'kind':'new B offline consumption of inherited A native bytes; not new native execution or rebinding','annotation_sha256':hashlib.sha256((root/'validation/component/runtime_checks.py').read_bytes()).hexdigest(),'rows':[],'controls':[]}
+verify_sources(root,pins)
+try:verify_sources(root,old)
+except CheckFailure as ex:assert str(ex)=='consumer source mismatch: validation/component/runtime_checks.py';report['controls'].append({'name':'old binding/2 refuses annotation/3','result':str(ex),'kind':'identity refusal'})
+else:raise AssertionError('stale binding accepted')
+for mode in ('debug','release'):
+ for f in sorted((e/'source/private-component/affected-inputs').glob('*.json')):
+  raw=f.read_bytes();job=json.loads(raw);row=rows[f.stem]
+  if row['expected_layer']!='result':continue
+  out=(e/'outputs'/mode/'selected'/f.name).read_bytes();result=json.loads(out)
+  consume_case(job,result,row,checker_id=selection['checker'],source=root,pins=pins,expected=expected,input_sha256=hashlib.sha256(raw).hexdigest(),raw_input=raw)
+  report['rows'].append({'case_id':f.stem,'mode':mode,'input_sha256':hashlib.sha256(raw).hexdigest(),'output_sha256':hashlib.sha256(out).hexdigest(),'duration_ps':result['duration_ps']})
+# Exact selected-job model/registry/profile/raw transitions independent of native timings.
+trans=json.loads((e/'source/private-component/job-transitions.json').read_bytes());inventory=[]
+for t in trans:
+ job=json.loads((e/'source'/t['file']['path']).read_bytes());row=rows[t['case_id']]
+ assert job['profile']==row['profile'] and job['bundle_hash']==row['bundle_hash'] and job['point_hash']==row['point_hash']
+ assert job['engine']==json.loads((e/'source/private-component/engine.json').read_bytes())
+ assert job['job_hash']==t['private_build_job_hash']==content_hash(job,exclude={'job_hash'})
+ assert 'sha256:'+hashlib.sha256((e/'source'/t['file']['path']).read_bytes()).hexdigest()==t['file']['byte_hash']
+ inventory.append({'case_id':t['case_id'],'raw_byte_hash':t['file']['byte_hash'],'outcome':row['expected_code'],'layer':row['expected_layer']})
+report['joined_inventory']=inventory;report['selection_hash']=selection['selection_hash'] if 'selection_hash' in selection else content_hash(selection)
+report['authority']=None
+(w/'offline-consumption.json').write_text(json.dumps(report,indent=2)+'\n');print('54 inherited native outputs independently consumed under annotation/3; 124 final raw joins; stale binding/2 refused')

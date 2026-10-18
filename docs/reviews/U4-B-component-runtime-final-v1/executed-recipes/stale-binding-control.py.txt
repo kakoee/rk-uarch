@@ -1,0 +1,10 @@
+import json
+from pathlib import Path
+from validation.component.runtime_checks import verify_sources
+from validation.component.checks import CheckFailure
+s=Path.cwd();pins=json.loads((s/"docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json").read_bytes())["files"]
+try:verify_sources(s,pins)
+except CheckFailure as e:
+ assert str(e)=="consumer source mismatch: validation/component/runtime_checks.py"
+ print("EXPECTED IDENTITY REFUSAL",str(e))
+else:raise AssertionError("UNSAFE ACCEPTANCE: stale binding/2 accepted annotated source")

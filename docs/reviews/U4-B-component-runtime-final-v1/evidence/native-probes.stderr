@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "/tmp/u4-b-runtime-review-01/probes/runner.py", line 68, in <module>
+    runpy.run_path(rest[0], run_name="__main__")
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/tmp/u4-b-runtime-native-probe.py", line 7, in <module>
+    adapter=m.PrivateAdapter(root.parent,out)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-a-runtime-build-c67d558/source/native/tools/component_private_adapter.py", line 53, in __init__
+    m: _prepare_payload(self.root, self.binding, mode=m) for m in ("debug", "release")
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-a-runtime-build-c67d558/source/src/rkuarch/engines/native/component_host.py", line 355, in _prepare_payload
+    prepared.refresh()
+  File "/tmp/u4-a-runtime-build-c67d558/source/src/rkuarch/engines/native/component_host.py", line 120, in refresh
+    _verify_imports(self.payload)
+  File "/tmp/u4-a-runtime-build-c67d558/source/src/rkuarch/engines/native/component_host.py", line 185, in _verify_imports
+    _require(
+  File "/tmp/u4-a-runtime-build-c67d558/source/src/rkuarch/engines/native/host.py", line 41, in _require
+    raise HostBindingError(message)
+rkuarch.engines.native.host.HostBindingError: component imported source identity: typing_extensions

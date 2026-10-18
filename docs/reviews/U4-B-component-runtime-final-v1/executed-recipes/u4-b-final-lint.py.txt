@@ -1,0 +1,5 @@
+import json,subprocess,tarfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');w=Path('/tmp/u4-b-runtime-final-lint-01');w.mkdir();s=w/'source';s.mkdir();tree=subprocess.check_output(['git','write-tree'],cwd=r).decode().strip();a=w/'source.tar';subprocess.run(['git','archive','-o',str(a),tree],cwd=r,check=True)
+with tarfile.open(a) as t:t.extractall(s,filter='data')
+cmd=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff','check','.'];run=subprocess.run(cmd,cwd=s,capture_output=True);(w/'stdout').write_bytes(run.stdout);(w/'stderr').write_bytes(run.stderr);report={'scope':'clean tracked staged-tree export, no untracked-file suppression or ignore changes','tree':tree,'argv':cmd,'cwd':str(s),'exit_code':run.returncode};(w/'receipt.json').write_text(json.dumps(report,indent=2)+'\n');print(run.stdout.decode());assert run.returncode==0

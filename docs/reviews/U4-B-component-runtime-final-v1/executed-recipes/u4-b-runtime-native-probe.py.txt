@@ -1,0 +1,25 @@
+import importlib.util,json
+from pathlib import Path
+from uarch_contract.hashing import sha256
+from validation.component.runtime_campaign import POLICY,schedule
+root=Path.cwd();work=Path('/tmp/u4-b-runtime-final-audit-01');out=work/'native-probes'
+spec=importlib.util.spec_from_file_location('frozen_private_adapter',root/'native/tools/component_private_adapter.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+adapter=m.PrivateAdapter(root.parent,out)
+selection=json.loads((root/'private-component/selection.json').read_bytes());rows={r['case_id']:r for r in selection['rows']}
+ids=['v3:cc0-v3','v3:B-native-O2','v3:B-native-resource-C07-sram-1']
+ids += [next(n for n in sorted(adapter.allowed) if rows[n]['expected_layer']=='profile')]
+setup=adapter.preflight(dict(selection,rows=[rows[n] for n in ids]),POLICY);slots=schedule(selection,ids)
+report={'scope':'B independently executed focused final c67d558 cfg(test) processes, original binding/2 and payload/2; not post-annotation binary evidence','payload':setup['execution_binding'],'cases':[]}; seen={}
+for n in ids:
+ for mode in ('debug','release'):
+  phases=['initial','replay'] if rows[n]['expected_layer']=='result' else ['initial']
+  for phase in phases:
+   slot=next(s for s in slots if s['case_id']==n and s['mode']==mode and s['phase']==phase and s['repetition']==0)
+   result=adapter.call(slot,rows[n],seen.get((n,mode)),POLICY)
+   entry={k:v for k,v in result.items() if not isinstance(v,bytes)};entry['slot']=slot
+   entry.update({k+'_byte_hash':sha256(result[k]) for k in ('raw_input','stdout','stderr')})
+   expected=(root.parent/'outputs'/mode/'selected'/(n+'.json')).read_bytes();assert (result['stdout'] or result['stderr'])==expected
+   report['cases'].append(entry)
+   if phase=='initial' and result['outcome']=='success':seen[n,mode]={'outcome':'success','raw_input_sha256':sha256(result['raw_input']).split(':')[1],'execution_binding':setup['execution_binding']}
+   print(n,mode,phase,result['outcome'],flush=True)
+(work/'native-probes.json').write_text(json.dumps(report,indent=2)+'\n')

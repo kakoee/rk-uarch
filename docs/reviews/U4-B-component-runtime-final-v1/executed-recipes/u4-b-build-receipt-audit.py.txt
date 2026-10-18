@@ -1,0 +1,18 @@
+import hashlib,json,subprocess
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');w=Path('/tmp/u4-b-runtime-final-audit-01');e=w/'evidence/final';origin=Path('/tmp/u4-a-runtime-build-c67d558');report={'inherited_commands':[],'independently_verified_current_binaries':[],'construction_read_complete':False}
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+for mode in ('debug','release'):
+ for tag in ['build','test-build','elf','loader','dso-hashes']+['process-corrected-'+n for n in ['malformed','protocol','component','k2-substitution']]:
+  stem=mode+'-'+tag;cmd=json.loads((e/'commands'/(stem+'.json')).read_bytes())
+  assert cmd['exit_code']==(2 if tag.startswith('process-') else 0)
+  for stream in ('stdout','stderr'):assert h((e/'commands'/(stem+'.'+stream)).read_bytes())==cmd[stream+'_hash']
+  assert 'sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523' in cmd['argv'];assert 'never' in cmd['argv'] and 'none' in cmd['argv']
+  report['inherited_commands'].append({'path':'final/commands/'+stem+'.json','sha256':h((e/'commands'/(stem+'.json')).read_bytes()),'exit_code':cmd['exit_code'],'scope':'A executed; B verified manifest/stream/accepted image'})
+ receipt=json.loads((e/'source/private-component/receipts'/mode/'BuildReceipt.json').read_bytes());assert receipt['engine']['implementation_hash']==receipt['build_input_hash']=='sha256:fe87474ef44cffec21c6484806ffbe7f4c5a921de66f78a806fb7932659e99f9'
+ for key in ['executable','generated_identity','build_log','environment','loader_observations']:
+  f=receipt[key];assert h((origin/'source'/f['path']).read_bytes())==f['byte_hash']
+ report['independently_verified_current_binaries'].append(receipt['executable'])
+prep=json.loads((e/'preparation.json').read_bytes());subprocess.run(['git','archive','-o',str(w/'c67d558-source.tar'),prep['source_commit']],cwd=r,check=True);assert h((w/'c67d558-source.tar').read_bytes())==prep['source_archive']['byte_hash'];report['exact_source_archive']=prep['source_archive'];report['inherited_cache_files_verified_by_A']=prep['cache_files']
+report['limitations']=['no B native rebuild or production reproducibility claim','old trace unknown/unfinished records unresolved','host Python mappings and image ELF/DSO observations are distinct and nonexhaustive','no new consumer/binary identity after annotation']
+(w/'build-audit.json').write_text(json.dumps(report,indent=2)+'\n');print('18 inherited command receipts and streams verified; source archive, generated identity, production receipts and binaries matched')

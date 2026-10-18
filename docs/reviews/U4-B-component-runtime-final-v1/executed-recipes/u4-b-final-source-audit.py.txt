@@ -1,0 +1,29 @@
+import hashlib,json,subprocess
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');w=Path('/tmp/u4-b-runtime-final-audit-01');e=w/'evidence/final';s=w/'source';a=r/'docs/reviews/U4-A-component-runtime-v1'
+def h(b):return hashlib.sha256(b).hexdigest()
+def git(*args):return subprocess.check_output(['git',*args],cwd=r)
+ids=json.loads((a/'source-build-identities.json').read_bytes());report={'subject':ids['source_commit'],'A_package':'8356856bfba98f0942428d85c2f23d4b0e8f8de1'}
+for c in [ids['preserved_installation'],'3949b104d0eaae95a7452f976c2afa048fa82ff1',ids['ordinary_delta_base']]:git('merge-base','--is-ancestor',c,ids['source_commit'])
+old=json.loads((r/'docs/reviews/U4-B-component-native-audit-v1/source-audit-final.json').read_bytes())['selected_support'];changes=[{'path':n,'old':v,'new':h((r/n).read_bytes())} for n,v in old.items() if h((r/n).read_bytes())!=v];assert not changes;report['selected_support']={'count':len(old),'changes':changes,'U0002_selected_support_transition':False}
+oldpaths=git('ls-tree','-r','--name-only',ids['ordinary_delta_base'],'--','src/rkuarch/engines/native').decode().splitlines();assert all(git('show',ids['ordinary_delta_base']+':'+n)==(r/n).read_bytes() for n in oldpaths);report['old_native_python_unchanged']=oldpaths
+# Preserve historical B preparation + K2 proposal/campaign files, all tracked historical identities.
+paths=git('ls-tree','-r','--name-only','a7629c9','--','docs/reviews/U4-B-component-runtime-preparation-v1','docs/reviews/U4-B-component-runtime-preparation-v2','docs/reviews/U4-B-issue-edge-F2-F3-v1','docs/reviews/U4-B-K2-parallel-first-use-v1').decode().splitlines();assert all(git('show','a7629c9:'+n)==(r/n).read_bytes() for n in paths);report['B_historical_files_unchanged']=len(paths)
+# Exact immutable candidate pins stay valid only on the original bytes.
+binding=json.loads((r/'docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json').read_bytes());report['consumer_original_count']=len(binding['files']);assert all(h(git('show',ids['source_commit']+':'+n))==v for n,v in binding['files'].items())
+report['changed_B_consumer_paths']=[n for n,v in binding['files'].items() if h((r/n).read_bytes())!=v];assert report['changed_B_consumer_paths']==['validation/component/runtime_checks.py']
+# Bind native consumers to installed accepted issue-edge source, record actual changes separately.
+changed=git('diff','--name-only',ids['preserved_installation'],ids['source_commit'],'--','contract','validation/component','docs/decisions','native/crates/uarch-engine/src').decode().splitlines();report['installed_to_A_actual_changed_paths']=changed
+report['F1_F3_F4_unchanged_files']={n:h((r/n).read_bytes()) for n in ['contract/uarch_contract/mapped.py','contract/uarch_contract/mapped_issue.py','validation/component/issue_checks.py','validation/component/observations_v3.py','validation/component/transition_checks_v3.py','validation/component/observations_v2.py']}
+for n in report['F1_F3_F4_unchanged_files']:assert git('show',ids['preserved_installation']+':'+n)==(r/n).read_bytes(),n
+# Actual current runtime/helper additions remain bytes bound at their original absolute origins.
+payloads=[json.loads((e/'source/private-component'/f'prospective-payload-v{i}.json').read_bytes()) for i in (1,2)];p1,p2=payloads
+x1={x['path']:x['byte_hash'] for x in p1['consumers']['external_files']};x2={x['path']:x['byte_hash'] for x in p2['consumers']['external_files']};assert all(x2[n]==v for n,v in x1.items());added={n:v for n,v in x2.items() if n not in x1};assert len(added)==13
+for n,v in added.items():assert 'sha256:'+h((Path('/')/n).read_bytes())==v,n
+report['payload2_added_runtime_bindings']=added;report['payload2_byte_hash']='sha256:'+h((e/'source/private-component/prospective-payload-v2.json').read_bytes())
+# Preserved raw gaps still do not identify complete reads.
+gaps=json.loads((r/'docs/reviews/U4-B-component-runtime-preparation-v1/read-audit-remaining.json').read_bytes());report['raw_trace_gaps']=gaps['raw_gaps']
+for gap in gaps['raw_gaps']:
+ b=Path(gap['path']).read_bytes();assert h(b)==gap['sha256'];assert b.decode().splitlines()[gap['line']-1]==gap['record']
+report['construction_read_complete']=False;report['new_capture']=False;report['authority']=None
+(w/'source-audit.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({k:v for k,v in report.items() if k not in ['raw_trace_gaps','payload2_added_runtime_bindings','old_native_python_unchanged','F1_F3_F4_unchanged_files']},indent=2))

@@ -1,0 +1,315 @@
+{
+  "scope": "original c67d558 available identity only; no authority or post-annotation binary binding",
+  "selection": {
+    "path": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-runtime-preparation-v2/selection.json",
+    "sha256": "27d1626383d84e0d9f4bb88d54bf3e016d2618636acf08aea01386923f3ac313"
+  },
+  "schedule": {
+    "path": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-runtime-preparation-v1/schedule.json",
+    "sha256": "74d31dd9d6c16dffb5e0b886a3e4f778106e3661d80a33a0156079d60560c516"
+  },
+  "schedule_transition": {
+    "path": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-runtime-preparation-v2/schedule-binding.json",
+    "sha256": "569e17001c50175381d22ee278dade0e1bc6a64470d22fdb32b91098b4d7896c"
+  },
+  "A_archive": {
+    "path": "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-A-component-runtime-v1/final-evidence.tar.gz",
+    "sha256": "f3dcce82390c116d762cba22246549540ec4f1b4408f0463252802fd63238def"
+  },
+  "available_original_payload": {
+    "path": "/tmp/u4-b-runtime-final-audit-01/evidence/final/source/private-component/prospective-payload-v2.json",
+    "sha256": "22d3d61111b6728ed8a2afe8facd68e1bec63e50752304b96bf8f44d994710e3"
+  },
+  "negative_inventory": {
+    "archive_member": "final/source/private-component/negative-inventory.json",
+    "sha256": "c6a0ad6cde32cdbc5ff13eb415833583dcea626fd7bc498e16c324b9fd8168a0",
+    "value": {
+      "cases": [
+        {
+          "case_id": "v3:B-native-resource-C04-carrier",
+          "expected_code": "CapacityExceeded",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:bec5c26b3ce5f8ecbafcff7a47acb24cf495575dae5e17e3423db9430bdfca76",
+            "path": "private-component/negative-profiles/v3:B-native-resource-C04-carrier.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:cae6263f0af118615ed0d9403e75197b1c200fa332c65a08720668a547529fc6",
+            "path": "private-component/jobs/v3:B-native-resource-C04-carrier.json"
+          }
+        },
+        {
+          "case_id": "v3:B-native-resource-C06-small",
+          "expected_code": "CapacityExceeded",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:a5ff975db955385331ed232b0a50fe3a783d7d9bb3240043af533a526128c824",
+            "path": "private-component/negative-profiles/v3:B-native-resource-C06-small.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:3ba773e327b89d87c93ed08e9009fb76993a490e6459199ce623cad0ae6cad75",
+            "path": "private-component/jobs/v3:B-native-resource-C06-small.json"
+          }
+        },
+        {
+          "case_id": "v3:B-native-resource-C07-hbm-1",
+          "expected_code": "CapacityExceeded",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:3e94310f9259702a8ea2a65a7ab304deeded01f4a94b4ffd319113e817cb12c8",
+            "path": "private-component/negative-profiles/v3:B-native-resource-C07-hbm-1.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:6fe26b48498c1d27b10b296b4fcf4ffc813786955517a2a5a58689f3b40c996c",
+            "path": "private-component/jobs/v3:B-native-resource-C07-hbm-1.json"
+          }
+        },
+        {
+          "case_id": "v3:B-native-resource-C07-sram-1",
+          "expected_code": "SramCapacityExceeded",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:fbbf189d9ddad9c5dd4967529e6ea96d45d7f51dfa361fbd1482efc02117243b",
+            "path": "private-component/negative-profiles/v3:B-native-resource-C07-sram-1.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:5cbe636dbae84514976b4e20f69db8b72bedbc3dd429caa1855983b82a360a19",
+            "path": "private-component/jobs/v3:B-native-resource-C07-sram-1.json"
+          }
+        },
+        {
+          "case_id": "v3:B2-lifetime-false-writer",
+          "expected_code": "InvalidDependency",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:873fd2d9dd5e4fff49c9bbcc1662d55db50e9cbe635a38d7fadd0a98fac5c369",
+            "path": "private-component/negative-profiles/v3:B2-lifetime-false-writer.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:412556d0d1705c59ad56683f24db878d5b5daa0f47dca26254b41b0bc347a5b0",
+            "path": "private-component/jobs/v3:B2-lifetime-false-writer.json"
+          }
+        },
+        {
+          "case_id": "v3:B2-lifetime-missing-consumer",
+          "expected_code": "InvalidDependency",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:689c579477415b311b8a06ffdbfd09e13c39b6836f5faf023a3247b4339c2acf",
+            "path": "private-component/negative-profiles/v3:B2-lifetime-missing-consumer.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:892606f897d7e88d1867d557e14e79e6bf3b7bd5265c6c35f0af75866fb129ab",
+            "path": "private-component/jobs/v3:B2-lifetime-missing-consumer.json"
+          }
+        },
+        {
+          "case_id": "v3:B2-lifetime-no-order",
+          "expected_code": "LiveBufferAlias",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:c09278e49a54e95ce8098d3fdd1c4ac8d98aea2a61c33529a1f1e2499cd5bbfd",
+            "path": "private-component/negative-profiles/v3:B2-lifetime-no-order.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:71e5dfee8f3f456e0b561b93f688e895c5f82eb398759632232883b01bb6c7c1",
+            "path": "private-component/jobs/v3:B2-lifetime-no-order.json"
+          }
+        },
+        {
+          "case_id": "v3:B2-lifetime-wrong-owner",
+          "expected_code": "InvalidResource",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:599a65fd137d0c7cf3081fa9d9aa4633e8fb4d3af2ea8f612827188241417d31",
+            "path": "private-component/negative-profiles/v3:B2-lifetime-wrong-owner.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:f269e23e4582487942723cf5e353f297e1172a6e38996c64bf35abb4544c487d",
+            "path": "private-component/jobs/v3:B2-lifetime-wrong-owner.json"
+          }
+        },
+        {
+          "case_id": "v3:B2-resource-C04-carrier",
+          "expected_code": "CapacityExceeded",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:3e00e8a94abceef9b6717dd569446f1ccf3c3d5601a9bec2c3b60721abae2b96",
+            "path": "private-component/negative-profiles/v3:B2-resource-C04-carrier.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:b2da6fb79f980924f71ebc4318660112a2d8ba5328fcd200f5436bb9c11bbeee",
+            "path": "private-component/jobs/v3:B2-resource-C04-carrier.json"
+          }
+        },
+        {
+          "case_id": "v3:B2-resource-C06-small",
+          "expected_code": "CapacityExceeded",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:44e4f90412ebe489b9593c5274e432dfd2336166327782b7ce29bb3116104f91",
+            "path": "private-component/negative-profiles/v3:B2-resource-C06-small.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:a9c177104d667bfe037e8eec3f87231433439a4f3d200a5dc366b7a20e409748",
+            "path": "private-component/jobs/v3:B2-resource-C06-small.json"
+          }
+        },
+        {
+          "case_id": "v3:B2-resource-C07-hbm-1",
+          "expected_code": "CapacityExceeded",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:05ad9da45a9682bb19cd1fb9920d0cd03f6ff17833d3905b84a562b74f9a6ada",
+            "path": "private-component/negative-profiles/v3:B2-resource-C07-hbm-1.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:3bb8e45068ef634aef2ef5a97c28facf6f0dbf11416c92fd2e449d350e40f58a",
+            "path": "private-component/jobs/v3:B2-resource-C07-hbm-1.json"
+          }
+        },
+        {
+          "case_id": "v3:B2-resource-C07-sram-1",
+          "expected_code": "SramCapacityExceeded",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:83accb45caf535c1e69205e4c0836c05426cec457d6db6a9a54c861b8511f21f",
+            "path": "private-component/negative-profiles/v3:B2-resource-C07-sram-1.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:082dd944dc794cfbcc65b885823404f6e80b5ca5bcbff4788dce3f45743cfc12",
+            "path": "private-component/jobs/v3:B2-resource-C07-sram-1.json"
+          }
+        },
+        {
+          "case_id": "v3:B3-false-writer-disjoint",
+          "expected_code": "InvalidDependency",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:2a3347c37f91e6d2e5fb4273dddff6f4e51dce65ef218e4d89b93537d5e500e8",
+            "path": "private-component/negative-profiles/v3:B3-false-writer-disjoint.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:607aa66b2c5655b8b66093ffd5c673fbc04ab96955ac212185777e1805fd5804",
+            "path": "private-component/jobs/v3:B3-false-writer-disjoint.json"
+          }
+        },
+        {
+          "case_id": "v3:B3-terminal-partial-A1",
+          "expected_code": "InvalidDependency",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:f066804a905a3c883ed30e8bb0c1773dea4768b7fc10e862ad7ecc64b8348aee",
+            "path": "private-component/negative-profiles/v3:B3-terminal-partial-A1.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:a8563b3898cae5757eca93764a4419941bc35b5173934853f5b8175589271be1",
+            "path": "private-component/jobs/v3:B3-terminal-partial-A1.json"
+          }
+        },
+        {
+          "case_id": "v3:B3-use-before-A3b",
+          "expected_code": "InvalidDependency",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:2b12f5c428562486e227483b3870a60cbb35d5560bd942e1a65e9505a6891be9",
+            "path": "private-component/negative-profiles/v3:B3-use-before-A3b.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:b068affd73c01cbe229906dd638cca7c5e9d5c73e22293397e9683d07c86c259",
+            "path": "private-component/jobs/v3:B3-use-before-A3b.json"
+          }
+        },
+        {
+          "case_id": "v3:B3-use-unordered-A3c",
+          "expected_code": "InvalidDependency",
+          "expected_pointer": null,
+          "layer": "resource-preflight",
+          "profile": {
+            "byte_hash": "sha256:e2f2457de9294694266411b7fb2c78649adf067bc388b98fc64cdfb707b60dab",
+            "path": "private-component/negative-profiles/v3:B3-use-unordered-A3c.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:b35196072af0b49abc138bab49cc9f6d0dcb8ac473813260db5f111ee3fe6dd5",
+            "path": "private-component/jobs/v3:B3-use-unordered-A3c.json"
+          }
+        },
+        {
+          "case_id": "v3:C04-carrier",
+          "expected_code": "TestVariantNotAdmitted",
+          "expected_pointer": null,
+          "layer": "profile",
+          "profile": {
+            "byte_hash": "sha256:4888e72b250890f4b2131f110b2a1f7f034db21a5d46e0d11935caadbb3b88c3",
+            "path": "private-component/negative-profiles/v3:C04-carrier.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:0ec5815a7177763240f5b361deecac33b7c6c0a338090f2a170ae81d874a1596",
+            "path": "private-component/jobs/v3:C04-carrier.json"
+          }
+        },
+        {
+          "case_id": "v3:C06-small",
+          "expected_code": "TestVariantNotAdmitted",
+          "expected_pointer": null,
+          "layer": "profile",
+          "profile": {
+            "byte_hash": "sha256:746ad004faec754f4e9fca86d326f1ac854aa80b1aebd9b6b2cd0347b2b47201",
+            "path": "private-component/negative-profiles/v3:C06-small.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:0b316d6452fbf55dd8b146c39c60d59c1fa0a62ee85ea2d13a278ee210fdb95c",
+            "path": "private-component/jobs/v3:C06-small.json"
+          }
+        },
+        {
+          "case_id": "v3:C07-hbm-1",
+          "expected_code": "TestVariantNotAdmitted",
+          "expected_pointer": null,
+          "layer": "profile",
+          "profile": {
+            "byte_hash": "sha256:29ffa8b92a6dd522506fe0ed9768d2cc27db230a675639999ea467d59d265813",
+            "path": "private-component/negative-profiles/v3:C07-hbm-1.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:824486dcc5494ec1808fbeaf2def3d12b673f09fc638ceea673434a5ad6c49f7",
+            "path": "private-component/jobs/v3:C07-hbm-1.json"
+          }
+        },
+        {
+          "case_id": "v3:C07-sram-1",
+          "expected_code": "TestVariantNotAdmitted",
+          "expected_pointer": null,
+          "layer": "profile",
+          "profile": {
+            "byte_hash": "sha256:52dd5f3e50aa6d46e9b9d380e78e9e2d3cb1549814b7b4db1bad79b5b6e6c0bb",
+            "path": "private-component/negative-profiles/v3:C07-sram-1.json"
+          },
+          "raw": {
+            "byte_hash": "sha256:791bb4f916207d79498a417626d57720b557b3dd04024f17e05b6e78a72574fe",
+            "path": "private-component/jobs/v3:C07-sram-1.json"
+          }
+        }
+      ],
+      "format": "uarch-component-negative-inventory/1"
+    }
+  },
+  "new_annotation_build_payload": null,
+  "public_authority_adapter": null,
+  "authority": null
+}
