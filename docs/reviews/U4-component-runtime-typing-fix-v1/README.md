@@ -18,8 +18,9 @@ A/B should use this published source correction instead of applying A's duplicat
 `B-consumer-types.patch`. The final build/runtime package must explicitly incorporate
 this transition. Existing payloads, build identities, binaries and evidence keep their
 original identities; this is not a claim that they already bind the corrected source.
-No builder pin, authority or deployment has been changed. A's unpublished final handoff
-and evidence archive are not part of this publication.
+No builder pin, authority or deployment has been changed. During integration, A's final
+handoff `8356856` appeared on the actual remote and was merged normally. Its existing
+evidence archive is unchanged; this fix adds no new native evidence.
 
 ## Additional CI failure and unapplied correction
 
