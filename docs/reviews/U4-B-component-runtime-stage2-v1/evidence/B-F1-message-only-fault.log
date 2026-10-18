@@ -1,0 +1,19 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 43, "sample": {"uarch_contract.mapped": "/tmp/u4-b-runtime-stage2-01/source/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-b-runtime-stage2-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_____ test_exact_refusal_rejects_borrowed_pre_and_post_dispatch_envelopes ______
+
+    def test_exact_refusal_rejects_borrowed_pre_and_post_dispatch_envelopes():
+        expected = dict(
+            code="InvalidDependency", message="accumulator use before production", pointer=None
+        )
+        exact_refusal(canonical_json(expected).encode(), expected)
+>       with pytest.raises(ValueError, match="intended refusal"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+validation/component/test_runtime_campaign.py:161: Failed
+=========================== short test summary info ============================
+FAILED validation/component/test_runtime_campaign.py::test_exact_refusal_rejects_borrowed_pre_and_post_dispatch_envelopes
+1 failed in 0.33s

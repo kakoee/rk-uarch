@@ -14,6 +14,7 @@ from uarch_contract.mapped import MappedEngineJob, validate_result
 
 from validation.component.checks import need
 from validation.component.observations_v3 import check_v3
+from validation.component.runtime_literals import check_extended_literals
 
 CHECKER = "validation.component.observations_v3:check_v3"
 
@@ -30,7 +31,11 @@ def verify_sources(source: Path, pins: dict[str, str]) -> None:
     }
     required.update(
         str(p.relative_to(source))
-        for folder in ("contract/uarch_contract", "validation/component")
+        for folder in (
+            "contract/uarch_contract",
+            "validation/component",
+            "src/rkuarch/engines/native",
+        )
         for p in (source / folder).glob("*.py")
         if not p.name.startswith("test_")
     )
@@ -45,6 +50,7 @@ def verify_sources(source: Path, pins: dict[str, str]) -> None:
 
 
 def assert_literals(job: dict[str, Any], result: dict[str, Any], expected: dict[str, Any]) -> None:
+    check_extended_literals(job, result, expected)
     need(expected["outcome"] == "success", "expected refusal cannot consume success")
     obs = result["observations"]
     dma = sorted(obs["dma"]["records"], key=lambda r: r["request_id"])
@@ -78,11 +84,12 @@ def assert_literals(job: dict[str, Any], result: dict[str, Any], expected: dict[
         for field in fields:
             if field in expected:
                 need(result[section][field] == expected[field], "literal " + field)
-    if expected.get("hbm_payload_bytes") == 0:
+    if "hbm_payload_bytes" in expected:
         need(
-            result["traffic_counts"]["read_payload_bytes"] == 0
-            and result["traffic_counts"]["write_payload_bytes"] == 0,
-            "resident HBM",
+            result["traffic_counts"]["read_payload_bytes"]
+            + result["traffic_counts"]["write_payload_bytes"]
+            == expected["hbm_payload_bytes"],
+            "literal HBM payload",
         )
     if "useful_floor_ps" in expected:
         need(result["duration_ps"] >= expected["useful_floor_ps"], "component floor")
@@ -229,10 +236,20 @@ def consume_case(
     expected: dict[str, Any],
     input_sha256: str,
     raw_input: bytes,
+    admitted: dict[str, Any] | None = None,
 ) -> None:
     # Caller must supply a separately frozen input binding; a caller hash is not authority.
     import json
 
+    need(admitted is not None, "separately frozen admitted inventory required")
+    assert admitted is not None
+    need(
+        admitted["case_id"] == row["case_id"]
+        and admitted["raw_input_sha256"] == input_sha256
+        and admitted["job_hash"] == job["job_hash"]
+        and admitted["engine"] == job["engine"],
+        "separately frozen admitted input/engine",
+    )
     model = job["engine"]["model"]
     need(
         (model["name"], model["version"], result["observations"]["format"], checker_id)

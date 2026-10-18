@@ -1,0 +1,121 @@
+[
+  {
+    "finding": "B-F1-exact-envelope",
+    "path": "validation/component/runtime_evidence.py",
+    "pre_sha256": "0b232d3c2ed18d0924906c98a78c67cb9ade34d5405d9a147d36a230fbfc5c9a",
+    "fault_sha256": "5cb722ad1f4b2ec6ed7bea086a6b35dc7828e9943b12ea0fc649b6040389ba6c",
+    "restored_sha256": "0b232d3c2ed18d0924906c98a78c67cb9ade34d5405d9a147d36a230fbfc5c9a",
+    "control_exit": 0,
+    "fault_exit": 1,
+    "restored_exit": 0,
+    "test": "test_runtime_campaign.py::test_exact_refusal_rejects_borrowed_pre_and_post_dispatch_envelopes",
+    "reused_completed_controls": true,
+    "logs": [
+      "B-F1-exact-envelope-control.log",
+      "B-F1-exact-envelope-fault.log",
+      "B-F1-exact-envelope-restored.log"
+    ]
+  },
+  {
+    "finding": "B-F3-matrix-order",
+    "path": "validation/component/matrix_order.py",
+    "pre_sha256": "8aa398157d38c37b7f063f2f84118382a29c628f4e4dde0bb3f967e1ded50154",
+    "fault_sha256": "5f42b4455e46fdb7cd2822cc691a56a23873d7c7fe52f3aa0f100b134daccdb4",
+    "restored_sha256": "8aa398157d38c37b7f063f2f84118382a29c628f4e4dde0bb3f967e1ded50154",
+    "control_exit": 0,
+    "fault_exit": 1,
+    "restored_exit": 0,
+    "test": "test_matrix_order.py::test_matrix_equal_ready_tie_and_wrong_order",
+    "reused_completed_controls": true,
+    "logs": [
+      "B-F3-matrix-order-control.log",
+      "B-F3-matrix-order-fault.log",
+      "B-F3-matrix-order-restored.log"
+    ]
+  },
+  {
+    "finding": "B-F9-closed-literals",
+    "path": "validation/component/runtime_checks.py",
+    "pre_sha256": "15de196868922b14c546fabe6bf6c431349a43441e7357f8475a5899b01a1590",
+    "fault_sha256": "749048337c77c4ceea4dab77ec62b4269610df1ee8be2586cd45c96860c4d799",
+    "restored_sha256": "15de196868922b14c546fabe6bf6c431349a43441e7357f8475a5899b01a1590",
+    "control_exit": 0,
+    "fault_exit": 1,
+    "restored_exit": 0,
+    "test": "test_runtime_checks.py::test_unknown_literal_is_not_silently_ignored",
+    "reused_completed_controls": true,
+    "logs": [
+      "B-F9-closed-literals-control.log",
+      "B-F9-closed-literals-fault.log",
+      "B-F9-closed-literals-restored.log"
+    ]
+  },
+  {
+    "finding": "B-F4-byte-consumption",
+    "path": "validation/component/runtime_campaign.py",
+    "pre_sha256": "71d48bd2fab86bdb18b3c2b085c81af1b6ae71fb60d5afd29d406f7a9e2c4032",
+    "fault_sha256": "0ac4b4abb00240059caa207b2040c911fdf8696df183a3073818fec959a68624",
+    "restored_sha256": "71d48bd2fab86bdb18b3c2b085c81af1b6ae71fb60d5afd29d406f7a9e2c4032",
+    "control_exit": 0,
+    "fault_exit": 1,
+    "restored_exit": 0,
+    "test": "test_runtime_campaign.py::test_negative_campaign_requires_intended_guard_and_bound_zero_entry[wrong-guard-intended refusal]",
+    "distinction": "behavioral acceptance/evidence retention",
+    "logs": [
+      "B-F4-byte-consumption-control.log",
+      "B-F4-byte-consumption-fault.log",
+      "B-F4-byte-consumption-restored.log"
+    ]
+  },
+  {
+    "finding": "B-F6-durable-replay",
+    "path": "validation/component/runtime_campaign.py",
+    "pre_sha256": "71d48bd2fab86bdb18b3c2b085c81af1b6ae71fb60d5afd29d406f7a9e2c4032",
+    "fault_sha256": "82990a525632eb9a28270b5a7591f20032a21442ea59ea06320002d70e5286e0",
+    "restored_sha256": "71d48bd2fab86bdb18b3c2b085c81af1b6ae71fb60d5afd29d406f7a9e2c4032",
+    "control_exit": 0,
+    "fault_exit": 1,
+    "restored_exit": 0,
+    "test": "test_runtime_campaign.py::test_campaign_rejects_and_preserves_failed_group[missing-receipt-FileNotFoundError]",
+    "distinction": "behavioral acceptance/evidence retention",
+    "logs": [
+      "B-F6-durable-replay-control.log",
+      "B-F6-durable-replay-fault.log",
+      "B-F6-durable-replay-restored.log"
+    ]
+  },
+  {
+    "finding": "B-F7-inventory-binding",
+    "path": "validation/component/runtime_checks.py",
+    "pre_sha256": "15de196868922b14c546fabe6bf6c431349a43441e7357f8475a5899b01a1590",
+    "fault_sha256": "bd6f9ea6d6dba95be470edc5e3426d9f9859cfaf66fcbe57dcd02c3f8433352a",
+    "restored_sha256": "15de196868922b14c546fabe6bf6c431349a43441e7357f8475a5899b01a1590",
+    "control_exit": 0,
+    "fault_exit": 1,
+    "restored_exit": 0,
+    "test": "test_runtime_checks.py::test_separately_frozen_input_refuses_consistent_foreign_pair",
+    "distinction": "identity binding",
+    "logs": [
+      "B-F7-inventory-binding-control.log",
+      "B-F7-inventory-binding-fault.log",
+      "B-F7-inventory-binding-restored.log"
+    ]
+  },
+  {
+    "finding": "B-F5-retain-before-validate",
+    "path": "validation/component/runtime_campaign.py",
+    "pre_sha256": "71d48bd2fab86bdb18b3c2b085c81af1b6ae71fb60d5afd29d406f7a9e2c4032",
+    "fault_sha256": "b5adf12868357ffcb0133a241402aa1d796b0c4a1e0751484fb5efa860fb7463",
+    "restored_sha256": "71d48bd2fab86bdb18b3c2b085c81af1b6ae71fb60d5afd29d406f7a9e2c4032",
+    "control_exit": 0,
+    "fault_exit": 1,
+    "restored_exit": 0,
+    "test": "test_runtime_campaign.py::test_campaign_rejects_and_preserves_failed_group[unparseable-JSONDecodeError]",
+    "distinction": "behavioral acceptance/evidence retention",
+    "logs": [
+      "B-F5-retain-before-validate-control.log",
+      "B-F5-retain-before-validate-fault.log",
+      "B-F5-retain-before-validate-restored.log"
+    ]
+  }
+]

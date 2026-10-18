@@ -1,0 +1,66 @@
+{
+  "additional_faults": "evidence/additional-fault-restoration.json",
+  "executed": [
+    {
+      "command": "pytest -q validation/component/test_runtime_checks.py validation/component/test_runtime_campaign.py validation/component/test_matrix_order.py",
+      "evidence": "evidence/final-affected-tests.log",
+      "passed": 31
+    },
+    {
+      "command": "pytest -q validation/component/test_runtime_checks.py",
+      "evidence": "evidence/final-consumer-transition.log",
+      "overlap_with_previous": 13,
+      "passed": 14,
+      "reason": "Added explicit fail-closed legacy caller transition"
+    },
+    {
+      "command": "saved_checks.py /tmp/u4-b-runtime-stage2-01",
+      "evidence": "evidence/final-saved-checks.log",
+      "matrix_structural_accepted_checker_refused": 2,
+      "positive_saved_results": 9
+    },
+    {
+      "command": "mypy five owned runtime modules",
+      "evidence": "evidence/final-typing.log",
+      "result": "pass"
+    },
+    {
+      "command": "ruff check nine owned source/test files and five probes",
+      "evidence": "evidence/final-lint.log",
+      "result": "pass"
+    },
+    {
+      "command": "pytest three affected retention/replay controls",
+      "evidence": "evidence/final-retention-transition.log",
+      "overlap_with_previous": 2,
+      "passed": 3,
+      "reason": "Keep slot/blob receipt before malformed metadata can fail"
+    },
+    {
+      "classification": "identity, not behavioral checker kill",
+      "command": "consumer_identity.py final-private-source B-package",
+      "evidence": "evidence/actual-stale-pair.log",
+      "result": "actual inherited c67 pair refused; inventory guard disconnected admits pair; restored refusal"
+    }
+  ],
+  "fault_scope": "Private single-guard removals; exact file restoration. Earlier fault receipts retain original source identities; later non-guard changes are attributed in README.",
+  "faults": "evidence/fault-restoration.json",
+  "final_joins_pending": [
+    "A frozen admitted input in pure/prepared consumer",
+    "A real adapter witness/replay/cleanup",
+    "A startup/selector changes",
+    "D3 exact refusal proposal",
+    "coherent source/build/payload bindings",
+    "activation environment and construction capture"
+  ],
+  "format": "component-B-stage2-checks/1",
+  "inherited_native": "See saved-inputs and negative-expectations; none relabelled as B execution",
+  "python": "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+  "read_audit_complete": false,
+  "runner": {
+    "path": "/tmp/u4-b-runtime-review-01/probes/runner.py",
+    "sha256": "28bffd70792897c14ad19bee0b5015b17b7979f4207c2cc6227e4167920b4813"
+  },
+  "scope": "author/private correction; no native build/run or authority",
+  "unique_affected_tests": 33
+}

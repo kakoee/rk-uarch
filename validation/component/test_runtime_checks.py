@@ -43,7 +43,11 @@ def inputs(profile2=True):
     )
     pins = {
         str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-        for folder in ("contract/uarch_contract", "validation/component")
+        for folder in (
+            "contract/uarch_contract",
+            "validation/component",
+            "src/rkuarch/engines/native",
+        )
         for p in (ROOT / folder).glob("*.py")
         if not p.name.startswith("test_")
     }
@@ -61,6 +65,12 @@ def inputs(profile2=True):
             expected=expected,
             input_sha256=hashlib.sha256(raw).hexdigest(),
             raw_input=raw,
+            admitted=dict(
+                case_id=row["case_id"],
+                raw_input_sha256=hashlib.sha256(raw).hexdigest(),
+                job_hash=job["job_hash"],
+                engine=deepcopy(job["engine"]),
+            ),
         ),
     )
 
@@ -124,4 +134,37 @@ def test_literal_expectation_is_not_retuned_by_result():
 def test_profile1_cannot_silently_enter_prospective_profile2_route():
     job, result, row, kwargs = inputs(profile2=False)
     with pytest.raises(CheckFailure, match="prospective profile/2 required"):
+        consume_case(job, result, row, **kwargs)
+
+
+@pytest.mark.parametrize("attack", ["stale-engine-pair", "caller-rehash"])
+def test_separately_frozen_input_refuses_consistent_foreign_pair(attack):
+    job, result, row, kwargs = inputs()
+    if attack == "stale-engine-pair":
+        job["engine"]["implementation_hash"] = "sha256:" + "1" * 64
+        result["engine"] = deepcopy(job["engine"])
+    else:
+        pass  # Foreign exact input bytes with the same parsed carrier.
+    job["job_hash"] = content_hash(job, exclude=("job_hash",))
+    result["job_hash"] = job["job_hash"]
+    result["result_hash"] = content_hash(result, exclude=("result_hash",))
+    kwargs["raw_input"] = canonical_json(job).encode()
+    if attack == "caller-rehash":
+        kwargs["raw_input"] += b" "
+    kwargs["input_sha256"] = hashlib.sha256(kwargs["raw_input"]).hexdigest()
+    with pytest.raises(CheckFailure, match="separately frozen admitted"):
+        consume_case(job, result, row, **kwargs)
+
+
+def test_unknown_literal_is_not_silently_ignored():
+    job, result, row, kwargs = inputs()
+    row["expected"]["duration_sp"] = 1
+    with pytest.raises(CheckFailure, match="unknown expectation keys"):
+        consume_case(job, result, row, **kwargs)
+
+
+def test_unjoined_legacy_caller_fails_closed_without_inventory():
+    job, result, row, kwargs = inputs()
+    kwargs.pop("admitted")
+    with pytest.raises(CheckFailure, match="admitted inventory required"):
         consume_case(job, result, row, **kwargs)

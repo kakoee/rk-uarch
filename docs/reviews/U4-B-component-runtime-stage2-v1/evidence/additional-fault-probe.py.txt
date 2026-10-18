@@ -1,0 +1,18 @@
+import hashlib,json,subprocess
+from pathlib import Path
+root=Path('/tmp/u4-b-runtime-stage2-01/source');out=root.parent
+runner=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python','-I','/tmp/u4-b-runtime-review-01/probes/runner.py',str(root)]
+checks=[('B-F1-message-only','validation/component/runtime_evidence.py','    need(value == expected, "exact intended refusal envelope")','    need(value["code"] == expected["code"] and value["pointer"] == expected["pointer"], "exact intended refusal envelope")', ['pytest','-q','validation/component/test_runtime_campaign.py::test_exact_refusal_rejects_borrowed_pre_and_post_dispatch_envelopes']),
+('B-F9-capacity-premise','validation/component/runtime_literals.py','need(capacity == expected["capacity_bytes"], "input literal capacity_bytes")','need(True, "input literal capacity_bytes")',['script','/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-component-runtime-stage2-v1/probes/saved_checks.py',str(out)])]
+records=[]
+for label,name,old,new,args in checks:
+ p=root/name;raw=p.read_bytes();assert raw.decode().count(old)==1
+ def run(phase):
+  r=subprocess.run(runner+args,capture_output=True);(out/(label+'-'+phase+'.log')).write_bytes(r.stdout+r.stderr);return r.returncode
+ assert run('control')==0
+ try:
+  p.write_text(raw.decode().replace(old,new));bad=hashlib.sha256(p.read_bytes()).hexdigest();assert run('fault')!=0
+ finally:p.write_bytes(raw)
+ assert run('restored')==0 and p.read_bytes()==raw
+ records.append(dict(finding=label,path=name,pre_sha256=hashlib.sha256(raw).hexdigest(),fault_sha256=bad,restored_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),control_exit=0,fault_exit=1,restored_exit=0,command=args))
+(out/'additional-fault-restoration.json').write_text(json.dumps(records,indent=2)+'\n')

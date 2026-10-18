@@ -1,0 +1,85 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 43, "sample": {"uarch_contract.mapped": "/tmp/u4-b-runtime-stage2-01/source/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-b-runtime-stage2-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_ test_campaign_rejects_and_preserves_failed_group[unparseable-JSONDecodeError] _
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-596/test_campaign_rejects_and_pres0')
+attack = 'unparseable', reason = 'JSONDecodeError'
+
+    @pytest.mark.parametrize(
+        "attack,reason",
+        [
+            ("unparseable", "JSONDecodeError"),
+            ("fake-witness", "saved witness"),
+            ("call-failure", "transport failed"),
+            ("missing-receipt", "FileNotFoundError"),
+            ("corrupt-saved", "blob collision"),
+            ("group-drift", "fresh process identity"),
+        ],
+    )
+    def test_campaign_rejects_and_preserves_failed_group(tmp_path, attack, reason):
+        a = Synthetic(tmp_path, attack)
+        with pytest.raises(ValueError, match=reason):
+            run(a)
+        report = json.loads((a.output / "incomplete.json").read_bytes())
+        assert not report["complete"] and report["incomplete_groups"]
+        assert not (a.output / "complete.json").exists()
+        if attack == "unparseable":
+>           attempt = json.loads((a.output / "attempts/00003.json").read_bytes())
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+validation/component/test_runtime_campaign.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-jjaff/pytest-596/test_campaign_rejects_and_pres0/run/attempts/00003.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-jjaff/pytest-596/test_campaign_rejects_and_pres0/run/attempts/00003.json'
+
+/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+----------------------------- Captured stderr call -----------------------------
+Process ForkProcess-1:
+Traceback (most recent call last):
+  File "/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/tmp/u4-b-runtime-stage2-01/source/docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py", line 151, in _worker
+    result = function(task)
+             ^^^^^^^^^^^^^^
+  File "/tmp/u4-b-runtime-stage2-01/source/validation/component/runtime_campaign.py", line 211, in group
+    outcome = consume_attempt(raw, rows[case], slot, acceptance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/u4-b-runtime-stage2-01/source/validation/component/runtime_evidence.py", line 69, in consume_attempt
+    job, result = json.loads(raw["raw_input"]), parse(semantic)
+                                                ^^^^^^^^^^^^^^^
+  File "/tmp/u4-b-runtime-stage2-01/source/validation/component/runtime_evidence.py", line 24, in parse
+    value = json.loads(raw)
+            ^^^^^^^^^^^^^^^
+  File "/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jjaff/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+=========================== short test summary info ============================
+FAILED validation/component/test_runtime_campaign.py::test_campaign_rejects_and_preserves_failed_group[unparseable-JSONDecodeError]
+1 failed in 1.60s
