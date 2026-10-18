@@ -1,0 +1,51 @@
+[
+  {
+    "name": "source-audit",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-f2f3-review-01/probes/runner.py",
+      "/tmp/u4-b-f2f3-final-source-01/full",
+      "script",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-F2-F3-final-v1/audit_source.py",
+      "/tmp/u4-b-f2f3-final-source-01/full",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-F2-F3-final-v1/source-audit.json"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "6aa2b049d1f6ded42cbad7cdf202ba482afb20aa4d50e0aede2fdb014c2e25a5",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "consumers",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-f2f3-review-01/probes/runner.py",
+      "/tmp/u4-b-f2f3-final-source-01/full",
+      "script",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-F2-F3-final-v1/check_join.py",
+      "/tmp/u4-b-f2f3-final-source-01/full",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-b/docs/reviews/U4-B-issue-edge-F2-F3-final-v1/consumer-checks.json"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "b57978fba5a6b7933dcf223df7d64ead695b8044328f1992541570d3c5742b54",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "regression",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-f2f3-review-01/probes/runner.py",
+      "/tmp/u4-b-f2f3-final-source-01/full",
+      "pytest",
+      "-q",
+      "contract/tests/mapped/test_component_capacity_integration_v3.py"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "2e83a95d4dfb4d5b584434869e1ec04595db6652995fa751121acf6ff45bbecc",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]
