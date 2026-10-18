@@ -1,0 +1,40 @@
+from pathlib import Path
+import json,hashlib,re,shutil
+w=Path('/tmp/u4-a-f23-4xtk0r5m');r=w/'source';repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');p=repo/'docs/reviews/U4-A-issue-edge-F2-F3-v1';(p/'evidence').mkdir(exist_ok=True)
+shutil.copyfile(r/'contract/tests/mapped/test_component_capacity_integration_v3.py',w/'test-first-written.py.txt')
+f=r/'docs/decisions/U0011-the-native-engine-core.md';s=f.read_text();start=s.index('Approval U4-issue-edge-credit-causes-a1-v1 is correction-direction/private-work approval,');end=s.index('Component model',start) if 'Component model' in s[start:] else -1
+print(s[start:])
+old=s[start:s.index('Prospective first use must bind',start)] if 'Prospective first use must bind' in s[start:] else ''
+end=s.index('A future first-use record MUST bind',start)
+new='''Approval U4-issue-edge-credit-causes-a1-v1 and renewed approval
+U4-issue-edge-F2-scope-reconfirmation-v1 authorize correction direction/private proposal
+work only, not installation or public execution authority. The renewed approval widens
+only F2; the accepted a1 /3 law and F4 consumer-binding behavior are unchanged.
+
+Native component model1 / observations2 first use is BLOCKED for same-engine,
+same-instant acquired-credit releases regardless of read/write direction, including
+write/write. The established affected subclass has a strictly waiting request reserved
+or issued between releases observed at that timestamp. Unclassified same-engine,
+same-instant acquired-release cases are blocked regardless of direction; write/read
+labels alone never establish safety. This proposal explicitly takes the broader
+conservative policy of blocking the entire same-engine/same-instant acquired-release
+class. It admits no classified-safe exception. Any future prospective exception must
+prove its classification from actual release and reservation/issue order, receive
+separate resolution and approval, and carry exact reviewed prospective selection and
+consumer bindings; direction alone is not such proof. /3 is unaffected.
+
+cc0-v1 and ww0-v1 are preserved, hash-bound reproducers of the unresolved /2 discrepancy;
+cc-v1 additionally retains its known issue-gap limitation. The restriction is neither
+a /2 repair nor a waiver. Its exit requires a separate exact reviewed resolution of the
+law/implementation/consumer discrepancy, discriminating regressions, renewed approval
+and explicit prospective first-use selection/authority. Historical /2 source, checker,
+carrier bytes, the historical106-case selection, receipts and verdict scopes remain
+unchanged. Reconstructed reviewer fixtures are labelled as reconstructions, not new
+native executions or runtime authority.
+
+'''
+s=s[:start]+new+s[end:];f.write_text(s);assert f.read_bytes()[:48294]==(repo/'docs/decisions/U0011-the-native-engine-core.md').read_bytes()[:48294]
+raw=f.read_bytes();h=lambda b:hashlib.sha256(b).hexdigest();f=r/'validation/component/installation_identity.py';s=f.read_text();s=re.sub(r'ISSUE_ADR_SHA = "[a-f0-9]+"','ISSUE_ADR_SHA = "'+h(raw)+'"',s);s=re.sub(r'ISSUE_APPENDIX_SHA = "[a-f0-9]+"','ISSUE_APPENDIX_SHA = "'+h(raw[48294:])+'"',s);s=re.sub(r'ISSUE_ADR_BYTES = \d+','ISSUE_ADR_BYTES = '+str(len(raw)),s)
+add=['contract/tests/mapped/test_component_capacity_integration_v3.py','contract/tests/mapped/fixtures/issue_capacity/sr2-v3-job.json','contract/tests/mapped/fixtures/issue_capacity/sr2-v3-result.json'];s=s.replace('ISSUE_ADDITIONS = {','ISSUE_ADDITIONS = {\n'+''.join('    "'+x+'",\n' for x in add));f.write_text(s)
+record=dict(format='prospective-component-F2-F3-first-use-requirements/1',authority=None,approval='U4-issue-edge-F2-scope-reconfirmation-v1',prior_a1='U4-issue-edge-credit-causes-a1-v1 unchanged',F2=dict(status='BLOCKED; no /2 repair or waiver',affected_class='same-engine, same-instant /2 acquired releases regardless of direction, including write/write',established_subclass='strictly waiting request reserved/issued between releases observed at that timestamp',unclassified='blocked regardless of read/write direction',conservative_policy='block entire same-engine/same-instant acquired-release class; no classified-safe exception admitted here',future_safe_classification='must prove actual release and reservation/issue ordering, never infer from direction; requires separate exact reviewed resolution and approval before any prospective exception',exit_condition=['separate exact reviewed /2 law/implementation/consumer discrepancy resolution','discriminating regressions on preserved reproducers','renewed approval and exact prospective selection/consumer/authority bindings'],reproducers=[dict(name='cc0-v1',raw_job_sha256='722d0ffb51df53d362ac765c1b7846ed68dd2f3c00d9894db7429cad69d1e253',provenance='inherited published Stage2 input and preserved Stage3 receipt'),dict(name='ww0-v1',raw_job_sha256='effb5beb75f13e9de13e31666fc810d60f3edbb1e83dd27071d3ce9c1364dd76',provenance='exact Stage3 make_inputs3.py reconstruction, matches preserved receipt; no new native execution')],historical_mutation=False,v3_affected=False),F4=dict(status='prior reviewer accepted; route behavior unchanged',record='docs/reviews/U4-B-issue-edge-stage2-v1/first-use-requirements.json',recipe='docs/reviews/U4-B-issue-edge-stage2-v1/first_use.py',consumer_pins='prospective refreshed closure; source-pin refresh is not fresh F1/F4 behavioral evidence'),B_final_join='pending exact revised record and review',remaining=['same reviewer focused F2/F3 recheck','separate protected installation','genuine L1 and unchanged U0024/read-audit limitations','separate public component placement/HostRecord/profile/selector/campaign authority; no K2 reuse'])
+(p/'prospective-first-use.json').write_text(json.dumps(record,indent=2)+'\n')

@@ -1,0 +1,14 @@
+import json,hashlib,sys
+from pathlib import Path
+from copy import deepcopy
+from uarch_contract.hashing import canonical_json,content_hash
+from uarch_contract.mapped import MappedEngineJob,validate_result
+from validation.component.observations_v3 import check_v3
+root,out=map(Path,sys.argv[1:]);d=root/'contract/tests/mapped/fixtures/issue_capacity';j=json.loads((d/'sr2-v3-job.json').read_bytes());r=json.loads((d/'sr2-v3-result.json').read_bytes());bad=deepcopy(r);early,late=[o for o in bad['observations']['reservation_opportunities']['records'] if o['t_ps']==86000];assert (early['event_cursor'],late['event_cursor'])==(52,54);early['granted_request_ids'],late['granted_request_ids']=['r02.00'],[];bad['result_hash']=content_hash(bad,exclude=('result_hash',));raw=canonical_json(bad).encode();assert hashlib.sha256(raw).hexdigest()=='4917188c882737737192445e32265786eb39bd71c9e937cda782ab415e46936e';(out.parent/'A1b.json').write_bytes(raw);expected=json.loads((root/'docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_bytes())['observation_contract'];rows=[]
+for name,result in [('valid-sr2-v3',r),('A1b',bad)]:
+ row={'case':name}
+ for label,fn in [('structural',lambda:validate_result(result,MappedEngineJob.model_validate(j))),('independent',lambda:check_v3(j,result,expected))]:
+  try:fn();row[label]='pass'
+  except Exception as e:row[label]=type(e).__name__+': '+str(e)
+ rows.append(row)
+out.write_text(json.dumps(rows,indent=2)+'\n');print(json.dumps(rows,indent=2))

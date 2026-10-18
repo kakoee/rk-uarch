@@ -1,0 +1,12 @@
+from pathlib import Path
+import hashlib,json,tarfile,subprocess,io,tempfile
+repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');approval=repo/'docs/reviews/U4-issue-edge-F2-F3-approved-v1';h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();a=json.loads((approval/'acceptance.json').read_bytes());assert h(approval/'review-evidence.tar.gz')==a['review_archive_sha256'];work=Path(tempfile.mkdtemp(prefix='u4-a-f23-'));review=work/'review';review.mkdir()
+with tarfile.open(approval/'review-evidence.tar.gz') as t:t.extractall(review,filter='data')
+files=json.loads((approval/'review-files.json').read_bytes())
+for f in files:assert h(review/f['path'])==f['sha256'] and (review/f['path']).stat().st_size==f['bytes']
+pkg=repo/'docs/reviews/U4-A-issue-edge-stage2-v1';assert h(pkg/'manifest.json')=='6d163e1a85cec9ed55f959dc7f13250ea9a6d09e1b25539f69e797bb8ba334f2';m=json.loads((pkg/'manifest.json').read_bytes());source=work/'source';source.mkdir()
+with tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive',m['base_commit']],cwd=repo))) as t:t.extractall(source,filter='data')
+for patch in m['patches']:
+ assert h(pkg/patch['path'])==patch['sha256'];subprocess.run(['git','apply','--check',str(pkg/patch['path'])],cwd=source,check=True);subprocess.run(['git','apply',str(pkg/patch['path'])],cwd=source,check=True)
+for row in m['files']:assert h(source/row['path'])==row['postimage_sha256']
+ids={k:subprocess.check_output(['git','rev-parse',k],cwd=repo,text=True).strip() for k in ['f7eda28','ff0bf58','e7a1b60','67f36db','5069b62']};r=dict(work=str(work),review=str(review),source=str(source),resolved_commits=ids,archive_sha256=h(approval/'review-evidence.tar.gz'),review_files_verified=len(files),manifest_sha256=h(pkg/'manifest.json'),postimages_verified=len(m['files']),raw_scratch_outputs='not supplied; not accessed',original_reviewer_files='untouched');(work/'prepare.json').write_text(json.dumps(r,indent=2)+'\n');Path('/tmp/u4-a-f23-location').write_text(str(work));print(json.dumps(r,indent=2))

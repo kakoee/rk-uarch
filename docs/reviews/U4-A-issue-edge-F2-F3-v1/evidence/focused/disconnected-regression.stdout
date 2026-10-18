@@ -1,0 +1,40 @@
+.F                                                                       [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 24, "sample": {"uarch_contract.mapped": "/tmp/u4-a-f23-4xtk0r5m/source/contract/uarch_contract/mapped.py", "uarch_contract.mapped_issue": "/tmp/u4-a-f23-4xtk0r5m/source/contract/uarch_contract/mapped_issue.py"}}
+
+=================================== FAILURES ===================================
+_______ test_validate_result_refuses_dependency_tight_pre_release_grant ________
+
+    def test_validate_result_refuses_dependency_tight_pre_release_grant():
+        job, result = pair()
+        validate_result(result, job)
+        forged = deepcopy(result)
+        obs = forged["observations"]
+        request = next(r for r in obs["dma"]["records"] if r["request_id"] == "r02.00")
+        task = next(r for r in obs["jobs"]["records"] if r["job_id"] == "r02")
+        assert task["ready_ps"] == request["reservation_ps"] == request["issue_ps"] == 86000
+        first = next(
+            a
+            for a in obs["activities"]["records"]
+            if a["request_id"] == "r02.00" and a["subphase"] == "dma_issue" and a["kind"] == "alignment"
+        )
+        assert first["predecessors"] == [{"activity_id": "activity-00000024", "relation": "dependency"}]
+        early, late = [o for o in obs["reservation_opportunities"]["records"] if o["t_ps"] == 86000]
+        assert (early["event_cursor"], late["event_cursor"]) == (52, 54)
+        assert early["granted_request_ids"] == []
+        assert late["granted_request_ids"] == ["r02.00"]
+        terminal = next(
+            a
+            for a in obs["activities"]["records"]
+            if a["request_id"] == "r00.00" and a["subphase"] == "ack" and a["kind"] == "service"
+        )
+        assert terminal["end_ps"] == 86000 and terminal["completion_ordinal"] == 53
+        early["granted_request_ids"], late["granted_request_ids"] = ["r02.00"], []
+        forged["result_hash"] = content_hash(forged, exclude=("result_hash",))
+>       with pytest.raises(ValueError, match="IncompleteObservations: reservation cursor capacity"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+contract/tests/mapped/test_component_capacity_integration_v3.py:51: Failed
+=========================== short test summary info ============================
+FAILED contract/tests/mapped/test_component_capacity_integration_v3.py::test_validate_result_refuses_dependency_tight_pre_release_grant
+1 failed, 1 passed in 0.37s

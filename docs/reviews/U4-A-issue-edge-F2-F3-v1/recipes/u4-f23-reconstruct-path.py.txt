@@ -1,0 +1,13 @@
+"""Synthetic fixture reconstruction only: join existing activity records; no engine run."""
+import json,hashlib
+from pathlib import Path
+from uarch_contract.hashing import canonical_json,content_hash
+w=Path('/tmp/u4-a-f23-4xtk0r5m');p=w/'source/contract/tests/mapped/fixtures/issue_capacity/sr2-v3-result.json';r=json.loads(p.read_bytes());acts={a['activity_id']:a for a in r['observations']['activities']['records']};tie=lambda a:(a['owner_id'],a['job_id'],a['request_id'] or '',a['subphase'],a['activity_id']);a=min((a for a in acts.values() if a['end_ps']==r['duration_ps']),key=tie);chain=[]
+while True:
+ if a['end_ps']>a['start_ps']:chain.append(dict(activity_id=a['activity_id'],category=a['category'],cause_job_id=a['job_id'],end_ps=a['end_ps'],kind='service',limiting_resource_id=a['owner_id'],predecessor_id=None,start_ps=a['start_ps']))
+ if not a['predecessors']:break
+ a=min((acts[x['activity_id']] for x in a['predecessors']),key=tie)
+r['observations']['critical_path']['records']=chain[::-1];r['attribution_ps']={k:sum(a['end_ps']-a['start_ps'] for a in chain if a['category']==k) for k in r['attribution_ps']};r['result_hash']=content_hash(r,exclude=('result_hash',));p.write_text(canonical_json(r));print('synthetic reconstructed result',hashlib.sha256(p.read_bytes()).hexdigest())
+for case, rows in json.loads((w/'review/stage3/receipts.json').read_bytes())['native_runs'].items():
+ if 'sr2-v3' in case:print('inherited Stage3 receipt',case,rows)
+print('reconstructed wrapper',hashlib.sha256(canonical_json(dict(outcome='success',result=r)).encode()).hexdigest())

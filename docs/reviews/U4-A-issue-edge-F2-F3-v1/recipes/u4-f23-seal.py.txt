@@ -1,0 +1,4 @@
+import json
+from pathlib import Path
+from uarch_contract.hashing import canonical_json,content_hash
+w=Path('/tmp/u4-a-f23-4xtk0r5m');r=json.loads((w/'sr2-valid-unsealed.json').read_bytes());r['result_hash']=content_hash(r,exclude=('result_hash',));(w/'source/contract/tests/mapped/fixtures/issue_capacity/sr2-v3-result.json').write_text(canonical_json(r))

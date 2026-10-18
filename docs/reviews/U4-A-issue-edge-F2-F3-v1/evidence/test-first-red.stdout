@@ -1,0 +1,54 @@
+FF                                                                       [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 24, "sample": {"uarch_contract.mapped": "/tmp/u4-a-f23-4xtk0r5m/source/contract/uarch_contract/mapped.py", "uarch_contract.mapped_issue": "/tmp/u4-a-f23-4xtk0r5m/source/contract/uarch_contract/mapped_issue.py"}}
+
+=================================== FAILURES ===================================
+_________________ test_dependency_tight_capacity_valid_control _________________
+
+    def test_dependency_tight_capacity_valid_control():
+        job, result = pair()
+>       validate_result(result, job)
+
+contract/tests/mapped/test_component_capacity_integration_v3.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+contract/uarch_contract/mapped.py:1408: in validate_result
+    validate_component_observations(r, job)
+contract/uarch_contract/mapped.py:1862: in validate_component_observations
+    require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, code = 'AttributionMismatch'
+detail = 'tight canonical activity path'
+
+    def require(condition: bool, code: str, detail: str = "") -> None:
+        if not condition:
+>           raise ValueError(code + ": " + detail)
+E           ValueError: AttributionMismatch: tight canonical activity path
+
+contract/uarch_contract/mapped.py:34: ValueError
+_______ test_validate_result_refuses_dependency_tight_pre_release_grant ________
+
+    def test_validate_result_refuses_dependency_tight_pre_release_grant():
+        job, result = pair()
+>       validate_result(result, job)
+
+contract/tests/mapped/test_component_capacity_integration_v3.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+contract/uarch_contract/mapped.py:1408: in validate_result
+    validate_component_observations(r, job)
+contract/uarch_contract/mapped.py:1862: in validate_component_observations
+    require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, code = 'AttributionMismatch'
+detail = 'tight canonical activity path'
+
+    def require(condition: bool, code: str, detail: str = "") -> None:
+        if not condition:
+>           raise ValueError(code + ": " + detail)
+E           ValueError: AttributionMismatch: tight canonical activity path
+
+contract/uarch_contract/mapped.py:34: ValueError
+=========================== short test summary info ============================
+FAILED contract/tests/mapped/test_component_capacity_integration_v3.py::test_dependency_tight_capacity_valid_control
+FAILED contract/tests/mapped/test_component_capacity_integration_v3.py::test_validate_result_refuses_dependency_tight_pre_release_grant
+2 failed in 0.51s

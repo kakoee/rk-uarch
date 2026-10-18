@@ -1,0 +1,78 @@
+{
+  "records": [
+    {
+      "name": "baseline-consumers",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "/tmp/u4-a-f23-4xtk0r5m/review/probes/runner.py",
+        "/tmp/u4-a-f23-4xtk0r5m/source",
+        "script",
+        "/tmp/u4-f23-consumers.py",
+        "/tmp/u4-a-f23-4xtk0r5m/source",
+        "/tmp/u4-a-f23-4xtk0r5m/focused/baseline-consumers.json"
+      ],
+      "exit_code": 0,
+      "validator_sha256": "b645aa77fe4e3ed35b8bf05bcc747e211b4ff9436a4ee2518569bb837c848afa",
+      "test_sha256": "020439b838e0f567a7828a04d20c0371ef2c487ac361b9850b93a718ce704875",
+      "stdout_sha256": "ae9bad9bb27140219d599c105a982847db9f1c7c0fcbf1bdd91937bf2f98d97c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "disconnected-consumers",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "/tmp/u4-a-f23-4xtk0r5m/review/probes/runner.py",
+        "/tmp/u4-a-f23-4xtk0r5m/source",
+        "script",
+        "/tmp/u4-f23-consumers.py",
+        "/tmp/u4-a-f23-4xtk0r5m/source",
+        "/tmp/u4-a-f23-4xtk0r5m/focused/disconnected-consumers.json"
+      ],
+      "exit_code": 0,
+      "validator_sha256": "78395342f02c6e08a483fd7b2d7e8b3c9c33735696ce2ff1098a566e9354ae5f",
+      "test_sha256": "020439b838e0f567a7828a04d20c0371ef2c487ac361b9850b93a718ce704875",
+      "stdout_sha256": "79f35b7015f656c9b72569f281f37614b7cb94784e4f3a498e925ffc60d9435f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "disconnected-regression",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "/tmp/u4-a-f23-4xtk0r5m/review/probes/runner.py",
+        "/tmp/u4-a-f23-4xtk0r5m/source",
+        "pytest",
+        "-q",
+        "contract/tests/mapped/test_component_capacity_integration_v3.py"
+      ],
+      "exit_code": 1,
+      "validator_sha256": "78395342f02c6e08a483fd7b2d7e8b3c9c33735696ce2ff1098a566e9354ae5f",
+      "test_sha256": "020439b838e0f567a7828a04d20c0371ef2c487ac361b9850b93a718ce704875",
+      "stdout_sha256": "5950b96d01ba09fc02666420af57ee1d71c936617f44a4483fd3c9deefcad714",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "restored-consumers",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "/tmp/u4-a-f23-4xtk0r5m/review/probes/runner.py",
+        "/tmp/u4-a-f23-4xtk0r5m/source",
+        "script",
+        "/tmp/u4-f23-consumers.py",
+        "/tmp/u4-a-f23-4xtk0r5m/source",
+        "/tmp/u4-a-f23-4xtk0r5m/focused/restored-consumers.json"
+      ],
+      "exit_code": 0,
+      "validator_sha256": "b645aa77fe4e3ed35b8bf05bcc747e211b4ff9436a4ee2518569bb837c848afa",
+      "test_sha256": "020439b838e0f567a7828a04d20c0371ef2c487ac361b9850b93a718ce704875",
+      "stdout_sha256": "ae9bad9bb27140219d599c105a982847db9f1c7c0fcbf1bdd91937bf2f98d97c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "only_mutation": "    validate_reservation_capacity(requests, lasts, opportunities, limit)\n",
+  "exact_restoration_sha256": "b645aa77fe4e3ed35b8bf05bcc747e211b4ff9436a4ee2518569bb837c848afa",
+  "scope": "real validate_result boundary; independent defense separately attributed; no identity checks invoked in fault"
+}

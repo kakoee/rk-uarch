@@ -1,0 +1,70 @@
+from pathlib import Path
+import json,shutil,hashlib
+w=Path('/tmp/u4-a-f23-4xtk0r5m');root=w/'source';repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');dest=root/'contract/tests/mapped/fixtures/issue_capacity';dest.mkdir(parents=True)
+# Exact regenerated reviewer job; independently reconstructed result from preserved sr-v3.
+shutil.copyfile(w/'inputs/sr2-v3.json',dest/'sr2-v3-job.json')
+r=json.loads((repo/'docs/reviews/U4-A-issue-edge-stage2-v1/private-probes/sr-v3/debug.json').read_bytes());j=json.loads((dest/'sr2-v3-job.json').read_bytes())
+for key in ['job_hash','engine','admission']:r[key]=j[key]
+for row in r['observations']['jobs']['records']:
+ if row['job_id']=='r02':row['ready_ps']=86000
+first=next(a for a in r['observations']['activities']['records'] if a['request_id']=='r02.00' and a['subphase']=='dma_issue' and a['kind']=='alignment');assert first['activity_id']=='activity-00000027';first['ready_ps']=86000;first['predecessors']=[{'activity_id':'activity-00000024','relation':'dependency'}]
+for q in r['observations']['queue_membership']['records']:
+ if q['item_id']=='r02.00' and ((q['activity_id']==first['activity_id'] and q['population']=='waiting') or q['queue_id']=='dma_waiting:0'):q['enter_ps']=86000
+# Result seal via actual contract canonical JSON/hash, run under the isolated runner next.
+(w/'sr2-valid-unsealed.json').write_text(json.dumps(r))
+source=root/'contract/uarch_contract/mapped_issue.py';original=source.read_bytes();(w/'mapped_issue-original.py.txt').write_bytes(original);call=b'    validate_reservation_capacity(requests, lasts, opportunities, limit)\n';assert original.count(call)==1;source.write_bytes(original.replace(call,b''))
+test='''"""Synthetic A1b integration control; no native execution or authority is implied."""
+
+from copy import deepcopy
+import json
+from pathlib import Path
+
+import pytest
+from uarch_contract.hashing import content_hash
+from uarch_contract.mapped import MappedEngineJob, validate_result
+
+FIXTURES = Path(__file__).parent / "fixtures" / "issue_capacity"
+
+
+def pair():
+    job = MappedEngineJob.model_validate_json((FIXTURES / "sr2-v3-job.json").read_bytes())
+    result = json.loads((FIXTURES / "sr2-v3-result.json").read_bytes())
+    return job, result
+
+
+def test_dependency_tight_capacity_valid_control():
+    job, result = pair()
+    validate_result(result, job)
+
+
+def test_validate_result_refuses_dependency_tight_pre_release_grant():
+    job, result = pair()
+    validate_result(result, job)
+    forged = deepcopy(result)
+    obs = forged["observations"]
+    request = next(r for r in obs["dma"]["records"] if r["request_id"] == "r02.00")
+    task = next(r for r in obs["jobs"]["records"] if r["job_id"] == "r02")
+    assert task["ready_ps"] == request["reservation_ps"] == request["issue_ps"] == 86000
+    first = next(a for a in obs["activities"]["records"]
+                 if a["request_id"] == "r02.00" and a["subphase"] == "dma_issue"
+                 and a["kind"] == "alignment")
+    assert first["predecessors"] == [
+        {"activity_id": "activity-00000024", "relation": "dependency"}
+    ]
+    early, late = [o for o in obs["reservation_opportunities"]["records"]
+                   if o["t_ps"] == 86000]
+    assert (early["event_cursor"], late["event_cursor"]) == (52, 54)
+    assert early["granted_request_ids"] == []
+    assert late["granted_request_ids"] == ["r02.00"]
+    terminal = next(a for a in obs["activities"]["records"]
+                    if a["request_id"] == "r00.00" and a["subphase"] == "ack"
+                    and a["kind"] == "service")
+    assert terminal["end_ps"] == 86000 and terminal["completion_ordinal"] == 53
+    early["granted_request_ids"], late["granted_request_ids"] = ["r02.00"], []
+    forged["result_hash"] = content_hash(forged, exclude=("result_hash",))
+    with pytest.raises(ValueError, match="IncompleteObservations: reservation cursor capacity"):
+        validate_result(forged, job)
+    validate_result(result, job)
+'''
+(root/'contract/tests/mapped/test_component_capacity_integration_v3.py').write_text(test)
+(w/'test-first.json').write_text(json.dumps(dict(disconnected_call=call.decode(),original_sha256=hashlib.sha256(original).hexdigest(),disconnected_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),test_sha256=hashlib.sha256(test.encode()).hexdigest(),scope='regression written before first execution; only validator call disconnected; runtime unchanged'),indent=2)+'\n')

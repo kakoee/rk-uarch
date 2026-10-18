@@ -1,0 +1,52 @@
+from pathlib import Path
+import json,hashlib,re,subprocess,tarfile,io,difflib,shutil
+repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');w=Path('/tmp/u4-a-f23-4xtk0r5m');root=w/'source';p=repo/'docs/reviews/U4-A-issue-edge-F2-F3-v1';old=repo/'docs/reviews/U4-A-issue-edge-stage2-v1';b=repo/'docs/reviews/U4-B-issue-edge-F2-F3-v1';sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();digest=lambda x:hashlib.sha256(x).hexdigest()
+f=root/'docs/decisions/U0011-the-native-engine-core.md';s=f.read_text();s=s.replace('class. It admits no classified-safe exception. Any future prospective exception must','class. The prospective offline classifier is explicitly more conservative: any /2 graph\nwith multiple requests on one engine remains blocked without separately reviewed complete\ntiming classification. It implements no timed-safe exception. At most one declared request\nper engine proves only absence of this F2 class for an independently validated graph,\nnever execution authority or relief from F4. Any future prospective exception must');f.write_text(s);raw=f.read_bytes()
+f=root/'validation/component/installation_identity.py';s=f.read_text();s=re.sub(r'ISSUE_ADR_SHA = "[a-f0-9]+"','ISSUE_ADR_SHA = "'+digest(raw)+'"',s);s=re.sub(r'ISSUE_APPENDIX_SHA = "[a-f0-9]+"','ISSUE_APPENDIX_SHA = "'+digest(raw[48294:])+'"',s);s=re.sub(r'ISSUE_ADR_BYTES = \d+','ISSUE_ADR_BYTES = '+str(len(raw)),s);f.write_text(s)
+add=['contract/tests/mapped/test_component_capacity_integration_v3.py','contract/tests/mapped/fixtures/issue_capacity/sr2-v3-job.json','contract/tests/mapped/fixtures/issue_capacity/sr2-v3-result.json'];f=root/'validation/component/issue-amendment-binding.json';o=json.loads(f.read_bytes());o['scope']='Prospective focused F2/F3 correction: renewed broader F2 restriction, validator-level regression and identity-only refresh; a1/F1/F4 and native behavior unchanged. No installation or authority; exact final B review and same-reviewer recheck remain separate.'
+for path in add:o['additions'][path]=sha(root/path)
+for path,row in o['replacements'].items():row['after']=sha(root/path)
+f.write_text(json.dumps(o,indent=2,sort_keys=True)+'\n')
+f=p/'prospective-first-use.json';o=json.loads(f.read_bytes());o['F2']['explicit_conservative_extension']='Adopt B offline policy: every /2 graph with multiple requests on an engine is blocked absent separately reviewed complete timing classification; no timed-safe exception exists here. At most one request per engine proves only absence of this class on an independently validated graph, not authority.';o['B_requirements']={'path':str((b/'first-use-requirements.json').relative_to(repo)),'sha256':sha(b/'first-use-requirements.json'),'commit':subprocess.check_output(['git','rev-parse','6bc9ceb'],cwd=repo,text=True).strip(),'status':'exact F2 class, unclassified policy and explicit conservative extension acknowledged; final B joined review pending'};f.write_text(json.dumps(o,indent=2)+'\n')
+prev=json.loads((old/'manifest.json').read_bytes());base=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip();groups={}
+for row in prev['files']:groups.setdefault(row['patch'],[]).append(row['path'])
+groups['contract-and-export.patch']+=add
+(p/'patches').mkdir(exist_ok=True);manifest=dict(format='unapplied-component-issue-F2-F3-correction/1',base_commit=base,original_candidate='ff0bf587bc3774b9cf2175bfdf5d108be3904969',original_manifest_sha256=sha(old/'manifest.json'),approval_commit='5069b62def5dec77eacadf2927a9ea4424a25bc2',approval='U4-issue-edge-F2-scope-reconfirmation-v1',status='unapplied prospective correction; B final joined review pending',authority=None,files=[],patches=[],reviewed_behavior={'F1':'prior reviewer accepted; unchanged','F4':'prior reviewer accepted; unchanged; consumer pin refresh only'},native_builds_this_correction=0)
+def patch_join(lines):
+ return ''.join(line if line.endswith('\n') else line+'\n\\ No newline at end of file\n' for line in lines)
+# Fresh original source reconstruction is used as the additive-delta preimage, never mutated.
+prior=w/'prior2';prior.mkdir()
+with tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive',prev['base_commit']],cwd=repo))) as tar:tar.extractall(prior,filter='data')
+for patch in prev['patches']:subprocess.run(['git','apply',str(old/patch['path'])],cwd=prior,check=True)
+for row in prev['files']:assert sha(prior/row['path'])==row['postimage_sha256']
+delta='';changed=[]
+for patch,paths in groups.items():
+ full=''
+ for path in sorted(paths):
+  check=subprocess.run(['git','show',base+':'+path],cwd=repo,capture_output=True);before=check.stdout if check.returncode==0 else None;after=(root/path).read_bytes();before_previous=(prior/path).read_bytes() if (prior/path).exists() else None
+  full+=patch_join(difflib.unified_diff((before or b'').decode().splitlines(True),after.decode().splitlines(True),fromfile='a/'+path if before is not None else '/dev/null',tofile='b/'+path))
+  manifest['files'].append(dict(path=path,patch=patch,preimage_sha256=digest(before) if before is not None else None,original_proposal_sha256=digest(before_previous) if before_previous is not None else None,postimage_sha256=digest(after),changed_this_correction=before_previous!=after))
+  if before_previous!=after:
+   changed.append(path);delta+=patch_join(difflib.unified_diff((before_previous or b'').decode().splitlines(True),after.decode().splitlines(True),fromfile='a/'+path if before_previous is not None else '/dev/null',tofile='b/'+path))
+ (p/'patches'/patch).write_text(full);manifest['patches'].append(dict(path='patches/'+patch,sha256=sha(p/'patches'/patch)))
+(p/'patches/additive-delta-from-stage2.patch').write_text(delta);manifest['alternative_delta']=dict(path='patches/additive-delta-from-stage2.patch',sha256=sha(p/'patches/additive-delta-from-stage2.patch'),base_manifest_sha256=sha(old/'manifest.json'),route='alternative: exact original 26 postimages plus this delta only')
+full=w/'full2';full.mkdir()
+with tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive',base],cwd=repo))) as tar:tar.extractall(full,filter='data')
+for row in manifest['patches']:
+ subprocess.run(['git','apply','--check',str(p/row['path'])],cwd=full,check=True);subprocess.run(['git','apply',str(p/row['path'])],cwd=full,check=True)
+alt=w/'delta2';shutil.copytree(prior,alt);subprocess.run(['git','apply','--check',str(p/manifest['alternative_delta']['path'])],cwd=alt,check=True);subprocess.run(['git','apply',str(p/manifest['alternative_delta']['path'])],cwd=alt,check=True)
+for row in manifest['files']:assert sha(full/row['path'])==sha(alt/row['path'])==row['postimage_sha256']
+for row in reversed(manifest['patches']):subprocess.run(['git','apply','--reverse','--check',str(p/row['path'])],cwd=full,check=True)
+subprocess.run(['git','apply','--reverse','--check',str(p/manifest['alternative_delta']['path'])],cwd=alt,check=True)
+for row in prev['verification']['historical_controls']:assert sha(full/row['path'])==row['sha256']
+# Every native file and every schema/export/checker runtime byte is unchanged from the original.
+for name in ['native','contract/schema','validation/component']:
+ for f in (prior/name).rglob('*'):
+  if f.is_file() and f.suffix!='.pyc':
+   rel=str(f.relative_to(prior))
+   if rel not in changed:assert (full/rel).read_bytes()==f.read_bytes(),rel
+support=json.loads((repo/'docs/reviews/U4-B-component-native-audit-v1/source-audit-final.json').read_bytes())['selected_support'];assert all(sha(full/path)==h for path,h in support.items())
+manifest['verification']=dict(original_postimages=26,postimages=len(manifest['files']),changed_paths=changed,full_apply_reverse=True,delta_apply_reverse=True,historical_controls=prev['verification']['historical_controls'],unchanged_selected_support_count=len(support),native_runtime_schema_checker_behavior='byte-identical to original; only ADR/test/identity delta',paths=dict(full=str(full),alternative=str(alt)))
+manifest['prospective_dependencies']=[dict(path=str(f.relative_to(repo)),sha256=sha(f)) for f in [b/'first-use-requirements.json',b/'restriction.py',b/'test_restriction.py',b/'reproducers.json',p/'prospective-first-use.json']]
+(p/'manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+print('frozen',len(manifest['files']),'postimages;',len(changed),'changed paths:',changed)

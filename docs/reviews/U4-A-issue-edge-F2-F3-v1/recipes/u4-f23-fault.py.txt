@@ -1,0 +1,13 @@
+from pathlib import Path
+import subprocess,hashlib,json
+w=Path('/tmp/u4-a-f23-4xtk0r5m');root=w/'source';out=w/'focused';out.mkdir();exe='/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python';prefix=[exe,'-I',str(w/'review/probes/runner.py'),str(root)];p=root/'contract/uarch_contract/mapped_issue.py';original=p.read_bytes();call=b'    validate_reservation_capacity(requests, lasts, opportunities, limit)\n';assert original.count(call)==1;records=[]
+def run(name,tail):
+ argv=prefix+tail;c=subprocess.run(argv,cwd=root,capture_output=True);(out/(name+'.stdout')).write_bytes(c.stdout);(out/(name+'.stderr')).write_bytes(c.stderr);records.append(dict(name=name,argv=argv,exit_code=c.returncode,validator_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),test_sha256=hashlib.sha256((root/'contract/tests/mapped/test_component_capacity_integration_v3.py').read_bytes()).hexdigest(),stdout_sha256=hashlib.sha256(c.stdout).hexdigest(),stderr_sha256=hashlib.sha256(c.stderr).hexdigest()));return c
+assert run('baseline-consumers',['script','/tmp/u4-f23-consumers.py',str(root),str(out/'baseline-consumers.json')]).returncode==0
+try:
+ p.write_bytes(original.replace(call,b''));assert run('disconnected-consumers',['script','/tmp/u4-f23-consumers.py',str(root),str(out/'disconnected-consumers.json')]).returncode==0
+ c=run('disconnected-regression',['pytest','-q','contract/tests/mapped/test_component_capacity_integration_v3.py']);assert c.returncode==1 and b'DID NOT RAISE' in c.stdout and b'1 failed, 1 passed' in c.stdout
+finally:p.write_bytes(original)
+assert p.read_bytes()==original
+assert run('restored-consumers',['script','/tmp/u4-f23-consumers.py',str(root),str(out/'restored-consumers.json')]).returncode==0
+baseline=json.loads((out/'baseline-consumers.json').read_bytes());mut=json.loads((out/'disconnected-consumers.json').read_bytes());rest=json.loads((out/'restored-consumers.json').read_bytes());assert baseline==rest;assert all(row['structural']=='pass' for row in mut);assert all(rows[0]['independent']=='pass' for rows in [baseline,mut,rest]);assert all(rows[1]['independent']=='CheckFailure: opportunity eligible grants / ready tie' for rows in [baseline,mut,rest]);assert baseline[1]['structural']=='ValueError: IncompleteObservations: reservation cursor capacity';(out/'fault-restoration.json').write_text(json.dumps(dict(records=records,only_mutation=call.decode(),exact_restoration_sha256=hashlib.sha256(original).hexdigest(),scope='real validate_result boundary; independent defense separately attributed; no identity checks invoked in fault'),indent=2)+'\n');print('Targeted full-validator fault: valid passes; A1b accepted when disconnected; DID NOT RAISE; exact restoration refuses. Independent refusal unchanged.')
