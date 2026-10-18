@@ -494,13 +494,14 @@ def test_component_envelope_keeps_strict_framing(stdout, stderr, status):
 def test_current_independent_binding_is_prepared(prepared_payload):
     root, binding, payload, _ = prepared_payload
     assert payload["consumers"]["independent_binding"]["path"] == (
-        "docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2/consumer-bindings.json"
+        "docs/reviews/U4-B-component-runtime-stage2-join-v1/prospective-consumer-bindings.json"
     )
     prepared = component_host._prepare_payload(root, binding, mode="debug")
     assert {
         "src/rkuarch/engines/native/component_runner.py",
         "validation/component/runtime_evidence.py",
         "validation/component/matrix_order.py",
+        "validation/component/runtime_resources.py",
     } <= set(prepared.consumer_pins)
     prepared.refresh()
 

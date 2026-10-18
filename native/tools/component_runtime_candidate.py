@@ -374,7 +374,8 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
         "independent_binding": binding(
             root,
             root
-            / "docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2/consumer-bindings.json",
+            / "docs/reviews/U4-B-component-runtime-stage2-join-v1"
+            / "prospective-consumer-bindings.json",
         ),
         "observation_contract": binding(
             observation_root or root,
