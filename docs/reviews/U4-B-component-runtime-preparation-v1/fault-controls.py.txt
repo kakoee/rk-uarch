@@ -1,0 +1,54 @@
+"""Narrow new preparation guards only; private synthetic controls, no native execution."""
+import ast
+import hashlib
+import json
+import subprocess
+from pathlib import Path
+
+root = Path('/tmp/u4-b-runtime-prep-final-02/source')
+out = Path('/tmp/u4-b-runtime-faults-01')
+out.mkdir()
+pre = ['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python', '-I',
+       '/tmp/u4-b-runtime-review-01/probes/runner.py', str(root), 'pytest', '-q']
+records = []
+for label, rel, message, tests, failures in [
+    ('route', 'validation/component/runtime_checks.py', 'model/format/checker route',
+     ['validation/component/test_runtime_checks.py', '-k', 'wrong_checker or valid_saved'], b'1 failed, 1 passed'),
+    ('input', 'validation/component/runtime_campaign.py', 'immutable selected raw input mismatch',
+     ['validation/component/test_runtime_campaign.py', '-k', 'adapter_mismatches'], b'1 failed, 3 passed'),
+]:
+    path = root / rel
+    original = path.read_bytes()
+    lines = original.splitlines(keepends=True)
+    tree = ast.parse(original)
+    nodes = [n for n in ast.walk(tree) if isinstance(n, ast.Expr) and isinstance(n.value, ast.Call)
+             and any(isinstance(x, ast.Constant) and x.value == message for x in ast.walk(n))]
+    assert len(nodes) == 1
+    n = nodes[0]
+    mutant = b''.join(lines[:n.lineno-1] + lines[n.end_lineno:])
+    def run(state):
+        r = subprocess.run(pre + tests, cwd=root, capture_output=True)
+        for stream in ('stdout', 'stderr'):
+            raw = getattr(r, stream)
+            (out / (label+'-'+state+'.'+stream+'.json')).write_text(json.dumps(raw.decode())+'\n')
+        records.append(dict(guard=label,state=state,argv=pre+tests,exit_code=r.returncode,
+                            source_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                            stdout_sha256=hashlib.sha256(r.stdout).hexdigest(),
+                            stderr_sha256=hashlib.sha256(r.stderr).hexdigest()))
+        return r
+    assert run('baseline').returncode == 0
+    try:
+        path.write_bytes(mutant)
+        r = run('removed')
+        assert r.returncode == 1 and b'DID NOT RAISE' in r.stdout and failures in r.stdout, r.stdout
+    finally:
+        path.write_bytes(original)
+    assert path.read_bytes() == original
+    assert run('restored').returncode == 0
+(out/'fault-restoration.json').write_text(json.dumps(dict(
+    scope='new B proposal controls only; no native or public authority evidence',
+    records=records,restored_exact_bytes=True,
+    route='With only route guard removed, explicit wrong-checker declaration is accepted; valid control passes. Binding discrimination, not a new engine/checker-law failure.',
+    input='With only raw-input hash guard removed, toy wrong bytes are accepted into complete private receipts; other adapter mismatch controls still refuse.',
+    synthetic=True,native_runs=0),indent=2)+'\n')
+print('Both targeted guards discriminate; exact restoration and affected controls pass.')
