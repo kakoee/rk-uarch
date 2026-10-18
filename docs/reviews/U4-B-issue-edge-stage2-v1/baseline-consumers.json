@@ -1,0 +1,83 @@
+{
+  "label": "private native outputs with synthetic unit anchors; no public execution",
+  "origins": {
+    "uarch_contract.mapped_issue": {
+      "path": "/tmp/u4-b-issue-v2-01/full/contract/uarch_contract/mapped_issue.py",
+      "sha256": "128bf08e2b6b9965e5d8e0f3cb0feb35dd74591a3f64dde2e5f97c1e79d66515"
+    },
+    "validation.component.issue_checks": {
+      "path": "/tmp/u4-b-issue-v2-01/full/validation/component/issue_checks.py",
+      "sha256": "7fe2dfff9c8f7db7493ee45fbd5cd55adf4e55fd84f1b6e5d7ce35dd7e55cc89"
+    },
+    "validation.component.transition_checks_v3": {
+      "path": "/tmp/u4-b-issue-v2-01/full/validation/component/transition_checks_v3.py",
+      "sha256": "3ab47303a14324e10c94d2a7820235b986491cc30ed3816322e62c3918738341"
+    },
+    "validation.component.observations_v3": {
+      "path": "/tmp/u4-b-issue-v2-01/full/validation/component/observations_v3.py",
+      "sha256": "58aca43c6bbc2341345b5559b347fa6e3f75dc9a86b733eb446104c145ba43e8"
+    }
+  },
+  "cases": [
+    {
+      "case": "cc0-v3-debug",
+      "result_hash": "sha256:f55e8878f0110a8a3d1904b52b0a53f46ce0c54ceab32cbfd9b42673824e8092",
+      "structural": "ValueError: AttributionMismatch: strict waiting credit causes",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "cc0-v3-release",
+      "result_hash": "sha256:f55e8878f0110a8a3d1904b52b0a53f46ce0c54ceab32cbfd9b42673824e8092",
+      "structural": "ValueError: AttributionMismatch: strict waiting credit causes",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "cc-v3-debug",
+      "result_hash": "sha256:dc1f9d4fc53350a7c70c3af9187a8aa6f837cda7610eb56a5480d89805f5006d",
+      "structural": "ValueError: AttributionMismatch: strict waiting credit causes",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "cc-v3-release",
+      "result_hash": "sha256:dc1f9d4fc53350a7c70c3af9187a8aa6f837cda7610eb56a5480d89805f5006d",
+      "structural": "ValueError: AttributionMismatch: strict waiting credit causes",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "sr-v3-debug",
+      "result_hash": "sha256:31322bbb1a83979315539cc2adb8f8a83288b317ab99c52f6a558dd2f5d50ff8",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "sr-v3-release",
+      "result_hash": "sha256:31322bbb1a83979315539cc2adb8f8a83288b317ab99c52f6a558dd2f5d50ff8",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "A7-post-reservation-credit",
+      "result_hash": "sha256:f80da8cf85578df0d39a519948656690a1397e74b090c7b3da61978fce3c7f1c",
+      "structural": "pass",
+      "independent": "pass"
+    },
+    {
+      "case": "omit-earlier-opportunity-release",
+      "result_hash": "sha256:f0b53d1ad5498726e1b9279f92aa70a824600ec690e8ce68b21d61bd587d058f",
+      "structural": "ValueError: AttributionMismatch: strict waiting credit causes",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "omit-current-release",
+      "result_hash": "sha256:16cb28e610b52a899bb1124286ca60307ebacf94acc75bd08fb25e1c1a91ccb8",
+      "structural": "ValueError: AttributionMismatch: strict waiting credit causes",
+      "independent": "CheckFailure: complete eligible causes"
+    },
+    {
+      "case": "A1-pre-release-grant",
+      "result_hash": "sha256:e4463ee1be2b155c3bc65ef8114604459d265a794d41a7bc869b6b3f2aed0ca3",
+      "structural": "pass",
+      "independent": "CheckFailure: opportunity eligible grants / ready tie"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+--- a/validation/component/issue_checks.py
++++ b/validation/component/issue_checks.py
+@@ -7,8 +7,19 @@
+ 
+ 
+ def credit_predecessors(
+-    req: str, rows: dict[str, Any], jobs: dict[str, Any], limit: int
++    req: str,
++    rows: dict[str, Any],
++    jobs: dict[str, Any],
++    limit: int,
++    reservation_cursor: int,
++    terminal_ordinals: dict[str, int],
+ ) -> set[str]:
++    """All eligible same-time releases, not exclusive assignment of a freed slot.
++
++    Saturation includes pending reservations. A credit cause must have been acquired
++    and its terminal observed strictly before this reservation opportunity, including
++    releases before earlier opportunities at the same time. Dispatch is not the cursor.
++    """
+     row = rows[req]
+     time = row["reservation_ps"]
+     occupied = {
+@@ -20,7 +31,13 @@
+     }
+     if time <= jobs[row["job_id"]]["ready_ps"] or len(occupied) != limit:
+         return set()
+-    return {key for key, old in occupied.items() if old["complete_ps"] == time}
++    return {
++        key
++        for key, old in occupied.items()
++        if old["issue_ps"] < time
++        and old["complete_ps"] == time
++        and terminal_ordinals[key] < reservation_cursor
++    }
+ 
+ 
+ def check_reservation_opportunities(
+--- a/validation/component/transition_checks_v3.py
++++ b/validation/component/transition_checks_v3.py
+@@ -107,9 +107,19 @@
+                         cause(end, start, "dependency")
+     limit = int(hardware["core_type"]["dma"]["max_outstanding"]["value"])
+     request_ends = {seq[-1]["request_id"]: seq[-1] for seq in expanded}
++    reservation_cursors = {
++        req: opportunity["event_cursor"]
++        for opportunity in obs["reservation_opportunities"]["records"]
++        for req in opportunity["granted_request_ids"]
++    }
++    terminal_ordinals = {
++        req: end["completion_ordinal"] for req, end in request_ends.items() if req in requests
++    }
+     for req, row in requests.items():
+         first = next(x for x in firsts[row["job_id"]] if x["request_id"] == req)
+-        for old in credit_predecessors(req, requests, jobs, limit):
++        for old in credit_predecessors(
++            req, requests, jobs, limit, reservation_cursors[req], terminal_ordinals
++        ):
+             cause(request_ends[old], first, "credit")
+     for a in acts.values():
+         supplied = [(p["activity_id"], p["relation"]) for p in a["predecessors"]]
+--- a/validation/component/test_issue_checks.py
++++ b/validation/component/test_issue_checks.py
+@@ -24,7 +24,14 @@
+         ),
+     }
+     assert (
+-        checks.credit_predecessors("new", rows, {"a": {"ready_ps": 0}, "b": {"ready_ps": ready}}, 1)
++        checks.credit_predecessors(
++            "new",
++            rows,
++            {"a": {"ready_ps": 0}, "b": {"ready_ps": ready}},
++            1,
++            52,
++            {"old": 50, "new": 93},
++        )
+         == wanted
+     )
+ 
+@@ -155,3 +162,54 @@
+     w["rows"]["r00"]["reservation_ps"] = 0
+     with pytest.raises(CheckFailure, match="opportunity eligible grants"):
+         verify(w)
++
++
++@pytest.mark.parametrize(
++    "cursor,wanted",
++    [(50, set()), (51, {"read"}), (52, {"read"}), (55, {"read"}), (56, {"read", "write"})],
++)
++def test_mixed_release_cursor_attribution(cursor, wanted):
++    # Synthetic helper literal: read terminal 50, inline ACK terminal 55 at 60000.
++    # The later opportunity still includes read; it is not an exclusive slot owner.
++    rows = {
++        key: dict(job_id=key, dma_engine_id=0, reservation_ps=0, issue_ps=0, complete_ps=60000)
++        for key in ("read", "write")
++    }
++    rows["new"] = dict(
++        job_id="new", dma_engine_id=0, reservation_ps=60000, issue_ps=60000, complete_ps=120000
++    )
++    assert (
++        checks.credit_predecessors(
++            "new", rows, {"new": {"ready_ps": 0}}, 2, cursor, {"read": 50, "write": 55, "new": 93}
++        )
++        == wanted
++    )
++
++
++@pytest.mark.parametrize(
++    "change", ["unsaturated", "other-engine", "not-acquired", "other-time", "equal-readiness"]
++)
++def test_credit_cursor_is_necessary_not_sufficient(change):
++    rows = {
++        "old": dict(job_id="old", dma_engine_id=0, reservation_ps=0, issue_ps=0, complete_ps=60000),
++        "new": dict(
++            job_id="new", dma_engine_id=0, reservation_ps=60000, issue_ps=60000, complete_ps=120000
++        ),
++    }
++    ready, limit = 0, 1
++    if change == "unsaturated":
++        limit = 2
++    elif change == "other-engine":
++        rows["old"]["dma_engine_id"] = 1
++    elif change == "not-acquired":
++        rows["old"]["issue_ps"] = 60000
++    elif change == "other-time":
++        rows["old"]["complete_ps"] = 59999
++    else:
++        ready = 60000
++    assert (
++        checks.credit_predecessors(
++            "new", rows, {"new": {"ready_ps": ready}}, limit, 52, {"old": 50, "new": 93}
++        )
++        == set()
++    )
