@@ -56,5 +56,76 @@ def main() -> None:
         stream.write(json.dumps(value, indent=2, sort_keys=True) + "\n")
 
 
+def acceptance_record(
+    prepared: Any, summary: dict[str, Any], negatives: dict[str, Any]
+) -> dict[str, Any]:
+    """Freeze caller-owned expectations before constructing/invoking the adapter.
+
+    Positive identity comes from the prepared payload inventory; negative identity
+    comes from the separately reviewed expectation transition, never returned bytes.
+    """
+    from uarch_contract.hashing import canonical_json, strict_json_loads
+
+    from rkuarch.engines.native.host import _read
+    from rkuarch.engines.native.records import FileBinding
+
+    prepared.refresh()
+    payload = prepared.payload
+    engine = payload.engine.model_dump(mode="json")
+    if summary["engine"] != engine:
+        raise ValueError("acceptance build engine")
+    build = strict_json_loads(_read(prepared.root, payload.build_inputs))
+    trust = strict_json_loads(_read(prepared.root, FileBinding.model_validate(build["trust_file"])))
+    selection = strict_json_loads(
+        _read(prepared.root, FileBinding.model_validate(trust["selection"]))
+    )
+    inputs = {
+        item.case_id: {
+            "case_id": item.case_id,
+            "raw_input_sha256": item.file.byte_hash.split(":")[1],
+            "job_hash": item.job_hash,
+            "engine": engine,
+        }
+        for item in payload.jobs
+    }
+    expected_negatives = {}
+    for row in negatives["rows"]:
+        name = row["case_id"]
+        if name in inputs or row["engine"] != engine:
+            raise ValueError("acceptance negative inventory/engine")
+        inputs[name] = {
+            "case_id": name,
+            "raw_input_sha256": row["input_sha256"],
+            "job_hash": row["job_hash"],
+            "engine": engine,
+        }
+        expected_negatives[name] = row
+    if set(inputs) != {r["case_id"] for r in selection["rows"]}:
+        raise ValueError("acceptance complete selected inventory")
+    executables = {}
+    for mode in ("debug", "release"):
+        record = summary["modes"][mode]
+        executable = Path(record["test_executable"])
+        actual = hashlib.sha256(executable.read_bytes()).hexdigest()
+        if "sha256:" + actual != record["test_executable_byte_hash"]:
+            raise ValueError("acceptance actual executable bytes")
+        executables[mode] = actual
+    return {
+        "format": "component-private-acceptance/1",
+        "evidence_kind": "private-synthetic-test",
+        "selection_sha256": hashlib.sha256(canonical_json(selection).encode()).hexdigest(),
+        "execution_binding": prepared.payload_file.byte_hash,
+        "inputs": inputs,
+        "negatives": expected_negatives,
+        "source": payload.consumers.import_root,
+        "pins": prepared.consumer_pins,
+        "observation_contract": strict_json_loads(
+            _read(prepared.root, payload.consumers.observation_contract)
+        ),
+        "executables": executables,
+        "witness_kind": "cfg(test) file-probe; synthetic anchors",
+    }
+
+
 if __name__ == "__main__":
     main()

@@ -84,10 +84,23 @@ def validate_component_response(
     *,
     job: dict[str, Any],
     observation_contract: dict[str, Any],
+    admitted: dict[str, Any] | None = None,
 ) -> MappedEngineResult:
-    """Pure replay validator, never authorization or a process-launch path."""
+    """Independently anchored saved-result validator; never execution authority."""
     from validation.component.observations_v3 import check_v3
 
+    _require(admitted is not None, "independent consumer inventory required")
+    assert admitted is not None
+    _require(job["engine"] == admitted["engine"], "independent consumer engine mismatch")
+    _require(
+        sha256(canonical_json(job).encode()).split(":")[1] == admitted["raw_input_sha256"],
+        "independent consumer raw mismatch",
+    )
+    _require(
+        job["job_hash"] == admitted["job_hash"]
+        and job["admission"]["case_id"] == admitted["case_id"],
+        "independent consumer inventory mismatch",
+    )
     checked = loads_runtime_job(
         canonical_json(job),
         trusted_registry_hash=job["registry"]["registry_hash"],
@@ -99,6 +112,7 @@ def validate_component_response(
     value = _decode_envelope(stdout, stderr, returncode)
     if returncode == 2:
         raise NativeRefusal(value)
+    _require(value["engine"] == admitted["engine"], "independent consumer engine mismatch")
     require_route(job, value)
     result = validate_result(value, checked)
     check_v3(job, value, observation_contract)
@@ -140,8 +154,14 @@ def _consume(
     expected = strict_json_loads(
         _read(prepared.root, prepared.payload.consumers.observation_contract)
     )
+    admitted = {
+        "case_id": selected.case_id,
+        "raw_input_sha256": selected.file.byte_hash.split(":")[1],
+        "job_hash": selected.job_hash,
+        "engine": prepared.payload.engine.model_dump(mode="json"),
+    }
     result = validate_component_response(
-        stdout, stderr, status, job=request, observation_contract=expected
+        stdout, stderr, status, job=request, observation_contract=expected, admitted=admitted
     )
     from validation.component.runtime_checks import consume_case
 
@@ -155,12 +175,7 @@ def _consume(
         expected=expected,
         input_sha256=selected.file.byte_hash.split(":")[1],
         raw_input=raw,
-        admitted={
-            "case_id": selected.case_id,
-            "raw_input_sha256": selected.file.byte_hash.split(":")[1],
-            "job_hash": selected.job_hash,
-            "engine": prepared.payload.engine.model_dump(mode="json"),
-        },
+        admitted=admitted,
     )
     prepared.refresh()
     return result

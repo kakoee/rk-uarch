@@ -78,6 +78,7 @@ def consume_attempt(
             raw["status"],
             job=job,
             observation_contract=acceptance["observation_contract"],
+            admitted=admitted,
         )
         consume_case(
             job,

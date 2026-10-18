@@ -67,7 +67,12 @@ def test_saved_result_core_uses_both_consumers_and_no_producers(monkeypatch):
 
     monkeypatch.setattr(imported, "export_component_job", unavailable)
     checked = component_runner.validate_component_response(
-        canonical_json(result).encode(), b"", 0, job=job, observation_contract=expected
+        canonical_json(result).encode(),
+        b"",
+        0,
+        job=job,
+        observation_contract=expected,
+        admitted=frozen_admitted(job),
     )
     assert checked.observations.format == "uarch-native-observations/3"
     assert checked.duration_ps == 121000
@@ -82,7 +87,12 @@ def test_saved_result_core_uses_both_consumers_and_no_producers(monkeypatch):
     result["result_hash"] = content_hash(result, exclude=("result_hash",))
     with pytest.raises(ValueError):
         component_runner.validate_component_response(
-            canonical_json(result).encode(), b"", 0, job=job, observation_contract=expected
+            canonical_json(result).encode(),
+            b"",
+            0,
+            job=job,
+            observation_contract=expected,
+            admitted=frozen_admitted(job),
         )
 
 
@@ -341,7 +351,12 @@ def test_independent_checker_is_mandatory_for_valid_saved_response(monkeypatch):
     monkeypatch.setattr(independent, "check_v3", refuse)
     with pytest.raises(ValueError, match="independent consumer sentinel"):
         component_runner.validate_component_response(
-            canonical_json(result).encode(), b"", 0, job=job, observation_contract=expected
+            canonical_json(result).encode(),
+            b"",
+            0,
+            job=job,
+            observation_contract=expected,
+            admitted=frozen_admitted(job),
         )
 
 
@@ -563,3 +578,149 @@ def test_acceptance_commit_is_explicitly_non_authorizing_metadata():
     ]
     assert "Non-authorizing historical metadata" in description
     assert "not verified Git provenance" in description
+
+
+def frozen_admitted(job):
+    """Synthetic inventory captured before each presented-input perturbation."""
+    from uarch_contract.hashing import sha256
+
+    return {
+        "case_id": job["admission"]["case_id"],
+        "raw_input_sha256": sha256(canonical_json(job).encode()).split(":")[1],
+        "job_hash": job["job_hash"],
+        "engine": deepcopy(job["engine"]),
+    }
+
+
+@pytest.mark.parametrize("kind", ["missing", "matching", "old-engine", "foreign-input"])
+def test_direct_consumer_requires_frozen_expectations(kind):
+    job, result = prospective_pair()
+    admitted = frozen_admitted(job)
+    expected = json.loads(
+        (ROOT / "docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json").read_bytes()
+    )["observation_contract"]
+    if kind == "old-engine":
+        job["engine"]["implementation_hash"] = "sha256:" + "e" * 64
+        result["engine"] = deepcopy(job["engine"])
+    elif kind == "foreign-input":
+        job["registry"]["test_only_specs"][0]["rationale"] += "; synthetic foreign registry"
+        job["registry"]["registry_hash"] = content_hash(job["registry"], exclude=("registry_hash",))
+    job["job_hash"] = content_hash(job, exclude=("job_hash",))
+    result["job_hash"] = job["job_hash"]
+    result["result_hash"] = content_hash(result, exclude=("result_hash",))
+    kwargs = {} if kind == "missing" else {"admitted": admitted}
+    if kind == "matching":
+        checked = component_runner.validate_component_response(
+            canonical_json(result).encode(),
+            b"",
+            0,
+            job=job,
+            observation_contract=expected,
+            **kwargs,
+        )
+        assert checked.duration_ps == 121000
+    else:
+        with pytest.raises(ValueError, match="independent consumer (inventory|engine|raw)"):
+            component_runner.validate_component_response(
+                canonical_json(result).encode(),
+                b"",
+                0,
+                job=job,
+                observation_contract=expected,
+                **kwargs,
+            )
+
+
+def test_acceptance_is_frozen_from_prepared_inventory(prepared_payload):
+    from native.tools.component_stage2_inputs import acceptance_record
+
+    root, binding, payload, _ = prepared_payload
+    prepared = component_host._prepare_payload(root, binding, mode="debug")
+    summary = {"engine": payload["engine"], "modes": {}}
+    for exe in payload["executables"]:
+        summary["modes"][exe["mode"]] = {
+            "test_executable": str(root / exe["executable"]["path"]),
+            "test_executable_byte_hash": exe["executable"]["byte_hash"],
+        }
+    record = acceptance_record(prepared, summary, {"rows": []})
+    case = payload["jobs"][0]
+    assert (
+        record["inputs"][case["case_id"]]["raw_input_sha256"]
+        == case["file"]["byte_hash"].split(":")[1]
+    )
+    assert record["inputs"][case["case_id"]]["engine"] == payload["engine"]
+    summary["engine"] = dict(summary["engine"], implementation_hash="sha256:" + "f" * 64)
+    with pytest.raises(ValueError, match="acceptance build engine"):
+        acceptance_record(prepared, summary, {"rows": []})
+
+
+@pytest.mark.parametrize("field", ["input_sha256", "engine", "envelope", "native_guard_source"])
+def test_D3_selected_input_joins_expectation_provenance(tmp_path, field):
+    import runpy
+    from types import SimpleNamespace
+
+    from uarch_contract.hashing import sha256
+    from uarch_contract.mapped import NativeEngineIdentity
+
+    from rkuarch.engines.native.records import FileBinding
+
+    namespace = runpy.run_path(
+        str(
+            ROOT
+            / "docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2"
+            / "component_negative-v5.py.txt"
+        )
+    )
+    job, _ = prospective_pair()
+
+    def put(name, value):
+        raw = canonical_json(value).encode()
+        (tmp_path / name).write_bytes(raw)
+        return FileBinding(path=name, byte_hash=sha256(raw))
+
+    raw_file = put("input.json", job)
+    profile = put("profile.json", job["profile"])
+    registry = put("registry.json", job["registry"])
+    (tmp_path / "guard.rs").write_bytes(b"SYNTHETIC source-bound guard")
+    envelope = {"code": "CapacityExceeded", "message": "synthetic guard", "pointer": None}
+    record = {
+        "case_id": job["admission"]["case_id"],
+        "input_sha256": raw_file.byte_hash.split(":")[1],
+        "job_hash": job["job_hash"],
+        "engine": deepcopy(job["engine"]),
+        "envelope": envelope,
+        "runtime_entries_required": 0,
+        "native_guard_source": {
+            "path": "guard.rs",
+            "sha256": sha256((tmp_path / "guard.rs").read_bytes()).split(":")[1],
+        },
+    }
+    provenance = put("provenance.json", record)
+    case = namespace["NegativeCase"](
+        case_id=job["admission"]["case_id"],
+        raw=raw_file,
+        profile=profile,
+        expected_envelope=envelope,
+        expectation_provenance=provenance,
+        layer="resource-preflight",
+    )
+    prepared = SimpleNamespace(
+        root=tmp_path,
+        payload=SimpleNamespace(
+            budget=SimpleNamespace(stdin_bytes=64 * 1024**2),
+            engine=NativeEngineIdentity.model_validate(job["engine"]),
+            registry=registry,
+        ),
+    )
+    assert namespace["_selected_raw"](prepared, case) == (tmp_path / "input.json").read_bytes()
+    if field == "input_sha256":
+        record[field] = "0" * 64
+    elif field == "engine":
+        record[field]["implementation_hash"] = "sha256:" + "0" * 64
+    elif field == "envelope":
+        record[field] = dict(envelope, message="wrong guard")
+    else:
+        record[field]["sha256"] = "0" * 64
+    bad = case.model_copy(update={"expectation_provenance": put("wrong-provenance.json", record)})
+    with pytest.raises(ValueError, match="D3 expectation"):
+        namespace["_selected_raw"](prepared, bad)
