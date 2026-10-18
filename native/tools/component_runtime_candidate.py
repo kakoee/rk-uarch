@@ -371,7 +371,10 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
         "files": [binding(root, p) for p in files],
         "external_files": [binding(Path("/"), p) for p in sorted(external)],
         "python_executable": binding(Path("/"), Path(sys.executable).resolve()),
-        "independent_binding": binding(root, root / B / "consumer-bindings-v2.json"),
+        "independent_binding": binding(
+            root,
+            root / "docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json",
+        ),
         "observation_contract": binding(
             observation_root or root,
             (observation_root or root) / OUTPUT / "observation-contract.json",

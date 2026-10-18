@@ -1,0 +1,19 @@
+import hashlib,json,subprocess
+from pathlib import Path
+r=Path.cwd();p=r/'docs/reviews/U4-A-component-runtime-final-integration-v1';b=r/'docs/reviews/U4-B-component-runtime-final-v1'
+def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+assert h(b/'manifest.json')=='998cb6f26a61de2e66b412f393b6638ff4abab38a19d957bf9156aef48c7e7ed'
+m=json.loads((b/'manifest.json').read_bytes())
+for row in m['files']:assert h(b/row['path'])==row['sha256'],row['path']
+joined=json.loads((r/'docs/reviews/U4-B-component-runtime-final-integration-v1/checks.json').read_bytes())
+for path,row in joined['exact_human_four_postimages'].items():assert h(r/path)==row['after_sha256'],path
+for c in ['07af1a9','6f5a4bf','4e5f9714cb9c2bee8dca12182af05fd7c38d0e78']:subprocess.run(['git','merge-base','--is-ancestor',c,'HEAD'],check=True)
+old=json.loads(Path('/tmp/u4-a-runtime-build-c67d558/source/private-component/BuildInputs.json').read_bytes());changed=[]
+for row in old['source_files']:
+ after='sha256:'+h(r/row['path'])
+ if after!=row['byte_hash']:changed.append({'path':row['path'],'before':row['byte_hash'],'after':after})
+assert changed==joined['actual_current_BuildInputs_changes_from_c67d558']
+pins=json.loads((b/'consumer-bindings-v3.json').read_bytes())['files']
+for path,digest in pins.items():assert h(r/path)==digest.removeprefix('sha256:')
+report={'integrated_commit':subprocess.check_output(['git','rev-parse','HEAD']).decode().strip(),'B_audit_manifest_sha256':h(b/'manifest.json'),'B_audit_leaves_verified':len(m['files']),'human_postimages_verified':joined['exact_human_four_postimages'],'consumer3_current_files_verified':len(pins),'BuildInputs_changes_before_A_amendment':changed,'annotation_reapplied':False,'authority':None}
+(p/'preflight.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))

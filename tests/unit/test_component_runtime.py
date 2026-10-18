@@ -474,3 +474,36 @@ def test_component_refusal_codes_do_not_expand_k2(code):
 def test_component_envelope_keeps_strict_framing(stdout, stderr, status):
     with pytest.raises(component_runner.ProtocolViolation):
         component_runner._decode_envelope(stdout, stderr, status)
+
+
+def test_current_independent_binding_is_prepared(prepared_payload):
+    root, binding, payload, _ = prepared_payload
+    assert payload["consumers"]["independent_binding"]["path"] == (
+        "docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json"
+    )
+    prepared = component_host._prepare_payload(root, binding, mode="debug")
+    assert len(prepared.consumer_pins) == 51
+    prepared.refresh()
+
+
+@pytest.mark.parametrize("kind", ["stale", "wrong"])
+def test_changed_independent_binding_refuses_current_source(prepared_payload, kind):
+    from rkuarch.engines.native.records import FileBinding
+    from validation.component.checks import CheckFailure
+
+    root, _, payload, put = prepared_payload
+    if kind == "stale":
+        pinned = json.loads(
+            (ROOT / "docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json")
+            .read_bytes()
+        )
+    else:
+        path = root / payload["consumers"]["independent_binding"]["path"]
+        pinned = json.loads(path.read_bytes())
+        pinned["files"]["validation/component/runtime_checks.py"] = "0" * 64
+    payload["consumers"]["independent_binding"] = put("changed-consumer.json", pinned)
+    binding = FileBinding.model_validate(put("changed-binding-payload.json", payload))
+    with pytest.raises(
+        CheckFailure, match="consumer source mismatch: validation/component/runtime_checks.py"
+    ):
+        component_host._prepare_payload(root, binding, mode="debug")
