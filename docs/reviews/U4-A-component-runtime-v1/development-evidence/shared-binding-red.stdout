@@ -1,0 +1,30 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_complete_private_preparation_and_echo_transport _____________
+
+prepared_payload = (PosixPath('/tmp/pytest-of-jjaff/pytest-541/test_complete_private_preparat0'), FileBinding(path='payload.json', byte_h...ef4eddf9b69a5ac7abca0862b73789210285ea330e2ff17e05'}, ...}, <function prepared_payload.<locals>.put at 0x7f2af4d82160>)
+
+    def test_complete_private_preparation_and_echo_transport(prepared_payload):
+        root, binding, _, _ = prepared_payload
+>       prepared = component_host._prepare_payload(root, binding, mode="debug")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_component_runtime.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/engines/native/component_host.py:249: in _prepare_payload
+    read(getattr(tools, name))
+src/rkuarch/engines/native/component_host.py:204: in read
+    _require(previous == file, "conflicting component file bindings")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, message = 'conflicting component file bindings'
+
+    def _require(condition: bool, message: str) -> None:
+        if not condition:
+>           raise HostBindingError(message)
+E           rkuarch.engines.native.host.HostBindingError: conflicting component file bindings
+
+src/rkuarch/engines/native/host.py:41: HostBindingError
+=========================== short test summary info ============================
+FAILED tests/unit/test_component_runtime.py::test_complete_private_preparation_and_echo_transport
+1 failed in 0.45s

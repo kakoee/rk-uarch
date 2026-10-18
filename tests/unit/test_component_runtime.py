@@ -164,6 +164,7 @@ def prepared_payload(tmp_path):
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / f["path"], dest)
         sources.append(dict(f, role="config"))
+    sources.append({**tools.cargo_lock.model_dump(mode="json"), "role": "config"})
     sources.sort(key=lambda f: f["path"])
     model = [sources[0]]
     build = {

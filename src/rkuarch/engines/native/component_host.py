@@ -201,7 +201,7 @@ def _prepare_payload(
     def read(file: FileBinding, base: Path = root) -> bytes:
         data = _read(base, file)
         previous = reads.setdefault((base, file.path), file)
-        _require(previous == file, "conflicting component file bindings")
+        _require(previous.byte_hash == file.byte_hash, "conflicting component file bindings")
         return data
 
     def record(cls: Any, file: FileBinding) -> Any:
