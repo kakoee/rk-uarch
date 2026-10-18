@@ -1,0 +1,26 @@
+import importlib.util,json
+from pathlib import Path
+from uarch_contract.hashing import sha256
+from validation.component.runtime_campaign import POLICY,schedule
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.records import FileBinding
+from validation.component.checks import CheckFailure
+r=Path.cwd();w=Path('/tmp/u4-b-runtime-joined-audit-01');a=w/'evidence/final';spec=importlib.util.spec_from_file_location('frozen_adapter',r/'native/tools/component_private_adapter.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);adapter=m.PrivateAdapter(r.parent,w/'processes');sel=json.loads((r/'private-component/selection.json').read_bytes());rows={x['case_id']:x for x in sel['rows']};names=['v3:cc0-v3','v3:B-native-resource-C07-sram-1','v3:C04-carrier'];setup=adapter.preflight(dict(sel,rows=[rows[n] for n in names]),POLICY);slots=schedule(sel,names)
+report={'scope':'B new six-process cfg(test) binding3 integration selection; no build/public execution','source_commit':'cc899d289c84aa837cd72ca23956c29443a2af40','payload':setup['execution_binding'],'complete_positive_preparation':len(adapter.prepared['debug'].selection_rows),'current_file_checks':len(adapter.prepared['debug'].checks),'cases':[],'binding_controls':[]};assert report['complete_positive_preparation']==104;assert report['current_file_checks']==1297
+for mode in ('debug','release'):
+ initial=None
+ for phase in ('initial','replay'):
+  n='v3:cc0-v3';slot=next(x for x in slots if (x['case_id'],x['mode'],x['phase'],x['repetition'])==(n,mode,phase,0));res=adapter.call(slot,rows[n],initial,POLICY);value=res['stdout'];assert value==(a/'outputs'/mode/'focused'/(n+'.json')).read_bytes();assert json.loads(value)['duration_ps']==121000
+  entry={k:v for k,v in res.items() if not isinstance(v,bytes)};entry['slot']=slot;entry.update({k+'_byte_hash':sha256(res[k]) for k in ('raw_input','stdout','stderr')});report['cases'].append(entry);initial={'outcome':'success','raw_input_sha256':sha256(res['raw_input']).split(':')[1],'execution_binding':setup['execution_binding']};print(n,mode,phase,res['outcome'],flush=True)
+for n,mode in [('v3:B-native-resource-C07-sram-1','debug'),('v3:C04-carrier','release')]:
+ slot=next(x for x in slots if (x['case_id'],x['mode'],x['phase'],x['repetition'])==(n,mode,'initial',0));res=adapter.call(slot,rows[n],None,POLICY);assert res['stderr']==(a/'outputs'/mode/'focused'/(n+'.json')).read_bytes();entry={k:v for k,v in res.items() if not isinstance(v,bytes)};entry['slot']=slot;entry.update({k+'_byte_hash':sha256(res[k]) for k in ('raw_input','stdout','stderr')});report['cases'].append(entry);print(n,mode,res['outcome'],flush=True)
+assert len({x['process_identity'] for x in report['cases']})==6
+base=json.loads((r/'private-component/prospective-payload.json').read_bytes());report['binding_controls'].append({'kind':'matching','accepted':True,'positive_definitions':104,'file_checks':1297})
+for kind in ('stale','wrong'):
+ path=r/'private-component'/('control-'+kind+'-payload.json');variant=json.loads(path.read_bytes());assert {k:v for k,v in base.items() if k!='consumers'}=={k:v for k,v in variant.items() if k!='consumers'};assert {k:v for k,v in base['consumers'].items() if k!='independent_binding'}=={k:v for k,v in variant['consumers'].items() if k!='independent_binding'}
+ assert path.read_bytes()==(a/'source'/path.relative_to(r)).read_bytes()
+ try:_prepare_payload(r,FileBinding(path=str(path.relative_to(r)),byte_hash=sha256(path.read_bytes())),mode='debug')
+ except CheckFailure as ex:assert str(ex)=='consumer source mismatch: validation/component/runtime_checks.py';report['binding_controls'].append({'kind':kind,'payload_hash':sha256(path.read_bytes()),'refusal':str(ex),'native_dispatch':False})
+ else:raise AssertionError('bad binding accepted')
+ print(kind,'exact identity refusal',flush=True)
+(w/'process-checks.json').write_text(json.dumps(report,indent=2)+'\n')

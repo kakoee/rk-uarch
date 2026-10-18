@@ -1,0 +1,11 @@
+import hashlib,json,shutil,subprocess,tarfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');p=r/'docs/reviews/U4-B-component-runtime-joined-final-v1';w=Path('/tmp/u4-b-runtime-joined-lint-01');w.mkdir();s=w/'source';s.mkdir()
+f=p/'README.md';f.write_text(f.read_text().replace('payload/3-consumer identity','payload and binding/3 identity'))
+shutil.copyfile('/tmp/u4-b-joined-package.py',p/'executed-recipes/u4-b-joined-package.py.txt')
+subprocess.run(['git','add',str(p.relative_to(r))],cwd=r,check=True);tree=subprocess.check_output(['git','write-tree'],cwd=r).decode().strip();a=w/'source.tar';subprocess.run(['git','archive','-o',str(a),tree],cwd=r,check=True)
+with tarfile.open(a) as t:t.extractall(s,filter='data')
+cmd=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff','check','.'];run=subprocess.run(cmd,cwd=s,capture_output=True);(p/'evidence/ruff.stdout').write_bytes(run.stdout);(p/'evidence/ruff.stderr').write_bytes(run.stderr);assert run.returncode==0,run.stdout
+lint={'scope':'clean tracked staged-tree export; root Ruff, no exclusions added','tree':tree,'argv':cmd,'cwd':str(s),'exit_code':run.returncode};(p/'evidence/lint.json').write_text(json.dumps(lint,indent=2)+'\n');checks=json.loads((p/'checks.json').read_bytes());checks['B_executed']['clean_tracked_root_ruff']='passed';(p/'checks.json').write_text(json.dumps(checks,indent=2)+'\n')
+shutil.copyfile('/tmp/u4-b-joined-finish.py',p/'executed-recipes/u4-b-joined-finish.py.txt')
+files=[{'path':str(f.relative_to(p)),'sha256':hashlib.sha256(f.read_bytes()).hexdigest(),'bytes':f.stat().st_size} for f in sorted(p.rglob('*')) if f.is_file() and f.name!='manifest.json'];manifest={'format':'B-integrated-component-runtime-review-manifest/1','source':'cc899d289c84aa837cd72ca23956c29443a2af40','handoff':'0ba682479dfd1186e4568b5bfc12df13ea75316d','files':files,'acyclic':'manifest excludes itself; publishing commit binds manifest','authority':None};(p/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');print('Root Ruff passed;',len(files),'manifest leaves; manifest sha256',hashlib.sha256((p/'manifest.json').read_bytes()).hexdigest())

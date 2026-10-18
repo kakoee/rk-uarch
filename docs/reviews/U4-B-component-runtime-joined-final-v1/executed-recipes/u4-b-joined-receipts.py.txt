@@ -1,0 +1,43 @@
+import hashlib,json,subprocess
+from pathlib import Path
+w=Path('/tmp/u4-b-runtime-joined-audit-01');e=w/'evidence/final';s=w/'source';r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');p=r/'docs/reviews/U4-A-component-runtime-final-integration-v1';ids=json.loads((p/'identities.json').read_bytes());old=Path('/tmp/u4-a-runtime-build-c67d558/source');report={'scope':'B independent audit of A-executed receipts; no new executions in this script','processes':[],'ordinary_refusals':[],'saved_output_and_D3_checks':[]}
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+selection=json.loads((e/'source/private-component/selection.json').read_bytes());rows={x['case_id']:x for x in selection['rows']};neg={x['case_id']:x for x in json.loads((e/'source/private-component/negative-inventory.json').read_bytes())['cases']};probes=json.loads((e/'native-probes.json').read_bytes());assert len(probes['cases'])==12 and len({x['process_identity'] for x in probes['cases']})==12
+for row in probes['cases']:
+ slot=row['slot'];folder=e/'native-probes'/f"{slot['ordinal']:05d}";receipt=json.loads((folder/'receipt.json').read_bytes());raw=(folder/'input/case.json').read_bytes();value=(folder/'output/result/case.json').read_bytes();status=int((folder/'output/result/case.status').read_text());entries=int((folder/'output/result/case.runtime-entries').read_text());job=json.loads(raw)
+ assert h(raw)==row['raw_input_byte_hash']==receipt['raw_input_byte_hash'];assert h(value)==receipt['semantic_output_byte_hash']==row['stdout_byte_hash' if status==0 else 'stderr_byte_hash'];assert raw==(e/'source/private-component/jobs'/(slot['case_id']+'.json')).read_bytes()
+ assert receipt['harness_exit_code']==0 and b'1 passed' in (folder/'harness.stdout').read_bytes();assert receipt['semantic_status']==status;assert receipt['runtime_entries']==entries;assert receipt['test_executable_byte_hash']==ids['modes'][slot['mode']]['test_executable_byte_hash'];assert row['process_identity']=='docker:'+receipt['container_id']+':pid1';assert receipt['container_id']==(folder/'container.id').read_text().strip()
+ assert '--network' in receipt['argv'] and 'none' in receipt['argv'] and 'never' in receipt['argv'];assert value==(e/'outputs'/slot['mode']/'focused'/(slot['case_id']+'.json')).read_bytes();assert value==(e/'outputs/debug/focused'/(slot['case_id']+'.json')).read_bytes()
+ previous=(old.parent/'outputs'/slot['mode']/'selected'/(slot['case_id']+'.json')).read_bytes()
+ if status==0:
+  result=json.loads(value);prior=json.loads(previous);assert entries==1;assert result['duration_ps']=={'v3:cc0-v3':121000,'v3:B-native-O2':2735000}[slot['case_id']];assert result['engine']==job['engine']==ids['engine'] and result['job_hash']==job['job_hash'];assert {k:v for k,v in result.items() if k not in ('engine','job_hash','result_hash')}=={k:v for k,v in prior.items() if k not in ('engine','job_hash','result_hash')}
+ else:
+  assert status==2 and entries==0 and value==previous;error=json.loads(value);assert error['code']==neg[slot['case_id']]['expected_code']==rows[slot['case_id']]['expected_code'];assert error['pointer']==neg[slot['case_id']]['expected_pointer']
+ report['processes'].append({'case_id':slot['case_id'],'mode':slot['mode'],'phase':slot['phase'],'receipt_sha256':h((folder/'receipt.json').read_bytes()),'status':status,'runtime_entries':entries,'layer':rows[slot['case_id']]['expected_layer'],'semantic_output_sha256':h(value)})
+for mode in ('debug','release'):
+ for name,data,code in [('malformed',b'\xff','InvalidJson'),('protocol',b'{}','UnsupportedProtocol'),('component',(e/'source/private-component/affected-inputs/v3:A-C02-cold.json').read_bytes(),'TestProfileMismatch'),('k2-substitution',(s/'native/crates/uarch-engine/testdata/synthetic-kernel-job.json').read_bytes(),'TestProfileMismatch')]:
+  stem=mode+'-process-corrected-'+name;f=e/'commands'/(stem+'.json');cmd=json.loads(f.read_bytes());assert cmd['exit_code']==2 and cmd['stdin_hash']==h(data) and '-i' in cmd['argv'];assert not (e/'commands'/(stem+'.stdout')).read_bytes()
+  for stream in ('stdout','stderr'):assert h((e/'commands'/(stem+'.'+stream)).read_bytes())==cmd[stream+'_hash']
+  err=json.loads((e/'commands'/(stem+'.stderr')).read_bytes());assert err['code']==code
+  if name=='component':assert err['message']=='component public authority absent'
+  report['ordinary_refusals'].append({'name':stem,'receipt_sha256':h(f.read_bytes()),'executable_sha256':ids['modes'][mode]['executable_byte_hash'],'exit_code':2,'code':code})
+replay=json.loads((e/'replay-D3-checks.json').read_bytes());assert replay['payload_byte_hash']==ids['payload']['byte_hash'] and replay['consumer_binding']==ids['consumer3'];assert len(replay['checks'])==8
+for row in replay['checks']:
+ raw=(e/'source/private-component/jobs'/(row['case_id']+'.json')).read_bytes();value=(e/'outputs'/row['mode']/'focused'/(row['case_id']+'.json')).read_bytes();assert h(raw)==row['raw_byte_hash'] and h(value)==row['output_byte_hash']
+ if 'code' in row:
+  f=e/Path(row['zero_entry_receipt']).relative_to('/tmp/u4-a-runtime-build-cc899d2');assert h(f.read_bytes())==row['zero_entry_receipt_byte_hash'];assert json.loads(f.read_bytes())['runtime_entries']==0
+ report['saved_output_and_D3_checks'].append(row)
+# Explicit source applicability, independent of equal output durations.
+for folder in ('native/crates/uarch-engine/src','src/rkuarch/engines/native','contract/uarch_contract'):
+ paths={x.relative_to(s) for x in (s/folder).rglob('*') if x.is_file() and x.suffix in ('.py','.rs')};assert paths=={x.relative_to(old) for x in (old/folder).rglob('*') if x.is_file() and x.suffix in ('.py','.rs')};assert all((s/x).read_bytes()==(old/x).read_bytes() for x in paths)
+report['unchanged_Rust_host_runner_contract']=True
+prior=r/'docs/reviews/U4-B-component-runtime-final-v1';faults=json.loads((prior/'evidence/fault-restoration.json').read_bytes());fmap={'component_runner.check_v3 invocation':'src/rkuarch/engines/native/component_runner.py','runtime_checks.verify_sources byte equality':'validation/component/runtime_checks.py'}
+for f in faults:assert h((s/fmap[f['guard']]).read_bytes())=='sha256:'+f['restored']
+report['inherited_faults_exact_full_source_match']=faults
+support=json.loads((r/'docs/reviews/U4-B-component-native-audit-v1/source-audit-final.json').read_bytes())['selected_support'];assert all(h((s/n).read_bytes())=='sha256:'+v for n,v in support.items());report['unchanged_selected_support']=len(support)
+gaps=json.loads((r/'docs/reviews/U4-B-component-runtime-preparation-v1/read-audit-remaining.json').read_bytes())['raw_gaps']
+for g in gaps:assert h(Path(g['path']).read_bytes())=='sha256:'+g['sha256'];assert Path(g['path']).read_text().splitlines()[g['line']-1]==g['record']
+report['unresolved_read_gaps']=gaps;report['read_audit_complete']=False
+for name,digest in [('D3-v3-unapplied.patch','f428c7a1ae4488101b79673af0441e24791f41b5339edb8b0685bde870f445c5'),('component_negative-v3.py.txt','b54b029a0db97a8ce754d6ab63c3676f262d01ef0734fe86b8217abba706ed62')]:assert h((s/'docs/reviews/U4-A-component-runtime-v1/proposals'/name).read_bytes())=='sha256:'+digest
+assert not (s/'src/rkuarch/engines/native/component_negative.py').exists();report['D3_unchanged_unapplied']=True
+(w/'receipt-audit.json').write_text(json.dumps(report,indent=2)+'\n');print('Verified inherited: 12 cfg(test) processes,8 ordinary refusals,4 saved-output+4 D3 checks; source/fault applicability,56 support files and3 unresolved raw gaps')

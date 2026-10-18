@@ -1,0 +1,46 @@
+import hashlib,json,re,subprocess,tarfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');p=r/'docs/reviews/U4-A-component-runtime-final-integration-v1';w=Path('/tmp/u4-b-runtime-joined-audit-01');w.mkdir();e=w/'evidence';e.mkdir();s=w/'source';s.mkdir();actual=Path('/tmp/u4-a-runtime-build-cc899d2/source');old=Path('/tmp/u4-a-runtime-build-c67d558/source')
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+def canon(v):return json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
+manifest=json.loads((p/'manifest.json').read_bytes())
+for f in manifest['files']:
+ b=(p/f['path']).read_bytes();assert h(b)==f['byte_hash'] and len(b)==f['bytes'],f['path']
+index=json.loads((p/'evidence-files.json').read_bytes());assert h((p/'evidence.tar.gz').read_bytes())==index['archive']['byte_hash'];members={f['path']:f for f in index['members']}
+with tarfile.open(p/'evidence.tar.gz') as t:
+ assert len(t.getmembers())==len(members) and set(t.getnames())==set(members)
+ for f in t.getmembers():
+  assert f.isfile() and not Path(f.name).is_absolute() and '..' not in Path(f.name).parts;b=t.extractfile(f).read();assert h(b)==members[f.name]['byte_hash'] and len(b)==members[f.name]['bytes']
+ t.extractall(e,filter='data')
+subprocess.run(['git','archive','-o',str(w/'source.tar'),'cc899d289c84aa837cd72ca23956c29443a2af40'],cwd=r,check=True)
+with tarfile.open(w/'source.tar') as t:t.extractall(s,filter='data')
+ids=json.loads((p/'identities.json').read_bytes());a=e/'final/source';build=json.loads((a/'private-component/BuildInputs.json').read_bytes());before=json.loads((old/'private-component/BuildInputs.json').read_bytes());bm={x['path']:x for x in before['source_files']};am={x['path']:x for x in build['source_files']};assert bm.keys()==am.keys() and len(am)==228
+changes=[]
+for n,row in am.items():
+ assert h((s/n).read_bytes())==h((actual/n).read_bytes())==row['byte_hash']
+ assert h((old/n).read_bytes())==bm[n]['byte_hash']
+ if row!=bm[n]:changes.append({'path':n,'before':bm[n]['byte_hash'],'after':row['byte_hash']})
+assert changes==ids['changed_BuildInputs'] and len(changes)==3
+assert {k:v for k,v in build.items() if k not in ('source_commit','source_files')}=={k:v for k,v in before.items() if k not in ('source_commit','source_files')}
+assert h(canon(build))==ids['engine']['implementation_hash'];assert build['source_commit']==ids['source_commit'];assert h((w/'source.tar').read_bytes())==json.loads((e/'final/preparation.json').read_bytes())['source_archive']['byte_hash']
+generated=(a/'native/crates/uarch-engine/generated/identity.rs').read_bytes();assert generated==(actual/'native/crates/uarch-engine/generated/identity.rs').read_bytes()
+for key,expected in [('ENGINE',ids['engine']),('TRUST',json.loads((a/'private-component/BuildTrust.json').read_bytes()))]:
+ val=re.search(r'pub const '+key+r'_JSON: &str = r###"(.*?)"###;',generated.decode(),re.S);assert val and json.loads(val[1])==expected
+assert h((actual/ids['consumer3']['path']).read_bytes())==ids['consumer3']['byte_hash'];assert h((actual/ids['payload']['path']).read_bytes())==ids['payload']['byte_hash'];assert (a/ids['payload']['path']).read_bytes()==(actual/ids['payload']['path']).read_bytes()
+for group in [ids['modes'],ids['previous_candidate']['modes']]:
+ for mode,v in group.items():
+  for key in ('executable','test_executable'):assert h(Path(v[key]).read_bytes())==v[key+'_byte_hash']
+for mode in ('debug','release'):
+ receipt=json.loads((a/'private-component/receipts'/mode/'BuildReceipt.json').read_bytes());assert receipt['engine']==ids['engine'] and receipt['build_input_hash']==ids['engine']['implementation_hash'];assert receipt['generated_identity']['byte_hash']==h(generated);assert receipt['executable']['byte_hash']==ids['modes'][mode]['executable_byte_hash']
+ for k in ('executable','generated_identity','build_log','environment','loader_observations'):
+  f=receipt[k];assert h((actual/f['path']).read_bytes())==f['byte_hash']
+trans=json.loads((a/'private-component/previous-candidate-job-transition.json').read_bytes());newpaths={x['case_id']:x['file']['path'] for x in json.loads((a/'private-component/job-transitions.json').read_bytes())};oldpaths={x['case_id']:x['file']['path'] for x in json.loads((old/'private-component/job-transitions.json').read_bytes())};assert len(trans)==len(newpaths)==len(oldpaths)==124;assert {t['case_id'] for t in trans}==newpaths.keys()==oldpaths.keys()
+verified=[]
+for t in trans:
+ n=t['case_id'];raw=(a/newpaths[n]).read_bytes();prior=(old/oldpaths[n]).read_bytes();assert h(raw)==t['new_raw_byte_hash'] and h(prior)==t['old_raw_byte_hash'];job=json.loads(raw);pre=json.loads(prior)
+ for kind,value in [('new',job),('old',pre)]:assert value['job_hash']==t[kind+'_job_hash']==h(canon({k:v for k,v in value.items() if k!='job_hash'}))
+ changed=json.loads(prior);changed['engine']['implementation_hash']=ids['engine']['implementation_hash'];changed['job_hash']=job['job_hash'];assert changed==job and canon(job)==raw;assert t['only_changed_fields']==['engine.implementation_hash','job_hash']
+ verified.append(t)
+assert (a/'private-component/selection.json').read_bytes()==(old/'private-component/selection.json').read_bytes()
+report={'source':ids['source_commit'],'handoff':'0ba682479dfd1186e4568b5bfc12df13ea75316d','manifest_files':len(manifest['files']),'archive_members':len(members),'archive_sha256':index['archive']['byte_hash'],'changed_BuildInputs':changes,'unchanged_BuildInputs':225,'all_other_BuildInputs_fields_except_source_commit_unchanged':True,'source_archive_sha256':h((w/'source.tar').read_bytes()),'generated_identity_sha256':h(generated),'eight_old_and_new_binary_hashes_verified':True,'engine':ids['engine'],'consumer3':ids['consumer3'],'payload':ids['payload'],'only_job_changes':['engine.implementation_hash','job_hash'],'job_transitions':verified,'authority':None}
+(w/'identity-audit.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({k:v for k,v in report.items() if k!='job_transitions'},indent=2))

@@ -1,0 +1,22 @@
+import copy,hashlib,json,subprocess
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');w=Path('/tmp/u4-b-runtime-joined-audit-01');s=w/'source';a=w/'evidence/final/source';old=Path('/tmp/u4-a-runtime-build-c67d558/source');ids=json.loads((r/'docs/reviews/U4-A-component-runtime-final-integration-v1/identities.json').read_bytes())
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+embedded={};raw=json.dumps(ids['engine'],sort_keys=True,separators=(',',':')).encode()
+for mode,row in ids['modes'].items():assert raw in Path(row['executable']).read_bytes();embedded[mode]=row['executable_byte_hash']
+new=json.loads((a/'private-component/negative-inventory.json').read_bytes());prior=json.loads((old/'private-component/negative-inventory.json').read_bytes());assert len(new['cases'])==len(prior['cases'])==20
+for n,b in zip(new['cases'],prior['cases'],strict=True):
+ x=copy.deepcopy(n);x['raw']['byte_hash']=b['raw']['byte_hash'];assert x==b
+ for key in ['raw','profile']:assert h((a/n[key]['path']).read_bytes())==n[key]['byte_hash']
+ assert (a/n['profile']['path']).read_bytes()==(old/b['profile']['path']).read_bytes()
+# The exact B amendment, including path identity, is the only preparation-tool change.
+p=w/'patch-proof';(p/'native/tools').mkdir(parents=True);name='native/tools/component_runtime_candidate.py';(p/name).write_bytes((old/name).read_bytes());subprocess.run(['git','apply',str(s/'docs/reviews/U4-B-component-runtime-final-v1/A-binding3-unapplied.patch')],cwd=p,check=True);assert (p/name).read_bytes()==(s/name).read_bytes()
+for file in ['docs/reviews/U4-B-issue-edge-F2-F3-v1/restriction.py','docs/reviews/U4-B-issue-edge-F2-F3-v1/reproducers.json','docs/reviews/U4-B-issue-edge-stage2-v1/first_use.py','docs/decisions/U0024-temporary-local-native-development-gate.md']:
+ if (old/file).exists():assert (s/file).read_bytes()==(old/file).read_bytes()
+# Exact old B audit package stays frozen.
+root=r/'docs/reviews/U4-B-component-runtime-final-v1';m=json.loads((root/'manifest.json').read_bytes())
+for f in m['files']:assert h((root/f['path']).read_bytes())=='sha256:'+f['sha256']
+# All current independent consumer pins; guard invariants do not depend on caller rehash.
+pins=json.loads((s/ids['consumer3']['path']).read_bytes())['files'];assert len(pins)==51;assert all(h((s/name).read_bytes())=='sha256:'+digest for name,digest in pins.items())
+report={'ordinary_binaries_contain_new_engine_json':embedded,'negative_definitions':20,'negative_changes_only_raw_byte_hash':True,'negative_profile_files_identical':True,'exact_B_tool_patch_postimage':h((p/name).read_bytes()) if name=='native/tools/component_runtime_candidate.py' else h((p/'native/tools/component_runtime_candidate.py').read_bytes()),'historical_B_package_leaves_preserved':len(m['files']),'matching_consumer_pins':51,'authority':None}
+(w/'preservation.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))
