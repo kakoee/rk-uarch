@@ -1,0 +1,21 @@
+import json
+from pathlib import Path
+from uarch_contract.hashing import sha256,canonical_json
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.component_runner import _consume
+from rkuarch.engines.native.records import FileBinding
+import rkuarch.workload.mapped as producer
+r=Path.cwd(); o=r.parent;p=r/'private-component';f=p/'prospective-payload-v2.json'
+payload=_prepare_payload(r,FileBinding(path=str(f.relative_to(r)),byte_hash=sha256(f.read_bytes())),mode='debug')
+def unavailable(*a,**k):raise AssertionError('producer unavailable')
+producer.export_component_job=unavailable;producer.export_component_bundle=unavailable
+rawinput=(p/'affected-inputs/v3:cc0-v3.json').read_bytes()
+raw=(o/'outputs/debug/selected/v3:cc0-v3.json').read_bytes()
+result=_consume(payload,json.loads(rawinput),raw,b'',0)
+assert canonical_json(result).encode()==raw
+transition=json.loads((p/'payload-transition.json').read_bytes())
+check_paths={str(x[0].resolve()) for x in payload.checks}
+for row in transition['added_runtime_files']:assert str((Path('/')/row['path']).resolve()) in check_paths,row
+payload.refresh()
+report={'scope':'one saved-output replay and complete current-byte preparation under data-only payload v2; no native execution','source_commit':'c67d558d61690bb346c86eb38cf0a170c03611e7','payload_byte_hash':sha256(f.read_bytes()),'input_byte_hash':sha256(rawinput),'output_byte_hash':sha256(raw),'producer_preparation':'unavailable','current_file_checks':len(payload.checks),'added_runtime_bindings_verified':len(transition['added_runtime_files']),'verdict':'structural + check_v3 + B pinned consume_case + literals passed'}
+(o/'payload-v2-check.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))

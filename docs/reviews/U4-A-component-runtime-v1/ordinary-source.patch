@@ -1,0 +1,2263 @@
+diff --git a/native/crates/uarch-engine/src/component.rs b/native/crates/uarch-engine/src/component.rs
+index 75fcc7a..9411dc8 100644
+--- a/native/crates/uarch-engine/src/component.rs
++++ b/native/crates/uarch-engine/src/component.rs
+@@ -9,6 +9,10 @@ use crate::{
+ };
+ use serde_json::Value;
+ use std::collections::{BTreeMap, BTreeSet};
++#[cfg(test)]
++thread_local! {
++    pub(crate) static TEST_RUNTIME_ENTRIES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
++}
+ fn overflow() -> crate::Refusal {
+     refuse("TimeOverflow", "", "checked component arithmetic")
+ }
+@@ -927,6 +931,8 @@ impl Runtime {
+         Ok(changed)
+     }
+     fn run(mut self, v: &Admitted) -> Result<Self> {
++        #[cfg(test)]
++        TEST_RUNTIME_ENTRIES.with(|n| n.set(n.get() + 1));
+         loop {
+             while let Some(event) = self.wheel.peek() {
+                 if event.t_ps != self.now {
+@@ -1058,7 +1064,7 @@ mod kernel_tests {
+     }
+ }
+ 
+-// PRIVATE UNAPPLIED prototype seam; public protocol does not select this version.
++// Installed model/observation seam; public launch still requires separate authority.
+ pub(crate) fn execute_with_observations(
+     input: &str,
+     trust: &Trust,
+diff --git a/native/crates/uarch-engine/src/protocol.rs b/native/crates/uarch-engine/src/protocol.rs
+index 4c08531..66ee06e 100644
+--- a/native/crates/uarch-engine/src/protocol.rs
++++ b/native/crates/uarch-engine/src/protocol.rs
+@@ -23,13 +23,26 @@ fn authority() -> Result<admission::Trust> {
+         wire::parse(generated::ENGINE_JSON).map_err(|e| refuse("InternalError", "", e))?;
+     let trust: Value =
+         wire::parse(generated::TRUST_JSON).map_err(|e| refuse("InternalError", "", e))?;
+-    if trust["format"] == "uarch-component-build-trust/1" {
++    if matches!(
++        trust["format"].as_str(),
++        Some("uarch-component-build-trust/1" | "uarch-component-build-trust/2")
++    ) {
+         return Err(refuse(
+             "TestProfileMismatch",
+             "",
+             "component public authority absent",
+         ));
+     }
++    if trust["format"] != "uarch-k2-build-trust/1"
++        || engine["model"]["name"] != "fixed-delay"
++        || engine["model"]["version"] != "1"
++    {
++        return Err(refuse(
++            "TestProfileMismatch",
++            "",
++            "uninstalled compiled authority format",
++        ));
++    }
+     let registry = trust["registry_hash"]
+         .as_str()
+         .ok_or_else(|| refuse("InternalError", "", "compiled registry"))?
+@@ -119,8 +132,26 @@ pub fn respond(input: &[u8]) -> Result<Vec<u8>> {
+         ));
+     }
+     let trust = authority()?;
++    respond_admitted(text, &raw, &trust)
++}
++fn respond_admitted(text: &str, raw: &Value, trust: &admission::Trust) -> Result<Vec<u8>> {
+     if raw["workload_closure"]["scope"]["kind"] != "kernel_fixture" {
+-        let result = crate::component::execute(text, &trust)?;
++        let result = if trust.engine["model"]["version"] == "2" {
++            if raw["profile"]["format"] != "uarch-native-test-profile/2" {
++                return Err(refuse(
++                    "TestProfileMismatch",
++                    "/profile/format",
++                    "component profile/2 required",
++                ));
++            }
++            crate::component::execute_with_observations(
++                text,
++                trust,
++                crate::component::ObservationVersion::V3,
++            )?
++        } else {
++            crate::component::execute(text, trust)?
++        };
+         let bytes = wire::canonical(&result)
+             .map_err(|e| refuse("InternalError", "", e))?
+             .into_bytes();
+@@ -129,7 +160,7 @@ pub fn respond(input: &[u8]) -> Result<Vec<u8>> {
+         }
+         return Ok(bytes);
+     }
+-    let v = admission::validate(text, &trust)?;
++    let v = admission::validate(text, trust)?;
+     caps(&v)?;
+     let out = Simulation::with_releases(
+         v.clocks.clone(),
+@@ -169,3 +200,70 @@ mod tests {
+         assert_eq!(respond(b"{}").unwrap_err().code, "UnsupportedProtocol");
+     }
+ }
++
++#[cfg(test)]
++mod component_runtime_tests {
++    use super::*;
++    use std::collections::{BTreeMap, BTreeSet};
++    fn anchor(v: &Value) -> admission::Trust {
++        admission::Trust {
++            registry: v["registry"]["registry_hash"].as_str().unwrap().into(),
++            profiles: BTreeMap::from([(
++                v["profile"]["profile_hash"].as_str().unwrap().into(),
++                BTreeSet::from([v["admission"]["case_id"].as_str().unwrap().into()]),
++            )]),
++            engine: v["engine"].clone(),
++        }
++    }
++    #[test]
++    fn installed_model_two_routes_to_observations_three() {
++        let v: Value =
++            serde_json::from_str(include_str!("../testdata/synthetic-runtime-cc0-v3.json"))
++                .unwrap();
++        crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.set(0));
++        let bytes = respond_admitted(&wire::canonical(&v).unwrap(), &v, &anchor(&v)).unwrap();
++        let out = wire::parse(std::str::from_utf8(&bytes).unwrap()).unwrap();
++        assert_eq!(out["observations"]["format"], "uarch-native-observations/3");
++        assert_eq!(out["duration_ps"], 121000);
++        assert_eq!(crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.get()), 1);
++        let mut wrong = v.clone();
++        wrong["profile"]["format"] = json!("uarch-native-test-profile/1");
++        crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.set(0));
++        let error =
++            respond_admitted(&wire::canonical(&wrong).unwrap(), &wrong, &anchor(&v)).unwrap_err();
++        assert_eq!(error.code, "TestProfileMismatch");
++        assert_eq!(error.pointer, "/profile/format");
++        assert_eq!(crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.get()), 0);
++    }
++    #[test]
++    #[ignore = "explicit private synthetic anchors; no public authority"]
++    fn private_selected_transport_probe() {
++        let input = std::path::PathBuf::from(std::env::var("COMPONENT_PRIVATE_INPUT").unwrap());
++        let output = std::path::PathBuf::from(std::env::var("COMPONENT_PRIVATE_OUTPUT").unwrap());
++        std::fs::create_dir(&output).unwrap();
++        let mut files: Vec<_> = std::fs::read_dir(input)
++            .unwrap()
++            .map(|x| x.unwrap().path())
++            .collect();
++        files.sort();
++        for path in files {
++            let raw = std::fs::read_to_string(&path).unwrap();
++            let v = wire::parse(&raw).unwrap();
++            crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.set(0));
++            let (bytes, status) = match respond_admitted(&raw, &v, &anchor(&v)) {
++                Ok(bytes) => (bytes, 0),
++                Err(error) => (error_bytes(&error), 2),
++            };
++            let entries = crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.get());
++            assert_eq!(entries, if status == 0 { 1 } else { 0 });
++            let name = path.file_stem().unwrap().to_str().unwrap();
++            std::fs::write(output.join(format!("{name}.json")), bytes).unwrap();
++            std::fs::write(output.join(format!("{name}.status")), status.to_string()).unwrap();
++            std::fs::write(
++                output.join(format!("{name}.runtime-entries")),
++                entries.to_string(),
++            )
++            .unwrap();
++        }
++    }
++}
+diff --git a/native/crates/uarch-engine/testdata/synthetic-runtime-cc0-v3.json b/native/crates/uarch-engine/testdata/synthetic-runtime-cc0-v3.json
+new file mode 100644
+index 0000000..25c220c
+--- /dev/null
++++ b/native/crates/uarch-engine/testdata/synthetic-runtime-cc0-v3.json
+@@ -0,0 +1 @@
++{"admission":{"case_id":"SYNTHETIC-REVIEWER-same-instant-credit-cc0-v3","checkpoint":"B","eligibility":"verification_only","invocation":"test","profile_hash":"sha256:6e1976d9e6eedbc2c4d995b36f045d47a5e6f7877a4b0e7e56f598770f4d31de"},"assumptions":{"arbitration":"fifo-ready/1","assumptions_hash":"sha256:53defdf4c304d46931b443cc86bf5ff2a36ff703d2c52aba319c3a97df0e0956","bank_placement":"contiguous-equal-regions/1","compute":"ws-stage-overhead-wave-drain/1","format":"uarch-mapped-assumptions/1","hbm_addressing":"stripe256-channel8-controller-pairs/1","limitations":["schema-only inputs; not runtime evidence","STUB; unknown accuracy; unverified energy"],"owner_enumeration":"native-owners/1","semantics_revision":"U0011-stage2/1","transport":"E4-named-edges-rational-service/2"},"assumptions_hash":"sha256:53defdf4c304d46931b443cc86bf5ff2a36ff703d2c52aba319c3a97df0e0956","bundle_hash":"sha256:a8e384d696639056dc0c643c215183f992e8c45c3e72a8477a0914d43b58d5b4","clock_setup":[],"engine":{"compiler_lock_hash":"sha256:ed28b3de6bc36549be667ddbecfbf47f413ebe5c8fde0567589cf85e95541768","implementation_hash":"sha256:946f30fb592389f8182b0dcfd7c80ff07029292834123f8bd10bb613d20ee060","model":{"implementation_hash":"sha256:9c00434cd2536a5291a6495a9e7fc078b6e2407ce31606f90f0c2f3b9834dccc","name":"native-intervals","version":"2"},"name":"native","version":"native-stage/1"},"fidelity_detail":{"compute":1,"dram":0,"layer_reuse":false,"noc":0,"sync":"exact"},"freq_hz":{"core":1000000000,"dram":1000000000,"noc":1200000000},"frequency_ratio":1.0,"hardware":{"format":"uarch-resolved-hardware/1","hardware_spec_hash":"sha256:31c7f51353e2dbc308ebbd794b46a52dc8ce62bfca204baff76343211af983d9","leaves":[{"path":"/clock_domains/core/freq_hz/date","value":null},{"path":"/clock_domains/core/freq_hz/kind","value":"stipulation"},{"path":"/clock_domains/core/freq_hz/provenance","value":null},{"path":"/clock_domains/core/freq_hz/rationale","value":"B1 hardware proposal, pending Javid: core target clock; no fitted efficiency; a design input, not a measured claim."},{"path":"/clock_domains/core/freq_hz/source","value":null},{"path":"/clock_domains/core/freq_hz/unit","value":"Hz"},{"path":"/clock_domains/core/freq_hz/value","value":{"denominator":1,"numerator":1000000000}},{"path":"/clock_domains/core/scales_with_core","value":true},{"path":"/clock_domains/dram/freq_hz/date","value":null},{"path":"/clock_domains/dram/freq_hz/kind","value":"stipulation"},{"path":"/clock_domains/dram/freq_hz/provenance","value":null},{"path":"/clock_domains/dram/freq_hz/rationale","value":"B1 hardware proposal, pending Javid: dram target clock; no fitted efficiency; a design input, not a measured claim."},{"path":"/clock_domains/dram/freq_hz/source","value":null},{"path":"/clock_domains/dram/freq_hz/unit","value":"Hz"},{"path":"/clock_domains/dram/freq_hz/value","value":{"denominator":1,"numerator":1000000000}},{"path":"/clock_domains/dram/scales_with_core","value":false},{"path":"/clock_domains/noc/freq_hz/date","value":null},{"path":"/clock_domains/noc/freq_hz/kind","value":"stipulation"},{"path":"/clock_domains/noc/freq_hz/provenance","value":null},{"path":"/clock_domains/noc/freq_hz/rationale","value":"Verification-only D09: isolate declared component premise; not a physical hardware claim."},{"path":"/clock_domains/noc/freq_hz/source","value":null},{"path":"/clock_domains/noc/freq_hz/unit","value":"Hz"},{"path":"/clock_domains/noc/freq_hz/value","value":{"denominator":1,"numerator":1200000000}},{"path":"/clock_domains/noc/scales_with_core","value":false},{"path":"/cores/core_type/dma/bytes_per_cycle/date","value":null},{"path":"/cores/core_type/dma/bytes_per_cycle/kind","value":"stipulation"},{"path":"/cores/core_type/dma/bytes_per_cycle/provenance","value":null},{"path":"/cores/core_type/dma/bytes_per_cycle/rationale","value":"B1 hardware proposal, pending Javid: aggregate per-core DMA delivery; a design input, not a measured claim."},{"path":"/cores/core_type/dma/bytes_per_cycle/source","value":null},{"path":"/cores/core_type/dma/bytes_per_cycle/unit","value":"byte/cycle"},{"path":"/cores/core_type/dma/bytes_per_cycle/value","value":{"denominator":1,"numerator":256}},{"path":"/cores/core_type/dma/engines/date","value":null},{"path":"/cores/core_type/dma/engines/kind","value":"stipulation"},{"path":"/cores/core_type/dma/engines/provenance","value":null},{"path":"/cores/core_type/dma/engines/rationale","value":"B1 hardware proposal, pending Javid: DMA issue engines; a design input, not a measured claim."},{"path":"/cores/core_type/dma/engines/source","value":null},{"path":"/cores/core_type/dma/engines/unit","value":"count"},{"path":"/cores/core_type/dma/engines/value","value":{"denominator":1,"numerator":4}},{"path":"/cores/core_type/dma/max_outstanding/date","value":null},{"path":"/cores/core_type/dma/max_outstanding/kind","value":"stipulation"},{"path":"/cores/core_type/dma/max_outstanding/provenance","value":null},{"path":"/cores/core_type/dma/max_outstanding/rationale","value":"Verification-only D06-two: isolate declared component premise; not a physical hardware claim."},{"path":"/cores/core_type/dma/max_outstanding/source","value":null},{"path":"/cores/core_type/dma/max_outstanding/unit","value":"count"},{"path":"/cores/core_type/dma/max_outstanding/value","value":{"denominator":1,"numerator":2}},{"path":"/cores/core_type/dma/request_bytes/date","value":null},{"path":"/cores/core_type/dma/request_bytes/kind","value":"stipulation"},{"path":"/cores/core_type/dma/request_bytes/provenance","value":null},{"path":"/cores/core_type/dma/request_bytes/rationale","value":"B1 hardware proposal, pending Javid: DMA request granularity; a design input, not a measured claim."},{"path":"/cores/core_type/dma/request_bytes/source","value":null},{"path":"/cores/core_type/dma/request_bytes/unit","value":"byte"},{"path":"/cores/core_type/dma/request_bytes/value","value":{"denominator":1,"numerator":256}},{"path":"/cores/core_type/job_overhead_cycles/date","value":null},{"path":"/cores/core_type/job_overhead_cycles/kind","value":"stipulation"},{"path":"/cores/core_type/job_overhead_cycles/provenance","value":null},{"path":"/cores/core_type/job_overhead_cycles/rationale","value":"B1 hardware proposal, pending Javid: core-domain job issue overhead; U-C0 unrepresented; a design input, not a measured claim."},{"path":"/cores/core_type/job_overhead_cycles/source","value":null},{"path":"/cores/core_type/job_overhead_cycles/unit","value":"cycle"},{"path":"/cores/core_type/job_overhead_cycles/value","value":{"denominator":1,"numerator":32}},{"path":"/cores/core_type/matrix_engine/accumulator_bytes/date","value":null},{"path":"/cores/core_type/matrix_engine/accumulator_bytes/kind","value":"stipulation"},{"path":"/cores/core_type/matrix_engine/accumulator_bytes/provenance","value":null},{"path":"/cores/core_type/matrix_engine/accumulator_bytes/rationale","value":"B1 hardware proposal, pending Javid: FP32 partial-sum storage; a design input, not a measured claim."},{"path":"/cores/core_type/matrix_engine/accumulator_bytes/source","value":null},{"path":"/cores/core_type/matrix_engine/accumulator_bytes/unit","value":"byte"},{"path":"/cores/core_type/matrix_engine/accumulator_bytes/value","value":{"denominator":1,"numerator":262144}},{"path":"/cores/core_type/matrix_engine/array/cols/date","value":null},{"path":"/cores/core_type/matrix_engine/array/cols/kind","value":"stipulation"},{"path":"/cores/core_type/matrix_engine/array/cols/provenance","value":null},{"path":"/cores/core_type/matrix_engine/array/cols/rationale","value":"B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim."},{"path":"/cores/core_type/matrix_engine/array/cols/source","value":null},{"path":"/cores/core_type/matrix_engine/array/cols/unit","value":"count"},{"path":"/cores/core_type/matrix_engine/array/cols/value","value":{"denominator":1,"numerator":256}},{"path":"/cores/core_type/matrix_engine/array/rows/date","value":null},{"path":"/cores/core_type/matrix_engine/array/rows/kind","value":"stipulation"},{"path":"/cores/core_type/matrix_engine/array/rows/provenance","value":null},{"path":"/cores/core_type/matrix_engine/array/rows/rationale","value":"B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim."},{"path":"/cores/core_type/matrix_engine/array/rows/source","value":null},{"path":"/cores/core_type/matrix_engine/array/rows/unit","value":"count"},{"path":"/cores/core_type/matrix_engine/array/rows/value","value":{"denominator":1,"numerator":256}},{"path":"/cores/core_type/matrix_engine/dataflows/0","value":"weight_stationary"},{"path":"/cores/core_type/matrix_engine/macs_per_cycle/bf16/date","value":null},{"path":"/cores/core_type/matrix_engine/macs_per_cycle/bf16/kind","value":"stipulation"},{"path":"/cores/core_type/matrix_engine/macs_per_cycle/bf16/provenance","value":null},{"path":"/cores/core_type/matrix_engine/macs_per_cycle/bf16/rationale","value":"B1 hardware proposal, pending Javid: dense throughput per core; no sparsity multiplier; a design input, not a measured claim."},{"path":"/cores/core_type/matrix_engine/macs_per_cycle/bf16/source","value":null},{"path":"/cores/core_type/matrix_engine/macs_per_cycle/bf16/unit","value":"MAC/cycle"},{"path":"/cores/core_type/matrix_engine/macs_per_cycle/bf16/value","value":{"denominator":1,"numerator":65536}},{"path":"/cores/core_type/matrix_engine/operand_buffer_bytes/date","value":null},{"path":"/cores/core_type/matrix_engine/operand_buffer_bytes/kind","value":"stipulation"},{"path":"/cores/core_type/matrix_engine/operand_buffer_bytes/provenance","value":null},{"path":"/cores/core_type/matrix_engine/operand_buffer_bytes/rationale","value":"B1 hardware proposal, pending Javid: array operand staging budget; a design input, not a measured claim."},{"path":"/cores/core_type/matrix_engine/operand_buffer_bytes/source","value":null},{"path":"/cores/core_type/matrix_engine/operand_buffer_bytes/unit","value":"byte"},{"path":"/cores/core_type/matrix_engine/operand_buffer_bytes/value","value":{"denominator":1,"numerator":1048576}},{"path":"/cores/core_type/matrix_engine/operand_bytes_per_cycle/date","value":null},{"path":"/cores/core_type/matrix_engine/operand_bytes_per_cycle/kind","value":"stipulation"},{"path":"/cores/core_type/matrix_engine/operand_bytes_per_cycle/provenance","value":null},{"path":"/cores/core_type/matrix_engine/operand_bytes_per_cycle/rationale","value":"B1 hardware proposal, pending Javid: core-domain operand delivery; a design input, not a measured claim."},{"path":"/cores/core_type/matrix_engine/operand_bytes_per_cycle/source","value":null},{"path":"/cores/core_type/matrix_engine/operand_bytes_per_cycle/unit","value":"byte/cycle"},{"path":"/cores/core_type/matrix_engine/operand_bytes_per_cycle/value","value":{"denominator":1,"numerator":1024}},{"path":"/cores/core_type/sram/banks/date","value":null},{"path":"/cores/core_type/sram/banks/kind","value":"stipulation"},{"path":"/cores/core_type/sram/banks/provenance","value":null},{"path":"/cores/core_type/sram/banks/rationale","value":"B1 hardware proposal, pending Javid: local SRAM banking; a design input, not a measured claim."},{"path":"/cores/core_type/sram/banks/source","value":null},{"path":"/cores/core_type/sram/banks/unit","value":"count"},{"path":"/cores/core_type/sram/banks/value","value":{"denominator":1,"numerator":32}},{"path":"/cores/core_type/sram/bytes/date","value":null},{"path":"/cores/core_type/sram/bytes/kind","value":"stipulation"},{"path":"/cores/core_type/sram/bytes/provenance","value":null},{"path":"/cores/core_type/sram/bytes/rationale","value":"B1 hardware proposal, pending Javid: paired SRAM choice with 1.0 pJ/byte; a design input, not a measured claim."},{"path":"/cores/core_type/sram/bytes/source","value":null},{"path":"/cores/core_type/sram/bytes/unit","value":"byte"},{"path":"/cores/core_type/sram/bytes/value","value":{"denominator":1,"numerator":16777216}},{"path":"/cores/core_type/sram/bytes_per_cycle_per_bank/date","value":null},{"path":"/cores/core_type/sram/bytes_per_cycle_per_bank/kind","value":"stipulation"},{"path":"/cores/core_type/sram/bytes_per_cycle_per_bank/provenance","value":null},{"path":"/cores/core_type/sram/bytes_per_cycle_per_bank/rationale","value":"B1 hardware proposal, pending Javid: local SRAM bank bandwidth; a design input, not a measured claim."},{"path":"/cores/core_type/sram/bytes_per_cycle_per_bank/source","value":null},{"path":"/cores/core_type/sram/bytes_per_cycle_per_bank/unit","value":"byte/cycle"},{"path":"/cores/core_type/sram/bytes_per_cycle_per_bank/value","value":{"denominator":1,"numerator":32}},{"path":"/cores/core_type/vector_engine/ops_per_cycle/date","value":null},{"path":"/cores/core_type/vector_engine/ops_per_cycle/kind","value":"stipulation"},{"path":"/cores/core_type/vector_engine/ops_per_cycle/provenance","value":null},{"path":"/cores/core_type/vector_engine/ops_per_cycle/rationale","value":"B1 hardware proposal, pending Javid: abstract scalar vector rate, not transcendental validation; a design input, not a measured claim."},{"path":"/cores/core_type/vector_engine/ops_per_cycle/source","value":null},{"path":"/cores/core_type/vector_engine/ops_per_cycle/unit","value":"op/cycle"},{"path":"/cores/core_type/vector_engine/ops_per_cycle/value","value":{"denominator":1,"numerator":256}},{"path":"/cores/grid/cols/date","value":null},{"path":"/cores/grid/cols/kind","value":"stipulation"},{"path":"/cores/grid/cols/provenance","value":null},{"path":"/cores/grid/cols/rationale","value":"B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim."},{"path":"/cores/grid/cols/source","value":null},{"path":"/cores/grid/cols/unit","value":"count"},{"path":"/cores/grid/cols/value","value":{"denominator":1,"numerator":2}},{"path":"/cores/grid/rows/date","value":null},{"path":"/cores/grid/rows/kind","value":"stipulation"},{"path":"/cores/grid/rows/provenance","value":null},{"path":"/cores/grid/rows/rationale","value":"B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim."},{"path":"/cores/grid/rows/source","value":null},{"path":"/cores/grid/rows/unit","value":"count"},{"path":"/cores/grid/rows/value","value":{"denominator":1,"numerator":2}},{"path":"/design_status","value":"proposed"},{"path":"/energy/pj_per_byte/dram/date","value":null},{"path":"/energy/pj_per_byte/dram/kind","value":"stipulation"},{"path":"/energy/pj_per_byte/dram/provenance","value":null},{"path":"/energy/pj_per_byte/dram/rationale","value":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim."},{"path":"/energy/pj_per_byte/dram/source","value":null},{"path":"/energy/pj_per_byte/dram/unit","value":"pJ/byte"},{"path":"/energy/pj_per_byte/dram/value","value":{"denominator":1,"numerator":20}},{"path":"/energy/pj_per_byte/noc_hop/date","value":null},{"path":"/energy/pj_per_byte/noc_hop/kind","value":"stipulation"},{"path":"/energy/pj_per_byte/noc_hop/provenance","value":null},{"path":"/energy/pj_per_byte/noc_hop/rationale","value":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim."},{"path":"/energy/pj_per_byte/noc_hop/source","value":null},{"path":"/energy/pj_per_byte/noc_hop/unit","value":"pJ/byte"},{"path":"/energy/pj_per_byte/noc_hop/value","value":{"denominator":1,"numerator":2}},{"path":"/energy/pj_per_byte/sram/date","value":null},{"path":"/energy/pj_per_byte/sram/kind","value":"stipulation"},{"path":"/energy/pj_per_byte/sram/provenance","value":null},{"path":"/energy/pj_per_byte/sram/rationale","value":"B1 hardware proposal, pending Javid: SRAM pair 16777216 bytes/1.0 pJ per byte; a design input, not a measured claim."},{"path":"/energy/pj_per_byte/sram/source","value":null},{"path":"/energy/pj_per_byte/sram/unit","value":"pJ/byte"},{"path":"/energy/pj_per_byte/sram/value","value":{"denominator":1,"numerator":1}},{"path":"/energy/pj_per_mac/bf16/date","value":null},{"path":"/energy/pj_per_mac/bf16/kind","value":"stipulation"},{"path":"/energy/pj_per_mac/bf16/provenance","value":null},{"path":"/energy/pj_per_mac/bf16/rationale","value":"B1 hardware proposal, pending Javid: co-design energy assumption, no validation; a design input, not a measured claim."},{"path":"/energy/pj_per_mac/bf16/source","value":null},{"path":"/energy/pj_per_mac/bf16/unit","value":"pJ/MAC"},{"path":"/energy/pj_per_mac/bf16/value","value":{"denominator":5,"numerator":2}},{"path":"/energy/voltage_ratio/1.0/date","value":null},{"path":"/energy/voltage_ratio/1.0/kind","value":"stipulation"},{"path":"/energy/voltage_ratio/1.0/provenance","value":null},{"path":"/energy/voltage_ratio/1.0/rationale","value":"B1 hardware proposal, pending Javid: base voltage normalization only; nonbase energy unknown; a design input, not a measured claim."},{"path":"/energy/voltage_ratio/1.0/source","value":null},{"path":"/energy/voltage_ratio/1.0/unit","value":"ratio"},{"path":"/energy/voltage_ratio/1.0/value","value":{"denominator":1,"numerator":1}},{"path":"/formats/bf16/accumulate_bytes/date","value":null},{"path":"/formats/bf16/accumulate_bytes/kind","value":"stipulation"},{"path":"/formats/bf16/accumulate_bytes/provenance","value":null},{"path":"/formats/bf16/accumulate_bytes/rationale","value":"B1 hardware proposal, pending Javid: FP32 accumulation; a design input, not a measured claim."},{"path":"/formats/bf16/accumulate_bytes/source","value":null},{"path":"/formats/bf16/accumulate_bytes/unit","value":"byte"},{"path":"/formats/bf16/accumulate_bytes/value","value":{"denominator":1,"numerator":4}},{"path":"/formats/bf16/block_scale_bytes/date","value":null},{"path":"/formats/bf16/block_scale_bytes/kind","value":"stipulation"},{"path":"/formats/bf16/block_scale_bytes/provenance","value":null},{"path":"/formats/bf16/block_scale_bytes/rationale","value":"B1 hardware proposal, pending Javid: plain format with no block-scale payload; a design input, not a measured claim."},{"path":"/formats/bf16/block_scale_bytes/source","value":null},{"path":"/formats/bf16/block_scale_bytes/unit","value":"byte"},{"path":"/formats/bf16/block_scale_bytes/value","value":{"denominator":1,"numerator":0}},{"path":"/formats/bf16/bytes","value":{"denominator":1,"numerator":2}},{"path":"/id","value":"private-unapplied-gap-cap2"},{"path":"/memory/controllers/0/attach/0","value":0},{"path":"/memory/controllers/0/attach/1","value":0},{"path":"/memory/controllers/0/noc_credits/date","value":null},{"path":"/memory/controllers/0/noc_credits/kind","value":"stipulation"},{"path":"/memory/controllers/0/noc_credits/provenance","value":null},{"path":"/memory/controllers/0/noc_credits/rationale","value":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim."},{"path":"/memory/controllers/0/noc_credits/source","value":null},{"path":"/memory/controllers/0/noc_credits/unit","value":"count"},{"path":"/memory/controllers/0/noc_credits/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/0/page_policy","value":"open"},{"path":"/memory/controllers/0/read_queue_depth/date","value":null},{"path":"/memory/controllers/0/read_queue_depth/kind","value":"stipulation"},{"path":"/memory/controllers/0/read_queue_depth/provenance","value":null},{"path":"/memory/controllers/0/read_queue_depth/rationale","value":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim."},{"path":"/memory/controllers/0/read_queue_depth/source","value":null},{"path":"/memory/controllers/0/read_queue_depth/unit","value":"count"},{"path":"/memory/controllers/0/read_queue_depth/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/0/scheduler","value":"fr_fcfs"},{"path":"/memory/controllers/0/write_queue_depth/date","value":null},{"path":"/memory/controllers/0/write_queue_depth/kind","value":"stipulation"},{"path":"/memory/controllers/0/write_queue_depth/provenance","value":null},{"path":"/memory/controllers/0/write_queue_depth/rationale","value":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim."},{"path":"/memory/controllers/0/write_queue_depth/source","value":null},{"path":"/memory/controllers/0/write_queue_depth/unit","value":"count"},{"path":"/memory/controllers/0/write_queue_depth/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/1/attach/0","value":0},{"path":"/memory/controllers/1/attach/1","value":1},{"path":"/memory/controllers/1/noc_credits/date","value":null},{"path":"/memory/controllers/1/noc_credits/kind","value":"stipulation"},{"path":"/memory/controllers/1/noc_credits/provenance","value":null},{"path":"/memory/controllers/1/noc_credits/rationale","value":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim."},{"path":"/memory/controllers/1/noc_credits/source","value":null},{"path":"/memory/controllers/1/noc_credits/unit","value":"count"},{"path":"/memory/controllers/1/noc_credits/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/1/page_policy","value":"open"},{"path":"/memory/controllers/1/read_queue_depth/date","value":null},{"path":"/memory/controllers/1/read_queue_depth/kind","value":"stipulation"},{"path":"/memory/controllers/1/read_queue_depth/provenance","value":null},{"path":"/memory/controllers/1/read_queue_depth/rationale","value":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim."},{"path":"/memory/controllers/1/read_queue_depth/source","value":null},{"path":"/memory/controllers/1/read_queue_depth/unit","value":"count"},{"path":"/memory/controllers/1/read_queue_depth/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/1/scheduler","value":"fr_fcfs"},{"path":"/memory/controllers/1/write_queue_depth/date","value":null},{"path":"/memory/controllers/1/write_queue_depth/kind","value":"stipulation"},{"path":"/memory/controllers/1/write_queue_depth/provenance","value":null},{"path":"/memory/controllers/1/write_queue_depth/rationale","value":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim."},{"path":"/memory/controllers/1/write_queue_depth/source","value":null},{"path":"/memory/controllers/1/write_queue_depth/unit","value":"count"},{"path":"/memory/controllers/1/write_queue_depth/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/2/attach/0","value":1},{"path":"/memory/controllers/2/attach/1","value":0},{"path":"/memory/controllers/2/noc_credits/date","value":null},{"path":"/memory/controllers/2/noc_credits/kind","value":"stipulation"},{"path":"/memory/controllers/2/noc_credits/provenance","value":null},{"path":"/memory/controllers/2/noc_credits/rationale","value":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim."},{"path":"/memory/controllers/2/noc_credits/source","value":null},{"path":"/memory/controllers/2/noc_credits/unit","value":"count"},{"path":"/memory/controllers/2/noc_credits/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/2/page_policy","value":"open"},{"path":"/memory/controllers/2/read_queue_depth/date","value":null},{"path":"/memory/controllers/2/read_queue_depth/kind","value":"stipulation"},{"path":"/memory/controllers/2/read_queue_depth/provenance","value":null},{"path":"/memory/controllers/2/read_queue_depth/rationale","value":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim."},{"path":"/memory/controllers/2/read_queue_depth/source","value":null},{"path":"/memory/controllers/2/read_queue_depth/unit","value":"count"},{"path":"/memory/controllers/2/read_queue_depth/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/2/scheduler","value":"fr_fcfs"},{"path":"/memory/controllers/2/write_queue_depth/date","value":null},{"path":"/memory/controllers/2/write_queue_depth/kind","value":"stipulation"},{"path":"/memory/controllers/2/write_queue_depth/provenance","value":null},{"path":"/memory/controllers/2/write_queue_depth/rationale","value":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim."},{"path":"/memory/controllers/2/write_queue_depth/source","value":null},{"path":"/memory/controllers/2/write_queue_depth/unit","value":"count"},{"path":"/memory/controllers/2/write_queue_depth/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/3/attach/0","value":1},{"path":"/memory/controllers/3/attach/1","value":1},{"path":"/memory/controllers/3/noc_credits/date","value":null},{"path":"/memory/controllers/3/noc_credits/kind","value":"stipulation"},{"path":"/memory/controllers/3/noc_credits/provenance","value":null},{"path":"/memory/controllers/3/noc_credits/rationale","value":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim."},{"path":"/memory/controllers/3/noc_credits/source","value":null},{"path":"/memory/controllers/3/noc_credits/unit","value":"count"},{"path":"/memory/controllers/3/noc_credits/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/3/page_policy","value":"open"},{"path":"/memory/controllers/3/read_queue_depth/date","value":null},{"path":"/memory/controllers/3/read_queue_depth/kind","value":"stipulation"},{"path":"/memory/controllers/3/read_queue_depth/provenance","value":null},{"path":"/memory/controllers/3/read_queue_depth/rationale","value":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim."},{"path":"/memory/controllers/3/read_queue_depth/source","value":null},{"path":"/memory/controllers/3/read_queue_depth/unit","value":"count"},{"path":"/memory/controllers/3/read_queue_depth/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/controllers/3/scheduler","value":"fr_fcfs"},{"path":"/memory/controllers/3/write_queue_depth/date","value":null},{"path":"/memory/controllers/3/write_queue_depth/kind","value":"stipulation"},{"path":"/memory/controllers/3/write_queue_depth/provenance","value":null},{"path":"/memory/controllers/3/write_queue_depth/rationale","value":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim."},{"path":"/memory/controllers/3/write_queue_depth/source","value":null},{"path":"/memory/controllers/3/write_queue_depth/unit","value":"count"},{"path":"/memory/controllers/3/write_queue_depth/value","value":{"denominator":1,"numerator":32}},{"path":"/memory/dram/bw_bytes_per_s/date","value":null},{"path":"/memory/dram/bw_bytes_per_s/kind","value":"stipulation"},{"path":"/memory/dram/bw_bytes_per_s/provenance","value":null},{"path":"/memory/dram/bw_bytes_per_s/rationale","value":"B1 hardware proposal, pending Javid: total chip bandwidth; never multiply again by channels; a design input, not a measured claim."},{"path":"/memory/dram/bw_bytes_per_s/source","value":null},{"path":"/memory/dram/bw_bytes_per_s/unit","value":"byte/s"},{"path":"/memory/dram/bw_bytes_per_s/value","value":{"denominator":1,"numerator":1000000000000}},{"path":"/memory/dram/capacity_bytes/date","value":null},{"path":"/memory/dram/capacity_bytes/kind","value":"stipulation"},{"path":"/memory/dram/capacity_bytes/provenance","value":null},{"path":"/memory/dram/capacity_bytes/rationale","value":"B1 hardware proposal, pending Javid: decimal 32 GB capacity; a design input, not a measured claim."},{"path":"/memory/dram/capacity_bytes/source","value":null},{"path":"/memory/dram/capacity_bytes/unit","value":"byte"},{"path":"/memory/dram/capacity_bytes/value","value":{"denominator":1,"numerator":32000000000}},{"path":"/memory/dram/channels/date","value":null},{"path":"/memory/dram/channels/kind","value":"stipulation"},{"path":"/memory/dram/channels/provenance","value":null},{"path":"/memory/dram/channels/rationale","value":"B1 hardware proposal, pending Javid: logical DRAM channels; two per listed controller; a design input, not a measured claim."},{"path":"/memory/dram/channels/source","value":null},{"path":"/memory/dram/channels/unit","value":"count"},{"path":"/memory/dram/channels/value","value":{"denominator":1,"numerator":8}},{"path":"/memory/dram/organization/bank_groups/date","value":null},{"path":"/memory/dram/organization/bank_groups/kind","value":"stipulation"},{"path":"/memory/dram/organization/bank_groups/provenance","value":null},{"path":"/memory/dram/organization/bank_groups/rationale","value":"B1 hardware proposal, pending Javid: bank groups per rank; a design input, not a measured claim."},{"path":"/memory/dram/organization/bank_groups/source","value":null},{"path":"/memory/dram/organization/bank_groups/unit","value":"count"},{"path":"/memory/dram/organization/bank_groups/value","value":{"denominator":1,"numerator":4}},{"path":"/memory/dram/organization/banks_per_group/date","value":null},{"path":"/memory/dram/organization/banks_per_group/kind","value":"stipulation"},{"path":"/memory/dram/organization/banks_per_group/provenance","value":null},{"path":"/memory/dram/organization/banks_per_group/rationale","value":"B1 hardware proposal, pending Javid: banks per bank group; a design input, not a measured claim."},{"path":"/memory/dram/organization/banks_per_group/source","value":null},{"path":"/memory/dram/organization/banks_per_group/unit","value":"count"},{"path":"/memory/dram/organization/banks_per_group/value","value":{"denominator":1,"numerator":4}},{"path":"/memory/dram/organization/ranks/date","value":null},{"path":"/memory/dram/organization/ranks/kind","value":"stipulation"},{"path":"/memory/dram/organization/ranks/provenance","value":null},{"path":"/memory/dram/organization/ranks/rationale","value":"B1 hardware proposal, pending Javid: ranks per logical channel; a design input, not a measured claim."},{"path":"/memory/dram/organization/ranks/source","value":null},{"path":"/memory/dram/organization/ranks/unit","value":"count"},{"path":"/memory/dram/organization/ranks/value","value":{"denominator":1,"numerator":1}},{"path":"/memory/dram/organization/row_bytes/date","value":null},{"path":"/memory/dram/organization/row_bytes/kind","value":"stipulation"},{"path":"/memory/dram/organization/row_bytes/provenance","value":null},{"path":"/memory/dram/organization/row_bytes/rationale","value":"B1 hardware proposal, pending Javid: row payload bytes; a design input, not a measured claim."},{"path":"/memory/dram/organization/row_bytes/source","value":null},{"path":"/memory/dram/organization/row_bytes/unit","value":"byte"},{"path":"/memory/dram/organization/row_bytes/value","value":{"denominator":1,"numerator":2048}},{"path":"/memory/dram/standard","value":"hbm2e"},{"path":"/memory/dram/timing/t_cl_cycles/date","value":null},{"path":"/memory/dram/timing/t_cl_cycles/kind","value":"stipulation"},{"path":"/memory/dram/timing/t_cl_cycles/provenance","value":null},{"path":"/memory/dram/timing/t_cl_cycles/rationale","value":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."},{"path":"/memory/dram/timing/t_cl_cycles/source","value":null},{"path":"/memory/dram/timing/t_cl_cycles/unit","value":"cycle"},{"path":"/memory/dram/timing/t_cl_cycles/value","value":{"denominator":1,"numerator":16}},{"path":"/memory/dram/timing/t_rcd_cycles/date","value":null},{"path":"/memory/dram/timing/t_rcd_cycles/kind","value":"stipulation"},{"path":"/memory/dram/timing/t_rcd_cycles/provenance","value":null},{"path":"/memory/dram/timing/t_rcd_cycles/rationale","value":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."},{"path":"/memory/dram/timing/t_rcd_cycles/source","value":null},{"path":"/memory/dram/timing/t_rcd_cycles/unit","value":"cycle"},{"path":"/memory/dram/timing/t_rcd_cycles/value","value":{"denominator":1,"numerator":16}},{"path":"/memory/dram/timing/t_refi_cycles/date","value":null},{"path":"/memory/dram/timing/t_refi_cycles/kind","value":"stipulation"},{"path":"/memory/dram/timing/t_refi_cycles/provenance","value":null},{"path":"/memory/dram/timing/t_refi_cycles/rationale","value":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."},{"path":"/memory/dram/timing/t_refi_cycles/source","value":null},{"path":"/memory/dram/timing/t_refi_cycles/unit","value":"cycle"},{"path":"/memory/dram/timing/t_refi_cycles/value","value":{"denominator":1,"numerator":3900}},{"path":"/memory/dram/timing/t_rfc_cycles/date","value":null},{"path":"/memory/dram/timing/t_rfc_cycles/kind","value":"stipulation"},{"path":"/memory/dram/timing/t_rfc_cycles/provenance","value":null},{"path":"/memory/dram/timing/t_rfc_cycles/rationale","value":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."},{"path":"/memory/dram/timing/t_rfc_cycles/source","value":null},{"path":"/memory/dram/timing/t_rfc_cycles/unit","value":"cycle"},{"path":"/memory/dram/timing/t_rfc_cycles/value","value":{"denominator":1,"numerator":350}},{"path":"/memory/dram/timing/t_rp_cycles/date","value":null},{"path":"/memory/dram/timing/t_rp_cycles/kind","value":"stipulation"},{"path":"/memory/dram/timing/t_rp_cycles/provenance","value":null},{"path":"/memory/dram/timing/t_rp_cycles/rationale","value":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim."},{"path":"/memory/dram/timing/t_rp_cycles/source","value":null},{"path":"/memory/dram/timing/t_rp_cycles/unit","value":"cycle"},{"path":"/memory/dram/timing/t_rp_cycles/value","value":{"denominator":1,"numerator":16}},{"path":"/memory/dram/timing_preset","value":null},{"path":"/memory/dram/timing_source","value":"direct"},{"path":"/memory/interleave/granularity_bytes/date","value":null},{"path":"/memory/interleave/granularity_bytes/kind","value":"stipulation"},{"path":"/memory/interleave/granularity_bytes/provenance","value":null},{"path":"/memory/interleave/granularity_bytes/rationale","value":"B1 hardware proposal, pending Javid: address interleave granularity; a design input, not a measured claim."},{"path":"/memory/interleave/granularity_bytes/source","value":null},{"path":"/memory/interleave/granularity_bytes/unit","value":"byte"},{"path":"/memory/interleave/granularity_bytes/value","value":{"denominator":1,"numerator":256}},{"path":"/memory/interleave/scheme","value":"round_robin"},{"path":"/nocs/0/buffer_flits/date","value":null},{"path":"/nocs/0/buffer_flits/kind","value":"stipulation"},{"path":"/nocs/0/buffer_flits/provenance","value":null},{"path":"/nocs/0/buffer_flits/rationale","value":"B1 hardware proposal, pending Javid: NoC input buffering; a design input, not a measured claim."},{"path":"/nocs/0/buffer_flits/source","value":null},{"path":"/nocs/0/buffer_flits/unit","value":"count"},{"path":"/nocs/0/buffer_flits/value","value":{"denominator":1,"numerator":8}},{"path":"/nocs/0/direction","value":"bidirectional"},{"path":"/nocs/0/link_bytes_per_cycle/date","value":null},{"path":"/nocs/0/link_bytes_per_cycle/kind","value":"stipulation"},{"path":"/nocs/0/link_bytes_per_cycle/provenance","value":null},{"path":"/nocs/0/link_bytes_per_cycle/rationale","value":"B1 hardware proposal, pending Javid: NoC link width; a design input, not a measured claim."},{"path":"/nocs/0/link_bytes_per_cycle/source","value":null},{"path":"/nocs/0/link_bytes_per_cycle/unit","value":"byte/cycle"},{"path":"/nocs/0/link_bytes_per_cycle/value","value":{"denominator":1,"numerator":64}},{"path":"/nocs/0/router_latency_cycles/date","value":null},{"path":"/nocs/0/router_latency_cycles/kind","value":"stipulation"},{"path":"/nocs/0/router_latency_cycles/provenance","value":null},{"path":"/nocs/0/router_latency_cycles/rationale","value":"B1 hardware proposal, pending Javid: NoC router pipeline; a design input, not a measured claim."},{"path":"/nocs/0/router_latency_cycles/source","value":null},{"path":"/nocs/0/router_latency_cycles/unit","value":"cycle"},{"path":"/nocs/0/router_latency_cycles/value","value":{"denominator":1,"numerator":2}},{"path":"/nocs/0/topology","value":"mesh"},{"path":"/nocs/0/virtual_channels/date","value":null},{"path":"/nocs/0/virtual_channels/kind","value":"stipulation"},{"path":"/nocs/0/virtual_channels/provenance","value":null},{"path":"/nocs/0/virtual_channels/rationale","value":"B1 hardware proposal, pending Javid: NoC virtual channels; a design input, not a measured claim."},{"path":"/nocs/0/virtual_channels/source","value":null},{"path":"/nocs/0/virtual_channels/unit","value":"count"},{"path":"/nocs/0/virtual_channels/value","value":{"denominator":1,"numerator":4}},{"path":"/shared_sram","value":null},{"path":"/static_power_w/date","value":null},{"path":"/static_power_w/kind","value":"stipulation"},{"path":"/static_power_w/provenance","value":null},{"path":"/static_power_w/rationale","value":"B1 hardware proposal, pending Javid: chip static power budget; no energy model in U2; a design input, not a measured claim."},{"path":"/static_power_w/source","value":null},{"path":"/static_power_w/unit","value":"W"},{"path":"/static_power_w/value","value":{"denominator":1,"numerator":40}},{"path":"/sync/barrier_latency_cycles/date","value":null},{"path":"/sync/barrier_latency_cycles/kind","value":"stipulation"},{"path":"/sync/barrier_latency_cycles/provenance","value":null},{"path":"/sync/barrier_latency_cycles/rationale","value":"B1 hardware proposal, pending Javid: NoC-domain barrier latency; U-C0 unrepresented; a design input, not a measured claim."},{"path":"/sync/barrier_latency_cycles/source","value":null},{"path":"/sync/barrier_latency_cycles/unit","value":"cycle"},{"path":"/sync/barrier_latency_cycles/value","value":{"denominator":1,"numerator":32}},{"path":"/sync/mechanism","value":"hardware_barrier"},{"path":"/tdp_w/date","value":null},{"path":"/tdp_w/kind","value":"stipulation"},{"path":"/tdp_w/provenance","value":null},{"path":"/tdp_w/rationale","value":"B1 hardware proposal, pending Javid: chip design power budget, not board power measurement; a design input, not a measured claim."},{"path":"/tdp_w/source","value":null},{"path":"/tdp_w/unit","value":"W"},{"path":"/tdp_w/value","value":{"denominator":1,"numerator":300}}]},"hardware_spec_hash":"sha256:31c7f51353e2dbc308ebbd794b46a52dc8ce62bfca204baff76343211af983d9","initial_state":"fixture_resident","job_hash":"sha256:f4f9e100e136057cae2d58c2f5c827bcf388d01d6a3c006231d2182c088ca7b0","mapped_point":{"frequency_ratio":1.0,"identity":{"fixture_id":"SYNTHETIC-REVIEWER-same-instant-credit-cc0-v3","kind":"fixture"},"initial_state":"fixture_resident","payload_hash":"sha256:21bca9c5f17ee5a4b53bfcf81a4cde479f24d08b83072a7a2cba5c6ca5f9d0b4","point_id":"SYNTHETIC-PROSPECTIVE-/3-gap-cap2","priming_iterations":0,"task_graph":{"arbitration":"fifo-ready/1","buffers":[{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":[],"id":"a-dst","initial_residency":"uninitialized","offset_bytes":9472,"op_id":null,"operand":null,"producer_id":"a-unicast","size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":["a-unicast"],"id":"a-src","initial_residency":"preloaded","offset_bytes":9216,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":null,"channel_id":null,"core_id":null,"final_consumer_ids":["r00"],"id":"r00h","initial_residency":"preloaded","offset_bytes":1536,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"hbm"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":[],"id":"r00s","initial_residency":"uninitialized","offset_bytes":0,"op_id":null,"operand":null,"producer_id":"r00","size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":null,"channel_id":null,"core_id":null,"final_consumer_ids":[],"id":"r01h","initial_residency":"uninitialized","offset_bytes":3840,"op_id":null,"operand":null,"producer_id":"r01","size_bytes":256,"slot_index":null,"space":"hbm"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":["r01"],"id":"r01s","initial_residency":"preloaded","offset_bytes":1024,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":null,"channel_id":null,"core_id":null,"final_consumer_ids":["r02"],"id":"r02h","initial_residency":"preloaded","offset_bytes":5632,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"hbm"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":[],"id":"r02s","initial_residency":"uninitialized","offset_bytes":2048,"op_id":null,"operand":null,"producer_id":"r02","size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":null,"channel_id":null,"core_id":null,"final_consumer_ids":["r03"],"id":"r03h","initial_residency":"preloaded","offset_bytes":7680,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"hbm"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":[],"id":"r03s","initial_residency":"uninitialized","offset_bytes":3072,"op_id":null,"operand":null,"producer_id":"r03","size_bytes":256,"slot_index":null,"space":"sram"}],"coverage":[],"dependencies":[{"after":"b-barrier","before":"a-unicast"}],"format":"uarch-taskgraph/1","graph_hash":"sha256:8c2c14e4766eb76fb2fa1756365b3448e163840fa1a9b835a682cdf7417562f5","jobs":[{"destination":{"buffer_id":"a-dst","offset_bytes":0,"size_bytes":256},"id":"a-unicast","kind":"noc_transfer","multicast":false,"op_id":null,"payload_bytes":256,"route_id":"a-zero","source":{"buffer_id":"a-src","offset_bytes":0,"size_bytes":256}},{"id":"b-barrier","kind":"barrier","owner_id":52,"participant_job_ids":["a-unicast"]},{"destination":{"buffer_id":"r00s","offset_bytes":0,"size_bytes":256},"direction":"read","dma_engine_id":0,"fragments":[{"channel_id":6,"destination_offset_bytes":0,"payload_bytes":256,"request_id":"r00.00","route_id":"p3","source_offset_bytes":0,"transaction_bytes":256}],"id":"r00","kind":"dma","op_id":null,"source":{"buffer_id":"r00h","offset_bytes":0,"size_bytes":256}},{"destination":{"buffer_id":"r01h","offset_bytes":0,"size_bytes":256},"direction":"write","dma_engine_id":0,"fragments":[{"channel_id":7,"destination_offset_bytes":0,"payload_bytes":256,"request_id":"r01.00","route_id":"p3","source_offset_bytes":0,"transaction_bytes":256}],"id":"r01","kind":"dma","op_id":null,"source":{"buffer_id":"r01s","offset_bytes":0,"size_bytes":256}},{"destination":{"buffer_id":"r02s","offset_bytes":0,"size_bytes":256},"direction":"read","dma_engine_id":0,"fragments":[{"channel_id":6,"destination_offset_bytes":0,"payload_bytes":256,"request_id":"r02.00","route_id":"p3","source_offset_bytes":0,"transaction_bytes":256}],"id":"r02","kind":"dma","op_id":null,"source":{"buffer_id":"r02h","offset_bytes":0,"size_bytes":256}},{"destination":{"buffer_id":"r03s","offset_bytes":0,"size_bytes":256},"direction":"read","dma_engine_id":0,"fragments":[{"channel_id":6,"destination_offset_bytes":0,"payload_bytes":256,"request_id":"r03.00","route_id":"p3","source_offset_bytes":0,"transaction_bytes":256}],"id":"r03","kind":"dma","op_id":null,"source":{"buffer_id":"r03h","offset_bytes":0,"size_bytes":256}}],"routes":[{"core_ids":[0],"destination_core_id":0,"id":"a-zero","noc_index":0,"source_core_id":0},{"core_ids":[0,1,3],"destination_core_id":3,"id":"p3","noc_index":0,"source_core_id":0}]}},"owner_enumeration":"native-owners/1","owners":[{"owner_id":0,"resource":"matrix:0"},{"owner_id":1,"resource":"matrix:1"},{"owner_id":2,"resource":"matrix:2"},{"owner_id":3,"resource":"matrix:3"},{"owner_id":4,"resource":"vector:0"},{"owner_id":5,"resource":"vector:1"},{"owner_id":6,"resource":"vector:2"},{"owner_id":7,"resource":"vector:3"},{"owner_id":8,"resource":"sram:0"},{"owner_id":9,"resource":"sram:1"},{"owner_id":10,"resource":"sram:2"},{"owner_id":11,"resource":"sram:3"},{"owner_id":12,"resource":"dma:0:0"},{"owner_id":13,"resource":"dma:0:1"},{"owner_id":14,"resource":"dma:0:2"},{"owner_id":15,"resource":"dma:0:3"},{"owner_id":16,"resource":"dma:1:0"},{"owner_id":17,"resource":"dma:1:1"},{"owner_id":18,"resource":"dma:1:2"},{"owner_id":19,"resource":"dma:1:3"},{"owner_id":20,"resource":"dma:2:0"},{"owner_id":21,"resource":"dma:2:1"},{"owner_id":22,"resource":"dma:2:2"},{"owner_id":23,"resource":"dma:2:3"},{"owner_id":24,"resource":"dma:3:0"},{"owner_id":25,"resource":"dma:3:1"},{"owner_id":26,"resource":"dma:3:2"},{"owner_id":27,"resource":"dma:3:3"},{"owner_id":28,"resource":"dma_port:0"},{"owner_id":29,"resource":"dma_port:1"},{"owner_id":30,"resource":"dma_port:2"},{"owner_id":31,"resource":"dma_port:3"},{"owner_id":32,"resource":"channel:0"},{"owner_id":33,"resource":"channel:1"},{"owner_id":34,"resource":"channel:2"},{"owner_id":35,"resource":"channel:3"},{"owner_id":36,"resource":"channel:4"},{"owner_id":37,"resource":"channel:5"},{"owner_id":38,"resource":"channel:6"},{"owner_id":39,"resource":"channel:7"},{"owner_id":40,"resource":"router:0:0:0"},{"owner_id":41,"resource":"router:0:0:1"},{"owner_id":42,"resource":"router:0:1:0"},{"owner_id":43,"resource":"router:0:1:1"},{"owner_id":44,"resource":"link:0:0:1"},{"owner_id":45,"resource":"link:0:0:2"},{"owner_id":46,"resource":"link:0:1:0"},{"owner_id":47,"resource":"link:0:1:3"},{"owner_id":48,"resource":"link:0:2:0"},{"owner_id":49,"resource":"link:0:2:3"},{"owner_id":50,"resource":"link:0:3:1"},{"owner_id":51,"resource":"link:0:3:2"},{"owner_id":52,"resource":"barrier:b-barrier"}],"point_hash":"sha256:21bca9c5f17ee5a4b53bfcf81a4cde479f24d08b83072a7a2cba5c6ca5f9d0b4","precision":"bf16","priming_iterations":0,"profile":{"entries":[{"allowed_job_kinds":["barrier","dma","noc_transfer"],"case_id":"SYNTHETIC-REVIEWER-same-instant-credit-cc0-v3","case_selection_revision":"REVIEWER-issue-edge-stage1/1","checkpoint":"B","clock_setup_hash":"sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","expected_outcome":"success","freq_hz":{"core":1000000000,"dram":1000000000,"noc":1200000000},"frequency_ratio":1.0,"graph_hash":"sha256:8c2c14e4766eb76fb2fa1756365b3448e163840fa1a9b835a682cdf7417562f5","hardware_spec":{"clock_domains":{"core":{"freq_hz":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core target clock; no fitted efficiency; a design input, not a measured claim.","source":null,"unit":"Hz","value":1000000000.0},"scales_with_core":true},"dram":{"freq_hz":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: dram target clock; no fitted efficiency; a design input, not a measured claim.","source":null,"unit":"Hz","value":1000000000.0},"scales_with_core":false},"noc":{"freq_hz":{"date":null,"kind":"stipulation","provenance":null,"rationale":"Verification-only D09: isolate declared component premise; not a physical hardware claim.","source":null,"unit":"Hz","value":1200000000.0},"scales_with_core":false}},"cores":{"core_type":{"dma":{"bytes_per_cycle":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: aggregate per-core DMA delivery; a design input, not a measured claim.","source":null,"unit":"byte/cycle","value":256.0},"engines":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: DMA issue engines; a design input, not a measured claim.","source":null,"unit":"count","value":4.0},"max_outstanding":{"date":null,"kind":"stipulation","provenance":null,"rationale":"Verification-only D06-two: isolate declared component premise; not a physical hardware claim.","source":null,"unit":"count","value":2.0},"request_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: DMA request granularity; a design input, not a measured claim.","source":null,"unit":"byte","value":256.0}},"job_overhead_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core-domain job issue overhead; U-C0 unrepresented; a design input, not a measured claim.","source":null,"unit":"cycle","value":32.0},"matrix_engine":{"accumulator_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: FP32 partial-sum storage; a design input, not a measured claim.","source":null,"unit":"byte","value":262144.0},"array":{"cols":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim.","source":null,"unit":"count","value":256.0},"rows":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim.","source":null,"unit":"count","value":256.0}},"dataflows":["weight_stationary"],"macs_per_cycle":{"bf16":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: dense throughput per core; no sparsity multiplier; a design input, not a measured claim.","source":null,"unit":"MAC/cycle","value":65536.0}},"operand_buffer_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: array operand staging budget; a design input, not a measured claim.","source":null,"unit":"byte","value":1048576.0},"operand_bytes_per_cycle":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core-domain operand delivery; a design input, not a measured claim.","source":null,"unit":"byte/cycle","value":1024.0}},"sram":{"banks":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: local SRAM banking; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: paired SRAM choice with 1.0 pJ/byte; a design input, not a measured claim.","source":null,"unit":"byte","value":16777216.0},"bytes_per_cycle_per_bank":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: local SRAM bank bandwidth; a design input, not a measured claim.","source":null,"unit":"byte/cycle","value":32.0}},"vector_engine":{"ops_per_cycle":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: abstract scalar vector rate, not transcendental validation; a design input, not a measured claim.","source":null,"unit":"op/cycle","value":256.0}}},"grid":{"cols":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim.","source":null,"unit":"count","value":2.0},"rows":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim.","source":null,"unit":"count","value":2.0}}},"design_status":"proposed","energy":{"pj_per_byte":{"dram":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":20.0},"noc_hop":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":2.0},"sram":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: SRAM pair 16777216 bytes/1.0 pJ per byte; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":1.0}},"pj_per_mac":{"bf16":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: co-design energy assumption, no validation; a design input, not a measured claim.","source":null,"unit":"pJ/MAC","value":0.4}},"voltage_ratio":{"1.0":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: base voltage normalization only; nonbase energy unknown; a design input, not a measured claim.","source":null,"unit":"ratio","value":1.0}}},"formats":{"bf16":{"accumulate_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: FP32 accumulation; a design input, not a measured claim.","source":null,"unit":"byte","value":4.0},"block_scale_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: plain format with no block-scale payload; a design input, not a measured claim.","source":null,"unit":"byte","value":0.0},"bytes":2.0}},"id":"private-unapplied-gap-cap2","memory":{"controllers":[{"attach":[0,0],"noc_credits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"page_policy":"open","read_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"scheduler":"fr_fcfs","write_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0}},{"attach":[0,1],"noc_credits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"page_policy":"open","read_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"scheduler":"fr_fcfs","write_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0}},{"attach":[1,0],"noc_credits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"page_policy":"open","read_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"scheduler":"fr_fcfs","write_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0}},{"attach":[1,1],"noc_credits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"page_policy":"open","read_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"scheduler":"fr_fcfs","write_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0}}],"dram":{"bw_bytes_per_s":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: total chip bandwidth; never multiply again by channels; a design input, not a measured claim.","source":null,"unit":"byte/s","value":1000000000000.0},"capacity_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: decimal 32 GB capacity; a design input, not a measured claim.","source":null,"unit":"byte","value":32000000000.0},"channels":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: logical DRAM channels; two per listed controller; a design input, not a measured claim.","source":null,"unit":"count","value":8.0},"organization":{"bank_groups":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: bank groups per rank; a design input, not a measured claim.","source":null,"unit":"count","value":4.0},"banks_per_group":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: banks per bank group; a design input, not a measured claim.","source":null,"unit":"count","value":4.0},"ranks":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: ranks per logical channel; a design input, not a measured claim.","source":null,"unit":"count","value":1.0},"row_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: row payload bytes; a design input, not a measured claim.","source":null,"unit":"byte","value":2048.0}},"standard":"hbm2e","timing":{"t_cl_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":16.0},"t_rcd_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":16.0},"t_refi_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":3900.0},"t_rfc_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":350.0},"t_rp_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":16.0}},"timing_preset":null,"timing_source":"direct"},"interleave":{"granularity_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: address interleave granularity; a design input, not a measured claim.","source":null,"unit":"byte","value":256.0},"scheme":"round_robin"}},"nocs":[{"buffer_flits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC input buffering; a design input, not a measured claim.","source":null,"unit":"count","value":8.0},"direction":"bidirectional","link_bytes_per_cycle":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC link width; a design input, not a measured claim.","source":null,"unit":"byte/cycle","value":64.0},"router_latency_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC router pipeline; a design input, not a measured claim.","source":null,"unit":"cycle","value":2.0},"topology":"mesh","virtual_channels":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC virtual channels; a design input, not a measured claim.","source":null,"unit":"count","value":4.0}}],"shared_sram":null,"static_power_w":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: chip static power budget; no energy model in U2; a design input, not a measured claim.","source":null,"unit":"W","value":40.0},"sync":{"barrier_latency_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC-domain barrier latency; U-C0 unrepresented; a design input, not a measured claim.","source":null,"unit":"cycle","value":32.0},"mechanism":"hardware_barrier"},"tdp_w":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: chip design power budget, not board power measurement; a design input, not a measured claim.","source":null,"unit":"W","value":300.0}},"hardware_spec_hash":"sha256:31c7f51353e2dbc308ebbd794b46a52dc8ce62bfca204baff76343211af983d9","initial_state":"fixture_resident","mapping_policy":{"buffer_depth":2,"name":"ws-rowsplit","version":"1"},"point_hash":"sha256:21bca9c5f17ee5a4b53bfcf81a4cde479f24d08b83072a7a2cba5c6ca5f9d0b4","priming_iterations":0,"scope":"transport_fixture","seed":0}],"format":"uarch-native-test-profile/2","owner":"Lane B agent proposal; unsigned; not first-use authority","profile_hash":"sha256:6e1976d9e6eedbc2c4d995b36f045d47a5e6f7877a4b0e7e56f598770f4d31de","semantics_revision":"U0011-stage2/1"},"protocol":"uarch-engine/3","rank":{"collectives":"excluded","equivalent_ranks":[0],"kind":"balanced_tp_representative","rank_index":0,"tp":1},"registry":{"format":"uarch-native-test-registry/1","registry_hash":"sha256:f2d7f590093a005cbac6f6c3dd57cf697e50085c4826bbbc40fc4d76ec11c40a","semantics_revision":"U0011-stage2/1","test_only_specs":[{"hardware_spec_hash":"sha256:2143b604fe16f6a8b380afb7f3e17f10539160c7078e0e8f1b82aa71840641e2","rationale":"B finite verification-only proposal; no production admission"},{"hardware_spec_hash":"sha256:31c7f51353e2dbc308ebbd794b46a52dc8ce62bfca204baff76343211af983d9","rationale":"PRIVATE SYNTHETIC UNAPPLIED issue-edge probe; no production authority"},{"hardware_spec_hash":"sha256:45cc07cfaa02926b303c9caec0111cababc8d6de514cf8698f212a6d5e830625","rationale":"B finite verification-only proposal; no production admission"},{"hardware_spec_hash":"sha256:4f656a98cca0cbc4adbab469e6fb7baf569c25137627528b94a9536289a9db0c","rationale":"B finite verification-only proposal; no production admission"},{"hardware_spec_hash":"sha256:52cfdcb80430d8a199324c9206c7da25bcaa43d0116e52ae9832f964a7996ecb","rationale":"B finite verification-only proposal; no production admission"},{"hardware_spec_hash":"sha256:7c3f728de191a297bbbc5872ebcf503340b5e1b9b74f3b15c25968690ecf2041","rationale":"B finite verification-only proposal; no production admission"},{"hardware_spec_hash":"sha256:847fe651514d7e3c895ce28ef178e7e743ca2cfefe530d35163baaca28368940","rationale":"B finite verification-only proposal; no production admission"},{"hardware_spec_hash":"sha256:cdca03d9b17a14a3b097daab1c75697a929d1f8df93aee4e52f7c4a7526fc26d","rationale":"B finite verification-only proposal; no production admission"},{"hardware_spec_hash":"sha256:d0aeec0c747e9fa3c51f850c21c206fe2a22a920ce22a5bbb89cb996d345c4bc","rationale":"B finite verification-only proposal; no production admission"},{"hardware_spec_hash":"sha256:f1201909743e05a49e0f5e7b86b3c07be1b29595a7dc89809c42d48578ca653d","rationale":"B finite verification-only proposal; no production admission"}]},"request_hash":null,"seed":0,"state_model":"resource_intervals/1","workload_closure":{"admission":{"case_id":"SYNTHETIC-REVIEWER-same-instant-credit-cc0-v3","checkpoint":"B","eligibility":"verification_only","invocation":"test","profile_hash":"sha256:6e1976d9e6eedbc2c4d995b36f045d47a5e6f7877a4b0e7e56f598770f4d31de"},"assumptions":{"arbitration":"fifo-ready/1","assumptions_hash":"sha256:53defdf4c304d46931b443cc86bf5ff2a36ff703d2c52aba319c3a97df0e0956","bank_placement":"contiguous-equal-regions/1","compute":"ws-stage-overhead-wave-drain/1","format":"uarch-mapped-assumptions/1","hbm_addressing":"stripe256-channel8-controller-pairs/1","limitations":["schema-only inputs; not runtime evidence","STUB; unknown accuracy; unverified energy"],"owner_enumeration":"native-owners/1","semantics_revision":"U0011-stage2/1","transport":"E4-named-edges-rational-service/2"},"assumptions_hash":"sha256:53defdf4c304d46931b443cc86bf5ff2a36ff703d2c52aba319c3a97df0e0956","bundle_hash":"sha256:a8e384d696639056dc0c643c215183f992e8c45c3e72a8477a0914d43b58d5b4","format":"uarch-prepared/3","hardware_spec":{"clock_domains":{"core":{"freq_hz":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core target clock; no fitted efficiency; a design input, not a measured claim.","source":null,"unit":"Hz","value":1000000000.0},"scales_with_core":true},"dram":{"freq_hz":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: dram target clock; no fitted efficiency; a design input, not a measured claim.","source":null,"unit":"Hz","value":1000000000.0},"scales_with_core":false},"noc":{"freq_hz":{"date":null,"kind":"stipulation","provenance":null,"rationale":"Verification-only D09: isolate declared component premise; not a physical hardware claim.","source":null,"unit":"Hz","value":1200000000.0},"scales_with_core":false}},"cores":{"core_type":{"dma":{"bytes_per_cycle":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: aggregate per-core DMA delivery; a design input, not a measured claim.","source":null,"unit":"byte/cycle","value":256.0},"engines":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: DMA issue engines; a design input, not a measured claim.","source":null,"unit":"count","value":4.0},"max_outstanding":{"date":null,"kind":"stipulation","provenance":null,"rationale":"Verification-only D06-two: isolate declared component premise; not a physical hardware claim.","source":null,"unit":"count","value":2.0},"request_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: DMA request granularity; a design input, not a measured claim.","source":null,"unit":"byte","value":256.0}},"job_overhead_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core-domain job issue overhead; U-C0 unrepresented; a design input, not a measured claim.","source":null,"unit":"cycle","value":32.0},"matrix_engine":{"accumulator_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: FP32 partial-sum storage; a design input, not a measured claim.","source":null,"unit":"byte","value":262144.0},"array":{"cols":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim.","source":null,"unit":"count","value":256.0},"rows":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim.","source":null,"unit":"count","value":256.0}},"dataflows":["weight_stationary"],"macs_per_cycle":{"bf16":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: dense throughput per core; no sparsity multiplier; a design input, not a measured claim.","source":null,"unit":"MAC/cycle","value":65536.0}},"operand_buffer_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: array operand staging budget; a design input, not a measured claim.","source":null,"unit":"byte","value":1048576.0},"operand_bytes_per_cycle":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core-domain operand delivery; a design input, not a measured claim.","source":null,"unit":"byte/cycle","value":1024.0}},"sram":{"banks":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: local SRAM banking; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: paired SRAM choice with 1.0 pJ/byte; a design input, not a measured claim.","source":null,"unit":"byte","value":16777216.0},"bytes_per_cycle_per_bank":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: local SRAM bank bandwidth; a design input, not a measured claim.","source":null,"unit":"byte/cycle","value":32.0}},"vector_engine":{"ops_per_cycle":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: abstract scalar vector rate, not transcendental validation; a design input, not a measured claim.","source":null,"unit":"op/cycle","value":256.0}}},"grid":{"cols":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core/array column count; a design input, not a measured claim.","source":null,"unit":"count","value":2.0},"rows":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: core/array row count; a design input, not a measured claim.","source":null,"unit":"count","value":2.0}}},"design_status":"proposed","energy":{"pj_per_byte":{"dram":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":20.0},"noc_hop":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: unvalidated interconnect/DRAM energy assumption; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":2.0},"sram":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: SRAM pair 16777216 bytes/1.0 pJ per byte; a design input, not a measured claim.","source":null,"unit":"pJ/byte","value":1.0}},"pj_per_mac":{"bf16":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: co-design energy assumption, no validation; a design input, not a measured claim.","source":null,"unit":"pJ/MAC","value":0.4}},"voltage_ratio":{"1.0":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: base voltage normalization only; nonbase energy unknown; a design input, not a measured claim.","source":null,"unit":"ratio","value":1.0}}},"formats":{"bf16":{"accumulate_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: FP32 accumulation; a design input, not a measured claim.","source":null,"unit":"byte","value":4.0},"block_scale_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: plain format with no block-scale payload; a design input, not a measured claim.","source":null,"unit":"byte","value":0.0},"bytes":2.0}},"id":"private-unapplied-gap-cap2","memory":{"controllers":[{"attach":[0,0],"noc_credits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"page_policy":"open","read_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"scheduler":"fr_fcfs","write_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0}},{"attach":[0,1],"noc_credits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"page_policy":"open","read_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"scheduler":"fr_fcfs","write_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0}},{"attach":[1,0],"noc_credits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"page_policy":"open","read_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"scheduler":"fr_fcfs","write_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0}},{"attach":[1,1],"noc_credits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: controller credits; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"page_policy":"open","read_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: read queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0},"scheduler":"fr_fcfs","write_queue_depth":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: write queue budget; a design input, not a measured claim.","source":null,"unit":"count","value":32.0}}],"dram":{"bw_bytes_per_s":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: total chip bandwidth; never multiply again by channels; a design input, not a measured claim.","source":null,"unit":"byte/s","value":1000000000000.0},"capacity_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: decimal 32 GB capacity; a design input, not a measured claim.","source":null,"unit":"byte","value":32000000000.0},"channels":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: logical DRAM channels; two per listed controller; a design input, not a measured claim.","source":null,"unit":"count","value":8.0},"organization":{"bank_groups":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: bank groups per rank; a design input, not a measured claim.","source":null,"unit":"count","value":4.0},"banks_per_group":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: banks per bank group; a design input, not a measured claim.","source":null,"unit":"count","value":4.0},"ranks":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: ranks per logical channel; a design input, not a measured claim.","source":null,"unit":"count","value":1.0},"row_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: row payload bytes; a design input, not a measured claim.","source":null,"unit":"byte","value":2048.0}},"standard":"hbm2e","timing":{"t_cl_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":16.0},"t_rcd_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":16.0},"t_refi_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":3900.0},"t_rfc_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":350.0},"t_rp_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: explicit illustrative DRAM-domain timing; not JEDEC or preset evidence; a design input, not a measured claim.","source":null,"unit":"cycle","value":16.0}},"timing_preset":null,"timing_source":"direct"},"interleave":{"granularity_bytes":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: address interleave granularity; a design input, not a measured claim.","source":null,"unit":"byte","value":256.0},"scheme":"round_robin"}},"nocs":[{"buffer_flits":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC input buffering; a design input, not a measured claim.","source":null,"unit":"count","value":8.0},"direction":"bidirectional","link_bytes_per_cycle":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC link width; a design input, not a measured claim.","source":null,"unit":"byte/cycle","value":64.0},"router_latency_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC router pipeline; a design input, not a measured claim.","source":null,"unit":"cycle","value":2.0},"topology":"mesh","virtual_channels":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC virtual channels; a design input, not a measured claim.","source":null,"unit":"count","value":4.0}}],"shared_sram":null,"static_power_w":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: chip static power budget; no energy model in U2; a design input, not a measured claim.","source":null,"unit":"W","value":40.0},"sync":{"barrier_latency_cycles":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: NoC-domain barrier latency; U-C0 unrepresented; a design input, not a measured claim.","source":null,"unit":"cycle","value":32.0},"mechanism":"hardware_barrier"},"tdp_w":{"date":null,"kind":"stipulation","provenance":null,"rationale":"B1 hardware proposal, pending Javid: chip design power budget, not board power measurement; a design input, not a measured claim.","source":null,"unit":"W","value":300.0}},"hardware_spec_hash":"sha256:31c7f51353e2dbc308ebbd794b46a52dc8ce62bfca204baff76343211af983d9","mapping_policy":{"buffer_depth":2,"name":"ws-rowsplit","version":"1"},"mapping_scope":"task_graph","points":[{"frequency_ratio":1.0,"identity":{"fixture_id":"SYNTHETIC-REVIEWER-same-instant-credit-cc0-v3","kind":"fixture"},"initial_state":"fixture_resident","payload_hash":"sha256:21bca9c5f17ee5a4b53bfcf81a4cde479f24d08b83072a7a2cba5c6ca5f9d0b4","point_id":"SYNTHETIC-PROSPECTIVE-/3-gap-cap2","priming_iterations":0,"task_graph":{"arbitration":"fifo-ready/1","buffers":[{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":[],"id":"a-dst","initial_residency":"uninitialized","offset_bytes":9472,"op_id":null,"operand":null,"producer_id":"a-unicast","size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":["a-unicast"],"id":"a-src","initial_residency":"preloaded","offset_bytes":9216,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":null,"channel_id":null,"core_id":null,"final_consumer_ids":["r00"],"id":"r00h","initial_residency":"preloaded","offset_bytes":1536,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"hbm"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":[],"id":"r00s","initial_residency":"uninitialized","offset_bytes":0,"op_id":null,"operand":null,"producer_id":"r00","size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":null,"channel_id":null,"core_id":null,"final_consumer_ids":[],"id":"r01h","initial_residency":"uninitialized","offset_bytes":3840,"op_id":null,"operand":null,"producer_id":"r01","size_bytes":256,"slot_index":null,"space":"hbm"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":["r01"],"id":"r01s","initial_residency":"preloaded","offset_bytes":1024,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":null,"channel_id":null,"core_id":null,"final_consumer_ids":["r02"],"id":"r02h","initial_residency":"preloaded","offset_bytes":5632,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"hbm"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":[],"id":"r02s","initial_residency":"uninitialized","offset_bytes":2048,"op_id":null,"operand":null,"producer_id":"r02","size_bytes":256,"slot_index":null,"space":"sram"},{"alignment_bytes":256,"bank":null,"channel_id":null,"core_id":null,"final_consumer_ids":["r03"],"id":"r03h","initial_residency":"preloaded","offset_bytes":7680,"op_id":null,"operand":null,"producer_id":null,"size_bytes":256,"slot_index":null,"space":"hbm"},{"alignment_bytes":256,"bank":0,"channel_id":null,"core_id":0,"final_consumer_ids":[],"id":"r03s","initial_residency":"uninitialized","offset_bytes":3072,"op_id":null,"operand":null,"producer_id":"r03","size_bytes":256,"slot_index":null,"space":"sram"}],"coverage":[],"dependencies":[{"after":"b-barrier","before":"a-unicast"}],"format":"uarch-taskgraph/1","graph_hash":"sha256:8c2c14e4766eb76fb2fa1756365b3448e163840fa1a9b835a682cdf7417562f5","jobs":[{"destination":{"buffer_id":"a-dst","offset_bytes":0,"size_bytes":256},"id":"a-unicast","kind":"noc_transfer","multicast":false,"op_id":null,"payload_bytes":256,"route_id":"a-zero","source":{"buffer_id":"a-src","offset_bytes":0,"size_bytes":256}},{"id":"b-barrier","kind":"barrier","owner_id":52,"participant_job_ids":["a-unicast"]},{"destination":{"buffer_id":"r00s","offset_bytes":0,"size_bytes":256},"direction":"read","dma_engine_id":0,"fragments":[{"channel_id":6,"destination_offset_bytes":0,"payload_bytes":256,"request_id":"r00.00","route_id":"p3","source_offset_bytes":0,"transaction_bytes":256}],"id":"r00","kind":"dma","op_id":null,"source":{"buffer_id":"r00h","offset_bytes":0,"size_bytes":256}},{"destination":{"buffer_id":"r01h","offset_bytes":0,"size_bytes":256},"direction":"write","dma_engine_id":0,"fragments":[{"channel_id":7,"destination_offset_bytes":0,"payload_bytes":256,"request_id":"r01.00","route_id":"p3","source_offset_bytes":0,"transaction_bytes":256}],"id":"r01","kind":"dma","op_id":null,"source":{"buffer_id":"r01s","offset_bytes":0,"size_bytes":256}},{"destination":{"buffer_id":"r02s","offset_bytes":0,"size_bytes":256},"direction":"read","dma_engine_id":0,"fragments":[{"channel_id":6,"destination_offset_bytes":0,"payload_bytes":256,"request_id":"r02.00","route_id":"p3","source_offset_bytes":0,"transaction_bytes":256}],"id":"r02","kind":"dma","op_id":null,"source":{"buffer_id":"r02h","offset_bytes":0,"size_bytes":256}},{"destination":{"buffer_id":"r03s","offset_bytes":0,"size_bytes":256},"direction":"read","dma_engine_id":0,"fragments":[{"channel_id":6,"destination_offset_bytes":0,"payload_bytes":256,"request_id":"r03.00","route_id":"p3","source_offset_bytes":0,"transaction_bytes":256}],"id":"r03","kind":"dma","op_id":null,"source":{"buffer_id":"r03h","offset_bytes":0,"size_bytes":256}}],"routes":[{"core_ids":[0],"destination_core_id":0,"id":"a-zero","noc_index":0,"source_core_id":0},{"core_ids":[0,1,3],"destination_core_id":3,"id":"p3","noc_index":0,"source_core_id":0}]}}],"producer":{"implementation_hash":"sha256:428a8eacb7877e5e11f26c8ec84e3d7f8902495346298e98df8faad87d973554","name":"PRIVATE-UNAPPLIED-issue-proposal","version":"1"},"rank":{"collectives":"excluded","equivalent_ranks":[0],"kind":"balanced_tp_representative","rank_index":0,"tp":1},"scope":{"kind":"transport_fixture"},"source":null}}
+\ No newline at end of file
+diff --git a/native/tools/component_private_adapter.py b/native/tools/component_private_adapter.py
+new file mode 100644
+index 0000000..5d6d0c0
+--- /dev/null
++++ b/native/tools/component_private_adapter.py
+@@ -0,0 +1,309 @@
++"""Private cfg(test) file-probe adapter for B's bounded audit; never a public runner.
++
++Each slot launches a fresh test executable in the accepted image with synthetic anchors.
++It is NOT an EOF/production-executable success test. Ordinary binary refusals are separate.
++No selector, HostRecord, real authority, public replay or caller-supplied raw input exists.
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import shlex
++from pathlib import Path
++from typing import Any
++
++from uarch_contract.hashing import sha256, strict_json_loads
++
++from rkuarch.engines.native.component_host import _prepare_payload
++from rkuarch.engines.native.component_runner import _consume, _decode_envelope
++from rkuarch.engines.native.host import _read, _require
++from rkuarch.engines.native.records import FileBinding
++from rkuarch.engines.native.runner import Limits, _exchange
++
++IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
++TEST = "protocol::component_runtime_tests::private_selected_transport_probe"
++
++
++def _bytes(path: Path, cap: int) -> bytes:
++    with path.open("rb") as stream:
++        raw = stream.read(cap + 1)
++    _require(len(raw) <= cap, "private probe output limit")
++    return raw
++
++
++class PrivateAdapter:
++    """Finite immutable inputs and byte-bound test executables; synthetic data only."""
++
++    def __init__(self, build_root: Path, output: Path) -> None:
++        self.build_root = build_root.resolve()
++        self.root = self.build_root / "source"
++        _require(
++            self.build_root.is_relative_to(Path("/tmp"))
++            and output.resolve().is_relative_to(Path("/tmp")),
++            "private /tmp roots required",
++        )
++        self.output = output.resolve()
++        self.output.mkdir(exist_ok=False)
++        payload = self.root / "private-component/prospective-payload.json"
++        self.binding = FileBinding(
++            path=str(payload.relative_to(self.root)), byte_hash=sha256(payload.read_bytes())
++        )
++        self.prepared = {
++            m: _prepare_payload(self.root, self.binding, mode=m) for m in ("debug", "release")
++        }
++        self.summary = strict_json_loads((self.build_root / "build-summary.json").read_bytes())
++        _require(
++            self.summary["engine"] == self.prepared["debug"].payload.engine.model_dump(mode="json"),
++            "private executable/engine binding",
++        )
++        self.selection = strict_json_loads(
++            (self.root / "private-component/selection.json").read_bytes()
++        )
++        self.rows = {r["case_id"]: r for r in self.selection["rows"]}
++        self.allowed = set(
++            strict_json_loads(
++                (self.root / "private-component/affected-selection.json").read_bytes()
++            )["ids"]
++        )
++        self.transitions = {
++            r["case_id"]: r
++            for r in strict_json_loads(
++                (self.root / "private-component/job-transitions.json").read_bytes()
++            )
++        }
++        self.negatives = {
++            r["case_id"]: r
++            for r in strict_json_loads(
++                (self.root / "private-component/negative-inventory.json").read_bytes()
++            )["cases"]
++        }
++        self.slots: list[dict[str, Any]] = []
++        self.files = {}
++        for prepared in self.prepared.values():
++            for base, binding in prepared.checks:
++                self.files[str(base / binding.path)] = binding.byte_hash.split(":")[1]
++        for name in ("build-summary.json",):
++            path = self.build_root / name
++            self.files[str(path)] = sha256(path.read_bytes()).split(":")[1]
++        for name in (
++            "selection.json",
++            "affected-selection.json",
++            "job-transitions.json",
++            "negative-inventory.json",
++        ):
++            path = self.root / "private-component" / name
++            self.files[str(path)] = sha256(path.read_bytes()).split(":")[1]
++        for mode in ("debug", "release"):
++            record = self.summary["modes"][mode]
++            path = Path(record["test_executable"])
++            _require(path.resolve().is_relative_to(self.build_root), "private test executable root")
++            self.files[str(path)] = record["test_executable_byte_hash"].split(":")[1]
++        for name in self.allowed:
++            binding = FileBinding.model_validate(self.transitions[name]["file"])
++            _read(self.root, binding)
++            self.files[str(self.root / binding.path)] = binding.byte_hash.split(":")[1]
++            if name in self.negatives:
++                profile = FileBinding.model_validate(self.negatives[name]["profile"])
++                _read(self.root, profile)
++                self.files[str(self.root / profile.path)] = profile.byte_hash.split(":")[1]
++        self._refresh()
++
++    def _refresh(self) -> None:
++        for path, wanted in self.files.items():
++            _require(
++                sha256(Path(path).read_bytes()).split(":")[1] == wanted,
++                "private audit setup changed: " + path,
++            )
++        for prepared in self.prepared.values():
++            prepared.refresh()
++
++    def preflight(self, selection: dict[str, Any], policy: dict[str, Any]) -> dict[str, Any]:
++        self._refresh()
++        ids = {r["case_id"] for r in selection["rows"]}
++        _require(
++            ids <= self.allowed and all(r == self.rows[r["case_id"]] for r in selection["rows"]),
++            "private selected definition mismatch",
++        )
++        _require(
++            policy["process_limit_required"] == 64
++            and policy["nofile"] == 256
++            and policy["per_call_seconds"] == 30,
++            "reviewed bounded private policy required",
++        )
++        from validation.component.runtime_campaign import schedule
++
++        self.slots = schedule(self.selection, sorted(ids))
++        return {
++            "evidence_kind": "private-synthetic-test",
++            "pids_limit": 64,
++            "execution_binding": self.binding.byte_hash,
++            "files": self.files,
++            "input_hashes": {
++                n: self.transitions[n]["file"]["byte_hash"].split(":")[1] for n in ids
++            },
++            "transport": "fresh cfg(test) file-probe process, not production EOF success",
++        }
++
++    def call(
++        self,
++        slot: dict[str, Any],
++        row: dict[str, Any],
++        initial: dict[str, Any] | None,
++        policy: dict[str, Any],
++    ) -> dict[str, Any]:
++        self._refresh()
++        _require(slot in self.slots, "preflight selected finite slot required")
++        name, mode = slot["case_id"], slot["mode"]
++        _require(
++            name in self.allowed
++            and row == self.rows[name]
++            and mode in self.prepared
++            and slot["phase"] in ("initial", "replay")
++            and slot["repetition"] in (0, 1, 2),
++            "private finite slot required",
++        )
++        raw = _read(self.root, FileBinding.model_validate(self.transitions[name]["file"]))
++        job = strict_json_loads(raw)
++        _require(
++            job["profile"] == row["profile"]
++            and job["engine"] == self.prepared[mode].payload.engine.model_dump(mode="json"),
++            "independent private job/profile/engine promise",
++        )
++        if name in self.negatives:
++            profile = FileBinding.model_validate(self.negatives[name]["profile"])
++            _require(
++                job["profile"] == strict_json_loads(_read(self.root, profile)),
++                "independent negative profile file",
++            )
++        if slot["phase"] == "replay":
++            _require(
++                initial is not None
++                and initial["outcome"] == "success"
++                and initial["raw_input_sha256"] == sha256(raw).split(":")[1]
++                and initial["execution_binding"] == self.binding.byte_hash,
++                "private successful receipt required for replay",
++            )
++        # Explicit saved-input producer disable; no producer module is needed to consume it.
++        import rkuarch.workload.mapped as producer
++
++        def unavailable(*args: Any, **kwargs: Any) -> None:
++            raise ValueError("private replay producer preparation unavailable")
++
++        producer.export_component_job = unavailable
++        producer.export_component_bundle = unavailable
++        run = self.output / f"{slot['ordinal']:05d}"
++        run.mkdir(exist_ok=False)
++        inputs, outputs = run / "input", run / "output"
++        inputs.mkdir()
++        outputs.mkdir()
++        (inputs / "case.json").write_bytes(raw)
++        exe = Path(self.summary["modes"][mode]["test_executable"])
++        (run / "docker-config").mkdir()
++        argv = [
++            "/usr/bin/docker",
++            "--config",
++            str(run / "docker-config"),
++            "--host",
++            "unix:///var/run/docker.sock",
++            "run",
++            "--rm",
++            "--pull",
++            "never",
++            "--cidfile",
++            str(run / "container.id"),
++            "--network",
++            "none",
++            "--read-only",
++            "--user",
++            "1000:1000",
++            "--cap-drop",
++            "ALL",
++            "--security-opt",
++            "no-new-privileges",
++            "--pids-limit",
++            "64",
++            "--memory",
++            "1g",
++            "--cpus",
++            "1",
++            "--ulimit",
++            "nofile=256:256",
++            "--tmpfs",
++            "/tmp",
++            "--mount",
++            f"type=bind,src={exe},dst=/private-test,readonly",
++            "--mount",
++            f"type=bind,src={inputs},dst=/inputs,readonly",
++            "--mount",
++            f"type=bind,src={outputs},dst=/outputs",
++            "--entrypoint",
++            "/usr/bin/env",
++            IMAGE,
++            "-i",
++            "COMPONENT_PRIVATE_INPUT=/inputs",
++            "COMPONENT_PRIVATE_OUTPUT=/outputs/result",
++            "/private-test",
++            TEST,
++            "--ignored",
++            "--exact",
++            "--nocapture",
++        ]
++        shell = run / "bounded-probe.sh"
++        shell.write_text("#!/bin/sh\nexec " + shlex.join(argv) + "\n")
++        shell.chmod(0o555)
++        fd = os.open(shell, os.O_RDONLY)
++        try:
++            stdout, stderr, status = _exchange(fd, b"", Limits(30, 1, 1024 * 1024, 1024 * 1024))
++        finally:
++            os.close(fd)
++        (run / "harness.stdout").write_bytes(stdout)
++        (run / "harness.stderr").write_bytes(stderr)
++        _require(status == 0 and b"1 passed" in stdout, "private unit process failed")
++        value = _bytes(outputs / "result/case.json", 64 * 1024**2)
++        semantic = int(_bytes(outputs / "result/case.status", 16))
++        entries = int(_bytes(outputs / "result/case.runtime-entries", 16))
++        result_stdout, result_stderr = (value, b"") if semantic == 0 else (b"", value)
++        if row["expected_layer"] == "result":
++            _require(semantic == 0 and entries == 1, "private positive native entry")
++            _consume(self.prepared[mode], json.loads(raw), value, b"", 0)
++            outcome = "success"
++        else:
++            error = _decode_envelope(result_stdout, result_stderr, semantic)
++            _require(
++                semantic == 2
++                and entries == 0
++                and error["code"] == row["expected_code"]
++                and error["pointer"] == self.negatives[name]["expected_pointer"],
++                "private exact refusal and zero runtime entry",
++            )
++            outcome = error["code"]
++        self._refresh()
++        container = (run / "container.id").read_text().strip()
++        _require(
++            len(container) == 64 and all(c in "0123456789abcdef" for c in container),
++            "actual private container identity required",
++        )
++        receipt = {
++            "argv": argv,
++            "container_id": container,
++            "harness_exit_code": status,
++            "semantic_status": semantic,
++            "test_executable_byte_hash": self.summary["modes"][mode]["test_executable_byte_hash"],
++            "raw_input_byte_hash": sha256(raw),
++            "semantic_output_byte_hash": sha256(value),
++            "runtime_entries": entries,
++            "evidence": "cfg(test) file-probe; synthetic anchors",
++        }
++        (run / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
++        return {
++            "raw_input": raw,
++            "stdout": result_stdout,
++            "stderr": result_stderr,
++            "process_identity": "docker:" + container + ":pid1",
++            "checked": True,
++            "outcome": outcome,
++            "producers_disabled": True,
++            "expected_pointer_verified": semantic == 2,
++            "zero_dispatch_evidence": str(run / "receipt.json") if semantic == 2 else None,
++        }
+diff --git a/native/tools/component_runtime_candidate.py b/native/tools/component_runtime_candidate.py
+new file mode 100644
+index 0000000..16761af
+--- /dev/null
++++ b/native/tools/component_runtime_candidate.py
+@@ -0,0 +1,397 @@
++"""Private installed-/3 build preparation. Never creates a selector or human authority.
++
++Run from the repository venv with PYTHONPATH=.:src:contract. Fresh output is mandatory.
++Build commands reuse the accepted offline container wrapper; trust/identities are additive.
++"""
++
++from __future__ import annotations
++
++import argparse
++import importlib.util
++import json
++import shutil
++import subprocess
++import sys
++import sysconfig
++import tarfile
++from copy import deepcopy
++from pathlib import Path
++
++from uarch_contract.hashing import canonical_json, content_hash, sha256
++
++from rkuarch.engines.native.component_records import ComponentBuildInputs, ComponentBuildTrust
++from rkuarch.engines.native.records import ToolInputs
++
++ROOT = Path(__file__).resolve().parents[2]
++B = "docs/reviews/U4-B-component-runtime-preparation-v2"
++OUTPUT = "private-component"
++IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
++
++
++def write(path: Path, value: object) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    path.write_text(canonical_json(value))
++
++
++def binding(root: Path, path: Path) -> dict:
++    return {"path": str(path.relative_to(root)), "byte_hash": sha256(path.read_bytes())}
++
++
++def wrapper(root: Path = ROOT):
++    path = root / "native/tools/component_candidate.py"
++    spec = importlib.util.spec_from_file_location("accepted_component_wrapper", path)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def focused_ids(selection: dict) -> list[str]:
++    """Exact B final affected plan: 27 positives and 20 finite D3 definitions."""
++    plan = json.loads(
++        (
++            ROOT / "docs/reviews/U4-B-component-runtime-preparation-v1/private-final-plan.json"
++        ).read_bytes()
++    )
++    ids = plan["cases"]
++    assert set(ids) <= {row["case_id"] for row in selection["rows"]}
++    return ids
++
++
++def freeze(source: Path, commit: str) -> dict:
++    """Freeze from an already verified clean tracked export, before generated identity."""
++    from validation.component.runtime_selection import definitions
++
++    selected = definitions()
++    assert selected["selection"] == json.loads((source / B / "selection.json").read_bytes())
++    out = source / OUTPUT
++    out.mkdir(exist_ok=False)
++    write(out / "selection.json", selected["selection"])
++    ids = focused_ids(selected["selection"])
++    write(out / "affected-selection.json", {"ids": ids, "scope": "private affected subset only"})
++    jobs = selected["jobs"]
++    registry = next(iter(jobs.values()))["job"]["registry"]
++    write(out / "registry.json", registry)
++    profiles = []
++    for row in selected["selection"]["rows"]:
++        if row["expected_layer"] == "result":
++            path = out / "profiles" / (row["profile"]["profile_hash"].split(":")[1] + ".json")
++            write(path, row["profile"])
++            profiles.append(binding(source, path))
++    profiles = sorted(profiles, key=lambda x: x["path"])
++    trust = ComponentBuildTrust.model_validate(
++        {
++            "format": "uarch-component-build-trust/2",
++            "purpose": "private-synthetic-tests-only",
++            "semantics_file": binding(
++                source, source / "docs/decisions/U0011-the-native-engine-core.md"
++            ),
++            "registry_hash": registry["registry_hash"],
++            "registry_file": binding(source, out / "registry.json"),
++            "profiles": profiles,
++            "selection": binding(source, out / "selection.json"),
++        }
++    )
++    write(out / "BuildTrust.json", trust)
++    tool_path = source / "docs/reviews/U4-A-K2-construction-v1/candidate-04/ToolInputs.json"
++    tools = ToolInputs.model_validate_json(tool_path.read_bytes())
++    assert tools.image_digest == IMAGE
++    paths = []
++    for parent in ("native", "src/rkuarch", "contract/uarch_contract", "validation"):
++        paths.extend(
++            p
++            for p in (source / parent).rglob("*")
++            if p.is_file()
++            and p.suffix in (".rs", ".toml", ".lock", ".py", ".json")
++            and "generated" not in p.parts
++        )
++    paths += [source / name for name in ("pyproject.toml", "uv.lock")]
++    paths += [
++        source / "docs/reviews/U4-A-K2-construction-v1/inputs" / n
++        for n in ("rustc-wrapper.sh", "linker.sh")
++    ]
++    inventory = [
++        {**binding(source, p), "role": "rust" if p.suffix == ".rs" else "config"}
++        for p in sorted(set(paths))
++    ]
++    model = [x for x in inventory if x["path"].startswith("native/crates/uarch-engine/src/")]
++    build = ComponentBuildInputs.model_validate(
++        {
++            "format": "uarch-component-build-inputs/2",
++            "source_commit": commit,
++            "source_files": inventory,
++            "trust_hash": content_hash(trust),
++            "trust_file": binding(source, out / "BuildTrust.json"),
++            "tool_inputs_hash": content_hash(tools),
++            "tool_inputs_file": binding(source, tool_path),
++            "model_source_paths": [x["path"] for x in model],
++            "model_inputs_hash": content_hash(model),
++            "mode_configs": [
++                {
++                    "mode": mode,
++                    "cargo_args": [
++                        "rustc",
++                        "--offline",
++                        "--locked",
++                        "-p",
++                        "uarch-engine",
++                        "--bin",
++                        "uarch-engine",
++                        "-vv",
++                        "--message-format=json",
++                    ]
++                    + (["--release"] if mode == "release" else []),
++                    "rustflags": tools.flags,
++                }
++                for mode in ("debug", "release")
++            ],
++            "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
++            "permitted_environment": {
++                "CARGO_HOME": "/cargo-home",
++                "CARGO_NET_OFFLINE": "true",
++                "CARGO_TARGET_DIR": "/target",
++                "RUSTUP_AUTO_INSTALL": "0",
++                "LC_ALL": "C",
++            },
++        }
++    )
++    write(out / "BuildInputs.json", build)
++    engine = {
++        "name": "native",
++        "version": "native-stage/1",
++        "implementation_hash": content_hash(build),
++        "compiler_lock_hash": content_hash(tools),
++        "model": {
++            "name": "native-intervals",
++            "version": "2",
++            "implementation_hash": build.model_inputs_hash,
++        },
++    }
++    write(out / "engine.json", engine)
++    generated = source / build.generated_identity_output_paths[0]
++    generated.parent.mkdir(exist_ok=True)
++    generated.write_text(
++        'pub const ENGINE_JSON: &str = r###"'
++        + canonical_json(engine)
++        + '"###;\npub const TRUST_JSON: &str = r###"'
++        + canonical_json(trust)
++        + '"###;\n'
++    )
++    transitions, positive = [], []
++    for name, item in jobs.items():
++        job = deepcopy(item["job"])
++        old_hash = job["job_hash"]
++        job["engine"] = engine
++        job["job_hash"] = content_hash(job, exclude=("job_hash",))
++        path = out / "jobs" / (name + ".json")
++        write(path, job)
++        if name in ids:
++            write(out / "affected-inputs" / path.name, job)
++        transitions.append(
++            {
++                "case_id": name,
++                "definition_job_hash": old_hash,
++                "private_build_job_hash": job["job_hash"],
++                "file": binding(source, path),
++            }
++        )
++        if item["item"]["expected_layer"] == "result":
++            positive.append(
++                {
++                    "case_id": name,
++                    "job_hash": job["job_hash"],
++                    "profile_hash": job["admission"]["profile_hash"],
++                    "file": binding(source, path),
++                }
++            )
++    write(out / "job-transitions.json", transitions)
++    write(out / "positive-inventory.json", positive)
++    expected = json.loads(
++        (source / "docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json").read_bytes()
++    )
++    write(out / "observation-contract.json", expected["observation_contract"])
++    return engine
++
++
++def prepare(out: Path) -> None:
++    if not out.is_absolute() or not out.is_relative_to(Path("/tmp")):
++        raise ValueError("fresh private absolute /tmp output required")
++    if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT):
++        raise ValueError("clean committed freeze required")
++    out.mkdir(exist_ok=False)
++    for name in ("source", "commands", "docker-config", "controls"):
++        (out / name).mkdir()
++    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
++    archive = out / "source.tar"
++    subprocess.run(["git", "archive", "-o", str(archive), commit], cwd=ROOT, check=True)
++    with tarfile.open(archive) as tar:
++        tar.extractall(out / "source", filter="data")
++    c = wrapper()
++    accepted = json.loads(c.CACHE_RECORD.read_bytes())
++    cache = Path(accepted["private_root"])
++    assert c.inventory(cache) == accepted["files"]
++    shutil.copytree(cache, out / "cache")
++    assert c.inventory(out / "cache") == accepted["files"]
++    for n in ("rustc-wrapper.sh", "linker.sh"):
++        shutil.copy2(ROOT / "docs/reviews/U4-A-K2-construction-v1/inputs" / n, out / "controls" / n)
++        (out / "controls" / n).chmod(0o555)
++    assert (
++        c.command(
++            out,
++            "image",
++            [
++                "/usr/bin/docker",
++                "--host",
++                "unix:///var/run/docker.sock",
++                "image",
++                "inspect",
++                IMAGE,
++                "--format",
++                "{{.Id}} {{.Os}} {{.Architecture}}",
++            ],
++        )
++        == 0
++    )
++    assert (out / "commands/image.stdout").read_text().strip() == IMAGE + " linux amd64"
++    engine = freeze(out / "source", commit)
++    write(
++        out / "preparation.json",
++        {
++            "source_commit": commit,
++            "source_archive": binding(out, archive),
++            "engine": engine,
++            "image": IMAGE,
++            "cache_files": len(accepted["files"]),
++            "authority": None,
++            "wrapper": binding(ROOT, ROOT / "native/tools/component_candidate.py"),
++        },
++    )
++    for tool, argv in (
++        ("rustc", [c.BIN + "rustc", "-vV"]),
++        ("cargo", [c.BIN + "cargo", "-vV"]),
++        ("rustfmt", [c.BIN + "rustfmt", "--version"]),
++        ("clippy", [c.BIN + "clippy-driver", "--version"]),
++        ("cargo-deny", ["/usr/local/cargo/bin/cargo-deny", "--version"]),
++    ):
++        assert c.command(out, "tool-" + tool, c.docker(out, "debug", "tool-" + tool) + argv) == 0
++        assert (out / "commands" / ("tool-" + tool + ".stdout")).read_bytes() == (
++            ROOT / "docs/reviews/U4-A-K2-C1-precise-v1" / (tool + ".stdout")
++        ).read_bytes()
++
++
++def verify(out: Path) -> None:
++    source = out / "source"
++    build = ComponentBuildInputs.model_validate_json(
++        (source / OUTPUT / "BuildInputs.json").read_bytes()
++    )
++    for f in build.source_files:
++        assert sha256((source / f.path).read_bytes()) == f.byte_hash, f.path
++    for f in (build.trust_file, build.tool_inputs_file):
++        assert sha256((source / f.path).read_bytes()) == f.byte_hash
++    engine = json.loads((source / OUTPUT / "engine.json").read_bytes())
++    assert engine["implementation_hash"] == content_hash(build)
++    generated = source / build.generated_identity_output_paths[0]
++    trust = json.loads((source / build.trust_file.path).read_bytes())
++    assert generated.read_text() == (
++        'pub const ENGINE_JSON: &str = r###"'
++        + canonical_json(engine)
++        + '"###;\npub const TRUST_JSON: &str = r###"'
++        + canonical_json(trust)
++        + '"###;\n'
++    )
++
++
++def build(out: Path, mode: str) -> None:
++    """Actual construction recipe; invoke the frozen export's copy of this tool."""
++    source = out / "source"
++    if ROOT.resolve() != source.resolve():
++        raise ValueError("build must use the exact frozen export recipe")
++    verify(out)
++    c = wrapper(source)
++    inputs = ComponentBuildInputs.model_validate_json(
++        (source / OUTPUT / "BuildInputs.json").read_bytes()
++    )
++    config = next(x for x in inputs.mode_configs if x.mode == mode)
++    command = c.docker(out, mode, mode + "-build") + [
++        c.BIN + "cargo",
++        *config.cargo_args,
++        "--",
++        "-C",
++        "link-arg=-Wl,-Map=/receipts/" + mode + ".map",
++    ]
++    if c.command(out, mode + "-build", command):
++        raise ValueError("private production executable construction failed")
++    test = [
++        c.BIN + "cargo",
++        "test",
++        "--offline",
++        "--locked",
++        "-p",
++        "uarch-engine",
++        "--lib",
++        "--no-run",
++        "--message-format=json",
++    ] + (["--release"] if mode == "release" else [])
++    if c.command(out, mode + "-test-build", c.docker(out, mode, mode + "-test-build") + test):
++        raise ValueError("private unit executable construction failed")
++    verify(out)
++    if c.inventory(out / "cache") != json.loads(c.CACHE_RECORD.read_bytes())["files"]:
++        raise ValueError("accepted private cache changed")
++
++
++def imports(root: Path, observation_root: Path | None = None) -> dict:
++    """Full project Python closure and stdlib/accepted dependency bytes, not caller modules."""
++    files = sorted(
++        {
++            p
++            for d in ("src/rkuarch", "contract/uarch_contract", "validation")
++            for p in (root / d).rglob("*.py")
++        }
++    )
++    external = set()
++    stdlib = Path(sysconfig.get_path("stdlib"))
++    external.update(p.resolve() for p in stdlib.rglob("*.py") if "site-packages" not in p.parts)
++    external.update(p.resolve() for p in (stdlib / "lib-dynload").glob("*.so"))
++    for name in (
++        "pydantic",
++        "pydantic_core",
++        "annotated_types",
++        "typing_extensions",
++        "typing_inspection",
++        "yaml",
++    ):
++        spec = importlib.util.find_spec(name)
++        p = Path(spec.origin).resolve()
++        external.add(p)
++        if spec.submodule_search_locations:
++            external.update(x.resolve() for x in p.parent.rglob("*") if x.suffix in (".py", ".so"))
++    return {
++        "checker": "validation.component.observations_v3:check_v3",
++        "observations": "uarch-native-observations/3",
++        "import_root": str(root),
++        "files": [binding(root, p) for p in files],
++        "external_files": [binding(Path("/"), p) for p in sorted(external)],
++        "python_executable": binding(Path("/"), Path(sys.executable).resolve()),
++        "independent_binding": binding(root, root / B / "consumer-bindings-v2.json"),
++        "observation_contract": binding(
++            observation_root or root,
++            (observation_root or root) / OUTPUT / "observation-contract.json",
++        ),
++    }
++
++
++def main() -> None:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("action", choices=("prepare", "verify", "build"))
++    parser.add_argument("output", type=Path)
++    parser.add_argument("--mode", choices=("debug", "release"), default="debug")
++    args = parser.parse_args()
++    if args.action == "prepare":
++        prepare(args.output)
++    elif args.action == "build":
++        build(args.output, args.mode)
++    else:
++        verify(args.output)
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/rkuarch/engines/native/component_host.py b/src/rkuarch/engines/native/component_host.py
+new file mode 100644
+index 0000000..97a879c
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_host.py
+@@ -0,0 +1,437 @@
++"""Separate component authority and bounded preparation; private payloads are not selectors."""
++
++from __future__ import annotations
++
++import contextlib
++import hashlib
++import os
++import sys
++import threading
++import time
++from collections.abc import Iterator
++from dataclasses import dataclass
++from pathlib import Path
++from typing import Any
++
++from uarch_contract.hashing import content_hash, sha256, strict_json_loads
++from uarch_contract.mapped import (
++    MappedEngineJob,
++    NativeEngineIdentity,
++    NativeTestProfile,
++    NativeTestRegistry,
++    admit,
++    validate_job,
++)
++
++from rkuarch.workload.mapped import loads_component_job
++
++from .component_records import (
++    ComponentBuildInputs,
++    ComponentBuildReceipt,
++    ComponentBuildTrust,
++    ComponentHostRecord,
++    ComponentHostSelector,
++    ComponentPayload,
++)
++from .host import _open, _read, _require
++from .records import FileBinding, ToolInputs
++
++_SELECTOR = Path("/etc/rkuarch/component-host-selector.json")
++_AUTHORITY = object()
++_PROJECT = ("uarch_contract", "rkuarch", "validation")
++_EXTERNAL = (
++    "pydantic",
++    "pydantic_core",
++    "annotated_types",
++    "typing_extensions",
++    "typing_inspection",
++    "yaml",
++)
++
++
++def loads_runtime_job(
++    data: str | bytes,
++    *,
++    trusted_registry_hash: str,
++    trusted_profile_hash: str,
++    expected_engine: NativeEngineIdentity,
++) -> MappedEngineJob:
++    """Installed B admission, including explicitly profiled transport test controls.
++
++    Component scope uses complete operand/resource admission. Transport fixtures are
++    test-only under checkpoint B; no generic production workload is added here.
++    Every point is admitted, not just the selected point. This is data validation.
++    """
++    from .component_records import require_component_engine
++
++    require_component_engine(expected_engine)
++    value = strict_json_loads(data)
++    anchors = dict(
++        trusted_registry_hash=trusted_registry_hash, trusted_profile_hash=trusted_profile_hash
++    )
++    if value.get("workload_closure", {}).get("scope", {}).get("kind") == "component":
++        job = loads_component_job(
++            data, invocation="test", expected_engine=expected_engine, **anchors
++        )
++    else:
++        job = validate_job(
++            value, invocation="test", checkpoint="B", expected_engine=expected_engine, **anchors
++        )
++        _require(
++            job.workload_closure.scope.kind == "transport_fixture", "component/test scope required"
++        )
++        admit(
++            job.workload_closure,
++            invocation="test",
++            checkpoint="B",
++            registry=job.registry,
++            profile=job.profile,
++            trusted_registry_hash=trusted_registry_hash,
++            trusted_profile_hash=trusted_profile_hash,
++        )
++    _require(
++        job.profile is not None and job.profile.format == "uarch-native-test-profile/2",
++        "component profile/2 required",
++    )
++    return job
++
++
++@dataclass(frozen=True)
++class _PreparedComponent:
++    """Private validated data only. Public launch never accepts this object as authority."""
++
++    root: Path
++    payload_file: FileBinding
++    payload: ComponentPayload
++    mode: str
++    checks: tuple[tuple[Path, FileBinding], ...]
++    immutable: bool
++    selection_rows: dict[str, Any]
++    consumer_pins: dict[str, str]
++
++    def refresh(self) -> None:
++        for root, binding in self.checks:
++            _read(root, binding)
++            if self.immutable:
++                with _open(root, binding.path) as fd:
++                    _require(
++                        not os.fstat(fd).st_mode & 0o222, "immutable component payload required"
++                    )
++        _verify_imports(self.payload)
++
++    def job(self, raw: bytes) -> MappedEngineJob:
++        value = strict_json_loads(raw)
++        _require(isinstance(value, dict), "component job object required")
++        matches = [j for j in self.payload.jobs if j.file.byte_hash == sha256(raw)]
++        _require(len(matches) == 1, "job outside exact component raw inventory")
++        selected = matches[0]
++        registry = NativeTestRegistry.model_validate(
++            strict_json_loads(_read(self.root, self.payload.registry))
++        )
++        job = loads_runtime_job(
++            raw,
++            trusted_registry_hash=registry.registry_hash,
++            trusted_profile_hash=selected.profile_hash,
++            expected_engine=self.payload.engine,
++        )
++        _require(
++            job.job_hash == selected.job_hash
++            and job.admission.case_id == selected.case_id
++            and job.profile is not None
++            and job.profile.format == "uarch-native-test-profile/2",
++            "component case/profile2 join",
++        )
++        return job
++
++    @contextlib.contextmanager
++    def executable(self) -> Iterator[int]:
++        selected = next(x for x in self.payload.executables if x.mode == self.mode)
++        with _open(self.root, selected.executable.path) as fd:
++            st = os.fstat(fd)
++            _require(
++                bool(st.st_mode & 0o111) and not st.st_mode & 0o222,
++                "component executable must be read-only and executable",
++            )
++            hasher = hashlib.sha256()
++            while block := os.read(fd, 1024 * 1024):
++                hasher.update(block)
++            _require(
++                "sha256:" + hasher.hexdigest() == selected.executable.byte_hash,
++                "component executable changed",
++            )
++            os.lseek(fd, 0, os.SEEK_SET)
++            yield fd
++
++
++def _verify_imports(payload: ComponentPayload) -> None:
++    root = Path(payload.consumers.import_root)
++    _require(root.is_absolute(), "absolute component import root required")
++    project = {str(root / x.path): x.byte_hash for x in payload.consumers.files}
++    external = {str(Path("/") / x.path): x.byte_hash for x in payload.consumers.external_files}
++    executable = payload.consumers.python_executable
++    _require(
++        str(Path(sys.executable).resolve()) == str(Path("/") / executable.path),
++        "component Python executable origin",
++    )
++    _read(Path("/"), executable)
++    for name, module in tuple(sys.modules.items()):
++        top = name.split(".")[0]
++        if top not in (*_PROJECT, *_EXTERNAL) and top not in sys.stdlib_module_names:
++            continue
++        raw = getattr(module, "__file__", None)
++        if raw:
++            path = str(Path(raw).resolve())
++            pins = project if top in _PROJECT else external
++            _require(
++                path in pins and sha256(Path(path).read_bytes()) == pins[path],
++                "component imported source identity: " + name,
++            )
++        elif top in _PROJECT:
++            _require(
++                all(Path(x).resolve().is_relative_to(root) for x in module.__path__),
++                "component namespace origin: " + name,
++            )
++
++
++def _prepare_payload(
++    root: Path, binding: FileBinding, *, mode: str, immutable: bool = False
++) -> _PreparedComponent:
++    """Synthetic tests may validate data here; this never returns execution authority."""
++    _require(mode in ("debug", "release"), "explicit component mode required")
++    reads: dict[tuple[Path, str], FileBinding] = {}
++
++    def read(file: FileBinding, base: Path = root) -> bytes:
++        data = _read(base, file)
++        previous = reads.setdefault((base, file.path), file)
++        _require(previous.byte_hash == file.byte_hash, "conflicting component file bindings")
++        return data
++
++    def record(cls: Any, file: FileBinding) -> Any:
++        return cls.model_validate(strict_json_loads(read(file)))
++
++    payload = record(ComponentPayload, binding)
++    build = record(ComponentBuildInputs, payload.build_inputs)
++    trust = record(ComponentBuildTrust, build.trust_file)
++    tools = record(ToolInputs, build.tool_inputs_file)
++    _require(
++        content_hash(build) == payload.engine.implementation_hash, "component BuildInputs join"
++    )
++    _require(content_hash(trust) == build.trust_hash, "component construction trust join")
++    _require(
++        content_hash(tools) == build.tool_inputs_hash == payload.engine.compiler_lock_hash,
++        "component ToolInputs join",
++    )
++    from .component_records import IMAGE
++
++    _require(tools.image_digest == IMAGE, "accepted component image required")
++    _require(all(x.rustflags == tools.flags for x in build.mode_configs), "component build flags")
++    _require(
++        trust.registry_file == payload.registry and trust.profiles == payload.profiles,
++        "component trust registry/profile files",
++    )
++    for file in build.source_files:
++        read(file)
++    model = [
++        x.model_dump(mode="json") for x in build.source_files if x.path in build.model_source_paths
++    ]
++    _require(
++        content_hash(model) == build.model_inputs_hash == payload.engine.model.implementation_hash,
++        "complete component model source identity",
++    )
++    for name in (
++        "accepted_k1_pins",
++        "cargo_lock",
++        "full_metadata",
++        "target_metadata",
++        "feature_graph",
++        "licence_inventory",
++        "crate_checksum_inventory",
++        "linker_and_os_inventory",
++    ):
++        read(getattr(tools, name))
++    read(trust.semantics_file)
++    selection = strict_json_loads(read(trust.selection))
++    _require(
++        selection.get("format")
++        in ("B-component-prospective-v3-selection/1", "B-component-prospective-v3-selection/2")
++        and selection.get("model") == ["native-intervals", "2"]
++        and selection.get("observations") == "uarch-native-observations/3"
++        and selection.get("checker") == payload.consumers.checker,
++        "component independent selection route",
++    )
++    promised = {
++        row["case_id"]: row for row in selection["rows"] if row["expected_layer"] == "result"
++    }
++    _require(
++        set(promised) == {item.case_id for item in payload.jobs},
++        "complete selected positive inventory",
++    )
++    registry = record(NativeTestRegistry, payload.registry)
++    _require(registry.registry_hash == trust.registry_hash, "component registry hash")
++    profiles = {}
++    expected_cases: set[tuple[str, str]] = set()
++    for file in payload.profiles:
++        profile = record(NativeTestProfile, file)
++        _require(profile.format == "uarch-native-test-profile/2", "component profile/2 required")
++        _require(profile.profile_hash not in profiles, "duplicate component profile")
++        profiles[profile.profile_hash] = profile
++        expected_cases.update((profile.profile_hash, e.case_id) for e in profile.entries)
++    seen_cases = set()
++    for item in payload.jobs:
++        raw = read(item.file)
++        job = loads_runtime_job(
++            raw,
++            trusted_registry_hash=registry.registry_hash,
++            trusted_profile_hash=item.profile_hash,
++            expected_engine=payload.engine,
++        )
++        _require(
++            job.profile == profiles.get(item.profile_hash)
++            and job.job_hash == item.job_hash
++            and job.admission.case_id == item.case_id,
++            "component selected closure join",
++        )
++        promise = promised[item.case_id]
++        assert job.profile is not None
++        _require(
++            job.profile.model_dump(mode="json") == promise["profile"]
++            and job.bundle_hash == promise["bundle_hash"]
++            and job.point_hash == promise["point_hash"]
++            and job.mapped_point.task_graph.graph_hash == promise["graph_hash"]
++            and job.workload_closure.mapping_policy.model_dump(mode="json") == promise["policy"],
++            "component engine-free selection/closure/policy promise",
++        )
++        seen_cases.add((item.profile_hash, item.case_id))
++    _require(seen_cases == expected_cases, "complete component profile/case inventory")
++    for executable in payload.executables:
++        receipt = record(ComponentBuildReceipt, executable.receipt)
++        _require(
++            receipt.engine == payload.engine
++            and receipt.mode == executable.mode
++            and receipt.executable == executable.executable,
++            "component receipt/executable join",
++        )
++        _require(
++            receipt.generated_identity.path in build.generated_identity_output_paths,
++            "component generated identity path",
++        )
++        for file in (
++            receipt.executable,
++            receipt.generated_identity,
++            receipt.build_log,
++            receipt.environment,
++            receipt.loader_observations,
++        ):
++            read(file)
++    source_pins = {x.path: x.byte_hash for x in build.source_files}
++    for file in payload.consumers.files:
++        _require(
++            source_pins.get(file.path) == file.byte_hash,
++            "component consumer/build source closure join",
++        )
++        read(file, Path(payload.consumers.import_root))
++    for file in payload.consumers.external_files:
++        read(file, Path("/"))
++    read(payload.consumers.python_executable, Path("/"))
++    read(payload.consumers.observation_contract)
++    consumer_pins = strict_json_loads(read(payload.consumers.independent_binding))["files"]
++    from validation.component.runtime_checks import verify_sources
++
++    verify_sources(Path(payload.consumers.import_root), consumer_pins)
++    _require(
++        all(source_pins.get(path) == "sha256:" + digest for path, digest in consumer_pins.items()),
++        "independent consumer/build closure join",
++    )
++    prepared = _PreparedComponent(
++        root,
++        binding,
++        payload,
++        mode,
++        tuple((base, file) for (base, _), file in reads.items()),
++        immutable,
++        promised,
++        consumer_pins,
++    )
++    prepared.refresh()
++    return prepared
++
++
++class ComponentSession:
++    """One independently authorized bounded session. Call budgets are not public permission."""
++
++    def __init__(
++        self,
++        prepared: _PreparedComponent,
++        authority_files: tuple[tuple[Path, FileBinding], ...],
++        *,
++        token: object,
++    ) -> None:
++        _require(token is _AUTHORITY, "independent component authority required")
++        self._prepared = prepared
++        self._authority_files = authority_files
++        self._token = token
++        self._deadline = time.monotonic() + prepared.payload.budget.session_seconds
++        self._remaining = prepared.payload.budget.calls
++        self._lock = threading.Lock()
++
++    def check(self) -> None:
++        _require(self._token is _AUTHORITY, "independent component authority required")
++        for root, file in self._authority_files:
++            _read(root, file)
++        self._prepared.refresh()
++
++    def claim(self) -> _PreparedComponent:
++        _require(self._token is _AUTHORITY, "independent component authority required")
++        with self._lock:
++            _require(
++                time.monotonic() < self._deadline and self._remaining > 0,
++                "component session budget exhausted",
++            )
++            self.check()
++            self._remaining -= 1
++            return self._prepared
++
++
++def prepare_component(*, mode: str) -> ComponentSession:
++    """Only the fixed independently installed component selector can authorize launch."""
++    _require(mode in ("debug", "release"), "explicit component mode required")
++    with _open(_SELECTOR.parent, _SELECTOR.name) as fd:
++        st = os.fstat(fd)
++        _require(
++            st.st_uid == 0 and not st.st_mode & 0o022,
++            "component selector must be root-owned and protected",
++        )
++        with os.fdopen(os.dup(fd), "rb") as stream:
++            selector_raw = stream.read()
++            selector = ComponentHostSelector.model_validate(strict_json_loads(selector_raw))
++    root = Path(selector.repository)
++    record_file = FileBinding(path=selector.record_path, byte_hash=selector.record_byte_hash)
++    record = ComponentHostRecord.model_validate(strict_json_loads(_read(root, record_file)))
++    subject = {"runtime_payload_byte_hash": record.payload.byte_hash}
++    decision = strict_json_loads(_read(root, record.decision))
++    _require(
++        decision
++        == {
++            "format": "uarch-component-human-first-use-decision/1",
++            "accepted_by": "Javid (@jjaffari)",
++            "reply": "yes",
++            "subject": subject,
++        },
++        "exact component human decision required",
++    )
++    review = strict_json_loads(_read(root, record.independent_review))
++    _require(
++        isinstance(review, dict)
++        and review.get("format") == "uarch-component-runtime-review/1"
++        and review.get("subject") == subject
++        and review.get("read_audit_complete") is True
++        and review.get("selected_support_current") is True,
++        "independent component runtime/read/currentness review required",
++    )
++    prepared = _prepare_payload(root, record.payload, mode=mode, immutable=True)
++    return ComponentSession(
++        prepared,
++        tuple((root, f) for f in (record_file, record.decision, record.independent_review))
++        + ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(selector_raw))),),
++        token=_AUTHORITY,
++    )
+diff --git a/src/rkuarch/engines/native/component_records.py b/src/rkuarch/engines/native/component_records.py
+new file mode 100644
+index 0000000..fcaa265
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_records.py
+@@ -0,0 +1,158 @@
++"""Additive component records. Valid shapes and construction pins are never authority."""
++
++from typing import Annotated, Literal
++
++from pydantic import Field, model_validator
++from uarch_contract.common import FrozenModel, Hash, NonEmpty
++from uarch_contract.mapped import NativeEngineIdentity
++
++from .records import FileBinding, GitCommit, ModeConfig, SourceInput
++
++IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
++CHECKER = "validation.component.observations_v3:check_v3"
++OBSERVATIONS = "uarch-native-observations/3"
++
++
++class ComponentBuildTrust(FrozenModel):
++    format: Literal["uarch-component-build-trust/2"]
++    purpose: Literal["private-synthetic-tests-only"]
++    semantics_file: FileBinding
++    registry_hash: Hash
++    registry_file: FileBinding
++    profiles: Annotated[tuple[FileBinding, ...], Field(min_length=1)]
++    selection: FileBinding
++    # Selection contains engine-free raw closure/profile promises, not later jobs/receipts.
++
++
++class ComponentBuildInputs(FrozenModel):
++    format: Literal["uarch-component-build-inputs/2"]
++    source_commit: GitCommit
++    source_files: Annotated[tuple[SourceInput, ...], Field(min_length=1)]
++    trust_hash: Hash
++    trust_file: FileBinding
++    tool_inputs_hash: Hash
++    tool_inputs_file: FileBinding
++    model_source_paths: Annotated[tuple[NonEmpty, ...], Field(min_length=1)]
++    model_inputs_hash: Hash
++    mode_configs: tuple[ModeConfig, ModeConfig]
++    generated_identity_output_paths: tuple[NonEmpty, ...]
++    permitted_environment: dict[NonEmpty, str]
++
++    @model_validator(mode="after")
++    def acyclic(self) -> "ComponentBuildInputs":
++        paths = [f.path for f in self.source_files]
++        if paths != sorted(set(paths)) or not set(self.model_source_paths) <= set(paths):
++            raise ValueError("complete sorted unique source/model inventory required")
++        if list(self.model_source_paths) != sorted(set(self.model_source_paths)):
++            raise ValueError("sorted unique model inventory required")
++        if self.generated_identity_output_paths != (
++            "native/crates/uarch-engine/generated/identity.rs",
++        ) or set(self.generated_identity_output_paths) & set(paths):
++            raise ValueError("acyclic explicit generated identity required")
++        if tuple(x.mode for x in self.mode_configs) != ("debug", "release"):
++            raise ValueError("separate debug/release configurations required")
++        return self
++
++
++class ComponentBuildReceipt(FrozenModel):
++    format: Literal["uarch-component-build-receipt/1"]
++    build_input_hash: Hash
++    engine: NativeEngineIdentity
++    mode: Literal["debug", "release"]
++    executable: FileBinding
++    image_digest: Literal["sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"]
++    generated_identity: FileBinding
++    build_log: FileBinding
++    environment: FileBinding
++    loader_observations: FileBinding
++    limitations: tuple[NonEmpty, ...]
++
++    @model_validator(mode="after")
++    def joined(self) -> "ComponentBuildReceipt":
++        require_component_engine(self.engine)
++        if self.engine.implementation_hash != self.build_input_hash:
++            raise ValueError("component executable/build identity mismatch")
++        return self
++
++
++class ComponentExecutable(FrozenModel):
++    mode: Literal["debug", "release"]
++    executable: FileBinding
++    receipt: FileBinding
++
++
++class ComponentJobBinding(FrozenModel):
++    case_id: NonEmpty
++    job_hash: Hash
++    profile_hash: Hash
++    file: FileBinding
++
++
++class ComponentConsumers(FrozenModel):
++    checker: Literal["validation.component.observations_v3:check_v3"]
++    observations: Literal["uarch-native-observations/3"]
++    import_root: NonEmpty
++    files: Annotated[tuple[FileBinding, ...], Field(min_length=1)]
++    observation_contract: FileBinding
++    independent_binding: FileBinding
++    python_executable: FileBinding
++    external_files: Annotated[tuple[FileBinding, ...], Field(min_length=1)]
++
++
++class ComponentBudget(FrozenModel):
++    calls: Annotated[int, Field(strict=True, ge=1, le=10000)]
++    session_seconds: Annotated[int, Field(strict=True, ge=1, le=86400)]
++    timeout_s: Annotated[int, Field(strict=True, ge=1, le=600)]
++    stdin_bytes: Annotated[int, Field(strict=True, ge=1, le=64 * 1024 * 1024)]
++    stdout_bytes: Annotated[int, Field(strict=True, ge=1, le=64 * 1024 * 1024)]
++    stderr_bytes: Annotated[int, Field(strict=True, ge=1, le=1024 * 1024)]
++
++
++class ComponentPayload(FrozenModel):
++    format: Literal["uarch-component-runtime-payload/1"]
++    engine: NativeEngineIdentity
++    build_inputs: FileBinding
++    registry: FileBinding
++    profiles: Annotated[tuple[FileBinding, ...], Field(min_length=1)]
++    jobs: Annotated[tuple[ComponentJobBinding, ...], Field(min_length=1)]
++    executables: tuple[ComponentExecutable, ComponentExecutable]
++    consumers: ComponentConsumers
++    budget: ComponentBudget
++
++    @model_validator(mode="after")
++    def finite(self) -> "ComponentPayload":
++        require_component_engine(self.engine)
++        if tuple(x.mode for x in self.executables) != ("debug", "release"):
++            raise ValueError("both actual component executable modes required")
++        for values in ([x.case_id for x in self.jobs], [x.job_hash for x in self.jobs]):
++            if len(set(values)) != len(values):
++                raise ValueError("unique finite component jobs required")
++        paths = [x.path for x in self.consumers.files]
++        if paths != sorted(set(paths)):
++            raise ValueError("sorted unique consumer/import closure required")
++        return self
++
++
++class ComponentHostRecord(FrozenModel):
++    format: Literal["uarch-component-first-use/1"]
++    payload: FileBinding
++    decision: FileBinding
++    independent_review: FileBinding
++
++
++class ComponentHostSelector(FrozenModel):
++    format: Literal["uarch-component-host-selector/1"]
++    repository: NonEmpty
++    acceptance_commit: GitCommit
++    record_path: NonEmpty
++    record_byte_hash: Hash
++
++
++def require_component_engine(engine: NativeEngineIdentity) -> None:
++    if (engine.name, engine.version, engine.model.name, engine.model.version) != (
++        "native",
++        "native-stage/1",
++        "native-intervals",
++        "2",
++    ):
++        raise ValueError("component native-intervals/2 identity required")
+diff --git a/src/rkuarch/engines/native/component_runner.py b/src/rkuarch/engines/native/component_runner.py
+new file mode 100644
+index 0000000..9302197
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_runner.py
+@@ -0,0 +1,187 @@
++"""Installed /3 transport and saved-result consumption; authority is never caller supplied."""
++
++from __future__ import annotations
++
++from pathlib import Path
++from typing import Any, get_args
++
++from uarch_contract.hashing import canonical_json, sha256, strict_json_loads
++from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, ProfileEntry, validate_result
++
++from .component_host import ComponentSession, _PreparedComponent, loads_runtime_job
++from .component_records import CHECKER, OBSERVATIONS
++from .host import _read
++from .runner import (
++    REFUSAL_CODES,
++    Limits,
++    NativeRefusal,
++    OperationalFailure,
++    ProtocolViolation,
++    _exchange,
++)
++
++# Installed profile outcomes plus independent native structural admission refusals.
++# The K2 decoder and its accepted code set remain unchanged.
++_COMPONENT_CODES = (
++    REFUSAL_CODES
++    | frozenset(get_args(ProfileEntry.model_fields["expected_outcome"].annotation))
++    | {
++        "InvalidBank",
++        "InvalidPreparedGraph",
++        "UnexpectedClosure",
++        "TestOnlyHardware",
++    }
++) - {"success"}
++
++
++def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str, Any]:
++    """Exact component framing; operational exits never become semantic refusals."""
++    if returncode < 0 or returncode == 1:
++        raise OperationalFailure(f"NativeExit:{returncode}")
++    if returncode not in (0, 2) or (returncode == 0 and stderr) or (returncode == 2 and stdout):
++        raise ProtocolViolation("status/stream mismatch")
++    raw = stdout if returncode == 0 else stderr
++    try:
++        value = strict_json_loads(raw.decode("utf-8"))
++        if not isinstance(value, dict) or canonical_json(value).encode() != raw:
++            raise ValueError("noncanonical envelope")
++        if returncode == 2 and (
++            set(value) != {"code", "message", "pointer"}
++            or type(value["code"]) is not str
++            or value["code"] not in _COMPONENT_CODES
++            or type(value["message"]) is not str
++            or (value["pointer"] is not None and type(value["pointer"]) is not str)
++        ):
++            raise ValueError("invalid component refusal fields/code")
++    except (ValueError, TypeError, UnicodeError, OverflowError) as error:
++        raise ProtocolViolation("invalid complete canonical component envelope") from error
++    return value
++
++
++def require_route(job: dict[str, Any], result: dict[str, Any]) -> None:
++    """Select checker from the admitted job model before consuming any output evidence."""
++    model = job.get("engine", {}).get("model", {})
++    if (model.get("name"), model.get("version")) != ("native-intervals", "2") or result.get(
++        "observations", {}
++    ).get("format") != OBSERVATIONS:
++        raise ProtocolViolation("component model/observation/checker route mismatch")
++
++
++def validate_component_response(
++    stdout: bytes,
++    stderr: bytes,
++    returncode: int,
++    *,
++    job: dict[str, Any],
++    observation_contract: dict[str, Any],
++) -> MappedEngineResult:
++    """Pure replay validator, never authorization or a process-launch path."""
++    from validation.component.observations_v3 import check_v3
++
++    checked = loads_runtime_job(
++        canonical_json(job),
++        trusted_registry_hash=job["registry"]["registry_hash"],
++        trusted_profile_hash=job["admission"]["profile_hash"],
++        expected_engine=MappedEngineJob.model_validate(job).engine,
++    )
++    if checked.profile is None or checked.profile.format != "uarch-native-test-profile/2":
++        raise ProtocolViolation("component profile/2 required")
++    value = _decode_envelope(stdout, stderr, returncode)
++    if returncode == 2:
++        raise NativeRefusal(value)
++    require_route(job, value)
++    result = validate_result(value, checked)
++    check_v3(job, value, observation_contract)
++    if canonical_json(result).encode() != stdout:
++        raise ProtocolViolation("component normalized result changed bytes")
++    return result
++
++
++def _request(prepared: _PreparedComponent, saved: Path) -> tuple[bytes, dict[str, Any]]:
++    prepared.refresh()
++    cap = prepared.payload.budget.stdin_bytes
++    with saved.open("rb") as stream:
++        raw = stream.read(cap + 1)
++    if len(raw) > cap:
++        raise OperationalFailure("StdinLimit")
++    checked = prepared.job(raw)
++    if canonical_json(checked).encode() != raw:
++        raise ProtocolViolation("component canonical selected request required")
++    return raw, checked.model_dump(mode="json")
++
++
++def _consume(
++    prepared: _PreparedComponent, request: dict[str, Any], stdout: bytes, stderr: bytes, status: int
++) -> MappedEngineResult:
++    prepared.refresh()
++    expected = strict_json_loads(
++        _read(prepared.root, prepared.payload.consumers.observation_contract)
++    )
++    result = validate_component_response(
++        stdout, stderr, status, job=request, observation_contract=expected
++    )
++    from validation.component.runtime_checks import consume_case
++
++    raw = canonical_json(request).encode()
++    consume_case(
++        request,
++        result.model_dump(mode="json"),
++        prepared.selection_rows[request["admission"]["case_id"]],
++        checker_id=CHECKER,
++        source=Path(prepared.payload.consumers.import_root),
++        pins=prepared.consumer_pins,
++        expected=expected,
++        input_sha256=sha256(raw).split(":")[1],
++        raw_input=raw,
++    )
++    prepared.refresh()
++    return result
++
++
++def _run_prepared(
++    saved: Path, prepared: _PreparedComponent
++) -> tuple[MappedEngineResult, dict[str, Any]]:
++    """Private transport core. Tests use synthetic data; public APIs require ComponentSession."""
++    request, job = _request(prepared, saved)
++    b = prepared.payload.budget
++    limits = Limits(b.timeout_s, b.stdin_bytes, b.stdout_bytes, b.stderr_bytes)
++    with prepared.executable() as fd:
++        stdout, stderr, status = _exchange(fd, request, limits)
++    result = _consume(prepared, job, stdout, stderr, status)
++    selected = next(x for x in prepared.payload.executables if x.mode == prepared.mode)
++    return result, {
++        "request_byte_hash": sha256(request),
++        "stdout_byte_hash": sha256(stdout),
++        "stderr_byte_hash": sha256(stderr),
++        "exit_code": status,
++        "executable_byte_hash": selected.executable.byte_hash,
++        "runtime_payload_byte_hash": prepared.payload_file.byte_hash,
++        "independent_checker": CHECKER,
++        "limits": vars(limits),
++    }
++
++
++def run_component(
++    saved: Path, *, session: ComponentSession
++) -> tuple[MappedEngineResult, dict[str, Any]]:
++    if not isinstance(session, ComponentSession):
++        raise ValueError("independent component authority required")
++    prepared = session.claim()
++    result = _run_prepared(saved, prepared)
++    session.check()
++    return result
++
++
++def replay_component(saved: Path, output: Path, *, session: ComponentSession) -> MappedEngineResult:
++    """Saved-result replay still needs current exact authority/inputs and both consumers."""
++    if not isinstance(session, ComponentSession):
++        raise ValueError("independent component authority required")
++    prepared = session.claim()
++    _, job = _request(prepared, saved)
++    with output.open("rb") as stream:
++        raw = stream.read(prepared.payload.budget.stdout_bytes + 1)
++    if len(raw) > prepared.payload.budget.stdout_bytes:
++        raise OperationalFailure("StdoutLimit")
++    result = _consume(prepared, job, raw, b"", 0)
++    session.check()
++    return result
+diff --git a/tests/unit/test_component_negative_proposal.py b/tests/unit/test_component_negative_proposal.py
+new file mode 100644
+index 0000000..5348939
+--- /dev/null
++++ b/tests/unit/test_component_negative_proposal.py
+@@ -0,0 +1,76 @@
++"""Private export of an UNAPPLIED D3 module; no installed negative transport."""
++
++import importlib.util
++import sys
++from importlib.machinery import SourceFileLoader
++from pathlib import Path
++
++import pytest
++from uarch_contract.hashing import canonical_json
++
++ROOT = Path(__file__).resolve().parents[2]
++
++
++@pytest.fixture
++def proposal(tmp_path):
++    source = ROOT / "docs/reviews/U4-A-component-runtime-v1/proposals/component_negative-v2.py.txt"
++    exported = tmp_path / "component_negative.py"
++    exported.write_bytes(source.read_bytes())
++    name = "private_negative_proposal"
++    loader = SourceFileLoader(name, str(exported))
++    spec = importlib.util.spec_from_loader(name, loader)
++    module = importlib.util.module_from_spec(spec)
++    sys.modules[name] = module
++    loader.exec_module(module)
++    yield module
++    del sys.modules[name]
++
++
++def case(module):
++    return module.NegativeCase(
++        case_id="synthetic-negative",
++        raw={"path": "raw.json", "byte_hash": "sha256:" + "a" * 64},
++        profile={"path": "profile.json", "byte_hash": "sha256:" + "b" * 64},
++        expected_code="CapacityExceeded",
++        expected_pointer=None,
++        layer="resource-preflight",
++    )
++
++
++def test_d3_exact_refusal_and_no_zero_dispatch_claim(proposal):
++    expected = {"code": "CapacityExceeded", "pointer": None, "message": "synthetic"}
++    assert (
++        proposal._consume_negative(b"", canonical_json(expected).encode(), 2, case(proposal))
++        == expected
++    )
++
++
++@pytest.mark.parametrize(
++    "status,code,pointer",
++    [
++        (0, "CapacityExceeded", None),
++        (2, "TestProfileMismatch", None),
++        (2, "CapacityExceeded", "/wrong"),
++    ],
++)
++def test_d3_success_or_wrong_refusal_fails(proposal, status, code, pointer):
++    error = canonical_json({"code": code, "pointer": pointer, "message": "synthetic"}).encode()
++    with pytest.raises(ValueError):
++        proposal._consume_negative(
++            b"" if status == 2 else error, error if status == 2 else b"", status, case(proposal)
++        )
++
++
++def test_d3_has_no_raw_or_positive_authority_bypass(proposal, tmp_path, monkeypatch):
++    monkeypatch.setattr(proposal, "_SELECTOR", tmp_path / "absent")
++    with pytest.raises((ValueError, OSError)):
++        proposal.prepare_negative(mode="debug")
++    with pytest.raises(ValueError, match="separate D3 authority"):
++        proposal.run_negative("synthetic-negative", session=object())
++    with pytest.raises(TypeError):
++        proposal.run_negative("synthetic-negative", raw=b"{}", session=object())
++
++
++def test_d3_malformed_refusal_fails(proposal):
++    with pytest.raises(ValueError):
++        proposal._consume_negative(b"", b'{"code":"CapacityExceeded"}', 2, case(proposal))
+diff --git a/tests/unit/test_component_runtime.py b/tests/unit/test_component_runtime.py
+new file mode 100644
+index 0000000..33c5af0
+--- /dev/null
++++ b/tests/unit/test_component_runtime.py
+@@ -0,0 +1,476 @@
++"""Synthetic component integration; no selector, human decision or public authority."""
++
++import json
++from copy import deepcopy
++from pathlib import Path
++
++import pytest
++from uarch_contract.hashing import canonical_json, content_hash
++
++from rkuarch.engines.native import component_host, component_runner
++
++ROOT = Path(__file__).resolve().parents[2]
++
++
++def prospective_pair():
++    """Explicit new profile/2 identity; preserve every historical input/output."""
++    old = ROOT / "docs/reviews/U4-A-issue-edge-stage2-v1/private-probes/cc0-v3"
++    job = json.loads((old / "job.json").read_bytes())
++    profile = job["profile"]
++    profile["format"] = "uarch-native-test-profile/2"
++    for entry in profile["entries"]:
++        entry["mapping_policy"] = job["workload_closure"]["mapping_policy"]
++    profile["profile_hash"] = content_hash(profile, exclude=("profile_hash",))
++    closure = job["workload_closure"]
++    closure["admission"]["profile_hash"] = profile["profile_hash"]
++    closure["bundle_hash"] = content_hash(closure, exclude=("bundle_hash",))
++    job["bundle_hash"] = closure["bundle_hash"]
++    job["admission"] = deepcopy(closure["admission"])
++    job["job_hash"] = content_hash(job, exclude=("job_hash",))
++    result = json.loads((old / "debug.json").read_bytes())
++    result.update(job_hash=job["job_hash"], admission=job["admission"], engine=job["engine"])
++    result["result_hash"] = content_hash(result, exclude=("result_hash",))
++    return job, result
++
++
++def test_component_public_entry_requires_its_own_authority(tmp_path, monkeypatch):
++    monkeypatch.setattr(component_host, "_SELECTOR", tmp_path / "absent-selector.json")
++    with pytest.raises((OSError, ValueError)):
++        component_host.prepare_component(mode="debug")
++    with pytest.raises(ValueError, match="component authority"):
++        component_runner.run_component(tmp_path / "absent-job", session=object())
++
++
++def test_component_route_is_job_selected_before_output_consumer():
++    job, result = prospective_pair()
++    component_runner.require_route(job, result)
++    for model, observations in [
++        ("1", "uarch-native-observations/3"),
++        ("2", "uarch-native-observations/2"),
++    ]:
++        badjob, badresult = deepcopy(job), deepcopy(result)
++        badjob["engine"]["model"]["version"] = model
++        badresult["observations"]["format"] = observations
++        with pytest.raises(ValueError, match="model/observation/checker"):
++            component_runner.require_route(badjob, badresult)
++
++
++def test_saved_result_core_uses_both_consumers_and_no_producers(monkeypatch):
++    job, result = prospective_pair()
++    expected = json.loads(
++        (ROOT / "docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json").read_bytes()
++    )["observation_contract"]
++    import rkuarch.workload.mapped as imported
++
++    def unavailable(*args, **kwargs):
++        raise AssertionError("producer unavailable")
++
++    monkeypatch.setattr(imported, "export_component_job", unavailable)
++    checked = component_runner.validate_component_response(
++        canonical_json(result).encode(), b"", 0, job=job, observation_contract=expected
++    )
++    assert checked.observations.format == "uarch-native-observations/3"
++    assert checked.duration_ps == 121000
++    # Resealed invalid predecessor exercises structural refusal through the runner.
++    # Historical A7 cursor discrimination is separate, inherited evidence.
++    first = next(
++        a
++        for a in result["observations"]["activities"]["records"]
++        if a["request_id"] == "r02.00" and a["kind"] == "alignment" and a["subphase"] == "dma_issue"
++    )
++    first["predecessors"].append({"activity_id": "activity-00000027", "relation": "credit"})
++    result["result_hash"] = content_hash(result, exclude=("result_hash",))
++    with pytest.raises(ValueError):
++        component_runner.validate_component_response(
++            canonical_json(result).encode(), b"", 0, job=job, observation_contract=expected
++        )
++
++
++@pytest.fixture
++def prepared_payload(tmp_path):
++    """Synthetic record graph + shell echo executable. Not a native build or authority."""
++    import importlib.util
++    import shutil
++
++    from rkuarch.engines.native.component_records import IMAGE
++    from rkuarch.engines.native.records import FileBinding, ToolInputs
++
++    spec = importlib.util.spec_from_file_location(
++        "private_recipe", ROOT / "native/tools/component_runtime_candidate.py"
++    )
++    recipe = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(recipe)
++    job, result = prospective_pair()
++
++    def put(name, value):
++        path = tmp_path / name
++        path.parent.mkdir(parents=True, exist_ok=True)
++        path.write_text(canonical_json(value))
++        return recipe.binding(tmp_path, path)
++
++    semantics = put("semantics.json", {"synthetic": True})
++    registry = put("registry.json", job["registry"])
++    profile = put("profile.json", job["profile"])
++    row = {
++        "case_id": job["admission"]["case_id"],
++        "expected_layer": "result",
++        "expected": {"outcome": "success", "duration_ps": 121000},
++        "profile": job["profile"],
++        "bundle_hash": job["bundle_hash"],
++        "point_hash": job["point_hash"],
++        "graph_hash": job["mapped_point"]["task_graph"]["graph_hash"],
++        "policy": job["workload_closure"]["mapping_policy"],
++    }
++    selection = put(
++        "selection.json",
++        {
++            "format": "B-component-prospective-v3-selection/1",
++            "model": ["native-intervals", "2"],
++            "observations": "uarch-native-observations/3",
++            "checker": "validation.component.observations_v3:check_v3",
++            "rows": [row],
++        },
++    )
++    trust = {
++        "format": "uarch-component-build-trust/2",
++        "purpose": "private-synthetic-tests-only",
++        "semantics_file": semantics,
++        "registry_hash": job["registry"]["registry_hash"],
++        "registry_file": registry,
++        "profiles": [profile],
++        "selection": selection,
++    }
++    trust_file = put("trust.json", trust)
++    tools_path = ROOT / "docs/reviews/U4-A-K2-construction-v1/candidate-04/ToolInputs.json"
++    tools = ToolInputs.model_validate_json(tools_path.read_bytes())
++    for value in tools.model_dump(mode="json").values():
++        if isinstance(value, dict) and "path" in value:
++            dest = tmp_path / value["path"]
++            dest.parent.mkdir(parents=True, exist_ok=True)
++            shutil.copyfile(ROOT / value["path"], dest)
++    put(
++        "private-component/observation-contract.json",
++        json.loads(
++            (ROOT / "docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json").read_bytes()
++        )["observation_contract"],
++    )
++    consumers = recipe.imports(ROOT, tmp_path)
++    binding_path = consumers["independent_binding"]["path"]
++    destination = tmp_path / binding_path
++    destination.parent.mkdir(parents=True, exist_ok=True)
++    shutil.copyfile(ROOT / binding_path, destination)
++    # The import recipe's expected observation file belongs to this synthetic data root.
++    consumers["observation_contract"] = recipe.binding(
++        tmp_path, tmp_path / "private-component/observation-contract.json"
++    )
++    sources = []
++    for f in consumers["files"]:
++        dest = tmp_path / f["path"]
++        dest.parent.mkdir(parents=True, exist_ok=True)
++        shutil.copyfile(ROOT / f["path"], dest)
++        sources.append(dict(f, role="config"))
++    sources.append({**tools.cargo_lock.model_dump(mode="json"), "role": "config"})
++    sources.sort(key=lambda f: f["path"])
++    model = [sources[0]]
++    build = {
++        "format": "uarch-component-build-inputs/2",
++        "source_commit": "0" * 40,
++        "source_files": sources,
++        "trust_hash": content_hash(trust),
++        "trust_file": trust_file,
++        "tool_inputs_hash": content_hash(tools),
++        "tool_inputs_file": put("tools.json", tools),
++        "model_source_paths": [model[0]["path"]],
++        "model_inputs_hash": content_hash(model),
++        "mode_configs": [
++            {"mode": m, "cargo_args": ["synthetic"], "rustflags": list(tools.flags)}
++            for m in ("debug", "release")
++        ],
++        "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
++        "permitted_environment": {},
++    }
++    build_file = put("build.json", build)
++    engine = deepcopy(job["engine"])
++    engine.update(implementation_hash=content_hash(build), compiler_lock_hash=content_hash(tools))
++    engine["model"]["implementation_hash"] = content_hash(model)
++    job["engine"] = engine
++    job["job_hash"] = content_hash(job, exclude=("job_hash",))
++    result.update(job_hash=job["job_hash"], engine=engine)
++    result["result_hash"] = content_hash(result, exclude=("result_hash",))
++    job_file = put("job.json", job)
++    put("output.json", result)
++    executable = tmp_path / "synthetic-echo"
++    executable.write_text("#!/bin/sh\nexec /bin/cat '" + str(tmp_path / "output.json") + "'\n")
++    executable.chmod(0o555)
++    exe = recipe.binding(tmp_path, executable)
++    generated = put("native/crates/uarch-engine/generated/identity.rs", {"synthetic": True})
++    note = put("synthetic-receipt.json", {"synthetic": True})
++    executables = []
++    for mode in ("debug", "release"):
++        receipt = put(
++            mode + ".json",
++            {
++                "format": "uarch-component-build-receipt/1",
++                "build_input_hash": content_hash(build),
++                "engine": engine,
++                "mode": mode,
++                "executable": exe,
++                "image_digest": IMAGE,
++                "generated_identity": generated,
++                "build_log": note,
++                "environment": note,
++                "loader_observations": note,
++                "limitations": ["synthetic shell echo; no construction evidence"],
++            },
++        )
++        executables.append({"mode": mode, "executable": exe, "receipt": receipt})
++    payload = {
++        "format": "uarch-component-runtime-payload/1",
++        "engine": engine,
++        "build_inputs": build_file,
++        "registry": registry,
++        "profiles": [profile],
++        "jobs": [
++            {
++                "case_id": job["admission"]["case_id"],
++                "job_hash": job["job_hash"],
++                "profile_hash": job["admission"]["profile_hash"],
++                "file": job_file,
++            }
++        ],
++        "executables": executables,
++        "consumers": consumers,
++        "budget": {
++            "calls": 2,
++            "session_seconds": 30,
++            "timeout_s": 5,
++            "stdin_bytes": 1048576,
++            "stdout_bytes": 1048576,
++            "stderr_bytes": 1024,
++        },
++    }
++    payload_file = FileBinding.model_validate(put("payload.json", payload))
++    return tmp_path, payload_file, payload, put
++
++
++def test_complete_private_preparation_and_echo_transport(prepared_payload):
++    root, binding, _, _ = prepared_payload
++    prepared = component_host._prepare_payload(root, binding, mode="debug")
++    result, receipt = component_runner._run_prepared(root / "job.json", prepared)
++    assert result.duration_ps == 121000
++    assert receipt["exit_code"] == 0
++    assert receipt["independent_checker"] == "validation.component.observations_v3:check_v3"
++    # Shape-valid private preparation cannot be supplied to either public entry point.
++    for entry, args in [
++        (component_runner.run_component, [root / "job.json"]),
++        (component_runner.replay_component, [root / "job.json", root / "output.json"]),
++    ]:
++        with pytest.raises(ValueError, match="component authority"):
++            entry(*args, session=prepared)
++
++
++def test_prepared_current_bytes_and_executable_are_rechecked(prepared_payload):
++    root, binding, _, _ = prepared_payload
++    prepared = component_host._prepare_payload(root, binding, mode="debug")
++    original = (root / "job.json").read_bytes()
++    (root / "job.json").write_bytes(original + b" ")
++    with pytest.raises(ValueError, match="digest mismatch"):
++        component_runner._run_prepared(root / "job.json", prepared)
++    (root / "job.json").write_bytes(original)
++    prepared.refresh()
++    exe = root / "synthetic-echo"
++    exe.chmod(0o755)
++    with pytest.raises(ValueError, match="read-only"):
++        with prepared.executable():
++            pytest.fail("writable executable opened")
++    exe.chmod(0o555)
++    with prepared.executable() as fd:
++        assert fd >= 0
++
++
++@pytest.mark.parametrize("field", ["model", "checker", "profile", "case", "source"])
++def test_payload_substitutions_refuse_before_transport(prepared_payload, field):
++    from rkuarch.engines.native.records import FileBinding
++
++    root, _, payload, put = prepared_payload
++    if field == "model":
++        payload["engine"]["model"]["version"] = "1"
++    elif field == "checker":
++        payload["consumers"]["observations"] = "uarch-native-observations/2"
++    elif field == "profile":
++        payload["profiles"] = [payload["registry"]]
++    elif field == "case":
++        payload["jobs"][0]["case_id"] = "not-selected"
++    else:
++        payload["consumers"]["files"][0]["byte_hash"] = "sha256:" + "f" * 64
++    binding = FileBinding.model_validate(put("changed.json", payload))
++    with pytest.raises(ValueError):
++        component_host._prepare_payload(root, binding, mode="debug")
++
++
++def test_budget_and_token_controls(prepared_payload, monkeypatch):
++    from types import SimpleNamespace
++
++    root, binding, payload, _ = prepared_payload
++    prepared = component_host._prepare_payload(root, binding, mode="debug")
++    with pytest.raises(ValueError, match="component authority"):
++        component_host.ComponentSession(prepared, (), token=object())
++    # A synthetic capability model exercises budget mechanics only, never public resolve.
++    session = component_host.ComponentSession(prepared, (), token=component_host._AUTHORITY)
++    assert session.claim() is prepared
++    assert session.claim() is prepared
++    with pytest.raises(ValueError, match="budget exhausted"):
++        session.claim()
++    session = component_host.ComponentSession(prepared, (), token=component_host._AUTHORITY)
++    monkeypatch.setattr(component_host, "time", SimpleNamespace(monotonic=lambda: float("inf")))
++    with pytest.raises(ValueError, match="budget exhausted"):
++        session.claim()
++
++
++def test_independent_checker_is_mandatory_for_valid_saved_response(monkeypatch):
++    import validation.component.observations_v3 as independent
++
++    job, result = prospective_pair()
++    expected = json.loads(
++        (ROOT / "docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json").read_bytes()
++    )["observation_contract"]
++
++    def refuse(*args, **kwargs):
++        raise ValueError("independent consumer sentinel")
++
++    monkeypatch.setattr(independent, "check_v3", refuse)
++    with pytest.raises(ValueError, match="independent consumer sentinel"):
++        component_runner.validate_component_response(
++            canonical_json(result).encode(), b"", 0, job=job, observation_contract=expected
++        )
++
++
++def test_import_origin_is_checked_even_when_bytes_match(prepared_payload, monkeypatch):
++    root, binding, _, _ = prepared_payload
++    prepared = component_host._prepare_payload(root, binding, mode="debug")
++    elsewhere = root / "same-bytes-different-origin.py"
++    elsewhere.write_bytes(Path(component_runner.__file__).read_bytes())
++    monkeypatch.setattr(component_runner, "__file__", str(elsewhere))
++    with pytest.raises(ValueError, match="imported source identity"):
++        prepared.refresh()
++
++
++def test_bound_independent_wrapper_is_mandatory(prepared_payload, monkeypatch):
++    import validation.component.runtime_checks as independent
++
++    root, binding, _, _ = prepared_payload
++    prepared = component_host._prepare_payload(root, binding, mode="debug")
++
++    def refuse(*args, **kwargs):
++        raise ValueError("bound selection consumer sentinel")
++
++    monkeypatch.setattr(independent, "consume_case", refuse)
++    with pytest.raises(ValueError, match="bound selection consumer sentinel"):
++        component_runner._run_prepared(root / "job.json", prepared)
++
++
++def test_partial_independent_closure_is_not_a_pin_refresh(prepared_payload):
++    from rkuarch.engines.native.records import FileBinding
++
++    root, _, payload, put = prepared_payload
++    pinned = json.loads((root / payload["consumers"]["independent_binding"]["path"]).read_bytes())
++    del pinned["files"]["contract/uarch_contract/mapped_issue.py"]
++    payload["consumers"]["independent_binding"] = put("partial-consumer.json", pinned)
++    binding = FileBinding.model_validate(put("partial-payload.json", payload))
++    with pytest.raises(ValueError, match="complete matching consumer/structural closure"):
++        component_host._prepare_payload(root, binding, mode="debug")
++
++
++@pytest.mark.parametrize("kind", ["K2", "stale"])
++def test_wrong_or_stale_selector_stops_before_dispatch(tmp_path, monkeypatch, kind):
++    """Synthetic ownership model only; no real root-owned selector is constructed."""
++    from types import SimpleNamespace
++
++    selector = tmp_path / "synthetic-selector.json"
++    (tmp_path / "record.json").write_bytes(b"{}")
++    selector.write_text(
++        json.dumps(
++            {
++                "format": "uarch-k2-host-selector/1"
++                if kind == "K2"
++                else "uarch-component-host-selector/1",
++                "repository": str(tmp_path),
++                "acceptance_commit": "0" * 40,
++                "record_path": "record.json",
++                "record_byte_hash": "sha256:" + "f" * 64,
++            }
++        )
++    )
++    monkeypatch.setattr(component_host, "_SELECTOR", selector)
++    original = component_host.os.fstat
++
++    def synthetic_owner(fd):
++        value = original(fd)
++        return SimpleNamespace(st_uid=0, st_mode=value.st_mode)
++
++    def no_dispatch(*args, **kwargs):
++        pytest.fail("wrong/stale selector reached dispatch")
++
++    monkeypatch.setattr(component_host.os, "fstat", synthetic_owner)
++    monkeypatch.setattr(component_runner, "_exchange", no_dispatch)
++    with pytest.raises(ValueError, match="literal_error" if kind == "K2" else "digest mismatch"):
++        component_host.prepare_component(mode="debug")
++
++
++def test_changed_session_authority_stops_before_dispatch(prepared_payload, monkeypatch):
++    from rkuarch.engines.native.records import FileBinding
++
++    root, binding, _, put = prepared_payload
++    prepared = component_host._prepare_payload(root, binding, mode="debug")
++    authority = FileBinding.model_validate(
++        put("synthetic-session-binding.json", {"synthetic": True})
++    )
++    session = component_host.ComponentSession(
++        prepared, ((root, authority),), token=component_host._AUTHORITY
++    )
++    session.check()
++    (root / authority.path).write_bytes(b"changed")
++
++    def no_dispatch(*args, **kwargs):
++        pytest.fail("changed session authority reached dispatch")
++
++    monkeypatch.setattr(component_runner, "_exchange", no_dispatch)
++    with pytest.raises(ValueError, match="digest mismatch"):
++        component_runner.run_component(root / "job.json", session=session)
++
++
++@pytest.mark.parametrize(
++    "code",
++    [
++        "SramCapacityExceeded",
++        "LiveBufferAlias",
++        "InvalidTransfer",
++        "TestOnlyHardware",
++        "UnsupportedMapping",
++    ],
++)
++def test_component_refusal_codes_do_not_expand_k2(code):
++    from rkuarch.engines.native.runner import ProtocolViolation
++    from rkuarch.engines.native.runner import _decode_envelope as k2_decode
++
++    value = {"code": code, "pointer": None, "message": "synthetic component refusal"}
++    raw = canonical_json(value).encode()
++    assert component_runner._decode_envelope(b"", raw, 2) == value
++    with pytest.raises(ProtocolViolation):
++        k2_decode(b"", raw, 2)
++
++
++@pytest.mark.parametrize(
++    "stdout,stderr,status",
++    [
++        (b"{}", b"error", 0),
++        (b"{}", b"error", 2),
++        (b"{}\n", b"", 0),
++        (b'{"a":1,"a":2}', b"", 0),
++        (b"[]", b"", 0),
++        (b"", b'{"code":"InventedError","message":"x","pointer":null}', 2),
++    ],
++)
++def test_component_envelope_keeps_strict_framing(stdout, stderr, status):
++    with pytest.raises(component_runner.ProtocolViolation):
++        component_runner._decode_envelope(stdout, stderr, status)

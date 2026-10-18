@@ -1,0 +1,40 @@
+import hashlib,json,subprocess,tarfile,tempfile
+from pathlib import Path
+from rkuarch.engines.native import component_records as records
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');d=r/'docs/reviews/U4-A-component-runtime-v1';work=Path(tempfile.mkdtemp(prefix='u4-runtime-package-verify-'));commands=[]
+def h(b):return 'sha256:'+hashlib.sha256(b).hexdigest()
+def run(args,cwd):
+ p=subprocess.run(args,cwd=cwd,capture_output=True);commands.append({'argv':args,'cwd':str(cwd),'exit_code':p.returncode,'stdout_byte_hash':h(p.stdout),'stderr_byte_hash':h(p.stderr)});assert p.returncode==0,(args,p.stderr.decode());return p.stdout
+ids=json.loads((d/'source-build-identities.json').read_bytes())
+for commit in [ids['preserved_installation'],'3949b104d0eaae95a7452f976c2afa048fa82ff1',ids['ordinary_delta_base']]:run(['git','merge-base','--is-ancestor',commit,ids['source_commit']],r)
+index=json.loads((d/'final-evidence-files.json').read_bytes());assert h((d/index['archive']['path']).read_bytes())==index['archive']['byte_hash']
+expected={row['path']:row for row in index['members']};extracted=work/'evidence';extracted.mkdir()
+with tarfile.open(d/index['archive']['path']) as tar:
+ assert set(tar.getnames())==set(expected) and len(tar.getmembers())==len(expected)
+ for m in tar.getmembers():
+  assert m.isfile() and not m.name.startswith('/') and '..' not in Path(m.name).parts
+  raw=tar.extractfile(m).read();assert h(raw)==expected[m.name]['byte_hash'] and len(raw)==expected[m.name]['bytes']
+ tar.extractall(extracted,filter='data')
+base=work/'base';base.mkdir();archive=work/'base.tar'
+run(['git','archive','-o',str(archive),ids['ordinary_delta_base']],r)
+with tarfile.open(archive) as tar:tar.extractall(base,filter='data')
+run(['git','apply','--check',str(d/'ordinary-source.patch')],base);run(['git','apply',str(d/'ordinary-source.patch')],base)
+for row in ids['source_postimages']:assert h((base/row['path']).read_bytes())==row['byte_hash'],row
+run(['git','apply',str(d/'test-proposal-delta.patch')],base)
+assert (base/'tests/unit/test_component_negative_proposal.py').read_bytes()==(r/'tests/unit/test_component_negative_proposal.py').read_bytes()
+run(['git','apply','--check',str(d/'proposals/D3-v3-unapplied.patch')],base);run(['git','apply',str(d/'proposals/D3-v3-unapplied.patch')],base)
+assert (base/'src/rkuarch/engines/native/component_negative.py').read_bytes()==(d/'proposals/component_negative-v3.py.txt').read_bytes()
+peer=work/'peer';(peer/'validation/component').mkdir(parents=True);bp=Path('validation/component/runtime_checks.py');pre=(r/bp).read_bytes();(peer/bp).write_bytes(pre)
+run(['git','apply','--check',str(d/'proposals/B-consumer-types.patch')],peer);run(['git','apply',str(d/'proposals/B-consumer-types.patch')],peer)
+assert (peer/bp).read_bytes()==pre.replace(b'def population(t):',b'def population(t: int) -> int:')
+original_archive=work/'c67d558.tar';run(['git','archive','-o',str(original_archive),ids['source_commit']],r)
+preparation=json.loads((extracted/'final/preparation.json').read_bytes());assert h(original_archive.read_bytes())==preparation['source_archive']['byte_hash']
+build=json.loads((extracted/'final/source/private-component/BuildInputs.json').read_bytes())
+for row in build['source_files']:assert h((r/row['path']).read_bytes())==row['byte_hash']
+old_paths=run(['git','ls-tree','-r','--name-only',ids['ordinary_delta_base'],'--','src/rkuarch/engines/native'],r).decode().splitlines()
+for p in old_paths:assert run(['git','show',ids['ordinary_delta_base']+':'+p],r)==(r/p).read_bytes(),p
+schema=[]
+for p in sorted((d/'schemas').glob('*.json')):
+ assert getattr(records,p.stem).model_json_schema()==json.loads(p.read_bytes());schema.append({'path':str(p.relative_to(d)),'byte_hash':h(p.read_bytes())})
+report={'scope':'actual archive/patch/source/schema reconstruction, no native execution','private_verification_root':str(work),'archive_members_verified':len(expected),'source_files_verified':len(build['source_files']),'original_git_source_archive_verified':preparation['source_archive'],'A_delta_postimages_verified':ids['source_postimages'],'test_delta_postimage':{'path':'tests/unit/test_component_negative_proposal.py','byte_hash':h((base/'tests/unit/test_component_negative_proposal.py').read_bytes())},'D3_proposal_postimage':h((base/'src/rkuarch/engines/native/component_negative.py').read_bytes()),'B_type_proposal':{'preimage':h(pre),'postimage':h((peer/bp).read_bytes())},'old_native_Python_files_preserved':old_paths,'schemas':schema,'commands':commands,'verdict':'passed'}
+(d/'reconstruction-verification.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({'work':str(work),'verdict':'passed','archive_members':len(expected),'source_files':len(build['source_files']),'old_native_python_files':len(old_paths)}))

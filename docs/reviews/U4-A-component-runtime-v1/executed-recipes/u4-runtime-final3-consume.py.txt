@@ -1,0 +1,30 @@
+"""Final47-case saved-output replay under frozen source/import bindings; no producer use."""
+import json
+from pathlib import Path
+from uarch_contract.hashing import sha256,canonical_json
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.component_runner import _consume
+from rkuarch.engines.native.records import FileBinding
+import rkuarch.workload.mapped as producer
+r=Path.cwd();o=r.parent;p=r/'private-component';file=p/'prospective-payload.json'
+prepared=_prepare_payload(r,FileBinding(path=str(file.relative_to(r)),byte_hash=sha256(file.read_bytes())),mode='debug')
+def unavailable(*a,**k):raise AssertionError('producer unavailable')
+producer.export_component_job=unavailable;producer.export_component_bundle=unavailable
+rows={x['case_id']:x for x in json.loads((p/'selection.json').read_bytes())['rows']};report={'source_commit':json.loads((p/'BuildInputs.json').read_bytes())['source_commit'],'payload_byte_hash':sha256(file.read_bytes()),'prepared_file_checks':len(prepared.checks),'producer_preparation':'unavailable','rows':[]}
+for mode in ('debug','release'):
+ for path in sorted((p/'affected-inputs').glob('*.json')):
+  name=path.stem;rawinput=path.read_bytes();job=json.loads(rawinput);d=o/'outputs'/mode/'selected';raw=(d/(name+'.json')).read_bytes();status=int((d/(name+'.status')).read_text());entries=int((d/(name+'.runtime-entries')).read_text());row=rows[name]
+  record={'case_id':name,'mode':mode,'input_byte_hash':sha256(rawinput),'output_byte_hash':sha256(raw),'status':status,'runtime_entries':entries}
+  if row['expected_layer']=='result':
+   assert status==0 and entries==1
+   result=_consume(prepared,job,raw,b'',0)
+   assert canonical_json(result).encode()==raw
+   record['duration_ps']=result.duration_ps;record['verdict']='structural + check_v3 + B pinned consume_case + literals + saved replay pass'
+  else:
+   from rkuarch.engines.native.component_runner import _decode_envelope
+   error=_decode_envelope(b'',raw,status);assert entries==0 and error['code']==row['expected_code'] and error['pointer'] is None
+   record.update(error=error,verdict='exact expected refusal before runtime entry')
+  if mode=='release':assert raw==(o/'outputs/debug/selected'/(name+'.json')).read_bytes()
+  report['rows'].append(record)
+prepared.refresh();(o/'consumption.json').write_text(json.dumps(report,indent=2)+'\n')
+print('94 rows: 54 positive producer-disabled replays,40 exact native refusals; 47 debug/release byte pairs')

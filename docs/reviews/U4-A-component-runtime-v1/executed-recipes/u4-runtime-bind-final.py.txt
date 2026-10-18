@@ -1,0 +1,37 @@
+"""Observed private build/consumer bindings, no HostRecord or selector."""
+import importlib.util,json,shutil
+from pathlib import Path
+from uarch_contract.hashing import content_hash,sha256
+from rkuarch.engines.native.component_records import ComponentBuildReceipt,ComponentPayload
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.records import FileBinding
+r=Path.cwd();o=r.parent;p=r/'private-component'
+spec=importlib.util.spec_from_file_location('f',r/'native/tools/component_runtime_candidate.py');f=importlib.util.module_from_spec(spec);spec.loader.exec_module(f)
+f.verify(o);engine=json.loads((p/'engine.json').read_bytes());trust=json.loads((p/'BuildTrust.json').read_bytes());summary=json.loads((o/'build-summary.json').read_bytes());exes=[]
+for mode,record in summary['modes'].items():
+ out=p/'receipts'/mode;out.mkdir(parents=True)
+ # Preserve actual production executable bytes separately from the cfg(test) executable.
+ binary=p/'bin'/mode/'uarch-engine';binary.parent.mkdir(parents=True);shutil.copy2(record['executable'],binary);binary.chmod(0o555)
+ for name in ('build.stderr','build.json','loader.stdout','elf.stdout'):
+  shutil.copy2(o/'commands'/(mode+'-'+name),out/name)
+ observed={'loader_list':f.binding(r,out/'loader.stdout'),'elf':f.binding(r,out/'elf.stdout'),
+           'status':'observed inside accepted image; no complete construction read trace claim'}
+ f.write(out/'loader-observations.json',observed)
+ receipt=ComponentBuildReceipt.model_validate({'format':'uarch-component-build-receipt/1','build_input_hash':engine['implementation_hash'],'engine':engine,'mode':mode,'executable':f.binding(r,binary),'image_digest':f.IMAGE,'generated_identity':f.binding(r,r/'native/crates/uarch-engine/generated/identity.rs'),'build_log':f.binding(r,out/'build.stderr'),'environment':f.binding(r,out/'build.json'),'loader_observations':f.binding(r,out/'loader-observations.json'),'limitations':['private construction trust rejects public execution','full construction read audit incomplete; inherited trace gaps unaccepted','no reproducibility rebuild of this freeze; debug/release byte equality is output evidence only','B final joined source/consumer review and strict-type seam remain pending']})
+ f.write(out/'BuildReceipt.json',receipt);exes.append({'mode':mode,'executable':receipt.executable.model_dump(mode='json'),'receipt':f.binding(r,out/'BuildReceipt.json')})
+consumers=f.imports(r);f.write(p/'consumer-bindings.json',consumers)
+payload=ComponentPayload.model_validate({'format':'uarch-component-runtime-payload/1','engine':engine,'build_inputs':f.binding(r,p/'BuildInputs.json'),'registry':trust['registry_file'],'profiles':trust['profiles'],'jobs':json.loads((p/'positive-inventory.json').read_bytes()),'executables':exes,'consumers':consumers,'budget':{'calls':1000,'session_seconds':3600,'timeout_s':30,'stdin_bytes':64*1024*1024,'stdout_bytes':64*1024*1024,'stderr_bytes':1024*1024}})
+f.write(p/'prospective-payload.json',payload)
+# Real complete positive payload preparation, still no selector or authority.
+prepared = _prepare_payload(r,FileBinding.model_validate(f.binding(r,p/'prospective-payload.json')),mode='debug')
+prepared.refresh()
+f.write(p/'preparation-verdict.json',{'status':'private data preparation passed','positive_cases':len(prepared.payload.jobs),'file_checks':len(prepared.checks),'scope':'complete prospective private payload validation','authority':None})
+rows=json.loads((p/'selection.json').read_bytes())['rows'];neg=[]
+for row in rows:
+ if row['expected_layer']=='result':continue
+ name=row['case_id'];raw=p/'jobs'/(name+'.json');job=json.loads(raw.read_bytes());profile=p/'negative-profiles'/(name+'.json');f.write(profile,job['profile'])
+ result=json.loads((o/'outputs/debug/selected'/(name+'.json')).read_bytes());assert result['code']==row['expected_code']
+ neg.append({'case_id':name,'raw':f.binding(r,raw),'profile':f.binding(r,profile),'expected_code':result['code'],'expected_pointer':result['pointer'],'layer':row['expected_layer']})
+f.write(p/'negative-inventory.json',{'format':'uarch-component-negative-inventory/1','cases':neg})
+f.verify(o)
+print('observed bindings written; complete private payload admitted; no authority created')

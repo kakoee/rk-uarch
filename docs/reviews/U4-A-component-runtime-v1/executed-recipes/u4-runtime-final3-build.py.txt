@@ -1,0 +1,31 @@
+import importlib.util,json
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');o=Path('/tmp/u4-a-runtime-build-c67d558');s=o/'source'
+def load(name,path):
+ spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+c=load('wrapper',s/'native/tools/component_candidate.py');f=load('freeze',s/'native/tools/component_runtime_candidate.py')
+f.verify(o);build=json.loads((s/'private-component/BuildInputs.json').read_bytes());engine=json.loads((s/'private-component/engine.json').read_bytes());report={'source_commit':build['source_commit'],'engine':engine,'modes':{},'trace_capture':False,'authority':None}
+for mode in ('debug','release'):
+ f.build(o,mode)
+ binary=o/'targets'/mode/mode/'uarch-engine'
+ records=[json.loads(line) for line in (o/'commands'/(mode+'-test-build.stdout')).read_text().splitlines() if line.startswith('{')]
+ exes=[x['executable'] for x in records if x.get('reason')=='compiler-artifact' and x.get('executable') and x['target']['name']=='uarch_engine'];assert len(exes)==1
+ testexe=exes[0];testpath=o/'targets'/mode/str(Path(testexe).relative_to('/target'))
+ # These four unit assertions are reused from d20df7b at byte-identical Rust sources.
+ old=json.loads(Path('/tmp/u4-a-runtime-build-d20df7b/build-summary.json').read_bytes())
+ assert c.digest(testpath.read_bytes())==old['modes'][mode]['test_executable_byte_hash']
+ for file in (s/'native/crates/uarch-engine/src').glob('*.rs'):
+  assert file.read_bytes()==(Path('/tmp/u4-a-runtime-build-d20df7b/source/native/crates/uarch-engine/src')/file.name).read_bytes()
+ prefix=c.docker(o,mode,mode+'-selected')
+ prefix[prefix.index('run')+1:prefix.index('run')+1]=['--pids-limit','64','--memory','1g','--cpus','1','--ulimit','nofile=256:256']
+ args=prefix+['COMPONENT_PRIVATE_INPUT=/work/private-component/affected-inputs','COMPONENT_PRIVATE_OUTPUT=/outputs/selected',testexe,'protocol::component_runtime_tests::private_selected_transport_probe','--ignored','--exact','--nocapture']
+ assert c.command(o,mode+'-selected',args)==0
+ assert c.command(o,mode+'-elf',c.docker(o,mode,mode+'-elf')+['/usr/bin/readelf','-l','-d','/target/'+mode+'/uarch-engine'])==0
+ assert c.command(o,mode+'-loader',c.docker(o,mode,mode+'-loader')+['/lib64/ld-linux-x86-64.so.2','--list','/target/'+mode+'/uarch-engine'])==0
+ # DSO bytes are observed, not an exhaustive loader/construction trace.
+ assert c.command(o,mode+'-dso-hashes',c.docker(o,mode,mode+'-dso-hashes')+['/usr/bin/sha256sum','/lib/x86_64-linux-gnu/libgcc_s.so.1','/lib/x86_64-linux-gnu/libc.so.6','/lib64/ld-linux-x86-64.so.2'])==0
+ report['modes'][mode]={'executable':str(binary),'executable_byte_hash':c.digest(binary.read_bytes()),'test_executable':str(testpath),'test_executable_byte_hash':c.digest(testpath.read_bytes()),'unit_assertions':'inherited d20df7b exact Rust sources and exact unit executable bytes','native_unit_filters':old['modes'][mode]['native_unit_filters']}
+ (o/'build-summary.json').write_text(json.dumps(report,indent=2)+'\n')
+ f.verify(o)
+assert c.inventory(o/'cache')==json.loads(c.CACHE_RECORD.read_bytes())['files']
+print(json.dumps(report,indent=2))

@@ -1,0 +1,6 @@
+import hashlib,json,os,subprocess,tarfile,tempfile
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');d=r/'docs/reviews/U4-A-component-runtime-v1';o=Path(tempfile.mkdtemp(prefix='u4-runtime-final-lint-'));s=o/'source';s.mkdir();tree=subprocess.check_output(['git','write-tree'],cwd=r).decode().strip();a=o/'source.tar';subprocess.run(['git','archive','-o',str(a),tree],cwd=r,check=True)
+with tarfile.open(a) as tar:tar.extractall(s,filter='data')
+cmd=[str(r/'.venv/bin/ruff'),'check','.'];p=subprocess.run(cmd,cwd=s,capture_output=True);(d/'final-clean-export-ruff.stdout').write_bytes(p.stdout);(d/'final-clean-export-ruff.stderr').write_bytes(p.stderr)
+report={'scope':'clean staged tracked export, including final evidence/proposals; no tests/native rebuild','tree':tree,'private_export':str(s),'argv':cmd,'exit_code':p.returncode,'stdout_byte_hash':'sha256:'+hashlib.sha256(p.stdout).hexdigest(),'stderr_byte_hash':'sha256:'+hashlib.sha256(p.stderr).hexdigest()};(d/'final-clean-export-lint.json').write_text(json.dumps(report,indent=2)+'\n');print(p.stdout.decode());assert p.returncode==0

@@ -1,0 +1,121 @@
+{
+  "path_prefix_for_component_modules": "src/rkuarch/engines/native/",
+  "evidence_path_note": "final/ and superseded/ are archive members; development-evidence/ is the preserved published package directory",
+  "rows": [
+    {
+      "source": [
+        "component_records.py",
+        "component_host.py"
+      ],
+      "change": "additive component records/full admission/current identity/setup/session joins",
+      "tests": [
+        "test_complete_private_preparation_and_echo_transport",
+        "test_prepared_current_bytes_and_executable_are_rechecked",
+        "test_payload_substitutions_refuse_before_transport",
+        "test_budget_and_token_controls",
+        "test_import_origin_is_checked_even_when_bytes_match",
+        "test_partial_independent_closure_is_not_a_pin_refresh",
+        "test_wrong_or_stale_selector_stops_before_dispatch",
+        "test_changed_session_authority_stops_before_dispatch"
+      ],
+      "evidence": [
+        "final-python/affected-integration.stdout",
+        "final/payload-v2-check.json",
+        "development-evidence/shared-binding-red.stdout",
+        "development-evidence/shared-binding-restored.stdout"
+      ]
+    },
+    {
+      "source": [
+        "component_runner.py"
+      ],
+      "change": "model-selected route; independent B-bound consumers and replay; component-only strict refusal codec",
+      "tests": [
+        "test_component_public_entry_requires_its_own_authority",
+        "test_component_route_is_job_selected_before_output_consumer",
+        "test_saved_result_core_uses_both_consumers_and_no_producers",
+        "test_independent_checker_is_mandatory_for_valid_saved_response",
+        "test_bound_independent_wrapper_is_mandatory",
+        "test_component_refusal_codes_do_not_expand_k2",
+        "test_component_envelope_keeps_strict_framing"
+      ],
+      "evidence": [
+        "final/consumption.json",
+        "final/payload-v2-check.json",
+        "development-evidence/consumer-receipt.json",
+        "development-evidence/codec-receipt.json"
+      ]
+    },
+    {
+      "source": [
+        "native/crates/uarch-engine/src/protocol.rs",
+        "native/crates/uarch-engine/src/component.rs",
+        "native/crates/uarch-engine/testdata/synthetic-runtime-cc0-v3.json"
+      ],
+      "change": "model2/profile2 selects obs3; construction/K2 trust cannot authorize component; test-only synthetic probe/runtime-entry witness; timing laws unchanged",
+      "tests": [
+        "installed_model_two_routes_to_observations_three",
+        "transport_refusals_do_not_need_any_authority",
+        "synthetic_rational_overflow_is_checked",
+        "lowest_owner_zero_closure_has_literal_110ps_path",
+        "private_selected_transport_probe"
+      ],
+      "evidence": [
+        "superseded/d20df7b/commands/*-unit-*.json (exact-byte inherited)",
+        "final/commands/*-selected.json",
+        "final/outputs/{debug,release}/selected",
+        "final/commands/*-process-corrected-*.json"
+      ]
+    },
+    {
+      "source": [
+        "native/tools/component_runtime_candidate.py",
+        "native/tools/component_private_adapter.py"
+      ],
+      "change": "committed source/cache/image build recipe and bounded private fresh-process adapter",
+      "tests": [
+        "actual debug/release builds",
+        "complete payload admission",
+        "4 private adapter processes",
+        "archive/patch/source/schema reconstruction"
+      ],
+      "evidence": [
+        "final/build-summary.json",
+        "final/preparation.json",
+        "final/adapter-smoke.json",
+        "reconstruction-verification.json"
+      ]
+    },
+    {
+      "source": [
+        "proposals/D3-v3-unapplied.patch"
+      ],
+      "change": "separate finite refusal-only proposed transport; no live installation",
+      "tests": [
+        "test_d3_exact_refusal_and_no_zero_dispatch_claim",
+        "test_d3_success_or_wrong_refusal_fails",
+        "test_d3_has_no_raw_or_positive_authority_bypass",
+        "test_d3_malformed_refusal_fails"
+      ],
+      "evidence": [
+        "final-python/affected-integration.stdout",
+        "final/d3-proposal-checks.json"
+      ]
+    },
+    {
+      "source": [
+        "unchanged old K2 host_paths.py, records.py, process.py"
+      ],
+      "change": "no change; compatibility controls retained",
+      "tests": [
+        "tests/unit/test_u4_k2_host_paths.py",
+        "tests/unit/test_u4_k2_host_records.py",
+        "tests/unit/test_u4_k2_process.py"
+      ],
+      "evidence": [
+        "final-python/affected-integration.stdout",
+        "reconstruction-verification.json"
+      ]
+    }
+  ]
+}
