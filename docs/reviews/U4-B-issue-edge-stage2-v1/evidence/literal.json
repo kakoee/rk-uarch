@@ -1,0 +1,507 @@
+[
+  {
+    "case": "cc0-v3",
+    "job_sha256": "d8bab0aac47f29fabb9bdd9417917d345b209eaf5dddaf94c818fb5150e576da",
+    "channel_step_ps": "159744/71",
+    "stages": {
+      "r01": {
+        "reservation": 0,
+        "issue": 0,
+        "phases": {
+          "write_port": [
+            0,
+            1000
+          ],
+          "request_noc": [
+            1667,
+            5000
+          ],
+          "dram_latency": [
+            5000,
+            53000
+          ],
+          "channel_service": [
+            53000,
+            55250
+          ],
+          "response_noc": [
+            55834,
+            59167
+          ],
+          "ack": [
+            60000,
+            60000
+          ]
+        },
+        "complete": 60000
+      },
+      "r00": {
+        "reservation": 0,
+        "issue": 0,
+        "phases": {
+          "request_noc": [
+            0,
+            3334
+          ],
+          "dram_latency": [
+            4000,
+            52000
+          ],
+          "channel_service": [
+            52000,
+            54250
+          ],
+          "response_noc": [
+            55000,
+            58334
+          ],
+          "read_port": [
+            59000,
+            60000
+          ]
+        },
+        "complete": 60000
+      },
+      "r02": {
+        "reservation": 60000,
+        "issue": 60000,
+        "phases": {
+          "request_noc": [
+            60000,
+            63334
+          ],
+          "dram_latency": [
+            64000,
+            112000
+          ],
+          "channel_service": [
+            112000,
+            114250
+          ],
+          "response_noc": [
+            115000,
+            118334
+          ],
+          "read_port": [
+            119000,
+            120000
+          ]
+        },
+        "complete": 120000
+      },
+      "r03": {
+        "reservation": 60000,
+        "issue": 60000,
+        "phases": {
+          "request_noc": [
+            60000,
+            63334
+          ],
+          "dram_latency": [
+            64000,
+            112000
+          ],
+          "channel_service": [
+            114250,
+            116500
+          ],
+          "response_noc": [
+            116667,
+            120000
+          ],
+          "read_port": [
+            120000,
+            121000
+          ]
+        },
+        "complete": 121000
+      }
+    },
+    "opportunities": [
+      [
+        0,
+        0,
+        [
+          "r00.00",
+          "r01.00"
+        ]
+      ],
+      [
+        2,
+        0,
+        []
+      ],
+      [
+        32,
+        26667,
+        []
+      ],
+      [
+        52,
+        60000,
+        [
+          "r02.00"
+        ]
+      ],
+      [
+        56,
+        60000,
+        [
+          "r03.00"
+        ]
+      ],
+      [
+        94,
+        120000,
+        []
+      ],
+      [
+        98,
+        121000,
+        []
+      ]
+    ],
+    "causes": {
+      "r00": [],
+      "r01": [],
+      "r02": [
+        [
+          "r00",
+          "read_port"
+        ]
+      ],
+      "r03": [
+        [
+          "r00",
+          "read_port"
+        ],
+        [
+          "r01",
+          "ack"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "cc-v3",
+    "job_sha256": "9bc3fae426ba31d08d7a9125d7b4af49832b464aee1eedf1530ab1fd6cfd8f74",
+    "channel_step_ps": "159744/71",
+    "stages": {
+      "r01": {
+        "reservation": 26667,
+        "issue": 27000,
+        "phases": {
+          "write_port": [
+            27000,
+            28000
+          ],
+          "request_noc": [
+            28334,
+            31667
+          ],
+          "dram_latency": [
+            32000,
+            80000
+          ],
+          "channel_service": [
+            80000,
+            82250
+          ],
+          "response_noc": [
+            82500,
+            85834
+          ],
+          "ack": [
+            86000,
+            86000
+          ]
+        },
+        "complete": 86000
+      },
+      "r00": {
+        "reservation": 26667,
+        "issue": 27000,
+        "phases": {
+          "request_noc": [
+            27500,
+            30834
+          ],
+          "dram_latency": [
+            31000,
+            79000
+          ],
+          "channel_service": [
+            79000,
+            81250
+          ],
+          "response_noc": [
+            81667,
+            85000
+          ],
+          "read_port": [
+            85000,
+            86000
+          ]
+        },
+        "complete": 86000
+      },
+      "r02": {
+        "reservation": 86000,
+        "issue": 86000,
+        "phases": {
+          "request_noc": [
+            86667,
+            90000
+          ],
+          "dram_latency": [
+            90000,
+            138000
+          ],
+          "channel_service": [
+            138000,
+            140250
+          ],
+          "response_noc": [
+            140834,
+            144167
+          ],
+          "read_port": [
+            145000,
+            146000
+          ]
+        },
+        "complete": 146000
+      },
+      "r03": {
+        "reservation": 86000,
+        "issue": 86000,
+        "phases": {
+          "request_noc": [
+            86667,
+            90000
+          ],
+          "dram_latency": [
+            90000,
+            138000
+          ],
+          "channel_service": [
+            140250,
+            142500
+          ],
+          "response_noc": [
+            142500,
+            145834
+          ],
+          "read_port": [
+            146000,
+            147000
+          ]
+        },
+        "complete": 147000
+      }
+    },
+    "opportunities": [
+      [
+        0,
+        0,
+        []
+      ],
+      [
+        2,
+        0,
+        []
+      ],
+      [
+        6,
+        26667,
+        [
+          "r00.00",
+          "r01.00"
+        ]
+      ],
+      [
+        52,
+        86000,
+        [
+          "r02.00"
+        ]
+      ],
+      [
+        56,
+        86000,
+        [
+          "r03.00"
+        ]
+      ],
+      [
+        94,
+        146000,
+        []
+      ],
+      [
+        98,
+        147000,
+        []
+      ]
+    ],
+    "causes": {
+      "r00": [],
+      "r01": [],
+      "r02": [
+        [
+          "r00",
+          "read_port"
+        ]
+      ],
+      "r03": [
+        [
+          "r00",
+          "read_port"
+        ],
+        [
+          "r01",
+          "ack"
+        ]
+      ]
+    }
+  },
+  {
+    "case": "sr-v3",
+    "job_sha256": "e2b60bea7a428befbcca54fc49044c1b5cde1afd0cc8ba7431f6845f8facb1c7",
+    "channel_step_ps": "159744/71",
+    "stages": {
+      "r00": {
+        "reservation": 26667,
+        "issue": 27000,
+        "phases": {
+          "write_port": [
+            27000,
+            28000
+          ],
+          "request_noc": [
+            28334,
+            31667
+          ],
+          "dram_latency": [
+            32000,
+            80000
+          ],
+          "channel_service": [
+            80000,
+            82250
+          ],
+          "response_noc": [
+            82500,
+            85834
+          ],
+          "ack": [
+            86000,
+            86000
+          ]
+        },
+        "complete": 86000
+      },
+      "r01": {
+        "reservation": 26667,
+        "issue": 27000,
+        "phases": {
+          "request_noc": [
+            27500,
+            30834
+          ],
+          "dram_latency": [
+            31000,
+            79000
+          ],
+          "channel_service": [
+            79000,
+            81250
+          ],
+          "response_noc": [
+            81667,
+            85000
+          ],
+          "read_port": [
+            85000,
+            86000
+          ]
+        },
+        "complete": 86000
+      },
+      "r02": {
+        "reservation": 86000,
+        "issue": 86000,
+        "phases": {
+          "request_noc": [
+            86667,
+            90000
+          ],
+          "dram_latency": [
+            90000,
+            138000
+          ],
+          "channel_service": [
+            138000,
+            140250
+          ],
+          "response_noc": [
+            140834,
+            144167
+          ],
+          "read_port": [
+            145000,
+            146000
+          ]
+        },
+        "complete": 146000
+      }
+    },
+    "opportunities": [
+      [
+        0,
+        0,
+        []
+      ],
+      [
+        2,
+        0,
+        []
+      ],
+      [
+        6,
+        26667,
+        [
+          "r00.00",
+          "r01.00"
+        ]
+      ],
+      [
+        52,
+        86000,
+        []
+      ],
+      [
+        54,
+        86000,
+        [
+          "r02.00"
+        ]
+      ],
+      [
+        76,
+        146000,
+        []
+      ]
+    ],
+    "causes": {
+      "r00": [],
+      "r01": [],
+      "r02": [
+        [
+          "r00",
+          "ack"
+        ]
+      ]
+    }
+  }
+]
