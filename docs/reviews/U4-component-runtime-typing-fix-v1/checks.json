@@ -1,0 +1,46 @@
+{
+  "historical_evidence_changed": false,
+  "not_run": [
+    "full suite",
+    "native execution",
+    "hosted CI polling"
+  ],
+  "protected_installation": false,
+  "runtime_annotation_fix": {
+    "ast_comparison": "identical after removing added annotations",
+    "existing_runtime_tests": {
+      "passed": 28
+    },
+    "mypy_production": {
+      "command": "mypy src contract/uarch_contract scripts",
+      "exit_code": 0,
+      "files": 92
+    },
+    "ruff_tracked_export": "passed",
+    "source_binding_controls": {
+      "prior": "refused at runtime_checks.py",
+      "prospective": "accepted",
+      "tampered": "refused at runtime_checks.py"
+    }
+  },
+  "runtime_authority_changed": false,
+  "unapplied_contract_test_proposal": {
+    "affected_tests": 15,
+    "identity_tests": 21,
+    "original_ci_contract_typecheck": {
+      "affected_files": 3,
+      "checked_files": 39,
+      "command": "mypy --no-explicit-package-bases contract/tests",
+      "errors": 37,
+      "exit_code": 1
+    },
+    "patch_sha256": "b2109daaca8ecf67e7c59c3f21c79dae429ae86012d2bcd71769d5d34ddb6717",
+    "proposed_ci_contract_typecheck": {
+      "exit_code": 0,
+      "files": 39
+    },
+    "ruff_tracked_export": "passed",
+    "strict_vendor_currentness": "passed"
+  },
+  "verification": "private git archive of 56bbc830a91c53bf0281220c02b2394f3a8a34fb with exact stated corrections; project imports from export"
+}

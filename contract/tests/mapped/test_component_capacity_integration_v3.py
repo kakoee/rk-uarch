@@ -3,6 +3,7 @@
 import json
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 import pytest
 from uarch_contract.hashing import content_hash
@@ -11,18 +12,18 @@ from uarch_contract.mapped import MappedEngineJob, validate_result
 FIXTURES = Path(__file__).parent / "fixtures" / "issue_capacity"
 
 
-def pair():
+def pair() -> tuple[MappedEngineJob, dict[str, Any]]:
     job = MappedEngineJob.model_validate_json((FIXTURES / "sr2-v3-job.json").read_bytes())
     result = json.loads((FIXTURES / "sr2-v3-result.json").read_bytes())
     return job, result
 
 
-def test_dependency_tight_capacity_valid_control():
+def test_dependency_tight_capacity_valid_control() -> None:
     job, result = pair()
     validate_result(result, job)
 
 
-def test_validate_result_refuses_dependency_tight_pre_release_grant():
+def test_validate_result_refuses_dependency_tight_pre_release_grant() -> None:
     job, result = pair()
     validate_result(result, job)
     forged = deepcopy(result)
