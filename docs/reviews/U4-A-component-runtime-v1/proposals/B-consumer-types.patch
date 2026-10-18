@@ -1,0 +1,11 @@
+--- a/validation/component/runtime_checks.py
++++ b/validation/component/runtime_checks.py
+@@ -92,7 +92,7 @@
+     if "max_inflight" in expected or "final_inflight" in expected:
+         credits = [r for r in obs["dma"]["records"] if r["credit_acquire_ps"] is not None]
+ 
+-        def population(t):
++        def population(t: int) -> int:
+             return sum(r["credit_acquire_ps"] <= t < r["credit_release_ps"] for r in credits)
+ 
+         if "max_inflight" in expected:
