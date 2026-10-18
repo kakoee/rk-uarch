@@ -450,7 +450,8 @@ def test_changed_session_authority_stops_before_dispatch(prepared_payload, monke
     ],
 )
 def test_component_refusal_codes_do_not_expand_k2(code):
-    from rkuarch.engines.native.runner import ProtocolViolation, _decode_envelope as k2_decode
+    from rkuarch.engines.native.runner import ProtocolViolation
+    from rkuarch.engines.native.runner import _decode_envelope as k2_decode
 
     value = {"code": code, "pointer": None, "message": "synthetic component refusal"}
     raw = canonical_json(value).encode()

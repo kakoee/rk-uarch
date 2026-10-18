@@ -1,0 +1,16 @@
+import hashlib,json,shutil,subprocess,os
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');out=Path('/tmp/u4-a-runtime-a67pm31q/codec-fault');out.mkdir()
+for n in ('src','contract/uarch_contract','validation','tests/unit'):
+ shutil.copytree(r/n,out/n,ignore=shutil.ignore_patterns('__pycache__'))
+shutil.copy2(r/'pyproject.toml',out/'pyproject.toml')
+p=out/'src/rkuarch/engines/native/component_runner.py';original=p.read_bytes();a=original.index(b'_COMPONENT_CODES =');b=original.index(b'\n\ndef _decode_envelope',a);fault=original[:a]+b'_COMPONENT_CODES = REFUSAL_CODES\n'+original[b:];p.write_bytes(fault);report={}
+for tag in ('fault','restored'):
+ if tag=='restored':p.write_bytes(original)
+ run=subprocess.run([str(r/'.venv/bin/python'),'-m','pytest','-q','tests/unit/test_component_runtime.py','-k','component_refusal_codes'],cwd=out,capture_output=True,env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'})
+ (out/(tag+'.stdout')).write_bytes(run.stdout);(out/(tag+'.stderr')).write_bytes(run.stderr)
+ report[tag]={'exit_code':run.returncode,'source_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'stdout_sha256':hashlib.sha256(run.stdout).hexdigest()}
+ assert run.returncode==(1 if tag=='fault' else 0)
+ if tag=='fault':assert b'5 failed' in run.stdout and b'invalid complete canonical component envelope' in run.stdout
+assert p.read_bytes()==original
+(out/'receipt.json').write_text(json.dumps(report,indent=2)+'\n');print(report)
