@@ -1,0 +1,11 @@
+"""Only reviewer A1: move a joined grant before same-time terminal release."""
+import json
+from pathlib import Path
+from uarch_contract.hashing import canonical_json,content_hash
+r=json.loads(Path('/tmp/u4-issue-stage2-native/evidence/target/sr-v3-debug.json').read_bytes())
+early,late=[x for x in r['observations']['reservation_opportunities']['records'] if x['t_ps']==86000]
+assert (early['event_cursor'],late['event_cursor'])==(52,54)
+assert early['granted_request_ids']==[] and late['granted_request_ids']==['r02.00']
+early['granted_request_ids'],late['granted_request_ids']=['r02.00'],[]
+r['result_hash']=content_hash(r,exclude=('result_hash',))
+Path('/tmp/u4-issue-stage2-consumers/A1.json').write_text(canonical_json(r))

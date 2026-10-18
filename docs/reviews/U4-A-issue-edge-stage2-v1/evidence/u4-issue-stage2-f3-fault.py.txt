@@ -1,0 +1,19 @@
+from pathlib import Path
+import json,hashlib,subprocess
+r=Path('/tmp/u4-issue-stage2-contract/source');p=r/'contract/uarch_contract/mapped_issue.py';baseline=p.read_bytes();out=Path('/tmp/u4-issue-stage2-consumers');records=[]
+py='/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python';runner='/tmp/u4-issue-stage2-review/probes/runner.py'
+def run(name):
+ result=out/(name+'.json');argv=[py,'-I',runner,str(r),'script',str(out/'fault_probe.py'),str(result)];proc=subprocess.run(argv,capture_output=True);(out/(name+'.stdout')).write_bytes(proc.stdout);(out/(name+'.stderr')).write_bytes(proc.stderr);assert proc.returncode==0,proc.stderr
+ data=json.loads(result.read_text());records.append(dict(name=name,argv=argv,exit_code=proc.returncode,source_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),observed=data));return data
+b=run('capacity-baseline-2')
+try:
+ s=baseline.decode();needle='sum(requests[key].dma_engine_id == engine for key in active) <= limit';assert s.count(needle)==1;p.write_text(s.replace(needle,'True'))
+ f=run('without-cursor-capacity-2');assert f['A1']['capacity_join_only']=='pass';assert f['sr-v3']['full_structural']=='pass';assert 'credit predecessor before' in f['A1']['full_structural']
+finally:p.write_bytes(baseline)
+a=run('capacity-exact-restored-2');assert a==b;assert p.read_bytes()==baseline
+(out/'capacity-fault.json').write_text(json.dumps(dict(records=records,exact_restoration=True,scope='isolated capacity join unsafe acceptance; full structural still refuses through F1'),indent=2)+'\n')
+# Preserve the already executed F1 group from the first script; do not rerun it.
+f1={name:json.loads((out/(name+'.json')).read_text()) for name in ['structural-baseline','without-both-a1-cursor-defenses','a1-exact-restored']}
+assert f1['structural-baseline']==f1['a1-exact-restored'];assert f1['without-both-a1-cursor-defenses']['A7']['full_structural']=='pass';assert f1['without-both-a1-cursor-defenses']['sr-v3']['full_structural']=='pass'
+(out/'credit-fault.json').write_text(json.dumps(dict(observed=f1,recipe='/tmp/u4-issue-stage2-faults.py',restored_source_sha256=hashlib.sha256(baseline).hexdigest(),scope='two overlapping ordinal defenses removed together; restored before later F3 harness syntax error',later_harness_error='first F3 mutation inserted a comment swallowing comma; import failed, excluded from guard evidence; finally restored source'),indent=2)+'\n')
+print('F3 targeted removal admits A1 in capacity join; full F1 defense still refuses; restoration passes. Prior successful F1 group retained.')

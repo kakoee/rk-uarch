@@ -1,0 +1,134 @@
+"""Reviewer synthetic mapped inputs (no authority). Run under runner.py with the private export.
+
+Usage: runner.py EXPORT script make_inputs.py RUNS_JOBS_DIR OUT_DIR
+  cc-v3 / cc-v1 : cap2 engine0 holds read r00 (ch6) and write r01 (ch7), both after the barrier;
+                  r02, r03 reads wait. Both holders release at the same instant: the read in
+                  phase 0, the write by its inline zero-duration ack.
+  sr-v3         : cap1; engine0 holds write r00 (ch7), r02 waits; engine1 read r01 (ch6) has a
+                  phase-0 terminal at the same instant, creating an earlier opportunity.
+"""
+
+import copy
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+from uarch_contract.hashing import canonical_json, content_hash
+from uarch_contract.mapped import MappedEngineJob
+
+from rkuarch.workload.mapped import validate_component_completeness
+
+src, out = Path(sys.argv[1]), Path(sys.argv[2])
+out.mkdir(exist_ok=False)
+
+
+def buf(id_, space, offset, residency, producer, consumers, core):
+    return {"alignment_bytes": 256, "bank": 0 if space == "sram" else None, "channel_id": None,
+            "core_id": core, "final_consumer_ids": consumers, "id": id_,
+            "initial_residency": residency, "offset_bytes": offset, "op_id": None,
+            "operand": None, "producer_id": producer, "size_bytes": 256, "slot_index": None,
+            "space": space}
+
+
+def dma(id_, direction, engine, channel, src_buf, dst_buf):
+    return {"destination": {"buffer_id": dst_buf, "offset_bytes": 0, "size_bytes": 256},
+            "direction": direction, "dma_engine_id": engine,
+            "fragments": [{"channel_id": channel, "destination_offset_bytes": 0,
+                           "payload_bytes": 256, "request_id": id_ + ".00", "route_id": "p3",
+                           "source_offset_bytes": 0, "transaction_bytes": 256}],
+            "id": id_, "kind": "dma", "op_id": None,
+            "source": {"buffer_id": src_buf, "offset_bytes": 0, "size_bytes": 256}}
+
+
+def reseal(v, case_id, model_version=None):
+    b = v["workload_closure"]
+    p = b["points"][0]
+    g = p["task_graph"]
+    g["graph_hash"] = content_hash(g, exclude=("graph_hash",))
+    p["identity"]["fixture_id"] = case_id
+    p["payload_hash"] = content_hash(p, exclude=("payload_hash",))
+    e = v["profile"]["entries"][0]
+    e.update(case_id=case_id, graph_hash=g["graph_hash"], point_hash=p["payload_hash"],
+             case_selection_revision="REVIEWER-issue-edge-stage1/1")
+    v["profile"]["profile_hash"] = content_hash(v["profile"], exclude=("profile_hash",))
+    b["admission"].update(case_id=case_id, profile_hash=v["profile"]["profile_hash"])
+    b["bundle_hash"] = content_hash(b, exclude=("bundle_hash",))
+    v.update(bundle_hash=b["bundle_hash"], mapped_point=p, point_hash=p["payload_hash"],
+             admission=b["admission"])
+    if model_version:
+        v["engine"]["model"]["version"] = model_version
+    v["job_hash"] = content_hash(v, exclude=("job_hash",))
+    j = MappedEngineJob.model_validate(v)
+    validate_component_completeness(j.workload_closure)
+    return v
+
+
+report = {}
+base2 = json.loads((src / "gap-cap2.json").read_text())
+base1 = json.loads((src / "gap-cap1.json").read_text())
+report["bases"] = {n: hashlib.sha256((src / n).read_bytes()).hexdigest()
+                   for n in ("gap-cap2.json", "gap-cap1.json")}
+
+# Credit-cause probe.
+v = copy.deepcopy(base2)
+g = v["workload_closure"]["points"][0]["task_graph"]
+g["jobs"] = [j for j in g["jobs"] if j["kind"] != "dma"] + [
+    dma("r00", "read", 0, 6, "r00h", "r00s"),
+    dma("r01", "write", 0, 7, "r01s", "r01h"),
+    dma("r02", "read", 0, 6, "r02h", "r02s"),
+    dma("r03", "read", 0, 6, "r03h", "r03s"),
+]
+g["buffers"] = [b for b in g["buffers"] if b["id"] in ("a-dst", "a-src")] + [
+    buf("r00h", "hbm", 1536, "preloaded", None, ["r00"], None),
+    buf("r00s", "sram", 0, "uninitialized", "r00", [], 0),
+    buf("r01h", "hbm", 3840, "uninitialized", "r01", [], None),
+    buf("r01s", "sram", 1024, "preloaded", None, ["r01"], 0),
+    buf("r02h", "hbm", 5632, "preloaded", None, ["r02"], None),
+    buf("r02s", "sram", 2048, "uninitialized", "r02", [], 0),
+    buf("r03h", "hbm", 7680, "preloaded", None, ["r03"], None),
+    buf("r03s", "sram", 3072, "uninitialized", "r03", [], 0),
+]
+g["buffers"].sort(key=lambda b: b["id"])
+g["dependencies"] = [{"after": "b-barrier", "before": "a-unicast"}] + [
+    {"after": r, "before": "b-barrier"} for r in ("r00", "r01", "r02", "r03")]
+cc1 = copy.deepcopy(v)
+# Gap-free twins: DMAs ready at 0 (core edge), so /2 can represent issue without a gap.
+cc0 = copy.deepcopy(v)
+cc0["workload_closure"]["points"][0]["task_graph"]["dependencies"] = [
+    {"after": "b-barrier", "before": "a-unicast"}]
+cc0_1 = copy.deepcopy(cc0)
+for name, version, value in (("cc-v3", None, v), ("cc-v1", "1", cc1),
+                             ("cc0-v3", None, cc0), ("cc0-v1", "1", cc0_1)):
+    sealed = reseal(value, "SYNTHETIC-REVIEWER-same-instant-credit-" + name, version)
+    (out / f"{name}.json").write_text(canonical_json(sealed))
+
+# Same-instant release-ordering case.
+v = copy.deepcopy(base1)
+g = v["workload_closure"]["points"][0]["task_graph"]
+g["jobs"] = [j for j in g["jobs"] if j["kind"] != "dma"] + [
+    dma("r00", "write", 0, 7, "r00s", "r00h"),
+    dma("r01", "read", 1, 6, "r01h", "r01s"),
+    dma("r02", "read", 0, 6, "r02h", "r02s"),
+]
+g["buffers"] = [b for b in g["buffers"] if b["id"] in ("a-dst", "a-src")] + [
+    buf("r00h", "hbm", 3840, "uninitialized", "r00", [], None),
+    buf("r00s", "sram", 0, "preloaded", None, ["r00"], 0),
+    buf("r01h", "hbm", 3584, "preloaded", None, ["r01"], None),
+    buf("r01s", "sram", 1024, "uninitialized", "r01", [], 0),
+    buf("r02h", "hbm", 5632, "preloaded", None, ["r02"], None),
+    buf("r02s", "sram", 2048, "uninitialized", "r02", [], 0),
+]
+g["buffers"].sort(key=lambda b: b["id"])
+g["dependencies"] = [{"after": "b-barrier", "before": "a-unicast"}] + [
+    {"after": r, "before": "b-barrier"} for r in ("r00", "r01", "r02")]
+sealed = reseal(v, "SYNTHETIC-REVIEWER-same-instant-release-order", None)
+(out / "sr-v3.json").write_text(canonical_json(sealed))
+
+for p in sorted(out.glob("*.json")):
+    j = json.loads(p.read_text())
+    (out / (p.stem + ".trust.json")).write_text(canonical_json(dict(
+        registry=j["registry"]["registry_hash"], profile=j["profile"]["profile_hash"],
+        case=j["admission"]["case_id"], engine=j["engine"])))
+    report[p.stem] = hashlib.sha256(p.read_bytes()).hexdigest()
+print(json.dumps(report, indent=1))

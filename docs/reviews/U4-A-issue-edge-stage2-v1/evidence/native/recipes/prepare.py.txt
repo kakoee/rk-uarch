@@ -1,0 +1,13 @@
+from pathlib import Path
+import subprocess,tarfile,io,json,hashlib,shutil
+r=Path('/tmp/u4-issue-stage2-native');r.mkdir();s=r/'source';s.mkdir();(r/'evidence/logs').mkdir(parents=True);(r/'evidence/target').mkdir();repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');pkg=repo/'docs/reviews/U4-A-issue-edge-amendment-v2';m=json.loads((pkg/'manifest.json').read_text());tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','-C',str(repo),'archive',m['base_commit']]))).extractall(s,filter='data')
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest() if p.exists() else None
+for x in m['files']:assert sha(s/x['path'])==x['preimage_sha256']
+for x in m['patches']:
+ p=pkg/x['path'];assert sha(p)==x['sha256'];subprocess.run(['git','apply','--check',str(p)],cwd=s,check=True);subprocess.run(['git','apply',str(p)],cwd=s,check=True)
+for x in m['files']:assert sha(s/x['path'])==x['postimage_sha256']
+(r/'evidence/reconstruction.json').write_text(json.dumps(dict(base=m['base_commit'],manifest_sha256=sha(pkg/'manifest.json'),patches=m['patches'],preimages_verified=len(m['files']),postimages_verified=len(m['files'])),indent=2)+'\n')
+for n in ['runner.py','make_inputs.py']:shutil.copy2(Path('/tmp/u4-issue-stage2-review/probes')/n,r/n)
+(r/'run.py').write_text(Path('/tmp/u4-issue-order-native/run.py').read_text().replace('/tmp/u4-issue-order-native','/tmp/u4-issue-stage2-native'))
+argv=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python','-I',str(r/'runner.py'),str(s),'script',str(r/'make_inputs.py'),'/tmp/u4-b-issue-edge-runs-01/jobs',str(r/'inputs')]
+p=subprocess.run(argv,capture_output=True);(r/'evidence/logs/input-regeneration.stdout').write_bytes(p.stdout);(r/'evidence/logs/input-regeneration.stderr').write_bytes(p.stderr);(r/'evidence/input-regeneration.json').write_text(json.dumps(dict(argv=argv,exit_code=p.returncode,recipe_sha256=sha(r/'make_inputs.py'),runner_sha256=sha(r/'runner.py')),indent=2)+'\n');print(p.stdout.decode());print(p.stderr.decode());assert p.returncode==0

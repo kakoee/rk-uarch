@@ -1,0 +1,65 @@
+{
+  "observed": {
+    "structural-baseline": {
+      "cc0-v3": {
+        "full_structural": "pass"
+      },
+      "cc-v3": {
+        "full_structural": "pass"
+      },
+      "sr-v3": {
+        "full_structural": "pass",
+        "capacity_join_only": "pass"
+      },
+      "A7": {
+        "full_structural": "AttributionMismatch: credit predecessor before reservation opportunity"
+      },
+      "A1": {
+        "full_structural": "IncompleteObservations: reservation cursor capacity",
+        "capacity_join_only": "IncompleteObservations: reservation cursor capacity"
+      }
+    },
+    "without-both-a1-cursor-defenses": {
+      "cc0-v3": {
+        "full_structural": "AttributionMismatch: exact per-opportunity credit causes"
+      },
+      "cc-v3": {
+        "full_structural": "AttributionMismatch: exact per-opportunity credit causes"
+      },
+      "sr-v3": {
+        "full_structural": "pass",
+        "capacity_join_only": "pass"
+      },
+      "A7": {
+        "full_structural": "pass"
+      },
+      "A1": {
+        "full_structural": "IncompleteObservations: reservation cursor capacity",
+        "capacity_join_only": "IncompleteObservations: reservation cursor capacity"
+      }
+    },
+    "a1-exact-restored": {
+      "cc0-v3": {
+        "full_structural": "pass"
+      },
+      "cc-v3": {
+        "full_structural": "pass"
+      },
+      "sr-v3": {
+        "full_structural": "pass",
+        "capacity_join_only": "pass"
+      },
+      "A7": {
+        "full_structural": "AttributionMismatch: credit predecessor before reservation opportunity"
+      },
+      "A1": {
+        "full_structural": "IncompleteObservations: reservation cursor capacity",
+        "capacity_join_only": "IncompleteObservations: reservation cursor capacity"
+      }
+    }
+  },
+  "recipe": "/tmp/u4-issue-stage2-faults.py",
+  "restored_source_sha256": "b645aa77fe4e3ed35b8bf05bcc747e211b4ff9436a4ee2518569bb837c848afa",
+  "scope": "two overlapping ordinal defenses removed together; restored before later F3 harness syntax error",
+  "later_harness_error": "first F3 mutation inserted a comment swallowing comma; import failed, excluded from guard evidence; finally restored source"
+}

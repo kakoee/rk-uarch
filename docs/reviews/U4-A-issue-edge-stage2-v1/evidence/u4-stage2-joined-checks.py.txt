@@ -1,0 +1,10 @@
+from pathlib import Path
+import subprocess,json,hashlib,shutil
+repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');p=repo/'docs/reviews/U4-A-issue-edge-stage2-v1';root=Path('/tmp/u4-issue-stage2-joined-apply');out=Path('/tmp/u4-stage2-joined-checks');out.mkdir();v=repo/'.venv/bin';prefix=[str(v/'python'),'-I','/tmp/u4-issue-stage2-review/probes/runner.py',str(root)]
+s=Path('/tmp/u4-stage2-final-consumers.py').read_text().replace("assert row['independent']=='pass'","assert row['independent']=='CheckFailure: complete eligible causes'").replace("assert row['independent']==('pass' if case=='sr-v3' else 'CheckFailure: complete eligible causes')","assert row['independent']=='pass'").replace('A freeze verification; B known F1 failures explicitly pending','Combined A/B consumer verification; actual B final joined review pending')
+Path('/tmp/u4-stage2-joined-consumers.py').write_text(s)
+commands=[('consumers',prefix+['script','/tmp/u4-stage2-joined-consumers.py',str(root),str(p),str(out/'consumers.json')]),('affected',prefix+['pytest','-q','validation/component/test_issue_checks.py','validation/component/test_installation_identity.py','--junitxml='+str(out/'affected.xml')])]
+rows=[]
+for name,cmd in commands:
+ result=subprocess.run(cmd,cwd=root,capture_output=True);(out/(name+'.stdout')).write_bytes(result.stdout);(out/(name+'.stderr')).write_bytes(result.stderr);rows.append(dict(name=name,argv=cmd,exit_code=result.returncode,stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),stderr_sha256=hashlib.sha256(result.stderr).hexdigest()));print(name,result.returncode,result.stdout.decode()[-1700:]);assert result.returncode==0
+(out/'receipts.json').write_text(json.dumps(rows,indent=2)+'\n')

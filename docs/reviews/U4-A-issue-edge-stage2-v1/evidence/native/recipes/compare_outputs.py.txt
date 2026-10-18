@@ -1,0 +1,10 @@
+import hashlib,json
+from pathlib import Path
+from uarch_contract.hashing import canonical_json
+r=Path('/tmp/u4-issue-stage2-native');expected=json.loads(Path('/tmp/u4-issue-stage2-review/receipts.json').read_text())['native_runs'];records=[]
+for case in ['cc0-v3','cc-v3','sr-v3']:
+ for mode in ['debug','release']:
+  f=r/f'evidence/target/{case}-{mode}.json';raw=f.read_bytes();v=json.loads(raw);wrapped=canonical_json({'outcome':'success','result':v}).encode();h=hashlib.sha256(wrapped).hexdigest();prior=next(x['output_sha256'] for x in expected['runs/'+case]['runs'] if x['mode']==mode);assert h==prior
+  records.append(dict(case=case,mode=mode,input_sha256=hashlib.sha256((r/f'inputs/{case}.json').read_bytes()).hexdigest(),raw_result_sha256=hashlib.sha256(raw).hexdigest(),reviewer_framed_output_sha256=h,matches_preserved_reviewer_output_receipt=True))
+ assert (r/f'evidence/target/{case}-debug.json').read_bytes()==(r/f'evidence/target/{case}-release.json').read_bytes()
+(r/'evidence/output-identities.json').write_text(json.dumps(dict(results=records,debug_release_exact=True,comparison='same canonical success wrapper as preserved reviewer harness; hash comparison, not access to reviewer raw files'),indent=2)+'\n');print(json.dumps(records,indent=2))

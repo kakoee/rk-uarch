@@ -1,0 +1,16 @@
+"""Structural F1/F3 controls only. The independent checker is not bypassed or scored here."""
+import json,sys
+from pathlib import Path
+from uarch_contract.mapped import MappedEngineJob,MappedEngineResult,validate_result
+from uarch_contract.mapped_issue import validate_reservation_capacity
+n=Path('/tmp/u4-issue-stage2-native');e=Path('/tmp/u4-issue-stage2-consumers');rows={}
+for name in ['cc0-v3','cc-v3','sr-v3','A7','A1']:
+ case={'A7':'cc0-v3','A1':'sr-v3'}.get(name,name);j=json.loads((n/'inputs'/(case+'.json')).read_bytes());p=e/(name+'.json') if name.startswith('A') else n/'evidence/target'/(name+'-debug.json');r=json.loads(p.read_bytes());row={}
+ try:validate_result(r,MappedEngineJob.model_validate(j));row['full_structural']='pass'
+ except Exception as error:row['full_structural']=str(error)
+ if name in ['sr-v3','A1']:
+  result=MappedEngineResult.model_validate(r);obs=result.observations;req={x.request_id:x for x in obs.dma.records if x.direction!='unicast'};lasts={key:max((a for a in obs.activities.records if a.request_id==key),key=lambda a:a.completion_ordinal) for key in req};limit=j['workload_closure']['hardware_spec']['cores']['core_type']['dma']['max_outstanding']['value']
+  try:validate_reservation_capacity(req,lasts,obs.reservation_opportunities.records,int(limit));row['capacity_join_only']='pass'
+  except Exception as error:row['capacity_join_only']=str(error)
+ rows[name]=row
+Path(sys.argv[1]).write_text(json.dumps(rows,indent=2)+'\n');print(json.dumps(rows,indent=2))

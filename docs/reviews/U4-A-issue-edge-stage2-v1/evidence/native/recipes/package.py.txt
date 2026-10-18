@@ -1,0 +1,21 @@
+from pathlib import Path
+import shutil,json,hashlib
+r=Path('/tmp/u4-issue-stage2-native');p=r/'package';p.mkdir()
+def sha(f):return hashlib.sha256(f.read_bytes()).hexdigest()
+def cp(f,d):d.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(f,d)
+for pattern in ['*.patch','*-manifest.json','native-report.md']:
+ for f in r.glob(pattern):cp(f,p/f.name)
+for f in (r/'evidence').rglob('*'):
+ if f.is_file() and 'target' not in f.relative_to(r/'evidence').parts:cp(f,p/f.relative_to(r))
+for f in r.glob('*.py'):cp(f,p/'recipes'/f.name)
+cp(Path('/tmp/u4-stage2-prepare-native.py'),p/'recipes/prepare.py')
+for f in (r/'inputs').glob('*.json'):cp(f,p/'inputs'/f.name)
+for n in ['cc0-v3','cc-v3','sr-v3']:
+ for mode in ['debug','release']:cp(r/f'evidence/target/{n}-{mode}.json',p/f'outputs/{n}-{mode}.json')
+post={x['path']:x['postimage_sha256'] for x in json.loads((r/'native-manifest.json').read_text())['files']};checks=[]
+for f in sorted((r/'evidence/logs').glob('*.json')):
+ d=json.loads(f.read_text());diff=[x for x,h in post.items() if d['source'].get(x)!=h];checks.append(dict(receipt=str(f.relative_to(r)),exit_code=d['exit_code'],all_final_postimages=not diff,different_or_absent=diff))
+(p/'evidence/source-test-bindings.json').write_text(json.dumps(checks,indent=2)+'\n')
+files=[dict(path=str(f.relative_to(p)),bytes=f.stat().st_size,sha256=sha(f)) for f in sorted(p.rglob('*')) if f.is_file()]
+(p/'package-manifest.json').write_text(json.dumps(dict(kind='UNAPPLIED Stage2 native a1 assessment and test-only additions',production_runtime_changed=False,files=files),indent=2)+'\n')
+print(json.dumps(dict(package=str(p),files=len(files),bytes=sum(x['bytes'] for x in files))))

@@ -1,0 +1,15 @@
+from pathlib import Path
+import json,hashlib,subprocess,shutil
+repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');p=repo/'docs/reviews/U4-A-issue-edge-stage2-v1';b=repo/'docs/reviews/U4-B-issue-edge-stage2-v1';r=Path('/tmp/u4-issue-stage2-contract/source');sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();m=json.loads((b/'manifest.json').read_bytes())
+shutil.copyfile(p/'manifest.json',p/'evidence/pre-B-join-manifest.json')
+for row in m['files']:assert sha(r/row['path'])==row['preimage_sha256']
+assert sha(b/'checker-a1.unapplied.patch')==m['patches'][0]['sha256']
+subprocess.run(['git','apply','--check',str(b/'checker-a1.unapplied.patch')],cwd=r,check=True);subprocess.run(['git','apply',str(b/'checker-a1.unapplied.patch')],cwd=r,check=True)
+f=r/'validation/component/issue-amendment-binding.json';o=json.loads(f.read_bytes())
+for row in m['files']:
+ assert sha(r/row['path'])==row['postimage_sha256'];o['additions'][row['path']]=row['postimage_sha256']
+o['scope']='Prospective Stage2 combined A/B candidate, approved a1; B independent correction exact. Final B joined-postimage/overlay review pending; historical binding immutable; no authority.'
+f.write_text(json.dumps(o,indent=2,sort_keys=True)+'\n')
+s=Path('/tmp/u4-issue-stage2-package.py').read_text().replace("'c5e3116'","'d17871c'").replace('/tmp/u4-issue-stage2-apply','/tmp/u4-issue-stage2-joined-apply').replace('/tmp/u4-issue-stage2-delta-apply','/tmp/u4-issue-stage2-joined-delta-apply').replace('BLOCKED: A private corrections frozen; B independent correction and exact joined-postimage review pending','BLOCKED: combined A/B source frozen; actual B joined-postimage and overlay review pending').replace("pending_B=['F1 independently authored checker correction accepting cc0-v3/cc-v3 and refusing A7','F4 prospective model/observation/checker binding control and F2 restriction','final joined postimages, overlay and actual B review']","pending_B=['actual final joined-postimage, overlay and consumer-closure review']").replace("'B correction pending' if path in", "'Exact B Stage2 checker postimage; final joined review pending' if path in").replace("'prior_B='", "'prior_B='")
+s=s.replace("m['verification']=dict(","m['B_stage2']={'commit': subprocess.check_output(['git','rev-parse','d17871c'],cwd=repo,text=True).strip(), 'checker_patch_sha256':'4f5bbb22e069ef7dfeed935ad9d1e8884e579af6cba12260fd886ef6d2d1be63', 'actual_final_joined_review':'pending'}\nm['verification']=dict(")
+Path('/tmp/u4-issue-stage2-joined-package.py').write_text(s)

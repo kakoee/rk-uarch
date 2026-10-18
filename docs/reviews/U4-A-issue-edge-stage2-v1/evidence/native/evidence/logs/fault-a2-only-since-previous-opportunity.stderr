@@ -1,0 +1,49 @@
+   Compiling version_check v0.9.5
+   Compiling typenum v1.19.0
+   Compiling proc-macro2 v1.0.107
+   Compiling libc v0.2.190
+   Compiling quote v1.0.47
+   Compiling rand_core v0.10.1
+   Compiling cfg-if v1.0.5
+   Compiling unicode-ident v1.0.27
+   Compiling getrandom v0.4.3
+   Compiling autocfg v1.5.1
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling cpufeatures v0.3.1
+   Compiling serde_json v1.0.154
+   Compiling serde v1.0.229
+   Compiling core_detect v1.0.0
+   Compiling memchr v2.8.3
+   Compiling cpufeatures v0.2.17
+   Compiling chacha20 v0.10.2
+   Compiling rand_xorshift v0.5.0
+   Compiling unarray v0.1.4
+   Compiling regex-syntax v0.8.11
+   Compiling bitflags v2.13.2
+   Compiling itoa v1.0.18
+   Compiling generic-array v0.14.7
+   Compiling num-traits v0.2.19
+   Compiling syn v3.0.9
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.6
+   Compiling digest v0.10.7
+   Compiling rand v0.10.3
+   Compiling sha2 v0.10.9
+   Compiling proptest v1.12.0
+   Compiling serde_derive v1.0.229
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.32s
+     Running unittests src/lib.rs (/target/stage2-fault/debug/deps/uarch_engine-02caa55ddc47d2af)
+
+thread 'component::issue_proposal_tests::proposed_stage2_cc0_retains_all_observed_same_instant_releases' (961) panicked at crates/uarch-engine/src/issue_proposal_tests.rs:551:9:
+assertion `left == right` failed
+  left: [("r01", "ack", 55)]
+ right: [("r00", "read_port", 50), ("r01", "ack", 55)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'component::issue_proposal_tests::proposed_stage2_gapped_cc_retains_all_observed_same_instant_releases' (962) panicked at crates/uarch-engine/src/issue_proposal_tests.rs:551:9:
+assertion `left == right` failed
+  left: [("r01", "ack", 55)]
+ right: [("r00", "read_port", 50), ("r01", "ack", 55)]
+error: test failed, to rerun pass `-p uarch-engine --lib`

@@ -1,0 +1,40 @@
+from pathlib import Path
+import hashlib,json,subprocess,difflib,tarfile,io,shutil
+r=Path('/tmp/u4-issue-stage2-native');repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');oldroot=Path('/tmp/u4-issue-order-native/source');base='64837bea3724919facbc27be1c7f5644a6354cfa'
+paths=['native/crates/uarch-engine/src/'+n for n in ['carrier.rs','component.rs','component_admission.rs','component_accounting.rs','component_carriers_v3.json','issue_proposal_tests.rs']]+['native/crates/uarch-engine/testdata/synthetic-issue-order-'+n+'.json' for n in ['r00','r01']]+['native/crates/uarch-engine/testdata/synthetic-stage2-'+n+'.json' for n in ['cc0-v3','cc-v3','sr-v3']]
+def sha(b):return hashlib.sha256(b).hexdigest()
+for kind in ['native','native-stage2-test-delta']:
+ records=[];patch=[]
+ for path in paths:
+  post=(r/'source'/path).read_bytes()
+  if kind=='native':
+   x=subprocess.run(['git','show',base+':'+path],cwd=repo,capture_output=True);pre=x.stdout if x.returncode==0 else None
+  else:pre=(oldroot/path).read_bytes() if (oldroot/path).exists() else None
+  if pre==post:continue
+  patch.append(f'diff --git a/{path} b/{path}\n')
+  if pre is None:patch.append('new file mode 100644\n')
+  patch.extend(line if line.endswith('\n') else line+'\n\\ No newline at end of file\n' for line in difflib.unified_diff((pre or b'').decode().splitlines(keepends=True),post.decode().splitlines(keepends=True),fromfile='a/'+path if pre is not None else '/dev/null',tofile='b/'+path))
+  records.append(dict(path=path,preimage_sha256=sha(pre) if pre is not None else None,postimage_sha256=sha(post)))
+ p=r/(kind+'.patch');p.write_text(''.join(patch));check=r/(kind+'-apply-check');check.mkdir()
+ if kind=='native':tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive',base,'native'],cwd=repo))).extractall(check,filter='data')
+ else:shutil.copytree(oldroot/'native',check/'native')
+ subprocess.run(['git','apply','--check',str(p)],cwd=check,check=True);subprocess.run(['git','apply',str(p)],cwd=check,check=True)
+ for item in records:assert sha((check/item['path']).read_bytes())==item['postimage_sha256']
+ subprocess.run(['git','apply','--reverse','--check',str(p)],cwd=check,check=True)
+ (r/(kind+'-manifest.json')).write_text(json.dumps(dict(kind='UNAPPLIED Stage2 native test-only addition; runtime unchanged',patch_sha256=sha(p.read_bytes()),base_commit=base if kind=='native' else None,previous_native_patch_sha256='32c2c0452f86cbdf6ce89cee3eb1ba1f1df1f33853ec4391384cd54574ea8ebc',files=records,apply_check=True,reverse_check=True,verified_postimages=True,public_authority=None),indent=2)+'\n');print(kind,sha(p.read_bytes()))
+continuity=[]
+for f in sorted((oldroot/'native').rglob('*')):
+ if not f.is_file():continue
+ rel=f.relative_to(oldroot)
+ if str(rel)=='native/crates/uarch-engine/src/issue_proposal_tests.rs':continue
+ current=r/'source'/rel;assert current.read_bytes()==f.read_bytes(),rel
+ continuity.append(dict(path=str(rel),sha256=sha(f.read_bytes()),byte_equal_v2_proposal=True))
+(r/'evidence/unchanged-native-inputs.json').write_text(json.dumps(dict(excluded_modified_test_module='native/crates/uarch-engine/src/issue_proposal_tests.rs',all_existing_other_native_files=continuity,production_runtime_changed=False,F2='historical /2 unchanged; affected mixed read/write first use blocked'),indent=2)+'\n')
+cache_record=repo/'docs/reviews/U4-A-K2-C1-precise-v1/cache-inventory.json';cache=json.loads(cache_record.read_text());cache_root=Path(cache['private_root'])
+for path,m in cache['files'].items():b=(cache_root/path).read_bytes();assert sha(b)==m['sha256'] and len(b)==m['bytes']
+(r/'evidence/cache-check.json').write_text(json.dumps(dict(record_sha256=sha(cache_record.read_bytes()),root=str(cache_root),exact_files_verified=len(cache['files']),match=True),indent=2)+'\n')
+executables=[]
+for mode in ['debug','release']:
+ f=next(f for f in (r/f'evidence/target/{mode}/deps').glob('uarch_engine-*') if f.is_file() and f.stat().st_mode&0o111)
+ executables.append(dict(mode=mode,path=str(f),sha256=sha(f.read_bytes()),bytes=f.stat().st_size,scope='private unit executable; no runtime authority or independent rebuild claim'))
+(r/'evidence/unit-executables.json').write_text(json.dumps(executables,indent=2)+'\n')

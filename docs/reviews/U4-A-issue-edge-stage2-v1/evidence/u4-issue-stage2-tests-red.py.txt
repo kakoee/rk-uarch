@@ -1,0 +1,91 @@
+"""Synthetic local structural controls; full mapped reviewer cases are separate receipts."""
+
+from copy import deepcopy
+from types import SimpleNamespace as Row
+
+import pytest
+
+from uarch_contract import mapped_issue as checks
+
+
+def mixed():
+    requests = {
+        key: Row(request_id=key, job_id=key, dma_engine_id=0,
+                 reservation_ps=0 if key in ("r00", "r01") else 60000,
+                 issue_ps=0 if key in ("r00", "r01") else 60000,
+                 complete_ps=60000 if key in ("r00", "r01") else 120000)
+        for key in ("r00", "r01", "r02", "r03")
+    }
+    jobs = {key: Row(ready_ps=0) for key in requests}
+    lasts = {key: Row(activity_id=key + ".terminal", completion_ordinal=ordinal)
+             for key, ordinal in zip(requests, (50, 55, 90, 95), strict=True)}
+    firsts = {key: Row(predecessors=[]) for key in requests}
+    firsts["r02"].predecessors = [Row(activity_id="r00.terminal", relation="credit")]
+    firsts["r03"].predecessors = [Row(activity_id=key + ".terminal", relation="credit")
+                                 for key in ("r00", "r01")]
+    cursors = dict(r00=0, r01=0, r02=52, r03=56)
+    return requests, jobs, firsts, lasts, cursors, 2
+
+
+def validate(values):
+    fn = getattr(checks, "validate_credit_causes", None)
+    assert fn is not None, "missing structural per-opportunity a1 law"
+    fn(*values)
+
+
+def test_mixed_release_a1_includes_all_pre_cursor_releases():
+    validate(mixed())
+
+
+def test_a7_later_release_before_alignment_still_after_reservation():
+    values = mixed()
+    values[3]["r01"].completion_ordinal = 53
+    values[2]["r02"].predecessors.append(Row(activity_id="r01.terminal", relation="credit"))
+    with pytest.raises(ValueError, match="credit predecessor before reservation opportunity"):
+        validate(values)
+
+
+def test_later_opportunity_retains_earlier_same_time_release():
+    values = mixed()
+    values[2]["r03"].predecessors = [Row(activity_id="r01.terminal", relation="credit")]
+    with pytest.raises(ValueError, match="exact per-opportunity credit causes"):
+        validate(values)
+
+
+def test_equal_readiness_still_excludes_credit_causes():
+    values = mixed()
+    values[1]["r02"].ready_ps = 60000
+    values[2]["r02"].predecessors = []
+    validate(values)
+
+
+def test_prior_saturation_is_still_required():
+    values = list(mixed())
+    values[5] = 3
+    values[2]["r02"].predecessors = []
+    values[2]["r03"].predecessors = []
+    validate(values)
+
+
+def capacity_fixture():
+    requests = {key: Row(dma_engine_id=engine)
+                for key, engine in (("write", 0), ("read", 1), ("waiting", 0))}
+    lasts = {key: Row(completion_ordinal=ordinal)
+             for key, ordinal in (("write", 53), ("read", 50), ("waiting", 98))}
+    opportunities = [Row(event_cursor=cursor, granted_request_ids=grants)
+                     for cursor, grants in ((0, ["write", "read"]), (52, []),
+                                             (54, ["waiting"]), (99, []))]
+    return requests, lasts, opportunities, 1
+
+
+def test_structural_capacity_uses_release_ordinal_not_equal_timestamp():
+    fn = getattr(checks, "validate_reservation_capacity", None)
+    assert fn is not None, "missing structural cursor capacity join"
+    baseline = capacity_fixture()
+    fn(*baseline)
+    forged = deepcopy(baseline)
+    forged[2][1].granted_request_ids = ["waiting"]
+    forged[2][2].granted_request_ids = []
+    with pytest.raises(ValueError, match="reservation cursor capacity"):
+        fn(*forged)
+    fn(*baseline)

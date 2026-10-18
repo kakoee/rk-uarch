@@ -1,0 +1,58 @@
+from pathlib import Path
+import shutil,json,hashlib
+r=Path('/tmp/u4-issue-stage2-native');d=r/'source/native/crates/uarch-engine';p=d/'src/issue_proposal_tests.rs';(r/'evidence/baseline-source').mkdir()
+for n in ['component.rs','component_accounting.rs','issue_proposal_tests.rs']:shutil.copy2(d/'src'/n,r/'evidence/baseline-source'/n)
+expected=json.loads(Path('/tmp/u4-issue-stage2-review/receipts.json').read_text())['inputs'];inputs=[]
+for f in sorted((r/'inputs').glob('*.json')):
+ h=hashlib.sha256(f.read_bytes()).hexdigest();assert expected[f.name]==h;inputs.append(dict(file=f.name,sha256=h,reviewer_equal=True))
+for n in ['cc0-v3','cc-v3','sr-v3']:shutil.copy2(r/'inputs'/f'{n}.json',d/'testdata'/f'synthetic-stage2-{n}.json')
+(r/'evidence/regenerated-input-identities.json').write_text(json.dumps(inputs,indent=2)+'\n')
+p.write_text(p.read_text()+'''
+
+fn stage2_result(raw: &str) -> Value {
+    let v: Value = serde_json::from_str(raw).unwrap();
+    execute_with_observations(raw, &anchor(&v), ObservationVersion::V3).unwrap()
+}
+fn stage2_mixed_causes(raw: &str, release: u64) {
+    let r=stage2_result(raw);
+    let rows=r["observations"]["activities"]["records"].as_array().unwrap();
+    let opportunities=r["observations"]["reservation_opportunities"]["records"].as_array().unwrap();
+    for (request,cursor,expected) in [("r02.00",52,vec![("r00","read_port",50)]),("r03.00",56,vec![("r00","read_port",50),("r01","ack",55)])] {
+        let opportunity=opportunities.iter().find(|o|o["granted_request_ids"].as_array().unwrap().iter().any(|x|x==request)).unwrap();
+        assert_eq!(opportunity["event_cursor"],cursor);
+        assert_eq!(opportunity["t_ps"],release);
+        let alignment=rows.iter().find(|a|a["request_id"]==request && a["subphase"]=="dma_issue" && a["kind"]=="alignment").unwrap();
+        let mut causes=alignment["predecessors"].as_array().unwrap().iter().filter(|p|p["relation"]=="credit").map(|p|{
+            let a=rows.iter().find(|a|a["activity_id"]==p["activity_id"]).unwrap();
+            assert_eq!(a["kind"],"service");
+            assert_eq!(a["end_ps"],release);
+            assert!(a["completion_ordinal"].as_u64().unwrap()<cursor);
+            (a["job_id"].as_str().unwrap(),a["subphase"].as_str().unwrap(),a["completion_ordinal"].as_u64().unwrap())
+        }).collect::<Vec<_>>();causes.sort();assert_eq!(causes,expected);
+    }
+}
+#[test]
+fn proposed_stage2_cc0_retains_all_observed_same_instant_releases() {
+    stage2_mixed_causes(include_str!("../testdata/synthetic-stage2-cc0-v3.json"),60000);
+}
+#[test]
+fn proposed_stage2_gapped_cc_retains_all_observed_same_instant_releases() {
+    stage2_mixed_causes(include_str!("../testdata/synthetic-stage2-cc-v3.json"),86000);
+}
+#[test]
+fn proposed_stage2_sr_waits_for_own_engine_inline_release() {
+    let r=stage2_result(include_str!("../testdata/synthetic-stage2-sr-v3.json"));
+    let opportunities=r["observations"]["reservation_opportunities"]["records"].as_array().unwrap();
+    let early=opportunities.iter().find(|o|o["event_cursor"]==52).unwrap();
+    assert_eq!(early["t_ps"],86000);assert_eq!(early["granted_request_ids"],json!([]));
+    let grant=opportunities.iter().find(|o|o["event_cursor"]==54).unwrap();
+    assert_eq!(grant["t_ps"],86000);assert_eq!(grant["granted_request_ids"],json!(["r02.00"]));
+    let rows=r["observations"]["activities"]["records"].as_array().unwrap();
+    let alignment=rows.iter().find(|a|a["request_id"]=="r02.00" && a["subphase"]=="dma_issue" && a["kind"]=="alignment").unwrap();
+    let causes=alignment["predecessors"].as_array().unwrap().iter().filter(|p|p["relation"]=="credit").collect::<Vec<_>>();assert_eq!(causes.len(),1);
+    let cause=rows.iter().find(|a|a["activity_id"]==causes[0]["activity_id"]).unwrap();
+    assert_eq!((cause["job_id"].as_str(),cause["subphase"].as_str(),cause["completion_ordinal"].as_u64()),(Some("r00"),Some("ack"),Some(53)));
+    assert_eq!(cause["kind"],"service");assert_eq!(cause["end_ps"],86000);
+}
+''')
+s=Path('/tmp/u4-issue-order-native/format.py').read_text().replace('/tmp/u4-issue-order-native','/tmp/u4-issue-stage2-native');(r/'format.py').write_text(s)

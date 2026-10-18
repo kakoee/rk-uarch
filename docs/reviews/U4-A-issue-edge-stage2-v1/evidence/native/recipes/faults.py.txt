@@ -1,0 +1,17 @@
+from pathlib import Path
+import shutil,subprocess,os,json,hashlib
+r=Path('/tmp/u4-issue-stage2-native');f=r/'fault-source';f.mkdir();shutil.copytree(r/'source/native',f/'native');p=f/'native/crates/uarch-engine/src/component.rs';baseline=p.read_text();records=[]
+def run(name,args):return subprocess.run(['python3',str(r/'run.py'),name,*args],env=dict(os.environ,COMPONENT_PRIVATE_SOURCE=str(f)),stdout=subprocess.DEVNULL).returncode
+needle='x.issue.is_some_and(|t| t < self.now) && x.end == Some(self.now)'
+faults=[('a2-only-since-previous-opportunity',needle,needle+' && x.activities.last().is_some_and(|&a| self.activities[a].completion >= self.reservation_opportunities.iter().rev().nth(1).map_or(0, |o| o.event_cursor))'),('include-not-yet-terminal-release',needle,'x.issue.is_some_and(|t| t < self.now) && x.end.is_none_or(|t|t==self.now)')]
+for name,old,new in faults:
+ assert old in baseline;p.write_text(baseline.replace(old,new,1));assert run(name+'-clean',['cargo','clean','-p','uarch-engine','--target-dir','/target/stage2-fault'])==0
+ args=['cargo','test','--offline','--locked','--target-dir','/target/stage2-fault','-p','uarch-engine','--lib','proposed_stage2','--','--nocapture']
+ killed=run('fault-'+name,args);assert killed==101
+ assert 'Compiling uarch-engine' in (r/f'evidence/logs/fault-{name}.stderr').read_text();mutated=hashlib.sha256(p.read_bytes()).hexdigest();p.write_text(baseline)
+ assert run(name+'-restore-clean',['cargo','clean','-p','uarch-engine','--target-dir','/target/stage2-fault'])==0
+ restored=run('restored-'+name,args);assert restored==0
+ assert 'Compiling uarch-engine' in (r/f'evidence/logs/restored-{name}.stderr').read_text()
+ records.append(dict(fault=name,fault_exit=killed,restored_exit=restored,mutated_sha256=mutated,baseline_sha256=hashlib.sha256(baseline.encode()).hexdigest(),restored_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),verified_recompilation=True))
+ print(name,killed,restored,flush=True)
+(r/'evidence/faults.json').write_text(json.dumps(records,indent=2)+'\n')

@@ -1,0 +1,120 @@
+FFFFFF                                                                   [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 24, "sample": {"uarch_contract.mapped": "/tmp/u4-issue-stage2-contract/source/contract/uarch_contract/mapped.py", "uarch_contract.mapped_issue": "/tmp/u4-issue-stage2-contract/source/contract/uarch_contract/mapped_issue.py"}}
+
+=================================== FAILURES ===================================
+____________ test_mixed_release_a1_includes_all_pre_cursor_releases ____________
+
+    def test_mixed_release_a1_includes_all_pre_cursor_releases():
+>       validate(mixed())
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+values = ({'r00': namespace(request_id='r00', job_id='r00', dma_engine_id=0, reservation_ps=0, issue_ps=0, complete_ps=60000), ...), 'r03': namespace(activity_id='r03.terminal', completion_ordinal=95)}, {'r00': 0, 'r01': 0, 'r02': 52, 'r03': 56}, 2)
+
+    def validate(values):
+        fn = getattr(checks, "validate_credit_causes", None)
+>       assert fn is not None, "missing structural per-opportunity a1 law"
+E       AssertionError: missing structural per-opportunity a1 law
+E       assert None is not None
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:32: AssertionError
+________ test_a7_later_release_before_alignment_still_after_reservation ________
+
+    def test_a7_later_release_before_alignment_still_after_reservation():
+        values = mixed()
+        values[3]["r01"].completion_ordinal = 53
+        values[2]["r02"].predecessors.append(Row(activity_id="r01.terminal", relation="credit"))
+        with pytest.raises(ValueError, match="credit predecessor before reservation opportunity"):
+>           validate(values)
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+values = ({'r00': namespace(request_id='r00', job_id='r00', dma_engine_id=0, reservation_ps=0, issue_ps=0, complete_ps=60000), ...), 'r03': namespace(activity_id='r03.terminal', completion_ordinal=95)}, {'r00': 0, 'r01': 0, 'r02': 52, 'r03': 56}, 2)
+
+    def validate(values):
+        fn = getattr(checks, "validate_credit_causes", None)
+>       assert fn is not None, "missing structural per-opportunity a1 law"
+E       AssertionError: missing structural per-opportunity a1 law
+E       assert None is not None
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:32: AssertionError
+___________ test_later_opportunity_retains_earlier_same_time_release ___________
+
+    def test_later_opportunity_retains_earlier_same_time_release():
+        values = mixed()
+        values[2]["r03"].predecessors = [Row(activity_id="r01.terminal", relation="credit")]
+        with pytest.raises(ValueError, match="exact per-opportunity credit causes"):
+>           validate(values)
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+values = ({'r00': namespace(request_id='r00', job_id='r00', dma_engine_id=0, reservation_ps=0, issue_ps=0, complete_ps=60000), ...), 'r03': namespace(activity_id='r03.terminal', completion_ordinal=95)}, {'r00': 0, 'r01': 0, 'r02': 52, 'r03': 56}, 2)
+
+    def validate(values):
+        fn = getattr(checks, "validate_credit_causes", None)
+>       assert fn is not None, "missing structural per-opportunity a1 law"
+E       AssertionError: missing structural per-opportunity a1 law
+E       assert None is not None
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:32: AssertionError
+______________ test_equal_readiness_still_excludes_credit_causes _______________
+
+    def test_equal_readiness_still_excludes_credit_causes():
+        values = mixed()
+        values[1]["r02"].ready_ps = 60000
+        values[2]["r02"].predecessors = []
+>       validate(values)
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+values = ({'r00': namespace(request_id='r00', job_id='r00', dma_engine_id=0, reservation_ps=0, issue_ps=0, complete_ps=60000), ...), 'r03': namespace(activity_id='r03.terminal', completion_ordinal=95)}, {'r00': 0, 'r01': 0, 'r02': 52, 'r03': 56}, 2)
+
+    def validate(values):
+        fn = getattr(checks, "validate_credit_causes", None)
+>       assert fn is not None, "missing structural per-opportunity a1 law"
+E       AssertionError: missing structural per-opportunity a1 law
+E       assert None is not None
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:32: AssertionError
+___________________ test_prior_saturation_is_still_required ____________________
+
+    def test_prior_saturation_is_still_required():
+        values = list(mixed())
+        values[5] = 3
+        values[2]["r02"].predecessors = []
+        values[2]["r03"].predecessors = []
+>       validate(values)
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+values = [{'r00': namespace(request_id='r00', job_id='r00', dma_engine_id=0, reservation_ps=0, issue_ps=0, complete_ps=60000), ...), 'r03': namespace(activity_id='r03.terminal', completion_ordinal=95)}, {'r00': 0, 'r01': 0, 'r02': 52, 'r03': 56}, 3]
+
+    def validate(values):
+        fn = getattr(checks, "validate_credit_causes", None)
+>       assert fn is not None, "missing structural per-opportunity a1 law"
+E       AssertionError: missing structural per-opportunity a1 law
+E       assert None is not None
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:32: AssertionError
+______ test_structural_capacity_uses_release_ordinal_not_equal_timestamp _______
+
+    def test_structural_capacity_uses_release_ordinal_not_equal_timestamp():
+        fn = getattr(checks, "validate_reservation_capacity", None)
+>       assert fn is not None, "missing structural cursor capacity join"
+E       AssertionError: missing structural cursor capacity join
+E       assert None is not None
+
+contract/tests/mapped/test_component_credit_cursor_v3.py:83: AssertionError
+=========================== short test summary info ============================
+FAILED contract/tests/mapped/test_component_credit_cursor_v3.py::test_mixed_release_a1_includes_all_pre_cursor_releases
+FAILED contract/tests/mapped/test_component_credit_cursor_v3.py::test_a7_later_release_before_alignment_still_after_reservation
+FAILED contract/tests/mapped/test_component_credit_cursor_v3.py::test_later_opportunity_retains_earlier_same_time_release
+FAILED contract/tests/mapped/test_component_credit_cursor_v3.py::test_equal_readiness_still_excludes_credit_causes
+FAILED contract/tests/mapped/test_component_credit_cursor_v3.py::test_prior_saturation_is_still_required
+FAILED contract/tests/mapped/test_component_credit_cursor_v3.py::test_structural_capacity_uses_release_ordinal_not_equal_timestamp
+6 failed in 0.43s

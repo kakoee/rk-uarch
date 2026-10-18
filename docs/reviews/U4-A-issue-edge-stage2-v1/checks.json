@@ -1,0 +1,43 @@
+{
+  "scope": "private affected checks only; final joined acceptance blocked",
+  "python": {
+    "receipts": "evidence/python-checks/receipts.json",
+    "test_first": [
+      "evidence/u4-issue-stage2-red.log",
+      "evidence/u4-issue-stage2-green.log",
+      "evidence/u4-issue-stage2-tests-red.py.txt"
+    ],
+    "initial_count": 35,
+    "joined_count": 44,
+    "distinct_tests": 59,
+    "joined_receipts": "evidence/joined-checks/receipts.json"
+  },
+  "native": {
+    "tests_per_mode": 15,
+    "modes": [
+      "debug",
+      "release"
+    ],
+    "mapped_processes": 6,
+    "report": "evidence/native/native-report.md"
+  },
+  "consumers": {
+    "receipt": "evidence/joined-checks/consumers.json",
+    "project_origins": "evidence/joined-checks/consumers.stdout",
+    "status": "both consumers accept six real outputs and refuse A7/A1; actual B joined review pending"
+  },
+  "faults": [
+    "evidence/consumers/credit-fault.json",
+    "evidence/consumers/capacity-fault.json",
+    "evidence/native/evidence/faults.json",
+    "../U4-B-issue-edge-stage2-v1/fault-restoration.json (exact B source inherited)"
+  ],
+  "unaffected": "Prior v2 campaigns and Stage1 /2 receipts inherited with original identities; not rerun",
+  "protected_installation": false,
+  "public_execution": false,
+  "F4": {
+    "fresh": "evidence/joined-checks/f4.json",
+    "inherited": "../U4-B-issue-edge-stage2-v1/first-use-controls.json at d17871c",
+    "scope": "matching v3 acceptance, wrong checker and wrong source refusal rerun; historical /2/A6c controls inherited"
+  }
+}

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/tmp/u4-issue-stage2-review/probes/runner.py", line 68, in <module>
+    runpy.run_path(rest[0], run_name="__main__")
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/tmp/u4-issue-stage2-consumers/fault_probe.py", line 5, in <module>
+    from uarch_contract.mapped_issue import validate_reservation_capacity
+  File "/tmp/u4-issue-stage2-contract/source/contract/uarch_contract/mapped_issue.py", line 191
+    True  # FAULT: omit only cursor capacity bound,
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax. Perhaps you forgot a comma?

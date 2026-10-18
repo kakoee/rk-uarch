@@ -1,0 +1,19 @@
+from pathlib import Path
+import json,hashlib,subprocess
+r=Path('/tmp/u4-issue-stage2-contract/source');p=r/'contract/uarch_contract/mapped_issue.py';baseline=p.read_bytes();out=Path('/tmp/u4-issue-stage2-consumers');records=[]
+py='/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python';runner='/tmp/u4-issue-stage2-review/probes/runner.py'
+def run(name):
+ result=out/(name+'.json');argv=[py,'-I',runner,str(r),'script',str(out/'fault_probe.py'),str(result)];proc=subprocess.run(argv,capture_output=True);(out/(name+'.stdout')).write_bytes(proc.stdout);(out/(name+'.stderr')).write_bytes(proc.stderr);assert proc.returncode==0,proc.stderr
+ data=json.loads(result.read_text());records.append(dict(name=name,argv=argv,exit_code=proc.returncode,source_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),observed=data));return data
+b=run('structural-baseline');assert all(b[k]['full_structural']=='pass' for k in ['cc0-v3','cc-v3','sr-v3']);assert 'credit predecessor before' in b['A7']['full_structural'];assert 'reservation cursor capacity' in b['A1']['full_structural']
+try:
+ s=baseline.decode();needle='and lasts[old.request_id].completion_ordinal < cursor';assert s.count(needle)==1;s=s.replace(needle,'');needle='key in terminals and terminals[key].completion_ordinal < cursor';assert s.count(needle)==1;s=s.replace(needle,'key in terminals');p.write_text(s)
+ f=run('without-both-a1-cursor-defenses');assert f['A7']['full_structural']=='pass';assert f['sr-v3']['full_structural']=='pass'
+finally:p.write_bytes(baseline)
+a=run('a1-exact-restored');assert a==b
+try:
+ s=baseline.decode();needle='sum(requests[key].dma_engine_id == engine for key in active) <= limit';assert s.count(needle)==1;p.write_text(s.replace(needle,'True  # FAULT: omit only cursor capacity bound'))
+ f=run('without-cursor-capacity');assert f['A1']['capacity_join_only']=='pass';assert f['sr-v3']['full_structural']=='pass';assert f['A1']['full_structural']!='pass'
+finally:p.write_bytes(baseline)
+a=run('capacity-exact-restored');assert a==b
+(out/'structural-faults.json').write_text(json.dumps(dict(records=records,exact_restoration=True,F1='two overlapping ordinal defenses removed together; A7 accepted',F3='isolated capacity join unsafe acceptance; full structural still refuses through F1'),indent=2)+'\n');print('F1 targeted defense group and F3 single capacity guard: discriminated; exact restoration passed')

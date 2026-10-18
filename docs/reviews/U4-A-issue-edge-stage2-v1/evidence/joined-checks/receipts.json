@@ -1,0 +1,54 @@
+[
+  {
+    "name": "consumers",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "/tmp/u4-issue-stage2-review/probes/runner.py",
+      "/tmp/u4-issue-stage2-joined-apply",
+      "script",
+      "/tmp/u4-stage2-joined-consumers.py",
+      "/tmp/u4-issue-stage2-joined-apply",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-issue-edge-stage2-v1",
+      "/tmp/u4-stage2-joined-checks/consumers.json"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "bfe183ccfaf163ebed4d08669d1c49111d34ad16bbf37df968ae62161c319dc3",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "affected",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "/tmp/u4-issue-stage2-review/probes/runner.py",
+      "/tmp/u4-issue-stage2-joined-apply",
+      "pytest",
+      "-q",
+      "validation/component/test_issue_checks.py",
+      "validation/component/test_installation_identity.py",
+      "--junitxml=/tmp/u4-stage2-joined-checks/affected.xml"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "c2bccc96db210762deff87f2fd79b68421aaf75d40ab7a72bb3c098d5bea8a22",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "f4",
+    "argv": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+      "-I",
+      "/tmp/u4-issue-stage2-review/probes/runner.py",
+      "/tmp/u4-issue-stage2-joined-apply",
+      "script",
+      "/tmp/u4-stage2-f4-join.py",
+      "/tmp/u4-issue-stage2-joined-apply",
+      "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/docs/reviews/U4-A-issue-edge-stage2-v1",
+      "/tmp/u4-stage2-joined-checks/f4.json"
+    ],
+    "cwd": "/tmp/u4-issue-stage2-joined-apply",
+    "exit_code": 0,
+    "stdout_sha256": "bfa236d1f5000145d7747c06cc74dd3722ef0e65a71592577ec23e2fa3e6535e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

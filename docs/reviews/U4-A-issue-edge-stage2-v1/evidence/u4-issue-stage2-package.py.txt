@@ -1,0 +1,40 @@
+from pathlib import Path
+import json,hashlib,subprocess,difflib,tarfile,io,shutil
+repo=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a');root=Path('/tmp/u4-issue-stage2-contract/source');native=Path('/tmp/u4-issue-stage2-native');old=repo/'docs/reviews/U4-A-issue-edge-amendment-v2';out=repo/'docs/reviews/U4-A-issue-edge-stage2-v1';(out/'patches').mkdir(exist_ok=True);h=lambda b:hashlib.sha256(b).hexdigest();base=subprocess.check_output(['git','rev-parse','c5e3116'],cwd=repo,text=True).strip();prev=json.loads((old/'manifest.json').read_text());nm=json.loads((native/'native-manifest.json').read_text());groups={}
+for row in prev['files']:
+ if row['patch']!='native.patch':groups.setdefault(row['patch'],[]).append(row['path'])
+groups['contract-and-export.patch'].append('contract/tests/mapped/test_component_credit_cursor_v3.py')
+m=dict(format='unapplied-component-issue-stage2-candidate/1',base_commit=base,approval_commit='7f88d7b524d8afd5968b61893c936516c723ff1a',prior_A='7d61d6a02644519d4a7b8b1ce9287e60cd03ca13',prior_B='cd0339bc50aee17d9f40e4748beca4af8f5ab814',decision='U4-issue-edge-credit-causes-a1-v1',state='BLOCKED: A private corrections frozen; B independent correction and exact joined-postimage review pending',public_authority=None,installation='UNAPPLIED',patches=[],files=[],pending_B=['F1 independently authored checker correction accepting cc0-v3/cc-v3 and refusing A7','F4 prospective model/observation/checker binding control and F2 restriction','final joined postimages, overlay and actual B review'])
+delta=''
+for patch,paths in groups.items():
+ text=''
+ for path in sorted(paths):
+  proc=subprocess.run(['git','show',base+':'+path],cwd=repo,capture_output=True);before=proc.stdout if proc.returncode==0 else None;after=(root/path).read_bytes()
+  text+=''.join(difflib.unified_diff((before or b'').decode().splitlines(True),after.decode().splitlines(True),fromfile='a/'+path if before is not None else '/dev/null',tofile='b/'+path))
+  m['files'].append(dict(path=path,patch=patch,preimage_sha256=h(before) if before is not None else None,postimage_sha256=h(after),status='B correction pending' if path in ['validation/component/issue_checks.py','validation/component/transition_checks_v3.py'] else 'A candidate or inherited exact postimage'))
+  previous=Path('/tmp/u4-issue-order-apply')/path;prior=previous.read_bytes() if previous.exists() else None
+  if prior!=after:delta+=''.join(difflib.unified_diff((prior or b'').decode().splitlines(True),after.decode().splitlines(True),fromfile='a/'+path if prior is not None else '/dev/null',tofile='b/'+path))
+ (out/'patches'/patch).write_text(text);m['patches'].append(dict(path='patches/'+patch,sha256=h(text.encode())))
+shutil.copyfile(native/'native.patch',out/'patches/native.patch');m['patches'].append(dict(path='patches/native.patch',sha256=h((native/'native.patch').read_bytes())))
+m['files'] += [dict(row,patch='native.patch',status='runtime inherited unchanged; test-only Stage2 additions') for row in nm['files']]
+# native worker file name below is the alternative test-only correction.
+nd=native/'native-stage2-delta.patch'
+if not nd.exists():nd=next(p for p in native.glob('*delta.patch'))
+delta+=nd.read_text();(out/'patches/alternative-delta-from-v2.patch').write_text(delta);m['alternative_delta']=dict(path='patches/alternative-delta-from-v2.patch',sha256=h(delta.encode()),base='exact assembled v2 proposal; alternative to full route')
+apply=Path('/tmp/u4-issue-stage2-apply');apply.mkdir(exist_ok=False)
+with tarfile.open(fileobj=io.BytesIO(subprocess.check_output(['git','archive',base],cwd=repo))) as tar:tar.extractall(apply,filter='data')
+for row in m['patches']:
+ subprocess.run(['git','apply','--check',str(out/row['path'])],cwd=apply,check=True);subprocess.run(['git','apply',str(out/row['path'])],cwd=apply,check=True)
+for row in m['files']:assert h((apply/row['path']).read_bytes())==row['postimage_sha256'],row['path']
+for row in reversed(m['patches']):subprocess.run(['git','apply','--reverse','--check',str(out/row['path'])],cwd=apply,check=True)
+alt=Path('/tmp/u4-issue-stage2-delta-apply');alt.mkdir(exist_ok=False)
+for row in prev['files']:
+ p=alt/row['path'];p.parent.mkdir(parents=True,exist_ok=True);raw=(Path('/tmp/u4-issue-order-apply')/row['path']).read_bytes();assert h(raw)==row['postimage_sha256'];p.write_bytes(raw)
+p=out/m['alternative_delta']['path'];subprocess.run(['git','apply','--check',str(p)],cwd=alt,check=True);subprocess.run(['git','apply',str(p)],cwd=alt,check=True)
+for row in m['files']:assert h((alt/row['path']).read_bytes())==row['postimage_sha256']
+subprocess.run(['git','apply','--reverse','--check',str(p)],cwd=alt,check=True)
+controls=prev['verification']['historical_controls']
+for row in controls:assert h((apply/row['path']).read_bytes())==row['sha256']
+support=json.loads((repo/'docs/reviews/U4-B-component-native-audit-v1/source-audit-final.json').read_text())['selected_support'];assert all(h((apply/path).read_bytes())==sha for path,sha in support.items())
+m['verification']=dict(full_apply_reverse_checks=True,alternative_apply_reverse_checks=True,matching_postimages=len(m['files']),private_full_export=str(apply),private_alternative_export=str(alt),historical_controls=controls,unchanged_selected_support_count=len(support))
+(out/'manifest.json').write_text(json.dumps(m,indent=2,sort_keys=True)+'\n');print('Frozen A-candidate',len(m['files']),'postimages; B correction/review BLOCKING')

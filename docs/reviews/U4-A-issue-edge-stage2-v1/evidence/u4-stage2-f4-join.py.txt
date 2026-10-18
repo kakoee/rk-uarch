@@ -1,0 +1,9 @@
+import json,hashlib,importlib.util,sys
+from pathlib import Path
+root,package,out=map(Path,sys.argv[1:]);recipe=root/'docs/reviews/U4-B-issue-edge-stage2-v1/first_use.py';spec=importlib.util.spec_from_file_location('prospective',recipe);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+pins={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for d in ['contract/uarch_contract','validation/component'] for p in (root/d).glob('*.py') if not p.name.startswith('test_')};expected=json.loads((root/'docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_bytes())['observation_contract'];j=json.loads((package/'private-probes/cc0-v3/job.json').read_bytes());r=json.loads((package/'private-probes/cc0-v3/debug.json').read_bytes());id3=module.ROUTES[('native-intervals','2')][1];id2=module.ROUTES[('native-intervals','1')][1]
+def result(fn):
+ try:fn();return 'pass'
+ except Exception as e:return type(e).__name__+': '+str(e)
+rows={'v3-combined':result(lambda:module.consume(j,r,id3,expected,root,pins)),'v3-wrong-checker':result(lambda:module.consume(j,r,id2,expected,root,pins))};wrong=dict(pins);wrong['validation/component/issue_checks.py']='0'*64;rows['wrong-checker-bytes']=result(lambda:module.consume(j,r,id3,expected,root,wrong));assert rows['v3-combined']=='pass';assert rows['v3-wrong-checker']=='ValueError: prospective model / observation format / independent checker mismatch';assert rows['wrong-checker-bytes']=='ValueError: prospective consumer source identity mismatch: validation/component/issue_checks.py'
+out.write_text(json.dumps(dict(recipe_sha256=hashlib.sha256(recipe.read_bytes()).hexdigest(),closure=pins,cases=rows,inherited='B d17871c first-use-controls: valid-v2, A6c, F2-original unchanged; not reexecuted here'),indent=2)+'\n');print(json.dumps(rows,indent=2))

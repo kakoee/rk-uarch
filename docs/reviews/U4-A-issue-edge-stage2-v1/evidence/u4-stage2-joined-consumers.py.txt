@@ -1,0 +1,32 @@
+import json, hashlib, sys
+from pathlib import Path
+from uarch_contract.mapped import MappedEngineJob, validate_result
+from validation.component.observations_v3 import check_v3
+root, package, dest = map(Path, sys.argv[1:])
+sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+manifest = json.loads((package/'manifest.json').read_bytes())
+for row in manifest['files']:
+    assert sha(root/row['path']) == row['postimage_sha256'], row['path']
+expected = json.loads((root/'docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_bytes())['observation_contract']
+rows = []
+for case, mode in [(c,m) for c in ['cc0-v3','cc-v3','sr-v3'] for m in ['debug','release']] + [('A7','forgery'),('A1','forgery')]:
+    jobcase = {'A7':'cc0-v3','A1':'sr-v3'}.get(case,case)
+    jp = package/'private-probes'/jobcase/'job.json'
+    rp = package/'private-probes'/(case+'.json') if mode == 'forgery' else package/'private-probes'/case/(mode+'.json')
+    j,r = json.loads(jp.read_bytes()), json.loads(rp.read_bytes())
+    row = dict(case=case,mode=mode,input_sha256=sha(jp),result_sha256=sha(rp))
+    for name,fn in [('structural',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('independent',lambda:check_v3(j,r,expected))]:
+        try: fn(); row[name]='pass'
+        except Exception as error: row[name]=type(error).__name__+': '+str(error)
+    if case == 'A7':
+        assert row['structural']=='ValueError: AttributionMismatch: credit predecessor before reservation opportunity'
+        assert row['independent']=='CheckFailure: complete eligible causes'
+    elif case == 'A1':
+        assert row['structural']=='ValueError: IncompleteObservations: reservation cursor capacity'
+        assert row['independent']=='CheckFailure: opportunity eligible grants / ready tie'
+    else:
+        assert row['structural']=='pass'
+        assert row['independent']=='pass'
+    rows.append(row)
+dest.write_text(json.dumps(dict(scope='Combined A/B consumer verification; actual B final joined review pending',source_postimages_verified=26,rows=rows),indent=2)+'\n')
+print(json.dumps(rows,indent=2))

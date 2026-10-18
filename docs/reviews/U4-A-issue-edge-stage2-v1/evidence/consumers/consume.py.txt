@@ -1,0 +1,12 @@
+import json,hashlib,sys
+from pathlib import Path
+from uarch_contract.mapped import MappedEngineJob,validate_result
+from validation.component.observations_v3 import check_v3
+root=Path(sys.argv[1]);out=Path(sys.argv[2]);n=Path('/tmp/u4-issue-stage2-native');e=Path('/tmp/u4-issue-stage2-consumers');expected=json.loads((root/'docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json').read_bytes())['observation_contract'];rows=[]
+for name in ['cc0-v3','cc-v3','sr-v3','A7','A1']:
+ case={'A7':'cc0-v3','A1':'sr-v3'}.get(name,name);jpath=n/'inputs'/(case+'.json');rpath=e/(name+'.json') if name.startswith('A') else n/'evidence/target'/(case+'-debug.json');j=json.loads(jpath.read_bytes());r=json.loads(rpath.read_bytes());row=dict(case=name,input_sha256=hashlib.sha256(jpath.read_bytes()).hexdigest(),output_sha256=hashlib.sha256(rpath.read_bytes()).hexdigest())
+ for label,fn in [('structural',lambda:validate_result(r,MappedEngineJob.model_validate(j))),('independent',lambda:check_v3(j,r,expected))]:
+  try:fn();row[label]='pass'
+  except Exception as error:row[label]=type(error).__name__+': '+str(error)
+ rows.append(row)
+out.write_text(json.dumps(rows,indent=2)+'\n');print(json.dumps(rows,indent=2))

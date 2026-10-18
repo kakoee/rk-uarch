@@ -1,0 +1,105 @@
+{
+  "records": [
+    {
+      "name": "capacity-baseline-2",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "/tmp/u4-issue-stage2-review/probes/runner.py",
+        "/tmp/u4-issue-stage2-contract/source",
+        "script",
+        "/tmp/u4-issue-stage2-consumers/fault_probe.py",
+        "/tmp/u4-issue-stage2-consumers/capacity-baseline-2.json"
+      ],
+      "exit_code": 0,
+      "source_sha256": "b645aa77fe4e3ed35b8bf05bcc747e211b4ff9436a4ee2518569bb837c848afa",
+      "observed": {
+        "cc0-v3": {
+          "full_structural": "pass"
+        },
+        "cc-v3": {
+          "full_structural": "pass"
+        },
+        "sr-v3": {
+          "full_structural": "pass",
+          "capacity_join_only": "pass"
+        },
+        "A7": {
+          "full_structural": "AttributionMismatch: credit predecessor before reservation opportunity"
+        },
+        "A1": {
+          "full_structural": "IncompleteObservations: reservation cursor capacity",
+          "capacity_join_only": "IncompleteObservations: reservation cursor capacity"
+        }
+      }
+    },
+    {
+      "name": "without-cursor-capacity-2",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "/tmp/u4-issue-stage2-review/probes/runner.py",
+        "/tmp/u4-issue-stage2-contract/source",
+        "script",
+        "/tmp/u4-issue-stage2-consumers/fault_probe.py",
+        "/tmp/u4-issue-stage2-consumers/without-cursor-capacity-2.json"
+      ],
+      "exit_code": 0,
+      "source_sha256": "d7729450727046bdd8799661745647b273ace6ec9b172ce4e47520252e9ec4c5",
+      "observed": {
+        "cc0-v3": {
+          "full_structural": "pass"
+        },
+        "cc-v3": {
+          "full_structural": "pass"
+        },
+        "sr-v3": {
+          "full_structural": "pass",
+          "capacity_join_only": "pass"
+        },
+        "A7": {
+          "full_structural": "AttributionMismatch: credit predecessor before reservation opportunity"
+        },
+        "A1": {
+          "full_structural": "AttributionMismatch: credit predecessor before reservation opportunity",
+          "capacity_join_only": "pass"
+        }
+      }
+    },
+    {
+      "name": "capacity-exact-restored-2",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch-u4-a/.venv/bin/python",
+        "-I",
+        "/tmp/u4-issue-stage2-review/probes/runner.py",
+        "/tmp/u4-issue-stage2-contract/source",
+        "script",
+        "/tmp/u4-issue-stage2-consumers/fault_probe.py",
+        "/tmp/u4-issue-stage2-consumers/capacity-exact-restored-2.json"
+      ],
+      "exit_code": 0,
+      "source_sha256": "b645aa77fe4e3ed35b8bf05bcc747e211b4ff9436a4ee2518569bb837c848afa",
+      "observed": {
+        "cc0-v3": {
+          "full_structural": "pass"
+        },
+        "cc-v3": {
+          "full_structural": "pass"
+        },
+        "sr-v3": {
+          "full_structural": "pass",
+          "capacity_join_only": "pass"
+        },
+        "A7": {
+          "full_structural": "AttributionMismatch: credit predecessor before reservation opportunity"
+        },
+        "A1": {
+          "full_structural": "IncompleteObservations: reservation cursor capacity",
+          "capacity_join_only": "IncompleteObservations: reservation cursor capacity"
+        }
+      }
+    }
+  ],
+  "exact_restoration": true,
+  "scope": "isolated capacity join unsafe acceptance; full structural still refuses through F1"
+}
