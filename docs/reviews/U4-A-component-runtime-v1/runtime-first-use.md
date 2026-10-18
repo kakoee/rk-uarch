@@ -69,7 +69,7 @@ positive control of one entry; it is neither a production observation nor a timi
 
 ## D3 remains unapplied
 
-`proposals/D3-unapplied.patch` adds a separate refusal-only module. A distinct fixed
+`proposals/D3-v3-unapplied.patch` adds a separate refusal-only module. A distinct fixed
 negative selector, exact negative decision/review and immutable inventory are required;
 positive authority alone is insufficient. The only caller argument is a finite case ID.
 Raw bytes, profiles, expected code/pointer and executable come from the independently

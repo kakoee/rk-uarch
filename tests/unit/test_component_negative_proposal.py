@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @pytest.fixture
 def proposal(tmp_path):
-    source = ROOT / "docs/reviews/U4-A-component-runtime-v1/proposals/component_negative-v2.py.txt"
+    source = ROOT / "docs/reviews/U4-A-component-runtime-v1/proposals/component_negative-v3.py.txt"
     exported = tmp_path / "component_negative.py"
     exported.write_bytes(source.read_bytes())
     name = "private_negative_proposal"
