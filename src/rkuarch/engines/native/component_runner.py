@@ -10,7 +10,7 @@ from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, ProfileEn
 
 from .component_host import ComponentSession, _PreparedComponent, loads_runtime_job
 from .component_records import CHECKER, OBSERVATIONS
-from .host import _read
+from .host import _read, _require
 from .runner import (
     REFUSAL_CODES,
     Limits,
@@ -56,6 +56,16 @@ def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str,
     except (ValueError, TypeError, UnicodeError, OverflowError) as error:
         raise ProtocolViolation("invalid complete canonical component envelope") from error
     return value
+
+
+def require_negative_envelope(
+    stdout: bytes, stderr: bytes, status: int, expected: dict[str, Any]
+) -> dict[str, Any]:
+    """Exact finite expectation from independent inventory; not a native-site proof."""
+    _require(status == 2, "exact negative envelope requires status2")
+    error = _decode_envelope(stdout, stderr, status)
+    _require(error == expected, "exact negative envelope mismatch")
+    return error
 
 
 def require_route(job: dict[str, Any], result: dict[str, Any]) -> None:
@@ -114,6 +124,19 @@ def _consume(
     prepared: _PreparedComponent, request: dict[str, Any], stdout: bytes, stderr: bytes, status: int
 ) -> MappedEngineResult:
     prepared.refresh()
+    # This is a consumer-layer check, independent of _request/prepared.job.
+    selected = next(
+        (item for item in prepared.payload.jobs if item.case_id == request["admission"]["case_id"]),
+        None,
+    )
+    _require(selected is not None, "consumer selected case")
+    _require(
+        request["engine"] == prepared.payload.engine.model_dump(mode="json"),
+        "consumer expected engine",
+    )
+    raw = canonical_json(request).encode()
+    assert selected is not None
+    _require(sha256(raw) == selected.file.byte_hash, "consumer selected raw bytes")
     expected = strict_json_loads(
         _read(prepared.root, prepared.payload.consumers.observation_contract)
     )
@@ -122,7 +145,6 @@ def _consume(
     )
     from validation.component.runtime_checks import consume_case
 
-    raw = canonical_json(request).encode()
     consume_case(
         request,
         result.model_dump(mode="json"),
@@ -131,8 +153,14 @@ def _consume(
         source=Path(prepared.payload.consumers.import_root),
         pins=prepared.consumer_pins,
         expected=expected,
-        input_sha256=sha256(raw).split(":")[1],
+        input_sha256=selected.file.byte_hash.split(":")[1],
         raw_input=raw,
+        admitted={
+            "case_id": selected.case_id,
+            "raw_input_sha256": selected.file.byte_hash.split(":")[1],
+            "job_hash": selected.job_hash,
+            "engine": prepared.payload.engine.model_dump(mode="json"),
+        },
     )
     prepared.refresh()
     return result

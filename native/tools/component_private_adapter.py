@@ -8,18 +8,17 @@ No selector, HostRecord, real authority, public replay or caller-supplied raw in
 from __future__ import annotations
 
 import json
-import os
-import shlex
 from pathlib import Path
 from typing import Any
 
 from uarch_contract.hashing import sha256, strict_json_loads
 
+from native.tools.component_container_guard import cleanup as cleanup_containers
+from native.tools.component_container_guard import run_container
 from rkuarch.engines.native.component_host import _prepare_payload
-from rkuarch.engines.native.component_runner import _consume, _decode_envelope
+from rkuarch.engines.native.component_runner import _consume, require_negative_envelope
 from rkuarch.engines.native.host import _read, _require
 from rkuarch.engines.native.records import FileBinding
-from rkuarch.engines.native.runner import Limits, _exchange
 
 IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
 TEST = "protocol::component_runtime_tests::private_selected_transport_probe"
@@ -29,6 +28,24 @@ def _bytes(path: Path, cap: int) -> bytes:
     with path.open("rb") as stream:
         raw = stream.read(cap + 1)
     _require(len(raw) <= cap, "private probe output limit")
+    return raw
+
+
+def saved_input(
+    root: Path, binding: FileBinding, initial: dict[str, Any] | None, cap: int
+) -> bytes:
+    """Replay reads B's retained bytes; identity comes from A's admitted inventory."""
+    if initial is None:
+        raw = _read(root, binding)
+    else:
+        _require(
+            initial["raw_input_sha256"] == binding.byte_hash.split(":")[1],
+            "durable replay inventory digest",
+        )
+        raw = _bytes(Path(initial["saved_input_path"]), cap)
+    _require(
+        len(raw) <= cap and sha256(raw) == binding.byte_hash, "private independent raw inventory"
+    )
     return raw
 
 
@@ -45,6 +62,8 @@ class PrivateAdapter:
         )
         self.output = output.resolve()
         self.output.mkdir(exist_ok=False)
+        self.container_scope = self.output / "containers"
+        self.container_scope.mkdir()
         payload = self.root / "private-component/prospective-payload.json"
         self.binding = FileBinding(
             path=str(payload.relative_to(self.root)), byte_hash=sha256(payload.read_bytes())
@@ -78,6 +97,12 @@ class PrivateAdapter:
                 (self.root / "private-component/negative-inventory.json").read_bytes()
             )["cases"]
         }
+        self.negative_expectations = {
+            r["case_id"]: r
+            for r in strict_json_loads(
+                (self.root / "private-component/negative-expectations.json").read_bytes()
+            )["rows"]
+        }
         self.slots: list[dict[str, Any]] = []
         self.files = {}
         for prepared in self.prepared.values():
@@ -91,6 +116,7 @@ class PrivateAdapter:
             "affected-selection.json",
             "job-transitions.json",
             "negative-inventory.json",
+            "negative-expectations.json",
         ):
             path = self.root / "private-component" / name
             self.files[str(path)] = sha256(path.read_bytes()).split(":")[1]
@@ -108,6 +134,11 @@ class PrivateAdapter:
                 _read(self.root, profile)
                 self.files[str(self.root / profile.path)] = profile.byte_hash.split(":")[1]
         self._refresh()
+
+    def cleanup(self) -> dict[str, Any]:
+        """B parent calls after stopping/joining workers, including failed campaigns."""
+        receipts = cleanup_containers(self.container_scope)
+        return {"verified_stopped": True, "outstanding": [], "containers": receipts}
 
     def _refresh(self) -> None:
         for path, wanted in self.files.items():
@@ -163,7 +194,14 @@ class PrivateAdapter:
             and slot["repetition"] in (0, 1, 2),
             "private finite slot required",
         )
-        raw = _read(self.root, FileBinding.model_validate(self.transitions[name]["file"]))
+        admitted_file = FileBinding.model_validate(self.transitions[name]["file"])
+        if slot["phase"] == "replay":
+            _require(initial is not None, "durable initial receipt required for replay")
+        else:
+            _require(initial is None, "initial call cannot supply replay descriptor")
+        raw = saved_input(
+            self.root, admitted_file, initial, self.prepared[mode].payload.budget.stdin_bytes
+        )
         job = strict_json_loads(raw)
         _require(
             job["profile"] == row["profile"]
@@ -171,18 +209,22 @@ class PrivateAdapter:
             "independent private job/profile/engine promise",
         )
         if name in self.negatives:
+            expected_negative = self.negative_expectations[name]
+            _require(
+                expected_negative["input_sha256"] == admitted_file.byte_hash.split(":")[1]
+                and expected_negative["job_hash"] == job["job_hash"]
+                and expected_negative["engine"] == job["engine"],
+                "private negative expectation input/engine join",
+            )
+            guard = expected_negative["native_guard_source"]
+            _require(
+                sha256((self.root / guard["path"]).read_bytes()).split(":")[1] == guard["sha256"],
+                "private negative guard source",
+            )
             profile = FileBinding.model_validate(self.negatives[name]["profile"])
             _require(
                 job["profile"] == strict_json_loads(_read(self.root, profile)),
                 "independent negative profile file",
-            )
-        if slot["phase"] == "replay":
-            _require(
-                initial is not None
-                and initial["outcome"] == "success"
-                and initial["raw_input_sha256"] == sha256(raw).split(":")[1]
-                and initial["execution_binding"] == self.binding.byte_hash,
-                "private successful receipt required for replay",
             )
         # Explicit saved-input producer disable; no producer module is needed to consume it.
         import rkuarch.workload.mapped as producer
@@ -199,19 +241,7 @@ class PrivateAdapter:
         outputs.mkdir()
         (inputs / "case.json").write_bytes(raw)
         exe = Path(self.summary["modes"][mode]["test_executable"])
-        (run / "docker-config").mkdir()
         argv = [
-            "/usr/bin/docker",
-            "--config",
-            str(run / "docker-config"),
-            "--host",
-            "unix:///var/run/docker.sock",
-            "run",
-            "--rm",
-            "--pull",
-            "never",
-            "--cidfile",
-            str(run / "container.id"),
             "--network",
             "none",
             "--read-only",
@@ -249,16 +279,19 @@ class PrivateAdapter:
             "--exact",
             "--nocapture",
         ]
-        shell = run / "bounded-probe.sh"
-        shell.write_text("#!/bin/sh\nexec " + shlex.join(argv) + "\n")
-        shell.chmod(0o555)
-        fd = os.open(shell, os.O_RDONLY)
-        try:
-            stdout, stderr, status = _exchange(fd, b"", Limits(30, 1, 1024 * 1024, 1024 * 1024))
-        finally:
-            os.close(fd)
+        cleanup_receipt = run_container(
+            self.container_scope / f"{slot['ordinal']:05d}",
+            argv,
+            timeout=policy["per_call_seconds"],
+            cap=1024 * 1024,
+        )
+        container_run = self.container_scope / f"{slot['ordinal']:05d}"
+        stdout = _bytes(container_run / "stdout", 1024 * 1024)
+        stderr = _bytes(container_run / "stderr", 1024 * 1024)
+        status = cleanup_receipt["exit_code"]
         (run / "harness.stdout").write_bytes(stdout)
         (run / "harness.stderr").write_bytes(stderr)
+        _require(cleanup_receipt["reason"] == "completed", "private container incomplete")
         _require(status == 0 and b"1 passed" in stdout, "private unit process failed")
         value = _bytes(outputs / "result/case.json", 64 * 1024**2)
         semantic = int(_bytes(outputs / "result/case.status", 16))
@@ -269,17 +302,13 @@ class PrivateAdapter:
             _consume(self.prepared[mode], json.loads(raw), value, b"", 0)
             outcome = "success"
         else:
-            error = _decode_envelope(result_stdout, result_stderr, semantic)
-            _require(
-                semantic == 2
-                and entries == 0
-                and error["code"] == row["expected_code"]
-                and error["pointer"] == self.negatives[name]["expected_pointer"],
-                "private exact refusal and zero runtime entry",
+            error = require_negative_envelope(
+                result_stdout, result_stderr, semantic, self.negative_expectations[name]["envelope"]
             )
+            _require(entries == 0, "private negative zero runtime entry")
             outcome = error["code"]
         self._refresh()
-        container = (run / "container.id").read_text().strip()
+        container = cleanup_receipt["container_id"]
         _require(
             len(container) == 64 and all(c in "0123456789abcdef" for c in container),
             "actual private container identity required",
@@ -296,14 +325,32 @@ class PrivateAdapter:
             "evidence": "cfg(test) file-probe; synthetic anchors",
         }
         (run / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+        witness = {
+            "case_id": name,
+            "mode": mode,
+            "raw_input_sha256": sha256(raw).split(":")[1],
+            "semantic_output_sha256": sha256(value).split(":")[1],
+            "executable_sha256": self.summary["modes"][mode]["test_executable_byte_hash"].split(
+                ":"
+            )[1],
+            "process_identity": "docker:" + container + ":pid1",
+            "runtime_entries": entries,
+            "transport_complete": True,
+            "evidence": "cfg(test) file-probe; synthetic anchors",
+        }
+        (run / "witness.json").write_text(json.dumps(witness, indent=2) + "\n")
         return {
             "raw_input": raw,
             "stdout": result_stdout,
             "stderr": result_stderr,
             "process_identity": "docker:" + container + ":pid1",
-            "checked": True,
             "outcome": outcome,
-            "producers_disabled": True,
-            "expected_pointer_verified": semantic == 2,
-            "zero_dispatch_evidence": str(run / "receipt.json") if semantic == 2 else None,
+            "status": semantic,
+            "witness": witness,
+            "cleanup": {
+                **cleanup_receipt,
+                "verified_stopped": cleanup_receipt["stopped"] and cleanup_receipt["removed"],
+                "process_identity": "docker:" + container + ":pid1",
+            },
+            "evidence_path": str(run / "receipt.json"),
         }

@@ -143,7 +143,10 @@ class ComponentHostRecord(FrozenModel):
 class ComponentHostSelector(FrozenModel):
     format: Literal["uarch-component-host-selector/1"]
     repository: NonEmpty
-    acceptance_commit: GitCommit
+    acceptance_commit: GitCommit = Field(
+        description="Non-authorizing historical metadata; not verified Git provenance. "
+        "Authority requires the separately bound decision/review/record chain."
+    )
     record_path: NonEmpty
     record_byte_hash: Hash
 

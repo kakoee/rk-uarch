@@ -87,7 +87,7 @@ def test_saved_result_core_uses_both_consumers_and_no_producers(monkeypatch):
 
 
 @pytest.fixture
-def prepared_payload(tmp_path):
+def prepared_payload(tmp_path, request):
     """Synthetic record graph + shell echo executable. Not a native build or authority."""
     import importlib.util
     import shutil
@@ -124,7 +124,7 @@ def prepared_payload(tmp_path):
     selection = put(
         "selection.json",
         {
-            "format": "B-component-prospective-v3-selection/1",
+            "format": getattr(request, "param", "B-component-prospective-v3-selection/2"),
             "model": ["native-intervals", "2"],
             "observations": "uarch-native-observations/3",
             "checker": "validation.component.observations_v3:check_v3",
@@ -479,10 +479,14 @@ def test_component_envelope_keeps_strict_framing(stdout, stderr, status):
 def test_current_independent_binding_is_prepared(prepared_payload):
     root, binding, payload, _ = prepared_payload
     assert payload["consumers"]["independent_binding"]["path"] == (
-        "docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json"
+        "docs/reviews/U4-A-component-runtime-stage2-v1/prospective-consumer-bindings-v1.json"
     )
     prepared = component_host._prepare_payload(root, binding, mode="debug")
-    assert len(prepared.consumer_pins) == 51
+    assert {
+        "src/rkuarch/engines/native/component_runner.py",
+        "validation/component/runtime_evidence.py",
+        "validation/component/matrix_order.py",
+    } <= set(prepared.consumer_pins)
     prepared.refresh()
 
 
@@ -494,8 +498,10 @@ def test_changed_independent_binding_refuses_current_source(prepared_payload, ki
     root, _, payload, put = prepared_payload
     if kind == "stale":
         pinned = json.loads(
-            (ROOT / "docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json")
-            .read_bytes()
+            (
+                ROOT
+                / "docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json"
+            ).read_bytes()
         )
     else:
         path = root / payload["consumers"]["independent_binding"]["path"]
@@ -503,7 +509,57 @@ def test_changed_independent_binding_refuses_current_source(prepared_payload, ki
         pinned["files"]["validation/component/runtime_checks.py"] = "0" * 64
     payload["consumers"]["independent_binding"] = put("changed-consumer.json", pinned)
     binding = FileBinding.model_validate(put("changed-binding-payload.json", payload))
-    with pytest.raises(
-        CheckFailure, match="consumer source mismatch: validation/component/runtime_checks.py"
-    ):
+    message = (
+        "complete matching consumer/structural closure required"
+        if kind == "stale"
+        else "consumer source mismatch: validation/component/runtime_checks.py"
+    )
+    with pytest.raises(CheckFailure, match=message):
         component_host._prepare_payload(root, binding, mode="debug")
+
+
+@pytest.mark.parametrize(
+    "prepared_payload", ["B-component-prospective-v3-selection/1"], indirect=True
+)
+def test_superseded_component_selection_refuses(prepared_payload):
+    root, binding, _, _ = prepared_payload
+    with pytest.raises(ValueError, match="component independent selection route"):
+        component_host._prepare_payload(root, binding, mode="debug")
+
+
+@pytest.mark.parametrize("kind", ["old-engine", "foreign-input"])
+def test_consumer_uses_frozen_input_and_engine(prepared_payload, kind):
+    root, binding, _, _ = prepared_payload
+    prepared = component_host._prepare_payload(root, binding, mode="debug")
+    job = json.loads((root / "job.json").read_bytes())
+    result = json.loads((root / "output.json").read_bytes())
+    if kind == "old-engine":
+        job["engine"]["implementation_hash"] = "sha256:" + "a" * 64
+        result["engine"] = deepcopy(job["engine"])
+        reason = "consumer expected engine"
+    else:
+        job["registry"]["test_only_specs"][0]["rationale"] += "; SYNTHETIC foreign record"
+        job["registry"]["registry_hash"] = content_hash(job["registry"], exclude=("registry_hash",))
+        reason = "consumer selected raw bytes"
+    job["job_hash"] = content_hash(job, exclude=("job_hash",))
+    result["job_hash"] = job["job_hash"]
+    result["result_hash"] = content_hash(result, exclude=("result_hash",))
+    # Direct consumption: no _request/prepared.job or native dispatch guards run first.
+    with pytest.raises(ValueError, match=reason):
+        component_runner._consume(prepared, job, canonical_json(result).encode(), b"", 0)
+
+
+def test_public_preparation_requires_trusted_startup(prepared_payload):
+    root, binding, _, _ = prepared_payload
+    with pytest.raises(ValueError, match="component trusted startup required"):
+        component_host._prepare_payload(root, binding, mode="debug", immutable=True)
+
+
+def test_acceptance_commit_is_explicitly_non_authorizing_metadata():
+    from rkuarch.engines.native.component_records import ComponentHostSelector
+
+    description = ComponentHostSelector.model_json_schema()["properties"]["acceptance_commit"][
+        "description"
+    ]
+    assert "Non-authorizing historical metadata" in description
+    assert "not verified Git provenance" in description

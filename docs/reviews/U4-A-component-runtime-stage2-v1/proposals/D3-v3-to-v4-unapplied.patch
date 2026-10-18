@@ -1,0 +1,107 @@
+--- a/src/rkuarch/engines/native/component_negative.py
++++ b/src/rkuarch/engines/native/component_negative.py
+@@ -1,4 +1,6 @@
+-"""UNAPPLIED finite refusal-only transport. Requires a separately installed D3 decision.
++"""UNAPPLIED Stage 2 exact-envelope successor. No native-site proof is inferred.
++
++Finite refusal-only transport. Requires a separately installed D3 decision.
+ 
+ The public API accepts only a case ID. Neither raw stdin nor replacement profiles,
+ expected errors, executable paths or a bypass flag are supplied by a caller.
+@@ -19,31 +21,37 @@
+ from uarch_contract.mapped import NativeTestProfile
+ 
+ from rkuarch.engines.native.component_host import _prepare_payload, _PreparedComponent
+-from rkuarch.engines.native.component_runner import _decode_envelope
++from rkuarch.engines.native.component_runner import require_negative_envelope
+ from rkuarch.engines.native.host import _open, _read, _require
+ from rkuarch.engines.native.records import FileBinding
+ from rkuarch.engines.native.runner import Limits, _exchange
+ 
+ _SELECTOR = Path("/etc/rkuarch/component-negative-selector.json")
+ _TOKEN = object()
++
++
++class ExpectedEnvelope(FrozenModel):
++    code: NonEmpty
++    message: NonEmpty
++    pointer: str | None
+ 
+ 
+ class NegativeCase(FrozenModel):
+     case_id: NonEmpty
+     raw: FileBinding
+     profile: FileBinding
+-    expected_code: NonEmpty
+-    expected_pointer: str | None
++    expected_envelope: ExpectedEnvelope
++    expectation_provenance: FileBinding
+     layer: Literal["profile", "resource-preflight"]
+ 
+ 
+ class NegativeInventory(FrozenModel):
+-    format: Literal["uarch-component-negative-inventory/1"]
++    format: Literal["uarch-component-negative-inventory/2"]
+     cases: Annotated[tuple[NegativeCase, ...], Field(min_length=1)]
+ 
+ 
+ class NegativeRecord(FrozenModel):
+-    format: Literal["uarch-component-negative-record/1"]
++    format: Literal["uarch-component-negative-record/2"]
+     runtime_payload: FileBinding
+     inventory: FileBinding
+     decision: FileBinding
+@@ -51,7 +59,7 @@
+ 
+ 
+ class NegativeSelector(FrozenModel):
+-    format: Literal["uarch-component-negative-selector/1"]
++    format: Literal["uarch-component-negative-selector/2"]
+     repository: NonEmpty
+     record: FileBinding
+ 
+@@ -82,13 +90,9 @@
+ def _consume_negative(
+     stdout: bytes, stderr: bytes, status: int, case: NegativeCase
+ ) -> dict[str, Any]:
+-    _require(status == 2, "D3 requires refusal; success is failure")
+-    error = _decode_envelope(stdout, stderr, status)
+-    _require(
+-        error["code"] == case.expected_code and error["pointer"] == case.expected_pointer,
+-        "D3 wrong code/pointer",
+-    )
+-    return error
++    return require_negative_envelope(
++        stdout, stderr, status, case.expected_envelope.model_dump(mode="json")
++    )
+ 
+ 
+ @dataclass(frozen=True)
+@@ -105,7 +109,8 @@
+                 _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 records required")
+         for case in self.inventory.cases:
+             _selected_raw(self.component, case)
+-            for file in (case.raw, case.profile):
++            for file in (case.raw, case.profile, case.expectation_provenance):
++                _read(self.component.root, file)
+                 with _open(self.component.root, file.path) as fd:
+                     _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 cases required")
+ 
+@@ -148,7 +153,7 @@
+     _require(
+         strict_json_loads(_read(root, record.decision))
+         == {
+-            "format": "uarch-component-negative-human-decision/1",
++            "format": "uarch-component-negative-human-decision/2",
+             "accepted_by": "Javid (@jjaffari)",
+             "reply": "yes",
+             "subject": subject,
+@@ -159,7 +164,7 @@
+     _require(
+         review
+         == {
+-            "format": "uarch-component-negative-review/1",
++            "format": "uarch-component-negative-review/2",
+             "subject": subject,
+             "read_audit_complete": True,
+             "finite_refusals_current": True,

@@ -117,6 +117,7 @@ class _PreparedComponent:
                     _require(
                         not os.fstat(fd).st_mode & 0o222, "immutable component payload required"
                     )
+        _trusted_startup(required=self.immutable)
         _verify_imports(self.payload)
 
     def job(self, raw: bytes) -> MappedEngineJob:
@@ -163,6 +164,15 @@ class _PreparedComponent:
             yield fd
 
 
+def _trusted_startup(*, required: bool) -> None:
+    # This check is defense in depth, not proof against arbitrary pre-start code.
+    # Immutable activation must externally pin the -I -S -B launcher and its TCB.
+    state = sys.modules.get("_rkuarch_trusted_startup")
+    _require(state is not None or not required, "component trusted startup required")
+    if state is not None:
+        state.refresh()
+
+
 def _verify_imports(payload: ComponentPayload) -> None:
     root = Path(payload.consumers.import_root)
     _require(root.is_absolute(), "absolute component import root required")
@@ -197,6 +207,7 @@ def _prepare_payload(
     root: Path, binding: FileBinding, *, mode: str, immutable: bool = False
 ) -> _PreparedComponent:
     """Synthetic tests may validate data here; this never returns execution authority."""
+    _trusted_startup(required=immutable)
     _require(mode in ("debug", "release"), "explicit component mode required")
     reads: dict[tuple[Path, str], FileBinding] = {}
 
@@ -252,8 +263,7 @@ def _prepare_payload(
     read(trust.semantics_file)
     selection = strict_json_loads(read(trust.selection))
     _require(
-        selection.get("format")
-        in ("B-component-prospective-v3-selection/1", "B-component-prospective-v3-selection/2")
+        selection.get("format") == "B-component-prospective-v3-selection/2"
         and selection.get("model") == ["native-intervals", "2"]
         and selection.get("observations") == "uarch-native-observations/3"
         and selection.get("checker") == payload.consumers.checker,

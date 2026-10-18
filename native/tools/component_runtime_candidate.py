@@ -373,7 +373,8 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
         "python_executable": binding(Path("/"), Path(sys.executable).resolve()),
         "independent_binding": binding(
             root,
-            root / "docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json",
+            root
+            / "docs/reviews/U4-A-component-runtime-stage2-v1/prospective-consumer-bindings-v1.json",
         ),
         "observation_contract": binding(
             observation_root or root,

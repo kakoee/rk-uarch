@@ -1,0 +1,124 @@
+{
+  "$defs": {
+    "ExpectedEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Message",
+          "type": "string"
+        },
+        "pointer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pointer"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "pointer"
+      ],
+      "title": "ExpectedEnvelope",
+      "type": "object"
+    },
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "NegativeCase": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "expectation_provenance": {
+          "$ref": "#/$defs/FileBinding"
+        },
+        "expected_envelope": {
+          "$ref": "#/$defs/ExpectedEnvelope"
+        },
+        "layer": {
+          "enum": [
+            "profile",
+            "resource-preflight"
+          ],
+          "title": "Layer",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/FileBinding"
+        },
+        "raw": {
+          "$ref": "#/$defs/FileBinding"
+        }
+      },
+      "required": [
+        "case_id",
+        "raw",
+        "profile",
+        "expected_envelope",
+        "expectation_provenance",
+        "layer"
+      ],
+      "title": "NegativeCase",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/NegativeCase"
+      },
+      "minItems": 1,
+      "title": "Cases",
+      "type": "array"
+    },
+    "format": {
+      "const": "uarch-component-negative-inventory/2",
+      "title": "Format",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "cases"
+  ],
+  "title": "NegativeInventory",
+  "type": "object"
+}
