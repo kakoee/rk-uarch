@@ -48,6 +48,12 @@ pub(crate) fn normalize_component(mut value: Value) -> Result<Value> {
     shape(&mut value, &schema, &schema, "")?;
     Ok(value)
 }
+pub(crate) fn normalize_component_v3(mut value: Value) -> Result<Value> {
+    let schema: Value = serde_json::from_str(include_str!("component_carriers_v3.json"))
+        .expect("compiled proposed component /3 schema");
+    shape(&mut value, &schema, &schema, "")?;
+    Ok(value)
+}
 fn shape(v: &mut Value, s: &Value, root: &Value, path: &str) -> Result<()> {
     if let Some(reference) = s["$ref"].as_str() {
         let name = reference

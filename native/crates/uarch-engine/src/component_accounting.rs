@@ -1,7 +1,7 @@
 //! Projection of completed native state. No expected row or declared-work fallback.
 use crate::{
     carrier::{Result, refuse},
-    component::{Activity, Counts, Runtime, add, mul},
+    component::{Activity, Counts, ObservationVersion, Runtime, add, mul},
     component_admission::{Admitted, TaskKind},
     hardware,
 };
@@ -37,6 +37,7 @@ fn kinds(a: &Activity) -> (&'static str, &'static str) {
         "channel_service" | "dram_latency" => ("MEM_REQ", "MEM_RESP"),
         "request_noc" | "response_noc" | "unicast_noc" => ("NOC_HEAD", "NOC_TAIL"),
         "ack" => ("TASK_READY", "DMA_DONE"),
+        "dma_issue" => ("TASK_READY", "DMA_ISSUE"),
         "barrier" => ("SYNC_ARRIVE", "BARRIER_RELEASE"),
         _ => unreachable!("typed phase"),
     }
@@ -173,7 +174,17 @@ pub(crate) fn construct(v: &Admitted, r: &Runtime) -> Result<Value> {
                 .clone()
         };
         dma.push(json!({"request_id":req,"job_id":task.id,"dma_engine_id":s.engine,"direction":direction,"source_buffer_id":s.source,"destination_buffer_id":s.destination,"payload_bytes":s.payload,"transaction_bytes":if s.engine.is_some(){256}else{0},"credit_acquire_ps":if s.engine.is_some(){s.issue}else{None},"issue_ps":s.issue,"complete_ps":s.end,"credit_release_ps":if s.engine.is_some(){s.end}else{None},"route_id":route_id}));
+        if r.observations == ObservationVersion::V3 {
+            dma.last_mut().expect("request row")["reservation_ps"] = json!(s.reservation);
+        }
         if let Some(engine) = s.engine {
+            if r.observations == ObservationVersion::V3 {
+                let reservation = s.reservation.ok_or_else(|| {
+                    refuse("IncompleteObservations", "", "missing DMA reservation")
+                })?;
+                queues.push(json!({"queue_id":format!("dma_waiting:{engine}"),"item_id":req,"population":"waiting","enter_ps":r.jobs[s.job].ready,"leave_ps":reservation,"owner_id":task.owner,"clock_domain":null,"activity_id":null}));
+                queues.push(json!({"queue_id":format!("dma_pending:{engine}"),"item_id":req,"population":"pending","enter_ps":reservation,"leave_ps":s.issue,"owner_id":task.owner,"clock_domain":null,"activity_id":null}));
+            }
             queues.push(json!({"queue_id":format!("dma_inflight:{engine}"),"item_id":req,"population":"inflight","enter_ps":s.issue,"leave_ps":s.end,"owner_id":task.owner,"clock_domain":null,"activity_id":null}));
         }
         let boundaries = if s.engine.is_none() {
@@ -337,7 +348,12 @@ pub(crate) fn construct(v: &Admitted, r: &Runtime) -> Result<Value> {
     }
     let (counts, ext, work, traffic) = totals(&r.counts)?;
     dma.sort_by(|a, b| a["request_id"].as_str().cmp(&b["request_id"].as_str()));
-    let observations = json!({"format":"uarch-native-observations/2","events":observed(events),"jobs":observed(jobs),"activities":observed(acts),"clocks":observed(clocks),"dma":observed(dma),"transfers":observed(transfers),"allocations":observed(allocations),"queue_membership":observed(queues),"resource_intervals":observed(resources),"critical_path":observed(critical)});
+    let mut observations = json!({"format":if r.observations==ObservationVersion::V3 {"uarch-native-observations/3"}else{"uarch-native-observations/2"},"events":observed(events),"jobs":observed(jobs),"activities":observed(acts),"clocks":observed(clocks),"dma":observed(dma),"transfers":observed(transfers),"allocations":observed(allocations),"queue_membership":observed(queues),"resource_intervals":observed(resources),"critical_path":observed(critical)});
+    if r.observations == ObservationVersion::V3 {
+        observations["reservation_opportunities"] = observed(r.reservation_opportunities.iter().enumerate().map(|(ordinal, opportunity)| {
+            json!({"opportunity_ordinal":ordinal,"t_ps":opportunity.time,"event_cursor":opportunity.event_cursor,"granted_request_ids":opportunity.granted.iter().map(|&s|r.sequences[s].request.as_ref().expect("DMA request")).collect::<Vec<_>>()})
+        }).collect());
+    }
     let mut result = json!({"protocol":"uarch-engine/3","job_hash":v.raw["job_hash"],"engine":v.raw["engine"],"scope":v.raw["workload_closure"]["scope"]["kind"],"completion":"complete","duration_ps":r.duration,"completed_jobs":v.graph.jobs.iter().enumerate().filter(|(i,_)|r.jobs[*i].end.is_some()).map(|(_,t)|t.id.clone()).collect::<Vec<_>>(),"admission":v.raw["admission"],"counts":counts,"ext_counts":ext,"work_counts":work,"traffic_counts":traffic,"per_op":op_rows,"busy_time_ps":busy,"attribution_ps":attribution,"diagnostics":{"matrix_util_ratio":null,"vector_util_ratio":null,"dma_compute_overlap_ratio":null,"sram_bank_conflict_stall_ratio":null,"noc_latency_p50_ps":null,"noc_latency_p99_ps":null,"noc_max_link_util_ratio":null,"dram_bw_util_ratio":null,"dram_row_hit_ratio":null,"energy_pj":null},"fidelity_detail":v.raw["fidelity_detail"],"unrepresented":["diagnostics/dram_row_hit_ratio","diagnostics/energy_pj","diagnostics/noc_max_link_util_ratio","diagnostics/sram_bank_conflict_stall_ratio","diagnostics/vector_util_ratio","ext_counts/noc_flit_hop_count","u_c0_duration_ps"],"simulator_metrics":{"event_count":r.events.len(),"completed_job_count":r.jobs.iter().filter(|j|j.end.is_some()).count(),"max_live_events":r.max_live_events},"trace_hash":null,"u_c0_duration_ps":null,"observations":observations,"owners":v.raw["owners"]});
     result["result_hash"] = Value::String(hardware::digest(&result)?);
     Ok(result)

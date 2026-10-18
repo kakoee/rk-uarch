@@ -13,11 +13,15 @@ from validation.component.installation_identity import (
     F5_TEST,
     INSTALLED_BYTES,
     INSTALLED_SHA,
-    NEW_ADR,
+    ISSUE_ADR_BYTES,
+    ISSUE_ADR_SHA,
+    ISSUE_APPENDIX_SHA,
+    ISSUE_BINDING,
     SELECTION,
     SELF_TEST,
     digest,
     installation_bindings,
+    issue_bindings,
     verify_adr,
     verify_postimages,
 )
@@ -27,10 +31,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def test_exact_installed_and_component_text_control() -> None:
     raw = (ROOT / ADR).read_bytes()
-    assert len(raw) == 32221 + 16073
-    assert digest(raw) == NEW_ADR
+    assert len(raw) == ISSUE_ADR_BYTES
+    assert digest(raw) == ISSUE_ADR_SHA
     assert digest(raw[:INSTALLED_BYTES]) == INSTALLED_SHA
-    assert digest(raw[INSTALLED_BYTES:]) == COMPONENT_SHA
+    assert digest(raw[INSTALLED_BYTES:48294]) == COMPONENT_SHA
+    assert digest(raw[48294:]) == ISSUE_APPENDIX_SHA
     verify_adr(raw)
     selection = json.loads((ROOT / SELECTION).read_text())
     verify_postimages(ROOT, installation_bindings(ROOT, selection))
@@ -87,4 +92,33 @@ def test_f5_and_changed_identity_test_are_bound(tmp_path: Path, path: str, chang
     if change == "edit":
         target.write_bytes((ROOT / path).read_bytes() + b"\n# changed\n")
     with pytest.raises((AssertionError, FileNotFoundError)):
+        verify_postimages(tmp_path, {path: expected[path]})
+
+
+@pytest.mark.parametrize("change", ["missing", "extra", "preimage", "authority"])
+def test_issue_transition_exact_inventory(change: str) -> None:
+    record = json.loads((ROOT / ISSUE_BINDING).read_text())
+    before = {p: t["before"] for p, t in record["replacements"].items()}
+    if change == "missing":
+        record["additions"].pop("validation/component/issue_checks.py")
+    elif change == "extra":
+        record["replacements"]["unexpected.py"] = dict(before="0" * 64, after="1" * 64)
+    elif change == "preimage":
+        record["replacements"][ADR]["before"] = "0" * 64
+    else:
+        record["authority"] = "manufactured"
+    with pytest.raises(AssertionError):
+        issue_bindings(ROOT, before, record)
+
+
+@pytest.mark.parametrize(
+    "path",
+    ["validation/component/issue_checks.py", "validation/component/installation_identity.py"],
+)
+def test_issue_checker_and_identity_helper_are_bound(tmp_path: Path, path: str) -> None:
+    expected = installation_bindings(ROOT, json.loads((ROOT / SELECTION).read_text()))
+    target = tmp_path / path
+    target.parent.mkdir(parents=True)
+    target.write_bytes((ROOT / path).read_bytes() + b"\n# changed\n")
+    with pytest.raises(AssertionError, match="installed postimage"):
         verify_postimages(tmp_path, {path: expected[path]})

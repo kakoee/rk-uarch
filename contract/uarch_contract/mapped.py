@@ -650,8 +650,17 @@ def hardware_projection(spec: HardwareSpec) -> ResolvedMappedHardware:
 
 class NativeModelIdentity(FrozenModel):
     name: Literal["fixed-delay", "native-intervals"]
-    version: Literal["1"]
+    version: Literal["1", "2"]
     implementation_hash: Hash
+
+    @model_validator(mode="after")
+    def observation_version(self) -> NativeModelIdentity:
+        require(
+            self.version == "1" or self.name == "native-intervals",
+            "ResultBindingMismatch",
+            "component model version",
+        )
+        return self
 
 
 class NativeEngineIdentity(FrozenModel):
@@ -1100,6 +1109,77 @@ class ComponentObservations(FrozenModel):
     critical_path: Observed[ComponentCriticalInterval]
 
 
+class ComponentActivityV3(FrozenModel):
+    activity_id: NonEmpty
+    job_id: NonEmpty
+    request_id: NonEmpty | None
+    subphase: Literal[
+        "dma_issue",
+        "compute_overhead",
+        "compute_stage",
+        "compute_wave",
+        "compute_drain",
+        "request_noc",
+        "response_noc",
+        "unicast_noc",
+        "dram_latency",
+        "channel_service",
+        "read_port",
+        "write_port",
+        "ack",
+        "barrier",
+    ]
+    kind: Literal["service", "alignment"]
+    ready_ps: U64
+    start_ps: U64
+    end_ps: U64
+    owner_id: U64
+    category: Literal["compute", "memory", "noc", "sync", "overhead"]
+    receiving_domain: Literal["core", "noc", "dram"] | None
+    occupies_resource: StrictBool
+    dispatch_ordinal: U64
+    completion_ordinal: U64
+    predecessors: tuple[ActivityPredecessor, ...]
+
+
+class ComponentQueueObservationV3(FrozenModel):
+    queue_id: NonEmpty
+    item_id: NonEmpty
+    population: Literal["waiting", "service", "inflight", "pending"]
+    enter_ps: U64
+    leave_ps: U64 | None
+    owner_id: U64
+    clock_domain: Literal["core", "noc", "dram"] | None
+
+    activity_id: NonEmpty | None
+
+
+class DmaObservationV3(DmaObservation):
+    reservation_ps: U64 | None
+
+
+class DmaReservationOpportunity(FrozenModel):
+    opportunity_ordinal: U64
+    t_ps: U64
+    event_cursor: U64
+    granted_request_ids: tuple[NonEmpty, ...]
+
+
+class ComponentObservationsV3(FrozenModel):
+    format: Literal["uarch-native-observations/3"]
+    events: Observed[EventObservation]
+    jobs: Observed[JobObservation]
+    activities: Observed[ComponentActivityV3]
+    clocks: Observed[ComponentClockObservation]
+    dma: Observed[DmaObservationV3]
+    reservation_opportunities: Observed[DmaReservationOpportunity]
+    transfers: Observed[TransferObservation]
+    allocations: Observed[AllocationObservation]
+    queue_membership: Observed[ComponentQueueObservationV3]
+    resource_intervals: Observed[ComponentResourceInterval]
+    critical_path: Observed[ComponentCriticalInterval]
+
+
 class Attribution(FrozenModel):
     compute: U64
     memory: U64
@@ -1163,7 +1243,10 @@ class MappedEngineResult(FrozenModel):
     simulator_metrics: SimulatorMetrics
     trace_hash: Hash | None
     u_c0_duration_ps: None
-    observations: Annotated[Observations | ComponentObservations, Field(discriminator="format")]
+    observations: Annotated[
+        Observations | ComponentObservations | ComponentObservationsV3,
+        Field(discriminator="format"),
+    ]
     owners: tuple[Owner, ...]
 
     @model_validator(mode="after")
@@ -1197,6 +1280,13 @@ def validate_result(value: object, job: MappedEngineJob) -> MappedEngineResult:
     r = MappedEngineResult.model_validate(value)
     require(r.job_hash == job.job_hash and r.engine == job.engine, "ResultBindingMismatch")
     require(r.admission == job.admission, "AdmissionMismatch")
+    if job.state_model == "resource_intervals/1":
+        v3_model = job.engine.model.name == "native-intervals" and job.engine.model.version == "2"
+        require(
+            isinstance(r.observations, ComponentObservationsV3) == v3_model,
+            "ResultBindingMismatch",
+            "component observation/model version",
+        )
     require(
         r.fidelity_detail == job.fidelity_detail and r.scope == job.workload_closure.scope.kind,
         "UnsupportedFidelity",
@@ -1322,8 +1412,13 @@ def validate_result(value: object, job: MappedEngineJob) -> MappedEngineResult:
 def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
     """Structural witness joins; independent model-law checks remain required."""
     obs = r.observations
-    require(isinstance(obs, ComponentObservations), "IncompleteObservations", "component /2")
-    assert isinstance(obs, ComponentObservations)
+    require(
+        isinstance(obs, (ComponentObservations, ComponentObservationsV3)),
+        "IncompleteObservations",
+        "component /3" if job.engine.model.version == "2" else "component /2",
+    )
+    assert isinstance(obs, (ComponentObservations, ComponentObservationsV3))
+    v3 = isinstance(obs, ComponentObservationsV3)
     owners = {x.owner_id: x.resource for x in job.owners}
     tasks = {x.id: x for x in job.mapped_point.task_graph.jobs}
     declared = {
@@ -1361,7 +1456,10 @@ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob)
         "barrier": ("barrier",),
         "noc_transfer": ("unicast_noc",),
     }
-    sequences: dict[tuple[str, str | None], list[ComponentActivity]] = {}
+    if v3:
+        for direction in ("read", "write"):
+            phase_orders[direction] = ("dma_issue", *phase_orders[direction])
+    sequences: dict[tuple[str, str | None], list[ComponentActivity | ComponentActivityV3]] = {}
     for activity in activities.values():
         require(activity.job_id in tasks, "InvalidResource", "activity job")
         sequences.setdefault((activity.job_id, activity.request_id), []).append(activity)
@@ -1466,8 +1564,16 @@ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob)
                     "ack",
                 }
             )
+            if v3:
+                allowed.add("dma_issue")
             require(a.subphase in allowed, "IncompleteObservations")
-            if a.subphase.endswith("_noc"):
+            if a.subphase == "dma_issue":
+                expected_owner, category, domain = (
+                    f"dma:{core_id}:{task.dma_engine_id % engines}",
+                    "memory",
+                    "core",
+                )
+            elif a.subphase.endswith("_noc"):
                 expected_owner, category, domain = (
                     f"router:0:{core_id // cols}:{core_id % cols}",
                     "noc",
@@ -1498,7 +1604,12 @@ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob)
             "IncompleteObservations",
             "activity category/domain",
         )
-        occupied = a.kind == "service" and a.subphase not in ("dram_latency", "ack", "barrier")
+        occupied = a.kind == "service" and a.subphase not in (
+            "dram_latency",
+            "ack",
+            "barrier",
+            "dma_issue",
+        )
         if a.subphase.endswith("_noc"):
             if isinstance(task, Dma):
                 assert a.request_id is not None
@@ -1534,6 +1645,7 @@ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob)
             kinds = ("NOC_HEAD", "NOC_TAIL")
         else:
             kinds = {
+                "dma_issue": ("TASK_READY", "DMA_ISSUE"),
                 "read_port": ("OWNER_GRANT", "DMA_DONE"),
                 "write_port": ("OWNER_GRANT", "MEM_RESP"),
                 "channel_service": ("MEM_REQ", "MEM_RESP"),
@@ -1659,7 +1771,14 @@ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob)
             and q.enter_ps <= q.leave_ps <= r.duration_ps,
             "IncompleteObservations",
         )
-        if q.queue_id.startswith(("channel_service:", "dma_inflight:")):
+        if q.queue_id.startswith(
+            ("channel_service:", "dma_inflight:", "dma_waiting:", "dma_pending:")
+        ):
+            require(
+                v3 or not q.queue_id.startswith(("dma_waiting:", "dma_pending:")),
+                "IncompleteObservations",
+                "versioned issue queue",
+            )
             require(
                 q.item_id in declared and q.clock_domain is None and q.activity_id is None,
                 "IncompleteObservations",
@@ -1674,11 +1793,15 @@ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob)
                     "IncompleteObservations",
                 )
             else:
+                queue_prefix = {"waiting": "dma_waiting", "pending": "dma_pending"}.get(
+                    q.population, "dma_inflight"
+                )
                 require(
-                    q.queue_id == f"dma_inflight:{t.dma_engine_id}"
+                    q.queue_id == f"{queue_prefix}:{t.dma_engine_id}"
                     and owners[q.owner_id]
                     == f"dma:{t.dma_engine_id // engines}:{t.dma_engine_id % engines}"
-                    and q.population == "inflight",
+                    and q.population
+                    in (("waiting", "pending", "inflight") if v3 else ("inflight",)),
                     "IncompleteObservations",
                 )
         else:
@@ -1715,7 +1838,12 @@ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob)
             "clock activity join",
         )
 
-    def tie(a: ComponentActivity) -> tuple[int, str, str, str, str]:
+    if v3:
+        from .mapped_issue import validate_issue_observations
+
+        validate_issue_observations(r, job)
+
+    def tie(a: ComponentActivity | ComponentActivityV3) -> tuple[int, str, str, str, str]:
         return a.owner_id, a.job_id, a.request_id or "", a.subphase, a.activity_id
 
     terminal = min(

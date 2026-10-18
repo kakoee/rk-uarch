@@ -650,3 +650,269 @@ hashes, bundle/job hashes and future external anchors; graph/point need not chan
 build, runtime authority or native result is created by this proposal. If the human retains
 profile/1, omit the isolated PolicyProfileEntry/profile-format/admission additions and their
 schema deltas/tests before freezing the accepted candidate; do not silently claim binding.
+
+## Component DMA issue observations /3 — proposed amendment, not installed
+
+This section is normative only after exact human installation of the reviewed amendment
+postimages. It grants no runtime placement, HostRecord, selector, profile authority or
+public campaign. The historical component /2 and fixed-delay /1 contracts and receipts
+remain unchanged. These rules add an observation of the existing E4 core issue edge;
+they add no service-rate cap, channel/port service, workload scope or hardware parameter.
+
+New component model identity `native-intervals`, version `2`, requires observation format
+`uarch-native-observations/3`. A /3 result with another model identity, or model/2 with
+/2 output, is `ResultBindingMismatch`. Native fixed-delay model/1 and component model/1
+continue to use /1 and /2 respectively. Existing protocol `uarch-engine/3`, input graph,
+profile/2 policy promises and admission `U0011-stage2/1` remain unchanged: the new model
+version binds the new output/lifetime law, not a retroactive reinterpretation of old
+input/profile promises. Future execution selections must explicitly bind the new model,
+engine, raw job, schema/ADR/checker bytes and expected observation version. No automatic
+upgrade of historical jobs, outputs, selections or anchors is permitted.
+
+### Waiting, pending and acquired are distinct
+
+Each declared DMA fragment is in one of three states after its job becomes ready:
+(1) unreserved waiting, (2) pending with one reserved engine credit while awaiting the
+core edge, or (3) acquired/inflight from issue through commit/ack. Before job readiness
+it belongs to none. Per flattened DMA engine, acquired plus pending MUST NOT exceed
+max_outstanding. Waiting consumes no credit. Pools are independent between engines;
+shared core payload-port arbitration remains the installed independent mechanism.
+
+At each actual eligibility opportunity, reserve all available credits in ascending
+(job ready time, request ID) order among requests eligible on that engine at THAT
+opportunity. Equal readiness timestamps do not make requests simultaneously eligible:
+a dependency must have actually completed before the opportunity. A request initially
+ready at time0 can reserve before another request becomes ready via an inline zero-time
+predecessor, even if the newly ready request has a smaller ID. Never retrospectively
+sort all requests with the same readiness timestamp into a single opportunity.
+
+An eligibility opportunity occurs initially before phase2 work, then at the first
+reservation pass after one or more terminal sequence completions. A DMA terminal releases
+its credit; terminal job completion can enable dependent jobs. All scheduled phase0
+completions at one timestamp drain before one opportunity. Each inline phase2 terminal
+completion creates a distinct subsequent opportunity, including at the same timestamp.
+Nonterminal completions and pending-to-acquired conversion do not create opportunities.
+Every opportunity is recorded, even if it grants nothing, including the final release.
+Repeated scheduler passes without an eligibility-changing transition are not extra
+opportunities. Native eligibility/reservation timing is otherwise unchanged.
+
+A reservation occurs at the earliest opportunity at which all dependency jobs have
+completed and an unreserved engine credit permits it. Reserving a credit is atomic with
+removing the request from unreserved waiting. Pending consumes capacity immediately but
+creates neither credit_acquire_ps, inflight time, payload traffic nor a busy/resource
+interval. Later-eligible arrivals cannot steal a reserved slot. Across independent engines,
+the witness serializes grants by (job ready time, flattened engine ID, request ID);
+capacity and the ready/request ordering law apply independently to each engine.
+
+At `next_edge(core_hz, reservation_ps, 0)`, atomically convert pending to acquired and
+emit DMA_ISSUE. There is no intermediate double charge and no momentary free slot.
+credit_acquire_ps equals issue_ps; credit_release_ps equals commit/ack completion.
+Neither count nor byte traffic is derived from reservation or declared work. All
+eligible reserved requests may issue on the same core edge; there is no finite issue
+rate or one-issue-per-cycle cap. A refusal/overflow emits no partial successful result.
+
+Positive-duration scheduled completions, including alignment completion, use phase0
+and are processed before phase2 eligibility/grants at the same timestamp. Zero-duration
+endpoints remain distinct inline phase2 events under installed U0011; a zero-duration
+ack release must precede by observation ordinal a subsequent reservation using it.
+Phase2 reaches its existing ready/grant fixed point in canonical owner/request order.
+An issue alignment ending now precedes its zero issue service; conversion precedes the
+first transfer phase. No later event may be used as an earlier cause. Reservation order within an opportunity follows the ready/request tie rule;
+request eligibility at different opportunities is preserved without serializing clocks
+or independent pools. Existing schedule-time event sequence and global ordering survive.
+
+### Exact /3 inventory and endpoints
+
+Every DMA fragment, read or write, prepends exactly two activities, including zero
+alignment: `dma_issue/alignment` followed by `dma_issue/service`. Both use its canonical
+flattened DMA engine owner, category memory, receiving domain core, occupies_resource
+false. Alignment is [reservation_ps, issue_ps], ready_ps is job ready_ps, with endpoint
+kinds TASK_READY / DEPENDENCY_READY. Service is [issue_ps, issue_ps], ready_ps issue_ps,
+with endpoint kinds TASK_READY / DMA_ISSUE. All four endpoint observations are distinct
+and correctly joined; service dispatch follows alignment completion, then service
+completion follows dispatch. Both have exact next_edge clock witnesses with n_cycles0.
+The first former transfer phase becomes ready at issue-service completion. No dma_issue
+transfer boundary or resource/busy interval is added. Existing boundary byte accounting
+and request/response/DRAM/core-port entry/exit laws remain unchanged.
+
+/3 DMA observation extends the existing record with REQUIRED reservation_ps: u64 for
+DMA and null for unicast. Unicast gains neither issue phase nor reservation. /3 has
+separate activity/queue/DMA carriers; /2 enums and required fields remain unchanged.
+Each DMA fragment has exactly one ledger row in EACH of these populations, including
+zero-length rows, with null activity_id and clock_domain and its DMA engine owner:
+
+| queue_id | population | interval |
+| --- | --- | --- |
+| dma_waiting:E | waiting | [job.ready_ps, reservation_ps] |
+| dma_pending:E | pending | [reservation_ps, issue_ps] |
+| dma_inflight:E | inflight | [issue_ps, complete_ps] |
+
+These are separate populations, never summed as duplicate inflight counts. Ordinary
+core-domain activity queues remain attached to each issue activity: waiting [ready,start]
+and service [start,end], with explicit service rows and the installed optional empty
+ordinary waiting row. Ledger rows are always explicit. Half-open population/finite-window
+rules remain installed: zero-length intervals contribute zero residence area, preserve
+endpoint flow counts, and null residence remains restricted to zero flow. Atomic
+conversion prevents capacity double counting even at zero alignment.
+
+### Exact reservation-order witness
+
+/3 additionally requires `reservation_opportunities: Observed[DmaReservationOpportunity]`.
+Each record has `opportunity_ordinal: u64`, `t_ps: u64`, `event_cursor: u64` and
+`granted_request_ids: tuple[NonEmpty,...]`. The ordinal is contiguous from0. The cursor
+is the number of existing endpoint observations already emitted immediately before the
+real reservation pass, and grants are appended as the scheduler actually reserves them.
+It is NOT an issue-alignment dispatch ordinal. This is a separate transition witness,
+not a new activity, clock, event-wheel endpoint, traffic count or resource interval.
+All requests appear in exactly one grant list, and each binds reservation_ps to t_ps.
+Empty lists are required. No successful partial witness is permitted.
+
+The initial witness is ordinal0/time0/cursor0. Each inline terminal completion implies
+cursor=completion_ordinal+1. A scheduled phase0 terminal implies the cursor after the
+entire same-time phase0 completion batch; multiple terminals in that batch imply one
+opportunity. A dependency job is complete at a cursor only when ALL its sequence terminal
+completion ordinals precede the cursor. A credit is available only after its acquired
+request's terminal completion precedes the cursor; earlier pending reservations still
+occupy slots. This distinguishes opportunities at identical timestamps.
+
+The independent checker MUST reconstruct the exact opportunity inventory from terminal
+endpoint transitions, then derive all eligible requests and available credits at each
+cursor. It must verify the complete earliest grant list and ready/request ties against
+that derived set. Trusting the claimed list, using readiness timestamps alone, accepting
+alignment-dispatch order as reservation order, or checking only capacity is insufficient.
+A fully joined forgery that moves a not-yet-eligible request into an earlier opportunity
+must be refused even if its timestamps, grants, queues, causes and capacity agree.
+
+B-ISSUE-ORDER-01 is the discriminator: with cap1 and r00 dependent on inline zero-hop
+unicast, initially ready r01 reserves/issues0 and completes60000; r00 reserves/issues60000
+and completes120000. The paired graph makes r01 dependent, reversing these roles. Both
+ready timestamps remain0, and the unicast completion creates a separate empty opportunity
+while capacity is occupied. The exact historical B inputs remain unchanged.
+
+This revises the UNINSTALLED /3/model2 proposal in place; it does not revise installed
+/1 or /2 semantics. Prior draft /3 results without this required witness are retained
+historical evidence, not accepted as outputs of the revised proposal. Installation and
+future bindings must name the exact revised schema/checker/source hashes. No decoder
+fallback, synthetic retrofit of historical outputs or silent receipt upgrade is allowed.
+
+### Exact causes, job start and allocation
+
+The first issue alignment carries all and only eligible tight dependency/credit causes.
+Dependencies are declared predecessor-job terminal activities at the dependency's actual
+job completion. For /3, approved correction a1 defines credit attribution at the request's
+RESERVATION OPPORTUNITY CURSOR, not at alignment dispatch and not by timestamps alone.
+Let t=reservation_ps and c=the event_cursor of the unique opportunity granting this request.
+Strict waiting requires t > job.ready_ps. Preserve the prior-saturation predicate: the
+other same-engine requests with reservation_ps < t <= complete_ps number exactly the
+engine's credit limit. Without both strict waiting and this prior saturation, the credit
+cause set is empty, including when dependency readiness equals reservation.
+
+When both predicates hold, the exact eligible set comprises ALL acquired same-engine
+requests that release at t and whose terminal observation ordinal is STRICTLY LESS than c.
+Every supplied credit predecessor must be a terminal activity and satisfy that ordinal
+bound. A release at or after c cannot explain this reservation, even when its timestamp
+matches t and its terminal precedes the later issue-alignment dispatch. Pending
+reservations consume capacity but cannot themselves be releasing causes. A release at an
+earlier timestamp is not tight. Alignment delay alone is not credit waiting.
+
+Include eligible same-time releases observed before c even if they precede the previous
+opportunity. Do not restrict the set to releases since the previous opportunity. This is a
+same-time eligible-release ATTRIBUTION SET, not exclusive assignment of a particular freed
+slot to a request. Earlier grants at t do not consume or remove an otherwise eligible
+release from the attribution set. Capacity itself remains enforced from actual prior
+grants and terminal order at each cursor. This /3 definition supersedes timestamp-only
+credit-set readings and exclusive-slot interpretations of "actual blocking activity";
+historical /2 text, bytes and verdict scopes remain unchanged.
+
+In the mixed cap2 cc0-v3 control, r00.read_port completes at ordinal50; the write ack
+alignment completes at51 but does not release credit. r02 is granted at cursor52 and has
+only r00.read_port as its credit cause. r01.ack terminates at55; r03 is granted at cursor56
+and includes BOTH r00.read_port and r01.ack. The gapped counterpart obeys the same ordinal
+rule. A7's later ack at53 cannot be a cause for r02's unchanged cursor52, even if the
+alignment dispatch is moved to54. Both structural and independent consumers must refuse it.
+
+Structural validation additionally checks capacity at reservation cursors: previous grants
+remain active while their terminal ordinal is >= c, and each new grant consumes one slot.
+The independent checker still derives complete eligible grant lists and capacity; this
+small structural join does not replace that mandatory independent check.
+
+For release60000 on a1GHz core: ready59999 reserves/issues60000 with credit-only cause;
+ready60000 reserves/issues60000 with dependency-only cause; ready60001 reserves60001,
+issues61000 with dependency-only cause. Both zero alignments remain in the inventory.
+The issue service and first transfer phase use immediate sequence links. No issue phase
+has a resource predecessor; payload ports/channels retain their existing resource causes.
+Canonical critical-path ties, zero-duration causal DAG and complete eligible-cause rules
+remain installed. Issue alignment contributes memory attribution, never busy time.
+
+DMA job.start_ps is the minimum reservation_ps across its fragments, NOT minimum issue_ps;
+ready_ps remains the maximum declared predecessor completion, end_ps maximum commit/ack.
+This follows the installed first-activity summary rule with the new explicit first phase.
+A produced nonpersistent buffer allocates at its producer job.start_ps, so a DMA-produced
+buffer may allocate at reservation before payload service. Allocation does not claim data
+production or work completion. Declared terminal consumers retain exact completion-based
+free endpoints. With no terminal consumers, retained output has free_ps null through run
+end, as before. Initial/no-producer reservations and @1 accumulator persistence remain
+unchanged; @2 exact producer/all-terminal-reader laws remain unchanged. Every actual use
+must still be covered. Compute and unicast job/allocation endpoints do not change.
+
+### Installation and verification boundary
+
+Install ADR, typed carriers, mapped JSON schema mirrors and structural validator together;
+install the independently reviewed /3 checker and exact native schema/runtime changes as
+one reviewed source transition. Keep the old /2 checker, schemas/fixtures/receipt bindings
+as historical controls. Native snapshot exports must explicitly select model/1 for old
+K2/component schemas and model/2 for the new /3 schema, preserving old snapshot bytes.
+New source/model/build identities and future profile/selection joins are mandatory; no
+old fixed-delay or component candidate identity is inherited by the amended model.
+
+Before installation require discriminating read/write issue-gap, cap1/cap2, independent
+engine, same-time release/dependency boundary, zero-alignment and unlimited same-edge
+issue controls, producer allocation endpoints, exact queue inventories, false/missing
+causes, early acquisition, capacity double booking, false issue-rate delay and restored
+baselines. Private exports and synthetic anchors do not install this amendment or create
+authority. Human L1 and later public/D3 acceptance remain separate. Existing bounded
+construction trace gaps remain unaccepted and no trace rebuild is implied by this change.
+
+
+### Prospective first-use restrictions and consumer binding (Stage 2 F2/F4)
+
+Approval U4-issue-edge-credit-causes-a1-v1 and renewed approval
+U4-issue-edge-F2-scope-reconfirmation-v1 authorize correction direction/private proposal
+work only, not installation or public execution authority. The renewed approval widens
+only F2; the accepted a1 /3 law and F4 consumer-binding behavior are unchanged.
+
+Native component model1 / observations2 first use is BLOCKED for same-engine,
+same-instant acquired-credit releases regardless of read/write direction, including
+write/write. The established affected subclass has a strictly waiting request reserved
+or issued between releases observed at that timestamp. Unclassified same-engine,
+same-instant acquired-release cases are blocked regardless of direction; write/read
+labels alone never establish safety. This proposal explicitly takes the broader
+conservative policy of blocking the entire same-engine/same-instant acquired-release
+class. The prospective offline classifier is explicitly more conservative: any /2 graph
+with multiple requests on one engine remains blocked without separately reviewed complete
+timing classification. It implements no timed-safe exception. At most one declared request
+per engine proves only absence of this F2 class for an independently validated graph,
+never execution authority or relief from F4. Any future prospective exception must
+prove its classification from actual release and reservation/issue order, receive
+separate resolution and approval, and carry exact reviewed prospective selection and
+consumer bindings; direction alone is not such proof. /3 is unaffected.
+
+cc0-v1 and ww0-v1 are preserved, hash-bound reproducers of the unresolved /2 discrepancy;
+cc-v1 additionally retains its known issue-gap limitation. The restriction is neither
+a /2 repair nor a waiver. Its exit requires a separate exact reviewed resolution of the
+law/implementation/consumer discrepancy, discriminating regressions, renewed approval
+and explicit prospective first-use selection/authority. Historical /2 source, checker,
+carrier bytes, the historical106-case selection, receipts and verdict scopes remain
+unchanged. Reconstructed reviewer fixtures are labelled as reconstructions, not new
+native executions or runtime authority.
+
+A future first-use record MUST bind the engine model, observation format, structural
+validator and independent checker by exact source/schema identities. Component model1
+selects observations2 and check_v2 only subject to the F2 restriction. Component model2
+selects observations3 and the exact revised check_v3. Structural validation AND the matching
+independent checker must both pass. A model2 job cannot obtain evidence from check_v2
+acceptance, even if that frozen checker alone lacks model binding. Do not choose the
+checker only from a result's self-declared format. Frozen /2 checker bytes stay unchanged;
+new wrapper/selection requirements are prospective B/coordinator-owned records. No old
+K2 HostRecord, selector, placement or runtime authority authorizes new component identities.
+Human installation, genuine L1, U0024 limits and later public authorization remain separate.

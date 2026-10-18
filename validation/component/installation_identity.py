@@ -30,6 +30,32 @@ ADDITIONS = {
     "validation/component/test_transient_lifetime.py",
 }
 
+ISSUE_BINDING = "validation/component/issue-amendment-binding.json"
+ISSUE_BASE_SHA = "a1d6ac18f52295aaf63a6c23b2dbf4815a8bfbef437c2e67782463a7e05f4f8b"
+ISSUE_ADR_SHA = "79ec2b939d5cdd02905861c03e1a8f32733648f47cfbb4db2d1d477dd0a414a7"
+ISSUE_APPENDIX_SHA = "b6f868c5dcd7ee610d85da2396bb5f617687fc8dbb0aa6f84941d62f6a057247"
+ISSUE_ADR_BYTES = 67486
+ISSUE_REPLACEMENTS = {
+    "docs/decisions/U0011-the-native-engine-core.md",
+    "validation/component/test_installation_identity.py",
+    "contract/schema/mapped/MappedEngineJob.json",
+    "contract/schema/mapped/MappedEngineResult.json",
+    "contract/uarch_contract/mapped.py",
+    "validation/component/installation_identity.py",
+}
+ISSUE_ADDITIONS = {
+    "contract/tests/mapped/test_component_capacity_integration_v3.py",
+    "contract/tests/mapped/fixtures/issue_capacity/sr2-v3-job.json",
+    "contract/tests/mapped/fixtures/issue_capacity/sr2-v3-result.json",
+    "contract/tests/mapped/test_component_credit_cursor_v3.py",
+    "validation/component/issue_checks.py",
+    "validation/component/test_issue_checks.py",
+    "contract/tests/mapped/test_component_issue_v3.py",
+    "validation/component/transition_checks_v3.py",
+    "contract/uarch_contract/mapped_issue.py",
+    "validation/component/observations_v3.py",
+}
+
 
 def digest(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
@@ -37,7 +63,10 @@ def digest(raw: bytes) -> str:
 
 def verify_adr(raw: bytes) -> None:
     assert digest(raw[:INSTALLED_BYTES]) == INSTALLED_SHA, "installed K2 ADR prefix"
-    assert digest(raw[INSTALLED_BYTES:]) == COMPONENT_SHA, "reviewed component suffix"
+    assert digest(raw[INSTALLED_BYTES:48294]) == COMPONENT_SHA, "reviewed component suffix"
+    assert len(raw) == ISSUE_ADR_BYTES, "exact issue ADR length"
+    assert digest(raw[48294:]) == ISSUE_APPENDIX_SHA, "reviewed issue appendix"
+    assert digest(raw) == ISSUE_ADR_SHA, "exact issue ADR"
 
 
 def installation_bindings(
@@ -69,6 +98,7 @@ def installation_bindings(
         len(value) == 64 and all(c in "0123456789abcdef" for c in value)
         for value in expected.values()
     ), "SHA256 shape"
+    expected = issue_bindings(root, expected)
     verify_adr((root / ADR).read_bytes())
     return expected
 
@@ -76,3 +106,26 @@ def installation_bindings(
 def verify_postimages(root: Path, expected: dict[str, str]) -> None:
     for path, value in expected.items():
         assert digest((root / path).read_bytes()) == value, f"installed postimage: {path}"
+
+
+def issue_bindings(root: Path, expected: dict[str, str], record: Any = None) -> dict[str, str]:
+    """Required prospective overlay; original installation record remains byte frozen."""
+    assert digest((root / BINDING).read_bytes()) == ISSUE_BASE_SHA, "historical binding bytes"
+    if record is None:
+        record = json.loads((root / ISSUE_BINDING).read_text())
+    assert record["format"] == "component-issue-amendment-binding/1"
+    assert record["authority"] is None
+    assert record["base_binding_sha256"] == ISSUE_BASE_SHA
+    assert set(record["replacements"]) == ISSUE_REPLACEMENTS, "exact issue replacements"
+    assert set(record["additions"]) == ISSUE_ADDITIONS, "exact issue additions"
+    output = dict(expected)
+    for path, transition in record["replacements"].items():
+        assert output[path] == transition["before"], "issue transition preimage"
+        output[path] = transition["after"]
+    assert output[ADR] == ISSUE_ADR_SHA, "exact issue ADR transition"
+    assert not (set(output) & set(record["additions"])), "issue duplicate addition"
+    output.update(record["additions"])
+    assert all(len(v) == 64 and all(c in "0123456789abcdef" for c in v) for v in output.values()), (
+        "issue SHA256 shape"
+    )
+    return output

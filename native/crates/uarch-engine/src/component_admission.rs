@@ -378,7 +378,15 @@ fn profile(v: &mut Value) -> Result<()> {
     Ok(())
 }
 const PRODUCTION: &str = "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9";
+#[derive(Clone, Copy)]
+pub(crate) enum ModelVersion {
+    One,
+    Two,
+}
 pub(crate) fn validate(input: &str, trust: &Trust) -> Result<Admitted> {
+    validate_model(input, trust, ModelVersion::One)
+}
+pub(crate) fn validate_model(input: &str, trust: &Trust, model: ModelVersion) -> Result<Admitted> {
     require(
         input.len() <= crate::protocol::MAX_INPUT_BYTES,
         "CapacityExceeded",
@@ -396,7 +404,10 @@ pub(crate) fn validate(input: &str, trust: &Trust) -> Result<Admitted> {
         "UnsupportedWorkloadScope",
         "component stage",
     )?;
-    let mut v = crate::carrier::normalize_component(value)?;
+    let mut v = match model {
+        ModelVersion::One => crate::carrier::normalize_component(value)?,
+        ModelVersion::Two => crate::carrier::normalize_component_v3(value)?,
+    };
     crate::hardware::validate(&mut v["workload_closure"]["hardware_spec"])?;
     if !v["profile"].is_null() {
         profile(&mut v["profile"])?;

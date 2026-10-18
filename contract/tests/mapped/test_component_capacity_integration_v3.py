@@ -1,0 +1,53 @@
+"""Synthetic A1b integration control; no native execution or authority is implied."""
+
+import json
+from copy import deepcopy
+from pathlib import Path
+
+import pytest
+from uarch_contract.hashing import content_hash
+from uarch_contract.mapped import MappedEngineJob, validate_result
+
+FIXTURES = Path(__file__).parent / "fixtures" / "issue_capacity"
+
+
+def pair():
+    job = MappedEngineJob.model_validate_json((FIXTURES / "sr2-v3-job.json").read_bytes())
+    result = json.loads((FIXTURES / "sr2-v3-result.json").read_bytes())
+    return job, result
+
+
+def test_dependency_tight_capacity_valid_control():
+    job, result = pair()
+    validate_result(result, job)
+
+
+def test_validate_result_refuses_dependency_tight_pre_release_grant():
+    job, result = pair()
+    validate_result(result, job)
+    forged = deepcopy(result)
+    obs = forged["observations"]
+    request = next(r for r in obs["dma"]["records"] if r["request_id"] == "r02.00")
+    task = next(r for r in obs["jobs"]["records"] if r["job_id"] == "r02")
+    assert task["ready_ps"] == request["reservation_ps"] == request["issue_ps"] == 86000
+    first = next(
+        a
+        for a in obs["activities"]["records"]
+        if a["request_id"] == "r02.00" and a["subphase"] == "dma_issue" and a["kind"] == "alignment"
+    )
+    assert first["predecessors"] == [{"activity_id": "activity-00000024", "relation": "dependency"}]
+    early, late = [o for o in obs["reservation_opportunities"]["records"] if o["t_ps"] == 86000]
+    assert (early["event_cursor"], late["event_cursor"]) == (52, 54)
+    assert early["granted_request_ids"] == []
+    assert late["granted_request_ids"] == ["r02.00"]
+    terminal = next(
+        a
+        for a in obs["activities"]["records"]
+        if a["request_id"] == "r00.00" and a["subphase"] == "ack" and a["kind"] == "service"
+    )
+    assert terminal["end_ps"] == 86000 and terminal["completion_ordinal"] == 53
+    early["granted_request_ids"], late["granted_request_ids"] = ["r02.00"], []
+    forged["result_hash"] = content_hash(forged, exclude=("result_hash",))
+    with pytest.raises(ValueError, match="IncompleteObservations: reservation cursor capacity"):
+        validate_result(forged, job)
+    validate_result(result, job)

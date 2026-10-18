@@ -460,6 +460,157 @@
       "title": "ComponentActivity",
       "type": "object"
     },
+    "ComponentActivityV3": {
+      "additionalProperties": false,
+      "properties": {
+        "activity_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Activity Id",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "compute",
+            "memory",
+            "noc",
+            "sync",
+            "overhead"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "completion_ordinal": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Completion Ordinal",
+          "type": "integer"
+        },
+        "dispatch_ordinal": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Dispatch Ordinal",
+          "type": "integer"
+        },
+        "end_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "End Ps",
+          "type": "integer"
+        },
+        "job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "service",
+            "alignment"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "occupies_resource": {
+          "title": "Occupies Resource",
+          "type": "boolean"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        },
+        "predecessors": {
+          "items": {
+            "$ref": "#/$defs/ActivityPredecessor"
+          },
+          "title": "Predecessors",
+          "type": "array"
+        },
+        "ready_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Ready Ps",
+          "type": "integer"
+        },
+        "receiving_domain": {
+          "anyOf": [
+            {
+              "enum": [
+                "core",
+                "noc",
+                "dram"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receiving Domain"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Request Id"
+        },
+        "start_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start Ps",
+          "type": "integer"
+        },
+        "subphase": {
+          "enum": [
+            "dma_issue",
+            "compute_overhead",
+            "compute_stage",
+            "compute_wave",
+            "compute_drain",
+            "request_noc",
+            "response_noc",
+            "unicast_noc",
+            "dram_latency",
+            "channel_service",
+            "read_port",
+            "write_port",
+            "ack",
+            "barrier"
+          ],
+          "title": "Subphase",
+          "type": "string"
+        }
+      },
+      "required": [
+        "activity_id",
+        "job_id",
+        "request_id",
+        "subphase",
+        "kind",
+        "ready_ps",
+        "start_ps",
+        "end_ps",
+        "owner_id",
+        "category",
+        "receiving_domain",
+        "occupies_resource",
+        "dispatch_ordinal",
+        "completion_ordinal",
+        "predecessors"
+      ],
+      "title": "ComponentActivityV3",
+      "type": "object"
+    },
     "ComponentClockObservation": {
       "additionalProperties": false,
       "properties": {
@@ -678,6 +829,65 @@
       "title": "ComponentObservations",
       "type": "object"
     },
+    "ComponentObservationsV3": {
+      "additionalProperties": false,
+      "properties": {
+        "activities": {
+          "$ref": "#/$defs/Observed_ComponentActivityV3_"
+        },
+        "allocations": {
+          "$ref": "#/$defs/Observed_AllocationObservation_"
+        },
+        "clocks": {
+          "$ref": "#/$defs/Observed_ComponentClockObservation_"
+        },
+        "critical_path": {
+          "$ref": "#/$defs/Observed_ComponentCriticalInterval_"
+        },
+        "dma": {
+          "$ref": "#/$defs/Observed_DmaObservationV3_"
+        },
+        "events": {
+          "$ref": "#/$defs/Observed_EventObservation_"
+        },
+        "format": {
+          "const": "uarch-native-observations/3",
+          "title": "Format",
+          "type": "string"
+        },
+        "jobs": {
+          "$ref": "#/$defs/Observed_JobObservation_"
+        },
+        "queue_membership": {
+          "$ref": "#/$defs/Observed_ComponentQueueObservationV3_"
+        },
+        "reservation_opportunities": {
+          "$ref": "#/$defs/Observed_DmaReservationOpportunity_"
+        },
+        "resource_intervals": {
+          "$ref": "#/$defs/Observed_ComponentResourceInterval_"
+        },
+        "transfers": {
+          "$ref": "#/$defs/Observed_TransferObservation_"
+        }
+      },
+      "required": [
+        "format",
+        "events",
+        "jobs",
+        "activities",
+        "clocks",
+        "dma",
+        "reservation_opportunities",
+        "transfers",
+        "allocations",
+        "queue_membership",
+        "resource_intervals",
+        "critical_path"
+      ],
+      "title": "ComponentObservationsV3",
+      "type": "object"
+    },
     "ComponentQueueObservation": {
       "additionalProperties": false,
       "properties": {
@@ -768,6 +978,99 @@
         "activity_id"
       ],
       "title": "ComponentQueueObservation",
+      "type": "object"
+    },
+    "ComponentQueueObservationV3": {
+      "additionalProperties": false,
+      "properties": {
+        "activity_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Activity Id"
+        },
+        "clock_domain": {
+          "anyOf": [
+            {
+              "enum": [
+                "core",
+                "noc",
+                "dram"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clock Domain"
+        },
+        "enter_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Enter Ps",
+          "type": "integer"
+        },
+        "item_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "leave_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Leave Ps"
+        },
+        "owner_id": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner Id",
+          "type": "integer"
+        },
+        "population": {
+          "enum": [
+            "waiting",
+            "service",
+            "inflight",
+            "pending"
+          ],
+          "title": "Population",
+          "type": "string"
+        },
+        "queue_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Queue Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "queue_id",
+        "item_id",
+        "population",
+        "enter_ps",
+        "leave_ps",
+        "owner_id",
+        "clock_domain",
+        "activity_id"
+      ],
+      "title": "ComponentQueueObservationV3",
       "type": "object"
     },
     "ComponentResourceInterval": {
@@ -1051,6 +1354,184 @@
         "route_id"
       ],
       "title": "DmaObservation",
+      "type": "object"
+    },
+    "DmaObservationV3": {
+      "additionalProperties": false,
+      "properties": {
+        "complete_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Complete Ps",
+          "type": "integer"
+        },
+        "credit_acquire_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Credit Acquire Ps"
+        },
+        "credit_release_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Credit Release Ps"
+        },
+        "destination_buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Destination Buffer Id",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "read",
+            "write",
+            "unicast"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "dma_engine_id": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dma Engine Id"
+        },
+        "issue_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Issue Ps",
+          "type": "integer"
+        },
+        "job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "payload_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "request_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "reservation_ps": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reservation Ps"
+        },
+        "route_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Route Id",
+          "type": "string"
+        },
+        "source_buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Source Buffer Id",
+          "type": "string"
+        },
+        "transaction_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Transaction Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "request_id",
+        "job_id",
+        "dma_engine_id",
+        "direction",
+        "source_buffer_id",
+        "destination_buffer_id",
+        "payload_bytes",
+        "transaction_bytes",
+        "credit_acquire_ps",
+        "issue_ps",
+        "complete_ps",
+        "credit_release_ps",
+        "route_id",
+        "reservation_ps"
+      ],
+      "title": "DmaObservationV3",
+      "type": "object"
+    },
+    "DmaReservationOpportunity": {
+      "additionalProperties": false,
+      "properties": {
+        "event_cursor": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Event Cursor",
+          "type": "integer"
+        },
+        "granted_request_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Granted Request Ids",
+          "type": "array"
+        },
+        "opportunity_ordinal": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Opportunity Ordinal",
+          "type": "integer"
+        },
+        "t_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "T Ps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "opportunity_ordinal",
+        "t_ps",
+        "event_cursor",
+        "granted_request_ids"
+      ],
+      "title": "DmaReservationOpportunity",
       "type": "object"
     },
     "EventObservation": {
@@ -1609,7 +2090,10 @@
           "type": "string"
         },
         "version": {
-          "const": "1",
+          "enum": [
+            "1",
+            "2"
+          ],
           "title": "Version",
           "type": "string"
         }
@@ -1794,6 +2278,29 @@
       "title": "Observed[ClockObservation]",
       "type": "object"
     },
+    "Observed_ComponentActivityV3_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/ComponentActivityV3"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[ComponentActivityV3]",
+      "type": "object"
+    },
     "Observed_ComponentActivity_": {
       "additionalProperties": false,
       "properties": {
@@ -1861,6 +2368,29 @@
         "records"
       ],
       "title": "Observed[ComponentCriticalInterval]",
+      "type": "object"
+    },
+    "Observed_ComponentQueueObservationV3_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/ComponentQueueObservationV3"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[ComponentQueueObservationV3]",
       "type": "object"
     },
     "Observed_ComponentQueueObservation_": {
@@ -1932,6 +2462,29 @@
       "title": "Observed[CriticalInterval]",
       "type": "object"
     },
+    "Observed_DmaObservationV3_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/DmaObservationV3"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[DmaObservationV3]",
+      "type": "object"
+    },
     "Observed_DmaObservation_": {
       "additionalProperties": false,
       "properties": {
@@ -1953,6 +2506,29 @@
         "records"
       ],
       "title": "Observed[DmaObservation]",
+      "type": "object"
+    },
+    "Observed_DmaReservationOpportunity_": {
+      "additionalProperties": false,
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/DmaReservationOpportunity"
+          },
+          "title": "Records",
+          "type": "array"
+        },
+        "status": {
+          "const": "observed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "records"
+      ],
+      "title": "Observed[DmaReservationOpportunity]",
       "type": "object"
     },
     "Observed_EventObservation_": {
@@ -2603,7 +3179,8 @@
       "discriminator": {
         "mapping": {
           "uarch-native-observations/1": "#/$defs/Observations",
-          "uarch-native-observations/2": "#/$defs/ComponentObservations"
+          "uarch-native-observations/2": "#/$defs/ComponentObservations",
+          "uarch-native-observations/3": "#/$defs/ComponentObservationsV3"
         },
         "propertyName": "format"
       },
@@ -2613,6 +3190,9 @@
         },
         {
           "$ref": "#/$defs/ComponentObservations"
+        },
+        {
+          "$ref": "#/$defs/ComponentObservationsV3"
         }
       ],
       "title": "Observations"

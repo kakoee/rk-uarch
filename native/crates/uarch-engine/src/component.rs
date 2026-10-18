@@ -100,6 +100,11 @@ pub(crate) struct Dispatch {
     pub phase: u8,
     pub seq: u64,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ObservationVersion {
+    V2,
+    V3,
+}
 #[derive(Clone, Debug)]
 pub(crate) struct Sequence {
     pub job: usize,
@@ -113,6 +118,7 @@ pub(crate) struct Sequence {
     pub phases: Vec<Phase>,
     pub step: usize,
     pub ready: u64,
+    pub reservation: Option<u64>,
     pub issue: Option<u64>,
     pub end: Option<u64>,
     pub activities: Vec<usize>,
@@ -161,7 +167,17 @@ pub(crate) struct Allocation {
     pub start: Option<u64>,
     pub end: Option<u64>,
 }
+#[derive(Clone, Debug)]
+pub(crate) struct ReservationOpportunity {
+    pub time: u64,
+    pub event_cursor: u64,
+    pub granted: Vec<usize>,
+}
 pub(crate) struct Runtime {
+    pub observations: ObservationVersion,
+    pub reservation_opportunities: Vec<ReservationOpportunity>,
+    eligibility_dirty: bool,
+    pending_issue: BTreeMap<u64, BTreeSet<usize>>,
     pub allocations: Vec<Allocation>,
     pub activities: Vec<Activity>,
     pub events: Vec<Dispatch>,
@@ -192,6 +208,7 @@ fn endpoint(a: &Activity, completion: bool) -> Kind {
             "channel_service" | "dram_latency" => (Kind::MemReq, Kind::MemResp),
             "request_noc" | "response_noc" | "unicast_noc" => (Kind::NocHead, Kind::NocTail),
             "ack" => (Kind::TaskReady, Kind::DmaDone),
+            "dma_issue" => (Kind::TaskReady, Kind::DmaIssue),
             "barrier" => (Kind::SyncArrive, Kind::BarrierRelease),
             _ => unreachable!("typed phase"),
         }
@@ -200,7 +217,14 @@ fn endpoint(a: &Activity, completion: bool) -> Kind {
 }
 impl Runtime {
     fn new(v: &Admitted) -> Result<Self> {
+        Self::new_version(v, ObservationVersion::V2)
+    }
+    fn new_version(v: &Admitted, observations: ObservationVersion) -> Result<Self> {
         let mut r = Self {
+            observations,
+            reservation_opportunities: vec![],
+            eligibility_dirty: true,
+            pending_issue: BTreeMap::new(),
             allocations: v
                 .graph
                 .buffers
@@ -249,6 +273,7 @@ impl Runtime {
                 phases: vec![],
                 step: 0,
                 ready: 0,
+                reservation: None,
                 issue: None,
                 end: None,
                 activities: vec![],
@@ -358,6 +383,17 @@ impl Runtime {
                         let channel = v.owners[&format!("channel:{}", f.channel)];
                         let hops = mul(route.hops, h.hop_cycles)?;
                         let mut phases = vec![];
+                        if observations == ObservationVersion::V3 {
+                            phases.push(phase(
+                                "dma_issue",
+                                t.owner,
+                                "memory",
+                                Some(0),
+                                0,
+                                false,
+                                false,
+                            ));
+                        }
                         if *write {
                             phases.push(phase(
                                 "write_port",
@@ -422,7 +458,11 @@ impl Runtime {
             r.jobs[job].sequences.push(r.sequences.len());
             r.sequences.push(seq);
         }
-        if r.sequences.len() > crate::protocol::MAX_EVENTS / 24 {
+        let events_per_sequence = match observations {
+            ObservationVersion::V2 => 24,
+            ObservationVersion::V3 => 28,
+        };
+        if r.sequences.len() > crate::protocol::MAX_EVENTS / events_per_sequence {
             return Err(refuse(
                 "CapacityExceeded",
                 "",
@@ -585,6 +625,14 @@ impl Runtime {
         previous: Option<usize>,
     ) -> Result<()> {
         let p = self.sequences[s].phases[self.sequences[s].step].clone();
+        if p.name == "dma_issue" {
+            let engine = self.sequences[s].engine.expect("DMA issue engine");
+            if !self.pending_issue.entry(engine).or_default().remove(&s) {
+                return Err(refuse("InternalError", "", "issue without reservation"));
+            }
+            self.inflight.entry(engine).or_default().insert(s);
+            self.sequences[s].issue = Some(self.now);
+        }
         self.sequences[s].service_ready = false;
         self.sequences[s].active = true;
         let (end, ratio) = if p.name == "channel_service" {
@@ -656,6 +704,9 @@ impl Runtime {
             return Ok(());
         }
         self.sequences[s].end = Some(self.now);
+        // Terminal transitions can release a credit or complete a dependency.
+        // A phase-0 batch coalesces before reserve; inline completion is seen next loop.
+        self.eligibility_dirty = true;
         if let Some(engine) = self.sequences[s].engine {
             self.inflight
                 .get_mut(&engine)
@@ -737,7 +788,84 @@ impl Runtime {
             }
         }
     }
+    fn reserve(&mut self, v: &Admitted) -> Result<bool> {
+        if !self.eligibility_dirty {
+            return Ok(false);
+        }
+        self.eligibility_dirty = false;
+        self.reservation_opportunities.push(ReservationOpportunity {
+            time: self.now,
+            event_cursor: self.events.len() as u64,
+            granted: vec![],
+        });
+        let mut ready: Vec<_> = self
+            .sequences
+            .iter()
+            .enumerate()
+            .filter(|(_, s)| {
+                s.enabled && s.issue.is_none() && s.reservation.is_none() && s.ready <= self.now
+            })
+            .map(|(i, s)| {
+                (
+                    s.ready,
+                    s.engine.unwrap_or(0),
+                    s.request.clone().unwrap_or_default(),
+                    i,
+                )
+            })
+            .collect();
+        ready.sort();
+        let mut changed = false;
+        for (_, _, _, s) in ready {
+            if let Some(engine) = self.sequences[s].engine {
+                let acquired = self.inflight.get(&engine).map_or(0, BTreeSet::len);
+                let pending = self.pending_issue.get(&engine).map_or(0, BTreeSet::len);
+                if (acquired + pending) as u64 >= v.hardware.credit_limit {
+                    continue;
+                }
+                // Strict eligibility uses reservation time, never the later aligned issue edge.
+                // Equal job-readiness/release is dependency eligibility, not credit waiting.
+                if self.now > self.jobs[self.sequences[s].job].ready.unwrap() {
+                    let before: Vec<_> = self
+                        .sequences
+                        .iter()
+                        .enumerate()
+                        .filter(|(i, x)| {
+                            *i != s
+                                && x.engine == Some(engine)
+                                && x.reservation.is_some_and(|t| t < self.now)
+                                && x.end.is_none_or(|t| t >= self.now)
+                        })
+                        .collect();
+                    if before.len() as u64 == v.hardware.credit_limit {
+                        self.sequences[s].credit_causes = before
+                            .iter()
+                            .filter(|(_, x)| {
+                                x.issue.is_some_and(|t| t < self.now) && x.end == Some(self.now)
+                            })
+                            .filter_map(|(_, x)| x.activities.last().copied())
+                            .collect();
+                    }
+                }
+                self.pending_issue.entry(engine).or_default().insert(s);
+                self.sequences[s].reservation = Some(self.now);
+                self.reservation_opportunities
+                    .last_mut()
+                    .expect("actual opportunity")
+                    .granted
+                    .push(s);
+            } else {
+                self.sequences[s].issue = Some(self.now);
+                self.sequences[s].ready = self.now;
+            }
+            changed = true;
+        }
+        Ok(changed)
+    }
     fn issue(&mut self, v: &Admitted) -> Result<bool> {
+        if self.observations == ObservationVersion::V3 {
+            return self.reserve(v);
+        }
         let mut ready: Vec<_> = self
             .sequences
             .iter()
@@ -819,7 +947,10 @@ impl Runtime {
                     .iter()
                     .enumerate()
                     .filter(|(_, s)| {
-                        s.issue.is_some() && s.end.is_none() && !s.active && s.ready <= self.now
+                        (s.issue.is_some() || s.reservation.is_some())
+                            && s.end.is_none()
+                            && !s.active
+                            && s.ready <= self.now
                     })
                     .map(|(i, s)| {
                         (
@@ -886,9 +1017,7 @@ impl Runtime {
     }
 }
 pub(crate) fn execute(input: &str, trust: &Trust) -> Result<Value> {
-    let v = component_admission::validate(input, trust)?;
-    let runtime = Runtime::new(&v)?.run(&v)?;
-    crate::component_accounting::construct(&v, &runtime)
+    execute_with_observations(input, trust, ObservationVersion::V2)
 }
 
 #[cfg(test)]
@@ -928,3 +1057,42 @@ mod kernel_tests {
         );
     }
 }
+
+// PRIVATE UNAPPLIED prototype seam; public protocol does not select this version.
+pub(crate) fn execute_with_observations(
+    input: &str,
+    trust: &Trust,
+    version: ObservationVersion,
+) -> Result<Value> {
+    let v = match version {
+        ObservationVersion::V2 => component_admission::validate(input, trust)?,
+        ObservationVersion::V3 => component_admission::validate_model(
+            input,
+            trust,
+            component_admission::ModelVersion::Two,
+        )?,
+    };
+    let expected = if version == ObservationVersion::V3 {
+        "2"
+    } else {
+        "1"
+    };
+    if v.raw["engine"]["model"]["name"] != "native-intervals"
+        || v.raw["engine"]["model"]["version"] != expected
+    {
+        return Err(refuse(
+            "UnsupportedFidelity",
+            "/engine/model",
+            "explicit observation/model version",
+        ));
+    }
+    let state = match version {
+        ObservationVersion::V2 => Runtime::new(&v)?,
+        ObservationVersion::V3 => Runtime::new_version(&v, version)?,
+    };
+    let runtime = state.run(&v)?;
+    crate::component_accounting::construct(&v, &runtime)
+}
+#[cfg(test)]
+#[path = "issue_proposal_tests.rs"]
+mod issue_proposal_tests;
