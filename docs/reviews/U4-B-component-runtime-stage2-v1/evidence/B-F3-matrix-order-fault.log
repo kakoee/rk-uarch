@@ -1,0 +1,21 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 5, "sample": {}}
+
+=================================== FAILURES ===================================
+_________________ test_matrix_equal_ready_tie_and_wrong_order __________________
+
+    def test_matrix_equal_ready_tie_and_wrong_order():
+        job, result = projection()
+        check_matrix_order(job, result)
+        bad = deepcopy(result)
+        a, b = bad["observations"]["jobs"]["records"]
+        a["start_ps"], b["start_ps"] = b["start_ps"], a["start_ps"]
+        a["end_ps"], b["end_ps"] = b["end_ps"], a["end_ps"]
+>       with pytest.raises(ValueError, match="matrix FIFO-ready grant"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+validation/component/test_matrix_order.py:32: Failed
+=========================== short test summary info ============================
+FAILED validation/component/test_matrix_order.py::test_matrix_equal_ready_tie_and_wrong_order
+1 failed in 0.08s

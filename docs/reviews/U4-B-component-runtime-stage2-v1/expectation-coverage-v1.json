@@ -1,0 +1,3040 @@
+{
+  "closed_positive_keys": [
+    "accumulator_bytes",
+    "attribution_ps",
+    "barrier_ready_ps",
+    "capacity_bytes",
+    "channel_end_ps",
+    "channel_end_ratios",
+    "complete_ps",
+    "credit_causes",
+    "crossings_ps",
+    "duration_ps",
+    "final_inflight",
+    "forbidden_serial_duration_ps",
+    "fragments",
+    "hbm_payload_bytes",
+    "issue_ps",
+    "issued_ops",
+    "job_ready_ps",
+    "job_times_ps",
+    "max_inflight",
+    "native_status",
+    "opportunities",
+    "opportunity_cursor_time",
+    "outcome",
+    "payload_bytes",
+    "premise",
+    "read_payload_bytes",
+    "read_transaction_bytes",
+    "representation",
+    "required_accumulator_bytes",
+    "reservation_ps",
+    "response_ps",
+    "sram_read_bytes",
+    "sram_write_bytes",
+    "tile_durations_ps",
+    "transaction_bytes",
+    "transient_bacc",
+    "unicast_payload_bytes",
+    "useful_floor_ps",
+    "useful_ops",
+    "write_payload_bytes",
+    "write_transaction_bytes",
+    "wrong_alignment_ps"
+  ],
+  "format": "component-expectation-coverage/1",
+  "rows": [
+    {
+      "case_id": "v3:A-C01-resident",
+      "expected": {
+        "duration_ps": 702000,
+        "outcome": "success"
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:A-C02-cold",
+      "expected": {
+        "duration_ps": 656000,
+        "outcome": "success"
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:A-C02-resident",
+      "expected": {
+        "duration_ps": 547000,
+        "outcome": "success"
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:A-C03-resident",
+      "expected": {
+        "duration_ps": 1182000,
+        "outcome": "success"
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:A2-255-256-cold",
+      "expected": {
+        "issued_ops": 67108864,
+        "outcome": "success",
+        "read_payload_bytes": 523776,
+        "read_transaction_bytes": 523776,
+        "useful_ops": 66977792,
+        "write_payload_bytes": 261632,
+        "write_transaction_bytes": 261632
+      },
+      "keys": {
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "read_payload_bytes": "independent output literal",
+        "read_transaction_bytes": "independent output literal",
+        "useful_ops": "independent output literal",
+        "write_payload_bytes": "independent output literal",
+        "write_transaction_bytes": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:A2-255-256-fixture_resident",
+      "expected": {
+        "duration_ps": 2364000,
+        "issued_ops": 67108864,
+        "outcome": "success",
+        "sram_read_bytes": 523776,
+        "sram_write_bytes": 261632,
+        "useful_ops": 66977792
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:B-native-D13-canonical-owner",
+      "expected": {
+        "barrier_ready_ps": 62000,
+        "duration_ps": 94000,
+        "outcome": "success"
+      },
+      "keys": {
+        "barrier_ready_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:B-native-O2",
+      "expected": {
+        "duration_ps": 2735000,
+        "hbm_payload_bytes": 0,
+        "issued_ops": 1966080,
+        "job_ready_ps": {
+          "a": 0,
+          "b": 547000,
+          "c": 1094000,
+          "d": 1094000,
+          "e": 2188000
+        },
+        "job_times_ps": {
+          "a": [
+            0,
+            547000
+          ],
+          "b": [
+            547000,
+            1094000
+          ],
+          "c": [
+            1094000,
+            1641000
+          ],
+          "d": [
+            1641000,
+            2188000
+          ],
+          "e": [
+            2188000,
+            2735000
+          ]
+        },
+        "outcome": "success",
+        "sram_read_bytes": 500,
+        "sram_write_bytes": 210,
+        "transient_bacc": [
+          547000,
+          2188000
+        ],
+        "useful_ops": 1050
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "hbm_payload_bytes": "independent output literal",
+        "issued_ops": "independent output literal",
+        "job_ready_ps": "independent output literal",
+        "job_times_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "transient_bacc": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:B-native-resource-C04-carrier",
+      "expected": {
+        "arithmetic_only_duration_ps": 1855000,
+        "blocker": "different exact accumulator footprints cannot share full-capacity allocation",
+        "outcome": "CapacityExceeded"
+      },
+      "keys": {
+        "arithmetic_only_duration_ps": "historical metadata/arithmetic only; not a native duration claim",
+        "blocker": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B-native-resource-C06-small",
+      "expected": {
+        "outcome": "CapacityExceeded",
+        "required_accumulator_bytes": 262144
+      },
+      "keys": {
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "required_accumulator_bytes": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B-native-resource-C07-hbm-1",
+      "expected": {
+        "capacity_bytes": 32000000000,
+        "outcome": "CapacityExceeded"
+      },
+      "keys": {
+        "capacity_bytes": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B-native-resource-C07-sram-1",
+      "expected": {
+        "capacity_bytes": 16777216,
+        "outcome": "SramCapacityExceeded"
+      },
+      "keys": {
+        "capacity_bytes": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B2-255-256",
+      "expected": {
+        "duration_ps": 2364000,
+        "native_status": "not_run",
+        "outcome": "success",
+        "representation": "prospective transient accumulator",
+        "sram_read_bytes": 523776,
+        "sram_write_bytes": 261632,
+        "useful_ops": 66977792
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "native_status": "descriptive metadata, not checked as output",
+        "outcome": "independent output literal",
+        "representation": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:B2-C04-transient",
+      "expected": {
+        "duration_ps": 1855000,
+        "native_status": "not_run",
+        "outcome": "success",
+        "representation": "prospective transient accumulator",
+        "sram_read_bytes": 393728,
+        "sram_write_bytes": 131584,
+        "useful_ops": 33685504
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "native_status": "descriptive metadata, not checked as output",
+        "outcome": "independent output literal",
+        "representation": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:B2-equal",
+      "expected": {
+        "duration_ps": 2364000,
+        "native_status": "not_run",
+        "outcome": "success",
+        "representation": "prospective transient accumulator",
+        "sram_read_bytes": 524288,
+        "sram_write_bytes": 262144,
+        "useful_ops": 67108864
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "native_status": "descriptive metadata, not checked as output",
+        "outcome": "independent output literal",
+        "representation": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:B2-lifetime-false-writer",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "InvalidDependency",
+        "parent_case": "B2-C04-transient"
+      },
+      "keys": {
+        "admission_outcome": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "parent_case": "historical metadata/arithmetic only; not a native duration claim"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B2-lifetime-missing-consumer",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "InvalidDependency",
+        "parent_case": "B2-C04-transient"
+      },
+      "keys": {
+        "admission_outcome": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "parent_case": "historical metadata/arithmetic only; not a native duration claim"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B2-lifetime-no-order",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "LiveBufferAlias",
+        "parent_case": "B2-C04-transient"
+      },
+      "keys": {
+        "admission_outcome": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "parent_case": "historical metadata/arithmetic only; not a native duration claim"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B2-lifetime-wrong-owner",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "InvalidResource",
+        "parent_case": "B2-C04-transient"
+      },
+      "keys": {
+        "admission_outcome": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "parent_case": "historical metadata/arithmetic only; not a native duration claim"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B2-resource-C04-carrier",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "CapacityExceeded",
+        "parent_case": "C04-carrier"
+      },
+      "keys": {
+        "admission_outcome": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "parent_case": "historical metadata/arithmetic only; not a native duration claim"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B2-resource-C06-small",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "CapacityExceeded",
+        "parent_case": "C06-small"
+      },
+      "keys": {
+        "admission_outcome": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "parent_case": "historical metadata/arithmetic only; not a native duration claim"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B2-resource-C07-hbm-1",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "CapacityExceeded",
+        "parent_case": "C07-hbm-1"
+      },
+      "keys": {
+        "admission_outcome": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "parent_case": "historical metadata/arithmetic only; not a native duration claim"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B2-resource-C07-sram-1",
+      "expected": {
+        "admission_outcome": "success",
+        "outcome": "SramCapacityExceeded",
+        "parent_case": "C07-sram-1"
+      },
+      "keys": {
+        "admission_outcome": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "parent_case": "historical metadata/arithmetic only; not a native duration claim"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B3-false-writer-disjoint",
+      "expected": {
+        "outcome": "InvalidDependency"
+      },
+      "keys": {
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B3-shared-use-control",
+      "expected": {
+        "duration_ps": 2364000,
+        "outcome": "success"
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:B3-terminal-control",
+      "expected": {
+        "duration_ps": 4728000,
+        "outcome": "success"
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:B3-terminal-partial-A1",
+      "expected": {
+        "outcome": "InvalidDependency"
+      },
+      "keys": {
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B3-use-before-A3b",
+      "expected": {
+        "outcome": "InvalidDependency"
+      },
+      "keys": {
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B3-use-unordered-A3c",
+      "expected": {
+        "outcome": "InvalidDependency"
+      },
+      "keys": {
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "resource-preflight"
+    },
+    {
+      "case_id": "v3:B3-writer-control",
+      "expected": {
+        "duration_ps": 1094000,
+        "outcome": "success"
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C01",
+      "expected": {
+        "accumulator_bytes": 16384,
+        "duration_ps": 702000,
+        "hbm_payload_bytes": 0,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "sram_read_bytes": 139264,
+        "sram_write_bytes": 8192,
+        "useful_floor_ps": 16000,
+        "useful_ops": 2097152
+      },
+      "keys": {
+        "accumulator_bytes": "input premise plus observed allocation",
+        "duration_ps": "independent output literal",
+        "hbm_payload_bytes": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_floor_ps": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C02",
+      "expected": {
+        "accumulator_bytes": 84,
+        "duration_ps": 547000,
+        "hbm_payload_bytes": 0,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "sram_read_bytes": 100,
+        "sram_write_bytes": 42,
+        "useful_floor_ps": 2,
+        "useful_ops": 210
+      },
+      "keys": {
+        "accumulator_bytes": "input premise plus observed allocation",
+        "duration_ps": "independent output literal",
+        "hbm_payload_bytes": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_floor_ps": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C03",
+      "expected": {
+        "duration_ps": 1182000,
+        "issued_ops": 33685504,
+        "outcome": "success",
+        "tile_durations_ps": [
+          1182000,
+          673000
+        ],
+        "useful_ops": 33685504
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "tile_durations_ps": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C04-carrier",
+      "expected": {
+        "arithmetic_only_duration_ps": 1855000,
+        "blocker": "different exact accumulator footprints cannot share full-capacity allocation",
+        "outcome": "CapacityExceeded"
+      },
+      "keys": {
+        "arithmetic_only_duration_ps": "historical metadata/arithmetic only; not a native duration claim",
+        "blocker": "historical metadata/arithmetic only; not a native duration claim",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "profile"
+    },
+    {
+      "case_id": "v3:C04-control",
+      "expected": {
+        "duration_ps": 1094000,
+        "issued_ops": 786432,
+        "outcome": "success",
+        "premise": "two equal-footprint independent jobs share matrix0 and accumulator; FIFO",
+        "useful_ops": 420
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C05-A-carrier",
+      "expected": {
+        "duration_ps": 656000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "read_payload_bytes": 100,
+        "read_transaction_bytes": 512,
+        "useful_ops": 210,
+        "write_payload_bytes": 42,
+        "write_transaction_bytes": 256
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "read_payload_bytes": "independent output literal",
+        "read_transaction_bytes": "independent output literal",
+        "useful_ops": "independent output literal",
+        "write_payload_bytes": "independent output literal",
+        "write_transaction_bytes": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C05-B",
+      "expected": {
+        "duration_ps": 669000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "read_payload_bytes": 100,
+        "read_transaction_bytes": 512,
+        "useful_ops": 210,
+        "write_payload_bytes": 42,
+        "write_transaction_bytes": 256
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "read_payload_bytes": "independent output literal",
+        "read_transaction_bytes": "independent output literal",
+        "useful_ops": "independent output literal",
+        "write_payload_bytes": "independent output literal",
+        "write_transaction_bytes": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C06-fit",
+      "expected": {
+        "outcome": "success",
+        "required_accumulator_bytes": 262144
+      },
+      "keys": {
+        "outcome": "independent output literal",
+        "required_accumulator_bytes": "input premise plus observed allocation"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C06-small",
+      "expected": {
+        "outcome": "CapacityExceeded",
+        "required_accumulator_bytes": 262144
+      },
+      "keys": {
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "required_accumulator_bytes": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "profile"
+    },
+    {
+      "case_id": "v3:C07-hbm-0",
+      "expected": {
+        "capacity_bytes": 32000000000,
+        "outcome": "success"
+      },
+      "keys": {
+        "capacity_bytes": "input premise plus observed allocation",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C07-hbm-1",
+      "expected": {
+        "capacity_bytes": 32000000000,
+        "outcome": "CapacityExceeded"
+      },
+      "keys": {
+        "capacity_bytes": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "profile"
+    },
+    {
+      "case_id": "v3:C07-sram-0",
+      "expected": {
+        "capacity_bytes": 16777216,
+        "outcome": "success"
+      },
+      "keys": {
+        "capacity_bytes": "input premise plus observed allocation",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C07-sram-1",
+      "expected": {
+        "capacity_bytes": 16777216,
+        "outcome": "SramCapacityExceeded"
+      },
+      "keys": {
+        "capacity_bytes": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1",
+        "outcome": "Exact intended refusal; numeric input conditions independently derived in negative-expectations-v1"
+      },
+      "layer": "profile"
+    },
+    {
+      "case_id": "v3:C08-1-256-256-r1",
+      "expected": {
+        "duration_ps": 673000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 131584,
+        "sram_write_bytes": 512,
+        "useful_ops": 131072
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-1-256-256-r2",
+      "expected": {
+        "duration_ps": 336500,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 131584,
+        "sram_write_bytes": 512,
+        "useful_ops": 131072
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-1-256-7-r1",
+      "expected": {
+        "duration_ps": 548000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 4096,
+        "sram_write_bytes": 14,
+        "useful_ops": 3584
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-1-256-7-r2",
+      "expected": {
+        "duration_ps": 274000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 4096,
+        "sram_write_bytes": 14,
+        "useful_ops": 3584
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-1-5-256-r1",
+      "expected": {
+        "duration_ps": 547000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2570,
+        "sram_write_bytes": 512,
+        "useful_ops": 2560
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-1-5-256-r2",
+      "expected": {
+        "duration_ps": 273500,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2570,
+        "sram_write_bytes": 512,
+        "useful_ops": 2560
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-1-5-7-r1",
+      "expected": {
+        "duration_ps": 545000,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 80,
+        "sram_write_bytes": 14,
+        "useful_ops": 70
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-1-5-7-r2",
+      "expected": {
+        "duration_ps": 272500,
+        "issued_ops": 131072,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 80,
+        "sram_write_bytes": 14,
+        "useful_ops": 70
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-16-256-256-r1",
+      "expected": {
+        "duration_ps": 702000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 139264,
+        "sram_write_bytes": 8192,
+        "useful_ops": 2097152
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-16-256-256-r2",
+      "expected": {
+        "duration_ps": 351000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 139264,
+        "sram_write_bytes": 8192,
+        "useful_ops": 2097152
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-16-256-7-r1",
+      "expected": {
+        "duration_ps": 571000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 11776,
+        "sram_write_bytes": 224,
+        "useful_ops": 57344
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-16-256-7-r2",
+      "expected": {
+        "duration_ps": 285500,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 11776,
+        "sram_write_bytes": 224,
+        "useful_ops": 57344
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-16-5-256-r1",
+      "expected": {
+        "duration_ps": 569000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2720,
+        "sram_write_bytes": 8192,
+        "useful_ops": 40960
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-16-5-256-r2",
+      "expected": {
+        "duration_ps": 284500,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2720,
+        "sram_write_bytes": 8192,
+        "useful_ops": 40960
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-16-5-7-r1",
+      "expected": {
+        "duration_ps": 560000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 230,
+        "sram_write_bytes": 224,
+        "useful_ops": 1120
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-16-5-7-r2",
+      "expected": {
+        "duration_ps": 280000,
+        "issued_ops": 2097152,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 230,
+        "sram_write_bytes": 224,
+        "useful_ops": 1120
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-255-256-256-r1",
+      "expected": {
+        "duration_ps": 1181000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 261632,
+        "sram_write_bytes": 130560,
+        "useful_ops": 33423360
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-255-256-256-r2",
+      "expected": {
+        "duration_ps": 590500,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 261632,
+        "sram_write_bytes": 130560,
+        "useful_ops": 33423360
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-255-256-7-r1",
+      "expected": {
+        "duration_ps": 932000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 134144,
+        "sram_write_bytes": 3570,
+        "useful_ops": 913920
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-255-256-7-r2",
+      "expected": {
+        "duration_ps": 466000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 134144,
+        "sram_write_bytes": 3570,
+        "useful_ops": 913920
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-255-5-256-r1",
+      "expected": {
+        "duration_ps": 930000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5110,
+        "sram_write_bytes": 130560,
+        "useful_ops": 652800
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-255-5-256-r2",
+      "expected": {
+        "duration_ps": 465000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5110,
+        "sram_write_bytes": 130560,
+        "useful_ops": 652800
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-255-5-7-r1",
+      "expected": {
+        "duration_ps": 804000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2620,
+        "sram_write_bytes": 3570,
+        "useful_ops": 17850
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-255-5-7-r2",
+      "expected": {
+        "duration_ps": 402000,
+        "issued_ops": 33423360,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2620,
+        "sram_write_bytes": 3570,
+        "useful_ops": 17850
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-256-256-256-r1",
+      "expected": {
+        "duration_ps": 1182000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 262144,
+        "sram_write_bytes": 131072,
+        "useful_ops": 33554432
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-256-256-256-r2",
+      "expected": {
+        "duration_ps": 591000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 262144,
+        "sram_write_bytes": 131072,
+        "useful_ops": 33554432
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-256-256-7-r1",
+      "expected": {
+        "duration_ps": 934000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 134656,
+        "sram_write_bytes": 3584,
+        "useful_ops": 917504
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-256-256-7-r2",
+      "expected": {
+        "duration_ps": 467000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 134656,
+        "sram_write_bytes": 3584,
+        "useful_ops": 917504
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-256-5-256-r1",
+      "expected": {
+        "duration_ps": 931000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5120,
+        "sram_write_bytes": 131072,
+        "useful_ops": 655360
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-256-5-256-r2",
+      "expected": {
+        "duration_ps": 465500,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5120,
+        "sram_write_bytes": 131072,
+        "useful_ops": 655360
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-256-5-7-r1",
+      "expected": {
+        "duration_ps": 805000,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2630,
+        "sram_write_bytes": 3584,
+        "useful_ops": 17920
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-256-5-7-r2",
+      "expected": {
+        "duration_ps": 402500,
+        "issued_ops": 33554432,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2630,
+        "sram_write_bytes": 3584,
+        "useful_ops": 17920
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-3-256-256-r1",
+      "expected": {
+        "duration_ps": 677000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 132608,
+        "sram_write_bytes": 1536,
+        "useful_ops": 393216
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-3-256-256-r2",
+      "expected": {
+        "duration_ps": 338500,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 132608,
+        "sram_write_bytes": 1536,
+        "useful_ops": 393216
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-3-256-7-r1",
+      "expected": {
+        "duration_ps": 551000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5120,
+        "sram_write_bytes": 42,
+        "useful_ops": 10752
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-3-256-7-r2",
+      "expected": {
+        "duration_ps": 275500,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 5120,
+        "sram_write_bytes": 42,
+        "useful_ops": 10752
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-3-5-256-r1",
+      "expected": {
+        "duration_ps": 550000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2590,
+        "sram_write_bytes": 1536,
+        "useful_ops": 7680
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-3-5-256-r2",
+      "expected": {
+        "duration_ps": 275000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 2590,
+        "sram_write_bytes": 1536,
+        "useful_ops": 7680
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-3-5-7-r1",
+      "expected": {
+        "duration_ps": 547000,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 100,
+        "sram_write_bytes": 42,
+        "useful_ops": 210
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-3-5-7-r2",
+      "expected": {
+        "duration_ps": 273500,
+        "issued_ops": 393216,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 100,
+        "sram_write_bytes": 42,
+        "useful_ops": 210
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-64-256-256-r1",
+      "expected": {
+        "duration_ps": 798000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 163840,
+        "sram_write_bytes": 32768,
+        "useful_ops": 8388608
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-64-256-256-r2",
+      "expected": {
+        "duration_ps": 399000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 163840,
+        "sram_write_bytes": 32768,
+        "useful_ops": 8388608
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-64-256-7-r1",
+      "expected": {
+        "duration_ps": 643000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 36352,
+        "sram_write_bytes": 896,
+        "useful_ops": 229376
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-64-256-7-r2",
+      "expected": {
+        "duration_ps": 321500,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 36352,
+        "sram_write_bytes": 896,
+        "useful_ops": 229376
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-64-5-256-r1",
+      "expected": {
+        "duration_ps": 642000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 3200,
+        "sram_write_bytes": 32768,
+        "useful_ops": 163840
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-64-5-256-r2",
+      "expected": {
+        "duration_ps": 321000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 3200,
+        "sram_write_bytes": 32768,
+        "useful_ops": 163840
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-64-5-7-r1",
+      "expected": {
+        "duration_ps": 608000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 710,
+        "sram_write_bytes": 896,
+        "useful_ops": 4480
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C08-64-5-7-r2",
+      "expected": {
+        "duration_ps": 304000,
+        "issued_ops": 8388608,
+        "outcome": "success",
+        "premise": "resident compute only; no DMA; core scales once",
+        "sram_read_bytes": 710,
+        "sram_write_bytes": 896,
+        "useful_ops": 4480
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "sram_read_bytes": "independent output literal",
+        "sram_write_bytes": "independent output literal",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:C09-overlap",
+      "expected": {
+        "duration_ps": 547000,
+        "forbidden_serial_duration_ps": 607000,
+        "issued_ops": 393216,
+        "job_times_ps": {
+          "c": [
+            0,
+            547000
+          ],
+          "r00": [
+            0,
+            60000
+          ]
+        },
+        "outcome": "success",
+        "premise": "independent DMA into disjoint allocation while matrix0 computes resident tile",
+        "useful_ops": 210
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "forbidden_serial_duration_ps": "independent output literal",
+        "issued_ops": "independent output literal",
+        "job_times_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "premise": "descriptive metadata, not checked as output",
+        "useful_ops": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D01",
+      "expected": {
+        "attribution_ps": {
+          "compute": 0,
+          "memory": 51250,
+          "noc": 8750,
+          "overhead": 0,
+          "sync": 0
+        },
+        "crossings_ps": [
+          0,
+          4000,
+          52000,
+          54250,
+          59000,
+          60000
+        ],
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "keys": {
+        "attribution_ps": "independent output literal",
+        "crossings_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D02",
+      "expected": {
+        "crossings_ps": [
+          1000,
+          5000,
+          53000,
+          55250,
+          60000,
+          60000
+        ],
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "keys": {
+        "crossings_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D03",
+      "expected": {
+        "channel_end_ps": [
+          54250,
+          56500,
+          58750,
+          61000,
+          63250
+        ],
+        "channel_end_ratios": [
+          [
+            3851744,
+            71
+          ],
+          [
+            4011488,
+            71
+          ],
+          [
+            4171232,
+            71
+          ],
+          [
+            4330976,
+            71
+          ],
+          [
+            4490720,
+            71
+          ]
+        ],
+        "complete_ps": [
+          60000,
+          62000,
+          64000,
+          66000,
+          69000
+        ],
+        "duration_ps": 69000,
+        "outcome": "success"
+      },
+      "keys": {
+        "channel_end_ps": "independent output literal",
+        "channel_end_ratios": "independent output literal",
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D04",
+      "expected": {
+        "channel_end_ps": [
+          54250,
+          56500,
+          58750,
+          61000,
+          63250,
+          65500,
+          67750,
+          70000,
+          72250,
+          74500,
+          76750,
+          78999
+        ],
+        "channel_end_ratios": [
+          [
+            3851744,
+            71
+          ],
+          [
+            4011488,
+            71
+          ],
+          [
+            4171232,
+            71
+          ],
+          [
+            4330976,
+            71
+          ],
+          [
+            4490720,
+            71
+          ],
+          [
+            4650464,
+            71
+          ],
+          [
+            4810208,
+            71
+          ],
+          [
+            4969952,
+            71
+          ],
+          [
+            5129696,
+            71
+          ],
+          [
+            5289440,
+            71
+          ],
+          [
+            5449184,
+            71
+          ],
+          [
+            5608928,
+            71
+          ]
+        ],
+        "complete_ps": [
+          60000,
+          62000,
+          64000,
+          66000,
+          69000,
+          71000,
+          73000,
+          75000,
+          78000,
+          80000,
+          82000,
+          84000
+        ],
+        "duration_ps": 84000,
+        "outcome": "success"
+      },
+      "keys": {
+        "channel_end_ps": "independent output literal",
+        "channel_end_ratios": "independent output literal",
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D05-one",
+      "expected": {
+        "complete_ps": [
+          60000,
+          120000
+        ],
+        "duration_ps": 120000,
+        "issue_ps": [
+          0,
+          60000
+        ],
+        "outcome": "success"
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D05-two",
+      "expected": {
+        "complete_ps": [
+          60000,
+          62000
+        ],
+        "duration_ps": 62000,
+        "issue_ps": [
+          0,
+          0
+        ],
+        "outcome": "success"
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D06-full",
+      "expected": {
+        "complete_ps": [
+          60000,
+          62000,
+          64000
+        ],
+        "duration_ps": 64000,
+        "issue_ps": [
+          0,
+          0,
+          0
+        ],
+        "outcome": "success"
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D06-two",
+      "expected": {
+        "complete_ps": [
+          60000,
+          62000,
+          120000
+        ],
+        "duration_ps": 120000,
+        "issue_ps": [
+          0,
+          0,
+          60000
+        ],
+        "outcome": "success"
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D07",
+      "expected": {
+        "final_inflight": 0,
+        "issue_ps": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          60000
+        ],
+        "max_inflight": 32,
+        "outcome": "success"
+      },
+      "keys": {
+        "final_inflight": "independent output literal",
+        "issue_ps": "independent output literal",
+        "max_inflight": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D08",
+      "expected": {
+        "complete_ps": [
+          60000,
+          61000
+        ],
+        "duration_ps": 61000,
+        "outcome": "success",
+        "response_ps": [
+          59000,
+          59000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "response_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D09-read",
+      "expected": {
+        "crossings_ps": [
+          0,
+          3334,
+          52000,
+          54250,
+          58334,
+          60000
+        ],
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "keys": {
+        "crossings_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D09-write",
+      "expected": {
+        "crossings_ps": [
+          1000,
+          5000,
+          53000,
+          55250,
+          59167,
+          60000
+        ],
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "keys": {
+        "crossings_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D10-read",
+      "expected": {
+        "crossings_ps": [
+          0,
+          3334,
+          56667,
+          58917,
+          62500,
+          63750
+        ],
+        "duration_ps": 63750,
+        "outcome": "success"
+      },
+      "keys": {
+        "crossings_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D10-write",
+      "expected": {
+        "crossings_ps": [
+          1250,
+          5000,
+          58889,
+          61139,
+          65000,
+          65000
+        ],
+        "duration_ps": 65000,
+        "outcome": "success"
+      },
+      "keys": {
+        "crossings_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D11",
+      "expected": {
+        "fragments": [
+          [
+            6,
+            256,
+            256
+          ],
+          [
+            7,
+            256,
+            256
+          ],
+          [
+            0,
+            1,
+            256
+          ]
+        ],
+        "outcome": "success",
+        "payload_bytes": 513,
+        "transaction_bytes": 768
+      },
+      "keys": {
+        "fragments": "independent output literal",
+        "outcome": "independent output literal",
+        "payload_bytes": "independent output literal",
+        "transaction_bytes": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D12",
+      "expected": {
+        "fragments": [
+          [
+            6,
+            1,
+            256
+          ],
+          [
+            7,
+            1,
+            256
+          ]
+        ],
+        "outcome": "success",
+        "payload_bytes": 2,
+        "transaction_bytes": 512
+      },
+      "keys": {
+        "fragments": "independent output literal",
+        "outcome": "independent output literal",
+        "payload_bytes": "independent output literal",
+        "transaction_bytes": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D13-hop",
+      "expected": {
+        "duration_ps": 4000,
+        "outcome": "success",
+        "unicast_payload_bytes": 256
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "unicast_payload_bytes": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D14",
+      "expected": {
+        "complete_ps": [
+          60000,
+          61000,
+          61000
+        ],
+        "duration_ps": 61000,
+        "outcome": "success",
+        "wrong_alignment_ps": 61667
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "wrong_alignment_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:D15",
+      "expected": {
+        "duration_ps": 60000,
+        "outcome": "success"
+      },
+      "keys": {
+        "duration_ps": "independent output literal",
+        "outcome": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:cc-v3",
+      "expected": {
+        "complete_ps": [
+          86000,
+          86000,
+          146000,
+          147000
+        ],
+        "credit_causes": {
+          "r00": [],
+          "r01": [],
+          "r02": [
+            [
+              "r00",
+              "read_port"
+            ]
+          ],
+          "r03": [
+            [
+              "r00",
+              "read_port"
+            ],
+            [
+              "r01",
+              "ack"
+            ]
+          ]
+        },
+        "duration_ps": 147000,
+        "issue_ps": [
+          27000,
+          27000,
+          86000,
+          86000
+        ],
+        "opportunities": [
+          [
+            0,
+            0,
+            []
+          ],
+          [
+            2,
+            0,
+            []
+          ],
+          [
+            6,
+            26667,
+            [
+              "r00.00",
+              "r01.00"
+            ]
+          ],
+          [
+            52,
+            86000,
+            [
+              "r02.00"
+            ]
+          ],
+          [
+            56,
+            86000,
+            [
+              "r03.00"
+            ]
+          ],
+          [
+            94,
+            146000,
+            []
+          ],
+          [
+            98,
+            147000,
+            []
+          ]
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667,
+          26667,
+          86000,
+          86000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "credit_causes": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "opportunities": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:cc0-v3",
+      "expected": {
+        "complete_ps": [
+          60000,
+          60000,
+          120000,
+          121000
+        ],
+        "credit_causes": {
+          "r00": [],
+          "r01": [],
+          "r02": [
+            [
+              "r00",
+              "read_port"
+            ]
+          ],
+          "r03": [
+            [
+              "r00",
+              "read_port"
+            ],
+            [
+              "r01",
+              "ack"
+            ]
+          ]
+        },
+        "duration_ps": 121000,
+        "issue_ps": [
+          0,
+          0,
+          60000,
+          60000
+        ],
+        "opportunities": [
+          [
+            0,
+            0,
+            [
+              "r00.00",
+              "r01.00"
+            ]
+          ],
+          [
+            2,
+            0,
+            []
+          ],
+          [
+            32,
+            26667,
+            []
+          ],
+          [
+            52,
+            60000,
+            [
+              "r02.00"
+            ]
+          ],
+          [
+            56,
+            60000,
+            [
+              "r03.00"
+            ]
+          ],
+          [
+            94,
+            120000,
+            []
+          ],
+          [
+            98,
+            121000,
+            []
+          ]
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          0,
+          0,
+          60000,
+          60000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "credit_causes": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "opportunities": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:issue-gap-cap1",
+      "expected": {
+        "complete_ps": [
+          86000,
+          146000
+        ],
+        "duration_ps": 146000,
+        "issue_ps": [
+          27000,
+          86000
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667,
+          86000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:issue-gap-cap2",
+      "expected": {
+        "complete_ps": [
+          86000,
+          89000,
+          146000
+        ],
+        "duration_ps": 146000,
+        "issue_ps": [
+          27000,
+          27000,
+          86000
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667,
+          26667,
+          86000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:issue-gap-cap2-pair",
+      "expected": {
+        "complete_ps": [
+          86000,
+          89000
+        ],
+        "duration_ps": 89000,
+        "issue_ps": [
+          27000,
+          27000
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667,
+          26667
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:issue-gap-independent",
+      "expected": {
+        "complete_ps": [
+          86000,
+          89000
+        ],
+        "duration_ps": 89000,
+        "issue_ps": [
+          27000,
+          27000
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667,
+          26667
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:issue-gap-write",
+      "expected": {
+        "complete_ps": [
+          86000
+        ],
+        "duration_ps": 86000,
+        "issue_ps": [
+          27000
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:issue-issue-gap",
+      "expected": {
+        "complete_ps": [
+          86000
+        ],
+        "duration_ps": 86000,
+        "issue_ps": [
+          27000
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:order-r00",
+      "expected": {
+        "complete_ps": [
+          120000,
+          60000
+        ],
+        "duration_ps": 120000,
+        "issue_ps": [
+          60000,
+          0
+        ],
+        "opportunity_cursor_time": [
+          [
+            0,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            17,
+            26667
+          ],
+          [
+            28,
+            60000
+          ],
+          [
+            50,
+            120000
+          ]
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          60000,
+          0
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "opportunity_cursor_time": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:order-r01",
+      "expected": {
+        "complete_ps": [
+          60000,
+          120000
+        ],
+        "duration_ps": 120000,
+        "issue_ps": [
+          0,
+          60000
+        ],
+        "opportunity_cursor_time": [
+          [
+            0,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            17,
+            26667
+          ],
+          [
+            28,
+            60000
+          ],
+          [
+            50,
+            120000
+          ]
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          0,
+          60000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "opportunity_cursor_time": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:sr-v3",
+      "expected": {
+        "complete_ps": [
+          86000,
+          86000,
+          146000
+        ],
+        "credit_causes": {
+          "r00": [],
+          "r01": [],
+          "r02": [
+            [
+              "r00",
+              "ack"
+            ]
+          ]
+        },
+        "duration_ps": 146000,
+        "issue_ps": [
+          27000,
+          27000,
+          86000
+        ],
+        "opportunities": [
+          [
+            0,
+            0,
+            []
+          ],
+          [
+            2,
+            0,
+            []
+          ],
+          [
+            6,
+            26667,
+            [
+              "r00.00",
+              "r01.00"
+            ]
+          ],
+          [
+            52,
+            86000,
+            []
+          ],
+          [
+            54,
+            86000,
+            [
+              "r02.00"
+            ]
+          ],
+          [
+            76,
+            146000,
+            []
+          ]
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667,
+          26667,
+          86000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "credit_causes": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "opportunities": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:sr2-v3",
+      "expected": {
+        "complete_ps": [
+          86000,
+          86000,
+          146000
+        ],
+        "credit_causes": {
+          "r00": [],
+          "r01": [],
+          "r02": []
+        },
+        "duration_ps": 146000,
+        "issue_ps": [
+          27000,
+          27000,
+          86000
+        ],
+        "opportunities": [
+          [
+            0,
+            0,
+            []
+          ],
+          [
+            2,
+            0,
+            []
+          ],
+          [
+            6,
+            26667,
+            [
+              "r00.00",
+              "r01.00"
+            ]
+          ],
+          [
+            52,
+            86000,
+            []
+          ],
+          [
+            54,
+            86000,
+            [
+              "r02.00"
+            ]
+          ],
+          [
+            76,
+            146000,
+            []
+          ]
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          26667,
+          26667,
+          86000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "credit_causes": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "opportunities": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    },
+    {
+      "case_id": "v3:ww0-v3",
+      "expected": {
+        "complete_ps": [
+          60000,
+          60000,
+          120000,
+          121000
+        ],
+        "credit_causes": {
+          "r00": [],
+          "r01": [],
+          "r02": [
+            [
+              "r00",
+              "ack"
+            ]
+          ],
+          "r03": [
+            [
+              "r00",
+              "ack"
+            ],
+            [
+              "r01",
+              "ack"
+            ]
+          ]
+        },
+        "duration_ps": 121000,
+        "issue_ps": [
+          0,
+          0,
+          60000,
+          60000
+        ],
+        "outcome": "success",
+        "reservation_ps": [
+          0,
+          0,
+          60000,
+          60000
+        ]
+      },
+      "keys": {
+        "complete_ps": "independent output literal",
+        "credit_causes": "independent output literal",
+        "duration_ps": "independent output literal",
+        "issue_ps": "independent output literal",
+        "outcome": "independent output literal",
+        "reservation_ps": "independent output literal"
+      },
+      "layer": "result"
+    }
+  ],
+  "selection_sha256": "c19901d4c53c259df7b543a0e6543e2f19a67e92e7c8c6d1500ebfa77d9aed81",
+  "unrepresentable_numeric_output_obligations": []
+}

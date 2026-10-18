@@ -7,11 +7,14 @@ Only private-synthetic-test sessions may run here. Receipt validation never gran
 from __future__ import annotations
 
 import hashlib
-import json
 import resource
 import runpy
 from pathlib import Path
 from typing import Any
+
+from uarch_contract.hashing import canonical_json
+
+from validation.component.runtime_evidence import STREAM_CAP, consume_attempt, replay_admission
 
 ROOT = Path(__file__).resolve().parents[2]
 HELPERS = {
@@ -57,7 +60,7 @@ def schedule(selection: dict[str, Any], cases: list[str] | None = None) -> list[
         bool(chosen) and len(set(chosen)) == len(chosen) and set(chosen) <= rows.keys(),
         "exact nonempty case subset",
     )
-    slots = []
+    slots: list[dict[str, Any]] = []
     for case in chosen:
         for phase in (
             ("initial", "replay") if rows[case]["expected_layer"] == "result" else ("initial",)
@@ -95,32 +98,10 @@ def verify_group(rows: list[dict[str, Any]], *, replay: bool) -> None:
         len({r["raw_input_sha256"] for r in rows}) == 1, "saved input identity across modes/replay"
     )
     require(
-        len({r["stdout_sha256"] for r in rows}) == 1, "six-way complete canonical output equality"
+        len({(r["stdout_sha256"], r["stderr_sha256"]) for r in rows}) == 1,
+        "six-way complete canonical output equality",
     )
-    require(all(r["checked"] is True for r in rows), "consumer outcome required")
-    require(
-        all(r["producers_disabled"] is True for r in rows if r["phase"] == "replay"),
-        "producer-disabled replay required",
-    )
-
-
-def check_replay_admission(
-    receipt: dict[str, Any], *, input_sha256: str, execution_binding: str, evidence_kind: str
-) -> None:
-    require(
-        receipt.get("complete") is True and receipt.get("outcome") == "success",
-        "successful complete receipt required for replay",
-    )
-    require(
-        receipt.get("evidence_kind") == evidence_kind
-        and receipt.get("execution_binding") == execution_binding
-        and receipt.get("raw_input_sha256") == input_sha256,
-        "replay source/input/evidence binding",
-    )
-    # Public replay must be joined to A's real authority/receipt verifier. A claimed
-    # digest/status in an arbitrary dict is not that capability. This proposal cannot
-    # admit public replay until that separately reviewed integration exists.
-    require(evidence_kind == "private-synthetic-test", "public replay authority join unavailable")
+    require(all(r["validation_passed"] is True for r in rows), "consumer outcome required")
 
 
 def run_private(
@@ -128,14 +109,15 @@ def run_private(
     adapter: Any,
     output: Path,
     *,
+    acceptance: dict[str, Any],
     cases: list[str] | None = None,
     resources: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Adapter owns exact binary/host/import/framing checks; this function owns scheduling.
+    """Private transport plus independently supplied frozen acceptance configuration.
 
-    adapter.preflight must bind its source/build/import inputs and enforce container CPU,
-    RAM, PID and FD bounds. adapter.call launches a new bounded process; it returns raw
-    input/stdout/stderr bytes and verified outcome metadata. No public adapter is supplied.
+    Adapter owns actual process/container cleanup and trusted instrumentation. B checks
+    retained bytes, witness joins and semantics; those checks do not authenticate a
+    malicious instrumentation producer. Public invocation remains unavailable.
     """
     require(output.resolve().is_relative_to(Path("/tmp")), "private output path required")
     output.mkdir(exist_ok=False)
@@ -145,101 +127,148 @@ def run_private(
     ids = sorted({s["case_id"] for s in slots})
     rows = {r["case_id"]: r for r in selection["rows"]}
     launch = dict(
-        format="component-private-launch/1",
+        format="component-private-launch/2",
         complete=False,
         evidence_kind="private-synthetic-test",
         selection_hash=selection["selection_hash"],
+        acceptance_sha256=digest(canonical_json(acceptance).encode()),
         cases=ids,
         planned_calls=len(slots),
         acceptance_gate=False,
         policy=POLICY,
     )
     store.json("launch.json", launch)
+
+    def group_name(case: str) -> str:
+        return digest(case.encode())
+
+    def cleanup() -> None:
+        receipt = adapter.cleanup()
+        store.json("cleanup.json", receipt)
+        require(
+            receipt.get("verified_stopped") is True and receipt.get("outstanding") == [],
+            "parent actual cleanup incomplete",
+        )
+
     try:
+        require(acceptance["format"] == "component-private-acceptance/1", "acceptance version")
+        require(
+            acceptance["selection_sha256"] == digest(canonical_json(selection).encode()),
+            "separately frozen selection",
+        )
+        require(acceptance["evidence_kind"] == "private-synthetic-test", "no public execution")
         setup = adapter.preflight(dict(selection, rows=[rows[k] for k in ids]), POLICY)
         require(
             setup["evidence_kind"] == "private-synthetic-test", "no public execution in proposal"
         )
         require(
-            setup["pids_limit"] <= POLICY["process_limit_required"] and setup["pids_limit"] > 0,
-            "bounded outer process limit required",
+            0 < setup["pids_limit"] <= POLICY["process_limit_required"],
+            "bounded outer process limit",
         )
         require(
-            bool(setup["execution_binding"]) and bool(setup["files"]),
-            "exact private setup required",
+            setup["execution_binding"] == acceptance["execution_binding"] and bool(setup["files"]),
+            "independent execution binding",
         )
 
-        def verify_setup():
+        def verify_setup() -> None:
             for path, pin in setup["files"].items():
                 require(digest(Path(path).read_bytes()) == pin, "current setup bytes changed")
 
         verify_setup()
         require(set(setup["input_hashes"]) == set(ids), "exact selected input binding inventory")
+        require(
+            all(
+                setup["input_hashes"][case] == acceptance["inputs"][case]["raw_input_sha256"]
+                for case in ids
+            ),
+            "independent input inventory",
+        )
         budget = resources if resources is not None else h["discover"](POLICY, len(ids))
         workers = min(POLICY["max_workers"], budget["workers"], len(ids))
         require(workers > 0, "positive worker budget")
         store.json("setup.json", dict(setup=setup, resources=budget, workers=workers))
 
-        def group(case):
+        def group(case: str) -> dict[str, Any]:
             resource.setrlimit(resource.RLIMIT_NOFILE, (POLICY["nofile"], POLICY["nofile"]))
-            results = []
-            initial = None
-            for slot in [s for s in slots if s["case_id"] == case]:
-                verify_setup()
-                if slot["phase"] == "replay":
-                    require(initial is not None, "no replay before successful receipt")
-                    check_replay_admission(
-                        initial,
-                        input_sha256=initial["raw_input_sha256"],
+            results: list[dict[str, Any]] = []
+            initial_refs: list[dict[str, str]] = []
+            case_slots = [s for s in slots if s["case_id"] == case]
+            store.json(
+                f"groups/{group_name(case)}/started.json", dict(case_id=case, slots=case_slots)
+            )
+            failure_stage = "setup"
+            failure_slot = None
+            try:
+                for slot in case_slots:
+                    failure_slot = slot
+                    verify_setup()
+                    initial = None
+                    if slot["phase"] == "replay":
+                        failure_stage = "replay-admission"
+                        initial = replay_admission(output, initial_refs, rows[case], acceptance)
+                    failure_stage = "transport"
+                    raw = adapter.call(slot, rows[case], initial, POLICY)
+                    record = dict(
+                        slot,
                         execution_binding=setup["execution_binding"],
                         evidence_kind="private-synthetic-test",
+                        transport_complete=True,
+                        validation_passed=False,
                     )
-                raw = adapter.call(slot, rows[case], initial, POLICY)
-                require(
-                    digest(raw["raw_input"]) == setup["input_hashes"][case],
-                    "immutable selected raw input mismatch",
+                    # Preserve bounded data BEFORE interpreting outcome/JSON/claims. Oversize
+                    # streams retain their bounded prefix and original length, then refuse.
+                    oversize = False
+                    for key in ("raw_input", "stdout", "stderr"):
+                        require(isinstance(raw[key], bytes), "raw bytes receipt required")
+                        data = raw[key]
+                        record[key + "_length"] = len(data)
+                        record[key + "_truncated"] = len(data) > STREAM_CAP
+                        oversize |= len(data) > STREAM_CAP
+                        kept = data[:STREAM_CAP]
+                        record[key + "_sha256"] = digest(kept)
+                        record[key + "_blob"] = store.blob(kept)
+                    # Publish the slot/blob join before untrusted metadata can fail.
+                    store.json(f"attempts/{slot['ordinal']:05d}.json", record)
+                    for key in ("process_identity", "status", "witness", "cleanup"):
+                        record[key] = raw.get(key)
+                    metadata = canonical_json(record).encode()
+                    require(len(metadata) <= STREAM_CAP, "bounded receipt metadata")
+                    store.json(f"attempt-metadata/{slot['ordinal']:05d}.json", record)
+                    require(not oversize, "per-stream byte cap")
+                    failure_stage = "attempt-validation"
+                    outcome = consume_attempt(raw, rows[case], slot, acceptance)
+                    verify_setup()
+                    record.update(validation_passed=True, outcome=outcome)
+                    name = f"calls/{slot['ordinal']:05d}.json"
+                    store.json(name, record)
+                    results.append(record)
+                    if slot["phase"] == "initial":
+                        initial_refs.append(
+                            dict(path=name, sha256=digest((output / name).read_bytes()))
+                        )
+                failure_stage = "group-validation"
+                verify_group(results, replay=rows[case]["expected_layer"] == "result")
+                summary = dict(case_id=case, complete=True, slots=[r["ordinal"] for r in results])
+                store.json(f"groups/{group_name(case)}/complete.json", summary)
+                return summary
+            except BaseException as error:
+                store.json(
+                    f"groups/{group_name(case)}/failed.json",
+                    dict(
+                        case_id=case,
+                        complete=False,
+                        reason=repr(error),
+                        failure_stage=failure_stage,
+                        failed_slot=failure_slot,
+                        validated_slots=[r["ordinal"] for r in results],
+                        unresolved_slots=[
+                            s["ordinal"]
+                            for s in case_slots
+                            if s["ordinal"] not in {r["ordinal"] for r in results}
+                        ],
+                    ),
                 )
-                record = dict(
-                    slot,
-                    process_identity=raw["process_identity"],
-                    checked=raw["checked"],
-                    outcome=raw["outcome"],
-                    producers_disabled=raw["producers_disabled"],
-                    complete=True,
-                    evidence_kind="private-synthetic-test",
-                    execution_binding=setup["execution_binding"],
-                )
-                require(
-                    raw["outcome"] == rows[case]["expected_code"], "wrong refusal/result outcome"
-                )
-                for key in ("raw_input", "stdout", "stderr"):
-                    require(isinstance(raw[key], bytes), "raw bytes receipt required")
-                    require(len(raw[key]) <= 64 * 1024**2, "per-stream byte cap")
-                    record[key + "_sha256"] = digest(raw[key])
-                    record[key + "_blob"] = store.blob(raw[key])
-                require(record["checked"] is True, "independent/structural acceptance required")
-                if rows[case]["expected_layer"] != "result":
-                    require(
-                        raw["expected_pointer_verified"] is True, "exact refusal pointer required"
-                    )
-                    record["zero_dispatch_evidence"] = raw["zero_dispatch_evidence"]
-                    require(
-                        bool(record["zero_dispatch_evidence"]),
-                        "separate native zero-dispatch evidence",
-                    )
-                verify_setup()
-                store.json(f"calls/{slot['ordinal']:05d}.json", record)
-                results.append(record)
-                if slot["phase"] == "initial" and raw["outcome"] == "success":
-                    initial = record
-            verify_group(results, replay=rows[case]["expected_layer"] == "result")
-            return dict(case_id=case, slots=[r["ordinal"] for r in results])
-
-        def progress(case, result):
-            print(
-                json.dumps(dict(event="case_complete", case_id=case, calls=len(result["slots"]))),
-                flush=True,
-            )
+                raise
 
         finished = h["run_workers"](
             ids,
@@ -247,21 +276,47 @@ def run_private(
             workers=workers,
             task_timeout=POLICY["case_seconds"],
             total_timeout=POLICY["total_seconds"],
-            progress=progress,
         )
         verify_setup()
+        cleanup()
         store.check_budget()
         require(sum(len(r["slots"]) for r in finished) == len(slots), "complete launch membership")
         result = dict(launch, complete=True, completed_calls=len(slots), results=finished)
         store.json("complete.json", result)
         return result
     except BaseException as error:
+        cleanup_error = None
+        if not (output / "cleanup.json").exists():
+            try:
+                cleanup()
+            except BaseException as failure:
+                cleanup_error = repr(failure)
+        # A killed worker cannot write its own terminal record. The parent records it,
+        # and failed group acceptance remains distinct from validated call receipts.
+        incomplete_groups = []
+        for case in ids:
+            base = f"groups/{group_name(case)}"
+            if (output / base / "complete.json").exists():
+                continue
+            unresolved = [
+                s["ordinal"]
+                for s in slots
+                if s["case_id"] == case and not (output / f"calls/{s['ordinal']:05d}.json").exists()
+            ]
+            summary = dict(
+                case_id=case, complete=False, reason=repr(error), unresolved_slots=unresolved
+            )
+            store.json(base + "/incomplete.json", summary)
+            incomplete_groups.append(summary)
         store.json(
             "incomplete.json",
             dict(
                 launch,
-                reason=type(error).__name__ + ": " + str(error),
-                completed_receipts=len(list((output / "calls").glob("*.json"))),
+                reason=repr(error),
+                cleanup_error=cleanup_error,
+                validated_calls=len(list((output / "calls").glob("*.json"))),
+                transported_attempts=len(list((output / "attempts").glob("*.json"))),
+                incomplete_groups=incomplete_groups,
             ),
         )
         raise

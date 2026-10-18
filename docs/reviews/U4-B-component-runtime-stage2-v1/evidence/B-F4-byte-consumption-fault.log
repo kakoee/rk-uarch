@@ -1,0 +1,23 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 43, "sample": {"uarch_contract.mapped": "/tmp/u4-b-runtime-stage2-01/source/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-b-runtime-stage2-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_ test_negative_campaign_requires_intended_guard_and_bound_zero_entry[wrong-guard-intended refusal] _
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-590/test_negative_campaign_require0')
+attack = 'wrong-guard', reason = 'intended refusal'
+
+    @pytest.mark.parametrize(
+        "attack,reason",
+        [("wrong-guard", "intended refusal"), ("fake-zero", "runtime-entry witness population")],
+    )
+    def test_negative_campaign_requires_intended_guard_and_bound_zero_entry(tmp_path, attack, reason):
+        a = Negative(tmp_path, attack)
+>       with pytest.raises(ValueError, match=reason):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+validation/component/test_runtime_campaign.py:246: Failed
+=========================== short test summary info ============================
+FAILED validation/component/test_runtime_campaign.py::test_negative_campaign_requires_intended_guard_and_bound_zero_entry[wrong-guard-intended refusal]
+1 failed in 1.58s

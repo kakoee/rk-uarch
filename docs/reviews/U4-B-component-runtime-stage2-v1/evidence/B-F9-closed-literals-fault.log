@@ -1,0 +1,17 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 41, "sample": {"uarch_contract.mapped": "/tmp/u4-b-runtime-stage2-01/source/contract/uarch_contract/mapped.py", "uarch_contract.mapped_issue": "/tmp/u4-b-runtime-stage2-01/source/contract/uarch_contract/mapped_issue.py", "validation.component.issue_checks": "/tmp/u4-b-runtime-stage2-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_________________ test_unknown_literal_is_not_silently_ignored _________________
+
+    def test_unknown_literal_is_not_silently_ignored():
+        job, result, row, kwargs = inputs()
+        row["expected"]["duration_sp"] = 1
+>       with pytest.raises(CheckFailure, match="unknown expectation keys"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE CheckFailure
+
+validation/component/test_runtime_checks.py:158: Failed
+=========================== short test summary info ============================
+FAILED validation/component/test_runtime_checks.py::test_unknown_literal_is_not_silently_ignored
+1 failed in 1.21s

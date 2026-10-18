@@ -1,0 +1,56 @@
+FF                                                                       [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 41, "sample": {"uarch_contract.mapped": "/tmp/u4-b-runtime-stage2-01/source/contract/uarch_contract/mapped.py", "uarch_contract.mapped_issue": "/tmp/u4-b-runtime-stage2-01/source/contract/uarch_contract/mapped_issue.py", "validation.component.issue_checks": "/tmp/u4-b-runtime-stage2-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-runtime-stage2-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_ test_separately_frozen_input_refuses_consistent_foreign_pair[stale-engine-pair] _
+
+attack = 'stale-engine-pair'
+
+    @pytest.mark.parametrize("attack", ["stale-engine-pair", "caller-rehash"])
+    def test_separately_frozen_input_refuses_consistent_foreign_pair(attack):
+        job, result, row, kwargs = inputs()
+        if attack == "stale-engine-pair":
+            job["engine"]["implementation_hash"] = "sha256:" + "1" * 64
+            result["engine"] = deepcopy(job["engine"])
+        else:
+            pass  # Foreign exact input bytes with the same parsed carrier.
+        job["job_hash"] = content_hash(job, exclude=("job_hash",))
+        result["job_hash"] = job["job_hash"]
+        result["result_hash"] = content_hash(result, exclude=("result_hash",))
+        kwargs["raw_input"] = canonical_json(job).encode()
+        if attack == "caller-rehash":
+            kwargs["raw_input"] += b" "
+        kwargs["input_sha256"] = hashlib.sha256(kwargs["raw_input"]).hexdigest()
+>       with pytest.raises(CheckFailure, match="separately frozen admitted"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE CheckFailure
+
+validation/component/test_runtime_checks.py:151: Failed
+_ test_separately_frozen_input_refuses_consistent_foreign_pair[caller-rehash] __
+
+attack = 'caller-rehash'
+
+    @pytest.mark.parametrize("attack", ["stale-engine-pair", "caller-rehash"])
+    def test_separately_frozen_input_refuses_consistent_foreign_pair(attack):
+        job, result, row, kwargs = inputs()
+        if attack == "stale-engine-pair":
+            job["engine"]["implementation_hash"] = "sha256:" + "1" * 64
+            result["engine"] = deepcopy(job["engine"])
+        else:
+            pass  # Foreign exact input bytes with the same parsed carrier.
+        job["job_hash"] = content_hash(job, exclude=("job_hash",))
+        result["job_hash"] = job["job_hash"]
+        result["result_hash"] = content_hash(result, exclude=("result_hash",))
+        kwargs["raw_input"] = canonical_json(job).encode()
+        if attack == "caller-rehash":
+            kwargs["raw_input"] += b" "
+        kwargs["input_sha256"] = hashlib.sha256(kwargs["raw_input"]).hexdigest()
+>       with pytest.raises(CheckFailure, match="separately frozen admitted"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE CheckFailure
+
+validation/component/test_runtime_checks.py:151: Failed
+=========================== short test summary info ============================
+FAILED validation/component/test_runtime_checks.py::test_separately_frozen_input_refuses_consistent_foreign_pair[stale-engine-pair]
+FAILED validation/component/test_runtime_checks.py::test_separately_frozen_input_refuses_consistent_foreign_pair[caller-rehash]
+2 failed in 1.28s

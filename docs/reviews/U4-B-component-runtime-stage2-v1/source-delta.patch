@@ -1,0 +1,1287 @@
+diff --git a/validation/component/matrix_order.py b/validation/component/matrix_order.py
+new file mode 100644
+index 0000000..2cbf314
+--- /dev/null
++++ b/validation/component/matrix_order.py
+@@ -0,0 +1,34 @@
++"""Independent nonpreemptive FIFO-ready matrix arbitration; no engine imports."""
++
++from collections import defaultdict
++from typing import Any
++
++from validation.component.checks import need
++
++
++def check_matrix_order(job: dict[str, Any], result: dict[str, Any]) -> None:
++    graph = job["mapped_point"]["task_graph"]
++    need(graph["arbitration"] == "fifo-ready/1", "matrix arbitration contract")
++    observed = {j["job_id"]: j for j in result["observations"]["jobs"]["records"]}
++    queues: dict[int, list[tuple[int, str]]] = defaultdict(list)
++    for task in graph["jobs"]:
++        if task["kind"] != "compute":
++            continue
++        ready = max(
++            (
++                observed[e["before"]]["end_ps"]
++                for e in graph["dependencies"]
++                if e["after"] == task["id"]
++            ),
++            default=0,
++        )
++        need(observed[task["id"]]["ready_ps"] == ready, "matrix dependency readiness")
++        queues[task["core_id"]].append((ready, task["id"]))
++    # Matrix ownership spans all four phases, including receiving-clock alignment.
++    # Dependencies establish readiness; the reported order cannot supply the oracle.
++    for queue in queues.values():
++        previous = 0
++        for ready, tid in sorted(queue):
++            row = observed[tid]
++            need(row["start_ps"] == max(ready, previous), "matrix FIFO-ready grant")
++            previous = row["end_ps"]
+diff --git a/validation/component/observations_v3.py b/validation/component/observations_v3.py
+index 8510347..49b67be 100644
+--- a/validation/component/observations_v3.py
++++ b/validation/component/observations_v3.py
+@@ -20,6 +20,7 @@ from validation.component.checks import (
+     unique,
+ )
+ from validation.component.issue_checks import check_issue
++from validation.component.matrix_order import check_matrix_order
+ from validation.component.phase_laws import channel
+ from validation.component.transition_checks_v3 import check_transitions, phase_binding
+ 
+@@ -105,6 +106,7 @@ def check_v3(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) ->
+             ),
+             "unicast request binding",
+         )
++    check_matrix_order(j, r)
+     check_issue(j, r)
+     check_credits(list(requests.values()), val(core["dma"]["max_outstanding"]))
+     phase_specs: dict[tuple[str, str | None, str], tuple[int | None, str | None]] = {}
+diff --git a/validation/component/runtime_campaign.py b/validation/component/runtime_campaign.py
+index 041eec8..7475e44 100644
+--- a/validation/component/runtime_campaign.py
++++ b/validation/component/runtime_campaign.py
+@@ -7,12 +7,15 @@ Only private-synthetic-test sessions may run here. Receipt validation never gran
+ from __future__ import annotations
+ 
+ import hashlib
+-import json
+ import resource
+ import runpy
+ from pathlib import Path
+ from typing import Any
+ 
++from uarch_contract.hashing import canonical_json
++
++from validation.component.runtime_evidence import STREAM_CAP, consume_attempt, replay_admission
++
+ ROOT = Path(__file__).resolve().parents[2]
+ HELPERS = {
+     "parallel_core.py": "bbe3746760753c388ac1fa3f3420016f008281a1014638863320e073e15348b1",
+@@ -57,7 +60,7 @@ def schedule(selection: dict[str, Any], cases: list[str] | None = None) -> list[
+         bool(chosen) and len(set(chosen)) == len(chosen) and set(chosen) <= rows.keys(),
+         "exact nonempty case subset",
+     )
+-    slots = []
++    slots: list[dict[str, Any]] = []
+     for case in chosen:
+         for phase in (
+             ("initial", "replay") if rows[case]["expected_layer"] == "result" else ("initial",)
+@@ -95,32 +98,10 @@ def verify_group(rows: list[dict[str, Any]], *, replay: bool) -> None:
+         len({r["raw_input_sha256"] for r in rows}) == 1, "saved input identity across modes/replay"
+     )
+     require(
+-        len({r["stdout_sha256"] for r in rows}) == 1, "six-way complete canonical output equality"
+-    )
+-    require(all(r["checked"] is True for r in rows), "consumer outcome required")
+-    require(
+-        all(r["producers_disabled"] is True for r in rows if r["phase"] == "replay"),
+-        "producer-disabled replay required",
++        len({(r["stdout_sha256"], r["stderr_sha256"]) for r in rows}) == 1,
++        "six-way complete canonical output equality",
+     )
+-
+-
+-def check_replay_admission(
+-    receipt: dict[str, Any], *, input_sha256: str, execution_binding: str, evidence_kind: str
+-) -> None:
+-    require(
+-        receipt.get("complete") is True and receipt.get("outcome") == "success",
+-        "successful complete receipt required for replay",
+-    )
+-    require(
+-        receipt.get("evidence_kind") == evidence_kind
+-        and receipt.get("execution_binding") == execution_binding
+-        and receipt.get("raw_input_sha256") == input_sha256,
+-        "replay source/input/evidence binding",
+-    )
+-    # Public replay must be joined to A's real authority/receipt verifier. A claimed
+-    # digest/status in an arbitrary dict is not that capability. This proposal cannot
+-    # admit public replay until that separately reviewed integration exists.
+-    require(evidence_kind == "private-synthetic-test", "public replay authority join unavailable")
++    require(all(r["validation_passed"] is True for r in rows), "consumer outcome required")
+ 
+ 
+ def run_private(
+@@ -128,14 +109,15 @@ def run_private(
+     adapter: Any,
+     output: Path,
+     *,
++    acceptance: dict[str, Any],
+     cases: list[str] | None = None,
+     resources: dict[str, Any] | None = None,
+ ) -> dict[str, Any]:
+-    """Adapter owns exact binary/host/import/framing checks; this function owns scheduling.
++    """Private transport plus independently supplied frozen acceptance configuration.
+ 
+-    adapter.preflight must bind its source/build/import inputs and enforce container CPU,
+-    RAM, PID and FD bounds. adapter.call launches a new bounded process; it returns raw
+-    input/stdout/stderr bytes and verified outcome metadata. No public adapter is supplied.
++    Adapter owns actual process/container cleanup and trusted instrumentation. B checks
++    retained bytes, witness joins and semantics; those checks do not authenticate a
++    malicious instrumentation producer. Public invocation remains unavailable.
+     """
+     require(output.resolve().is_relative_to(Path("/tmp")), "private output path required")
+     output.mkdir(exist_ok=False)
+@@ -145,101 +127,148 @@ def run_private(
+     ids = sorted({s["case_id"] for s in slots})
+     rows = {r["case_id"]: r for r in selection["rows"]}
+     launch = dict(
+-        format="component-private-launch/1",
++        format="component-private-launch/2",
+         complete=False,
+         evidence_kind="private-synthetic-test",
+         selection_hash=selection["selection_hash"],
++        acceptance_sha256=digest(canonical_json(acceptance).encode()),
+         cases=ids,
+         planned_calls=len(slots),
+         acceptance_gate=False,
+         policy=POLICY,
+     )
+     store.json("launch.json", launch)
++
++    def group_name(case: str) -> str:
++        return digest(case.encode())
++
++    def cleanup() -> None:
++        receipt = adapter.cleanup()
++        store.json("cleanup.json", receipt)
++        require(
++            receipt.get("verified_stopped") is True and receipt.get("outstanding") == [],
++            "parent actual cleanup incomplete",
++        )
++
+     try:
++        require(acceptance["format"] == "component-private-acceptance/1", "acceptance version")
++        require(
++            acceptance["selection_sha256"] == digest(canonical_json(selection).encode()),
++            "separately frozen selection",
++        )
++        require(acceptance["evidence_kind"] == "private-synthetic-test", "no public execution")
+         setup = adapter.preflight(dict(selection, rows=[rows[k] for k in ids]), POLICY)
+         require(
+             setup["evidence_kind"] == "private-synthetic-test", "no public execution in proposal"
+         )
+         require(
+-            setup["pids_limit"] <= POLICY["process_limit_required"] and setup["pids_limit"] > 0,
+-            "bounded outer process limit required",
++            0 < setup["pids_limit"] <= POLICY["process_limit_required"],
++            "bounded outer process limit",
+         )
+         require(
+-            bool(setup["execution_binding"]) and bool(setup["files"]),
+-            "exact private setup required",
++            setup["execution_binding"] == acceptance["execution_binding"] and bool(setup["files"]),
++            "independent execution binding",
+         )
+ 
+-        def verify_setup():
++        def verify_setup() -> None:
+             for path, pin in setup["files"].items():
+                 require(digest(Path(path).read_bytes()) == pin, "current setup bytes changed")
+ 
+         verify_setup()
+         require(set(setup["input_hashes"]) == set(ids), "exact selected input binding inventory")
++        require(
++            all(
++                setup["input_hashes"][case] == acceptance["inputs"][case]["raw_input_sha256"]
++                for case in ids
++            ),
++            "independent input inventory",
++        )
+         budget = resources if resources is not None else h["discover"](POLICY, len(ids))
+         workers = min(POLICY["max_workers"], budget["workers"], len(ids))
+         require(workers > 0, "positive worker budget")
+         store.json("setup.json", dict(setup=setup, resources=budget, workers=workers))
+ 
+-        def group(case):
++        def group(case: str) -> dict[str, Any]:
+             resource.setrlimit(resource.RLIMIT_NOFILE, (POLICY["nofile"], POLICY["nofile"]))
+-            results = []
+-            initial = None
+-            for slot in [s for s in slots if s["case_id"] == case]:
+-                verify_setup()
+-                if slot["phase"] == "replay":
+-                    require(initial is not None, "no replay before successful receipt")
+-                    check_replay_admission(
+-                        initial,
+-                        input_sha256=initial["raw_input_sha256"],
++            results: list[dict[str, Any]] = []
++            initial_refs: list[dict[str, str]] = []
++            case_slots = [s for s in slots if s["case_id"] == case]
++            store.json(
++                f"groups/{group_name(case)}/started.json", dict(case_id=case, slots=case_slots)
++            )
++            failure_stage = "setup"
++            failure_slot = None
++            try:
++                for slot in case_slots:
++                    failure_slot = slot
++                    verify_setup()
++                    initial = None
++                    if slot["phase"] == "replay":
++                        failure_stage = "replay-admission"
++                        initial = replay_admission(output, initial_refs, rows[case], acceptance)
++                    failure_stage = "transport"
++                    raw = adapter.call(slot, rows[case], initial, POLICY)
++                    record = dict(
++                        slot,
+                         execution_binding=setup["execution_binding"],
+                         evidence_kind="private-synthetic-test",
++                        transport_complete=True,
++                        validation_passed=False,
+                     )
+-                raw = adapter.call(slot, rows[case], initial, POLICY)
+-                require(
+-                    digest(raw["raw_input"]) == setup["input_hashes"][case],
+-                    "immutable selected raw input mismatch",
+-                )
+-                record = dict(
+-                    slot,
+-                    process_identity=raw["process_identity"],
+-                    checked=raw["checked"],
+-                    outcome=raw["outcome"],
+-                    producers_disabled=raw["producers_disabled"],
+-                    complete=True,
+-                    evidence_kind="private-synthetic-test",
+-                    execution_binding=setup["execution_binding"],
+-                )
+-                require(
+-                    raw["outcome"] == rows[case]["expected_code"], "wrong refusal/result outcome"
++                    # Preserve bounded data BEFORE interpreting outcome/JSON/claims. Oversize
++                    # streams retain their bounded prefix and original length, then refuse.
++                    oversize = False
++                    for key in ("raw_input", "stdout", "stderr"):
++                        require(isinstance(raw[key], bytes), "raw bytes receipt required")
++                        data = raw[key]
++                        record[key + "_length"] = len(data)
++                        record[key + "_truncated"] = len(data) > STREAM_CAP
++                        oversize |= len(data) > STREAM_CAP
++                        kept = data[:STREAM_CAP]
++                        record[key + "_sha256"] = digest(kept)
++                        record[key + "_blob"] = store.blob(kept)
++                    # Publish the slot/blob join before untrusted metadata can fail.
++                    store.json(f"attempts/{slot['ordinal']:05d}.json", record)
++                    for key in ("process_identity", "status", "witness", "cleanup"):
++                        record[key] = raw.get(key)
++                    metadata = canonical_json(record).encode()
++                    require(len(metadata) <= STREAM_CAP, "bounded receipt metadata")
++                    store.json(f"attempt-metadata/{slot['ordinal']:05d}.json", record)
++                    require(not oversize, "per-stream byte cap")
++                    failure_stage = "attempt-validation"
++                    outcome = consume_attempt(raw, rows[case], slot, acceptance)
++                    verify_setup()
++                    record.update(validation_passed=True, outcome=outcome)
++                    name = f"calls/{slot['ordinal']:05d}.json"
++                    store.json(name, record)
++                    results.append(record)
++                    if slot["phase"] == "initial":
++                        initial_refs.append(
++                            dict(path=name, sha256=digest((output / name).read_bytes()))
++                        )
++                failure_stage = "group-validation"
++                verify_group(results, replay=rows[case]["expected_layer"] == "result")
++                summary = dict(case_id=case, complete=True, slots=[r["ordinal"] for r in results])
++                store.json(f"groups/{group_name(case)}/complete.json", summary)
++                return summary
++            except BaseException as error:
++                store.json(
++                    f"groups/{group_name(case)}/failed.json",
++                    dict(
++                        case_id=case,
++                        complete=False,
++                        reason=repr(error),
++                        failure_stage=failure_stage,
++                        failed_slot=failure_slot,
++                        validated_slots=[r["ordinal"] for r in results],
++                        unresolved_slots=[
++                            s["ordinal"]
++                            for s in case_slots
++                            if s["ordinal"] not in {r["ordinal"] for r in results}
++                        ],
++                    ),
+                 )
+-                for key in ("raw_input", "stdout", "stderr"):
+-                    require(isinstance(raw[key], bytes), "raw bytes receipt required")
+-                    require(len(raw[key]) <= 64 * 1024**2, "per-stream byte cap")
+-                    record[key + "_sha256"] = digest(raw[key])
+-                    record[key + "_blob"] = store.blob(raw[key])
+-                require(record["checked"] is True, "independent/structural acceptance required")
+-                if rows[case]["expected_layer"] != "result":
+-                    require(
+-                        raw["expected_pointer_verified"] is True, "exact refusal pointer required"
+-                    )
+-                    record["zero_dispatch_evidence"] = raw["zero_dispatch_evidence"]
+-                    require(
+-                        bool(record["zero_dispatch_evidence"]),
+-                        "separate native zero-dispatch evidence",
+-                    )
+-                verify_setup()
+-                store.json(f"calls/{slot['ordinal']:05d}.json", record)
+-                results.append(record)
+-                if slot["phase"] == "initial" and raw["outcome"] == "success":
+-                    initial = record
+-            verify_group(results, replay=rows[case]["expected_layer"] == "result")
+-            return dict(case_id=case, slots=[r["ordinal"] for r in results])
+-
+-        def progress(case, result):
+-            print(
+-                json.dumps(dict(event="case_complete", case_id=case, calls=len(result["slots"]))),
+-                flush=True,
+-            )
++                raise
+ 
+         finished = h["run_workers"](
+             ids,
+@@ -247,21 +276,47 @@ def run_private(
+             workers=workers,
+             task_timeout=POLICY["case_seconds"],
+             total_timeout=POLICY["total_seconds"],
+-            progress=progress,
+         )
+         verify_setup()
++        cleanup()
+         store.check_budget()
+         require(sum(len(r["slots"]) for r in finished) == len(slots), "complete launch membership")
+         result = dict(launch, complete=True, completed_calls=len(slots), results=finished)
+         store.json("complete.json", result)
+         return result
+     except BaseException as error:
++        cleanup_error = None
++        if not (output / "cleanup.json").exists():
++            try:
++                cleanup()
++            except BaseException as failure:
++                cleanup_error = repr(failure)
++        # A killed worker cannot write its own terminal record. The parent records it,
++        # and failed group acceptance remains distinct from validated call receipts.
++        incomplete_groups = []
++        for case in ids:
++            base = f"groups/{group_name(case)}"
++            if (output / base / "complete.json").exists():
++                continue
++            unresolved = [
++                s["ordinal"]
++                for s in slots
++                if s["case_id"] == case and not (output / f"calls/{s['ordinal']:05d}.json").exists()
++            ]
++            summary = dict(
++                case_id=case, complete=False, reason=repr(error), unresolved_slots=unresolved
++            )
++            store.json(base + "/incomplete.json", summary)
++            incomplete_groups.append(summary)
+         store.json(
+             "incomplete.json",
+             dict(
+                 launch,
+-                reason=type(error).__name__ + ": " + str(error),
+-                completed_receipts=len(list((output / "calls").glob("*.json"))),
++                reason=repr(error),
++                cleanup_error=cleanup_error,
++                validated_calls=len(list((output / "calls").glob("*.json"))),
++                transported_attempts=len(list((output / "attempts").glob("*.json"))),
++                incomplete_groups=incomplete_groups,
+             ),
+         )
+         raise
+diff --git a/validation/component/runtime_checks.py b/validation/component/runtime_checks.py
+index 80cd079..fe23f0b 100644
+--- a/validation/component/runtime_checks.py
++++ b/validation/component/runtime_checks.py
+@@ -14,6 +14,7 @@ from uarch_contract.mapped import MappedEngineJob, validate_result
+ 
+ from validation.component.checks import need
+ from validation.component.observations_v3 import check_v3
++from validation.component.runtime_literals import check_extended_literals
+ 
+ CHECKER = "validation.component.observations_v3:check_v3"
+ 
+@@ -30,7 +31,11 @@ def verify_sources(source: Path, pins: dict[str, str]) -> None:
+     }
+     required.update(
+         str(p.relative_to(source))
+-        for folder in ("contract/uarch_contract", "validation/component")
++        for folder in (
++            "contract/uarch_contract",
++            "validation/component",
++            "src/rkuarch/engines/native",
++        )
+         for p in (source / folder).glob("*.py")
+         if not p.name.startswith("test_")
+     )
+@@ -45,6 +50,7 @@ def verify_sources(source: Path, pins: dict[str, str]) -> None:
+ 
+ 
+ def assert_literals(job: dict[str, Any], result: dict[str, Any], expected: dict[str, Any]) -> None:
++    check_extended_literals(job, result, expected)
+     need(expected["outcome"] == "success", "expected refusal cannot consume success")
+     obs = result["observations"]
+     dma = sorted(obs["dma"]["records"], key=lambda r: r["request_id"])
+@@ -78,11 +84,12 @@ def assert_literals(job: dict[str, Any], result: dict[str, Any], expected: dict[
+         for field in fields:
+             if field in expected:
+                 need(result[section][field] == expected[field], "literal " + field)
+-    if expected.get("hbm_payload_bytes") == 0:
++    if "hbm_payload_bytes" in expected:
+         need(
+-            result["traffic_counts"]["read_payload_bytes"] == 0
+-            and result["traffic_counts"]["write_payload_bytes"] == 0,
+-            "resident HBM",
++            result["traffic_counts"]["read_payload_bytes"]
++            + result["traffic_counts"]["write_payload_bytes"]
++            == expected["hbm_payload_bytes"],
++            "literal HBM payload",
+         )
+     if "useful_floor_ps" in expected:
+         need(result["duration_ps"] >= expected["useful_floor_ps"], "component floor")
+@@ -229,10 +236,20 @@ def consume_case(
+     expected: dict[str, Any],
+     input_sha256: str,
+     raw_input: bytes,
++    admitted: dict[str, Any] | None = None,
+ ) -> None:
+     # Caller must supply a separately frozen input binding; a caller hash is not authority.
+     import json
+ 
++    need(admitted is not None, "separately frozen admitted inventory required")
++    assert admitted is not None
++    need(
++        admitted["case_id"] == row["case_id"]
++        and admitted["raw_input_sha256"] == input_sha256
++        and admitted["job_hash"] == job["job_hash"]
++        and admitted["engine"] == job["engine"],
++        "separately frozen admitted input/engine",
++    )
+     model = job["engine"]["model"]
+     need(
+         (model["name"], model["version"], result["observations"]["format"], checker_id)
+diff --git a/validation/component/runtime_evidence.py b/validation/component/runtime_evidence.py
+new file mode 100644
+index 0000000..3fa97af
+--- /dev/null
++++ b/validation/component/runtime_evidence.py
+@@ -0,0 +1,156 @@
++"""Private receipt consumption and durable replay. No invocation or authority creation."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++from typing import Any
++
++from uarch_contract.hashing import canonical_json
++
++from validation.component.checks import need
++from validation.component.runtime_checks import CHECKER, consume_case, verify_sources
++
++STREAM_CAP = 64 * 1024**2
++
++
++def digest(raw: bytes) -> str:
++    return hashlib.sha256(raw).hexdigest()
++
++
++def parse(raw: bytes) -> Any:
++    need(isinstance(raw, bytes) and len(raw) <= STREAM_CAP, "bounded result bytes")
++    value = json.loads(raw)
++    need(canonical_json(value).encode() == raw, "canonical complete envelope bytes")
++    return value
++
++
++def exact_refusal(raw: bytes, expected: dict[str, Any]) -> None:
++    value = parse(raw)
++    need(
++        isinstance(value, dict) and set(value) == {"code", "message", "pointer"}, "refusal envelope"
++    )
++    need(value == expected, "exact intended refusal envelope")
++
++
++def consume_attempt(
++    raw: dict[str, Any], row: dict[str, Any], slot: dict[str, Any], acceptance: dict[str, Any]
++) -> str:
++    admitted = acceptance["inputs"][row["case_id"]]
++    need(digest(raw["raw_input"]) == admitted["raw_input_sha256"], "immutable selected raw input")
++    witness = raw["witness"]
++    need(isinstance(witness, dict), "saved witness object required")
++    positive = row["expected_layer"] == "result"
++    semantic = raw["stdout"] if positive else raw["stderr"]
++    bindings = dict(
++        case_id=slot["case_id"],
++        mode=slot["mode"],
++        raw_input_sha256=admitted["raw_input_sha256"],
++        semantic_output_sha256=digest(semantic),
++        executable_sha256=acceptance["executables"][slot["mode"]],
++        process_identity=raw["process_identity"],
++        transport_complete=True,
++    )
++    need(all(witness.get(k) == v for k, v in bindings.items()), "execution witness bindings")
++    need(type(witness.get("runtime_entries")) is int, "numeric runtime-entry witness")
++    need(witness["runtime_entries"] == (1 if positive else 0), "runtime-entry witness population")
++    need(witness.get("evidence") == acceptance["witness_kind"], "instrumentation witness kind")
++    cleanup = raw["cleanup"]
++    need(
++        isinstance(cleanup, dict)
++        and cleanup.get("verified_stopped") is True
++        and bool(cleanup.get("container_id"))
++        and cleanup.get("process_identity") == raw["process_identity"],
++        "actual cleanup receipt",
++    )
++    if positive:
++        need(raw["status"] == 0 and raw["stderr"] == b"", "success transport envelope")
++        job, result = json.loads(raw["raw_input"]), parse(semantic)
++        # Both published consumption entry points are required. They share check_v3;
++        # executing them twice is not two independently derived oracles.
++        verify_sources(Path(acceptance["source"]), acceptance["pins"])
++        from rkuarch.engines.native.component_runner import validate_component_response
++
++        validate_component_response(
++            raw["stdout"],
++            raw["stderr"],
++            raw["status"],
++            job=job,
++            observation_contract=acceptance["observation_contract"],
++        )
++        consume_case(
++            job,
++            result,
++            row,
++            checker_id=CHECKER,
++            source=Path(acceptance["source"]),
++            pins=acceptance["pins"],
++            expected=acceptance["observation_contract"],
++            input_sha256=admitted["raw_input_sha256"],
++            raw_input=raw["raw_input"],
++            admitted=admitted,
++        )
++        return "success"
++    need(raw["status"] == 2 and raw["stdout"] == b"", "refusal transport envelope")
++    exact_refusal(semantic, acceptance["negatives"][row["case_id"]]["envelope"])
++    code = row["expected_code"]
++    need(isinstance(code, str), "expected refusal code string")
++    assert isinstance(code, str)
++    return code
++
++
++def read_bound(root: Path, name: str, pin: str) -> bytes:
++    path = root / name
++    need(
++        path.resolve().is_relative_to(root.resolve()) and not path.is_symlink(),
++        "retained evidence path",
++    )
++    need(path.stat().st_size <= STREAM_CAP, "bounded saved artifact")
++    raw = path.read_bytes()
++    need(digest(raw) == pin, "retained evidence hash")
++    return raw
++
++
++def replay_admission(
++    root: Path, references: list[dict[str, str]], row: dict[str, Any], acceptance: dict[str, Any]
++) -> dict[str, Any]:
++    """Read six separately saved initial validations and artifacts; never trust a caller dict."""
++    need(len(references) == 6, "complete initial group required")
++    records = []
++    for ref in references:
++        record = json.loads(read_bound(root, ref["path"], ref["sha256"]))
++        need(
++            record["validation_passed"] is True
++            and record["phase"] == "initial"
++            and record["case_id"] == row["case_id"]
++            and record["execution_binding"] == acceptance["execution_binding"],
++            "initial receipt binding",
++        )
++        raw = {
++            key: read_bound(root, record[key + "_blob"], record[key + "_sha256"])
++            for key in ("raw_input", "stdout", "stderr")
++        }
++        raw.update(
++            {key: record[key] for key in ("process_identity", "witness", "cleanup", "status")}
++        )
++        consume_attempt(raw, row, record, acceptance)
++        records.append(record)
++    need(
++        {(r["mode"], r["repetition"]) for r in records}
++        == {(mode, rep) for mode in ("debug", "release") for rep in range(3)},
++        "initial receipt slots",
++    )
++    need(len({r["process_identity"] for r in records}) == 6, "initial fresh processes")
++    need(
++        len({(r["raw_input_sha256"], r["stdout_sha256"], r["stderr_sha256"]) for r in records})
++        == 1,
++        "initial deterministic artifacts",
++    )
++    first = records[0]
++    return dict(
++        saved_input_path=str(root / first["raw_input_blob"]),
++        raw_input_sha256=first["raw_input_sha256"],
++        initial_receipts=references,
++        property="durable verified readback; no second independent oracle",
++    )
+diff --git a/validation/component/runtime_literals.py b/validation/component/runtime_literals.py
+new file mode 100644
+index 0000000..435370b
+--- /dev/null
++++ b/validation/component/runtime_literals.py
+@@ -0,0 +1,83 @@
++"""Closed frozen-literal vocabulary; input premises are not output measurements."""
++
++from typing import Any
++
++from validation.component.checks import need
++
++METADATA = frozenset({"premise", "native_status", "representation"})
++INPUTS = frozenset({"capacity_bytes", "required_accumulator_bytes", "accumulator_bytes"})
++OUTPUTS = frozenset(
++    """outcome duration_ps attribution_ps useful_ops issued_ops
++read_payload_bytes write_payload_bytes read_transaction_bytes write_transaction_bytes
++unicast_payload_bytes sram_read_bytes sram_write_bytes hbm_payload_bytes useful_floor_ps
++reservation_ps issue_ps complete_ps max_inflight final_inflight response_ps job_times_ps
++job_ready_ps barrier_ready_ps transient_bacc channel_end_ps channel_end_ratios crossings_ps
++opportunities opportunity_cursor_time credit_causes fragments payload_bytes transaction_bytes
++tile_durations_ps forbidden_serial_duration_ps wrong_alignment_ps""".split()
++)
++
++
++def check_extended_literals(
++    job: dict[str, Any], result: dict[str, Any], expected: dict[str, Any]
++) -> None:
++    need(not (set(expected) - METADATA - INPUTS - OUTPUTS), "unknown expectation keys")
++    graph = job["mapped_point"]["task_graph"]
++    hardware = job["workload_closure"]["hardware_spec"]
++    buffers = graph["buffers"]
++    allocations = {a["buffer_id"]: a for a in result["observations"]["allocations"]["records"]}
++    for key in ("accumulator_bytes", "required_accumulator_bytes"):
++        if key in expected:
++            acc = [b for b in buffers if b["space"] == "accumulator"]
++            need(len(acc) == 1 and acc[0]["size_bytes"] == expected[key], "input literal " + key)
++            need(
++                allocations[acc[0]["id"]]["size_bytes"] == expected[key],
++                "allocation literal " + key,
++            )
++    if "capacity_bytes" in expected:
++        boundary = next(b for b in buffers if b["id"] == "zz-boundary")
++        space = boundary["space"]
++        capacity = (
++            hardware["memory"]["dram"]["capacity_bytes"]
++            if space == "hbm"
++            else hardware["cores"]["core_type"]["sram"]["bytes"]
++        )["value"]
++        need(capacity == expected["capacity_bytes"], "input literal capacity_bytes")
++        a = allocations[boundary["id"]]
++        need(a["offset_bytes"] + a["size_bytes"] == capacity, "allocation capacity boundary")
++    obs = result["observations"]
++    dma = sorted(
++        (d for d in obs["dma"]["records"] if d["direction"] != "unicast"),
++        key=lambda d: d["request_id"],
++    )
++    if "fragments" in expected:
++        owners = {o["owner_id"]: o["resource"] for o in job["owners"]}
++        channels = {
++            a["request_id"]: int(owners[a["owner_id"]].split(":")[1])
++            for a in obs["activities"]["records"]
++            if a["kind"] == "service" and a["subphase"] == "channel_service"
++        }
++        need(
++            [[channels[d["request_id"]], d["payload_bytes"], d["transaction_bytes"]] for d in dma]
++            == expected["fragments"],
++            "literal fragments",
++        )
++    for key in ("payload_bytes", "transaction_bytes"):
++        if key in expected:
++            need(sum(d[key] for d in dma) == expected[key], "literal " + key)
++            counts = result["traffic_counts"]
++            need(
++                counts["read_" + key] + counts["write_" + key] == expected[key],
++                "traffic literal " + key,
++            )
++    if "tile_durations_ps" in expected:
++        tasks = {t["id"] for t in graph["jobs"] if t["kind"] == "compute"}
++        rows = sorted(
++            (r for r in obs["jobs"]["records"] if r["job_id"] in tasks), key=lambda r: r["job_id"]
++        )
++        need(
++            [r["end_ps"] - r["start_ps"] for r in rows] == expected["tile_durations_ps"],
++            "literal tile_durations_ps",
++        )
++    for key in ("forbidden_serial_duration_ps", "wrong_alignment_ps"):
++        if key in expected:
++            need(result["duration_ps"] != expected[key], "forbidden literal " + key)
+diff --git a/validation/component/test_matrix_order.py b/validation/component/test_matrix_order.py
+new file mode 100644
+index 0000000..d488f5d
+--- /dev/null
++++ b/validation/component/test_matrix_order.py
+@@ -0,0 +1,52 @@
++"""Synthetic projections isolate FIFO-ready law from carrier/hash defenses."""
++
++from copy import deepcopy
++
++import pytest
++
++from validation.component.matrix_order import check_matrix_order
++
++
++def projection():
++    graph = dict(
++        arbitration="fifo-ready/1",
++        dependencies=[],
++        jobs=[dict(id=i, kind="compute", core_id=0) for i in ("c", "z")],
++    )
++    rows = [
++        dict(job_id="c", ready_ps=0, start_ps=0, end_ps=547000),
++        dict(job_id="z", ready_ps=0, start_ps=547000, end_ps=1094000),
++    ]
++    return dict(mapped_point=dict(task_graph=graph)), dict(
++        observations=dict(jobs=dict(records=rows))
++    )
++
++
++def test_matrix_equal_ready_tie_and_wrong_order():
++    job, result = projection()
++    check_matrix_order(job, result)
++    bad = deepcopy(result)
++    a, b = bad["observations"]["jobs"]["records"]
++    a["start_ps"], b["start_ps"] = b["start_ps"], a["start_ps"]
++    a["end_ps"], b["end_ps"] = b["end_ps"], a["end_ps"]
++    with pytest.raises(ValueError, match="matrix FIFO-ready grant"):
++        check_matrix_order(job, bad)
++
++
++def test_matrix_dependency_readiness_precedes_id_and_independent_core():
++    job, result = projection()
++    graph, rows = job["mapped_point"]["task_graph"], result["observations"]["jobs"]["records"]
++    graph["jobs"].append(dict(id="before", kind="barrier"))
++    graph["dependencies"] = [dict(before="before", after="c")]
++    rows[:] = [
++        dict(job_id="before", end_ps=1000),
++        dict(job_id="z", ready_ps=0, start_ps=0, end_ps=547000),
++        dict(job_id="c", ready_ps=1000, start_ps=547000, end_ps=1094000),
++    ]
++    check_matrix_order(job, result)
++    graph["jobs"][0]["core_id"] = 1
++    rows[-1].update(start_ps=1000, end_ps=548000)
++    check_matrix_order(job, result)
++    rows[-1]["ready_ps"] = 0
++    with pytest.raises(ValueError, match="dependency readiness"):
++        check_matrix_order(job, result)
+diff --git a/validation/component/test_runtime_campaign.py b/validation/component/test_runtime_campaign.py
+index d4a0109..34e5756 100644
+--- a/validation/component/test_runtime_campaign.py
++++ b/validation/component/test_runtime_campaign.py
+@@ -1,192 +1,287 @@
+-"""Toy process/receipt tests only. No native engine, HostRecord or public invocation."""
++"""Synthetic saved-output adapters; no native execution, authority or cleanup proof."""
+ 
+-import hashlib
+ import json
+ import os
+ from copy import deepcopy
+ from pathlib import Path
+ 
+ import pytest
++from uarch_contract.hashing import canonical_json
+ 
+-from validation.component.runtime_campaign import (
+-    ROOT,
+-    check_replay_admission,
+-    run_private,
+-    schedule,
+-    verify_group,
+-)
++from validation.component.runtime_campaign import ROOT, digest, run_private, schedule
++from validation.component.runtime_evidence import exact_refusal, replay_admission
++from validation.component.test_runtime_checks import inputs
+ 
+ 
+-class Toy:
+-    def __init__(self, fail=False):
+-        self.fail = fail
++class Synthetic:
++    def __init__(self, tmp_path, attack=None):
++        job, result, row, kwargs = inputs()
++        row.update(expected_layer="result", expected_code="success")
++        self.case, self.kwargs = row["case_id"], kwargs
++        self.raw, self.stdout = kwargs["raw_input"], canonical_json(result).encode()
++        self.original = tmp_path / "producer-input"
++        self.original.write_bytes(self.raw)
++        self.output, self.attack = tmp_path / "run", attack
++        self.selection = dict(selection_hash="synthetic-selection", rows=[row])
++        self.acceptance = dict(
++            format="component-private-acceptance/1",
++            evidence_kind="private-synthetic-test",
++            selection_sha256=digest(canonical_json(self.selection).encode()),
++            execution_binding="synthetic-execution",
++            inputs={self.case: kwargs["admitted"]},
++            negatives={},
++            source=str(ROOT),
++            pins=kwargs["pins"],
++            observation_contract=kwargs["expected"],
++            executables=dict(debug="synthetic-debug", release="synthetic-release"),
++            witness_kind="synthetic-unit-anchor",
++        )
+ 
+     def preflight(self, selection, policy):
+         return dict(
+             evidence_kind="private-synthetic-test",
+             pids_limit=64,
+-            execution_binding="toy-only-no-native",
+-            input_hashes={
+-                r["case_id"]: hashlib.sha256(r["case_id"].encode()).hexdigest()
+-                for r in selection["rows"]
+-            },
+-            files={__file__: hashlib.sha256(Path(__file__).read_bytes()).hexdigest()},
++            execution_binding=self.acceptance["execution_binding"],
++            files={__file__: digest(Path(__file__).read_bytes())},
++            input_hashes={self.case: digest(self.raw)},
+         )
+ 
++    def cleanup(self):
++        return dict(verified_stopped=True, outstanding=[], evidence="synthetic-no-process")
++
+     def call(self, slot, row, initial, policy):
+-        if self.fail and slot["repetition"] == 1:
+-            raise ValueError("toy deliberate failure")
++        if self.attack == "call-failure" and slot["ordinal"] == 3:
++            raise ValueError("synthetic transport failed")
++        # No producer is callable in replay: saved artifact alone is sufficient.
++        raw = (
++            Path(initial["saved_input_path"]).read_bytes()
++            if initial
++            else self.original.read_bytes()
++        )
++        if slot["ordinal"] == 5 and self.attack == "no-producer":
++            self.original.unlink()
++        if slot["ordinal"] == 5 and self.attack == "missing-receipt":
++            (self.output / "calls/00000.json").unlink()
++        if slot["ordinal"] == 5 and self.attack == "corrupt-saved":
++            (self.output / "blobs" / digest(self.raw)).write_bytes(b"corrupt")
++        stdout = self.stdout
++        if self.attack == "unparseable-all" or (
++            self.attack == "unparseable" and slot["ordinal"] == 3
++        ):
++            stdout = b"FAILING-CALL-EVIDENCE"
++        pid = f"synthetic-{os.getpid()}-{slot['ordinal']}"
++        if self.attack == "group-drift" and slot["ordinal"] == 11:
++            pid = f"synthetic-{os.getpid()}-0"
++        witness = dict(
++            case_id=self.case,
++            mode=slot["mode"],
++            raw_input_sha256=digest(raw),
++            semantic_output_sha256=digest(stdout),
++            executable_sha256=self.acceptance["executables"][slot["mode"]],
++            process_identity=pid,
++            transport_complete=True,
++            runtime_entries=1,
++            evidence="synthetic-unit-anchor",
++        )
++        if self.attack == "fake-witness":
++            witness = "/nonexistent/zero-entry"
++        if self.attack == "non-json-witness":
++            witness = Path("/nonexistent/zero-entry")
+         return dict(
+-            process_identity=f"toy-worker-{os.getpid()}-slot-{slot['ordinal']}",
+-            raw_input=row["case_id"].encode(),
+-            stdout=b"toy result",
++            raw_input=raw,
++            stdout=stdout,
+             stderr=b"",
++            status=0,
++            process_identity=pid,
++            witness=witness,
++            cleanup=dict(container_id="synthetic", process_identity=pid, verified_stopped=True),
+             checked=True,
+-            outcome=row["expected_code"],
+-            producers_disabled=slot["phase"] == "replay",
++            producers_disabled=True,
+             expected_pointer_verified=True,
+-            zero_dispatch_evidence="toy-only",
+         )
+ 
+ 
+-def selection():
+-    return dict(
+-        selection_hash="toy-selection",
+-        rows=[
+-            dict(case_id="positive", expected_layer="result", expected_code="success"),
+-            dict(
+-                case_id="negative",
+-                expected_layer="resource-preflight",
+-                expected_code="CapacityExceeded",
+-            ),
+-        ],
++def run(adapter):
++    return run_private(
++        adapter.selection,
++        adapter,
++        adapter.output,
++        acceptance=adapter.acceptance,
++        resources={"workers": 1},
+     )
+ 
+ 
+-def test_actual_schedule_counts():
++def test_historical_schedule_unchanged():
+     full = json.loads(
+         (ROOT / "docs/reviews/U4-B-component-runtime-preparation-v1/selection.json").read_bytes()
+     )
+     slots = schedule(full)
+-    assert len(slots) == 1368
+-    assert sum(s["phase"] == "initial" for s in slots) == 744
+-    assert sum(s["phase"] == "replay" for s in slots) == 624
+-    assert [s["ordinal"] for s in slots] == list(range(len(slots)))
++    assert len(slots) == 1368 and sum(s["phase"] == "replay" for s in slots) == 624
+ 
+ 
+-def test_toy_parallel_receipts_and_deterministic_schedule(tmp_path):
+-    out = tmp_path / "run"
+-    result = run_private(selection(), Toy(), out, resources={"workers": 2})
+-    assert result["complete"] and not result["acceptance_gate"]
+-    assert result["completed_calls"] == 18
+-    records = [json.loads(p.read_bytes()) for p in sorted((out / "calls").glob("*.json"))]
+-    assert [r["ordinal"] for r in records] == list(range(18))
+-    assert all(r["evidence_kind"] == "private-synthetic-test" for r in records)
+-    assert not (out / "incomplete.json").exists()
++def test_actual_consumption_and_durable_replay_with_producer_unavailable(tmp_path):
++    a = Synthetic(tmp_path, "no-producer")
++    r = run(a)
++    assert r["complete"] and r["completed_calls"] == 12 and not r["acceptance_gate"]
++    assert len(list((a.output / "attempts").glob("*.json"))) == 12
+ 
+ 
+-def test_worker_failure_records_incomplete_and_no_retry(tmp_path):
+-    out = tmp_path / "bad"
+-    with pytest.raises(ValueError, match="worker failure"):
+-        run_private(selection(), Toy(fail=True), out, resources={"workers": 2})
+-    assert (out / "launch.json").exists() and (out / "incomplete.json").exists()
+-    assert not (out / "complete.json").exists()
+-    assert len(list((out / "calls").glob("*.json"))) <= 2
+-
+-
+-def test_developer_subset_never_claims_complete_gate(tmp_path):
+-    out = tmp_path / "subset"
+-    value = run_private(selection(), Toy(), out, cases=["positive"], resources={"workers": 1})
+-    assert value["completed_calls"] == 12 and value["acceptance_gate"] is False
+-
+-
+-def test_missing_and_duplicate_slots_and_replay_drift_refuse(tmp_path):
+-    out = tmp_path / "slots"
+-    run_private(selection(), Toy(), out, cases=["positive"], resources={"workers": 1})
+-    rows = [json.loads(p.read_bytes()) for p in sorted((out / "calls").glob("*.json"))]
+-    for bad in (rows[:-1], rows + [rows[0]]):
+-        with pytest.raises(ValueError, match="slot membership"):
+-            verify_group(bad, replay=True)
+-    bad = deepcopy(rows)
+-    bad[-1]["stdout_sha256"] = "wrong"
+-    with pytest.raises(ValueError, match="canonical output"):
+-        verify_group(bad, replay=True)
+-    bad = deepcopy(rows)
+-    bad[-1]["producers_disabled"] = False
+-    with pytest.raises(ValueError, match="producer-disabled"):
+-        verify_group(bad, replay=True)
+-
+-
+-def test_failed_or_misbound_receipt_cannot_admit_replay():
+-    good = dict(
+-        complete=True,
+-        outcome="success",
+-        evidence_kind="private-synthetic-test",
+-        execution_binding="bound",
+-        raw_input_sha256="input",
+-    )
+-    kwargs = dict(
+-        input_sha256="input", execution_binding="bound", evidence_kind="private-synthetic-test"
++@pytest.mark.parametrize(
++    "attack,reason",
++    [
++        ("unparseable", "JSONDecodeError"),
++        ("fake-witness", "saved witness"),
++        ("call-failure", "transport failed"),
++        ("missing-receipt", "FileNotFoundError"),
++        ("corrupt-saved", "blob collision"),
++        ("group-drift", "fresh process identity"),
++    ],
++)
++def test_campaign_rejects_and_preserves_failed_group(tmp_path, attack, reason):
++    a = Synthetic(tmp_path, attack)
++    with pytest.raises(ValueError, match=reason):
++        run(a)
++    report = json.loads((a.output / "incomplete.json").read_bytes())
++    assert not report["complete"] and report["incomplete_groups"]
++    assert not (a.output / "complete.json").exists()
++    if attack == "unparseable":
++        attempt = json.loads((a.output / "attempts/00003.json").read_bytes())
++        assert (a.output / attempt["stdout_blob"]).read_bytes() == b"FAILING-CALL-EVIDENCE"
++        assert not attempt["validation_passed"]
++        assert report["incomplete_groups"][0]["unresolved_slots"] == list(range(3, 12))
++    if attack == "group-drift":
++        assert report["validated_calls"] == 12
++        assert report["incomplete_groups"][0]["unresolved_slots"] == []
++        assert list((a.output / "groups").glob("*/failed.json"))
++
++
++def test_exact_refusal_rejects_borrowed_pre_and_post_dispatch_envelopes():
++    expected = dict(
++        code="InvalidDependency", message="accumulator use before production", pointer=None
+     )
+-    check_replay_admission(good, **kwargs)
++    exact_refusal(canonical_json(expected).encode(), expected)
++    with pytest.raises(ValueError, match="intended refusal"):
++        exact_refusal(
++            canonical_json(dict(expected, message="final consumers acc")).encode(), expected
++        )
++    expected = dict(code="CapacityExceeded", message="zacc", pointer=None)
++    with pytest.raises(ValueError, match="intended refusal"):
++        exact_refusal(
++            canonical_json(dict(expected, message="complete output byte limit")).encode(), expected
++        )
++
++
++def test_replay_rejects_incomplete_misbound_and_corrupt_retained_evidence(tmp_path):
++    a = Synthetic(tmp_path)
++    run(a)
++    refs = [
++        dict(
++            path=f"calls/{i:05d}.json",
++            sha256=digest((a.output / f"calls/{i:05d}.json").read_bytes()),
++        )
++        for i in range(6)
++    ]
++    row = a.selection["rows"][0]
++    replay_admission(a.output, refs, row, a.acceptance)
+     for field, value in [
+-        ("complete", False),
+-        ("outcome", "CapacityExceeded"),
++        ("validation_passed", False),
++        ("case_id", "foreign"),
+         ("execution_binding", "stale"),
+-        ("raw_input_sha256", "changed"),
+-        ("evidence_kind", "public-component"),
+     ]:
+-        with pytest.raises(ValueError):
+-            check_replay_admission(good | {field: value}, **kwargs)
+-
++        original = (a.output / refs[0]["path"]).read_bytes()
++        changed = json.loads(original) | {field: value}
++        raw = canonical_json(changed).encode()
++        (a.output / refs[0]["path"]).write_bytes(raw)
++        altered = deepcopy(refs)
++        altered[0]["sha256"] = digest(raw)
++        with pytest.raises(ValueError, match="initial receipt binding"):
++            replay_admission(a.output, altered, row, a.acceptance)
++        (a.output / refs[0]["path"]).write_bytes(original)
++    original_blob = a.output / "blobs" / digest(a.raw)
++    original_blob.write_bytes(b"corrupt")
++    with pytest.raises(ValueError, match="retained evidence hash"):
++        replay_admission(a.output, refs, row, a.acceptance)
++    original_blob.write_bytes(a.raw)
++    with pytest.raises(ValueError, match="complete initial"):
++        replay_admission(a.output, refs[:-1], row, a.acceptance)
+ 
+-def test_public_claim_is_not_an_authority_capability(tmp_path):
+-    class Claimed(Toy):
+-        def preflight(self, *args):
+-            return dict(super().preflight(*args), evidence_kind="public-component")
+ 
++def test_public_execution_stays_unavailable(tmp_path):
++    a = Synthetic(tmp_path)
++    a.acceptance["evidence_kind"] = "public-component"
+     with pytest.raises(ValueError, match="no public execution"):
+-        run_private(selection(), Claimed(), tmp_path / "claim", resources={"workers": 1})
++        run(a)
+ 
+ 
+-def test_public_replay_claim_cannot_substitute_authority():
+-    receipt = dict(
+-        complete=True,
+-        outcome="success",
+-        evidence_kind="public-component",
+-        execution_binding="claimed",
+-        raw_input_sha256="input",
+-        authority_receipt_sha256="caller-claim",
+-    )
+-    with pytest.raises(ValueError, match="public replay authority join unavailable"):
+-        check_replay_admission(
+-            receipt,
+-            input_sha256="input",
+-            execution_binding="claimed",
+-            evidence_kind="public-component",
+-        )
++class Negative(Synthetic):
++    def __init__(self, tmp_path, attack=None):
++        super().__init__(tmp_path, attack)
++        row = self.selection["rows"][0]
++        row.update(expected_layer="resource-preflight", expected_code="CapacityExceeded")
++        self.envelope = dict(code="CapacityExceeded", message="zacc", pointer=None)
++        self.acceptance["selection_sha256"] = digest(canonical_json(self.selection).encode())
++        self.acceptance["negatives"] = {self.case: dict(envelope=self.envelope)}
++
++    def call(self, slot, row, initial, policy):
++        raw = super().call(slot, row, initial, policy)
++        envelope = dict(self.envelope)
++        if self.attack == "wrong-guard":
++            envelope["message"] = "complete output byte limit"
++        raw.update(stdout=b"", stderr=canonical_json(envelope).encode(), status=2)
++        raw["witness"]["semantic_output_sha256"] = digest(raw["stderr"])
++        raw["witness"]["runtime_entries"] = 7 if self.attack == "fake-zero" else 0
++        # Producer assertions deliberately false: actual bytes decide acceptance.
++        raw.update(checked=False, expected_pointer_verified=False)
++        return raw
++
++
++def test_negative_actual_bytes_override_adapter_flags(tmp_path):
++    assert run(Negative(tmp_path))["completed_calls"] == 6
+ 
+ 
+ @pytest.mark.parametrize(
+-    "field,value,reason",
+-    [
+-        ("raw_input", b"different-job", "immutable selected raw input"),
+-        ("outcome", "success", "wrong refusal/result outcome"),
+-        ("expected_pointer_verified", False, "exact refusal pointer"),
+-        ("zero_dispatch_evidence", None, "separate native zero-dispatch"),
+-    ],
++    "attack,reason",
++    [("wrong-guard", "intended refusal"), ("fake-zero", "runtime-entry witness population")],
+ )
+-def test_adapter_mismatches_fail_closed(tmp_path, field, value, reason):
+-    class Broken(Toy):
++def test_negative_campaign_requires_intended_guard_and_bound_zero_entry(tmp_path, attack, reason):
++    a = Negative(tmp_path, attack)
++    with pytest.raises(ValueError, match=reason):
++        run(a)
++    attempt = json.loads((a.output / "attempts/00000.json").read_bytes())
++    assert (a.output / attempt["stderr_blob"]).read_bytes()
++    assert not attempt["validation_passed"]
++
++
++def test_every_unparseable_positive_refuses_even_when_all_bytes_match(tmp_path):
++    a = Synthetic(tmp_path, "unparseable-all")
++    with pytest.raises(ValueError, match="JSONDecodeError"):
++        run(a)
++
++
++def test_cancelled_worker_has_incomplete_group_and_parent_cleanup(tmp_path, monkeypatch):
++    import time
++
++    from validation.component import runtime_campaign
++
++    class Waiting(Synthetic):
+         def call(self, *args):
+-            return dict(super().call(*args), **{field: value})
++            time.sleep(2)
++            raise AssertionError("worker deadline did not cancel transport")
+ 
+-    with pytest.raises(ValueError, match=reason):
+-        run_private(
+-            selection(),
+-            Broken(),
+-            tmp_path / "bad-adapter",
+-            cases=["negative"],
+-            resources={"workers": 1},
+-        )
+-    assert not (tmp_path / "bad-adapter/complete.json").exists()
++    monkeypatch.setitem(runtime_campaign.POLICY, "case_seconds", 0.05)
++    a = Waiting(tmp_path)
++    with pytest.raises(ValueError, match="deadline"):
++        run(a)
++    report = json.loads((a.output / "incomplete.json").read_bytes())
++    assert report["incomplete_groups"][0]["unresolved_slots"] == list(range(12))
++    assert json.loads((a.output / "cleanup.json").read_bytes())["verified_stopped"]
++    assert not (a.output / "complete.json").exists()
++
++
++def test_invalid_metadata_cannot_lose_attempt_blob_binding(tmp_path):
++    a = Synthetic(tmp_path, "non-json-witness")
++    with pytest.raises(ValueError, match="worker failure"):
++        run(a)
++    attempt = json.loads((a.output / "attempts/00000.json").read_bytes())
++    assert (a.output / attempt["stdout_blob"]).read_bytes() == a.stdout
++    assert attempt["case_id"] == a.case and not attempt["validation_passed"]
+diff --git a/validation/component/test_runtime_checks.py b/validation/component/test_runtime_checks.py
+index 606743f..8252195 100644
+--- a/validation/component/test_runtime_checks.py
++++ b/validation/component/test_runtime_checks.py
+@@ -43,7 +43,11 @@ def inputs(profile2=True):
+     )
+     pins = {
+         str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+-        for folder in ("contract/uarch_contract", "validation/component")
++        for folder in (
++            "contract/uarch_contract",
++            "validation/component",
++            "src/rkuarch/engines/native",
++        )
+         for p in (ROOT / folder).glob("*.py")
+         if not p.name.startswith("test_")
+     }
+@@ -61,6 +65,12 @@ def inputs(profile2=True):
+             expected=expected,
+             input_sha256=hashlib.sha256(raw).hexdigest(),
+             raw_input=raw,
++            admitted=dict(
++                case_id=row["case_id"],
++                raw_input_sha256=hashlib.sha256(raw).hexdigest(),
++                job_hash=job["job_hash"],
++                engine=deepcopy(job["engine"]),
++            ),
+         ),
+     )
+ 
+@@ -125,3 +135,36 @@ def test_profile1_cannot_silently_enter_prospective_profile2_route():
+     job, result, row, kwargs = inputs(profile2=False)
+     with pytest.raises(CheckFailure, match="prospective profile/2 required"):
+         consume_case(job, result, row, **kwargs)
++
++
++@pytest.mark.parametrize("attack", ["stale-engine-pair", "caller-rehash"])
++def test_separately_frozen_input_refuses_consistent_foreign_pair(attack):
++    job, result, row, kwargs = inputs()
++    if attack == "stale-engine-pair":
++        job["engine"]["implementation_hash"] = "sha256:" + "1" * 64
++        result["engine"] = deepcopy(job["engine"])
++    else:
++        pass  # Foreign exact input bytes with the same parsed carrier.
++    job["job_hash"] = content_hash(job, exclude=("job_hash",))
++    result["job_hash"] = job["job_hash"]
++    result["result_hash"] = content_hash(result, exclude=("result_hash",))
++    kwargs["raw_input"] = canonical_json(job).encode()
++    if attack == "caller-rehash":
++        kwargs["raw_input"] += b" "
++    kwargs["input_sha256"] = hashlib.sha256(kwargs["raw_input"]).hexdigest()
++    with pytest.raises(CheckFailure, match="separately frozen admitted"):
++        consume_case(job, result, row, **kwargs)
++
++
++def test_unknown_literal_is_not_silently_ignored():
++    job, result, row, kwargs = inputs()
++    row["expected"]["duration_sp"] = 1
++    with pytest.raises(CheckFailure, match="unknown expectation keys"):
++        consume_case(job, result, row, **kwargs)
++
++
++def test_unjoined_legacy_caller_fails_closed_without_inventory():
++    job, result, row, kwargs = inputs()
++    kwargs.pop("admitted")
++    with pytest.raises(CheckFailure, match="admitted inventory required"):
++        consume_case(job, result, row, **kwargs)

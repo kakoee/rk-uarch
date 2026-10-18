@@ -20,6 +20,7 @@ from validation.component.checks import (
     unique,
 )
 from validation.component.issue_checks import check_issue
+from validation.component.matrix_order import check_matrix_order
 from validation.component.phase_laws import channel
 from validation.component.transition_checks_v3 import check_transitions, phase_binding
 
@@ -105,6 +106,7 @@ def check_v3(j: dict[str, Any], r: dict[str, Any], expected: dict[str, Any]) -> 
             ),
             "unicast request binding",
         )
+    check_matrix_order(j, r)
     check_issue(j, r)
     check_credits(list(requests.values()), val(core["dma"]["max_outstanding"]))
     phase_specs: dict[tuple[str, str | None, str], tuple[int | None, str | None]] = {}
