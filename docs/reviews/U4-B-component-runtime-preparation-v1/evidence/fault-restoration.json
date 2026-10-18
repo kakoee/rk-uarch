@@ -1,0 +1,124 @@
+{
+  "scope": "new B proposal controls only; no native or public authority evidence",
+  "records": [
+    {
+      "guard": "route",
+      "state": "baseline",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "/tmp/u4-b-runtime-review-01/probes/runner.py",
+        "/tmp/u4-b-runtime-prep-final-02/source",
+        "pytest",
+        "-q",
+        "validation/component/test_runtime_checks.py",
+        "-k",
+        "wrong_checker or valid_saved"
+      ],
+      "exit_code": 0,
+      "source_sha256": "5ab9063143a6b6607600d4d2678eb4412ef208822894df0081d51132d1ec8132",
+      "stdout_sha256": "273250c48695b36466aa1fc7d901b32fb43be25405c0fc69afe27948bb59782c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "guard": "route",
+      "state": "removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "/tmp/u4-b-runtime-review-01/probes/runner.py",
+        "/tmp/u4-b-runtime-prep-final-02/source",
+        "pytest",
+        "-q",
+        "validation/component/test_runtime_checks.py",
+        "-k",
+        "wrong_checker or valid_saved"
+      ],
+      "exit_code": 1,
+      "source_sha256": "c89205dd232b050893b33872fa53eeed01726c07facecd622f96d2fdac4419ed",
+      "stdout_sha256": "daaa5df0ce25aaf0019d5a92c468b894395980be53a37a2a0b3d4adfed300497",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "guard": "route",
+      "state": "restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "/tmp/u4-b-runtime-review-01/probes/runner.py",
+        "/tmp/u4-b-runtime-prep-final-02/source",
+        "pytest",
+        "-q",
+        "validation/component/test_runtime_checks.py",
+        "-k",
+        "wrong_checker or valid_saved"
+      ],
+      "exit_code": 0,
+      "source_sha256": "5ab9063143a6b6607600d4d2678eb4412ef208822894df0081d51132d1ec8132",
+      "stdout_sha256": "f1cc43d3aa14161a365a142d2037bc750340eb906296cd202b7d3b265ce63907",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "guard": "input",
+      "state": "baseline",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "/tmp/u4-b-runtime-review-01/probes/runner.py",
+        "/tmp/u4-b-runtime-prep-final-02/source",
+        "pytest",
+        "-q",
+        "validation/component/test_runtime_campaign.py",
+        "-k",
+        "adapter_mismatches"
+      ],
+      "exit_code": 0,
+      "source_sha256": "7a17b85f678019944a79358c7b8805c75b3bd44e3fa806e283e1c1759631d4ae",
+      "stdout_sha256": "5a8335f91db6bc8059a192da9c4e50ba281c8cea60b4cdcf382ebbac10ea7906",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "guard": "input",
+      "state": "removed",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "/tmp/u4-b-runtime-review-01/probes/runner.py",
+        "/tmp/u4-b-runtime-prep-final-02/source",
+        "pytest",
+        "-q",
+        "validation/component/test_runtime_campaign.py",
+        "-k",
+        "adapter_mismatches"
+      ],
+      "exit_code": 1,
+      "source_sha256": "458980b8b8651552f85e313a145184cbe0c8e9a149b497490a519434b7f1a210",
+      "stdout_sha256": "b51672eceed5c1a173b575e38c66c6924d0a82fdc24405aaff17ea9f9f2e53ad",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "guard": "input",
+      "state": "restored",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "/tmp/u4-b-runtime-review-01/probes/runner.py",
+        "/tmp/u4-b-runtime-prep-final-02/source",
+        "pytest",
+        "-q",
+        "validation/component/test_runtime_campaign.py",
+        "-k",
+        "adapter_mismatches"
+      ],
+      "exit_code": 0,
+      "source_sha256": "7a17b85f678019944a79358c7b8805c75b3bd44e3fa806e283e1c1759631d4ae",
+      "stdout_sha256": "5a8335f91db6bc8059a192da9c4e50ba281c8cea60b4cdcf382ebbac10ea7906",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "restored_exact_bytes": true,
+  "route": "With only route guard removed, explicit wrong-checker declaration is accepted; valid control passes. Binding discrimination, not a new engine/checker-law failure.",
+  "input": "With only raw-input hash guard removed, toy wrong bytes are accepted into complete private receipts; other adapter mismatch controls still refuse.",
+  "synthetic": true,
+  "native_runs": 0
+}

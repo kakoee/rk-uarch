@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from uarch_contract.hashing import canonical_json, content_hash
+from uarch_contract.mapped import PRODUCTION_HARDWARE, NativeTestRegistry
 
 from validation.component.join_inputs import reseal
 from validation.component.native_inputs import policy_item, private_job, prospective_inputs
@@ -88,6 +89,27 @@ def definitions() -> dict[str, Any]:
             expected_layer="result",
             expected_public_code="success",
         )
+    # Extend only the unsigned prospective registry after all exact definitions exist.
+    # Preserve every old row/rationale and add only actually selected variant hashes.
+    historical_registry = deepcopy(corpus["registry"])
+    entries = {e["hardware_spec_hash"]: e for e in historical_registry["test_only_specs"]}
+    added = sorted(
+        {i["bundle"]["hardware_spec_hash"] for i in items.values()}
+        - set(entries)
+        - {PRODUCTION_HARDWARE}
+    )
+    for hardware_hash in added:
+        entries[hardware_hash] = dict(
+            hardware_spec_hash=hardware_hash,
+            rationale=(
+                "B finite prospective /3 verification variant; synthetic proposal, no authority"
+            ),
+        )
+    corpus["registry"]["test_only_specs"] = [entries[h] for h in sorted(entries)]
+    corpus["registry"]["registry_hash"] = content_hash(
+        corpus["registry"], exclude=("registry_hash",)
+    )
+    NativeTestRegistry.model_validate(corpus["registry"])
     rows, jobs = [], {}
     for old_name, item in sorted(items.items()):
         name = "v3:" + old_name
@@ -148,7 +170,9 @@ def definitions() -> dict[str, Any]:
         )
     counts = Counter(r["expected_layer"] for r in rows)
     selection = dict(
-        format="B-component-prospective-v3-selection/1",
+        format="B-component-prospective-v3-selection/2",
+        registry=deepcopy(corpus["registry"]),
+        registry_transition=dict(before=historical_registry, added_hardware_hashes=added),
         status="definition freeze; not authority",
         model=list(MODEL),
         observations=FORMAT,

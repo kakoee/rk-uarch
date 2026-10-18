@@ -1,0 +1,75 @@
+{
+  "status": "construction read coverage remains unsupported; no waiver",
+  "raw_gaps": [
+    {
+      "path": "/tmp/u4-b-component-candidate-03/receipts/debug/debug.trace.450",
+      "sha256": "bfa6f0d596e06235521fccedc8da46590efed478284d9549e307688d441fe661",
+      "line": 11,
+      "record": "1792268641.783334 ???()                 = ?",
+      "parents": [
+        {
+          "path": "/tmp/u4-b-component-candidate-03/receipts/debug/debug.trace.434",
+          "line": 479,
+          "record": "1792268641.781535 clone(child_stack=0x74ca9dffb070, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=[450], tls=0x74ca9dfff6c0, child_tidptr=0x74ca9dfff990) = 450"
+        }
+      ],
+      "terminal": "1792268641.783472 +++ exited with 0 +++",
+      "resolution": "unknown syscall identity/arguments/result unavailable",
+      "accepted": false
+    },
+    {
+      "path": "/tmp/u4-b-component-candidate-03/receipts/debug/debug.trace.452",
+      "sha256": "9a23d9ff1e4b31a4099b9046feb86aa422fbd324538a31b5fdce23a9afc0368a",
+      "line": 9,
+      "record": "1792268641.786417 ???()                 = ?",
+      "parents": [
+        {
+          "path": "/tmp/u4-b-component-candidate-03/receipts/debug/debug.trace.432",
+          "line": 479,
+          "record": "1792268641.784855 clone(child_stack=0x7155945fb070, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=[452], tls=0x7155945ff6c0, child_tidptr=0x7155945ff990) = 452"
+        }
+      ],
+      "terminal": "1792268641.786588 +++ exited with 0 +++",
+      "resolution": "unknown syscall identity/arguments/result unavailable",
+      "accepted": false
+    },
+    {
+      "path": "/tmp/u4-b-component-candidate-03/receipts/release/release.trace.482",
+      "sha256": "d9370f7e307b2669714bf26d511a7f70afad5451fd5aef8e53b8d69de1ae2b37",
+      "line": 10,
+      "record": "1792268654.771925 sched_getaffinity(482, 32,  <unfinished ...>) = ?",
+      "parents": [
+        {
+          "path": "/tmp/u4-b-component-candidate-03/receipts/release/release.trace.469",
+          "line": 479,
+          "record": "1792268654.770161 clone(child_stack=0x70bc995fb070, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=[482], tls=0x70bc995ff6c0, child_tidptr=0x70bc995ff990) = 482"
+        }
+      ],
+      "terminal": "1792268654.772038 +++ exited with 0 +++",
+      "resolution": "sched_getaffinity identified; unfinished return/arguments remain unavailable",
+      "accepted": false
+    }
+  ],
+  "strict_parse": [
+    {
+      "mode": "debug",
+      "strict_parser": "unparsed record for pid 450: ???()                 = ?",
+      "accepted": false
+    },
+    {
+      "mode": "release",
+      "strict_parser": "missing terminal or unfinished call",
+      "accepted": false
+    }
+  ],
+  "parser_sha256": "e330c3046534309314915056ad7153ce0478c3c2662997eca97a01c9b00f5fe3",
+  "parser_changed": false,
+  "new_captures": 0,
+  "accepted_diagnostic_manual_has_syscall_number_option": true,
+  "options": [
+    "Keep explicit non-exhaustive read evidence; a human/reviewer decision is still needed before any gate requiring exhaustive closure",
+    "Coordinate one targeted existing-strace capture with the necessary final A build: syscall numbers and complete per-process terminal/unfinished records; retain strict parser and failed originals. This may still fail and cannot retroactively repair the old traces."
+  ],
+  "unsupported_claim": "No exhaustive construction input/read closure can be derived from these bytes. Source declarations, dep-info and ELF/DSO identity are separate bounded claims.",
+  "future_capture_status": "proposed to A; no capture/build performed or peer agreement claimed"
+}

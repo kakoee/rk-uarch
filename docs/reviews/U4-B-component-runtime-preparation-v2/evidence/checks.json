@@ -1,0 +1,45 @@
+{
+  "tree": "18f4539769175f0febcb812d17f5837ecba756bf",
+  "checks": [
+    {
+      "name": "selection",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "/tmp/u4-b-runtime-review-01/probes/runner.py",
+        "/tmp/u4-b-runtime-registry-final-01/source",
+        "pytest",
+        "-q",
+        "validation/component/test_runtime_selection.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "ac5f3dcd2ddf50fe2e9aa13cef87576f2709e038912adf0355059e25c93f38e3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "closure",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "/tmp/u4-b-runtime-review-01/probes/runner.py",
+        "/tmp/u4-b-runtime-registry-final-01/source",
+        "script",
+        "/tmp/u4-b-runtime-registry-final-01/closure.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "6f480e6780e8f945149030ff57724fd318e3a72f3aa74acce0ff8e4d3d346841",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "root-ruff",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/ruff",
+        "check",
+        "."
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
