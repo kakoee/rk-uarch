@@ -1,0 +1,42 @@
+{
+  "helper_commit": "d1a929ca48d3a846bbff2f2608cf34bcfbf7fd81",
+  "helper_sha256": "43ab5c8a9ac766e9b834696f5255b054fbdb18b21b52f4091dfa859641adad0f",
+  "read_only_preflight": "passed: strict currentness, mapped schema freshness, 1 identity test in 0.14s",
+  "guard_checks": [
+    {
+      "name": "missing human authorization",
+      "refused": true,
+      "reason": "STOP: human invocation required"
+    },
+    {
+      "name": "abbreviated helper pin",
+      "refused": true,
+      "reason": "STOP: full helper commit required"
+    },
+    {
+      "name": "nonexistent helper commit",
+      "refused": true,
+      "reason": "STOP: fatal: Not a valid commit name 0000000000000000000000000000000000000000"
+    },
+    {
+      "name": "new selected path collision",
+      "refused": true,
+      "reason": "STOP: new path already exists: occupied"
+    },
+    {
+      "name": "wrong preimage",
+      "refused": true,
+      "reason": "STOP: preimage mismatch: occupied"
+    },
+    {
+      "name": "selected symlink",
+      "refused": true,
+      "reason": "STOP: symlink in selected path: link"
+    }
+  ],
+  "live_placement": false,
+  "staging": false,
+  "native_execution": false,
+  "UARCH_HUMAN_set_by_coordinator": false,
+  "notes": "Guard paths executed read-only or in private temporary files. Normal commit hooks and live placement are for the human invocation, not claimed executed."
+}
