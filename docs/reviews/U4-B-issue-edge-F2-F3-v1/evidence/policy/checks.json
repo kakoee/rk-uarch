@@ -1,0 +1,67 @@
+{
+  "records": [
+    {
+      "label": "baseline",
+      "exit_code": 0,
+      "source_sha256": "5b052b9eb984a9e83f124e3bad0fa3d00f2d7f7f196efe16b3136ec942c57866",
+      "stdout_sha256": "22d16909bb9cb74a42c226188c6992b148a70f2b1c5b6b545b394e2266eedfcb",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-m",
+        "pytest",
+        "-c",
+        "/tmp/u4-b-f2f3-source-01/pyproject.toml",
+        "--rootdir",
+        "/tmp/u4-b-f2f3-policy-checks-01/source",
+        "-p",
+        "no:cacheprovider",
+        "/tmp/u4-b-f2f3-policy-checks-01/source/test_restriction.py",
+        "-q"
+      ]
+    },
+    {
+      "label": "narrow-mixed-only-fault",
+      "exit_code": 1,
+      "source_sha256": "23d20b359a4a14f7132887e13444697447e12023f9de1e947e8b34b466a8fc68",
+      "stdout_sha256": "fc588a6411c4e218124569632c2b5f8aeea5d1a71fa926a51996e327f54543a5",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-m",
+        "pytest",
+        "-c",
+        "/tmp/u4-b-f2f3-source-01/pyproject.toml",
+        "--rootdir",
+        "/tmp/u4-b-f2f3-policy-checks-01/source",
+        "-p",
+        "no:cacheprovider",
+        "/tmp/u4-b-f2f3-policy-checks-01/source/test_restriction.py",
+        "-q"
+      ]
+    },
+    {
+      "label": "restored",
+      "exit_code": 0,
+      "source_sha256": "5b052b9eb984a9e83f124e3bad0fa3d00f2d7f7f196efe16b3136ec942c57866",
+      "stdout_sha256": "e0394e0de3b0d1707069051db4dc6c724532b76239950836a9b897a8b5b4e23d",
+      "argv": [
+        "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+        "-I",
+        "-m",
+        "pytest",
+        "-c",
+        "/tmp/u4-b-f2f3-source-01/pyproject.toml",
+        "--rootdir",
+        "/tmp/u4-b-f2f3-policy-checks-01/source",
+        "-p",
+        "no:cacheprovider",
+        "/tmp/u4-b-f2f3-policy-checks-01/source/test_restriction.py",
+        "-q"
+      ]
+    }
+  ],
+  "label": "synthetic offline classification only; no validator or native execution",
+  "unsafe_classification": "mixed-only mutant labels homogeneous multi-request engine outside F2; six directional controls fail",
+  "exact_restoration": true
+}
