@@ -1,0 +1,1409 @@
+diff --git a/native/tools/component_container_guard.py b/native/tools/component_container_guard.py
+new file mode 100644
+index 0000000..d9c7909
+--- /dev/null
++++ b/native/tools/component_container_guard.py
+@@ -0,0 +1,233 @@
++"""Private Docker lifecycle ownership. No K2 or public launch path.
++
++A separate session watches a worker-held pipe. Worker death closes the pipe, but
++cannot kill the guardian. Parent cleanup cancels registered intents, then waits for
++verified receipts. A management failure is unresolved, never a stopped claim.
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import select
++import subprocess
++import sys
++import time
++import uuid
++from pathlib import Path
++
++DOCKER = ["/usr/bin/docker", "--host", "unix:///var/run/docker.sock"]
++LABEL = "rk-uarch.private-owner"
++
++
++def save(path, value):
++    temporary = path.with_suffix(".tmp")
++    temporary.write_text(json.dumps(value, indent=2) + "\n")
++    temporary.replace(path)
++
++
++def command(args):
++    p = subprocess.run([*DOCKER, *args], capture_output=True, timeout=5)
++    if p.returncode:
++        raise RuntimeError(p.stderr.decode(errors="replace"))
++    return p.stdout
++
++
++def guard(directory, read_fd):
++    global DOCKER
++    config = directory / "docker-config"
++    config.mkdir(exist_ok=False)
++    DOCKER = [*DOCKER, "--config", str(config)]
++    spec = json.loads((directory / "intent.json").read_bytes())
++    started = time.monotonic()
++    receipt = {
++        "format": "private-container-cleanup/1",
++        "owner": spec["owner"],
++        "name": spec["name"],
++        "container_id": None,
++        "stopped": False,
++        "removed": False,
++        "exit_code": None,
++        "reason": "unresolved",
++    }
++    process = None
++    create_acknowledged = False
++
++    def cancellation():
++        if (directory / "cancel").exists():
++            return "cancelled"
++        if select.select([read_fd], [], [], 0)[0] and os.read(read_fd, 1) == b"":
++            return "worker-exit"
++        if time.monotonic() - started >= spec["timeout"]:
++            return "deadline"
++        return None
++
++    try:
++        reason = cancellation()
++        if reason:
++            receipt.update(reason=reason, stopped=True, removed=True, never_created=True)
++            return
++        # Complete the bounded create before reconciling cancellation. Killing the
++        # CLI alone cannot prove the daemon did not create a container later.
++        identity = (
++            command(
++                [
++                    "create",
++                    "--pull",
++                    "never",
++                    "--name",
++                    spec["name"],
++                    "--label",
++                    LABEL + "=" + spec["owner"],
++                    *spec["args"],
++                ]
++            )
++            .decode()
++            .strip()
++        )
++        create_acknowledged = True
++        receipt["container_id"] = identity
++        save(directory / "created.json", {"container_id": identity})
++        reason = cancellation()
++        with (directory / "stdout").open("wb") as out, (directory / "stderr").open("wb") as err:
++            if not reason:
++                process = subprocess.Popen(
++                    [*DOCKER, "start", "-a", identity],
++                    stdout=out,
++                    stderr=err,
++                    start_new_session=True,
++                )
++                save(directory / "started.json", {"container_id": identity})
++                while process.poll() is None:
++                    reason = cancellation()
++                    if reason:
++                        break
++                    if (
++                        max((directory / n).stat().st_size for n in ("stdout", "stderr"))
++                        > spec["cap"]
++                    ):
++                        reason = "output-limit"
++                        break
++                    time.sleep(0.02)
++                if not reason:
++                    receipt["exit_code"] = process.returncode
++                    reason = "completed"
++        receipt["reason"] = reason
++    except Exception as error:
++        receipt["error"] = repr(error)
++    finally:
++        try:
++            if create_acknowledged:
++                identity = receipt["container_id"]
++                info = json.loads(command(["inspect", identity]))[0]
++                if info["Id"] != identity or info["Config"]["Labels"].get(LABEL) != spec["owner"]:
++                    raise RuntimeError("container ownership mismatch")
++                if info["State"]["Running"]:
++                    command(["kill", identity])
++                info = json.loads(command(["inspect", identity]))[0]
++                receipt["pre_remove_state"] = info["State"]
++                # start may race the first inspection: force-remove the exact ID.
++                # Successful removal and subsequent absence prove it cannot start later.
++                command(["rm", "-f", identity])
++                absent = subprocess.run(
++                    [*DOCKER, "inspect", identity], capture_output=True, timeout=5
++                )
++                if absent.returncode == 0 or not any(
++                    m in absent.stderr.lower() for m in (b"no such object", b"no such container")
++                ):
++                    raise RuntimeError("removal not verified")
++                receipt["stopped"] = True
++                receipt["removed"] = True
++            elif not receipt.get("never_created"):
++                # A create RPC timeout is not proof of absence. Preserve exact
++                # name/token for manual resolution; parent must fail closed.
++                receipt["error"] = receipt.get("error", "create acknowledgement absent")
++            if process is not None:
++                try:
++                    process.wait(timeout=3)
++                except subprocess.TimeoutExpired:
++                    process.kill()
++                    process.wait(timeout=3)
++        except Exception as error:
++            receipt["cleanup_error"] = repr(error)
++        receipt["elapsed_seconds"] = time.monotonic() - started
++        save(directory / "cleanup.json", receipt)
++        os.close(read_fd)
++
++
++def run_container(directory: Path, args: list[str], *, timeout: float, cap: int = 1024**2):
++    directory = directory.resolve()
++    directory.mkdir(parents=True, exist_ok=False)
++    owner = uuid.uuid4().hex
++    save(
++        directory / "intent.json",
++        {
++            "owner": owner,
++            "name": "u4-private-" + owner,
++            "args": args,
++            "timeout": timeout,
++            "cap": cap,
++        },
++    )
++    read_fd, write_fd = os.pipe()
++    try:
++        process = subprocess.Popen(
++            [
++                sys.executable,
++                "-I",
++                "-S",
++                "-B",
++                str(Path(__file__).resolve()),
++                str(directory),
++                str(read_fd),
++            ],
++            pass_fds=(read_fd,),
++            start_new_session=True,
++            stdin=subprocess.DEVNULL,
++            stdout=subprocess.DEVNULL,
++            stderr=subprocess.DEVNULL,
++        )
++        os.close(read_fd)
++        read_fd = -1
++        try:
++            process.wait(timeout=timeout + 35)
++        except BaseException:
++            (directory / "cancel").touch()
++            raise
++    finally:
++        os.close(write_fd)
++        if read_fd >= 0:
++            os.close(read_fd)
++    receipt = json.loads((directory / "cleanup.json").read_bytes())
++    if not receipt["stopped"] or not receipt["removed"] or "cleanup_error" in receipt:
++        raise RuntimeError("private container cleanup unresolved: " + str(directory))
++    return receipt
++
++
++def cleanup(scope: Path, *, timeout: float = 35):
++    """After workers stop/join: cancel exact intents in this invocation's directory.
++
++    Parent must not accept completion while workers may create further intents.
++    Does not sweep Docker or infer stopped from a CLI/worker exit.
++    """
++    intents = sorted(scope.glob("*/intent.json"))
++    for intent in intents:
++        (intent.parent / "cancel").touch()
++    end = time.monotonic() + timeout
++    receipts = []
++    for intent in intents:
++        path = intent.parent / "cleanup.json"
++        while not path.exists() and time.monotonic() < end:
++            time.sleep(0.02)
++        if not path.exists():
++            raise RuntimeError("private cleanup incomplete intent: " + str(intent))
++        receipt = json.loads(path.read_bytes())
++        owner = json.loads(intent.read_bytes())["owner"]
++        if receipt["owner"] != owner or not receipt["stopped"] or not receipt["removed"]:
++            raise RuntimeError("private cleanup unresolved: " + str(path))
++        receipts.append(receipt)
++    return receipts
++
++
++if __name__ == "__main__":
++    guard(Path(sys.argv[1]), int(sys.argv[2]))
+diff --git a/native/tools/component_private_adapter.py b/native/tools/component_private_adapter.py
+index 5d6d0c0..b87d1b0 100644
+--- a/native/tools/component_private_adapter.py
++++ b/native/tools/component_private_adapter.py
+@@ -8,18 +8,17 @@ No selector, HostRecord, real authority, public replay or caller-supplied raw in
+ from __future__ import annotations
+ 
+ import json
+-import os
+-import shlex
+ from pathlib import Path
+ from typing import Any
+ 
+ from uarch_contract.hashing import sha256, strict_json_loads
+ 
++from native.tools.component_container_guard import cleanup as cleanup_containers
++from native.tools.component_container_guard import run_container
+ from rkuarch.engines.native.component_host import _prepare_payload
+-from rkuarch.engines.native.component_runner import _consume, _decode_envelope
++from rkuarch.engines.native.component_runner import _consume, require_negative_envelope
+ from rkuarch.engines.native.host import _read, _require
+ from rkuarch.engines.native.records import FileBinding
+-from rkuarch.engines.native.runner import Limits, _exchange
+ 
+ IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
+ TEST = "protocol::component_runtime_tests::private_selected_transport_probe"
+@@ -32,6 +31,24 @@ def _bytes(path: Path, cap: int) -> bytes:
+     return raw
+ 
+ 
++def saved_input(
++    root: Path, binding: FileBinding, initial: dict[str, Any] | None, cap: int
++) -> bytes:
++    """Replay reads B's retained bytes; identity comes from A's admitted inventory."""
++    if initial is None:
++        raw = _read(root, binding)
++    else:
++        _require(
++            initial["raw_input_sha256"] == binding.byte_hash.split(":")[1],
++            "durable replay inventory digest",
++        )
++        raw = _bytes(Path(initial["saved_input_path"]), cap)
++    _require(
++        len(raw) <= cap and sha256(raw) == binding.byte_hash, "private independent raw inventory"
++    )
++    return raw
++
++
+ class PrivateAdapter:
+     """Finite immutable inputs and byte-bound test executables; synthetic data only."""
+ 
+@@ -45,6 +62,8 @@ class PrivateAdapter:
+         )
+         self.output = output.resolve()
+         self.output.mkdir(exist_ok=False)
++        self.container_scope = self.output / "containers"
++        self.container_scope.mkdir()
+         payload = self.root / "private-component/prospective-payload.json"
+         self.binding = FileBinding(
+             path=str(payload.relative_to(self.root)), byte_hash=sha256(payload.read_bytes())
+@@ -78,6 +97,12 @@ class PrivateAdapter:
+                 (self.root / "private-component/negative-inventory.json").read_bytes()
+             )["cases"]
+         }
++        self.negative_expectations = {
++            r["case_id"]: r
++            for r in strict_json_loads(
++                (self.root / "private-component/negative-expectations.json").read_bytes()
++            )["rows"]
++        }
+         self.slots: list[dict[str, Any]] = []
+         self.files = {}
+         for prepared in self.prepared.values():
+@@ -91,6 +116,7 @@ class PrivateAdapter:
+             "affected-selection.json",
+             "job-transitions.json",
+             "negative-inventory.json",
++            "negative-expectations.json",
+         ):
+             path = self.root / "private-component" / name
+             self.files[str(path)] = sha256(path.read_bytes()).split(":")[1]
+@@ -109,6 +135,11 @@ class PrivateAdapter:
+                 self.files[str(self.root / profile.path)] = profile.byte_hash.split(":")[1]
+         self._refresh()
+ 
++    def cleanup(self) -> dict[str, Any]:
++        """B parent calls after stopping/joining workers, including failed campaigns."""
++        receipts = cleanup_containers(self.container_scope)
++        return {"verified_stopped": True, "outstanding": [], "containers": receipts}
++
+     def _refresh(self) -> None:
+         for path, wanted in self.files.items():
+             _require(
+@@ -163,7 +194,14 @@ class PrivateAdapter:
+             and slot["repetition"] in (0, 1, 2),
+             "private finite slot required",
+         )
+-        raw = _read(self.root, FileBinding.model_validate(self.transitions[name]["file"]))
++        admitted_file = FileBinding.model_validate(self.transitions[name]["file"])
++        if slot["phase"] == "replay":
++            _require(initial is not None, "durable initial receipt required for replay")
++        else:
++            _require(initial is None, "initial call cannot supply replay descriptor")
++        raw = saved_input(
++            self.root, admitted_file, initial, self.prepared[mode].payload.budget.stdin_bytes
++        )
+         job = strict_json_loads(raw)
+         _require(
+             job["profile"] == row["profile"]
+@@ -171,19 +209,23 @@ class PrivateAdapter:
+             "independent private job/profile/engine promise",
+         )
+         if name in self.negatives:
++            expected_negative = self.negative_expectations[name]
++            _require(
++                expected_negative["input_sha256"] == admitted_file.byte_hash.split(":")[1]
++                and expected_negative["job_hash"] == job["job_hash"]
++                and expected_negative["engine"] == job["engine"],
++                "private negative expectation input/engine join",
++            )
++            guard = expected_negative["native_guard_source"]
++            _require(
++                sha256((self.root / guard["path"]).read_bytes()).split(":")[1] == guard["sha256"],
++                "private negative guard source",
++            )
+             profile = FileBinding.model_validate(self.negatives[name]["profile"])
+             _require(
+                 job["profile"] == strict_json_loads(_read(self.root, profile)),
+                 "independent negative profile file",
+             )
+-        if slot["phase"] == "replay":
+-            _require(
+-                initial is not None
+-                and initial["outcome"] == "success"
+-                and initial["raw_input_sha256"] == sha256(raw).split(":")[1]
+-                and initial["execution_binding"] == self.binding.byte_hash,
+-                "private successful receipt required for replay",
+-            )
+         # Explicit saved-input producer disable; no producer module is needed to consume it.
+         import rkuarch.workload.mapped as producer
+ 
+@@ -199,19 +241,7 @@ class PrivateAdapter:
+         outputs.mkdir()
+         (inputs / "case.json").write_bytes(raw)
+         exe = Path(self.summary["modes"][mode]["test_executable"])
+-        (run / "docker-config").mkdir()
+         argv = [
+-            "/usr/bin/docker",
+-            "--config",
+-            str(run / "docker-config"),
+-            "--host",
+-            "unix:///var/run/docker.sock",
+-            "run",
+-            "--rm",
+-            "--pull",
+-            "never",
+-            "--cidfile",
+-            str(run / "container.id"),
+             "--network",
+             "none",
+             "--read-only",
+@@ -249,16 +279,19 @@ class PrivateAdapter:
+             "--exact",
+             "--nocapture",
+         ]
+-        shell = run / "bounded-probe.sh"
+-        shell.write_text("#!/bin/sh\nexec " + shlex.join(argv) + "\n")
+-        shell.chmod(0o555)
+-        fd = os.open(shell, os.O_RDONLY)
+-        try:
+-            stdout, stderr, status = _exchange(fd, b"", Limits(30, 1, 1024 * 1024, 1024 * 1024))
+-        finally:
+-            os.close(fd)
++        cleanup_receipt = run_container(
++            self.container_scope / f"{slot['ordinal']:05d}",
++            argv,
++            timeout=policy["per_call_seconds"],
++            cap=1024 * 1024,
++        )
++        container_run = self.container_scope / f"{slot['ordinal']:05d}"
++        stdout = _bytes(container_run / "stdout", 1024 * 1024)
++        stderr = _bytes(container_run / "stderr", 1024 * 1024)
++        status = cleanup_receipt["exit_code"]
+         (run / "harness.stdout").write_bytes(stdout)
+         (run / "harness.stderr").write_bytes(stderr)
++        _require(cleanup_receipt["reason"] == "completed", "private container incomplete")
+         _require(status == 0 and b"1 passed" in stdout, "private unit process failed")
+         value = _bytes(outputs / "result/case.json", 64 * 1024**2)
+         semantic = int(_bytes(outputs / "result/case.status", 16))
+@@ -269,17 +302,13 @@ class PrivateAdapter:
+             _consume(self.prepared[mode], json.loads(raw), value, b"", 0)
+             outcome = "success"
+         else:
+-            error = _decode_envelope(result_stdout, result_stderr, semantic)
+-            _require(
+-                semantic == 2
+-                and entries == 0
+-                and error["code"] == row["expected_code"]
+-                and error["pointer"] == self.negatives[name]["expected_pointer"],
+-                "private exact refusal and zero runtime entry",
++            error = require_negative_envelope(
++                result_stdout, result_stderr, semantic, self.negative_expectations[name]["envelope"]
+             )
++            _require(entries == 0, "private negative zero runtime entry")
+             outcome = error["code"]
+         self._refresh()
+-        container = (run / "container.id").read_text().strip()
++        container = cleanup_receipt["container_id"]
+         _require(
+             len(container) == 64 and all(c in "0123456789abcdef" for c in container),
+             "actual private container identity required",
+@@ -296,14 +325,32 @@ class PrivateAdapter:
+             "evidence": "cfg(test) file-probe; synthetic anchors",
+         }
+         (run / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
++        witness = {
++            "case_id": name,
++            "mode": mode,
++            "raw_input_sha256": sha256(raw).split(":")[1],
++            "semantic_output_sha256": sha256(value).split(":")[1],
++            "executable_sha256": self.summary["modes"][mode]["test_executable_byte_hash"].split(
++                ":"
++            )[1],
++            "process_identity": "docker:" + container + ":pid1",
++            "runtime_entries": entries,
++            "transport_complete": True,
++            "evidence": "cfg(test) file-probe; synthetic anchors",
++        }
++        (run / "witness.json").write_text(json.dumps(witness, indent=2) + "\n")
+         return {
+             "raw_input": raw,
+             "stdout": result_stdout,
+             "stderr": result_stderr,
+             "process_identity": "docker:" + container + ":pid1",
+-            "checked": True,
+             "outcome": outcome,
+-            "producers_disabled": True,
+-            "expected_pointer_verified": semantic == 2,
+-            "zero_dispatch_evidence": str(run / "receipt.json") if semantic == 2 else None,
++            "status": semantic,
++            "witness": witness,
++            "cleanup": {
++                **cleanup_receipt,
++                "verified_stopped": cleanup_receipt["stopped"] and cleanup_receipt["removed"],
++                "process_identity": "docker:" + container + ":pid1",
++            },
++            "evidence_path": str(run / "receipt.json"),
+         }
+diff --git a/native/tools/component_runtime_candidate.py b/native/tools/component_runtime_candidate.py
+index 39dc257..1199132 100644
+--- a/native/tools/component_runtime_candidate.py
++++ b/native/tools/component_runtime_candidate.py
+@@ -373,7 +373,8 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
+         "python_executable": binding(Path("/"), Path(sys.executable).resolve()),
+         "independent_binding": binding(
+             root,
+-            root / "docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json",
++            root
++            / "docs/reviews/U4-A-component-runtime-stage2-v1/prospective-consumer-bindings-v1.json",
+         ),
+         "observation_contract": binding(
+             observation_root or root,
+diff --git a/native/tools/component_stage2_inputs.py b/native/tools/component_stage2_inputs.py
+new file mode 100644
+index 0000000..0bec0b0
+--- /dev/null
++++ b/native/tools/component_stage2_inputs.py
+@@ -0,0 +1,60 @@
++"""Prospective Stage 2 negative bindings. No execution, authority or historical edits."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import sys
++from copy import deepcopy
++from pathlib import Path
++from typing import Any
++
++
++def transition_negatives(new: Path, old: Path, expected: dict[str, Any]) -> dict[str, Any]:
++    rows = []
++    for prior in expected["rows"]:
++        name = prior["case_id"]
++        if Path(name).name != name or name in (".", ".."):
++            raise ValueError("finite case filename")
++        relative = Path("private-component/jobs") / (name + ".json")
++        before_raw, after_raw = (old / relative).read_bytes(), (new / relative).read_bytes()
++        before, after = json.loads(before_raw), json.loads(after_raw)
++        if (
++            hashlib.sha256(before_raw).hexdigest() != prior["input_sha256"]
++            or before["job_hash"] != prior["job_hash"]
++            or before["engine"] != prior["engine"]
++        ):
++            raise ValueError("historical independently expected input")
++        if {k: v for k, v in before.items() if k not in ("engine", "job_hash")} != {
++            k: v for k, v in after.items() if k not in ("engine", "job_hash")
++        }:
++            raise ValueError("identity-only transition required")
++        guard = prior["native_guard_source"]
++        if hashlib.sha256((new / guard["path"]).read_bytes()).hexdigest() != guard["sha256"]:
++            raise ValueError("changed native guard needs new independent expectations")
++        row = deepcopy(prior)
++        row.update(
++            historical_expectation=deepcopy(prior),
++            input_sha256=hashlib.sha256(after_raw).hexdigest(),
++            job_hash=after["job_hash"],
++            engine=after["engine"],
++            transition_scope=(
++                "Prospective identity-only input transition; all observations inherited"
++            ),
++        )
++        rows.append(row)
++    return {"format": "component-negative-expectations/1", "rows": rows}
++
++
++def main() -> None:
++    new, old, expectations = map(Path, sys.argv[1:])
++    if not new.resolve().is_relative_to(Path("/tmp")) or new.resolve() == old.resolve():
++        raise ValueError("new private export required")
++    output = new / "private-component/negative-expectations.json"
++    value = transition_negatives(new, old, json.loads(expectations.read_bytes()))
++    with output.open("x") as stream:
++        stream.write(json.dumps(value, indent=2, sort_keys=True) + "\n")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/native/tools/component_trusted_start.py b/native/tools/component_trusted_start.py
+new file mode 100644
+index 0000000..6d24233
+--- /dev/null
++++ b/native/tools/component_trusted_start.py
+@@ -0,0 +1,152 @@
++"""Private prospective launcher: python -I -S -B THIS MANIFEST SHA256 MODULE.
++
++The externally pinned interpreter, this file and its bootstrap stdlib are the TCB.
++This is not an in-process sandbox. Activation must supply an immutable manifest,
++roots, interpreter/DSOs and launcher; a caller-chosen digest is not authority.
++"""
++
++import hashlib
++import importlib
++import importlib.machinery as machinery
++import importlib.util
++import json
++import sys
++import types
++from pathlib import Path
++
++
++def require(condition, message):
++    if not condition:
++        raise RuntimeError("trusted startup: " + message)
++
++
++def main():
++    require(
++        sys.flags.isolated and sys.flags.no_site and sys.flags.dont_write_bytecode,
++        "requires -I -S -B",
++    )
++    require(
++        not any(n in sys.modules for n in ("site", "sitecustomize", "usercustomize")),
++        "automatic site initialization",
++    )
++    require(
++        sys.meta_path
++        == [machinery.BuiltinImporter, machinery.FrozenImporter, machinery.PathFinder],
++        "initial import hooks",
++    )
++    manifest_path, expected, entry = sys.argv[1:4]
++    raw = Path(manifest_path).read_bytes()
++    require(hashlib.sha256(raw).hexdigest() == expected, "manifest digest")
++    manifest = json.loads(raw)
++    require(set(manifest) == {"roots", "files"}, "manifest shape")
++    roots = tuple(str(Path(p).resolve(strict=True)) for p in manifest["roots"])
++    pins = manifest["files"]
++    require(roots and len(roots) == len(set(roots)), "roots")
++
++    def checked(path):
++        resolved = str(Path(path).resolve(strict=True))
++        require(resolved == str(path) and resolved in pins, "unlisted origin: " + str(path))
++        require(any(Path(resolved).is_relative_to(p) for p in roots), "origin outside roots")
++        data = Path(resolved).read_bytes()
++        require(hashlib.sha256(data).hexdigest() == pins[resolved], "changed source: " + resolved)
++        return data
++
++    class Source(machinery.SourceFileLoader):
++        def get_code(self, fullname):
++            # Never ask SourceFileLoader for code: -B does not disable pyc reads.
++            return compile(checked(self.path), self.path, "exec", dont_inherit=True)
++
++    class Extension(machinery.ExtensionFileLoader):
++        def create_module(self, spec):
++            checked(self.path)
++            return super().create_module(spec)
++
++        def exec_module(self, module):
++            checked(self.path)
++            return super().exec_module(module)
++
++    class Finder:
++        def find_spec(self, fullname, path=None, target=None):
++            search = roots if path is None else path
++            namespaces = []
++            for directory in search:
++                directory = str(Path(directory).resolve(strict=True))
++                require(any(Path(directory).is_relative_to(p) for p in roots), "package path")
++                finder = machinery.FileFinder(
++                    directory,
++                    (Source, machinery.SOURCE_SUFFIXES),
++                    (Extension, machinery.EXTENSION_SUFFIXES),
++                )
++                spec = finder.find_spec(fullname)
++                if spec is None:
++                    continue
++                if spec.loader is not None:
++                    checked(spec.origin)
++                    return spec
++                namespaces.extend(spec.submodule_search_locations or [])
++            if namespaces:
++                spec = machinery.ModuleSpec(fullname, None, is_package=True)
++                spec.submodule_search_locations = namespaces
++                return spec
++            # Do not fall through to zip, editable or arbitrary path hooks.
++            raise ModuleNotFoundError("trusted startup: unlisted module " + fullname)
++
++    baseline = dict(sys.modules)
++    finder = Finder()
++    allowed = (machinery.BuiltinImporter, machinery.FrozenImporter, finder)
++    sys.path[:] = roots
++    sys.path_hooks[:] = []
++    sys.path_importer_cache.clear()
++    sys.meta_path[:] = allowed
++
++    def refresh():
++        require(
++            tuple(sys.path) == roots and tuple(sys.meta_path) == allowed,
++            "changed import paths/hooks",
++        )
++        require(not sys.path_hooks, "changed path hooks")
++        require(
++            not any(n in sys.modules for n in ("site", "sitecustomize", "usercustomize")),
++            "site loaded",
++        )
++        for path in pins:
++            checked(path)
++        for name, module in sys.modules.copy().items():
++            if name in baseline:
++                require(module is baseline[name], "replaced bootstrap module")
++                continue
++            if name == "_rkuarch_trusted_startup":
++                require(module is state, "replaced startup state")
++                continue
++            spec = getattr(module, "__spec__", None)
++            require(spec is not None, "missing module spec: " + name)
++            loader = spec.loader
++            if loader in (machinery.BuiltinImporter, machinery.FrozenImporter):
++                continue
++            if isinstance(loader, (Source, Extension)):
++                checked(spec.origin)
++            else:
++                require(
++                    spec.origin is None and spec.submodule_search_locations is not None,
++                    "untrusted loader: " + name,
++                )
++                require(
++                    all(
++                        any(Path(p).is_relative_to(r) for r in roots)
++                        for p in spec.submodule_search_locations
++                    ),
++                    "namespace paths",
++                )
++
++    state = types.ModuleType("_rkuarch_trusted_startup")
++    state.refresh = refresh
++    state.manifest_sha256 = expected
++    sys.modules[state.__name__] = state
++    refresh()
++    sys.argv = [entry, *sys.argv[4:]]
++    importlib.import_module(entry)
++    refresh()
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/rkuarch/engines/native/component_host.py b/src/rkuarch/engines/native/component_host.py
+index 97a879c..8466c8f 100644
+--- a/src/rkuarch/engines/native/component_host.py
++++ b/src/rkuarch/engines/native/component_host.py
+@@ -117,6 +117,7 @@ class _PreparedComponent:
+                     _require(
+                         not os.fstat(fd).st_mode & 0o222, "immutable component payload required"
+                     )
++        _trusted_startup(required=self.immutable)
+         _verify_imports(self.payload)
+ 
+     def job(self, raw: bytes) -> MappedEngineJob:
+@@ -163,6 +164,15 @@ class _PreparedComponent:
+             yield fd
+ 
+ 
++def _trusted_startup(*, required: bool) -> None:
++    # This check is defense in depth, not proof against arbitrary pre-start code.
++    # Immutable activation must externally pin the -I -S -B launcher and its TCB.
++    state = sys.modules.get("_rkuarch_trusted_startup")
++    _require(state is not None or not required, "component trusted startup required")
++    if state is not None:
++        state.refresh()
++
++
+ def _verify_imports(payload: ComponentPayload) -> None:
+     root = Path(payload.consumers.import_root)
+     _require(root.is_absolute(), "absolute component import root required")
+@@ -197,6 +207,7 @@ def _prepare_payload(
+     root: Path, binding: FileBinding, *, mode: str, immutable: bool = False
+ ) -> _PreparedComponent:
+     """Synthetic tests may validate data here; this never returns execution authority."""
++    _trusted_startup(required=immutable)
+     _require(mode in ("debug", "release"), "explicit component mode required")
+     reads: dict[tuple[Path, str], FileBinding] = {}
+ 
+@@ -252,8 +263,7 @@ def _prepare_payload(
+     read(trust.semantics_file)
+     selection = strict_json_loads(read(trust.selection))
+     _require(
+-        selection.get("format")
+-        in ("B-component-prospective-v3-selection/1", "B-component-prospective-v3-selection/2")
++        selection.get("format") == "B-component-prospective-v3-selection/2"
+         and selection.get("model") == ["native-intervals", "2"]
+         and selection.get("observations") == "uarch-native-observations/3"
+         and selection.get("checker") == payload.consumers.checker,
+diff --git a/src/rkuarch/engines/native/component_records.py b/src/rkuarch/engines/native/component_records.py
+index fcaa265..5a9ed8b 100644
+--- a/src/rkuarch/engines/native/component_records.py
++++ b/src/rkuarch/engines/native/component_records.py
+@@ -143,7 +143,10 @@ class ComponentHostRecord(FrozenModel):
+ class ComponentHostSelector(FrozenModel):
+     format: Literal["uarch-component-host-selector/1"]
+     repository: NonEmpty
+-    acceptance_commit: GitCommit
++    acceptance_commit: GitCommit = Field(
++        description="Non-authorizing historical metadata; not verified Git provenance. "
++        "Authority requires the separately bound decision/review/record chain."
++    )
+     record_path: NonEmpty
+     record_byte_hash: Hash
+ 
+diff --git a/src/rkuarch/engines/native/component_runner.py b/src/rkuarch/engines/native/component_runner.py
+index 9302197..68361a4 100644
+--- a/src/rkuarch/engines/native/component_runner.py
++++ b/src/rkuarch/engines/native/component_runner.py
+@@ -10,7 +10,7 @@ from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, ProfileEn
+ 
+ from .component_host import ComponentSession, _PreparedComponent, loads_runtime_job
+ from .component_records import CHECKER, OBSERVATIONS
+-from .host import _read
++from .host import _read, _require
+ from .runner import (
+     REFUSAL_CODES,
+     Limits,
+@@ -58,6 +58,16 @@ def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int) -> dict[str,
+     return value
+ 
+ 
++def require_negative_envelope(
++    stdout: bytes, stderr: bytes, status: int, expected: dict[str, Any]
++) -> dict[str, Any]:
++    """Exact finite expectation from independent inventory; not a native-site proof."""
++    _require(status == 2, "exact negative envelope requires status2")
++    error = _decode_envelope(stdout, stderr, status)
++    _require(error == expected, "exact negative envelope mismatch")
++    return error
++
++
+ def require_route(job: dict[str, Any], result: dict[str, Any]) -> None:
+     """Select checker from the admitted job model before consuming any output evidence."""
+     model = job.get("engine", {}).get("model", {})
+@@ -114,6 +124,19 @@ def _consume(
+     prepared: _PreparedComponent, request: dict[str, Any], stdout: bytes, stderr: bytes, status: int
+ ) -> MappedEngineResult:
+     prepared.refresh()
++    # This is a consumer-layer check, independent of _request/prepared.job.
++    selected = next(
++        (item for item in prepared.payload.jobs if item.case_id == request["admission"]["case_id"]),
++        None,
++    )
++    _require(selected is not None, "consumer selected case")
++    _require(
++        request["engine"] == prepared.payload.engine.model_dump(mode="json"),
++        "consumer expected engine",
++    )
++    raw = canonical_json(request).encode()
++    assert selected is not None
++    _require(sha256(raw) == selected.file.byte_hash, "consumer selected raw bytes")
+     expected = strict_json_loads(
+         _read(prepared.root, prepared.payload.consumers.observation_contract)
+     )
+@@ -122,7 +145,6 @@ def _consume(
+     )
+     from validation.component.runtime_checks import consume_case
+ 
+-    raw = canonical_json(request).encode()
+     consume_case(
+         request,
+         result.model_dump(mode="json"),
+@@ -131,8 +153,14 @@ def _consume(
+         source=Path(prepared.payload.consumers.import_root),
+         pins=prepared.consumer_pins,
+         expected=expected,
+-        input_sha256=sha256(raw).split(":")[1],
++        input_sha256=selected.file.byte_hash.split(":")[1],
+         raw_input=raw,
++        admitted={
++            "case_id": selected.case_id,
++            "raw_input_sha256": selected.file.byte_hash.split(":")[1],
++            "job_hash": selected.job_hash,
++            "engine": prepared.payload.engine.model_dump(mode="json"),
++        },
+     )
+     prepared.refresh()
+     return result
+diff --git a/tests/unit/test_component_adapter_evidence.py b/tests/unit/test_component_adapter_evidence.py
+new file mode 100644
+index 0000000..2c03d70
+--- /dev/null
++++ b/tests/unit/test_component_adapter_evidence.py
+@@ -0,0 +1,65 @@
++"""Private saved-byte seam and unapplied D3 proposal; no native execution."""
++
++import json
++import runpy
++from pathlib import Path
++
++import pytest
++from uarch_contract.hashing import canonical_json, sha256
++
++from native.tools.component_private_adapter import saved_input
++from rkuarch.engines.native.records import FileBinding
++
++ROOT = Path(__file__).resolve().parents[2]
++
++
++def test_saved_replay_uses_retained_bytes_without_preparation(tmp_path, monkeypatch):
++    raw = b'{"private":"saved"}'
++    saved = tmp_path / "retained.json"
++    saved.write_bytes(raw)
++    binding = FileBinding(path="not-present.json", byte_hash=sha256(raw))
++    initial = {"saved_input_path": str(saved), "raw_input_sha256": sha256(raw).split(":")[1]}
++
++    def unavailable(*args, **kwargs):
++        raise AssertionError("original input preparation unavailable")
++
++    monkeypatch.setattr("native.tools.component_private_adapter._read", unavailable)
++    assert saved_input(tmp_path, binding, initial, 1024) == raw
++    saved.write_bytes(b'{"private":"changed"}')
++    with pytest.raises(ValueError, match="private independent raw inventory"):
++        saved_input(tmp_path, binding, initial, 1024)
++    initial["raw_input_sha256"] = sha256(saved.read_bytes()).split(":")[1]
++    with pytest.raises(ValueError, match="durable replay inventory digest"):
++        saved_input(tmp_path, binding, initial, 1024)
++
++
++def test_unapplied_d3_exact_envelope_and_version():
++    proposal = (
++        ROOT
++        / "docs/reviews/U4-A-component-runtime-stage2-v1/proposals/component_negative-v4.py.txt"
++    )
++    namespace = runpy.run_path(str(proposal))
++    envelope = {"code": "CapacityExceeded", "message": "synthetic finite guard", "pointer": None}
++    file = {"path": "private.json", "byte_hash": "sha256:" + "a" * 64}
++    case = namespace["NegativeCase"].model_validate(
++        {
++            "case_id": "SYNTHETIC",
++            "raw": file,
++            "profile": file,
++            "expected_envelope": envelope,
++            "expectation_provenance": file,
++            "layer": "resource-preflight",
++        }
++    )
++    consume = namespace["_consume_negative"]
++    assert consume(b"", canonical_json(envelope).encode(), 2, case) == envelope
++    for message in ("other finite guard", "complete output byte limit"):
++        with pytest.raises(ValueError, match="exact negative envelope"):
++            consume(b"", canonical_json(dict(envelope, message=message)).encode(), 2, case)
++    inventory = {"format": "uarch-component-negative-inventory/2", "cases": [case.model_dump()]}
++    assert namespace["NegativeInventory"].model_validate(inventory).cases == (case,)
++    inventory["format"] = "uarch-component-negative-inventory/1"
++    with pytest.raises(ValueError):
++        namespace["NegativeInventory"].model_validate(inventory)
++    manifest = json.loads((proposal.parent / "D3-manifest.json").read_bytes())
++    assert sha256(proposal.read_bytes()).split(":")[1] == manifest["postimage_v4_sha256"]
+diff --git a/tests/unit/test_component_containers.py b/tests/unit/test_component_containers.py
+new file mode 100644
+index 0000000..c282e82
+--- /dev/null
++++ b/tests/unit/test_component_containers.py
+@@ -0,0 +1,109 @@
++"""Bounded real Docker probes, synthetic sleep only; opt in to accepted offline image."""
++
++import json
++import os
++import signal
++import subprocess
++import sys
++import time
++
++import pytest
++
++from native.tools.component_container_guard import cleanup, run_container
++
++IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
++pytestmark = pytest.mark.skipif(os.environ.get("U4_PRIVATE_DOCKER") != "1", reason="private Docker")
++ARGS = [
++    "--network",
++    "none",
++    "--read-only",
++    "--cap-drop",
++    "ALL",
++    "--pids-limit",
++    "16",
++    "--memory",
++    "64m",
++    "--entrypoint",
++    "/bin/sleep",
++    IMAGE,
++    "20",
++]
++
++
++def inspect_stopped(receipt):
++    assert receipt["stopped"] is True
++    assert receipt["removed"] is True
++    assert receipt["container_id"]
++    p = subprocess.run(["docker", "inspect", receipt["container_id"]], capture_output=True)
++    assert p.returncode != 0 and any(
++        m in p.stderr.lower() for m in (b"no such object", b"no such container")
++    )
++
++
++def test_deadline_stops_actual_container(tmp_path):
++    receipt = run_container(tmp_path / "call", ARGS, timeout=0.6)
++    assert receipt["reason"] == "deadline"
++    inspect_stopped(receipt)
++    assert receipt["pre_remove_state"]["Running"] is False
++
++
++def test_native_exit_semantics(tmp_path):
++    receipt = run_container(tmp_path / "call", [*ARGS[:-1], "0"], timeout=5)
++    assert receipt["exit_code"] == 0 and receipt["reason"] == "completed"
++    inspect_stopped(receipt)
++
++
++@pytest.mark.parametrize("phase", ["created", "running"])
++def test_worker_death_and_parent_cleanup(tmp_path, phase):
++    call = tmp_path / "call"
++    module = "from native.tools.component_container_guard import run_container;"
++    code = module + f"run_container(__import__('pathlib').Path({str(call)!r}),{ARGS!r},timeout=20)"
++    process = subprocess.Popen([sys.executable, "-c", code], start_new_session=True)
++    try:
++        until = time.monotonic() + 8
++        while time.monotonic() < until:
++            marker = call / ("created.json" if phase == "created" else "started.json")
++            if marker.exists():
++                break
++            time.sleep(0.01)
++        assert marker.exists()
++        os.kill(process.pid, signal.SIGKILL)
++        process.wait(timeout=3)
++        receipt = cleanup(tmp_path, timeout=12)[0]
++        assert receipt["reason"] in ("worker-exit", "cancelled")
++        inspect_stopped(receipt)
++    finally:
++        if process.poll() is None:
++            process.kill()
++            process.wait()
++        cleanup(tmp_path, timeout=12)
++
++
++def test_parent_cancel_and_unrelated_container(tmp_path):
++    # An independently created, exact control is removed only by this test's finally.
++    control = subprocess.check_output(["docker", "create", *ARGS], text=True).strip()
++    (tmp_path / "unrelated-control.id").write_text(control + "\n")
++    subprocess.run(["docker", "start", control], check=True, capture_output=True)
++    call = tmp_path / "call"
++    code = (
++        "from native.tools.component_container_guard import run_container;"
++        f"run_container(__import__('pathlib').Path({str(call)!r}),{ARGS!r},timeout=20)"
++    )
++    process = subprocess.Popen([sys.executable, "-c", code])
++    try:
++        until = time.monotonic() + 8
++        while not (call / "started.json").exists() and time.monotonic() < until:
++            time.sleep(0.02)
++        assert (call / "started.json").exists()
++        inspect_stopped(cleanup(tmp_path, timeout=12)[0])
++        state = json.loads(subprocess.check_output(["docker", "inspect", control]))[0]["State"]
++        assert state["Running"] is True
++        process.wait(timeout=3)
++    finally:
++        if process.poll() is None:
++            process.kill()
++            process.wait()
++        try:
++            cleanup(tmp_path, timeout=12)
++        finally:
++            subprocess.run(["docker", "rm", "-f", control], check=True, capture_output=True)
+diff --git a/tests/unit/test_component_exact_refusals.py b/tests/unit/test_component_exact_refusals.py
+new file mode 100644
+index 0000000..dc45fa4
+--- /dev/null
++++ b/tests/unit/test_component_exact_refusals.py
+@@ -0,0 +1,33 @@
++"""Synthetic stable envelopes: site evidence remains a separate obligation."""
++
++import pytest
++from uarch_contract.hashing import canonical_json
++
++from rkuarch.engines.native.component_runner import require_negative_envelope
++
++EXPECTED = {
++    "code": "CapacityExceeded",
++    "message": "DMA fragment count exceeds limit",
++    "pointer": None,
++}
++
++
++def test_exact_refusal():
++    assert (
++        require_negative_envelope(b"", canonical_json(EXPECTED).encode(), 2, EXPECTED) == EXPECTED
++    )
++
++
++@pytest.mark.parametrize(
++    "message", ["complete output byte limit", "DMA request count exceeds limit"]
++)
++def test_same_code_wrong_guard_refuses(message):
++    borrowed = dict(EXPECTED, message=message)
++    with pytest.raises(ValueError, match="exact negative envelope"):
++        require_negative_envelope(b"", canonical_json(borrowed).encode(), 2, EXPECTED)
++
++
++@pytest.mark.parametrize("status,stdout,stderr", [(0, b"{}", b""), (2, b"x", b"{}"), (1, b"", b"")])
++def test_negative_framing_is_mandatory(status, stdout, stderr):
++    with pytest.raises(ValueError):
++        require_negative_envelope(stdout, stderr, status, EXPECTED)
+diff --git a/tests/unit/test_component_runtime.py b/tests/unit/test_component_runtime.py
+index f9c54c8..8c79d6f 100644
+--- a/tests/unit/test_component_runtime.py
++++ b/tests/unit/test_component_runtime.py
+@@ -87,7 +87,7 @@ def test_saved_result_core_uses_both_consumers_and_no_producers(monkeypatch):
+ 
+ 
+ @pytest.fixture
+-def prepared_payload(tmp_path):
++def prepared_payload(tmp_path, request):
+     """Synthetic record graph + shell echo executable. Not a native build or authority."""
+     import importlib.util
+     import shutil
+@@ -124,7 +124,7 @@ def prepared_payload(tmp_path):
+     selection = put(
+         "selection.json",
+         {
+-            "format": "B-component-prospective-v3-selection/1",
++            "format": getattr(request, "param", "B-component-prospective-v3-selection/2"),
+             "model": ["native-intervals", "2"],
+             "observations": "uarch-native-observations/3",
+             "checker": "validation.component.observations_v3:check_v3",
+@@ -479,10 +479,14 @@ def test_component_envelope_keeps_strict_framing(stdout, stderr, status):
+ def test_current_independent_binding_is_prepared(prepared_payload):
+     root, binding, payload, _ = prepared_payload
+     assert payload["consumers"]["independent_binding"]["path"] == (
+-        "docs/reviews/U4-B-component-runtime-final-v1/consumer-bindings-v3.json"
++        "docs/reviews/U4-A-component-runtime-stage2-v1/prospective-consumer-bindings-v1.json"
+     )
+     prepared = component_host._prepare_payload(root, binding, mode="debug")
+-    assert len(prepared.consumer_pins) == 51
++    assert {
++        "src/rkuarch/engines/native/component_runner.py",
++        "validation/component/runtime_evidence.py",
++        "validation/component/matrix_order.py",
++    } <= set(prepared.consumer_pins)
+     prepared.refresh()
+ 
+ 
+@@ -494,8 +498,10 @@ def test_changed_independent_binding_refuses_current_source(prepared_payload, ki
+     root, _, payload, put = prepared_payload
+     if kind == "stale":
+         pinned = json.loads(
+-            (ROOT / "docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json")
+-            .read_bytes()
++            (
++                ROOT
++                / "docs/reviews/U4-B-component-runtime-preparation-v2/consumer-bindings-v2.json"
++            ).read_bytes()
+         )
+     else:
+         path = root / payload["consumers"]["independent_binding"]["path"]
+@@ -503,7 +509,57 @@ def test_changed_independent_binding_refuses_current_source(prepared_payload, ki
+         pinned["files"]["validation/component/runtime_checks.py"] = "0" * 64
+     payload["consumers"]["independent_binding"] = put("changed-consumer.json", pinned)
+     binding = FileBinding.model_validate(put("changed-binding-payload.json", payload))
+-    with pytest.raises(
+-        CheckFailure, match="consumer source mismatch: validation/component/runtime_checks.py"
+-    ):
++    message = (
++        "complete matching consumer/structural closure required"
++        if kind == "stale"
++        else "consumer source mismatch: validation/component/runtime_checks.py"
++    )
++    with pytest.raises(CheckFailure, match=message):
++        component_host._prepare_payload(root, binding, mode="debug")
++
++
++@pytest.mark.parametrize(
++    "prepared_payload", ["B-component-prospective-v3-selection/1"], indirect=True
++)
++def test_superseded_component_selection_refuses(prepared_payload):
++    root, binding, _, _ = prepared_payload
++    with pytest.raises(ValueError, match="component independent selection route"):
+         component_host._prepare_payload(root, binding, mode="debug")
++
++
++@pytest.mark.parametrize("kind", ["old-engine", "foreign-input"])
++def test_consumer_uses_frozen_input_and_engine(prepared_payload, kind):
++    root, binding, _, _ = prepared_payload
++    prepared = component_host._prepare_payload(root, binding, mode="debug")
++    job = json.loads((root / "job.json").read_bytes())
++    result = json.loads((root / "output.json").read_bytes())
++    if kind == "old-engine":
++        job["engine"]["implementation_hash"] = "sha256:" + "a" * 64
++        result["engine"] = deepcopy(job["engine"])
++        reason = "consumer expected engine"
++    else:
++        job["registry"]["test_only_specs"][0]["rationale"] += "; SYNTHETIC foreign record"
++        job["registry"]["registry_hash"] = content_hash(job["registry"], exclude=("registry_hash",))
++        reason = "consumer selected raw bytes"
++    job["job_hash"] = content_hash(job, exclude=("job_hash",))
++    result["job_hash"] = job["job_hash"]
++    result["result_hash"] = content_hash(result, exclude=("result_hash",))
++    # Direct consumption: no _request/prepared.job or native dispatch guards run first.
++    with pytest.raises(ValueError, match=reason):
++        component_runner._consume(prepared, job, canonical_json(result).encode(), b"", 0)
++
++
++def test_public_preparation_requires_trusted_startup(prepared_payload):
++    root, binding, _, _ = prepared_payload
++    with pytest.raises(ValueError, match="component trusted startup required"):
++        component_host._prepare_payload(root, binding, mode="debug", immutable=True)
++
++
++def test_acceptance_commit_is_explicitly_non_authorizing_metadata():
++    from rkuarch.engines.native.component_records import ComponentHostSelector
++
++    description = ComponentHostSelector.model_json_schema()["properties"]["acceptance_commit"][
++        "description"
++    ]
++    assert "Non-authorizing historical metadata" in description
++    assert "not verified Git provenance" in description
+diff --git a/tests/unit/test_component_stage2_inputs.py b/tests/unit/test_component_stage2_inputs.py
+new file mode 100644
+index 0000000..5b15fbf
+--- /dev/null
++++ b/tests/unit/test_component_stage2_inputs.py
+@@ -0,0 +1,54 @@
++"""Prospective expectation transitions preserve old inputs and evidence."""
++
++import json
++from copy import deepcopy
++
++import pytest
++
++from native.tools.component_stage2_inputs import transition_negatives
++
++
++def test_only_identity_transition_preserves_inherited_expectation(tmp_path):
++    import hashlib
++
++    def raw(v):
++        return json.dumps(v, sort_keys=True, separators=(",", ":")).encode()
++
++    old, new = tmp_path / "old", tmp_path / "new"
++    for root in (old, new):
++        (root / "private-component/jobs").mkdir(parents=True)
++        (root / "native").mkdir()
++        (root / "native/guard.rs").write_bytes(b"unchanged guard")
++    job = {"engine": {"implementation_hash": "old"}, "job_hash": "old", "body": "finite"}
++    current = dict(job, engine={"implementation_hash": "new"}, job_hash="new")
++    (old / "private-component/jobs/case.json").write_bytes(raw(job))
++    (new / "private-component/jobs/case.json").write_bytes(raw(current))
++    expected = {
++        "format": "component-negative-expectations/1",
++        "rows": [
++            {
++                "case_id": "case",
++                "input_sha256": hashlib.sha256(raw(job)).hexdigest(),
++                "job_hash": "old",
++                "engine": job["engine"],
++                "envelope": {"code": "CapacityExceeded", "message": "finite", "pointer": None},
++                "native_guard_source": {
++                    "path": "native/guard.rs",
++                    "sha256": hashlib.sha256(b"unchanged guard").hexdigest(),
++                },
++                "observed": {"attribution": "inherited; no new execution"},
++            }
++        ],
++    }
++    preserved = deepcopy(expected)
++    result = transition_negatives(new, old, expected)
++    assert expected == preserved
++    row = result["rows"][0]
++    assert row["historical_expectation"] == preserved["rows"][0]
++    assert row["input_sha256"] == hashlib.sha256(raw(current)).hexdigest()
++    assert row["engine"] == current["engine"]
++    assert row["observed"] == preserved["rows"][0]["observed"]
++    current["body"] = "different guard input"
++    (new / "private-component/jobs/case.json").write_bytes(raw(current))
++    with pytest.raises(ValueError, match="identity-only transition"):
++        transition_negatives(new, old, expected)
+diff --git a/tests/unit/test_component_trusted_start.py b/tests/unit/test_component_trusted_start.py
+new file mode 100644
+index 0000000..f835ce4
+--- /dev/null
++++ b/tests/unit/test_component_trusted_start.py
+@@ -0,0 +1,144 @@
++"""Actual private .pth and timestamp-valid pyc vectors; no runtime authority."""
++
++import hashlib
++import importlib._bootstrap_external as bytecode
++import importlib.util
++import json
++import subprocess
++import sysconfig
++import venv
++from pathlib import Path
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[2]
++START = ROOT / "native/tools/component_trusted_start.py"
++
++
++@pytest.fixture(scope="module")
++def startup(tmp_path_factory):
++    root = tmp_path_factory.mktemp("trusted-start")
++    environment = root / "venv"
++    venv.create(environment, with_pip=False)
++    python = environment / "bin/python"
++    site = next((environment / "lib").glob("python*/site-packages"))
++    project = root / "project"
++    package = project / "validation/component"
++    package.mkdir(parents=True)
++    (project / "validation/__init__.py").write_text("")
++    (package / "__init__.py").write_text("")
++    checker = package / "observations_v3.py"
++    checker.write_text(
++        "def check_v3(job, result, expected):\n"
++        "    if result != 'valid': raise ValueError('independent corruption refusal')\n"
++        "    return {}\n"
++    )
++    (project / "entry.py").write_text(
++        "import json,sys\nfrom validation.component.observations_v3 import check_v3\n"
++        "check_v3(None, 'valid', None)\n"
++        "try: check_v3(None, 'corrupt', None)\n"
++        "except ValueError: outcome='refused'\n"
++        "else: outcome='UNSAFE ACCEPTANCE'\n"
++        "state=sys.modules.get('_rkuarch_trusted_startup')\n"
++        "if state: state.refresh()\n"
++        "print(json.dumps({'outcome':outcome,'site':'site' in sys.modules,"
++        "'hook':'zz_probe' in sys.modules}))\n"
++    )
++    stdlib = Path(sysconfig.get_path("stdlib"))
++    roots = [project, site, stdlib, stdlib / "lib-dynload"]
++    files = {}
++    for parent in (project, stdlib):
++        for f in parent.rglob("*"):
++            if f.is_file() and f.suffix in (".py", ".so") and "site-packages" not in f.parts:
++                files[str(f.resolve())] = hashlib.sha256(f.read_bytes()).hexdigest()
++    manifest = root / "startup.json"
++    manifest.write_text(json.dumps({"roots": list(map(str, roots)), "files": files}))
++    yield root, python, site, project, checker, manifest
++
++
++def invoke(startup, trusted, launcher=START):
++    _, python, _, project, _, manifest = startup
++    if trusted:
++        argv = [
++            str(python),
++            "-I",
++            "-S",
++            "-B",
++            str(launcher),
++            str(manifest),
++            hashlib.sha256(manifest.read_bytes()).hexdigest(),
++            "entry",
++        ]
++    else:
++        argv = [
++            str(python),
++            "-I",
++            "-B",
++            "-c",
++            f"import sys;sys.path.insert(0,{str(project)!r});import entry",
++        ]
++    result = subprocess.run(argv, capture_output=True, text=True, timeout=10)
++    assert result.returncode == 0, result.stderr
++    return json.loads(result.stdout)
++
++
++def test_valid_startup(startup):
++    assert invoke(startup, True) == {"outcome": "refused", "site": False, "hook": False}
++
++
++@pytest.mark.parametrize("vector", ["pth", "pyc"])
++def test_real_substitution_is_blocked_and_restored(startup, vector, tmp_path):
++    _, _, site, _, checker, _ = startup
++    original = checker.read_bytes()
++    pth, hook = site / "zz_probe.pth", site / "zz_probe.py"
++    pyc = Path(importlib.util.cache_from_source(str(checker)))
++    if vector == "pth":
++        pth.write_text("import zz_probe\n")
++        hook.write_text(
++            "import importlib.machinery,sys\n"
++            "class Finder:\n"
++            " def find_spec(self,name,path=None,target=None):\n"
++            "  if name!='validation.component.observations_v3': return None\n"
++            "  spec=importlib.machinery.PathFinder.find_spec(name,path); real=spec.loader\n"
++            "  class Loader:\n"
++            "   def create_module(self,s): return real.create_module(s)\n"
++            "   def exec_module(self,m):\n"
++            "    real.exec_module(m);m.check_v3=lambda *args:{}\n"
++            "  spec.loader=Loader();return spec\n"
++            "sys.meta_path.insert(0,Finder())\n"
++        )
++    else:
++        code = compile(
++            original.decode() + "\ndef check_v3(*args): return {}\n", str(checker), "exec"
++        )
++        st = checker.stat()
++        pyc.parent.mkdir(exist_ok=True)
++        pyc.write_bytes(bytecode._code_to_timestamp_pyc(code, int(st.st_mtime), st.st_size))
++    try:
++        assert invoke(startup, False)["outcome"] == "UNSAFE ACCEPTANCE"
++        assert checker.read_bytes() == original
++        assert invoke(startup, True) == {"outcome": "refused", "site": False, "hook": False}
++        if vector == "pyc":
++            # Revert only the no-bytecode-read defense, leaving source pins intact.
++            scratch = tmp_path / "start.py"
++            original_launcher = START.read_bytes()
++            text = original_launcher.decode()
++            target = 'return compile(checked(self.path), self.path, "exec", dont_inherit=True)'
++            assert text.count(target) == 1
++            scratch.write_text(
++                text.replace(target, "checked(self.path); return super().get_code(fullname)")
++            )
++            assert invoke(startup, True, scratch)["outcome"] == "UNSAFE ACCEPTANCE"
++            scratch.write_bytes(original_launcher)
++            assert invoke(startup, True, scratch)["outcome"] == "refused"
++            assert scratch.read_bytes() == START.read_bytes()
++        else:
++            # Relevant launch-defense revert: -I -B still executes this actual .pth.
++            # Startup flag refusal cannot undo site code that has already executed.
++            assert invoke(startup, False)["hook"] is True
++            assert invoke(startup, True)["hook"] is False
++    finally:
++        for f in (pth, hook, pyc):
++            f.unlink(missing_ok=True)
++    assert invoke(startup, False)["outcome"] == "refused"
++    assert invoke(startup, True)["outcome"] == "refused"
