@@ -9,12 +9,14 @@ from __future__ import annotations
 import hashlib
 import resource
 import runpy
+from functools import partial
 from pathlib import Path
 from typing import Any
 
 from uarch_contract.hashing import canonical_json
 
 from validation.component.runtime_evidence import STREAM_CAP, consume_attempt, replay_admission
+from validation.component.runtime_resources import discover
 
 ROOT = Path(__file__).resolve().parents[2]
 HELPERS = {
@@ -49,6 +51,7 @@ def helpers() -> dict[str, Any]:
     for name, pin in HELPERS.items():
         require(digest((base / name).read_bytes()) == pin, "unchanged orchestration helper")
         loaded.update(runpy.run_path(str(base / name)))
+    loaded["discover"] = partial(discover, select_resources=loaded["select_resources"])
     return loaded
 
 

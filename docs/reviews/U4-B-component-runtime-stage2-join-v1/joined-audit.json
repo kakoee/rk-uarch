@@ -1,0 +1,48 @@
+{
+  "subject": "46c5abb248b5d58304f35628f84e5919e122f989",
+  "manifest_sha256": "068063560f61d2ca7e3bc7d7270f4931bf3a0c0221361a88dccbb9486b0a72ae",
+  "BuildInputs": {
+    "total": 235,
+    "unchanged": 218,
+    "changed": 10,
+    "added": 7
+  },
+  "consumer_pins": 61,
+  "consumer_changes": [
+    "src/rkuarch/engines/native/component_host.py",
+    "src/rkuarch/engines/native/component_records.py",
+    "src/rkuarch/engines/native/component_runner.py",
+    "validation/component/runtime_evidence.py"
+  ],
+  "job_identity_only_transitions": 124,
+  "historical_negative_records_preserved": 20,
+  "actual_binaries": {
+    "debug-executable": "sha256:1f80b84650a5f2b43954b5654a84cba32d570b86766bb9b78adb0d3443444958",
+    "debug-test_executable": "sha256:979b8440964754e79eea96d39212f7cc2884b4a98f8bdfd0ba4637ceecbdb609",
+    "release-executable": "sha256:fad2ae795c85e2086474c7ab39cf9bf865674291cdb4b5a2e603968f2bd0f0c4",
+    "release-test_executable": "sha256:0f01e110f07c9f68c3e9204720832dbeed5375c56889f3f09354cff4cc79011b"
+  },
+  "payload_controls": [
+    {
+      "kind": "matching",
+      "positive_inventory": 104,
+      "outcome": "accepted private preparation"
+    },
+    {
+      "kind": "wrong",
+      "outcome": "identity refusal",
+      "reason": "consumer source mismatch: validation/component/runtime_checks.py"
+    },
+    {
+      "kind": "stale",
+      "outcome": "identity refusal",
+      "reason": "consumer source mismatch: src/rkuarch/engines/native/component_runner.py"
+    }
+  ],
+  "inherited_calls_reconsumed": 20,
+  "inherited_durable_replay_descriptors_reconsumed": 4,
+  "new_native_executions": 0,
+  "campaign_acceptance": false,
+  "construction_read_capture": "NONE",
+  "A_F3": "DEFERRED; not executed"
+}

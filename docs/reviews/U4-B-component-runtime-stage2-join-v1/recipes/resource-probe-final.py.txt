@@ -1,0 +1,20 @@
+import json,os,runpy,hashlib
+from datetime import datetime,timezone
+from pathlib import Path
+from validation.component.runtime_campaign import run_private,helpers,POLICY,ROOT
+from validation.component.test_runtime_campaign import Synthetic
+O=Path('/tmp/u4-b-runtime-stage2-join-01');h=helpers();prior=runpy.run_path(str(ROOT/'docs/reviews/U4-B-K2-parallel-first-use-v1/resource_limits.py'))
+try:
+ prior['discover'](POLICY,1)
+ raise AssertionError('baseline should reproduce missing hierarchy-root cpu.max')
+except FileNotFoundError as e:
+ assert e.filename=='/sys/fs/cgroup/cpu.max';baseline=str(e)
+budget=h['discover'](POLICY,1)
+sample={'at_utc':datetime.now(timezone.utc).isoformat(),'proc_self_cgroup':Path('/proc/self/cgroup').read_text(),'cgroup_mountinfo':[s for s in Path('/proc/self/mountinfo').read_text().splitlines() if ' - cgroup2 'in s],'affinity':sorted(os.sched_getaffinity(0)),'cgroup_pids_max':Path('/sys/fs/cgroup/init.scope/pids.max').read_text().strip(),'baseline_refusal':baseline,'corrected_default_discovery':budget,'no_resources_override':True}
+(O/'resource-observation-final.json').write_text(json.dumps(sample,indent=2)+'\n')
+root=O/'synthetic-harness-final';root.mkdir();adapter=Synthetic(root,'no-producer')
+result=run_private(adapter.selection,adapter,adapter.output,acceptance=adapter.acceptance)
+assert result['complete'] and result['completed_calls']==12 and result['acceptance_gate'] is False
+assert len(list((adapter.output/'calls').glob('*.json')))==12
+report={'scope':'one synthetic unit-anchor group; no native executable or actual container cleanup evidence','calls':12,'producer_unavailable_for_six_replays':True,'resources_override':False,'result':result,'old_native_identity_unchanged':True,'native_campaign_acceptance':False}
+(O/'resource-harness-final.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

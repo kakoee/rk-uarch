@@ -1,0 +1,24 @@
+import hashlib,json,subprocess,tarfile,io
+from pathlib import Path
+O=Path('/tmp/u4-b-runtime-stage2-join-01');R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');P=R/'docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2';I=json.loads((P/'identities.json').read_bytes());frozen=O/'source-a';report=[]
+h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+for rev,patch,paths in [('3c70b71','source-delta-from-B.patch',I['changed_source_files']),('cc899d2','BuildInputs-delta-from-cc899d2.patch',[x['path'] for x in I['changed_BuildInputs']])]:
+ d=O/('reconstruct-'+rev);d.mkdir()
+ b=subprocess.check_output(['git','archive',rev,'--','native','src','tests','validation'],cwd=R)
+ with tarfile.open(fileobj=io.BytesIO(b)) as t:t.extractall(d,filter='data')
+ subprocess.run(['git','apply',str(P/patch)],cwd=d,check=True)
+ for n in paths:assert h(d/n)==hashlib.sha256(subprocess.check_output(['git','show','46c5abb:'+n],cwd=R)).hexdigest(),n
+ report.append({'patch':patch,'preimage_commit':subprocess.check_output(['git','rev-parse',rev],cwd=R,text=True).strip(),'exact_postimages':len(paths)})
+for route, patches in [('full',[P/'D3-v5-full-unapplied.patch']),('delta',[P.parent/'proposals/D3-v4-full-unapplied.patch',P/'D3-v4-to-v5-unapplied.patch'])]:
+ d=O/('D3-'+route);d.mkdir()
+ for patch in patches:subprocess.run(['git','apply',str(patch)],cwd=d,check=True)
+ v=h(d/'src/rkuarch/engines/native/component_negative.py');assert v==h(P/'component_negative-v5.py.txt');report.append({'D3_route':route,'postimage_sha256':v,'unapplied':True})
+a=json.loads((R/'docs/reviews/U4-B-component-native-audit-v1/source-audit-final.json').read_bytes());sup=a['selected_support'];print(type(sup),str(sup)[:350])
+# Existing historical package manifests remain intact.
+historical=[]
+for name in ('U4-A-component-runtime-stage2-v1','U4-B-component-runtime-stage2-v1'):
+ p=R/'docs/reviews'/name;m=json.loads((p/'manifest.json').read_bytes())
+ for n,v in m['files'].items():assert h(p/n)==v['sha256'] and (p/n).stat().st_size==v['bytes']
+ historical.append({'package':name,'leaves':len(m['files']),'manifest_sha256':h(p/'manifest.json')})
+assert h(frozen/I['test_overlay']['path'])==I['test_overlay']['corrected_sha256']
+(O/'reconstruction.json').write_text(json.dumps({'patch_routes':report,'test_overlay_sha256':h(frozen/I['test_overlay']['path']),'historical_manifests':historical},indent=2)+'\n');print(json.dumps(report))

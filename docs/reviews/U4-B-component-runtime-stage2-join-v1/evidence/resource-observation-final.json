@@ -1,0 +1,73 @@
+{
+  "at_utc": "2026-10-18T23:02:51.836153+00:00",
+  "proc_self_cgroup": "0::/init.scope\n",
+  "cgroup_mountinfo": [
+    "120 111 0:23 / /sys/fs/cgroup rw,nosuid,nodev,noexec,relatime shared:23 - cgroup2 cgroup2 rw"
+  ],
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "cgroup_pids_max": "14999",
+  "baseline_refusal": "[Errno 2] No such file or directory: '/sys/fs/cgroup/cpu.max'",
+  "corrected_default_discovery": {
+    "affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "effective_cpu_capacity": "16",
+    "cpu_quotas": [],
+    "available_memory_bytes": 11690921984,
+    "cgroup_memory_limits": [],
+    "memory_headroom_bytes": 11690921984,
+    "parent_and_safety_reserve_bytes": 536870912,
+    "per_worker_budget_bytes": 1073741824,
+    "workers": 1,
+    "task_count": 1,
+    "membership": "/init.scope",
+    "mount": "/sys/fs/cgroup",
+    "mounted_root": "/",
+    "observed_cgroups": [
+      {
+        "path": "/sys/fs/cgroup/init.scope",
+        "cpu.max": "max 100000",
+        "memory.max": "max",
+        "memory.current": 7476989952
+      },
+      {
+        "path": "/sys/fs/cgroup",
+        "interface": "hierarchy-root-no-bandwidth-or-memory-interface"
+      }
+    ],
+    "limitations": "Visible cgroup limits, affinity and current MemAvailable only; namespace-hidden ancestors and competing future allocations are not inferred. No resource setting changed. Worker/container loss still stops the run. Docker per-call limits remain separately enforced; this is no host reservation."
+  },
+  "no_resources_override": true
+}

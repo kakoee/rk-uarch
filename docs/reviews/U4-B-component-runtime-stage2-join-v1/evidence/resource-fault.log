@@ -1,0 +1,20 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 4, "sample": {}}
+
+=================================== FAILURES ===================================
+_____________ test_every_ancestor_cpu_and_memory_limit_is_applied ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-616/test_every_ancestor_cpu_and_me0')
+
+    def test_every_ancestor_cpu_and_memory_limit_is_applied(tmp_path):
+        mount, group, membership, info = fixture(tmp_path)
+        (mount / "parent/cpu.max").write_text("250000 100000\n")
+        (group / "memory.max").write_text("7000\n")
+        value = inspect_cgroups(membership, info)
+>       assert budget(value)["workers"] == 2
+E       assert 6 == 2
+
+validation/component/test_runtime_resources.py:63: AssertionError
+=========================== short test summary info ============================
+FAILED validation/component/test_runtime_resources.py::test_every_ancestor_cpu_and_memory_limit_is_applied
+1 failed in 0.20s

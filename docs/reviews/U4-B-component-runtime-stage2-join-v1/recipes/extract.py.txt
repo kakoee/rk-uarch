@@ -1,0 +1,18 @@
+import hashlib,json,pathlib,tarfile,subprocess
+r=pathlib.Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b'); p=r/'docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2'; out=pathlib.Path('/tmp/u4-b-runtime-stage2-join-01')
+def h(b):return hashlib.sha256(b).hexdigest()
+m=json.loads((p/'manifest.json').read_bytes())
+for n,v in m['files'].items():
+ b=(p/n).read_bytes(); assert len(b)==v['bytes'] and h(b)==v['sha256'],n
+idx=json.loads((p/'evidence-files.json').read_bytes()); dest=out/'inherited';dest.mkdir()
+with tarfile.open(p/'evidence.tar.gz') as t:
+ members=t.getmembers(); assert all(x.isfile() and not pathlib.PurePosixPath(x.name).is_absolute() and '..' not in pathlib.PurePosixPath(x.name).parts for x in members)
+ assert {x.name for x in members}==set(idx['files'])
+ for x in members:
+  b=t.extractfile(x).read(); v=idx['files'][x.name];assert len(b)==v['bytes'] and h(b)==v['sha256'],x.name
+  f=dest/x.name;f.parent.mkdir(parents=True,exist_ok=True);f.write_bytes(b)
+archive=subprocess.check_output(['git','archive','46c5abb248b5d58304f35628f84e5919e122f989'],cwd=r);assert h(archive)=='12cf995c66f621d2c851913df07031146500c207d3116cfe0056c8cc73965da7'
+(out/'source.tar').write_bytes(archive); (out/'source').mkdir()
+subprocess.run(['tar','-xf',str(out/'source.tar'),'-C',str(out/'source')],check=True)
+res={'manifest_sha256':h((p/'manifest.json').read_bytes()),'package_leaves':len(m['files']),'archive_leaves':len(members),'all_hashes_verified':True,'source_archive_sha256':h(archive)}
+(out/'archive-verification.json').write_text(json.dumps(res,indent=2)+'\n');print(res)

@@ -1,0 +1,22 @@
+import hashlib,json
+from pathlib import Path
+from validation.component.runtime_checks import verify_sources,CHECKER
+from validation.component.checks import CheckFailure
+O=Path('/tmp/u4-b-runtime-stage2-join-01');R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');S=Path.cwd();P=R/'docs/reviews/U4-B-component-runtime-stage2-join-v1'
+v=json.loads((P/'prospective-consumer-bindings.json').read_bytes());old=json.loads((R/'docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2/consumer-bindings.json').read_bytes());records=[]
+for kind,pins in [('matching',v['files']),('stale',old['files']),('wrong',dict(v['files'],**{'validation/component/runtime_campaign.py':'0'*64}))]:
+ try:
+  verify_sources(S,pins);assert kind=='matching';records.append({'case':kind,'outcome':'accepted exact source binding'})
+ except CheckFailure as e:
+  assert kind!='matching';records.append({'case':kind,'outcome':'identity-only refusal','reason':str(e)})
+assert CHECKER=='validation.component.observations_v3:check_v3'
+prior=json.loads((R/'docs/reviews/U4-B-component-runtime-stage2-v1/negative-expectations-v1.json').read_bytes()); new=json.loads((O/'inherited/build/source/private-component/negative-expectations.json').read_bytes()); assert [r['historical_expectation'] for r in new['rows']]==prior['rows']
+E=O/'inherited/build';summary=json.loads((E/'process-summary.json').read_bytes());assert len(summary['cases'])==8
+for row in summary['cases']:
+ base=E/'commands'/f"{row['mode']}-process-{row['case']}";meta=json.loads(base.with_suffix('.json').read_bytes());assert meta['exit_code']==2
+ for stream in ('stdout','stderr'):
+  raw=base.with_suffix('.'+stream).read_bytes();assert 'sha256:'+hashlib.sha256(raw).hexdigest()==meta[stream+'_hash']
+  if stream=='stdout':assert raw==b''
+  else:assert json.loads(raw)==row['error']
+failed=json.loads((E/'campaign/incomplete.json').read_bytes());assert failed['transported_attempts']==failed['validated_calls']==0 and not failed['complete'];assert not list((E/'campaign/calls').glob('*.json'))
+(O/'final-controls.json').write_text(json.dumps({'prospective_binding_controls':records,'route':CHECKER,'route_behavior':'unchanged source; source-pin controls only','inherited_ordinary_refusal_bytes_verified':8,'original_campaign_calls':0,'new_native_runs':0},indent=2)+'\n');print(records)

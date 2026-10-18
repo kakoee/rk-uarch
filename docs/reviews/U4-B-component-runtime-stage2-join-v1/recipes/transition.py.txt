@@ -1,0 +1,22 @@
+import hashlib,json,subprocess
+from pathlib import Path
+R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');O=Path('/tmp/u4-b-runtime-stage2-join-01');P=R/'docs/reviews/U4-B-component-runtime-stage2-join-v1';A=R/'docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2';h=lambda b:hashlib.sha256(b).hexdigest()
+files=['validation/component/runtime_campaign.py','validation/component/runtime_resources.py','validation/component/test_runtime_resources.py'];rows=[];patch=b''
+for n in files:
+ p=R/n;before=subprocess.run(['git','show','46c5abb:'+n],cwd=R,capture_output=True)
+ rows.append({'path':n,'preimage_sha256':h(before.stdout) if before.returncode==0 else None,'postimage_sha256':h(p.read_bytes()),'bytes':p.stat().st_size})
+ if before.returncode==0:patch+=subprocess.check_output(['git','diff','--binary','46c5abb','--',n],cwd=R)
+ else:
+  delta=subprocess.run(['git','diff','--no-index','--binary','/dev/null',n],cwd=R,capture_output=True);assert delta.returncode==1;patch+=delta.stdout
+(P/'resource-discovery.patch').write_bytes(patch)
+v=json.loads((A/'consumer-bindings.json').read_bytes());v['predecessor_sha256']=h((A/'consumer-bindings.json').read_bytes());v['source_scope']='Prospective B component resource-discovery delta only; no engine/binary/payload rebinding or authority'
+for row in rows:
+ if not Path(row['path']).name.startswith('test_'):v['files'][row['path']]=row['postimage_sha256']
+assert len(v['files'])==62
+(P/'prospective-consumer-bindings.json').write_text(json.dumps(v,indent=2,sort_keys=True)+'\n')
+transition={'reviewed_source':'46c5abb248b5d58304f35628f84e5919e122f989','reviewed_handoff':'1dd5c5206290e464df34308509e5d6cf75505d01','source_delta':rows,'patch_sha256':h(patch),'BuildInputs_transition':{'before':235,'unchanged':234,'changed':1,'added':2,'prospective_total':237,'new_implementation_hash':None,'reason':'source commit and prospective BuildInputs must be frozen by A; existing binaries are not rebound'},'consumer_transition':{'before':61,'unchanged':60,'changed':1,'added':1,'prospective_total':62,'binding_sha256':h((P/'prospective-consumer-bindings.json').read_bytes())},'binaries_rebuilt':False,'existing_binaries_rebound':False,'historical_K2_resource_helper_sha256':h((R/'docs/reviews/U4-B-K2-parallel-first-use-v1/resource_limits.py').read_bytes()),'authority':None,'read_capture':'NONE'}
+(P/'source-transition.json').write_text(json.dumps(transition,indent=2)+'\n')
+# Demonstrate exact correction reconstructs from A source without protected edits.
+d=O/'correction-reconstructed';d.mkdir();subprocess.run(['tar','-xf',str(O/'source.tar'),'-C',str(d)],check=True);subprocess.run(['git','apply',str(P/'resource-discovery.patch')],cwd=d,check=True)
+for row in rows:assert h((d/row['path']).read_bytes())==row['postimage_sha256']
+print(json.dumps(transition,indent=2))

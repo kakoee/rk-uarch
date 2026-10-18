@@ -1,0 +1,12 @@
+import hashlib,json,subprocess
+from pathlib import Path
+O=Path('/tmp/u4-b-runtime-stage2-join-01');S=O/'source';p=S/'validation/component/runtime_resources.py';before=p.read_bytes();h=lambda b:hashlib.sha256(b).hexdigest();needle=b'            quotas.append((int(q), int(p)))';assert before.count(needle)==1
+cmd=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python','-I','/tmp/u4-b-runtime-review-01/probes/runner.py',str(S),'pytest','-q','validation/component/test_runtime_resources.py::test_every_ancestor_cpu_and_memory_limit_is_applied']
+try:
+ p.write_bytes(before.replace(needle,b'            pass  # PRIVATE FAULT: discard finite CPU quota'))
+ mutant=h(p.read_bytes());r=subprocess.run(cmd,capture_output=True,text=True);(O/'resource-fault.log').write_text(r.stdout+r.stderr)
+ assert r.returncode==1 and "assert 6 == 2" in r.stdout, r.stdout
+finally:p.write_bytes(before)
+assert p.read_bytes()==before
+r=subprocess.run(cmd,capture_output=True,text=True);(O/'resource-restored.log').write_text(r.stdout+r.stderr);assert r.returncode==0
+(O/'resource-fault.json').write_text(json.dumps({'guard':'finite ancestor CPU quota retained in capacity minimum','scope':'private synthetic Linux fixture; no native execution','restored_sha256':h(before),'mutant_sha256':mutant,'mutant_test_exit':1,'failure':'effective capacity 8 instead of 5/2; permits six workers by memory rather than two by ancestor CPU quota','exact_restoration':True,'restored_test_exit':0},indent=2)+'\n')
