@@ -106,6 +106,8 @@ class _PreparedComponent:
     mode: str
     checks: tuple[tuple[Path, FileBinding], ...]
     immutable: bool
+    selection_rows: dict[str, Any]
+    consumer_pins: dict[str, str]
 
     def refresh(self) -> None:
         for root, binding in self.checks:
@@ -250,7 +252,8 @@ def _prepare_payload(
     read(trust.semantics_file)
     selection = strict_json_loads(read(trust.selection))
     _require(
-        selection.get("format") == "B-component-prospective-v3-selection/1"
+        selection.get("format")
+        in ("B-component-prospective-v3-selection/1", "B-component-prospective-v3-selection/2")
         and selection.get("model") == ["native-intervals", "2"]
         and selection.get("observations") == "uarch-native-observations/3"
         and selection.get("checker") == payload.consumers.checker,
@@ -331,6 +334,14 @@ def _prepare_payload(
         read(file, Path("/"))
     read(payload.consumers.python_executable, Path("/"))
     read(payload.consumers.observation_contract)
+    consumer_pins = strict_json_loads(read(payload.consumers.independent_binding))["files"]
+    from validation.component.runtime_checks import verify_sources
+
+    verify_sources(Path(payload.consumers.import_root), consumer_pins)
+    _require(
+        all(source_pins.get(path) == "sha256:" + digest for path, digest in consumer_pins.items()),
+        "independent consumer/build closure join",
+    )
     prepared = _PreparedComponent(
         root,
         binding,
@@ -338,6 +349,8 @@ def _prepare_payload(
         mode,
         tuple((base, file) for (base, _), file in reads.items()),
         immutable,
+        promised,
+        consumer_pins,
     )
     prepared.refresh()
     return prepared

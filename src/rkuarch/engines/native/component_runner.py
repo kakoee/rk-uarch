@@ -83,6 +83,20 @@ def _consume(
     result = validate_component_response(
         stdout, stderr, status, job=request, observation_contract=expected
     )
+    from validation.component.runtime_checks import consume_case
+
+    raw = canonical_json(request).encode()
+    consume_case(
+        request,
+        result.model_dump(mode="json"),
+        prepared.selection_rows[request["admission"]["case_id"]],
+        checker_id=CHECKER,
+        source=Path(prepared.payload.consumers.import_root),
+        pins=prepared.consumer_pins,
+        expected=expected,
+        input_sha256=sha256(raw).split(":")[1],
+        raw_input=raw,
+    )
     prepared.refresh()
     return result
 

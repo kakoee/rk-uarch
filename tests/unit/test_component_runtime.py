@@ -114,6 +114,7 @@ def prepared_payload(tmp_path):
     row = {
         "case_id": job["admission"]["case_id"],
         "expected_layer": "result",
+        "expected": {"outcome": "success", "duration_ps": 121000},
         "profile": job["profile"],
         "bundle_hash": job["bundle_hash"],
         "point_hash": job["point_hash"],
@@ -154,6 +155,10 @@ def prepared_payload(tmp_path):
         )["observation_contract"],
     )
     consumers = recipe.imports(ROOT, tmp_path)
+    binding_path = consumers["independent_binding"]["path"]
+    destination = tmp_path / binding_path
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / binding_path, destination)
     # The import recipe's expected observation file belongs to this synthetic data root.
     consumers["observation_contract"] = recipe.binding(
         tmp_path, tmp_path / "private-component/observation-contract.json"
@@ -348,3 +353,29 @@ def test_import_origin_is_checked_even_when_bytes_match(prepared_payload, monkey
     monkeypatch.setattr(component_runner, "__file__", str(elsewhere))
     with pytest.raises(ValueError, match="imported source identity"):
         prepared.refresh()
+
+
+def test_bound_independent_wrapper_is_mandatory(prepared_payload, monkeypatch):
+    import validation.component.runtime_checks as independent
+
+    root, binding, _, _ = prepared_payload
+    prepared = component_host._prepare_payload(root, binding, mode="debug")
+
+    def refuse(*args, **kwargs):
+        raise ValueError("bound selection consumer sentinel")
+
+    monkeypatch.setattr(independent, "consume_case", refuse)
+    with pytest.raises(ValueError, match="bound selection consumer sentinel"):
+        component_runner._run_prepared(root / "job.json", prepared)
+
+
+def test_partial_independent_closure_is_not_a_pin_refresh(prepared_payload):
+    from rkuarch.engines.native.records import FileBinding
+
+    root, _, payload, put = prepared_payload
+    pinned = json.loads((root / payload["consumers"]["independent_binding"]["path"]).read_bytes())
+    del pinned["files"]["contract/uarch_contract/mapped_issue.py"]
+    payload["consumers"]["independent_binding"] = put("partial-consumer.json", pinned)
+    binding = FileBinding.model_validate(put("partial-payload.json", payload))
+    with pytest.raises(ValueError, match="complete matching consumer/structural closure"):
+        component_host._prepare_payload(root, binding, mode="debug")

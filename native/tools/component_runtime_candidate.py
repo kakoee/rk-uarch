@@ -23,7 +23,7 @@ from rkuarch.engines.native.component_records import ComponentBuildInputs, Compo
 from rkuarch.engines.native.records import ToolInputs
 
 ROOT = Path(__file__).resolve().parents[2]
-B = "docs/reviews/U4-B-component-runtime-preparation-v1"
+B = "docs/reviews/U4-B-component-runtime-preparation-v2"
 OUTPUT = "private-component"
 IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
 
@@ -37,8 +37,8 @@ def binding(root: Path, path: Path) -> dict:
     return {"path": str(path.relative_to(root)), "byte_hash": sha256(path.read_bytes())}
 
 
-def wrapper():
-    path = ROOT / "native/tools/component_candidate.py"
+def wrapper(root: Path = ROOT):
+    path = root / "native/tools/component_candidate.py"
     spec = importlib.util.spec_from_file_location("accepted_component_wrapper", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -46,14 +46,15 @@ def wrapper():
 
 
 def focused_ids(selection: dict) -> list[str]:
-    """13 new B controls, two component positives and all20 finite D3 definitions."""
-    return [
-        r["case_id"]
-        for r in selection["rows"]
-        if r["source_input"] is not None
-        or r["expected_layer"] != "result"
-        or r["case_id"] in ("v3:A-C02-cold", "v3:B-native-O2")
-    ]
+    """Exact B final affected plan: 27 positives and 20 finite D3 definitions."""
+    plan = json.loads(
+        (
+            ROOT / "docs/reviews/U4-B-component-runtime-preparation-v1/private-final-plan.json"
+        ).read_bytes()
+    )
+    ids = plan["cases"]
+    assert set(ids) <= {row["case_id"] for row in selection["rows"]}
+    return ids
 
 
 def freeze(source: Path, commit: str) -> dict:
@@ -299,6 +300,44 @@ def verify(out: Path) -> None:
     )
 
 
+def build(out: Path, mode: str) -> None:
+    """Actual construction recipe; invoke the frozen export's copy of this tool."""
+    source = out / "source"
+    if ROOT.resolve() != source.resolve():
+        raise ValueError("build must use the exact frozen export recipe")
+    verify(out)
+    c = wrapper(source)
+    inputs = ComponentBuildInputs.model_validate_json(
+        (source / OUTPUT / "BuildInputs.json").read_bytes()
+    )
+    config = next(x for x in inputs.mode_configs if x.mode == mode)
+    command = c.docker(out, mode, mode + "-build") + [
+        c.BIN + "cargo",
+        *config.cargo_args,
+        "--",
+        "-C",
+        "link-arg=-Wl,-Map=/receipts/" + mode + ".map",
+    ]
+    if c.command(out, mode + "-build", command):
+        raise ValueError("private production executable construction failed")
+    test = [
+        c.BIN + "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--lib",
+        "--no-run",
+        "--message-format=json",
+    ] + (["--release"] if mode == "release" else [])
+    if c.command(out, mode + "-test-build", c.docker(out, mode, mode + "-test-build") + test):
+        raise ValueError("private unit executable construction failed")
+    verify(out)
+    if c.inventory(out / "cache") != json.loads(c.CACHE_RECORD.read_bytes())["files"]:
+        raise ValueError("accepted private cache changed")
+
+
 def imports(root: Path, observation_root: Path | None = None) -> dict:
     """Full project Python closure and stdlib/accepted dependency bytes, not caller modules."""
     files = sorted(
@@ -332,6 +371,7 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
         "files": [binding(root, p) for p in files],
         "external_files": [binding(Path("/"), p) for p in sorted(external)],
         "python_executable": binding(Path("/"), Path(sys.executable).resolve()),
+        "independent_binding": binding(root, root / B / "consumer-bindings-v2.json"),
         "observation_contract": binding(
             observation_root or root,
             (observation_root or root) / OUTPUT / "observation-contract.json",
@@ -341,11 +381,14 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("prepare", "verify"))
+    parser.add_argument("action", choices=("prepare", "verify", "build"))
     parser.add_argument("output", type=Path)
+    parser.add_argument("--mode", choices=("debug", "release"), default="debug")
     args = parser.parse_args()
     if args.action == "prepare":
         prepare(args.output)
+    elif args.action == "build":
+        build(args.output, args.mode)
     else:
         verify(args.output)
 

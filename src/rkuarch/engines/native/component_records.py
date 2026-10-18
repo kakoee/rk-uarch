@@ -94,6 +94,7 @@ class ComponentConsumers(FrozenModel):
     import_root: NonEmpty
     files: Annotated[tuple[FileBinding, ...], Field(min_length=1)]
     observation_contract: FileBinding
+    independent_binding: FileBinding
     python_executable: FileBinding
     external_files: Annotated[tuple[FileBinding, ...], Field(min_length=1)]
 
