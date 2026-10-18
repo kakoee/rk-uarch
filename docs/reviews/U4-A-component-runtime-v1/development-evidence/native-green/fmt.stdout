@@ -1,0 +1,70 @@
+Diff in /work/native/crates/uarch-engine/src/protocol.rs:23:
+         wire::parse(generated::ENGINE_JSON).map_err(|e| refuse("InternalError", "", e))?;
+     let trust: Value =
+         wire::parse(generated::TRUST_JSON).map_err(|e| refuse("InternalError", "", e))?;
+-    if matches!(trust["format"].as_str(), Some("uarch-component-build-trust/1" | "uarch-component-build-trust/2")) {
++    if matches!(
++        trust["format"].as_str(),
++        Some("uarch-component-build-trust/1" | "uarch-component-build-trust/2")
++    ) {
+         return Err(refuse(
+             "TestProfileMismatch",
+             "",
+Diff in /work/native/crates/uarch-engine/src/protocol.rs:31:
+         ));
+     }
+     if trust["format"] != "uarch-k2-build-trust/1" {
+-        return Err(refuse("TestProfileMismatch", "", "uninstalled compiled authority format"));
++        return Err(refuse(
++            "TestProfileMismatch",
++            "",
++            "uninstalled compiled authority format",
++        ));
+     }
+     let registry = trust["registry_hash"]
+         .as_str()
+Diff in /work/native/crates/uarch-engine/src/protocol.rs:128:
+     if raw["workload_closure"]["scope"]["kind"] != "kernel_fixture" {
+         let result = if trust.engine["model"]["version"] == "2" {
+             if raw["profile"]["format"] != "uarch-native-test-profile/2" {
+-                return Err(refuse("TestProfileMismatch", "/profile/format", "component profile/2 required"));
++                return Err(refuse(
++                    "TestProfileMismatch",
++                    "/profile/format",
++                    "component profile/2 required",
++                ));
+             }
+-            crate::component::execute_with_observations(text, trust, crate::component::ObservationVersion::V3)?
++            crate::component::execute_with_observations(
++                text,
++                trust,
++                crate::component::ObservationVersion::V3,
++            )?
+         } else {
+             crate::component::execute(text, trust)?
+         };
+Diff in /work/native/crates/uarch-engine/src/protocol.rs:199:
+     }
+     #[test]
+     fn installed_model_two_routes_to_observations_three() {
+-        let v: Value = serde_json::from_str(include_str!(
+-            "../testdata/synthetic-runtime-cc0-v3.json"
+-        )).unwrap();
++        let v: Value =
++            serde_json::from_str(include_str!("../testdata/synthetic-runtime-cc0-v3.json"))
++                .unwrap();
+         let bytes = respond_admitted(&wire::canonical(&v).unwrap(), &v, &anchor(&v)).unwrap();
+         let out = wire::parse(std::str::from_utf8(&bytes).unwrap()).unwrap();
+         assert_eq!(out["observations"]["format"], "uarch-native-observations/3");
+Diff in /work/native/crates/uarch-engine/src/protocol.rs:213:
+         let input = std::path::PathBuf::from(std::env::var("COMPONENT_PRIVATE_INPUT").unwrap());
+         let output = std::path::PathBuf::from(std::env::var("COMPONENT_PRIVATE_OUTPUT").unwrap());
+         std::fs::create_dir(&output).unwrap();
+-        let mut files: Vec<_> = std::fs::read_dir(input).unwrap().map(|x| x.unwrap().path()).collect();
++        let mut files: Vec<_> = std::fs::read_dir(input)
++            .unwrap()
++            .map(|x| x.unwrap().path())
++            .collect();
+         files.sort();
+         for path in files {
+             let raw = std::fs::read_to_string(&path).unwrap();

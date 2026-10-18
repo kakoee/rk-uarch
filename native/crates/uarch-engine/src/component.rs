@@ -9,6 +9,10 @@ use crate::{
 };
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
+#[cfg(test)]
+thread_local! {
+    pub(crate) static TEST_RUNTIME_ENTRIES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
 fn overflow() -> crate::Refusal {
     refuse("TimeOverflow", "", "checked component arithmetic")
 }
@@ -927,6 +931,8 @@ impl Runtime {
         Ok(changed)
     }
     fn run(mut self, v: &Admitted) -> Result<Self> {
+        #[cfg(test)]
+        TEST_RUNTIME_ENTRIES.with(|n| n.set(n.get() + 1));
         loop {
             while let Some(event) = self.wheel.peek() {
                 if event.t_ps != self.now {
@@ -1058,7 +1064,7 @@ mod kernel_tests {
     }
 }
 
-// PRIVATE UNAPPLIED prototype seam; public protocol does not select this version.
+// Installed model/observation seam; public launch still requires separate authority.
 pub(crate) fn execute_with_observations(
     input: &str,
     trust: &Trust,

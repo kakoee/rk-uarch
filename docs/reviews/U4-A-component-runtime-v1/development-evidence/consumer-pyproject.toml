@@ -1,0 +1,72 @@
+[project]
+name = "rk-uarch"
+version = "0.0.1"
+description = "Microarchitecture-level simulator of one AI accelerator, feeding rk-sim"
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2", "numpy", "pyyaml", "typer", "jinja2"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "hypothesis", "mypy", "ruff", "import-linter", "types-PyYAML"]
+# U-P10's dry run only. On a Cloud TPU VM, install jax[tpu] per Google's instructions instead.
+measure = ["jax[cpu]"]
+
+[project.scripts]
+uarch = "rkuarch.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rkuarch", "contract/uarch_contract"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "contract/tests", "validation"]
+addopts = "--import-mode=importlib"
+pythonpath = [".", "src", "contract"]
+markers = [
+  "golden: full-request regressions against tests/golden/expected",
+  "nightly: slow suites (mutants, L2 differential), run on the Linux box",
+  "silicon: needs reference hardware or recorded results",
+  "native: needs the built native engine",
+  "determinism: byte-identity checks across runs, workers and threads",
+]
+
+[tool.ruff]
+extend-exclude = [
+  "contract/vendor",
+  "docs/reviews/U2-A-RR-C1/actual_replay.py",
+  "docs/reviews/U2-A-RR-C1/checks.py",
+  "docs/reviews/U2-A-RR-C1/final_audit.py",
+  "docs/reviews/U2-A-RR-C1/support_lifecycle.py",
+  "docs/reviews/U2-RR-C1-reconciliation/audit.py",
+  "docs/reviews/U2-RR-C1-reconciliation/production_probe.py",
+  "docs/reviews/U2-RR-C1-reconciliation/test_condition_order.py",
+  "docs/reviews/U2-RR-C1-reconciliation/verify_replay.py",
+  "docs/reviews/U2-adoption-v1-execution/prepared-replay.py",
+  "docs/reviews/U2-adoption-v2-execution/final_verify.py",
+  "docs/reviews/U2-adoption-v2-execution/runtime_driver.py",
+  "docs/reviews/U2-artifact-adoption-v2/audit.py",
+  "docs/reviews/U2-source-input-freeze-v1/preflight.py",
+  "docs/reviews/U2-source-input-freeze-v2/preflight.py",
+  "tests/fixtures/u2_b/historical-u1/rk/schema/agentic.py",
+  "tests/fixtures/u2_b/historical-u1/rk/schema/channels.py",
+  "tests/fixtures/u2_b/historical-u1/rk/schema/execution.py",
+  "tests/fixtures/u2_b/historical-u1/rk/schema/fidelity.py",
+  "tests/fixtures/u2_b/historical-u1/rk/schema/hashing.py",
+  "tests/fixtures/u2_b/historical-u1/rk/schema/traces.py",
+  "tests/fixtures/u2_b/historical-u1/rk/schema/workloads.py"
+]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+exclude = ["^contract/vendor/"]
+python_version = "3.12"
+strict = true
+mypy_path = [".", "src", "contract"]
+explicit_package_bases = true
+files = ["src/rkuarch", "contract/uarch_contract"]

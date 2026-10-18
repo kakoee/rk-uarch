@@ -1,0 +1,10 @@
+import importlib.util,shutil
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a'); spec=importlib.util.spec_from_file_location('c',r/'native/tools/component_candidate.py'); c=importlib.util.module_from_spec(spec);spec.loader.exec_module(c)
+o=Path('/tmp/u4-a-runtime-a67pm31q/native-green-restored');o.mkdir()
+for n in ('commands','docker-config','source'): (o/n).mkdir()
+shutil.copytree(r/'native',o/'source/native',ignore=shutil.ignore_patterns('__pycache__','target'))
+for n in ('cache','controls'): shutil.copytree(o.parent/'native-red'/n,o/n)
+assert c.command(o,'fmt',c.docker(o,'debug','fmt')+[c.BIN+'cargo','fmt','--','--check']) in (0,1)
+# Formatting is a source edit performed separately, not an unrecorded container rewrite.
+assert c.command(o,'routing-green',c.docker(o,'debug','routing-green')+[c.BIN+'cargo','test','--offline','--locked','-p','uarch-engine','--lib','protocol::component_runtime_tests::installed_model_two_routes_to_observations_three','--','--exact'])==0

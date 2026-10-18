@@ -1,0 +1,72 @@
+{
+  "$defs": {
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "uarch-component-build-trust/2",
+      "title": "Format",
+      "type": "string"
+    },
+    "profiles": {
+      "items": {
+        "$ref": "#/$defs/FileBinding"
+      },
+      "minItems": 1,
+      "title": "Profiles",
+      "type": "array"
+    },
+    "purpose": {
+      "const": "private-synthetic-tests-only",
+      "title": "Purpose",
+      "type": "string"
+    },
+    "registry_file": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "registry_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Registry Hash",
+      "type": "string"
+    },
+    "selection": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "semantics_file": {
+      "$ref": "#/$defs/FileBinding"
+    }
+  },
+  "required": [
+    "format",
+    "purpose",
+    "semantics_file",
+    "registry_hash",
+    "registry_file",
+    "profiles",
+    "selection"
+  ],
+  "title": "ComponentBuildTrust",
+  "type": "object"
+}

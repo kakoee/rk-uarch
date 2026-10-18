@@ -1,0 +1,51 @@
+{
+  "$defs": {
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "decision": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "format": {
+      "const": "uarch-component-first-use/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "independent_review": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "payload": {
+      "$ref": "#/$defs/FileBinding"
+    }
+  },
+  "required": [
+    "format",
+    "payload",
+    "decision",
+    "independent_review"
+  ],
+  "title": "ComponentHostRecord",
+  "type": "object"
+}

@@ -23,11 +23,24 @@ fn authority() -> Result<admission::Trust> {
         wire::parse(generated::ENGINE_JSON).map_err(|e| refuse("InternalError", "", e))?;
     let trust: Value =
         wire::parse(generated::TRUST_JSON).map_err(|e| refuse("InternalError", "", e))?;
-    if trust["format"] == "uarch-component-build-trust/1" {
+    if matches!(
+        trust["format"].as_str(),
+        Some("uarch-component-build-trust/1" | "uarch-component-build-trust/2")
+    ) {
         return Err(refuse(
             "TestProfileMismatch",
             "",
             "component public authority absent",
+        ));
+    }
+    if trust["format"] != "uarch-k2-build-trust/1"
+        || engine["model"]["name"] != "fixed-delay"
+        || engine["model"]["version"] != "1"
+    {
+        return Err(refuse(
+            "TestProfileMismatch",
+            "",
+            "uninstalled compiled authority format",
         ));
     }
     let registry = trust["registry_hash"]
@@ -119,8 +132,26 @@ pub fn respond(input: &[u8]) -> Result<Vec<u8>> {
         ));
     }
     let trust = authority()?;
+    respond_admitted(text, &raw, &trust)
+}
+fn respond_admitted(text: &str, raw: &Value, trust: &admission::Trust) -> Result<Vec<u8>> {
     if raw["workload_closure"]["scope"]["kind"] != "kernel_fixture" {
-        let result = crate::component::execute(text, &trust)?;
+        let result = if trust.engine["model"]["version"] == "2" {
+            if raw["profile"]["format"] != "uarch-native-test-profile/2" {
+                return Err(refuse(
+                    "TestProfileMismatch",
+                    "/profile/format",
+                    "component profile/2 required",
+                ));
+            }
+            crate::component::execute_with_observations(
+                text,
+                trust,
+                crate::component::ObservationVersion::V3,
+            )?
+        } else {
+            crate::component::execute(text, trust)?
+        };
         let bytes = wire::canonical(&result)
             .map_err(|e| refuse("InternalError", "", e))?
             .into_bytes();
@@ -129,7 +160,7 @@ pub fn respond(input: &[u8]) -> Result<Vec<u8>> {
         }
         return Ok(bytes);
     }
-    let v = admission::validate(text, &trust)?;
+    let v = admission::validate(text, trust)?;
     caps(&v)?;
     let out = Simulation::with_releases(
         v.clocks.clone(),
@@ -167,5 +198,72 @@ mod tests {
             assert_eq!(respond(input).unwrap_err().code, "InvalidJson");
         }
         assert_eq!(respond(b"{}").unwrap_err().code, "UnsupportedProtocol");
+    }
+}
+
+#[cfg(test)]
+mod component_runtime_tests {
+    use super::*;
+    use std::collections::{BTreeMap, BTreeSet};
+    fn anchor(v: &Value) -> admission::Trust {
+        admission::Trust {
+            registry: v["registry"]["registry_hash"].as_str().unwrap().into(),
+            profiles: BTreeMap::from([(
+                v["profile"]["profile_hash"].as_str().unwrap().into(),
+                BTreeSet::from([v["admission"]["case_id"].as_str().unwrap().into()]),
+            )]),
+            engine: v["engine"].clone(),
+        }
+    }
+    #[test]
+    fn installed_model_two_routes_to_observations_three() {
+        let v: Value =
+            serde_json::from_str(include_str!("../testdata/synthetic-runtime-cc0-v3.json"))
+                .unwrap();
+        crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.set(0));
+        let bytes = respond_admitted(&wire::canonical(&v).unwrap(), &v, &anchor(&v)).unwrap();
+        let out = wire::parse(std::str::from_utf8(&bytes).unwrap()).unwrap();
+        assert_eq!(out["observations"]["format"], "uarch-native-observations/3");
+        assert_eq!(out["duration_ps"], 121000);
+        assert_eq!(crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.get()), 1);
+        let mut wrong = v.clone();
+        wrong["profile"]["format"] = json!("uarch-native-test-profile/1");
+        crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.set(0));
+        let error =
+            respond_admitted(&wire::canonical(&wrong).unwrap(), &wrong, &anchor(&v)).unwrap_err();
+        assert_eq!(error.code, "TestProfileMismatch");
+        assert_eq!(error.pointer, "/profile/format");
+        assert_eq!(crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.get()), 0);
+    }
+    #[test]
+    #[ignore = "explicit private synthetic anchors; no public authority"]
+    fn private_selected_transport_probe() {
+        let input = std::path::PathBuf::from(std::env::var("COMPONENT_PRIVATE_INPUT").unwrap());
+        let output = std::path::PathBuf::from(std::env::var("COMPONENT_PRIVATE_OUTPUT").unwrap());
+        std::fs::create_dir(&output).unwrap();
+        let mut files: Vec<_> = std::fs::read_dir(input)
+            .unwrap()
+            .map(|x| x.unwrap().path())
+            .collect();
+        files.sort();
+        for path in files {
+            let raw = std::fs::read_to_string(&path).unwrap();
+            let v = wire::parse(&raw).unwrap();
+            crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.set(0));
+            let (bytes, status) = match respond_admitted(&raw, &v, &anchor(&v)) {
+                Ok(bytes) => (bytes, 0),
+                Err(error) => (error_bytes(&error), 2),
+            };
+            let entries = crate::component::TEST_RUNTIME_ENTRIES.with(|n| n.get());
+            assert_eq!(entries, if status == 0 { 1 } else { 0 });
+            let name = path.file_stem().unwrap().to_str().unwrap();
+            std::fs::write(output.join(format!("{name}.json")), bytes).unwrap();
+            std::fs::write(output.join(format!("{name}.status")), status.to_string()).unwrap();
+            std::fs::write(
+                output.join(format!("{name}.runtime-entries")),
+                entries.to_string(),
+            )
+            .unwrap();
+        }
     }
 }

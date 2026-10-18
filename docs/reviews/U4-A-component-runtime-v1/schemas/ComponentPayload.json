@@ -1,0 +1,325 @@
+{
+  "$defs": {
+    "ComponentBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "calls": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Calls",
+          "type": "integer"
+        },
+        "session_seconds": {
+          "maximum": 86400,
+          "minimum": 1,
+          "title": "Session Seconds",
+          "type": "integer"
+        },
+        "stderr_bytes": {
+          "maximum": 1048576,
+          "minimum": 1,
+          "title": "Stderr Bytes",
+          "type": "integer"
+        },
+        "stdin_bytes": {
+          "maximum": 67108864,
+          "minimum": 1,
+          "title": "Stdin Bytes",
+          "type": "integer"
+        },
+        "stdout_bytes": {
+          "maximum": 67108864,
+          "minimum": 1,
+          "title": "Stdout Bytes",
+          "type": "integer"
+        },
+        "timeout_s": {
+          "maximum": 600,
+          "minimum": 1,
+          "title": "Timeout S",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "calls",
+        "session_seconds",
+        "timeout_s",
+        "stdin_bytes",
+        "stdout_bytes",
+        "stderr_bytes"
+      ],
+      "title": "ComponentBudget",
+      "type": "object"
+    },
+    "ComponentConsumers": {
+      "additionalProperties": false,
+      "properties": {
+        "checker": {
+          "const": "validation.component.observations_v3:check_v3",
+          "title": "Checker",
+          "type": "string"
+        },
+        "external_files": {
+          "items": {
+            "$ref": "#/$defs/FileBinding"
+          },
+          "minItems": 1,
+          "title": "External Files",
+          "type": "array"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/FileBinding"
+          },
+          "minItems": 1,
+          "title": "Files",
+          "type": "array"
+        },
+        "import_root": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Import Root",
+          "type": "string"
+        },
+        "observation_contract": {
+          "$ref": "#/$defs/FileBinding"
+        },
+        "observations": {
+          "const": "uarch-native-observations/3",
+          "title": "Observations",
+          "type": "string"
+        },
+        "python_executable": {
+          "$ref": "#/$defs/FileBinding"
+        }
+      },
+      "required": [
+        "checker",
+        "observations",
+        "import_root",
+        "files",
+        "observation_contract",
+        "python_executable",
+        "external_files"
+      ],
+      "title": "ComponentConsumers",
+      "type": "object"
+    },
+    "ComponentExecutable": {
+      "additionalProperties": false,
+      "properties": {
+        "executable": {
+          "$ref": "#/$defs/FileBinding"
+        },
+        "mode": {
+          "enum": [
+            "debug",
+            "release"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "receipt": {
+          "$ref": "#/$defs/FileBinding"
+        }
+      },
+      "required": [
+        "mode",
+        "executable",
+        "receipt"
+      ],
+      "title": "ComponentExecutable",
+      "type": "object"
+    },
+    "ComponentJobBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "file": {
+          "$ref": "#/$defs/FileBinding"
+        },
+        "job_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Job Hash",
+          "type": "string"
+        },
+        "profile_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Profile Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "job_hash",
+        "profile_hash",
+        "file"
+      ],
+      "title": "ComponentJobBinding",
+      "type": "object"
+    },
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "NativeEngineIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "compiler_lock_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Compiler Lock Hash",
+          "type": "string"
+        },
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/NativeModelIdentity"
+        },
+        "name": {
+          "const": "native",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "native-stage/1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash",
+        "model",
+        "compiler_lock_hash"
+      ],
+      "title": "NativeEngineIdentity",
+      "type": "object"
+    },
+    "NativeModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "fixed-delay",
+            "native-intervals"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "enum": [
+            "1",
+            "2"
+          ],
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash"
+      ],
+      "title": "NativeModelIdentity",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "budget": {
+      "$ref": "#/$defs/ComponentBudget"
+    },
+    "build_inputs": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "consumers": {
+      "$ref": "#/$defs/ComponentConsumers"
+    },
+    "engine": {
+      "$ref": "#/$defs/NativeEngineIdentity"
+    },
+    "executables": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ComponentExecutable"
+        },
+        {
+          "$ref": "#/$defs/ComponentExecutable"
+        }
+      ],
+      "title": "Executables",
+      "type": "array"
+    },
+    "format": {
+      "const": "uarch-component-runtime-payload/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "jobs": {
+      "items": {
+        "$ref": "#/$defs/ComponentJobBinding"
+      },
+      "minItems": 1,
+      "title": "Jobs",
+      "type": "array"
+    },
+    "profiles": {
+      "items": {
+        "$ref": "#/$defs/FileBinding"
+      },
+      "minItems": 1,
+      "title": "Profiles",
+      "type": "array"
+    },
+    "registry": {
+      "$ref": "#/$defs/FileBinding"
+    }
+  },
+  "required": [
+    "format",
+    "engine",
+    "build_inputs",
+    "registry",
+    "profiles",
+    "jobs",
+    "executables",
+    "consumers",
+    "budget"
+  ],
+  "title": "ComponentPayload",
+  "type": "object"
+}

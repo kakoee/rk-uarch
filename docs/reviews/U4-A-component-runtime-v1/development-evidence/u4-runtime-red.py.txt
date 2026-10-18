@@ -1,0 +1,14 @@
+import importlib.util,json,shutil
+from pathlib import Path
+r=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-a')
+spec=importlib.util.spec_from_file_location('c',r/'native/tools/component_candidate.py'); c=importlib.util.module_from_spec(spec); spec.loader.exec_module(c)
+out=Path('/tmp/u4-a-runtime-a67pm31q/native-red'); out.mkdir()
+for n in ('source','commands','docker-config'): (out/n).mkdir()
+shutil.copytree(r/'native',out/'source/native',ignore=shutil.ignore_patterns('__pycache__','target'))
+a=json.loads(c.CACHE_RECORD.read_bytes()); cache=Path(a['private_root']); assert c.inventory(cache)==a['files']; shutil.copytree(cache,out/'cache')
+shutil.copytree(r/'docs/reviews/U4-A-K2-construction-v1/inputs',out/'all-inputs')
+(out/'controls').mkdir()
+for n in ('rustc-wrapper.sh','linker.sh'):
+ shutil.copy2(out/'all-inputs'/n,out/'controls'/n); (out/'controls'/n).chmod(0o555)
+code=c.command(out,'routing-red',c.docker(out,'debug','routing-red')+[c.BIN+'cargo','test','--offline','--locked','-p','uarch-engine','--lib','protocol::component_runtime_tests::installed_model_two_routes_to_observations_three','--','--exact'])
+assert code==101,code

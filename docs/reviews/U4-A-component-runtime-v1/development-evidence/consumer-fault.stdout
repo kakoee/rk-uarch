@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_independent_checker_is_mandatory_for_valid_saved_response ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x739f9ee0cfe0>
+
+    def test_independent_checker_is_mandatory_for_valid_saved_response(monkeypatch):
+        import validation.component.observations_v3 as independent
+    
+        job, result = prospective_pair()
+        expected = json.loads(
+            (ROOT / "docs/reviews/U4-B-component-stage2-v1/first-use-bindings.json").read_bytes()
+        )["observation_contract"]
+    
+        def refuse(*args, **kwargs):
+            raise ValueError("independent consumer sentinel")
+    
+        monkeypatch.setattr(independent, "check_v3", refuse)
+>       with pytest.raises(ValueError, match="independent consumer sentinel"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_component_runtime.py:336: Failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_component_runtime.py::test_independent_checker_is_mandatory_for_valid_saved_response
+1 failed in 0.43s
