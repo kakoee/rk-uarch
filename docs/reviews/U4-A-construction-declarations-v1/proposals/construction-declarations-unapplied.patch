@@ -1,0 +1,372 @@
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_construction.py
+@@ -0,0 +1,82 @@
++"""Explicit production construction specification; pure data, never execution authority."""
++
++from __future__ import annotations
++
++from typing import Any, Literal
++
++from pydantic import model_validator
++from uarch_contract.common import FrozenModel
++
++BIN = "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/"
++CARGO = BIN + "cargo"
++FLAGS = ("-C", "debuginfo=1", "-C", "linker=/controls/linker.sh")
++
++
++def mode_spec(mode: str) -> dict[str, Any]:
++    if mode not in ("debug", "release"):
++        raise ValueError("explicit production construction mode")
++    return {
++        "mode": mode,
++        "cargo_args": [
++            "rustc",
++            "--offline",
++            "--locked",
++            "-p",
++            "uarch-engine",
++            "--bin",
++            "uarch-engine",
++            "-vv",
++            "--message-format=json",
++            *(["--release"] if mode == "release" else []),
++            "--",
++            "-C",
++            f"link-arg=-Wl,-Map=/receipts/{mode}.map",
++        ],
++        "rustflags": list(FLAGS),
++        "permitted_environment": {
++            "PATH": BIN + ":/usr/local/cargo/bin:/usr/bin:/bin",
++            "CARGO_HOME": "/cargo-home",
++            "CARGO_NET_OFFLINE": "true",
++            "CARGO_TARGET_DIR": "/target",
++            "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
++            "RUSTUP_AUTO_INSTALL": "0",
++            "LC_ALL": "C",
++            "RUSTC": BIN + "rustc",
++            "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
++            "RUSTFLAGS": " ".join(FLAGS),
++            "C2_RUN_TAG": mode + "-build",
++        },
++    }
++
++
++class ConstructionMode(FrozenModel):
++    mode: Literal["debug", "release"]
++    cargo_args: tuple[str, ...]
++    rustflags: tuple[str, ...]
++    permitted_environment: dict[str, str]
++
++    @model_validator(mode="after")
++    def exact(self) -> "ConstructionMode":
++        if self.model_dump(mode="json") != mode_spec(self.mode):
++            raise ValueError("exact production construction specification required")
++        return self
++
++
++def construction_modes(flags: tuple[str, ...] | list[str]) -> list[dict[str, Any]]:
++    if tuple(flags) != FLAGS:
++        raise ValueError("accepted construction flags required")
++    return [mode_spec(mode) for mode in ("debug", "release")]
++
++
++def selected_mode(modes: list[dict[str, Any]], mode: str) -> ConstructionMode:
++    parsed = [ConstructionMode.model_validate(value) for value in modes]
++    if [value.mode for value in parsed] != ["debug", "release"]:
++        raise ValueError("exact ordered debug/release construction modes required")
++    if mode not in ("debug", "release"):
++        raise ValueError("explicit production construction mode")
++    return next(value for value in parsed if value.mode == mode)
++
++
++def invocation(modes: list[dict[str, Any]], mode: str) -> tuple[list[str], dict[str, str]]:
++    value = selected_mode(modes, mode)
++    return [CARGO, *value.cargo_args], dict(value.permitted_environment)
+--- a/src/rkuarch/engines/native/component_records.py
++++ b/src/rkuarch/engines/native/component_records.py
+@@ -1,11 +1,12 @@
+ """Additive component records. Valid shapes and construction pins are never authority."""
+ 
+-from typing import Annotated, Literal
++from typing import Annotated, Any, Literal
+ 
+ from pydantic import Field, model_validator
+ from uarch_contract.common import FrozenModel, Hash, NonEmpty
+ from uarch_contract.mapped import NativeEngineIdentity
+ 
++from .component_construction import ConstructionMode
+ from .records import FileBinding, GitCommit, ModeConfig, SourceInput
+ 
+ IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
+@@ -52,6 +53,43 @@
+         if tuple(x.mode for x in self.mode_configs) != ("debug", "release"):
+             raise ValueError("separate debug/release configurations required")
+         return self
++
++
++class ComponentBuildInputsV3(FrozenModel):
++    format: Literal["uarch-component-build-inputs/3"]
++    source_commit: GitCommit
++    source_files: Annotated[tuple[SourceInput, ...], Field(min_length=1)]
++    trust_hash: Hash
++    trust_file: FileBinding
++    tool_inputs_hash: Hash
++    tool_inputs_file: FileBinding
++    model_source_paths: Annotated[tuple[NonEmpty, ...], Field(min_length=1)]
++    model_inputs_hash: Hash
++    mode_configs: tuple[ConstructionMode, ConstructionMode]
++    generated_identity_output_paths: tuple[NonEmpty, ...]
++
++    @model_validator(mode="after")
++    def acyclic(self) -> "ComponentBuildInputsV3":
++        paths = [f.path for f in self.source_files]
++        if paths != sorted(set(paths)) or not set(self.model_source_paths) <= set(paths):
++            raise ValueError("complete sorted unique source/model inventory required")
++        if list(self.model_source_paths) != sorted(set(self.model_source_paths)):
++            raise ValueError("sorted unique model inventory required")
++        if self.generated_identity_output_paths != (
++            "native/crates/uarch-engine/generated/identity.rs",
++        ) or set(self.generated_identity_output_paths) & set(paths):
++            raise ValueError("acyclic explicit generated identity required")
++        if tuple(x.mode for x in self.mode_configs) != ("debug", "release"):
++            raise ValueError("separate debug/release configurations required")
++        return self
++
++
++def parse_component_build_inputs(value: Any) -> ComponentBuildInputs | ComponentBuildInputsV3:
++    if isinstance(value, dict) and value.get("format") == "uarch-component-build-inputs/2":
++        return ComponentBuildInputs.model_validate(value)
++    if isinstance(value, dict) and value.get("format") == "uarch-component-build-inputs/3":
++        return ComponentBuildInputsV3.model_validate(value)
++    raise ValueError("explicit supported component BuildInputs version required")
+ 
+ 
+ class ComponentBuildReceipt(FrozenModel):
+--- a/src/rkuarch/engines/native/component_host.py
++++ b/src/rkuarch/engines/native/component_host.py
+@@ -26,12 +26,12 @@
+ from rkuarch.workload.mapped import loads_component_job
+ 
+ from .component_records import (
+-    ComponentBuildInputs,
+     ComponentBuildReceipt,
+     ComponentBuildTrust,
+     ComponentHostRecord,
+     ComponentHostSelector,
+     ComponentPayload,
++    parse_component_build_inputs,
+ )
+ from .host import _open, _read, _require
+ from .records import FileBinding, ToolInputs
+@@ -221,7 +221,7 @@
+         return cls.model_validate(strict_json_loads(read(file)))
+ 
+     payload = record(ComponentPayload, binding)
+-    build = record(ComponentBuildInputs, payload.build_inputs)
++    build = parse_component_build_inputs(strict_json_loads(read(payload.build_inputs)))
+     trust = record(ComponentBuildTrust, build.trust_file)
+     tools = record(ToolInputs, build.tool_inputs_file)
+     _require(
+--- a/native/tools/component_candidate.py
++++ b/native/tools/component_candidate.py
+@@ -75,7 +75,9 @@
+     return run.returncode
+ 
+ 
+-def docker(scratch: Path, mode: str, tag: str) -> list[str]:
++def docker(
++    scratch: Path, mode: str, tag: str, *, environment: dict[str, str] | None = None
++) -> list[str]:
+     receipts = scratch / "receipts" / mode / tag
+     receipts.mkdir(parents=True, exist_ok=True)
+     args = [
+@@ -112,11 +114,23 @@
+     ]:
+         src.mkdir(parents=True, exist_ok=True)
+         args += ["--mount", f"type=bind,src={src},dst={dst}" + (",readonly" if ro else "")]
+-    return args + [
+-        "--entrypoint",
+-        "/usr/bin/env",
+-        IMAGE,
+-        "-i",
++    return (
++        args
++        + ["--entrypoint", "/usr/bin/env", IMAGE, "-i"]
++        + container_environment(tag, environment)
++    )
++
++
++def container_environment(tag: str, environment: dict[str, str] | None = None) -> list[str]:
++    """Exact replacement for declared production inputs; historical defaults stay unchanged."""
++    if environment is not None:
++        if not environment or any(
++            not key or "=" in key or "\x00" in key or "\x00" in value
++            for key, value in environment.items()
++        ):
++            raise ValueError("explicit bounded environment strings required")
++        return [key + "=" + value for key, value in sorted(environment.items())]
++    return [
+         "PATH=" + BIN + ":/usr/local/cargo/bin:/usr/bin:/bin",
+         "CARGO_HOME=/cargo-home",
+         "CARGO_NET_OFFLINE=true",
+--- a/native/tools/component_runtime_candidate.py
++++ b/native/tools/component_runtime_candidate.py
+@@ -19,7 +19,12 @@
+ 
+ from uarch_contract.hashing import canonical_json, content_hash, sha256
+ 
+-from rkuarch.engines.native.component_records import ComponentBuildInputs, ComponentBuildTrust
++from rkuarch.engines.native.component_construction import construction_modes, invocation
++from rkuarch.engines.native.component_records import (
++    ComponentBuildInputsV3,
++    ComponentBuildTrust,
++    parse_component_build_inputs,
++)
+ from rkuarch.engines.native.records import ToolInputs
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+@@ -119,9 +124,9 @@
+         for p in sorted(set(paths))
+     ]
+     model = [x for x in inventory if x["path"].startswith("native/crates/uarch-engine/src/")]
+-    build = ComponentBuildInputs.model_validate(
++    build = ComponentBuildInputsV3.model_validate(
+         {
+-            "format": "uarch-component-build-inputs/2",
++            "format": "uarch-component-build-inputs/3",
+             "source_commit": commit,
+             "source_files": inventory,
+             "trust_hash": content_hash(trust),
+@@ -130,33 +135,8 @@
+             "tool_inputs_file": binding(source, tool_path),
+             "model_source_paths": [x["path"] for x in model],
+             "model_inputs_hash": content_hash(model),
+-            "mode_configs": [
+-                {
+-                    "mode": mode,
+-                    "cargo_args": [
+-                        "rustc",
+-                        "--offline",
+-                        "--locked",
+-                        "-p",
+-                        "uarch-engine",
+-                        "--bin",
+-                        "uarch-engine",
+-                        "-vv",
+-                        "--message-format=json",
+-                    ]
+-                    + (["--release"] if mode == "release" else []),
+-                    "rustflags": tools.flags,
+-                }
+-                for mode in ("debug", "release")
+-            ],
++            "mode_configs": construction_modes(tools.flags),
+             "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
+-            "permitted_environment": {
+-                "CARGO_HOME": "/cargo-home",
+-                "CARGO_NET_OFFLINE": "true",
+-                "CARGO_TARGET_DIR": "/target",
+-                "RUSTUP_AUTO_INSTALL": "0",
+-                "LC_ALL": "C",
+-            },
+         }
+     )
+     write(out / "BuildInputs.json", build)
+@@ -285,8 +265,8 @@
+ 
+ def verify(out: Path) -> None:
+     source = out / "source"
+-    build = ComponentBuildInputs.model_validate_json(
+-        (source / OUTPUT / "BuildInputs.json").read_bytes()
++    build = parse_component_build_inputs(
++        json.loads((source / OUTPUT / "BuildInputs.json").read_bytes())
+     )
+     for f in build.source_files:
+         assert sha256((source / f.path).read_bytes()) == f.byte_hash, f.path
+@@ -305,6 +285,14 @@
+     )
+ 
+ 
++def production_invocation(
++    inputs: ComponentBuildInputsV3, mode: str
++) -> tuple[list[str], dict[str, str]]:
++    """Pure rendering of the exact declared production command, with no appended args."""
++    checked = ComponentBuildInputsV3.model_validate(inputs.model_dump(mode="json"))
++    return invocation([value.model_dump(mode="json") for value in checked.mode_configs], mode)
++
++
+ def build(out: Path, mode: str) -> None:
+     """Actual construction recipe; invoke the frozen export's copy of this tool."""
+     source = out / "source"
+@@ -312,17 +300,11 @@
+         raise ValueError("build must use the exact frozen export recipe")
+     verify(out)
+     c = wrapper(source)
+-    inputs = ComponentBuildInputs.model_validate_json(
++    inputs = ComponentBuildInputsV3.model_validate_json(
+         (source / OUTPUT / "BuildInputs.json").read_bytes()
+     )
+-    config = next(x for x in inputs.mode_configs if x.mode == mode)
+-    command = c.docker(out, mode, mode + "-build") + [
+-        c.BIN + "cargo",
+-        *config.cargo_args,
+-        "--",
+-        "-C",
+-        "link-arg=-Wl,-Map=/receipts/" + mode + ".map",
+-    ]
++    argv, environment = production_invocation(inputs, mode)
++    command = c.docker(out, mode, mode + "-build", environment=environment) + argv
+     if c.command(out, mode + "-build", command):
+         raise ValueError("private production executable construction failed")
+     test = [
+--- a/validation/component/capture_monitor.py
++++ b/validation/component/capture_monitor.py
+@@ -16,6 +16,8 @@
+ from typing import Any
+ 
+ from uarch_contract.hashing import canonical_json, sha256
++
++from rkuarch.engines.native.component_construction import invocation
+ 
+ from native.tools import component_container_guard as guardian
+ from validation.component.checks import need
+@@ -99,19 +101,33 @@
+     need(build["source_commit"] == plan["source_commit"], "capture BuildInputs source join")
+     recipe = json.loads(Path(plan["inputs"]["construction_recipe"]["path"]).read_bytes())
+     need(
+-        recipe["format"] == "component-capture-recipe/1"
++        recipe["format"] in ("component-capture-recipe/1", "component-capture-recipe/2")
+         and recipe["source_commit"] == plan["source_commit"]
+         and recipe["build_inputs_byte_hash"] == plan["inputs"]["build_inputs"]["byte_hash"],
+         "construction recipe source/build join",
+     )
+-    # Legacy component BuildInputs /1 omits fields carried by runtime BuildInputs /2.
+-    # Freeze them in an explicit additive companion, never rewrite old BuildInputs.
++    current = build.get("format") == "uarch-component-build-inputs/3"
++    need(
++        (recipe["format"] == "component-capture-recipe/2") == current,
++        "exact recipe/BuildInputs version join",
++    )
++    # Older /1-/2 declarations keep their existing equality rules; no legacy downgrade.
+     for key in ("permitted_environment", "mode_configs", "generated_identity_output_paths"):
+         need(key not in build or build[key] == recipe[key], "recipe cannot override BuildInputs")
+     need(recipe["preparation_source"] in build["source_files"], "recipe preparation source binding")
+     environment = json.loads(Path(plan["inputs"]["environment"]["path"]).read_bytes())
+-    need(
+-        environment == plan["environment"] == recipe["permitted_environment"]
++    if current:
++        need(plan["phase"] in ("debug", "release"), "production recipe requires construction mode")
++        need(
++            "permitted_environment" not in build and "permitted_environment" not in recipe,
++            "per-mode environment only",
++        )
++        argv, declared_environment = invocation(recipe["mode_configs"], plan["phase"])
++        need(plan["child_argv"] == argv, "exact construction argv")
++    else:
++        declared_environment = recipe["permitted_environment"]
++    need(
++        environment == plan["environment"] == declared_environment
+         and not any(k in environment for k in ("LD_PRELOAD", "LD_LIBRARY_PATH", "PYTHONPATH")),
+         "frozen clean environment",
+     )

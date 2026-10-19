@@ -1,0 +1,50 @@
+--- a/validation/component/capture_monitor.py
++++ b/validation/component/capture_monitor.py
+@@ -16,6 +16,8 @@
+ from typing import Any
+ 
+ from uarch_contract.hashing import canonical_json, sha256
++
++from rkuarch.engines.native.component_construction import invocation
+ 
+ from native.tools import component_container_guard as guardian
+ from validation.component.checks import need
+@@ -99,19 +101,33 @@
+     need(build["source_commit"] == plan["source_commit"], "capture BuildInputs source join")
+     recipe = json.loads(Path(plan["inputs"]["construction_recipe"]["path"]).read_bytes())
+     need(
+-        recipe["format"] == "component-capture-recipe/1"
++        recipe["format"] in ("component-capture-recipe/1", "component-capture-recipe/2")
+         and recipe["source_commit"] == plan["source_commit"]
+         and recipe["build_inputs_byte_hash"] == plan["inputs"]["build_inputs"]["byte_hash"],
+         "construction recipe source/build join",
+     )
+-    # Legacy component BuildInputs /1 omits fields carried by runtime BuildInputs /2.
+-    # Freeze them in an explicit additive companion, never rewrite old BuildInputs.
++    current = build.get("format") == "uarch-component-build-inputs/3"
++    need(
++        (recipe["format"] == "component-capture-recipe/2") == current,
++        "exact recipe/BuildInputs version join",
++    )
++    # Older /1-/2 declarations keep their existing equality rules; no legacy downgrade.
+     for key in ("permitted_environment", "mode_configs", "generated_identity_output_paths"):
+         need(key not in build or build[key] == recipe[key], "recipe cannot override BuildInputs")
+     need(recipe["preparation_source"] in build["source_files"], "recipe preparation source binding")
+     environment = json.loads(Path(plan["inputs"]["environment"]["path"]).read_bytes())
+-    need(
+-        environment == plan["environment"] == recipe["permitted_environment"]
++    if current:
++        need(plan["phase"] in ("debug", "release"), "production recipe requires construction mode")
++        need(
++            "permitted_environment" not in build and "permitted_environment" not in recipe,
++            "per-mode environment only",
++        )
++        argv, declared_environment = invocation(recipe["mode_configs"], plan["phase"])
++        need(plan["child_argv"] == argv, "exact construction argv")
++    else:
++        declared_environment = recipe["permitted_environment"]
++    need(
++        environment == plan["environment"] == declared_environment
+         and not any(k in environment for k in ("LD_PRELOAD", "LD_LIBRARY_PATH", "PYTHONPATH")),
+         "frozen clean environment",
+     )
