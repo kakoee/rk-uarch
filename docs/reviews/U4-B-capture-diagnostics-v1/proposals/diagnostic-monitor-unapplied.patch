@@ -1,0 +1,110 @@
+--- a/validation/component/capture_monitor.py
++++ b/validation/component/capture_monitor.py
+@@ -68,7 +68,8 @@
+
+ def verify_plan(plan: dict[str, Any]) -> None:
+     need(
+-        plan["format"] == "component-capture-plan/1" and plan["image"] == IMAGE,
++        plan["format"] in ("component-capture-plan/1", "component-capture-plan/2")
++        and plan["image"] == IMAGE,
+         "frozen capture format/image",
+     )
+     need(
+@@ -86,9 +87,17 @@
+             "environment",
+             "syscall_policy",
+             "construction_recipe",
+-        },
++        }
++        | (
++            {"capture_diagnostic_policy"} if plan["format"] == "component-capture-plan/2" else set()
++        ),
+         "complete frozen capture inputs",
+     )
++    if plan["format"] == "component-capture-plan/2":
++        from validation.component.capture_diagnostics import verify_policy
++
++        verify_policy(plan)
++        need(0 < plan["stream_bytes"] <= 65536, "bounded tracer/bootstrap channels")
+     for item in plan["inputs"].values():
+         path = Path(item["path"])
+         need(
+@@ -243,6 +252,11 @@
+
+
+ def command(plan: dict[str, Any], root: Path) -> list[str]:
++    child = plan["child_argv"]
++    if plan["format"] == "component-capture-plan/2":
++        from validation.component.capture_diagnostics import wrapped_child
++
++        child = wrapped_child(plan["phase"], child)
+     args = [
+         "--platform",
+         "linux/amd64",
+@@ -278,7 +292,7 @@
+         + [k + "=" + v for k, v in sorted(plan["environment"].items())]
+         + TRACER
+         + ["/receipts/" + plan["phase"] + ".trace"]
+-        + plan["child_argv"]
++        + child
+     )
+     return result
+
+@@ -294,6 +308,10 @@
+
+
+ def analyze(root: Path, plan: dict[str, Any], status: int) -> dict[str, Any]:
++    if plan["format"] == "component-capture-plan/2":
++        from validation.component.capture_diagnostics import inspect_capture
++
++        return inspect_capture(root, plan, status)
+     path = ROOT / PARSER
+     need(sha256(path.read_bytes()) == "sha256:" + PARSER_HASH, "strict parser identity")
+     parser = runpy.run_path(str(path))["parse"]
+@@ -350,6 +368,10 @@
+         started = True
+         while process.is_alive():
+             total, _ = inventory(root)
++            if plan["format"] == "component-capture-plan/2":
++                from validation.component.capture_diagnostics import enforce_stream_caps
++
++                enforce_stream_caps(root, plan)
+             if total >= plan["output_bytes"]:
+                 reason = "total output limit"
+             if time.monotonic() - start >= plan["seconds"]:
+@@ -407,6 +429,10 @@
+                 "capture process completion",
+             )
+             total, _ = inventory(root)
++            if plan["format"] == "component-capture-plan/2":
++                from validation.component.capture_diagnostics import enforce_stream_caps
++
++                enforce_stream_caps(root, plan)
+             need(
+                 total < plan["output_bytes"] and time.monotonic() - start < plan["seconds"],
+                 "capture final limits",
+@@ -414,6 +440,11 @@
+             need(reason is None, "capture monitor interrupted: " + str(reason))
+             verify_plan(plan)
+             coverage = analyze(root, plan, status)
++            if plan["format"] == "component-capture-plan/2":
++                need(
++                    coverage["diagnostics_accepted"] is True,
++                    "capture diagnostics refused: " + str(coverage["errors"]),
++                )
+         except BaseException as error:
+             reason = reason or repr(error)
+     try:
+@@ -428,7 +459,11 @@
+         total, rows = None, {}
+         reason = reason or repr(error)
+     record = {
+-        "format": "component-capture-receipt/1",
++        "format": (
++            "component-capture-receipt/2"
++            if plan["format"] == "component-capture-plan/2"
++            else "component-capture-receipt/1"
++        ),
+         "authority": None,
+         "started_ns": wall,
+         "ended_ns": time.time_ns(),
