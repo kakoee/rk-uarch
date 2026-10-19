@@ -1,0 +1,157 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+______ test_d3_final_outcome_is_persisted_before_return_or_raise[expired] ______
+
+tmp_path = PosixPath('/tmp/u4-a-activation-final-join-pPA6FE/baseline-isolated/test_d3_final_outcome_is_persi2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x78dceaf09b50>
+final_time = 11
+
+    @pytest.mark.parametrize("final_time", [9, 10, 11], ids=["success", "exact-deadline", "expired"])
+    def test_d3_final_outcome_is_persisted_before_return_or_raise(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, final_time: int
+    ) -> None:
+        # Baseline evidence explicitly selects the preserved v6 file. Default is the new proposal.
+        source = Path(os.environ.get("U4_D3_PROPOSAL", str(PROPOSAL)))
+        loader = SourceFileLoader("private_d3_finalization", str(source))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        assert spec is not None
+        module = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, loader.name, module)
+        loader.exec_module(module)
+    
+        class SyntheticSession:
+            _deadline = 10
+    
+            def claim(self, case_id: str) -> tuple[None, None]:
+                assert case_id == "synthetic-wrapper-only"
+                return None, None
+    
+        monkeypatch.setattr(module, "NegativeSession", SyntheticSession)
+        clock = iter([2, final_time])
+        monkeypatch.setattr(module, "time", SimpleNamespace(monotonic=lambda: next(clock)))
+        receipt = tmp_path / "attempt.json"
+        initial = {
+            "validation_passed": True,
+            "failure_stage": None,
+            "status": 2,
+            "runtime_entries": None,
+            "retained_stream_sentinel": "unchanged synthetic evidence",
+        }
+        events: list[str] = []
+        saves: list[bytes] = []
+        actual_save = module._save
+    
+        def save(path: Path, value: Any) -> None:
+            actual_save(path, value)
+            saves.append(path.read_bytes())
+            events.append("save")
+    
+        def core(*args: Any, **kwargs: Any) -> dict[str, Any]:
+            assert kwargs["timeout_s"] == 8  # The call starts before expiry.
+            assert kwargs["repetition"] == 2
+            value = dict(initial)
+            module._save(receipt, value)
+            return value
+    
+        monkeypatch.setattr(module, "_save", save)
+        monkeypatch.setattr(module, "_run_negative_image", core)
+        if final_time > 10:
+            with pytest.raises(ValueError, match="D3 session deadline exhausted"):
+                try:
+>                   module.run_negative(
+                        "synthetic-wrapper-only",
+                        session=SyntheticSession(),
+                        evidence_root=tmp_path,
+                        repetition=2,
+                    )
+
+tests/unit/test_component_d3_finalization.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/reviews/U4-A-component-activation-readiness-v1/proposals/component_negative-v6.py.txt:247: in run_negative
+    _require(time.monotonic() <= session._deadline, "D3 session deadline exhausted")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, message = 'D3 session deadline exhausted'
+
+    def _require(condition: bool, message: str) -> None:
+        if not condition:
+>           raise HostBindingError(message)
+E           rkuarch.engines.native.host.HostBindingError: D3 session deadline exhausted
+
+src/rkuarch/engines/native/host.py:41: HostBindingError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/u4-a-activation-final-join-pPA6FE/baseline-isolated/test_d3_final_outcome_is_persi2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x78dceaf09b50>
+final_time = 11
+
+    @pytest.mark.parametrize("final_time", [9, 10, 11], ids=["success", "exact-deadline", "expired"])
+    def test_d3_final_outcome_is_persisted_before_return_or_raise(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, final_time: int
+    ) -> None:
+        # Baseline evidence explicitly selects the preserved v6 file. Default is the new proposal.
+        source = Path(os.environ.get("U4_D3_PROPOSAL", str(PROPOSAL)))
+        loader = SourceFileLoader("private_d3_finalization", str(source))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        assert spec is not None
+        module = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, loader.name, module)
+        loader.exec_module(module)
+    
+        class SyntheticSession:
+            _deadline = 10
+    
+            def claim(self, case_id: str) -> tuple[None, None]:
+                assert case_id == "synthetic-wrapper-only"
+                return None, None
+    
+        monkeypatch.setattr(module, "NegativeSession", SyntheticSession)
+        clock = iter([2, final_time])
+        monkeypatch.setattr(module, "time", SimpleNamespace(monotonic=lambda: next(clock)))
+        receipt = tmp_path / "attempt.json"
+        initial = {
+            "validation_passed": True,
+            "failure_stage": None,
+            "status": 2,
+            "runtime_entries": None,
+            "retained_stream_sentinel": "unchanged synthetic evidence",
+        }
+        events: list[str] = []
+        saves: list[bytes] = []
+        actual_save = module._save
+    
+        def save(path: Path, value: Any) -> None:
+            actual_save(path, value)
+            saves.append(path.read_bytes())
+            events.append("save")
+    
+        def core(*args: Any, **kwargs: Any) -> dict[str, Any]:
+            assert kwargs["timeout_s"] == 8  # The call starts before expiry.
+            assert kwargs["repetition"] == 2
+            value = dict(initial)
+            module._save(receipt, value)
+            return value
+    
+        monkeypatch.setattr(module, "_save", save)
+        monkeypatch.setattr(module, "_run_negative_image", core)
+        if final_time > 10:
+            with pytest.raises(ValueError, match="D3 session deadline exhausted"):
+                try:
+                    module.run_negative(
+                        "synthetic-wrapper-only",
+                        session=SyntheticSession(),
+                        evidence_root=tmp_path,
+                        repetition=2,
+                    )
+                except ValueError:
+                    events.append("raised")
+                    # Observe durable state at the exception boundary, before any recovery.
+                    retained = json.loads(receipt.read_bytes())
+>                   assert retained["validation_passed"] is False
+E                   assert True is False
+
+tests/unit/test_component_d3_finalization.py:84: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_component_d3_finalization.py::test_d3_final_outcome_is_persisted_before_return_or_raise[expired]
+1 failed, 2 passed in 0.48s
