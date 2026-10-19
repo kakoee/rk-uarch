@@ -1,0 +1,19 @@
+--- a/native/tools/component_runtime_candidate.py
++++ b/native/tools/component_runtime_candidate.py
+@@ -105,6 +105,7 @@
+             and "generated" not in p.parts
+         )
+     paths += [source / name for name in ("pyproject.toml", "uv.lock")]
++    paths.append(source / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
+     paths += [
+         source / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
+         for name in ("parallel_core.py", "resource_limits.py")
+@@ -383,7 +384,7 @@
+         "independent_binding": binding(
+             root,
+             root
+-            / "docs/reviews/U4-B-component-activation-final-v1"
++            / "docs/reviews/U4-B-activation-orchestration-v1"
+             / "activation-consumer-bindings.json",
+         ),
+         "observation_contract": binding(
