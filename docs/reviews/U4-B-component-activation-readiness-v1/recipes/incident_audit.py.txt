@@ -1,0 +1,35 @@
+"""Read-only search of B-owned retained records, including archive members."""
+import hashlib,json,tarfile,os
+from pathlib import Path
+R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');O=Path('/tmp/u4-b-activation-readiness-01');src=R/'docs/reviews/U4-component-activation-readiness-coordination-v1/incident-container-removal.json';v=json.loads(src.read_bytes());tokens={x[k]:x['container_id'] for x in v['containers'] for k in ('container_id','name','owner')};roots=sorted((R/'docs/reviews').glob('U4-B-*'))+sorted(p for p in Path('/tmp').glob('u4-b-*')if p.is_dir() and p!=O)
+text_suffix={'.json','.jsonl','.txt','.md','.log','.stdout','.stderr','.py','.sh','.rs','.patch'};hits=[];scanned=0;archives=0;members=0;excluded=[];known=[];seen=set()
+def scan(raw,label):
+ global scanned
+ scanned+=1
+ found=sorted({cid for token,cid in tokens.items()if token.encode()in raw})
+ if found:
+  dest=known if 'U4-component-activation-readiness-coordination-v1/' in label else hits
+  dest.append({'record':label,'sha256':hashlib.sha256(raw).hexdigest(),'container_ids':found})
+for root in roots:
+ for base,dirs,files in os.walk(root,followlinks=False):
+  dirs[:]=[d for d in dirs if d not in ('.git','.venv','__pycache__','target','targets','cache','cargo-cache','mypy-cache','mypy-final-cache') and not (Path(base)/d).is_symlink()]
+  for name in files:
+   p=Path(base)/name
+   if p.is_symlink() or str(p)in seen:continue
+   seen.add(str(p))
+   if name.endswith(('.tar.gz','.tgz','.tar')):
+    archives+=1
+    try:
+     with tarfile.open(p)as t:
+      for item in t:
+       if not item.isfile():continue
+       f=Path(item.name)
+       if f.suffix not in text_suffix and f.name not in ('stdout','stderr','receipt','intent'):continue
+       if item.size>64*1024**2:excluded.append(str(p)+'::'+item.name+' (over64MiB)');continue
+       raw=t.extractfile(item).read();members+=1;scan(raw,str(p)+'::'+item.name)
+    except (tarfile.TarError,OSError)as e:excluded.append(str(p)+': '+repr(e))
+   elif p.suffix in text_suffix or name in ('stdout','stderr','intent','receipt'):
+    if p.stat().st_size>64*1024**2:excluded.append(str(p)+' (over64MiB)');continue
+    scan(p.read_bytes(),str(p))
+result={'scope':'B clone U4-B-* review records and retained /tmp/u4-b-* trees; no other clone/scratch search or Docker operation','receipt_sha256':hashlib.sha256(src.read_bytes()).hexdigest(),'roots':[str(x)for x in roots],'text_records_read':scanned,'archives_read':archives,'text_archive_members_read':members,'provenance_matches':hits,'copied_intake_matches_only':known,'excluded':excluded,'excluded_directory_classes':['.git','.venv','__pycache__','target','targets','cache','cargo-cache','mypy-cache','mypy-final-cache'],'limitations':'No search of binary/cache/container filesystems or other sessions. No match is not proof of no loss. Destroyed filesystem/logs were not recreated.','impact':'unknown unless matched records establish a specific dependency','reviewed_group_evidence':'Prior20-call and12-call archives independently verified; actual IDs are checked separately, not invalidated by inference.'}
+(O/'incident-audit.json').write_text(json.dumps(result,indent=2)+'\n');print({k:result[k]for k in ('text_records_read','archives_read','text_archive_members_read','provenance_matches','excluded')})

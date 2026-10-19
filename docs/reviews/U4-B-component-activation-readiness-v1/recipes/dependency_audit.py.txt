@@ -1,0 +1,20 @@
+import hashlib,json
+from pathlib import Path
+R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');O=Path('/tmp/u4-b-activation-readiness-01');h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();load=lambda p:json.loads(p.read_bytes());incident=load(R/'docs/reviews/U4-component-activation-readiness-coordination-v1/incident-container-removal.json');bad={x['container_id']for x in incident['containers']};groups=[]
+for name,root in [('46c5abb-direct20',Path('/tmp/u4-b-runtime-stage2-join-01/inherited/build/direct-probes')),('4d447ba-group12',Path('/tmp/u4-b-resource-confirmation-01/inherited/build/campaign'))]:
+ calls=list((root/'calls').glob('*.json'));assert len(calls)==(20 if '20'in name else 12);ids=[]
+ for path in calls:
+  v=load(path);ids.append(v['cleanup']['container_id'])
+  for k in ('raw_input','stdout','stderr'):assert h(root/v[k+'_blob'])==v[k+'_sha256']
+ assert not (bad&set(ids));groups.append({'subject':name,'calls':len(calls),'full_ids':ids,'incident_intersection':[],'retained_stream_blobs_verified':3*len(calls),'execution':'inherited from A; no new execution'})
+deps=[]
+for v in load(R/'docs/reviews/U4-B-component-runtime-stage2-v1/evidence/saved-inputs.json'):
+ row={'case_id':v['case_id'],'provenance':v['provenance']}
+ for key in ('job','result'):
+  p=Path(v[key]['path']);row[key]={**v[key],'exists':p.is_file(),'hash_matches':p.is_file()and h(p)==v[key]['sha256']}
+ deps.append(row)
+negative=load(R/'docs/reviews/U4-B-component-runtime-stage2-v1/negative-expectations-v1.json')['rows'];neg=[]
+for n in negative:
+ p=Path(n['observed']['path']);g=R/n['native_guard_source']['path'];neg.append({'case_id':n['case_id'],'exact_envelope':n['envelope'],'intended_guard':n['intended_guard'],'guard_source':n['native_guard_source'],'guard_source_current':h(g)==n['native_guard_source']['sha256'],'inherited_output':n['observed'],'output_available_and_exact':p.is_file()and h(p)==n['observed']['sha256'],'entry_claim':n['entry_evidence']['attribution'],'remaining':'same code, null pointer, full envelope and zero-entry do not alone distinguish every native guard; retain independent condition and exact fault/control attribution'})
+old=Path('/tmp/u4-a-runtime-resource-4d447ba/source');payload=load(old/'private-component/prospective-payload.json');origins=load(Path('/tmp/u4-b-resource-confirmation-01/inherited/build/campaign-import-origins.json'));files=payload['consumers']['external_files'];environment={'subject':'historical4d447ba only, not new activation candidate','external_inventory_files':len(files),'python_executable':payload['consumers']['python_executable'],'bootstrap_sha256':h(old/'native/tools/component_trusted_start.py'),'project_origin_observations':len(origins['modules']),'origin_record_sha256':h(Path('/tmp/u4-b-resource-confirmation-01/inherited/build/campaign-import-origins.json')),'extension_inventory':[x for x in files if '.so'in x['path']],'actual_loaded_assurance':'Observed module paths/bytes in prior process only; not authentication of code already run before manifest; dependency inventory is not loaded-code trace','new_launch_manifest':None,'new_preflight_evidence':None,'A_F3':'deferred; no substitution/revert/reconstruction attempt'}
+(O/'durable-evidence-audit.json').write_text(json.dumps({'groups':groups,'saved_output_dependencies':deps,'destroyed_container_contents_recreated':False,'impact':'No incident-ID overlap with these32 retained calls; retained blobs available. Other provenance/impact remains unknown.'},indent=2)+'\n');(O/'negative-audit.json').write_text(json.dumps({'status':'existing v5 proposal inspected; A final transport successor pending','rows':neg,'new_public_or_negative_execution':False},indent=2)+'\n');(O/'environment-baseline.json').write_text(json.dumps(environment,indent=2)+'\n');print({'retained_calls':32,'saved_dependency_pairs':len(deps),'pairs_fully_available':sum(x['job']['hash_matches']and x['result']['hash_matches']for x in deps),'negative_outputs_available':sum(x['output_available_and_exact']for x in neg),'external_inventory':len(files),'project_origin_observations':len(origins['modules'])})

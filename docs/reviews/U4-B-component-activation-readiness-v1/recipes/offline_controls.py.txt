@@ -1,0 +1,26 @@
+"""Synthetic trace/parser controls only. No capture, Docker or engine invocation."""
+import hashlib,json,runpy
+from pathlib import Path
+R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');O=Path('/tmp/u4-b-activation-readiness-01');path=R/'docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py';assert hashlib.sha256(path.read_bytes()).hexdigest()=='e330c3046534309314915056ad7153ce0478c3c2662997eca97a01c9b00f5fe3';m=runpy.run_path(str(path))
+logs={1:'1.0 execve("/bin/sh", ["/bin/sh"], []) = 0\n1.1 openat(AT_FDCWD, "/canary/alias", O_RDONLY) = 3</canary/sentinel>\n1.2 clone(flags=SIGCHLD) = 2\n1.3 clone(flags=SIGCHLD) = 3\n1.4 openat(AT_FDCWD, "/canary/absent", O_RDONLY) = -1 ENOENT\n1.5 +++ exited with 0 +++\n',2:'1.2 execve("/bin/cat", ["/bin/cat"], []) = 0\n1.3 read(3</canary/sentinel>, "U4-read-canary-v1\\n", 17) = 17\n1.4 mmap(NULL, 4096, PROT_READ, MAP_PRIVATE, 4</lib/example.so>, 0) = 0x1000\n1.5 close(3</canary/sentinel>) = 0\n1.6 +++ exited with 0 +++\n',3:'1.3 execve("/bin/ls", ["/bin/ls"], []) = 0\n1.4 getdents64(3</canary>, [], 4096) = 48\n1.5 +++ exited with 0 +++\n'}
+stdout=b'U4-read-canary-v1\n';good={'started':1,'ended':2,'exit_code':0,'loss':False,'limit_hit':False}
+def gate(data,status):
+ if set(status)!=set(good) or not status['ended']>status['started'] or status['exit_code']!=0 or status['loss'] is not False or status['limit_hit']is not False:raise ValueError('capture status/loss incomplete')
+ return m['check'](data,stdout)
+positive=gate(logs,good);results=[]
+for attack in ['missing-child','missing-tail','missing-read','unknown','unfinished','truncated-path','loss','limit','missing-start']:
+ data=dict(logs);status=dict(good)
+ if attack=='missing-child':del data[2]
+ elif attack=='missing-tail':data[2]=data[2].replace('1.6 +++ exited with 0 +++\n','')
+ elif attack=='missing-read':data[2]='\n'.join(line for line in data[2].splitlines()if not line.startswith('1.3 read'))+'\n'
+ elif attack=='unknown':data[2]=data[2].replace('1.6 +++','1.55 ???() = ?\n1.6 +++')
+ elif attack=='unfinished':data[2]=data[2].replace('1.6 +++','1.55 sched_getaffinity(2, 32, <unfinished ...>\n1.6 +++')
+ elif attack=='truncated-path':data[2]=data[2].replace('"/bin/cat",','"/bin/cat"...,')
+ elif attack=='loss':status['loss']=True
+ elif attack=='limit':status['limit_hit']=True
+ elif attack=='missing-start':del status['started']
+ try:gate(data,status)
+ except ValueError as e:results.append({'attack':attack,'outcome':'refused','reason':str(e)})
+ else:raise AssertionError(attack)
+assert gate(logs,good)==positive
+(O/'offline-controls.json').write_text(json.dumps({'scope':'synthetic unit trace strings; no actual capture or startup tests','parser_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'positive':positive,'negative_controls':results,'restored_control':'same original in-memory bytes accepted','complete_construction_reads':False},indent=2)+'\n');print('synthetic parser: valid +9 targeted malformed/loss controls +original valid; no capture')

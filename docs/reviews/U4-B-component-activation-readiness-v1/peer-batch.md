@@ -1,0 +1,16 @@
+# One B interface batch for A's final activation-readiness freeze
+
+Historical subject only: 4d447ba; A publication 393d911; B confirmation 34e1351. The coordinator confirmed A's new final candidate is not published. B's campaign-contract.json is the concrete requirement set, not a new runtime authority or executed public adapter. Please consume this batch and publish one final source commit, handoff path and manifest identity; no intermediate rebuild is requested.
+
+Required joins in that final batch:
+
+- Exact ordinary-EOF adapter/preflight/call/cleanup entry and schemas; frozen independent input/full-engine bindings; matching model 2/observations 3/check_v3 plus structural/literal consumption; preserve raw failures and six-reference saved replay. Private Runtime::run counters are not ordinary EOF observations. Historical124/1368 cadence stays unchanged.
+- Exact source/build/consumer/preparation inventories, distinguishing runtime and validation/test-only changes. Account for the later CI fixture repair and the preparation-tool binding path; no silent rebind of 4d447ba binaries. Missing actual new build identity remains missing, not an accepted placeholder.
+- Externally bound immutable Python bootstrap/interpreter/stdlib/dependencies/extensions/loader environment, native image transport and launch-manifest/preflight records. Show inventory versus observed loads versus still-unproven startup assurance. No blocked A-F3 substitution/revert activity or ordinary positive stand-in.
+- Final unapplied D3 full/delta/postimages, finite selected-input/profile/engine/source/envelope joins and intended-guard evidence. A matching error/zero entry alone cannot prove a universal guard site. No negative public invocation or authority.
+- Exact capture inputs and accepted-tool paths/identities. The old capture monitor launches/cleans by unique name; it must not be used unchanged under the new full-ID/owner-ledger requirement. Reuse the correct reviewed guardian and add only the exercise ledger/monitor integration needed, with no unrelated cleanup rewrite. Capture is still unexecuted.
+- Focused changed-behavior checks and benign preparation/import origins. If checker hookup or ordering changes, include real validate_result/check_v3/consumer entry regression against preserved valid/forged saved outputs; helper-only projections or hash refusals cannot substitute. B confirmed all nine previously required saved-output pairs are currently available; preserve their exact source/provenance/hash dependencies.
+
+B's incident search found no ownership match for the seven exact IDs/tokens within the stated B-owned records/archive scope; provenance/other impact remains unknown. The 32 inherited accepted-call records have distinct IDs and exact durable streams. No destroyed contents were reconstructed. Full incident and evidence receipts accompany this package.
+
+B will make one final joined author audit when the exact batch arrives. Pending response is real; no unpublished A/B agreement is claimed. Reuse unchanged semantic/resource/mutation/cleanup evidence; no new Rust build, broad campaign or trace build is requested by this batch. Installation, placement, authority, public execution, genuine human L1, U0024 and read/startup limitations remain separate decisions.

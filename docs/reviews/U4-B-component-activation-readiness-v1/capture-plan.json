@@ -1,0 +1,73 @@
+{
+  "format": "B-activation-read-capture-plan/1",
+  "status": "PREPARATION ONLY; no capture or engine build authorized here",
+  "actual_future_source": null,
+  "actual_future_BuildInputs": null,
+  "accepted_diagnostics": {
+    "path": "docs/reviews/U4-B-read-diagnostic-acquisition-v1/identities.json",
+    "sha256": "2d9362e720f55d2bc133afb48f5ad6949b765fba8e746cc5dcbca0f3c70a1de6"
+  },
+  "strict_parser": {
+    "path": "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py",
+    "sha256": "e330c3046534309314915056ad7153ce0478c3c2662997eca97a01c9b00f5fe3"
+  },
+  "historical_capture_helper": {
+    "path": "docs/reviews/U4-B-K2-construction-audit-v1/trace_monitor.py",
+    "sha256": "e81af649c664b6bf75690a8126e25df9b223c1d3a561b4794275ce38723d8115"
+  },
+  "helper_launch_status": "DO NOT invoke unchanged historical monitor: it owns containers by name, lacks this incident response full-ID creation ledger; use reviewed exact-ID guardian plus reviewed ledger integration for any future exercise",
+  "tracer_argv_prefix": [
+    "/lib64/ld-linux-x86-64.so.2",
+    "--library-path",
+    "/diagnostics/usr/lib/x86_64-linux-gnu:/diagnostics/lib/x86_64-linux-gnu",
+    "/diagnostics/usr/bin/strace",
+    "-ff",
+    "-ttt",
+    "-yy",
+    "-v",
+    "-s",
+    "4096",
+    "-o",
+    "/receipts/PHASE.trace"
+  ],
+  "phase_not_substituted_until_freeze": true,
+  "canary_child_argv": [
+    "/bin/sh",
+    "-c",
+    "exec 3</canary/alias; /bin/sh -c \"/bin/cat <&3\"; if /bin/cat /canary/absent; then exit 81; fi; /bin/ls -U /canary >/dev/null"
+  ],
+  "build_child": "exact mode_configs.cargo_args of frozen BuildInputs, under pinned clean env/wrappers; no invented final source or argv",
+  "limits": {
+    "canary_seconds": 30,
+    "canary_bytes": 16777216,
+    "build_seconds": 600,
+    "build_bytes": 536870912
+  },
+  "required_mounts": {
+    "/work": "frozen source including generated identity, read-only",
+    "/cargo-home": "accepted1719-file cache, read-only",
+    "/controls": "pinned compiler/linker wrappers, read-only",
+    "/diagnostics": "already acquired diagnostic bytes, read-only, tracer-only loader path",
+    "/canary": "synthetic sentinel/alias + absent premise, read-only, never engine input",
+    "/target": "fresh isolated target per mode, writable",
+    "/receipts": "fresh append-only owned capture output, writable",
+    "/tmp": "private tmpfs"
+  },
+  "must_refuse": [
+    "missing final source/build/manifest binding",
+    "missing start/end/exit/status or missing child/root trace",
+    "deadline/output cap/symlink/diagnostic loss",
+    "unknown syscall or unmatched unfinished/resumed record",
+    "abbreviated relevant path/argv/environment",
+    "unresolved shared cwd/CLONE_FS, fd/alias/generated version",
+    "undeclared read not reconciled to closure",
+    "attempt to infer complete reads from file inventory"
+  ],
+  "future_fields_pending": [
+    "exact final activation source and generated identity",
+    "reviewed full-ID ledger wrapper/monitor binding",
+    "final compiler/linker/loader/startup manifests and mounts",
+    "original reviewer assessment of adequacy and missing evidence"
+  ],
+  "current_coverage": "NONE for4d447ba/46c5abb/cc899d2; candidate03 historical gaps remain unresolved"
+}

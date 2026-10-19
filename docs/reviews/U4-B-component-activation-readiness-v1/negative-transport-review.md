@@ -1,0 +1,16 @@
+# D3 and intended-refusal discrimination
+
+Inspected baseline is A's unapplied v5 module at U4-A-component-runtime-stage2-v1/final-join-v2/component_negative-v5.py.txt, SHA256495edbde82fc088d4fe1026e99e59c833f74bc19e77a5bc20fe89b550626f30b. Its full/delta routes and four provenance controls were already verified; no repetition or protected installation occurred. The final image-transport successor is an A dependency.
+
+The selected case joins separately bound input bytes, job/engine, profile/registry, exact error envelope, provenance and native guard source. The inventory/2 record/selector/human-decision/review chain remains separate and unapplied. Caller raw stdin, profile changes, arbitrary expected errors or a success-capable bypass must not become a public interface. K2 authority cannot authorize component jobs. Existing v5 still calls the host-fd exchange; that cannot silently stand in for the proposed digest-pinned image transport. A must reconcile its exact final proposal with the production adapter and publish full/delta/postimages.
+
+The independently frozen20 rows in negative-audit.json preserve the original expected conditions and source-bound inherited outputs. All 20 original outputs remain available with exact hashes and native guard source unchanged. Two original histories use cc899d2 and 18 use c67d558; later prospective transitions remain identities, not new runs. Four actual46c5abb observations retain their own narrower scope. No new negative execution or manufactured expectation was performed.
+
+The discrimination ladder must remain explicit:
+
+1. A stale profile/hash refusal proves identity admission only. The independently bound resource-negative input must reach its intended Rust admission/resource guard; an earlier profile refusal cannot receive that credit.
+2. Code-only matching is insufficient. Require the exact status/stdout/stderr framing and `{code,message,pointer}`. A same-code refusal with a different message/pointer must fail. Existing accepted message-only fault evidence remains inherited.
+3. Exact envelope, null pointer, source hash and zero native runtime entries still do not prove every possible guard site. Inspect the independent input condition, guard location/source, ordering of possible earlier refusals, actual source-bound entry observations and paired valid control. For an essential guard, inherited or new focused removal must demonstrate intended unsafe acceptance/wrong result; an alternative refusal is labelled redundant/alternative, never a behavioral kill.
+4. A literal `runtime_entries_required=0` in provenance is an expectation, not an observation. Private cfg(test) entry files cannot be relabelled as production EOF telemetry. If the final public D3 claim requires entry/site instrumentation unavailable there, that evidence mechanism remains a separately reviewed prerequisite; do not fill it with a synthetic counter.
+
+Final A join will compare source/job/profile/registry/envelope/provenance binding and ordinary EOF execution route, using saved evidence and focused benign checks only. No D3 negative public transport, genuine authority, protected installation or release is authorized. Historical /2 same-engine/same-instant acquired-release restriction remains across all directions, including write/write and unclassified cases.

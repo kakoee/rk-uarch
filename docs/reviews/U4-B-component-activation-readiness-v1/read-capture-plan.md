@@ -1,0 +1,33 @@
+# Exact future capture plan, with unresolved final inputs
+
+No tracer, canary, engine build or activation build ran in this task. `capture-plan.json` binds the already accepted diagnostic inventory, strict parser, fixed tracer prefix, canary argv, mount roles and budgets. Final source/BuildInputs fields are null and are explicit refusal conditions. They are not accepted placeholders. A must provide its final source, generated identity, compiler/linker/startup manifests and preparation/build inputs before an executable capture batch can be rendered/reviewed.
+
+Use only the accepted private strace 6.1/libunwind extraction and digest-pinned image `sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523`. Rehash the extraction, symlink targets and image loader against the acquired inventory; missing bytes stop, with no new package acquisition. Historical monitor/canary evidence is inherited at its original probe identity. **Do not invoke the old trace_monitor.run unchanged**: its container ownership is a unique name, not this task's required full-ID creation ledger. This is a capture-orchestration prerequisite, not a defect attributed to the reviewed production guardian.
+
+For each future authorized exercise, retain a pre-existing-container inventory; use the reviewed exact-ID guardian plus a reviewed ledger integration. Record the task intent and owner token, full created ID, acknowledged creation and inspected owner before starting. Cleanup selects only those exact task-created IDs and verifies removal; uncertain creation/removal remains incomplete. No label/prefix sweep, prune, host attachment, host PID namespace, SYS_PTRACE capability, privileged mode or seccomp relaxation is permitted. Existing containers remain untouched. The exact production guardian is not rewritten here.
+
+The native child prefix is:
+
+```text
+/lib64/ld-linux-x86-64.so.2 --library-path /diagnostics/usr/lib/x86_64-linux-gnu:/diagnostics/lib/x86_64-linux-gnu /diagnostics/usr/bin/strace -ff -ttt -yy -v -s 4096 -o /receipts/PHASE.trace
+```
+
+PHASE is bound once to the final phase record, not accepted as a free invocation. Append the exact frozen BuildInputs mode_configs.cargo_args, retaining the accepted compiler/linker wrappers and flags. Use fresh separate targets per mode; do not retry a failed build to obtain a clean trace. The tracer-only library path must not become LD_LIBRARY_PATH for children. Bind the tracer's own pre-child loader/DSO closure separately; it does not trace itself. No syscall filter may silently remove file/fd/process/memory operations. Adding syscall-number output would need an explicit parser-format amendment; the frozen strict parser must not silently strip unknown records.
+
+The enclosing command uses an explicit clean environment and the accepted image: `--pull never --platform linux/amd64 --network none --read-only --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges`; no Docker socket is mounted. `/work`, accepted `/cargo-home`, `/controls`, `/diagnostics` and optional `/canary` are read-only. Only fresh `/target`, fresh `/receipts` and private tmpfs `/tmp` are writable. Freeze `PATH`, `RUSTC`, `RUSTC_WRAPPER`, `RUSTFLAGS`, Cargo home/target/offline/registry protocol, locale and mode tag from the actual construction inputs. Resource settings for that construction must be reviewed and recorded; public per-call limits do not automatically authorize a build environment.
+
+Before any final build, the optional separately permitted non-engine canary has exact sentinel `U4-read-canary-v1\n`, alias pointing to it and absent-file premise under a private read-only mount. Its fixed argv is in capture-plan.json. It covers inherited-fd reads, failed lookups, directory enumeration, child exec/exit and image mmap. Budget 30s/16MiB; eventual build budget 600s/512MiB total owned output. These are limits, not guarantees of sufficiency. On denial, deadline, size limit, diagnostic failure or output symlink, preserve partial logs and refuse coverage. Do not alter privileges or retry elsewhere to evade a restriction.
+
+The capture receipt must bind wall/monotonic start and end, root PID/tree, exact command/env/mounts, exit/signal status, each per-PID raw file hash and size, tracer stderr, output-accounting totals, limit/loss indicators, guardian/ledger cleanup and source/cache/generated preservation. Unknown or absent loss/status evidence cannot mean no loss. Reconcile root terminal status to the command result and every observed child to a complete trace; retain failed subprocess/lookup evidence rather than assuming every child must succeed.
+
+Strict interpretation obligations:
+
+- Preserve raw per-process order, unfinished/resumed pairs and all unknown syscall records. A terminal record does not resolve an undecoded call. Missing root/child/tail, unclosed pair, truncated path/argv/environment or declared capture loss refuses completeness.
+- Resolve cwd/dirfd, inherited/duplicated/closed descriptors, symlinks, rename/unlink and shared CLONE_FS/CLONE_FILES effects against actual events. A previous candidate's no-shared-cwd conclusion cannot be inherited blindly.
+- Classify successful reads/mappings/execs separately from failed lookups and directory membership. Reconcile observed source/cache/tool/image/OS/configuration/trust inputs to immutable closure; capture generated identity and build-script/compiler/linker intermediates with temporal versions. End-state hashes cannot reconstruct earlier generated bytes.
+- Retain dynamic proc/sys/dev/environment/IPC/anonymous mapping edges separately. Exec-environment capture is not a proof of variable use; mmap access is not proof of every page consumed; tracing is not universal untraced reproducibility.
+- Compare observed closure to frozen declarations, with no 56-file quota. An undeclared access requires classification/reconciliation, not caller rehash acceptance. Hash inventories remain independent of actual-load/read evidence.
+
+This task executed synthetic parser/status controls only: a valid unit trace, nine targeted missing/loss/unknown/unfinished/truncated variants, then the original valid bytes. They exercised the frozen parser and a labelled proposal status gate, not live capture or an engine. They do not fill any read gap.
+
+Current construction capture is NONE for 4d447ba,46c5abb andcc899d2. Candidate-03's debug.trace.450:11, debug.trace.452:9 and release.trace.482:10 remain unresolved historical records. No later trace can reconstruct them or silently extend their scope. The final reviewer assesses capture adequacy before any read-completeness claim; all such claims remain false here.

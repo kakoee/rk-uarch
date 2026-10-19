@@ -1,0 +1,46 @@
+# B independent activation-readiness preparation
+
+**Independent preparation complete; final A candidate join pending.** The coordinator explicitly confirmed that A's new activation-readiness candidate is not published and will supply one exact source commit, handoff path and manifest identity. Nothing on moving main is treated as that candidate. This package is decision-ready preparation, not activation or an independent reviewer verdict.
+
+Historical runtime remains 4d447ba0a75200fec09b07314ca8bee654224a66, A publication 393d911484c33a298ebb61d82d7e5c2d19187418, B confirmation 34e135144f6f908e04269c3d32420936e3c6ae64. Main was normally fast-forwarded to coordination commitc1d935c. The coordination intake records scoped acceptance of both original Stage 3 responses, with deferrals intact. No prior binary, selection, consumer record, result, reviewer report or execution attribution was edited.
+
+## Concrete preparation and residual join
+
+| Work item | B result | Remaining dependency |
+|---|---|---|
+| Production campaign/consumer boundary | campaign-contract.json freezes historical 124/1368 cadence, independent admitted-input/engine expectations, matching model 2/observations 3/check_v3, structure/literals, exact refusal provenance, retained failures, six-initial-reference replay, limits and exact-ID ownership cleanup. | A's exact ordinary-EOF adapter and schemas. No cfg(test) evidence becomes public execution. |
+| Immutable environment | environment-review.md separates interpreter/bootstrap/pre-manifest caches, stdlib/dependency/extension/loader inventory, actual observed module origins and unproved startup assurance. Historical baseline inventory and observations are bound separately. | Exact final immutable launcher/manifest/digest authority/preflight outputs and original reviewer assessment. A-F3 is not waived. |
+| Construction read capture | read-capture-plan.md and capture-plan.json define accepted tools, exact tracer/canary argv, mode-input selection, mounts, budgets, start/end/status/loss checks and closure reconciliation. | Final source/BuildInputs/generated identity and reviewed full-ID ledger/capture-monitor integration. Null final bindings refuse; no executable final build command is claimed. |
+| Negative transport | Existing D3 v5 inspected and exact 20 independent negative conditions/provenance audited. All 20 inherited outputs remain available; same-code/full-envelope/zero-entry distinctions retained. | A's final unapplied ordinary-image-transport successor and any separately reviewed required public entry/site evidence. No D3 invocation authorized. |
+| Final inventory/checker audit | Historical bindings, runtime, validation/test and preparation source scopes and saved-output dependencies are explicit. All nine required saved job/result pairs currently match their pins. Real checker/consumer hookup regressions are required if relevant final code changes. | One exact A batch; no final new source inventory or A/B agreement is invented. |
+| Human decisions | human-decisions.md orders installation/environment/source freeze/build/placement/authority/public-first-use decisions and gives input-only GEMM/DMA worksheet instructions. | Genuine human workings and actual decisions remain pending. U0024 and TPU/reference scope unchanged. |
+
+[peer-batch.md](peer-batch.md) is the single early B interface batch for A. No connected author-session messaging route is available; publication supplies coordinator relay. A's final source/build/consumer/preparation inventories and launch outputs are required for the one final audit. No additional source freeze, Rust build or campaign was performed just to refresh documentation.
+
+## Container incident: bounded independent search
+
+The unmodified coordination receipt hash is 5b6850f1af8ffa2e6c103651842a32e1fed1d1df966eb0c743c7064a6951ae82. B searched the seven exact full IDs, names and owner tokens only in its own retained task records:172 B-owned review/private roots,483327 textual records, including 143973 textual members in 845 archives. No independent ownership/provenance match was found. Two empty historical scratch source.tar files could not be opened; both are explicitly listed. Root symlinks were checked absent. The complete root list, exclusions and search recipe are in incident-audit.json and recipes/incident_audit.py.txt.
+
+This is not proof of no loss. Binary/cache/target files, symlinks, nested compressed members and other sessions' scratch were not searched; destroyed container filesystems/logs cannot be recovered by this search. Origin and any other concrete dependency/impact remain **unknown** for all seven. No destroyed contents were recreated or relabelled recovered. No Docker command ran, and the reviewer's original report was not changed.
+
+The 20 retained46c5abb direct calls and 12 retained4d447ba group calls have distinct IDs from the seven incident containers. All 96 referenced raw/stdout/stderr blobs reverify. `durable-evidence-audit.json` records those IDs and the exact availability/hash status of all nine earlier saved-output dependency pairs. This establishes that the inspected durable evidence remains available; it does not invalidate unrelated evidence or prove that the deleted containers were unnecessary. The production guardian's exact-ID behavior is distinct from the reviewer's ad hoc shared-label removal.
+
+Any future authorized container exercise must inventory pre-existing containers, record its durable creation intent/full ID/token before starting, inspect ownership, and clean only its own exact IDs. No shared-label removal, prefix sweep or prune. An uncertain creation/cleanup leaves the exercise incomplete. No unrelated guardian rewrite is proposed.
+
+## Executed, inspected and inherited
+
+**Executed in this task:** read-only owned-record/archive incident search; exact durable-stream and saved-dependency hash checks;20 negative-output availability/guard-source checks; historical selection/source-pin arithmetic checks; synthetic offline parser/status controls. The latter use the frozen strict parser (e330c304…) against valid unit strings, nine missing-child/tail/read, unknown, unfinished, truncated-path, loss, limit and missing-start variants, then original valid strings. They are synthetic unit fixtures, not captured canary/native results. No runtime implementation changed.
+
+**Inspected:** coordination/intake, prior accepted joins, existing activation proposal, D3 v5, trusted-start source, public host-fd exchange, historical read monitor/parser and human worksheet inputs. The old capture monitor uses a unique container name; it must not be run unchanged under the newly required full-ID creation-ledger rule. The plan reuses the reviewed guardian only after a reviewed ledger/monitor join; it does not blame or rewrite production cleanup. Existing D3/host-fd exchange also does not silently establish digest-pinned image transport.
+
+**Inherited:** actual builds/calls/cleanup and author checks at 4d447ba and 46c5abb, B34e1351 confirmation, unchanged semantic/literal/matrix and fault evidence, resource 13-test/quota-restoration evidence, old diagnostic/canary results and the reviewers' scoped Stage 3 adjudication. Historical Python evidence inventories 821 external files and observes 46 project modules; inventories and observed origins do not establish pre-manifest startup integrity. No old evidence is relabelled as a new run or new-candidate evidence.
+
+No new native/activation build, live canary/capture, container, positive/negative public transport, campaign, broad suite, tool install, reference search, root placement, protected edit, authority or CI polling occurred. No A-F3 substitution/defense-revert activity was retried, reconstructed, transferred or disguised. The final-candidate checker hookup/source-origin regressions are pending actual changed code, not replaced with helper-only or hash-only tests.
+
+## Remaining decisions and limits
+
+A's final candidate, schemas, immutable environment/preflight evidence and exact inventory deltas are missing by coordinator confirmation. Those are the only author-side final-join dependency; final audit is pending, not accepted. Later CI fixture repair remains separate from historical binaries and must be included explicitly in any future build inventory.
+
+A-F3 stays DEFERRED. The original reviewer must assess required permitted evidence; unavailable restricted verification remains a public-first-use blocker, not an invitation to move platforms or substitute a positive run. Construction capture remains NONE for 4d447ba,46c5abb andcc899d2. Candidate03 debug.trace.450:11, debug.trace.452:9 and release.trace.482:10 remain unresolved historical gaps. No trace completeness or reproducibility claim follows.
+
+Protected installation/D3, immutable placement, deployment/public environment, genuine selector/HostRecord/profile authority, public campaign and human L1 GEMM/DMA workings remain pending. Historical /2 direction-independent acquired-release restriction and 124/1368 schedule are preserved;120/1344 remains unapproved. U0024 remains a limited local-verification policy, not qualification. The 70-row TPU proposal/reference milestone remains separate. No artifact adoption, performance/silicon claim, badge, G3a/U4 or sprint closure follows.

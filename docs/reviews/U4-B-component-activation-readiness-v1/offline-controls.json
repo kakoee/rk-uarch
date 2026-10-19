@@ -1,0 +1,95 @@
+{
+  "scope": "synthetic unit trace strings; no actual capture or startup tests",
+  "parser_sha256": "e330c3046534309314915056ad7153ce0478c3c2662997eca97a01c9b00f5fe3",
+  "positive": {
+    "processes": 3,
+    "children": [
+      2,
+      3
+    ],
+    "roots": [
+      1
+    ],
+    "events": 11,
+    "obligations": {
+      "owned_descendants": true,
+      "shell_exec": true,
+      "cat_exec": true,
+      "ls_exec": true,
+      "alias_open": true,
+      "resolved_sentinel_read": true,
+      "sentinel_close": true,
+      "missing_file": true,
+      "directory_enumeration": true,
+      "image_file_mmap": true
+    },
+    "undeclared_sentinel": {
+      "path": "/canary/sentinel",
+      "declared_source_or_cache": false,
+      "read_events": [
+        {
+          "pid": 2,
+          "ordinal": 1,
+          "call": "read",
+          "args": "3</canary/sentinel>, \"U4-read-canary-v1\\n\", 17",
+          "result": "17"
+        }
+      ]
+    },
+    "limitations": [
+      "Frozen inventory resolves symlinks; a readlink syscall is not required.",
+      "Observed mmap is not proof every mapped byte was consumed.",
+      "Exec environment presence does not prove variable use.",
+      "This finite canary is not exhaustive build-read or semantic-dependency proof."
+    ]
+  },
+  "negative_controls": [
+    {
+      "attack": "missing-child",
+      "outcome": "refused",
+      "reason": "missing child trace"
+    },
+    {
+      "attack": "missing-tail",
+      "outcome": "refused",
+      "reason": "missing terminal or unfinished call"
+    },
+    {
+      "attack": "missing-read",
+      "outcome": "refused",
+      "reason": "missing canary evidence: ['resolved_sentinel_read']"
+    },
+    {
+      "attack": "unknown",
+      "outcome": "refused",
+      "reason": "unparsed record for pid 2: ???() = ?"
+    },
+    {
+      "attack": "unfinished",
+      "outcome": "refused",
+      "reason": "missing terminal or unfinished call"
+    },
+    {
+      "attack": "truncated-path",
+      "outcome": "refused",
+      "reason": "truncated path/argv in relevant call"
+    },
+    {
+      "attack": "loss",
+      "outcome": "refused",
+      "reason": "capture status/loss incomplete"
+    },
+    {
+      "attack": "limit",
+      "outcome": "refused",
+      "reason": "capture status/loss incomplete"
+    },
+    {
+      "attack": "missing-start",
+      "outcome": "refused",
+      "reason": "capture status/loss incomplete"
+    }
+  ],
+  "restored_control": "same original in-memory bytes accepted",
+  "complete_construction_reads": false
+}
