@@ -16,10 +16,17 @@ import sysconfig
 import tarfile
 from copy import deepcopy
 from pathlib import Path
+from types import ModuleType
+from typing import Any
 
 from uarch_contract.hashing import canonical_json, content_hash, sha256
 
-from rkuarch.engines.native.component_records import ComponentBuildInputs, ComponentBuildTrust
+from rkuarch.engines.native.component_construction import construction_modes, invocation
+from rkuarch.engines.native.component_records import (
+    ComponentBuildInputsV3,
+    ComponentBuildTrust,
+    parse_component_build_inputs,
+)
 from rkuarch.engines.native.records import ToolInputs
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,31 +40,33 @@ def write(path: Path, value: object) -> None:
     path.write_text(canonical_json(value))
 
 
-def binding(root: Path, path: Path) -> dict:
+def binding(root: Path, path: Path) -> dict[str, Any]:
     return {"path": str(path.relative_to(root)), "byte_hash": sha256(path.read_bytes())}
 
 
-def wrapper(root: Path = ROOT):
+def wrapper(root: Path = ROOT) -> ModuleType:
     path = root / "native/tools/component_candidate.py"
     spec = importlib.util.spec_from_file_location("accepted_component_wrapper", path)
+    if spec is None or spec.loader is None:
+        raise ValueError("component wrapper source loader required")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
 
-def focused_ids(selection: dict) -> list[str]:
+def focused_ids(selection: dict[str, Any]) -> list[str]:
     """Exact B final affected plan: 27 positives and 20 finite D3 definitions."""
     plan = json.loads(
         (
             ROOT / "docs/reviews/U4-B-component-runtime-preparation-v1/private-final-plan.json"
         ).read_bytes()
     )
-    ids = plan["cases"]
+    ids: list[str] = plan["cases"]
     assert set(ids) <= {row["case_id"] for row in selection["rows"]}
     return ids
 
 
-def freeze(source: Path, commit: str) -> dict:
+def freeze(source: Path, commit: str) -> dict[str, Any]:
     """Freeze from an already verified clean tracked export, before generated identity."""
     from validation.component.runtime_selection import definitions
 
@@ -95,7 +104,7 @@ def freeze(source: Path, commit: str) -> dict:
     tool_path = source / "docs/reviews/U4-A-K2-construction-v1/candidate-04/ToolInputs.json"
     tools = ToolInputs.model_validate_json(tool_path.read_bytes())
     assert tools.image_digest == IMAGE
-    paths = []
+    paths: list[Path] = []
     for parent in ("native", "src/rkuarch", "contract/uarch_contract", "validation"):
         paths.extend(
             p
@@ -105,6 +114,7 @@ def freeze(source: Path, commit: str) -> dict:
             and "generated" not in p.parts
         )
     paths += [source / name for name in ("pyproject.toml", "uv.lock")]
+    paths.append(source / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
     paths += [
         source / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
         for name in ("parallel_core.py", "resource_limits.py")
@@ -118,9 +128,9 @@ def freeze(source: Path, commit: str) -> dict:
         for p in sorted(set(paths))
     ]
     model = [x for x in inventory if x["path"].startswith("native/crates/uarch-engine/src/")]
-    build = ComponentBuildInputs.model_validate(
+    build = ComponentBuildInputsV3.model_validate(
         {
-            "format": "uarch-component-build-inputs/2",
+            "format": "uarch-component-build-inputs/3",
             "source_commit": commit,
             "source_files": inventory,
             "trust_hash": content_hash(trust),
@@ -129,36 +139,15 @@ def freeze(source: Path, commit: str) -> dict:
             "tool_inputs_file": binding(source, tool_path),
             "model_source_paths": [x["path"] for x in model],
             "model_inputs_hash": content_hash(model),
-            "mode_configs": [
-                {
-                    "mode": mode,
-                    "cargo_args": [
-                        "rustc",
-                        "--offline",
-                        "--locked",
-                        "-p",
-                        "uarch-engine",
-                        "--bin",
-                        "uarch-engine",
-                        "-vv",
-                        "--message-format=json",
-                    ]
-                    + (["--release"] if mode == "release" else []),
-                    "rustflags": tools.flags,
-                }
-                for mode in ("debug", "release")
-            ],
+            "mode_configs": construction_modes(tools.flags),
             "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
-            "permitted_environment": {
-                "CARGO_HOME": "/cargo-home",
-                "CARGO_NET_OFFLINE": "true",
-                "CARGO_TARGET_DIR": "/target",
-                "RUSTUP_AUTO_INSTALL": "0",
-                "LC_ALL": "C",
-            },
         }
     )
     write(out / "BuildInputs.json", build)
+    write(
+        out / "ordinary-build-recipe.json",
+        ordinary_recipe((out / "BuildInputs.json").read_bytes()),
+    )
     engine = {
         "name": "native",
         "version": "native-stage/1",
@@ -227,6 +216,9 @@ def prepare(out: Path) -> None:
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
     archive = out / "source.tar"
     subprocess.run(["git", "archive", "-o", str(archive), commit], cwd=ROOT, check=True)
+    (out / "source-commit.raw").write_bytes(
+        subprocess.check_output(["git", "cat-file", "commit", commit], cwd=ROOT)
+    )
     with tarfile.open(archive) as tar:
         tar.extractall(out / "source", filter="data")
     c = wrapper()
@@ -238,24 +230,6 @@ def prepare(out: Path) -> None:
     for n in ("rustc-wrapper.sh", "linker.sh"):
         shutil.copy2(ROOT / "docs/reviews/U4-A-K2-construction-v1/inputs" / n, out / "controls" / n)
         (out / "controls" / n).chmod(0o555)
-    assert (
-        c.command(
-            out,
-            "image",
-            [
-                "/usr/bin/docker",
-                "--host",
-                "unix:///var/run/docker.sock",
-                "image",
-                "inspect",
-                IMAGE,
-                "--format",
-                "{{.Id}} {{.Os}} {{.Architecture}}",
-            ],
-        )
-        == 0
-    )
-    assert (out / "commands/image.stdout").read_text().strip() == IMAGE + " linux amd64"
     engine = freeze(out / "source", commit)
     write(
         out / "preparation.json",
@@ -269,28 +243,17 @@ def prepare(out: Path) -> None:
             "wrapper": binding(ROOT, ROOT / "native/tools/component_candidate.py"),
         },
     )
-    for tool, argv in (
-        ("rustc", [c.BIN + "rustc", "-vV"]),
-        ("cargo", [c.BIN + "cargo", "-vV"]),
-        ("rustfmt", [c.BIN + "rustfmt", "--version"]),
-        ("clippy", [c.BIN + "clippy-driver", "--version"]),
-        ("cargo-deny", ["/usr/local/cargo/bin/cargo-deny", "--version"]),
-    ):
-        assert c.command(out, "tool-" + tool, c.docker(out, "debug", "tool-" + tool) + argv) == 0
-        assert (out / "commands" / ("tool-" + tool + ".stdout")).read_bytes() == (
-            ROOT / "docs/reviews/U4-A-K2-C1-precise-v1" / (tool + ".stdout")
-        ).read_bytes()
 
 
 def verify(out: Path) -> None:
     source = out / "source"
-    build = ComponentBuildInputs.model_validate_json(
-        (source / OUTPUT / "BuildInputs.json").read_bytes()
+    build = parse_component_build_inputs(
+        json.loads((source / OUTPUT / "BuildInputs.json").read_bytes())
     )
     for f in build.source_files:
         assert sha256((source / f.path).read_bytes()) == f.byte_hash, f.path
-    for f in (build.trust_file, build.tool_inputs_file):
-        assert sha256((source / f.path).read_bytes()) == f.byte_hash
+    for file in (build.trust_file, build.tool_inputs_file):
+        assert sha256((source / file.path).read_bytes()) == file.byte_hash
     engine = json.loads((source / OUTPUT / "engine.json").read_bytes())
     assert engine["implementation_hash"] == content_hash(build)
     generated = source / build.generated_identity_output_paths[0]
@@ -304,45 +267,59 @@ def verify(out: Path) -> None:
     )
 
 
-def build(out: Path, mode: str) -> None:
-    """Actual construction recipe; invoke the frozen export's copy of this tool."""
-    source = out / "source"
-    if ROOT.resolve() != source.resolve():
+def construction_recipe(build_input_bytes: bytes) -> dict[str, Any]:
+    """Bind exact /3 input bytes without inventing values or executing a build."""
+    build = ComponentBuildInputsV3.model_validate_json(build_input_bytes)
+    sources = [
+        value
+        for value in build.source_files
+        if value.path == "native/tools/component_runtime_candidate.py"
+    ]
+    if len(sources) != 1:
+        raise ValueError("exact preparation source required for construction recipe")
+    return {
+        "format": "component-capture-recipe/2",
+        "source_commit": build.source_commit,
+        "build_inputs_byte_hash": sha256(build_input_bytes),
+        "preparation_source": sources[0].model_dump(mode="json"),
+        "mode_configs": [value.model_dump(mode="json") for value in build.mode_configs],
+        "generated_identity_output_paths": list(build.generated_identity_output_paths),
+    }
+
+
+def production_invocation(
+    inputs: ComponentBuildInputsV3, mode: str
+) -> tuple[list[str], dict[str, str]]:
+    """Pure rendering of the exact declared production command, with no appended args."""
+    checked = ComponentBuildInputsV3.model_validate(inputs.model_dump(mode="json"))
+    return invocation([value.model_dump(mode="json") for value in checked.mode_configs], mode)
+
+
+def ordinary_recipe(build_input_bytes: bytes) -> dict[str, Any]:
+    """Finite ordinary declaration; optional historical capture is a separate API."""
+    result = construction_recipe(build_input_bytes)
+    result["format"] = "component-ordinary-build-recipe/1"
+    result["optional_construction_reads"] = "not-required"
+    result["startup_assurance"] = "separate-required-public-gate"
+    return result
+
+
+def build(out: Path, mode: str, build_root: Path) -> None:
+    """Later ordinary construction through B's harness and the bounded guardian.
+
+    No unit-test compilation is hidden in this production command. Required scoped
+    tests/clippy and independent review are separate retained obligations.
+    """
+    from native.tools.component_ordinary_build import construct
+
+    if ROOT.resolve() != (out / "source").resolve():
         raise ValueError("build must use the exact frozen export recipe")
     verify(out)
-    c = wrapper(source)
-    inputs = ComponentBuildInputs.model_validate_json(
-        (source / OUTPUT / "BuildInputs.json").read_bytes()
-    )
-    config = next(x for x in inputs.mode_configs if x.mode == mode)
-    command = c.docker(out, mode, mode + "-build") + [
-        c.BIN + "cargo",
-        *config.cargo_args,
-        "--",
-        "-C",
-        "link-arg=-Wl,-Map=/receipts/" + mode + ".map",
-    ]
-    if c.command(out, mode + "-build", command):
-        raise ValueError("private production executable construction failed")
-    test = [
-        c.BIN + "cargo",
-        "test",
-        "--offline",
-        "--locked",
-        "-p",
-        "uarch-engine",
-        "--lib",
-        "--no-run",
-        "--message-format=json",
-    ] + (["--release"] if mode == "release" else [])
-    if c.command(out, mode + "-test-build", c.docker(out, mode, mode + "-test-build") + test):
-        raise ValueError("private unit executable construction failed")
+    construct(out, build_root, mode, imports(out / "source"))
     verify(out)
-    if c.inventory(out / "cache") != json.loads(c.CACHE_RECORD.read_bytes())["files"]:
-        raise ValueError("accepted private cache changed")
 
 
-def imports(root: Path, observation_root: Path | None = None) -> dict:
+def imports(root: Path, observation_root: Path | None = None) -> dict[str, Any]:
     """Full project Python closure and stdlib/accepted dependency bytes, not caller modules."""
     files = sorted(
         {
@@ -356,7 +333,8 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
         root / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
         for name in ("parallel_core.py", "resource_limits.py")
     )
-    external = set()
+    files.append(root / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
+    external: set[Path] = set()
     stdlib = Path(sysconfig.get_path("stdlib"))
     external.update(p.resolve() for p in stdlib.rglob("*.py") if "site-packages" not in p.parts)
     external.update(p.resolve() for p in (stdlib / "lib-dynload").glob("*.so"))
@@ -369,6 +347,8 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
         "yaml",
     ):
         spec = importlib.util.find_spec(name)
+        if spec is None or spec.origin is None:
+            raise ValueError("accepted dependency origin required: " + name)
         p = Path(spec.origin).resolve()
         external.add(p)
         if spec.submodule_search_locations:
@@ -383,8 +363,8 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
         "independent_binding": binding(
             root,
             root
-            / "docs/reviews/U4-A-component-activation-readiness-v1"
-            / "prospective-consumer-bindings.json",
+            / "docs/reviews/U4-A-build-provenance-final-v1"
+            / "activation-consumer-bindings.json",
         ),
         "observation_contract": binding(
             observation_root or root,
@@ -397,12 +377,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "verify", "build"))
     parser.add_argument("output", type=Path)
+    parser.add_argument("--build-root", type=Path)
     parser.add_argument("--mode", choices=("debug", "release"), default="debug")
     args = parser.parse_args()
     if args.action == "prepare":
         prepare(args.output)
     elif args.action == "build":
-        build(args.output, args.mode)
+        if args.build_root is None:
+            parser.error("build requires an exclusive --build-root")
+        build(args.output, args.mode, args.build_root)
     else:
         verify(args.output)
 

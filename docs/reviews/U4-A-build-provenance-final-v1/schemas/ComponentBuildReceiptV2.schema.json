@@ -1,0 +1,161 @@
+{
+  "$defs": {
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "NativeEngineIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "compiler_lock_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Compiler Lock Hash",
+          "type": "string"
+        },
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/NativeModelIdentity"
+        },
+        "name": {
+          "const": "native",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "native-stage/1",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash",
+        "model",
+        "compiler_lock_hash"
+      ],
+      "title": "NativeEngineIdentity",
+      "type": "object"
+    },
+    "NativeModelIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "enum": [
+            "fixed-delay",
+            "native-intervals"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "enum": [
+            "1",
+            "2"
+          ],
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "implementation_hash"
+      ],
+      "title": "NativeModelIdentity",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Ordinary provenance link, independently checked before public review/2.",
+  "properties": {
+    "build_input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Build Input Hash",
+      "type": "string"
+    },
+    "engine": {
+      "$ref": "#/$defs/NativeEngineIdentity"
+    },
+    "environment": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "executable": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "format": {
+      "const": "uarch-component-build-receipt/2",
+      "title": "Format",
+      "type": "string"
+    },
+    "generated_identity": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "image_digest": {
+      "const": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+      "title": "Image Digest",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "mode": {
+      "enum": [
+        "debug",
+        "release"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "ordinary_receipt": {
+      "$ref": "#/$defs/FileBinding"
+    }
+  },
+  "required": [
+    "format",
+    "build_input_hash",
+    "engine",
+    "mode",
+    "executable",
+    "image_digest",
+    "generated_identity",
+    "ordinary_receipt",
+    "environment",
+    "limitations"
+  ],
+  "title": "ComponentBuildReceiptV2",
+  "type": "object"
+}

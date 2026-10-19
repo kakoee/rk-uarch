@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "StartupSubject": {
+      "additionalProperties": false,
+      "properties": {
+        "consumer_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Consumer Hash",
+          "type": "string"
+        },
+        "runtime_payload_byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Runtime Payload Byte Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runtime_payload_byte_hash",
+        "consumer_hash"
+      ],
+      "title": "StartupSubject",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/FileBinding"
+      },
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    },
+    "format": {
+      "const": "uarch-component-startup-assurance/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "launcher": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "manifest": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "subject": {
+      "$ref": "#/$defs/StartupSubject"
+    },
+    "verdict": {
+      "const": "accepted",
+      "title": "Verdict",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "subject",
+    "verdict",
+    "launcher",
+    "manifest",
+    "evidence"
+  ],
+  "title": "ComponentStartupAssurance",
+  "type": "object"
+}

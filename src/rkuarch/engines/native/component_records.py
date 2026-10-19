@@ -1,11 +1,12 @@
 """Additive component records. Valid shapes and construction pins are never authority."""
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 from uarch_contract.common import FrozenModel, Hash, NonEmpty
 from uarch_contract.mapped import NativeEngineIdentity
 
+from .component_construction import ConstructionMode
 from .records import FileBinding, GitCommit, ModeConfig, SourceInput
 
 IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
@@ -54,6 +55,43 @@ class ComponentBuildInputs(FrozenModel):
         return self
 
 
+class ComponentBuildInputsV3(FrozenModel):
+    format: Literal["uarch-component-build-inputs/3"]
+    source_commit: GitCommit
+    source_files: Annotated[tuple[SourceInput, ...], Field(min_length=1)]
+    trust_hash: Hash
+    trust_file: FileBinding
+    tool_inputs_hash: Hash
+    tool_inputs_file: FileBinding
+    model_source_paths: Annotated[tuple[NonEmpty, ...], Field(min_length=1)]
+    model_inputs_hash: Hash
+    mode_configs: tuple[ConstructionMode, ConstructionMode]
+    generated_identity_output_paths: tuple[NonEmpty, ...]
+
+    @model_validator(mode="after")
+    def acyclic(self) -> "ComponentBuildInputsV3":
+        paths = [f.path for f in self.source_files]
+        if paths != sorted(set(paths)) or not set(self.model_source_paths) <= set(paths):
+            raise ValueError("complete sorted unique source/model inventory required")
+        if list(self.model_source_paths) != sorted(set(self.model_source_paths)):
+            raise ValueError("sorted unique model inventory required")
+        if self.generated_identity_output_paths != (
+            "native/crates/uarch-engine/generated/identity.rs",
+        ) or set(self.generated_identity_output_paths) & set(paths):
+            raise ValueError("acyclic explicit generated identity required")
+        if tuple(x.mode for x in self.mode_configs) != ("debug", "release"):
+            raise ValueError("separate debug/release configurations required")
+        return self
+
+
+def parse_component_build_inputs(value: Any) -> ComponentBuildInputs | ComponentBuildInputsV3:
+    if isinstance(value, dict) and value.get("format") == "uarch-component-build-inputs/2":
+        return ComponentBuildInputs.model_validate(value)
+    if isinstance(value, dict) and value.get("format") == "uarch-component-build-inputs/3":
+        return ComponentBuildInputsV3.model_validate(value)
+    raise ValueError("explicit supported component BuildInputs version required")
+
+
 class ComponentBuildReceipt(FrozenModel):
     format: Literal["uarch-component-build-receipt/1"]
     build_input_hash: Hash
@@ -73,6 +111,34 @@ class ComponentBuildReceipt(FrozenModel):
         if self.engine.implementation_hash != self.build_input_hash:
             raise ValueError("component executable/build identity mismatch")
         return self
+
+
+class ComponentBuildReceiptV2(FrozenModel):
+    """Ordinary provenance link, independently checked before public review/2."""
+
+    format: Literal["uarch-component-build-receipt/2"]
+    build_input_hash: Hash
+    engine: NativeEngineIdentity
+    mode: Literal["debug", "release"]
+    executable: FileBinding
+    image_digest: Literal["sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"]
+    generated_identity: FileBinding
+    ordinary_receipt: FileBinding
+    environment: FileBinding
+    limitations: tuple[NonEmpty, ...]
+
+    @model_validator(mode="after")
+    def joined(self) -> "ComponentBuildReceiptV2":
+        require_component_engine(self.engine)
+        if self.engine.implementation_hash != self.build_input_hash:
+            raise ValueError("component executable/build identity mismatch")
+        return self
+
+
+def parse_component_build_receipt(value: object) -> ComponentBuildReceipt | ComponentBuildReceiptV2:
+    if isinstance(value, dict) and value.get("format") == "uarch-component-build-receipt/1":
+        return ComponentBuildReceipt.model_validate(value)
+    return ComponentBuildReceiptV2.model_validate(value)
 
 
 class ComponentExecutable(FrozenModel):

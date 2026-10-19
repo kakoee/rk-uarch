@@ -75,7 +75,9 @@ def command(scratch: Path, name: str, argv: list[str], stdin: bytes | None = Non
     return run.returncode
 
 
-def docker(scratch: Path, mode: str, tag: str) -> list[str]:
+def docker(
+    scratch: Path, mode: str, tag: str, *, environment: dict[str, str] | None = None
+) -> list[str]:
     receipts = scratch / "receipts" / mode / tag
     receipts.mkdir(parents=True, exist_ok=True)
     args = [
@@ -112,11 +114,23 @@ def docker(scratch: Path, mode: str, tag: str) -> list[str]:
     ]:
         src.mkdir(parents=True, exist_ok=True)
         args += ["--mount", f"type=bind,src={src},dst={dst}" + (",readonly" if ro else "")]
-    return args + [
-        "--entrypoint",
-        "/usr/bin/env",
-        IMAGE,
-        "-i",
+    return (
+        args
+        + ["--entrypoint", "/usr/bin/env", IMAGE, "-i"]
+        + container_environment(tag, environment)
+    )
+
+
+def container_environment(tag: str, environment: dict[str, str] | None = None) -> list[str]:
+    """Exact replacement for declared production inputs; historical defaults stay unchanged."""
+    if environment is not None:
+        if not environment or any(
+            not key or "=" in key or "\x00" in key or "\x00" in value
+            for key, value in environment.items()
+        ):
+            raise ValueError("explicit bounded environment strings required")
+        return [key + "=" + value for key, value in sorted(environment.items())]
+    return [
         "PATH=" + BIN + ":/usr/local/cargo/bin:/usr/bin:/bin",
         "CARGO_HOME=/cargo-home",
         "CARGO_NET_OFFLINE=true",

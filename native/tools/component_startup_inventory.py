@@ -13,6 +13,7 @@ import json
 import struct
 import subprocess
 from pathlib import Path
+from typing import Any
 
 
 def digest(path: Path) -> str:
@@ -24,7 +25,7 @@ def write(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n")
 
 
-def copy_bound(source: Path, target: Path, expected: str) -> dict:
+def copy_bound(source: Path, target: Path, expected: str) -> dict[str, Any]:
     data = source.read_bytes()
     pin = hashlib.sha256(data).hexdigest()
     if pin != expected.removeprefix("sha256:"):
@@ -86,7 +87,24 @@ def elf_interpreter(path: Path) -> str | None:
     return None
 
 
-def construct(source: Path, payload_path: Path, expected_payload: str, output: Path) -> dict:
+def project_files(source: Path) -> list[Path]:
+    """Exact project import inventory, including hash-checked runpy helpers."""
+    files = {
+        p
+        for folder in ("src/rkuarch", "contract/uarch_contract", "validation", "native/tools")
+        for p in (source / folder).rglob("*.py")
+    }
+    files.update(
+        source / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
+        for name in ("parallel_core.py", "resource_limits.py")
+    )
+    files.add(source / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
+    return sorted(files)
+
+
+def construct(
+    source: Path, payload_path: Path, expected_payload: str, output: Path
+) -> dict[str, Any]:
     if digest(payload_path) != expected_payload.removeprefix("sha256:"):
         raise ValueError("inherited payload digest")
     source, output = source.resolve(strict=True), output.resolve()
@@ -98,9 +116,8 @@ def construct(source: Path, payload_path: Path, expected_payload: str, output: P
     snapshot = output / "snapshot"
     rows = []
     project = snapshot / "project"
-    for folder in ("src/rkuarch", "contract/uarch_contract", "validation", "native/tools"):
-        for file in sorted((source / folder).rglob("*.py")):
-            rows.append(copy_bound(file, project / file.relative_to(source), digest(file)))
+    for file in project_files(source):
+        rows.append(copy_bound(file, project / file.relative_to(source), digest(file)))
     external = snapshot / "external"
     for binding in consumer["external_files"]:
         origin = Path("/") / binding["path"]

@@ -1,5 +1,6 @@
 """Synthetic component integration; no selector, human decision or public authority."""
 
+import inspect
 import json
 from copy import deepcopy
 from pathlib import Path
@@ -38,7 +39,12 @@ def test_component_public_entry_requires_its_own_authority(tmp_path, monkeypatch
     with pytest.raises((OSError, ValueError)):
         component_host.prepare_component(mode="debug")
     with pytest.raises(ValueError, match="component authority"):
-        component_runner.run_component(tmp_path / "absent-job", session=object())
+        options = (
+            {"evidence_root": tmp_path / "evidence"}
+            if "evidence_root" in inspect.signature(component_runner.run_component).parameters
+            else {}
+        )
+        component_runner.run_component(tmp_path / "absent-job", session=object(), **options)
 
 
 def test_component_route_is_job_selected_before_output_consumer():

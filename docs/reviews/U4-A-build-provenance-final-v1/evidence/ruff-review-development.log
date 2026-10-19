@@ -1,0 +1,46 @@
+E501 Line too long (103 > 100)
+   --> native/tools/component_startup_inventory.py:106:101
+    |
+106 | def construct(source: Path, payload_path: Path, expected_payload: str, output: Path) -> dict[str, Any]:
+    |                                                                                                     ^^^
+107 |     if digest(payload_path) != expected_payload.removeprefix("sha256:"):
+108 |         raise ValueError("inherited payload digest")
+    |
+
+E501 Line too long (105 > 100)
+  --> tests/unit/test_component_review.py:65:101
+   |
+65 | def test_trace_absence_does_not_substitute_for_or_block_required_review(records: dict[str, Any]) -> None:
+   |                                                                                                     ^^^^^
+66 |     result = checked(records)
+67 |     assert len(records["calls"]) == 1
+   |
+
+E501 Line too long (105 > 100)
+  --> tests/unit/test_component_review.py:76:101
+   |
+76 | @pytest.mark.parametrize("field", ["build_provenance", "startup_assurance", "selected_support_evidence"])
+   |                                                                                                     ^^^^^
+77 | def test_missing_required_review_refuses(records: dict[str, Any], field: str) -> None:
+78 |     del records["record"][field]
+   |
+
+E501 Line too long (105 > 100)
+  --> tests/unit/test_component_review.py:83:101
+   |
+83 | @pytest.mark.parametrize("mutation", ["old", "subject", "read-flag", "false-support", "numeric-support"])
+   |                                                                                                     ^^^^^
+84 | def test_wrong_or_stale_review_refuses(records: dict[str, Any], mutation: str) -> None:
+85 |     record = records["record"]
+   |
+
+E501 Line too long (125 > 100)
+   --> tests/unit/test_component_review.py:125:101
+    |
+125 | def test_bad_provenance_cannot_be_replaced_by_good_startup(records: dict[str, Any], monkeypatch: pytest.MonkeyPatch) -> None:
+    |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+126 |     def refuse(*args: Any) -> Any:
+127 |         raise ValueError("synthetic independent build refusal")
+    |
+
+Found 5 errors.

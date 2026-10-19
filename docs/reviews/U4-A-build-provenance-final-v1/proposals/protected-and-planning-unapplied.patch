@@ -1,0 +1,659 @@
+--- a/docs/build-spec.md
++++ b/docs/build-spec.md
+@@ -2528,6 +2528,15 @@
+ preparation producers outside engines. Imported mapped inputs bypass policy execution and
+ are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
+ component boundary; T (U7) delivers the first full product table. A small table may be
+ built earlier for a named use, but no full grid gates silicon. Passing G4/G7 is not a
+@@ -2690,6 +2699,15 @@
+ native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
+ readiness process for Blackhole before U-P15. Readiness does not require a full table.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
+ is compared with independent models only where abstractions and inputs match. Required L1
+ runs for each applicable admitted capability. L2 tool selection is optional and recorded
+@@ -2963,6 +2981,15 @@
+ - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+   U0023; full-table work is later, not a kernel prerequisite.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
+ EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
+@@ -3090,6 +3117,15 @@
+ Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
+ placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: execute only the authorized phase. B (U4a) implements the accepted small component
+ slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
+ U-P7 T in U7. Unsupported work refuses, never disappears from a claimed complete layer.
+@@ -3174,6 +3210,15 @@
+ releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains open if host
+ evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
+ any simulator-performance claim and final closure. No implied waiver from proceeding.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
+ admit npu-m256 at declared representative points, and execute G5's verification obligations.
+--- a/docs/decisions/U0011-the-native-engine-core.md
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -916,3 +916,134 @@
+ new wrapper/selection requirements are prospective B/coordinator-owned records. No old
+ K2 HostRecord, selector, placement or runtime authority authorizes new component identities.
+ Human installation, genuine L1, U0024 limits and later public authorization remain separate.
++
++## Build provenance scope amendment — prospective human installation
++
++This amendment implements Javid's direction to reconsider exhaustive construction-read
++tracing while preserving build identity, testing and reproducibility. It replaces the
++mandatory construction-read-capture prerequisite introduced in later U4 preparation
++proposals; it does not retrospectively alter their receipts or verdicts. Until human
++installation and the reviewed implementation transition, existing executable gates remain
++in force. A historical requirement preserved in an older proposal is not a competing
++requirement for the successor prepared under this amendment.
++
++### Required build and result provenance
++
++For a new admitted native candidate, retain an exact source commit/tree and declared
++source inventory, generated-input bytes and their producer identities, locked dependency
++versions/checksums/features, compiler/linker and image identities, and complete per-mode
++build commands and explicit environment. Build from a clean source export into fresh
++build-output directories using the accepted tools and verified dependency cache. A cache
++of verified dependency source archives is reusable; an unexplained prior target directory
++is not clean-build evidence. Record success/failure, exit status, ordinary stdout/stderr,
++resource/deadline outcomes, actual executable hashes and generated output identities.
++Do not silently substitute tools, dependencies, generated inputs or build flags.
++
++Each run binds the actual executable and relevant Python consumer identities, workload,
++hardware, assumptions/model and input identities, result bytes and executed checks. Future
++product tables bind their run/result records and preparation/assembly implementation.
++The provenance chain is table/result -> run -> executable -> build record -> source and
++inputs. These records attest declared inputs and observed outputs; they do not prove an
++exhaustive dynamic read set or independence from all ambient state. No self-authorizing
++build receipt, test-supplied identity or fabricated human/reviewer acceptance is permitted.
++
++Retain scope-appropriate native/Python tests, independent expectations and consumer checks,
++semantic fault/restoration controls, producer-disabled saved-input replay and required
++fresh-process/debug-release result determinism. Reuse unchanged evidence only with exact
++identity and scope justification. Clean rebuild verification is required for a claim of
++binary reproducibility: compare actual executable hashes from independent fresh-output
++builds of the same declared inputs/mode. Existing qualifying evidence may be reused;
++there is no repeated-build requirement for documentation-only changes. A mismatch must be
++investigated and reported, not normalized away or called bit-reproducible. Debug and release
++executables may differ; their comparable simulation results must meet existing determinism
++requirements. No exhaustive tracing is needed for this bounded reproducibility evidence.
++
++### Exhaustive construction tracing is optional
++
++Compiler/build-script/linker syscall tracing, canaries, construction-read closure and
++trace-specific diagnostic classification are optional investigations, not prerequisites
++for U4 build provenance, component activation or table provenance. This removes the added
++mandatory gate rather than deferring it to an automatic later sprint gate. A future need
++for stronger assurance requires its own justified scope and authorization.
++
++Preserve all historical trace files, NONE CAPTURED statuses and unresolved candidate-03
++records. Never set read_audit_complete=true on the strength of this amendment. Separate
++future build-provenance acceptance from optional read-audit status and from runtime startup
++assurance through an explicit reviewed record/consumer version transition. Reject stale,
++missing or mismatched required provenance; merely deleting the current boolean check is
++not an implementation of this policy. Current K2 records/authority are not migrated.
++
++Ordinary compiler progress and warnings are retained build diagnostics, not evidence of
++tracer loss and not automatically build failures. Keep actual compiler exit status, Cargo
++completion/artifact checks where applicable, lint/clippy warning policy, resource/deadline
++limits, complete bounded output retention and failure receipts. A truncated or incomplete
++required receipt cannot become success. The proposed empty compiler-stderr allowlists and
++per-line tracing-policy approval are not part of the ordinary build gate. Optional tracing
++must still report its own unknown/lost/incomplete evidence honestly; do not weaken an old
++trace parser to manufacture a pass.
++
++### Boundaries that do not change
++
++This amendment does not change simulator event/resource tracing or required runtime
++observations. It preserves exact executable/consumer selection, input/result admission,
++independent result checking, D3 refusal semantics, immutable deployment and genuine human
++authority. A-F3 startup-integrity assurance remains a separate unresolved public-first-use
++gate. No stopped verification is retried, reconstructed or transferred by this amendment.
++Trusted startup evidence cannot be inferred from a source hash, a clean build or a positive
++simulation run. Genuine L1 workings, the affected /2 restriction, incident disclosure,
++U0024 obligations, reference readiness and U4/G3a closure requirements are unchanged.
++No installation, native build/run, deployment, campaign or new authority is authorized by
++preparing or reviewing this amendment.
++
++
++## Prospective component ordinary-image activation amendment
++
++This addition requires exact separate human installation. It creates no execution
++permission. Historical component decisions, /2 consumers, selections and receipts
++retain their original subjects; K2 authority cannot authorize a component identity.
++
++The component /3 production route shall use the accepted digest-pinned native image
++and ordinary debug/release executables with one admitted saved stdin stream and EOF.
++Private cfg(test) witnesses shall not supply ordinary-process entry counts. Consume
++success through structural validation, the matching /3 checker and independently
++frozen literals/input/full-engine anchors. Retain bounded attempts and complete
++framing, streams, status, slot, resource and exact-created-ID cleanup evidence before
++interpretation. Reopen and independently consume all six bound initial receipts
++before replay; preserve failed attempts and the historical 124/1368 schedule.
++The 120/1344 proposal remains unapproved. Public acceptance requires a separately
++reviewed ordinary-EOF campaign contract and implementation, not private acceptance/1.
++
++The Python bootstrap (including typing's compatibility pseudo-modules), interpreter,
++stdlib/cache candidates, extensions, loader/DSOs and configuration require external
++immutable bindings. An externally supplied manifest digest is not self-authorizing;
++private read-only copies and a benign import launch do not establish immutable
++placement, exhaustive loaded-code assurance or A-F3 closure. The stopped real-D11
++startup-substitution/defense-revert activity remains deferred and must not be retried,
++transferred or replaced with an ordinary positive claim. Required unavailable evidence
++continues to block public first use unless separately resolved by the original reviewer
++and exact human decisions; this amendment supplies no waiver.
++
++D3 inventory/2, record/2, selector/2 and exact envelope/provenance laws remain separate.
++The prospective v6 adapter uses the same ordinary EOF transport but leaves entry/site
++observations unobserved. An expected zero-entry value, exact message, null pointer or
++source hash does not establish universal guard reach. D3 installation, review and
++execution permission require their own exact subject and decision.
++
++Before activation source freeze, reconcile A/B adapter, consumer, preparation,
++validation-test, startup and any installed proposal postimages. Then bind actual
++BuildInputs, generated identity, accepted tools/lock/cache/features and reviewed
++ordinary build provenance with retained status, streams, artifacts and full-ID cleanup. No historical binary inherits later source identities.
++Build execution, root placement, immutable public environment, genuine
++selector/HostRecord/profile authority and public campaign are separate gates. Missing
++construction reads and the three historical candidate-03 gaps remain unresolved.
++The /2 same-engine/same-instant acquired-release first-use restriction applies in all
++directions, including write/write and unclassified cases; no /2 repair or waiver is
++made. Genuine human L1 workings and U0024 remain unchanged; no qualification or U4
++closure follows.
++
++For the successor, runtime-review/2 binds ordinary build provenance and separately
++supplied startup assurance; optional construction-read evidence is not a prerequisite.
++D3 negative-review/3 binds that same runtime-review/2 plus its exact finite refusal
++subject/evidence. Their selectors and human decisions remain separate. Historical
++review/1 and negative-review/2 cannot be silently reinterpreted or made current by
++setting read_audit_complete. The K2 authority chain is unchanged.
+--- a/docs/execution-plan.md
++++ b/docs/execution-plan.md
+@@ -239,6 +239,7 @@
+ | **Parallel progress** | If reference feasibility/access is unresolved, retain the open G3a/campaign gate and proceed only with independently ready U6 tasks; do not call U4/U5 closed |
+ | **Not in this sprint** | No C2 depth, threads, mandatory FP8/os-tiled/ragged grid or automatic silicon measurement authorization |
+ | **Effort** | Re-estimate M/K1/K2/B/R; old full-table T effort is not a current U4 forecast |
++| **Build provenance** | U0011 build-provenance scope amendment: declared source/tool/dependency/generated-input identities, clean builds, executable/run/result bindings and scoped reproducibility evidence remain required. Exhaustive construction-read tracing is optional; A-F3 startup assurance and all other activation gates remain separate. |
+ 
+ ### U5 · Silicon I: the large-core class
+ 
+--- a/docs/prompts/U-P11a-native-engine-kernel.md
++++ b/docs/prompts/U-P11a-native-engine-kernel.md
+@@ -37,6 +37,15 @@
+ - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+   U0023; full-table work is later, not a kernel prerequisite.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
+ EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
+--- a/docs/prompts/U-P11b-native-engine-models-and-executor.md
++++ b/docs/prompts/U-P11b-native-engine-models-and-executor.md
+@@ -19,6 +19,15 @@
+ Mapping policy identifiers are provenance, not instructions for the native engine to invoke
+ Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
+ placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: execute only the authorized phase. B (U4a) implements the accepted small component
+ slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
+--- a/docs/prompts/U-P11c-native-engine-diagnostics-and-g5.md
++++ b/docs/prompts/U-P11c-native-engine-diagnostics-and-g5.md
+@@ -16,6 +16,15 @@
+ releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains open if host
+ evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
+ any simulator-performance claim and final closure. No implied waiver from proceeding.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
+ admit npu-m256 at declared representative points, and execute G5's verification obligations.
+--- a/docs/prompts/U-P7-mapping-grid-and-the-first-full-table.md
++++ b/docs/prompts/U-P7-mapping-grid-and-the-first-full-table.md
+@@ -14,6 +14,15 @@
+ Extend U2's saved-input path with the existing TaskGraph; policies are versioned
+ preparation producers outside engines. Imported mapped inputs bypass policy execution and
+ are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
+ component boundary; T (U7) delivers the first full product table. A small table may be
+--- a/docs/prompts/U-P8-L1-limits-and-L2-differential.md
++++ b/docs/prompts/U-P8-L1-limits-and-L2-differential.md
+@@ -21,6 +21,15 @@
+ measurements, cloud spend or silently fabricated fields. Identify contract extensions and
+ native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
+ readiness process for Blackhole before U-P15. Readiness does not require a full table.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
+ is compared with independent models only where abstractions and inputs match. Required L1
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_negative.py
+@@ -0,0 +1,287 @@
++"""UNAPPLIED v6 ordinary-image EOF successor. No native-site proof is inferred.
++
++Finite refusal-only transport. Requires a separately installed D3 decision.
++
++The public API accepts only a case ID. Neither raw stdin nor replacement profiles,
++expected errors, executable paths or a bypass flag are supplied by a caller.
++"""
++
++from __future__ import annotations
++
++import os
++import time
++from dataclasses import dataclass
++from pathlib import Path
++from threading import Lock
++from typing import Annotated, Any, Literal
++
++from pydantic import Field
++from uarch_contract.common import FrozenModel, NonEmpty
++from uarch_contract.hashing import sha256, strict_json_loads
++from uarch_contract.mapped import NativeTestProfile
++
++from rkuarch.engines.native.component_host import (
++    _prepare_payload,
++    _PreparedComponent,
++    checked_component_review,
++    require_reviewed_startup,
++)
++from rkuarch.engines.native.component_image import _save, exchange_image
++from rkuarch.engines.native.component_review import ComponentNegativeReview
++from rkuarch.engines.native.component_runner import require_negative_envelope
++from rkuarch.engines.native.host import _open, _read, _require
++from rkuarch.engines.native.records import FileBinding
++
++_SELECTOR = Path("/etc/rkuarch/component-negative-selector.json")
++_TOKEN = object()
++
++
++class ExpectedEnvelope(FrozenModel):
++    code: NonEmpty
++    message: NonEmpty
++    pointer: str | None
++
++
++class NegativeCase(FrozenModel):
++    case_id: NonEmpty
++    raw: FileBinding
++    profile: FileBinding
++    expected_envelope: ExpectedEnvelope
++    expectation_provenance: FileBinding
++    layer: Literal["profile", "resource-preflight"]
++
++
++class NegativeInventory(FrozenModel):
++    format: Literal["uarch-component-negative-inventory/2"]
++    cases: Annotated[tuple[NegativeCase, ...], Field(min_length=1)]
++
++
++class NegativeRecord(FrozenModel):
++    format: Literal["uarch-component-negative-record/2"]
++    runtime_payload: FileBinding
++    inventory: FileBinding
++    decision: FileBinding
++    review: FileBinding
++
++
++class NegativeSelector(FrozenModel):
++    format: Literal["uarch-component-negative-selector/2"]
++    repository: NonEmpty
++    record: FileBinding
++
++
++def _selected_raw(prepared: _PreparedComponent, case: NegativeCase) -> bytes:
++    raw = _read(prepared.root, case.raw)
++    _require(len(raw) <= prepared.payload.budget.stdin_bytes, "D3 stdin limit")
++    value = strict_json_loads(raw)
++    profile = NativeTestProfile.model_validate_json(_read(prepared.root, case.profile))
++    _require(value["engine"] == prepared.payload.engine.model_dump(mode="json"), "D3 engine join")
++    _require(
++        profile.format == "uarch-native-test-profile/2"
++        and value["profile"] == profile.model_dump(mode="json")
++        and value["admission"]["profile_hash"] == profile.profile_hash
++        and value["admission"]["case_id"] == case.case_id
++        and any(e.case_id == case.case_id for e in profile.entries),
++        "D3 independent profile join",
++    )
++    _require(
++        value["registry"] == strict_json_loads(_read(prepared.root, prepared.payload.registry)),
++        "D3 independent registry join",
++    )
++    provenance = strict_json_loads(_read(prepared.root, case.expectation_provenance))
++    _require(
++        provenance["case_id"] == case.case_id
++        and provenance["input_sha256"] == case.raw.byte_hash.split(":")[1]
++        and provenance["job_hash"] == value["job_hash"]
++        and provenance["engine"] == value["engine"]
++        and provenance["envelope"] == case.expected_envelope.model_dump(mode="json")
++        and provenance["runtime_entries_required"] == 0,
++        "D3 expectation input/envelope binding",
++    )
++    guard = provenance["native_guard_source"]
++    try:
++        guard_bytes = _read(
++            prepared.root, FileBinding(path=guard["path"], byte_hash="sha256:" + guard["sha256"])
++        )
++    except ValueError as error:
++        raise ValueError("D3 expectation guard source") from error
++    _require(
++        sha256(guard_bytes) == "sha256:" + guard["sha256"],
++        "D3 expectation guard source",
++    )
++    # No Python resource-success preflight: the finite independently bound refusal is the test.
++    # This function supplies no native prevalidation flag and computes no delays.
++    return raw
++
++
++def _consume_negative(
++    stdout: bytes, stderr: bytes, status: int, case: NegativeCase
++) -> dict[str, Any]:
++    return require_negative_envelope(
++        stdout, stderr, status, case.expected_envelope.model_dump(mode="json")
++    )
++
++
++@dataclass(frozen=True)
++class _PreparedNegative:
++    component: _PreparedComponent
++    inventory: NegativeInventory
++    checks: tuple[tuple[Path, FileBinding], ...]
++    startup_manifest_hash: str | None = None
++
++    def refresh(self) -> None:
++        self.component.refresh()
++        if self.startup_manifest_hash is not None:
++            require_reviewed_startup(self.startup_manifest_hash)
++        for root, binding in self.checks:
++            _read(root, binding)
++            with _open(root, binding.path) as fd:
++                _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 records required")
++        for case in self.inventory.cases:
++            _selected_raw(self.component, case)
++            for file in (case.raw, case.profile, case.expectation_provenance):
++                _read(self.component.root, file)
++                with _open(self.component.root, file.path) as fd:
++                    _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 cases required")
++
++
++class NegativeSession:
++    def __init__(self, prepared: _PreparedNegative, *, token: object) -> None:
++        _require(token is _TOKEN, "separate D3 authority required")
++        self._token = token
++        self._prepared = prepared
++        self._remaining = prepared.component.payload.budget.calls
++        self._deadline = time.monotonic() + prepared.component.payload.budget.session_seconds
++        self._lock = Lock()
++
++    def claim(self, case_id: str) -> tuple[_PreparedNegative, NegativeCase]:
++        with self._lock:
++            _require(self._token is _TOKEN, "separate D3 authority required")
++            matches = [c for c in self._prepared.inventory.cases if c.case_id == case_id]
++            _require(len(matches) == 1, "D3 immutable case ID required")
++            _require(
++                self._remaining > 0 and time.monotonic() < self._deadline, "D3 budget exhausted"
++            )
++            self._prepared.refresh()
++            self._remaining -= 1
++            return self._prepared, matches[0]
++
++
++def prepare_negative(*, mode: str) -> NegativeSession:
++    with _open(_SELECTOR.parent, _SELECTOR.name) as fd:
++        st = os.fstat(fd)
++        _require(st.st_uid == 0 and not st.st_mode & 0o022, "protected D3 selector required")
++        with os.fdopen(os.dup(fd), "rb") as stream:
++            raw = stream.read()
++    selector = NegativeSelector.model_validate_json(raw)
++    root = Path(selector.repository)
++    record = NegativeRecord.model_validate_json(_read(root, selector.record))
++    subject = {
++        "runtime_payload_byte_hash": record.runtime_payload.byte_hash,
++        "negative_inventory_byte_hash": record.inventory.byte_hash,
++    }
++    _require(
++        strict_json_loads(_read(root, record.decision))
++        == {
++            "format": "uarch-component-negative-human-decision/2",
++            "accepted_by": "Javid (@jjaffari)",
++            "reply": "yes",
++            "subject": subject,
++        },
++        "exact separate D3 human decision required",
++    )
++    review = ComponentNegativeReview.model_validate_json(_read(root, record.review))
++    _require(review.subject.model_dump(mode="json") == subject, "exact independent D3 subject")
++    component = _prepare_payload(root, record.runtime_payload, mode=mode, immutable=True)
++    runtime_review = checked_component_review(component, review.runtime_review)
++    require_reviewed_startup(runtime_review.startup_manifest.byte_hash)
++    for file in review.finite_refusals_evidence:
++        _read(root, file)
++    inventory = NegativeInventory.model_validate_json(_read(root, record.inventory))
++    ids = [c.case_id for c in inventory.cases]
++    _require(ids == sorted(set(ids)), "sorted unique D3 IDs required")
++    checks = tuple(
++        (root, f) for f in (selector.record, record.inventory, record.decision, record.review)
++    )
++    checks += ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(raw))),)
++    checks += tuple(
++        (root, file)
++        for file in (
++            review.runtime_review,
++            *runtime_review.required_files,
++            *review.finite_refusals_evidence,
++        )
++    )
++    prepared = _PreparedNegative(
++        component, inventory, checks, runtime_review.startup_manifest.byte_hash
++    )
++    prepared.refresh()
++    return NegativeSession(prepared, token=_TOKEN)
++
++
++def _run_negative_image(
++    prepared: _PreparedNegative,
++    case: NegativeCase,
++    evidence_root: Path,
++    *,
++    timeout_s: float,
++    repetition: int,
++) -> dict[str, Any]:
++    _require(type(repetition) is int and 0 <= repetition < 3, "D3 exact repetition")
++    component = prepared.component
++    raw = _selected_raw(component, case)
++    stdout, stderr, status, record = exchange_image(
++        component,
++        raw,
++        evidence_root,
++        timeout_s=timeout_s,
++        slot={"phase": "initial", "mode": component.mode, "repetition": repetition},
++        admitted={
++            "case_id": case.case_id,
++            "raw_input_sha256": sha256(raw).removeprefix("sha256:"),
++            "engine": component.payload.engine.model_dump(mode="json"),
++        },
++    )
++    record["slot"] = {"phase": "initial", "mode": component.mode, "repetition": repetition}
++    record["case_id"] = case.case_id
++    record["expected_envelope"] = case.expected_envelope.model_dump(mode="json")
++    record["expectation_provenance"] = case.expectation_provenance.model_dump(mode="json")
++    record["failure_stage"] = "negative-consumer"
++    record["zero_dispatch"] = "unobserved; exact envelope/source expectation is not entry evidence"
++    try:
++        error = _consume_negative(stdout, stderr, status, case)
++        prepared.refresh()
++        record["validation_passed"] = True
++        record["failure_stage"] = None
++        record["error"] = error
++    except Exception as failure:
++        record["validation_error"] = repr(failure)
++        raise
++    finally:
++        _save(evidence_root / "attempt.json", record)
++    return record
++
++
++def run_negative(
++    case_id: str, *, session: NegativeSession, evidence_root: Path, repetition: int = 0
++) -> dict[str, Any]:
++    _require(isinstance(session, NegativeSession), "separate D3 authority required")
++    prepared, case = session.claim(case_id)
++    record = _run_negative_image(
++        prepared,
++        case,
++        evidence_root,
++        timeout_s=session._deadline - time.monotonic(),
++        repetition=repetition,
++    )
++    try:
++        _require(time.monotonic() <= session._deadline, "D3 session deadline exhausted")
++    except Exception as error:
++        record.update(
++            validation_passed=False,
++            failure_stage="session-finalization",
++            finalization_error=repr(error),
++        )
++        _save(evidence_root / "attempt.json", record)
++        raise
++    return record
+--- a/src/rkuarch/engines/native/component_runner.py
++++ b/src/rkuarch/engines/native/component_runner.py
+@@ -205,14 +205,14 @@
+ 
+ 
+ def run_component(
+-    saved: Path, *, session: ComponentSession
++    saved: Path, *, session: ComponentSession, evidence_root: Path, repetition: int = 0
+ ) -> tuple[MappedEngineResult, dict[str, Any]]:
+-    if not isinstance(session, ComponentSession):
+-        raise ValueError("independent component authority required")
+-    prepared = session.claim()
+-    result = _run_prepared(saved, prepared)
+-    session.check()
+-    return result
++    """Prospective default image route; installation is a later explicit decision."""
++    from .component_image import run_component_image
++
++    return run_component_image(
++        saved, session=session, evidence_root=evidence_root, repetition=repetition
++    )
+ 
+ 
+ def replay_component(saved: Path, output: Path, *, session: ComponentSession) -> MappedEngineResult:
+--- a/validation/component/runtime_checks.py
++++ b/validation/component/runtime_checks.py
+@@ -35,9 +35,14 @@
+             "contract/uarch_contract",
+             "validation/component",
+             "src/rkuarch/engines/native",
++            "native/tools",
+         )
+         for p in (source / folder).glob("*.py")
+         if not p.name.startswith("test_")
++    )
++    required.update(
++        "docs/reviews/U4-B-K2-parallel-first-use-v1/" + name
++        for name in ("parallel_core.py", "resource_limits.py")
+     )
+     need(required <= set(pins), "complete matching consumer/structural closure required")
+     for name, wanted in pins.items():
+--- a/validation/component/runtime_selection.py
++++ b/validation/component/runtime_selection.py
+@@ -220,4 +220,5 @@
+     (out / "selection.json").write_text(
+         json.dumps(value["selection"], indent=2, sort_keys=True) + "\n"
+     )
+-    return value["selection"]
++    selected: dict[str, Any] = value["selection"]
++    return selected

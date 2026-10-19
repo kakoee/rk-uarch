@@ -1,0 +1,83 @@
+{
+  "$defs": {
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "NegativeSubject": {
+      "additionalProperties": false,
+      "properties": {
+        "negative_inventory_byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Negative Inventory Byte Hash",
+          "type": "string"
+        },
+        "runtime_payload_byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Runtime Payload Byte Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runtime_payload_byte_hash",
+        "negative_inventory_byte_hash"
+      ],
+      "title": "NegativeSubject",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "finite_refusals_current": {
+      "const": true,
+      "title": "Finite Refusals Current",
+      "type": "boolean"
+    },
+    "finite_refusals_evidence": {
+      "items": {
+        "$ref": "#/$defs/FileBinding"
+      },
+      "minItems": 1,
+      "title": "Finite Refusals Evidence",
+      "type": "array"
+    },
+    "format": {
+      "const": "uarch-component-negative-review/3",
+      "title": "Format",
+      "type": "string"
+    },
+    "runtime_review": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "subject": {
+      "$ref": "#/$defs/NegativeSubject"
+    }
+  },
+  "required": [
+    "format",
+    "subject",
+    "runtime_review",
+    "finite_refusals_current",
+    "finite_refusals_evidence"
+  ],
+  "title": "ComponentNegativeReview",
+  "type": "object"
+}

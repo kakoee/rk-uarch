@@ -1,0 +1,21 @@
+.................................................F.........              [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 55, "sample": {"uarch_contract.mapped": "/tmp/u4-a-provenance-b58z7967/final-check-export/direct/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-a-provenance-b58z7967/final-check-export/direct/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-a-provenance-b58z7967/final-check-export/direct/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-a-provenance-b58z7967/final-check-export/direct/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+____________ test_component_public_entry_requires_its_own_authority ____________
+
+tmp_path = PosixPath('/tmp/u4-a-provenance-b58z7967/final-tests/test_component_public_entry_re0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72d59733d220>
+
+    def test_component_public_entry_requires_its_own_authority(tmp_path, monkeypatch):
+        monkeypatch.setattr(component_host, "_SELECTOR", tmp_path / "absent-selector.json")
+        with pytest.raises((OSError, ValueError)):
+            component_host.prepare_component(mode="debug")
+        with pytest.raises(ValueError, match="component authority"):
+>           component_runner.run_component(tmp_path / "absent-job", session=object())
+E           TypeError: run_component() missing 1 required keyword-only argument: 'evidence_root'
+
+tests/unit/test_component_runtime.py:41: TypeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_component_runtime.py::test_component_public_entry_requires_its_own_authority
+1 failed, 58 passed in 2.08s

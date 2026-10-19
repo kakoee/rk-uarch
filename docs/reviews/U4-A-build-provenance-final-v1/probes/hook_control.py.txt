@@ -1,0 +1,27 @@
+from pathlib import Path
+import subprocess, hashlib, json, difflib
+work=Path('/tmp/u4-a-provenance-b58z7967'); root=work/'source'
+test=root/'tests/unit/test_component_build_review.py'
+test.write_text(test.read_text().replace('successful bounded build outcome','successful complete ordinary build status'))
+p=root/'src/rkuarch/engines/native/component_build_review.py'; original=p.read_bytes()
+line='        consumed = consume_build(build_root, receipt, wanted)'
+replacement='''        consumed = {"required_files": [
+            item for rows in declaration["inputs"].values() for item in rows
+        ] + [{"path": v["path"], "byte_hash": v["byte_hash"]}
+             for v in receipt["streams"].values()] + [wanted["executable"]]}'''
+assert original.decode().count(line)==1
+fault=original.decode().replace(line,replacement).encode()
+(work/'hook-disconnection.patch').write_text(''.join(difflib.unified_diff(original.decode().splitlines(True),fault.decode().splitlines(True),fromfile='a/src/rkuarch/engines/native/component_build_review.py',tofile='b/src/rkuarch/engines/native/component_build_review.py')))
+cmd=['/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python','-I',str(root/'docs/reviews/U4-B-activation-orchestration-v1/probes/isolated_runner.py'),str(root),'pytest','-q','tests/unit/test_component_build_review.py::test_actual_independent_consumer_join_without_trace','tests/unit/test_component_build_review.py::test_resealed_incomplete_receipt_requires_independent_consumer']
+def run(label):
+ with (work/(label+'.log')).open('w') as f:
+  return subprocess.run(cmd+['--basetemp='+str(work/label)],cwd=root,stdout=f,stderr=subprocess.STDOUT).returncode
+out={'scope':'private synthetic B-hook disconnection only; no startup change','baseline':run('hook-valid-baseline'),'original_sha256':hashlib.sha256(original).hexdigest()}
+try:
+ p.write_bytes(fault); out['disconnected']=run('hook-disconnected'); out['fault_sha256']=hashlib.sha256(fault).hexdigest()
+finally:
+ p.write_bytes(original)
+out['restored_sha256']=hashlib.sha256(p.read_bytes()).hexdigest();out['restored']=run('hook-restored')
+(work/'hook-control.json').write_text(json.dumps(out,indent=2)+'\n')
+print(json.dumps(out))
+assert out['baseline']==out['restored']==0 and out['disconnected']==1 and out['original_sha256']==out['restored_sha256']

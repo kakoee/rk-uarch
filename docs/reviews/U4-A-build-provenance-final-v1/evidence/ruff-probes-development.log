@@ -1,0 +1,239 @@
+E501 Line too long (150 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:26:101
+   |
+24 | …e_candidate.py").read_bytes())
+25 | …st.FunctionDef) and n.name == "freeze")
+26 | …isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name) and n.target.id == "paths")
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+27 | …instance(n, ast.Assign) and isinstance(n.targets[0], ast.Name) and n.targets[0].id == "inventory")
+28 | …
+   |
+
+E501 Line too long (157 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:27:101
+   |
+25 | …FunctionDef) and n.name == "freeze")
+26 | …nstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name) and n.target.id == "paths")
+27 | …tance(n, ast.Assign) and isinstance(n.targets[0], ast.Name) and n.targets[0].id == "inventory")
+   |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+28 | …
+29 | …e_ignores=[]), "<paths-only>", "exec"), scope)
+   |
+
+E501 Line too long (108 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:29:101
+   |
+27 |     end = next(i for i, n in enumerate(function.body) if isinstance(n, ast.Assign) and isinstance(n.targets[0], ast.Name) and n.target…
+28 |     scope: dict[str, Any] = {"source": root, "Path": Path}
+29 |     exec(compile(ast.Module(body=function.body[start:end], type_ignores=[]), "<paths-only>", "exec"), scope)
+   |                                                                                                     ^^^^^^^^
+30 |     return {str(p.relative_to(root)): digest(p) for p in sorted(set(scope["paths"]))}
+   |
+
+E501 Line too long (138 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:42:101
+   |
+40 | …(p) for p in project_files(root)}
+41 | …
+42 | …-construction-declarations-final-v1/inherited-external-inventory.json").read_bytes())
+   |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+43 | …ernal_files"]
+44 | …python_executable"]
+   |
+
+E501 Line too long (107 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:50:101
+   |
+48 |     refusals = {}
+49 |     for name in (
+50 |         "native/tools/component_ordinary_build.py", "src/rkuarch/engines/native/component_build_review.py",
+   |                                                                                                     ^^^^^^^
+51 |         "src/rkuarch/engines/native/component_review.py", "validation/component/ordinary_build_acceptance.py",
+52 |         "validation/component/ordinary_build_receipt.py",
+   |
+
+E501 Line too long (110 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:51:101
+   |
+49 |     for name in (
+50 |         "native/tools/component_ordinary_build.py", "src/rkuarch/engines/native/component_build_review.py",
+51 |         "src/rkuarch/engines/native/component_review.py", "validation/component/ordinary_build_acceptance.py",
+   |                                                                                                     ^^^^^^^^^^
+52 |         "validation/component/ordinary_build_receipt.py",
+53 |     ):
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:54:25
+   |
+52 |         "validation/component/ordinary_build_receipt.py",
+53 |     ):
+54 |         bad = dict(pins); del bad[name]
+   |                         ^
+55 |         try:
+56 |             verify_sources(root, bad)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:63:21
+   |
+61 |             raise AssertionError("missing required module accepted: " + name)
+62 |     name = "native/tools/component_runtime_candidate.py"
+63 |     bad = dict(pins); bad[name] = "24271b51ffe564b01455059ca49e1831fe3576c99764b0f276755f1e97a61d58"
+   |                     ^
+64 |     try:
+65 |         verify_sources(root, bad)
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:76:43
+   |
+74 |             raw = getattr(module, "__file__", None)
+75 |             if raw:
+76 |                 path = Path(raw).resolve(); assert path.is_relative_to(root), (name, path)
+   |                                           ^
+77 |                 origins[name] = {"path": str(path.relative_to(root)), "sha256": digest(path)}
+78 |             else:
+   |
+
+E501 Line too long (102 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:80:101
+   |
+78 |             else:
+79 |                 assert all(Path(v).resolve().is_relative_to(root) for v in module.__path__)
+80 |     report = {"format": "A-provenance-final-join-check/1", "source_inventory": source_inventory(root),
+   |                                                                                                     ^^
+81 |               "project_import_inventory": imports, "startup_project_path_inventory": startup_paths,
+82 |               "source_count": len(expected["prospective_source_files"]), "consumer_count": len(pins),
+   |
+
+E501 Line too long (101 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:82:101
+   |
+80 |     report = {"format": "A-provenance-final-join-check/1", "source_inventory": source_inventory(root),
+81 |               "project_import_inventory": imports, "startup_project_path_inventory": startup_paths,
+82 |               "source_count": len(expected["prospective_source_files"]), "consumer_count": len(pins),
+   |                                                                                                     ^
+83 |               "import_count": len(imports), "external_count": len(result["external_files"]),
+84 |               "python_executable": result["python_executable"], "independent_binding": result["independent_binding"],
+   |
+
+E501 Line too long (117 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:84:101
+   |
+82 |               "source_count": len(expected["prospective_source_files"]), "consumer_count": len(pins),
+83 |               "import_count": len(imports), "external_count": len(result["external_files"]),
+84 |               "python_executable": result["python_executable"], "independent_binding": result["independent_binding"],
+   |                                                                                                     ^^^^^^^^^^^^^^^^^
+85 |               "missing_and_stale_refusals": refusals, "origin_checks": origins,
+86 |               "startup_assurance": "not assessed; A-F3 deferred", "build_or_startup_execution": False,
+   |
+
+E501 Line too long (102 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:86:101
+   |
+84 |               "python_executable": result["python_executable"], "independent_binding": result["independent_binding"],
+85 |               "missing_and_stale_refusals": refusals, "origin_checks": origins,
+86 |               "startup_assurance": "not assessed; A-F3 deferred", "build_or_startup_execution": False,
+   |                                                                                                     ^^
+87 |               "method": "read/hash imports; pure path enumeration only, no construct/startup/probe"}
+88 |     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+   |
+
+E501 Line too long (137 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/audit_join.py:89:101
+   |
+87 | …h enumeration only, no construct/startup/probe"}
+88 | …ort_keys=True) + "\n")
+89 | …if k.endswith("count") or k in ("build_or_startup_execution", "startup_assurance")}))
+   |                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+E501 Line too long (103 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/reconstruct.py:27:101
+   |
+25 |     record = json.loads((package / "source-transition.json").read_bytes())
+26 |     archive = work / "base.tar"
+27 |     subprocess.run(["git", "archive", "-o", str(archive), record["base_commit"]], cwd=repo, check=True)
+   |                                                                                                     ^^^
+28 |     routes = {}
+29 |     for name, patches in (
+   |
+
+E501 Line too long (138 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/reconstruct.py:31:101
+   |
+29 | …
+30 | …cessor-from-base.patch"]),
+31 | …-A-construction-declarations-final-v1/proposals/complete-activation-unapplied.patch",
+   |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+32 | …lta-from-aecc6a2-overlay.patch"]),
+33 | …
+   |
+
+E702 Multiple statements on one line (semicolon)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/reconstruct.py:34:27
+   |
+32 |                               package / "proposals/delta-from-aecc6a2-overlay.patch"]),
+33 |     ):
+34 |         root = work / name; root.mkdir()
+   |                           ^
+35 |         with tarfile.open(archive) as stream:
+36 |             stream.extractall(root, filter="data")
+   |
+
+E501 Line too long (116 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/reconstruct.py:44:101
+   |
+42 |         for path, pin in record["prospective_source_files"].items():
+43 |             assert digest(root / path) == pin, (name, path)
+44 |         assert digest(root / "validation/component/capture_monitor.py") == record["optional_capture_monitor_sha256"]
+   |                                                                                                     ^^^^^^^^^^^^^^^^
+45 |         routes[name] = {"postimages": len(record["postimages"]), "declared_sources": len(record["prospective_source_files"]),
+46 |                         "patches": [{"path": str(p.relative_to(repo)), "sha256": digest(p)} for p in patches]}
+   |
+
+E501 Line too long (125 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/reconstruct.py:45:101
+   |
+43 |             assert digest(root / path) == pin, (name, path)
+44 |         assert digest(root / "validation/component/capture_monitor.py") == record["optional_capture_monitor_sha256"]
+45 |         routes[name] = {"postimages": len(record["postimages"]), "declared_sources": len(record["prospective_source_files"]),
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+46 |                         "patches": [{"path": str(p.relative_to(repo)), "sha256": digest(p)} for p in patches]}
+47 |     # Package manifest does not self-reference or contain an unbuilt executable identity.
+   |
+
+E501 Line too long (110 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/reconstruct.py:46:101
+   |
+44 |         assert digest(root / "validation/component/capture_monitor.py") == record["optional_capture_monitor_sha256"]
+45 |         routes[name] = {"postimages": len(record["postimages"]), "declared_sources": len(record["prospective_source_files"]),
+46 |                         "patches": [{"path": str(p.relative_to(repo)), "sha256": digest(p)} for p in patches]}
+   |                                                                                                     ^^^^^^^^^^
+47 |     # Package manifest does not self-reference or contain an unbuilt executable identity.
+48 |     manifest_path = package / "manifest.json"
+   |
+
+E501 Line too long (102 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/reconstruct.py:53:101
+   |
+51 |         for path, binding in manifest["files"].items():
+52 |             file = package / path
+53 |             assert digest(file) == binding["sha256"] and file.stat().st_size == binding["bytes"], path
+   |                                                                                                     ^^
+54 |     report = {"format": "A-provenance-reconstruction/1", "base": record["base_commit"], "routes": routes,
+55 |               "installation": False, "build": False, "authority": None}
+   |
+
+E501 Line too long (105 > 100)
+  --> docs/reviews/U4-A-build-provenance-final-v1/probes/reconstruct.py:54:101
+   |
+52 |             file = package / path
+53 |             assert digest(file) == binding["sha256"] and file.stat().st_size == binding["bytes"], path
+54 |     report = {"format": "A-provenance-reconstruction/1", "base": record["base_commit"], "routes": routes,
+   |                                                                                                     ^^^^^
+55 |               "installation": False, "build": False, "authority": None}
+56 |     (work / "reconstruction.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+   |
+
+Found 22 errors.

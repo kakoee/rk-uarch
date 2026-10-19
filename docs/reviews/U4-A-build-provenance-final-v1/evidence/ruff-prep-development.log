@@ -1,0 +1,56 @@
+E501 Line too long (110 > 100)
+   --> native/tools/component_ordinary_build.py:504:101
+    |
+502 |         raise ValueError("separate ordered build roots required")
+503 |     if not destination.is_absolute() or any(
+504 |         destination.resolve().is_relative_to(p.resolve()) or p.resolve().is_relative_to(destination.resolve())
+    |                                                                                                     ^^^^^^^^^^
+505 |         for p in builds.values()
+506 |     ):
+    |
+
+E501 Line too long (115 > 100)
+   --> native/tools/component_ordinary_build.py:514:101
+    |
+512 |         target = destination / prefix
+513 |         shutil.copytree(source, target, ignore=shutil.ignore_patterns("target"), symlinks=True)
+514 |         outer = ComponentBuildReceiptV2.model_validate_json((target / "component-build-receipt.json").read_bytes())
+    |                                                                                                     ^^^^^^^^^^^^^^^
+515 |         if outer.mode != mode:
+516 |             raise ValueError("assembled build mode mismatch")
+    |
+
+E501 Line too long (105 > 100)
+   --> native/tools/component_ordinary_build.py:533:101
+    |
+531 |                 ("transport", "transport.json"))}})
+532 |         executables.append({"mode": mode, "executable": value["executable"],
+533 |                             "receipt": file_binding(destination, prefix + "payload-build-receipt.json")})
+    |                                                                                                     ^^^^^
+534 |     result = {"format": "component-ordinary-build-links/1", "builds": rows, "executables": executables,
+535 |               "authority": None, "startup_assurance": "not-supplied", "required_checks_review": "not-supplied"}
+    |
+
+E501 Line too long (103 > 100)
+   --> native/tools/component_ordinary_build.py:534:101
+    |
+532 |         executables.append({"mode": mode, "executable": value["executable"],
+533 |                             "receipt": file_binding(destination, prefix + "payload-build-receipt.json")})
+534 |     result = {"format": "component-ordinary-build-links/1", "builds": rows, "executables": executables,
+    |                                                                                                     ^^^
+535 |               "authority": None, "startup_assurance": "not-supplied", "required_checks_review": "not-supplied"}
+536 |     (destination / "ordinary-build-links.json").write_text(canonical_json(result))
+    |
+
+E501 Line too long (111 > 100)
+   --> native/tools/component_ordinary_build.py:535:101
+    |
+533 |                             "receipt": file_binding(destination, prefix + "payload-build-receipt.json")})
+534 |     result = {"format": "component-ordinary-build-links/1", "builds": rows, "executables": executables,
+535 |               "authority": None, "startup_assurance": "not-supplied", "required_checks_review": "not-supplied"}
+    |                                                                                                     ^^^^^^^^^^^
+536 |     (destination / "ordinary-build-links.json").write_text(canonical_json(result))
+537 |     return result
+    |
+
+Found 6 errors (1 fixed, 5 remaining).

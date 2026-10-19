@@ -1,0 +1,45 @@
+E501 Line too long (113 > 100)
+   --> tests/unit/test_component_build_review.py:583:101
+    |
+581 |     consumers = dict(expected["consumers"])
+582 |     # Only inert local bytes substitute for Python snapshots; no process starts.
+583 |     consumers["external_files"] = [adapter.file_binding(Path("/"), str(root / "debug/inputs/python/lib.py")[1:])]
+    |                                                                                                     ^^^^^^^^^^^^^
+584 |     consumers["python_executable"] = adapter.file_binding(Path("/"), str(root / "debug/inputs/python/python")[1:])
+585 |     def callback(output: Path, spec: dict[str, Any], value: dict[str, Any]) -> dict[str, Any]:
+    |
+
+E501 Line too long (114 > 100)
+   --> tests/unit/test_component_build_review.py:584:101
+    |
+582 |     # Only inert local bytes substitute for Python snapshots; no process starts.
+583 |     consumers["external_files"] = [adapter.file_binding(Path("/"), str(root / "debug/inputs/python/lib.py")[1:])]
+584 |     consumers["python_executable"] = adapter.file_binding(Path("/"), str(root / "debug/inputs/python/python")[1:])
+    |                                                                                                     ^^^^^^^^^^^^^^
+585 |     def callback(output: Path, spec: dict[str, Any], value: dict[str, Any]) -> dict[str, Any]:
+586 |         mode = value["mode"]
+    |
+
+E702 Multiple statements on one line (semicolon)
+   --> tests/unit/test_component_build_review.py:590:36
+    |
+588 |         data = (root / mode / "stdout").read_bytes()
+589 |         stderr = (root / mode / "stderr").read_bytes()
+590 |         put(output, "stdout", data); put(output, "stderr", stderr)
+    |                                    ^
+591 |         put(output, "outputs/uarch-engine", (root / mode / "outputs/uarch-engine").read_bytes())
+592 |         put(output, "transport.json", guard_record(output, value, data, stderr))
+    |
+
+E501 Line too long (122 > 100)
+   --> tests/unit/test_component_build_review.py:595:101
+    |
+593 |         return dict(exit_code=0, completed=True, timed_out=False, resource_failure=None,
+594 |                     observed_bytes={"stdout": len(data), "stderr": len(stderr)},
+595 |                     stream_complete={"stdout": True, "stderr": True}, stream_truncated={"stdout": False, "stderr": False})
+    |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^
+596 |     monkeypatch.setattr(ordinary, "transport", callback)
+597 |     builds = {mode: root / "first" / mode for mode in ("debug", "release")}
+    |
+
+Found 4 errors.

@@ -26,13 +26,15 @@ from uarch_contract.mapped import (
 from rkuarch.workload.mapped import loads_component_job
 
 from .component_records import (
-    ComponentBuildInputs,
     ComponentBuildReceipt,
     ComponentBuildTrust,
     ComponentHostRecord,
     ComponentHostSelector,
     ComponentPayload,
+    parse_component_build_inputs,
+    parse_component_build_receipt,
 )
+from .component_review import CheckedRuntimeReview
 from .host import _open, _read, _require
 from .records import FileBinding, ToolInputs
 
@@ -221,7 +223,7 @@ def _prepare_payload(
         return cls.model_validate(strict_json_loads(read(file)))
 
     payload = record(ComponentPayload, binding)
-    build = record(ComponentBuildInputs, payload.build_inputs)
+    build = parse_component_build_inputs(strict_json_loads(read(payload.build_inputs)))
     trust = record(ComponentBuildTrust, build.trust_file)
     tools = record(ToolInputs, build.tool_inputs_file)
     _require(
@@ -314,7 +316,7 @@ def _prepare_payload(
         seen_cases.add((item.profile_hash, item.case_id))
     _require(seen_cases == expected_cases, "complete component profile/case inventory")
     for executable in payload.executables:
-        receipt = record(ComponentBuildReceipt, executable.receipt)
+        receipt = parse_component_build_receipt(strict_json_loads(read(executable.receipt)))
         _require(
             receipt.engine == payload.engine
             and receipt.mode == executable.mode
@@ -325,14 +327,13 @@ def _prepare_payload(
             receipt.generated_identity.path in build.generated_identity_output_paths,
             "component generated identity path",
         )
-        for file in (
-            receipt.executable,
-            receipt.generated_identity,
-            receipt.build_log,
-            receipt.environment,
-            receipt.loader_observations,
-        ):
-            read(file)
+        receipt_files = [receipt.executable, receipt.generated_identity, receipt.environment]
+        if isinstance(receipt, ComponentBuildReceipt):
+            receipt_files.extend((receipt.build_log, receipt.loader_observations))
+        else:
+            receipt_files.append(receipt.ordinary_receipt)
+        for receipt_file in receipt_files:
+            read(receipt_file)
     source_pins = {x.path: x.byte_hash for x in build.source_files}
     for file in payload.consumers.files:
         _require(
@@ -366,6 +367,60 @@ def _prepare_payload(
     return prepared
 
 
+def provenance_expectations(prepared: _PreparedComponent) -> dict[str, Any]:
+    """Independently derive required joins from the already checked payload."""
+    from .component_records import ComponentBuildInputsV3
+
+    payload = prepared.payload
+    build = parse_component_build_inputs(
+        strict_json_loads(_read(prepared.root, payload.build_inputs))
+    )
+    _require(isinstance(build, ComponentBuildInputsV3), "review/2 requires BuildInputs/3")
+    return {
+        "runtime_payload_byte_hash": prepared.payload_file.byte_hash,
+        "engine": payload.engine.model_dump(mode="json"),
+        "build_inputs": payload.build_inputs.model_dump(mode="json"),
+        "build_input_hash": content_hash(build),
+        "source_commit": build.source_commit,
+        "source_files": [item.model_dump(mode="json") for item in build.source_files],
+        "tool_inputs": build.tool_inputs_file.model_dump(mode="json"),
+        "tool_inputs_hash": build.tool_inputs_hash,
+        "mode_configs": [item.model_dump(mode="json") for item in build.mode_configs],
+        "generated_identity_output_paths": list(build.generated_identity_output_paths),
+        "executables": [item.model_dump(mode="json") for item in payload.executables],
+        "consumer_hash": content_hash(payload.consumers),
+        "consumers": payload.consumers.model_dump(mode="json"),
+    }
+
+
+def checked_component_review(
+    prepared: _PreparedComponent, binding: FileBinding
+) -> CheckedRuntimeReview:
+    from .component_review import check_runtime_review
+
+    launchers = [
+        item
+        for item in prepared.payload.consumers.files
+        if item.path == "native/tools/component_trusted_start.py"
+    ]
+    _require(len(launchers) == 1, "bound component startup launcher required")
+    return check_runtime_review(
+        prepared.root,
+        strict_json_loads(_read(prepared.root, binding)),
+        expected=provenance_expectations(prepared),
+        launcher=launchers[0],
+    )
+
+
+def require_reviewed_startup(manifest_hash: str) -> None:
+    state = sys.modules.get("_rkuarch_trusted_startup")
+    _require(
+        state is not None
+        and getattr(state, "manifest_sha256", None) == manifest_hash.removeprefix("sha256:"),
+        "independent startup assurance/active manifest join required",
+    )
+
+
 class ComponentSession:
     """One independently authorized bounded session. Call budgets are not public permission."""
 
@@ -375,11 +430,13 @@ class ComponentSession:
         authority_files: tuple[tuple[Path, FileBinding], ...],
         *,
         token: object,
+        startup_manifest_hash: str | None = None,
     ) -> None:
         _require(token is _AUTHORITY, "independent component authority required")
         self._prepared = prepared
         self._authority_files = authority_files
         self._token = token
+        self._startup_manifest_hash = startup_manifest_hash
         self._deadline = time.monotonic() + prepared.payload.budget.session_seconds
         self._remaining = prepared.payload.budget.calls
         self._lock = threading.Lock()
@@ -389,6 +446,8 @@ class ComponentSession:
         for root, file in self._authority_files:
             _read(root, file)
         self._prepared.refresh()
+        if self._startup_manifest_hash is not None:
+            require_reviewed_startup(self._startup_manifest_hash)
 
     def claim(self) -> _PreparedComponent:
         _require(self._token is _AUTHORITY, "independent component authority required")
@@ -429,19 +488,14 @@ def prepare_component(*, mode: str) -> ComponentSession:
         },
         "exact component human decision required",
     )
-    review = strict_json_loads(_read(root, record.independent_review))
-    _require(
-        isinstance(review, dict)
-        and review.get("format") == "uarch-component-runtime-review/1"
-        and review.get("subject") == subject
-        and review.get("read_audit_complete") is True
-        and review.get("selected_support_current") is True,
-        "independent component runtime/read/currentness review required",
-    )
     prepared = _prepare_payload(root, record.payload, mode=mode, immutable=True)
+    review = checked_component_review(prepared, record.independent_review)
+    require_reviewed_startup(review.startup_manifest.byte_hash)
     return ComponentSession(
         prepared,
         tuple((root, f) for f in (record_file, record.decision, record.independent_review))
-        + ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(selector_raw))),),
+        + ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(selector_raw))),)
+        + tuple((root, file) for file in review.required_files),
         token=_AUTHORITY,
+        startup_manifest_hash=review.startup_manifest.byte_hash,
     )

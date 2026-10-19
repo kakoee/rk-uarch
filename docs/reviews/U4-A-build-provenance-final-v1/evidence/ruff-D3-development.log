@@ -1,0 +1,12 @@
+E501 Line too long (114 > 100)
+   --> src/rkuarch/engines/native/component_negative.py:103:101
+    |
+101 |     guard = provenance["native_guard_source"]
+102 |     try:
+103 |         guard_bytes = _read(prepared.root, FileBinding(path=guard["path"], byte_hash="sha256:" + guard["sha256"]))
+    |                                                                                                     ^^^^^^^^^^^^^^
+104 |     except ValueError as error:
+105 |         raise ValueError("D3 expectation guard source") from error
+    |
+
+Found 2 errors (1 fixed, 1 remaining).

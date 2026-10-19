@@ -1,0 +1,3576 @@
+--- a/docs/build-spec.md
++++ b/docs/build-spec.md
+@@ -2528,6 +2528,15 @@
+ preparation producers outside engines. Imported mapped inputs bypass policy execution and
+ are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
+ component boundary; T (U7) delivers the first full product table. A small table may be
+ built earlier for a named use, but no full grid gates silicon. Passing G4/G7 is not a
+@@ -2690,6 +2699,15 @@
+ native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
+ readiness process for Blackhole before U-P15. Readiness does not require a full table.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
+ is compared with independent models only where abstractions and inputs match. Required L1
+ runs for each applicable admitted capability. L2 tool selection is optional and recorded
+@@ -2963,6 +2981,15 @@
+ - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+   U0023; full-table work is later, not a kernel prerequisite.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
+ EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
+@@ -3090,6 +3117,15 @@
+ Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
+ placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: execute only the authorized phase. B (U4a) implements the accepted small component
+ slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
+ U-P7 T in U7. Unsupported work refuses, never disappears from a claimed complete layer.
+@@ -3174,6 +3210,15 @@
+ releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains open if host
+ evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
+ any simulator-performance claim and final closure. No implied waiver from proceeding.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
+ admit npu-m256 at declared representative points, and execute G5's verification obligations.
+--- a/docs/decisions/U0011-the-native-engine-core.md
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -916,3 +916,134 @@
+ new wrapper/selection requirements are prospective B/coordinator-owned records. No old
+ K2 HostRecord, selector, placement or runtime authority authorizes new component identities.
+ Human installation, genuine L1, U0024 limits and later public authorization remain separate.
++
++## Build provenance scope amendment — prospective human installation
++
++This amendment implements Javid's direction to reconsider exhaustive construction-read
++tracing while preserving build identity, testing and reproducibility. It replaces the
++mandatory construction-read-capture prerequisite introduced in later U4 preparation
++proposals; it does not retrospectively alter their receipts or verdicts. Until human
++installation and the reviewed implementation transition, existing executable gates remain
++in force. A historical requirement preserved in an older proposal is not a competing
++requirement for the successor prepared under this amendment.
++
++### Required build and result provenance
++
++For a new admitted native candidate, retain an exact source commit/tree and declared
++source inventory, generated-input bytes and their producer identities, locked dependency
++versions/checksums/features, compiler/linker and image identities, and complete per-mode
++build commands and explicit environment. Build from a clean source export into fresh
++build-output directories using the accepted tools and verified dependency cache. A cache
++of verified dependency source archives is reusable; an unexplained prior target directory
++is not clean-build evidence. Record success/failure, exit status, ordinary stdout/stderr,
++resource/deadline outcomes, actual executable hashes and generated output identities.
++Do not silently substitute tools, dependencies, generated inputs or build flags.
++
++Each run binds the actual executable and relevant Python consumer identities, workload,
++hardware, assumptions/model and input identities, result bytes and executed checks. Future
++product tables bind their run/result records and preparation/assembly implementation.
++The provenance chain is table/result -> run -> executable -> build record -> source and
++inputs. These records attest declared inputs and observed outputs; they do not prove an
++exhaustive dynamic read set or independence from all ambient state. No self-authorizing
++build receipt, test-supplied identity or fabricated human/reviewer acceptance is permitted.
++
++Retain scope-appropriate native/Python tests, independent expectations and consumer checks,
++semantic fault/restoration controls, producer-disabled saved-input replay and required
++fresh-process/debug-release result determinism. Reuse unchanged evidence only with exact
++identity and scope justification. Clean rebuild verification is required for a claim of
++binary reproducibility: compare actual executable hashes from independent fresh-output
++builds of the same declared inputs/mode. Existing qualifying evidence may be reused;
++there is no repeated-build requirement for documentation-only changes. A mismatch must be
++investigated and reported, not normalized away or called bit-reproducible. Debug and release
++executables may differ; their comparable simulation results must meet existing determinism
++requirements. No exhaustive tracing is needed for this bounded reproducibility evidence.
++
++### Exhaustive construction tracing is optional
++
++Compiler/build-script/linker syscall tracing, canaries, construction-read closure and
++trace-specific diagnostic classification are optional investigations, not prerequisites
++for U4 build provenance, component activation or table provenance. This removes the added
++mandatory gate rather than deferring it to an automatic later sprint gate. A future need
++for stronger assurance requires its own justified scope and authorization.
++
++Preserve all historical trace files, NONE CAPTURED statuses and unresolved candidate-03
++records. Never set read_audit_complete=true on the strength of this amendment. Separate
++future build-provenance acceptance from optional read-audit status and from runtime startup
++assurance through an explicit reviewed record/consumer version transition. Reject stale,
++missing or mismatched required provenance; merely deleting the current boolean check is
++not an implementation of this policy. Current K2 records/authority are not migrated.
++
++Ordinary compiler progress and warnings are retained build diagnostics, not evidence of
++tracer loss and not automatically build failures. Keep actual compiler exit status, Cargo
++completion/artifact checks where applicable, lint/clippy warning policy, resource/deadline
++limits, complete bounded output retention and failure receipts. A truncated or incomplete
++required receipt cannot become success. The proposed empty compiler-stderr allowlists and
++per-line tracing-policy approval are not part of the ordinary build gate. Optional tracing
++must still report its own unknown/lost/incomplete evidence honestly; do not weaken an old
++trace parser to manufacture a pass.
++
++### Boundaries that do not change
++
++This amendment does not change simulator event/resource tracing or required runtime
++observations. It preserves exact executable/consumer selection, input/result admission,
++independent result checking, D3 refusal semantics, immutable deployment and genuine human
++authority. A-F3 startup-integrity assurance remains a separate unresolved public-first-use
++gate. No stopped verification is retried, reconstructed or transferred by this amendment.
++Trusted startup evidence cannot be inferred from a source hash, a clean build or a positive
++simulation run. Genuine L1 workings, the affected /2 restriction, incident disclosure,
++U0024 obligations, reference readiness and U4/G3a closure requirements are unchanged.
++No installation, native build/run, deployment, campaign or new authority is authorized by
++preparing or reviewing this amendment.
++
++
++## Prospective component ordinary-image activation amendment
++
++This addition requires exact separate human installation. It creates no execution
++permission. Historical component decisions, /2 consumers, selections and receipts
++retain their original subjects; K2 authority cannot authorize a component identity.
++
++The component /3 production route shall use the accepted digest-pinned native image
++and ordinary debug/release executables with one admitted saved stdin stream and EOF.
++Private cfg(test) witnesses shall not supply ordinary-process entry counts. Consume
++success through structural validation, the matching /3 checker and independently
++frozen literals/input/full-engine anchors. Retain bounded attempts and complete
++framing, streams, status, slot, resource and exact-created-ID cleanup evidence before
++interpretation. Reopen and independently consume all six bound initial receipts
++before replay; preserve failed attempts and the historical 124/1368 schedule.
++The 120/1344 proposal remains unapproved. Public acceptance requires a separately
++reviewed ordinary-EOF campaign contract and implementation, not private acceptance/1.
++
++The Python bootstrap (including typing's compatibility pseudo-modules), interpreter,
++stdlib/cache candidates, extensions, loader/DSOs and configuration require external
++immutable bindings. An externally supplied manifest digest is not self-authorizing;
++private read-only copies and a benign import launch do not establish immutable
++placement, exhaustive loaded-code assurance or A-F3 closure. The stopped real-D11
++startup-substitution/defense-revert activity remains deferred and must not be retried,
++transferred or replaced with an ordinary positive claim. Required unavailable evidence
++continues to block public first use unless separately resolved by the original reviewer
++and exact human decisions; this amendment supplies no waiver.
++
++D3 inventory/2, record/2, selector/2 and exact envelope/provenance laws remain separate.
++The prospective v6 adapter uses the same ordinary EOF transport but leaves entry/site
++observations unobserved. An expected zero-entry value, exact message, null pointer or
++source hash does not establish universal guard reach. D3 installation, review and
++execution permission require their own exact subject and decision.
++
++Before activation source freeze, reconcile A/B adapter, consumer, preparation,
++validation-test, startup and any installed proposal postimages. Then bind actual
++BuildInputs, generated identity, accepted tools/lock/cache/features and reviewed
++ordinary build provenance with retained status, streams, artifacts and full-ID cleanup. No historical binary inherits later source identities.
++Build execution, root placement, immutable public environment, genuine
++selector/HostRecord/profile authority and public campaign are separate gates. Missing
++construction reads and the three historical candidate-03 gaps remain unresolved.
++The /2 same-engine/same-instant acquired-release first-use restriction applies in all
++directions, including write/write and unclassified cases; no /2 repair or waiver is
++made. Genuine human L1 workings and U0024 remain unchanged; no qualification or U4
++closure follows.
++
++For the successor, runtime-review/2 binds ordinary build provenance and separately
++supplied startup assurance; optional construction-read evidence is not a prerequisite.
++D3 negative-review/3 binds that same runtime-review/2 plus its exact finite refusal
++subject/evidence. Their selectors and human decisions remain separate. Historical
++review/1 and negative-review/2 cannot be silently reinterpreted or made current by
++setting read_audit_complete. The K2 authority chain is unchanged.
+--- a/docs/execution-plan.md
++++ b/docs/execution-plan.md
+@@ -239,6 +239,7 @@
+ | **Parallel progress** | If reference feasibility/access is unresolved, retain the open G3a/campaign gate and proceed only with independently ready U6 tasks; do not call U4/U5 closed |
+ | **Not in this sprint** | No C2 depth, threads, mandatory FP8/os-tiled/ragged grid or automatic silicon measurement authorization |
+ | **Effort** | Re-estimate M/K1/K2/B/R; old full-table T effort is not a current U4 forecast |
++| **Build provenance** | U0011 build-provenance scope amendment: declared source/tool/dependency/generated-input identities, clean builds, executable/run/result bindings and scoped reproducibility evidence remain required. Exhaustive construction-read tracing is optional; A-F3 startup assurance and all other activation gates remain separate. |
+ 
+ ### U5 · Silicon I: the large-core class
+ 
+--- a/docs/prompts/U-P11a-native-engine-kernel.md
++++ b/docs/prompts/U-P11a-native-engine-kernel.md
+@@ -37,6 +37,15 @@
+ - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+   U0023; full-table work is later, not a kernel prerequisite.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
+ EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
+--- a/docs/prompts/U-P11b-native-engine-models-and-executor.md
++++ b/docs/prompts/U-P11b-native-engine-models-and-executor.md
+@@ -19,6 +19,15 @@
+ Mapping policy identifiers are provenance, not instructions for the native engine to invoke
+ Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
+ placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: execute only the authorized phase. B (U4a) implements the accepted small component
+ slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
+--- a/docs/prompts/U-P11c-native-engine-diagnostics-and-g5.md
++++ b/docs/prompts/U-P11c-native-engine-diagnostics-and-g5.md
+@@ -16,6 +16,15 @@
+ releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains open if host
+ evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
+ any simulator-performance claim and final closure. No implied waiver from proceeding.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
+ admit npu-m256 at declared representative points, and execute G5's verification obligations.
+--- a/docs/prompts/U-P7-mapping-grid-and-the-first-full-table.md
++++ b/docs/prompts/U-P7-mapping-grid-and-the-first-full-table.md
+@@ -14,6 +14,15 @@
+ Extend U2's saved-input path with the existing TaskGraph; policies are versioned
+ preparation producers outside engines. Imported mapped inputs bypass policy execution and
+ are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
+ component boundary; T (U7) delivers the first full product table. A small table may be
+--- a/docs/prompts/U-P8-L1-limits-and-L2-differential.md
++++ b/docs/prompts/U-P8-L1-limits-and-L2-differential.md
+@@ -21,6 +21,15 @@
+ measurements, cloud spend or silently fabricated fields. Identify contract extensions and
+ native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
+ readiness process for Blackhole before U-P15. Readiness does not require a full table.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
+ is compared with independent models only where abstractions and inputs match. Required L1
+--- a/native/tools/component_candidate.py
++++ b/native/tools/component_candidate.py
+@@ -75,7 +75,9 @@
+     return run.returncode
+ 
+ 
+-def docker(scratch: Path, mode: str, tag: str) -> list[str]:
++def docker(
++    scratch: Path, mode: str, tag: str, *, environment: dict[str, str] | None = None
++) -> list[str]:
+     receipts = scratch / "receipts" / mode / tag
+     receipts.mkdir(parents=True, exist_ok=True)
+     args = [
+@@ -112,11 +114,23 @@
+     ]:
+         src.mkdir(parents=True, exist_ok=True)
+         args += ["--mount", f"type=bind,src={src},dst={dst}" + (",readonly" if ro else "")]
+-    return args + [
+-        "--entrypoint",
+-        "/usr/bin/env",
+-        IMAGE,
+-        "-i",
++    return (
++        args
++        + ["--entrypoint", "/usr/bin/env", IMAGE, "-i"]
++        + container_environment(tag, environment)
++    )
++
++
++def container_environment(tag: str, environment: dict[str, str] | None = None) -> list[str]:
++    """Exact replacement for declared production inputs; historical defaults stay unchanged."""
++    if environment is not None:
++        if not environment or any(
++            not key or "=" in key or "\x00" in key or "\x00" in value
++            for key, value in environment.items()
++        ):
++            raise ValueError("explicit bounded environment strings required")
++        return [key + "=" + value for key, value in sorted(environment.items())]
++    return [
+         "PATH=" + BIN + ":/usr/local/cargo/bin:/usr/bin:/bin",
+         "CARGO_HOME=/cargo-home",
+         "CARGO_NET_OFFLINE=true",
+--- a/native/tools/component_container_guard.py
++++ b/native/tools/component_container_guard.py
+@@ -189,6 +189,7 @@
+     cap: int = 1024**2,
+     stderr_cap: int | None = None,
+     stdin_bytes: bytes | None = None,
++    environment: dict[str, str] | None = None,
+ ) -> dict[str, Any]:
+     directory = directory.resolve()
+     directory.mkdir(parents=True, exist_ok=False)
+@@ -205,6 +206,7 @@
+             "cap": cap,
+             "stderr_cap": cap if stderr_cap is None else stderr_cap,
+             "stdin": stdin_bytes is not None,
++            **({"environment": environment} if environment is not None else {}),
+         },
+     )
+     read_fd, write_fd = os.pipe()
+@@ -219,6 +221,7 @@
+                 str(directory),
+                 str(read_fd),
+             ],
++            env=environment,
+             pass_fds=(read_fd,),
+             start_new_session=True,
+             stdin=subprocess.DEVNULL,
+--- /dev/null
++++ b/native/tools/component_ordinary_build.py
+@@ -0,0 +1,597 @@
++"""Finite ordinary component construction recipe. Planning is not execution authority.
++
++Reuse the accepted construction specification and full-ID guardian. This module
++adds no tracer, canary, diagnostic allowlist or startup assurance generation.
++"""
++
++from __future__ import annotations
++
++from pathlib import Path
++from typing import Any
++
++from uarch_contract.hashing import content_hash
++
++from rkuarch.engines.native.component_construction import invocation
++from rkuarch.engines.native.component_records import IMAGE, ComponentBuildInputsV3
++
++HOST_ENVIRONMENT = {"PATH": "/usr/bin:/bin", "LC_ALL": "C", "HOME": "/nonexistent"}
++
++LIMITS = {
++    "timeout_s": 600,
++    "stdout_bytes": 16 * 1024**2,
++    "stderr_bytes": 16 * 1024**2,
++    "cpus": 1,
++    "memory_bytes": 2 * 1024**3,
++    "pids": 256,
++    "nofile": 1024,
++}
++
++
++def plan(
++    prepared_root: Path, output_root: Path, mode: str, inputs: ComponentBuildInputsV3
++) -> dict[str, Any]:
++    """Render exact pure command/paths; caller must bind and verify every input."""
++    if (
++        not prepared_root.is_absolute()
++        or not output_root.is_absolute()
++        or any(c in str(p) for p in (prepared_root, output_root) for c in (",", "\n", "\x00"))
++    ):
++        raise ValueError("ordinary build roots must be explicit absolute paths")
++    prepared, output = prepared_root.resolve(), output_root.resolve()
++    if (
++        prepared != prepared_root
++        or output != output_root
++        or output.is_relative_to(prepared)
++        or prepared.is_relative_to(output)
++    ):
++        raise ValueError("ordinary build roots must be disjoint and canonical")
++    inputs = ComponentBuildInputsV3.model_validate(inputs.model_dump(mode="json"))
++    argv, environment = invocation([v.model_dump(mode="json") for v in inputs.mode_configs], mode)
++    layout = {name: str(output / name) for name in ("target", "outputs", "receipts")}
++    layout["artifact"] = str(output / "target" / mode / "uarch-engine")
++    mounts = {
++        "/work": str(output / "inputs/source"),
++        "/cargo-home": str(output / "inputs/cache"),
++        "/controls": str(output / "inputs/source/docs/reviews/U4-A-K2-construction-v1/inputs"),
++    }
++    args = [
++        "--platform",
++        "linux/amd64",
++        "--network",
++        "none",
++        "--read-only",
++        "--user",
++        "1000:1000",
++        "--cap-drop",
++        "ALL",
++        "--security-opt",
++        "no-new-privileges",
++        "--tmpfs",
++        "/tmp",
++        "--cpus",
++        str(LIMITS["cpus"]),
++        "--memory",
++        str(LIMITS["memory_bytes"]),
++        "--pids-limit",
++        str(LIMITS["pids"]),
++        "--ulimit",
++        f"nofile={LIMITS['nofile']}:{LIMITS['nofile']}",
++        "--workdir",
++        "/work/native",
++    ]
++    for target, origin in sorted(mounts.items()):
++        args += ["--mount", f"type=bind,src={origin},dst={target},readonly"]
++    for target, name in (("/target", "target"), ("/outputs", "outputs"), ("/receipts", "receipts")):
++        args += ["--mount", f"type=bind,src={layout[name]},dst={target}"]
++    args += ["--entrypoint", "/usr/bin/env", IMAGE, "-i"]
++    args += [key + "=" + value for key, value in sorted(environment.items())]
++    args += argv
++    return {
++        "format": "uarch-component-ordinary-build-plan/1",
++        "mode": mode,
++        "prepared_root": str(prepared),
++        "output_root": str(output),
++        "build_input_hash": content_hash(inputs),
++        "image_digest": IMAGE,
++        "child_argv": argv,
++        "environment": environment,
++        "container_argv": args,
++        "guardian_environment": dict(HOST_ENVIRONMENT),
++        "readonly_mounts": mounts,
++        "layout": layout,
++        "limits": dict(LIMITS),
++    }
++
++
++def create_outputs(value: dict[str, Any]) -> None:
++    """Reserve a fresh private output root; never clean/reuse an old target."""
++    root = Path(value["output_root"])
++    root.mkdir(parents=True, exist_ok=False)
++    # B record_attempt exclusively creates target/ and outputs/ after input validation.
++    (root / "receipts").mkdir(exist_ok=False)
++
++
++def resource_policy() -> dict[str, Any]:
++    from validation.component.runtime_campaign import POLICY
++
++    return {
++        **POLICY,
++        "max_workers": 1,
++        "per_worker_memory_bytes": LIMITS["memory_bytes"],
++        "per_call_seconds": LIMITS["timeout_s"],
++        "nofile": LIMITS["nofile"],
++        "process_limit_required": LIMITS["pids"],
++    }
++
++
++def _resource_check(value: dict[str, Any]) -> None:
++    """Verify saved visible-hierarchy observations using the existing budget arithmetic."""
++    import json
++
++    from uarch_contract.hashing import canonical_json
++
++    from validation.component.runtime_campaign import helpers
++
++    value = json.loads(canonical_json(value))
++    affinity = value["affinity"]
++    if (
++        not affinity
++        or len(set(affinity)) != len(affinity)
++        or any(type(x) is not int or x < 0 for x in affinity)
++    ):
++        raise ValueError("ordinary resource affinity")
++    mount, membership = Path(value["mount"]), Path(value["membership"])
++    if (
++        not mount.is_absolute()
++        or not membership.is_absolute()
++        or value["mounted_root"] != "/"
++        or ".." in membership.parts
++    ):
++        raise ValueError("ordinary visible resource hierarchy")
++    current = mount / membership.relative_to("/")
++    paths = []
++    while True:
++        paths.append(str(current))
++        if current == mount:
++            break
++        current = current.parent
++    if [v["path"] for v in value["observed_cgroups"]] != paths:
++        raise ValueError("ordinary complete resource ancestors")
++    quotas, memory = [], []
++    for item in value["observed_cgroups"]:
++        if "interface" in item:
++            if item != {
++                "path": str(mount),
++                "interface": "hierarchy-root-no-bandwidth-or-memory-interface",
++            }:
++                raise ValueError("ordinary resource root interface")
++            continue
++        quota, period = item["cpu.max"].split()
++        if int(period) <= 0 or (quota != "max" and int(quota) <= 0):
++            raise ValueError("ordinary CPU observation")
++        if quota != "max":
++            quotas.append([int(quota), int(period)])
++        used, limit = item["memory.current"], item["memory.max"]
++        if type(used) is not int or used < 0 or (limit != "max" and int(limit) < 0):
++            raise ValueError("ordinary memory observation")
++        if limit != "max":
++            memory.append([int(limit), used])
++    if value["cpu_quotas"] != quotas or value["cgroup_memory_limits"] != memory:
++        raise ValueError("ordinary observed resource arithmetic")
++    policy = resource_policy()
++    actual = helpers()["select_resources"](
++        affinity,
++        quotas,
++        value["available_memory_bytes"],
++        memory,
++        reserve=policy["memory_reserve_bytes"],
++        per_worker=policy["per_worker_memory_bytes"],
++        tasks=1,
++    )
++    if any(value.get(key) != item for key, item in actual.items()):
++        raise ValueError("ordinary default resource selection")
++
++
++def verify_transport(
++    root: Path, record: dict[str, Any], declaration: dict[str, Any], receipt: dict[str, Any]
++) -> list[dict[str, str]]:
++    """Reconsume exact ordinary command, bounded resources and owned cleanup ledger."""
++    import json
++    import re
++
++    from uarch_contract.hashing import sha256
++
++    from validation.component.ordinary_eof_acceptance import GUARD_FILES, read_bound
++
++    if (
++        set(record)
++        != {
++            "format",
++            "plan",
++            "resources",
++            "guardian",
++            "parent_cleanup",
++            "failure",
++            "construction_artifacts",
++        }
++        or record["format"] != "component-ordinary-build-transport/1"
++        or record["failure"] is not None
++    ):
++        raise ValueError("complete ordinary build transport")
++    saved = record["plan"]
++    build_file = declaration["inputs"]["build_inputs"][0]
++    inputs = ComponentBuildInputsV3.model_validate_json(
++        read_bound(root, build_file["path"], build_file["byte_hash"])
++    )
++    rendered = plan(
++        Path(saved["prepared_root"]), Path(saved["output_root"]), declaration["mode"], inputs
++    )
++    if (
++        saved != rendered
++        or saved["child_argv"] != declaration["argv"]
++        or saved["environment"] != declaration["environment"]
++    ):
++        raise ValueError("exact ordinary outer/native invocation")
++    _resource_check(record["resources"])
++    if set(record["guardian"]) != set(GUARD_FILES) | {"stdout", "stderr"}:
++        raise ValueError("complete ordinary guardian ledger")
++    required = []
++    guards = {}
++    for name, item in record["guardian"].items():
++        if item["path"] != "container/" + name:
++            raise ValueError("ordinary guardian path")
++        raw = read_bound(
++            root,
++            item["path"],
++            item["byte_hash"],
++            max(LIMITS["stdout_bytes"], LIMITS["stderr_bytes"]),
++        )
++        required.append(item)
++        if name in GUARD_FILES:
++            guards[name] = json.loads(raw)
++        elif sha256(raw) != receipt["streams"][name]["byte_hash"]:
++            raise ValueError("ordinary original stream equality")
++    intent, prior, created, started, cleanup = (guards[name] for name in GUARD_FILES)
++    cid, owner = created["container_id"], created["owner"]
++    if re.fullmatch(r"[0-9a-f]{64}", cid) is None or re.fullmatch(r"[0-9a-f]{32}", owner) is None:
++        raise ValueError("ordinary full container identity")
++    if (
++        intent["owner"] != owner
++        or cleanup["owner"] != owner
++        or intent["name"] != cleanup["name"]
++        or intent["name"] != "u4-private-" + owner
++    ):
++        raise ValueError("ordinary guardian ownership")
++    ids = [v["container_id"] for v in prior["containers"]]
++    if (
++        len(ids) != len(set(ids))
++        or any(re.fullmatch(r"[0-9a-f]{64}", x) is None for x in ids)
++        or cid in ids
++    ):
++        raise ValueError("ordinary pre-existing container preservation")
++    if started["container_id"] != cid or cleanup["container_id"] != cid:
++        raise ValueError("ordinary created/started/cleanup ID join")
++    if (
++        cleanup["format"] != "private-container-cleanup/1"
++        or cleanup["stopped"] is not True
++        or cleanup["removed"] is not True
++        or cleanup["reason"] != "completed"
++        or type(cleanup["exit_code"]) is not int
++        or cleanup["exit_code"] != receipt["exit_code"]
++        or any(k in cleanup for k in ("error", "cleanup_error", "never_created"))
++    ):
++        raise ValueError("ordinary verified cleanup completion")
++    if (
++        intent["args"] != saved["container_argv"]
++        or intent["timeout"] != LIMITS["timeout_s"]
++        or intent["cap"] != LIMITS["stdout_bytes"]
++        or intent["stderr_cap"] != LIMITS["stderr_bytes"]
++        or intent["stdin"] is not False
++        or intent.get("environment") != HOST_ENVIRONMENT
++    ):
++        raise ValueError("ordinary exact guardian command/limits")
++    parent_file = record["parent_cleanup"]
++    parent = json.loads(read_bound(root, parent_file["path"], parent_file["byte_hash"]))
++    if parent != {"format": "component-ordinary-build-parent-cleanup/1", "receipts": [cleanup]}:
++        raise ValueError("ordinary exact parent cleanup")
++    required.append(parent_file)
++    artifacts = record["construction_artifacts"]
++    names = [v["path"] for v in artifacts]
++    if names != sorted(set(names)) or f"receipts/{declaration['mode']}.map" not in names:
++        raise ValueError("ordinary construction map/artifact inventory")
++    total = 0
++    for item in artifacts:
++        if not item["path"].startswith("receipts/"):
++            raise ValueError("ordinary construction artifact path")
++        raw = read_bound(root, item["path"], item["byte_hash"], 64 * 1024**2)
++        total += len(raw)
++        required.append(item)
++    if total > 256 * 1024**2:
++        raise ValueError("ordinary retained construction artifact bound")
++    return required
++
++
++def transport(root: Path, spec: dict[str, Any], value: dict[str, Any]) -> dict[str, Any]:
++    """Later bounded guardian callback; this task exercises it only with inline mocks."""
++    import shutil
++
++    from uarch_contract.hashing import sha256
++
++    from native.tools import component_container_guard as guardian
++    from validation.component.runtime_campaign import helpers
++
++    if spec != {
++        "argv": value["child_argv"],
++        "environment": value["environment"],
++        "limits": {key: LIMITS[key] for key in ("timeout_s", "stdout_bytes", "stderr_bytes")},
++    }:
++        raise ValueError("ordinary transport declaration mismatch")
++    if str(root.resolve()) != value["output_root"]:
++        raise ValueError("ordinary actual output root")
++    record: dict[str, Any] = {
++        "format": "component-ordinary-build-transport/1",
++        "plan": value,
++        "resources": None,
++        "guardian": {},
++        "parent_cleanup": None,
++        "failure": None,
++        "construction_artifacts": [],
++    }
++    cleanup: dict[str, Any] = {}
++    try:
++        record["resources"] = helpers()["discover"](resource_policy(), 1)
++        _resource_check(record["resources"])
++        cleanup = guardian.run_container(
++            root / "container",
++            value["container_argv"],
++            timeout=LIMITS["timeout_s"],
++            cap=LIMITS["stdout_bytes"],
++            stderr_cap=LIMITS["stderr_bytes"],
++            environment=HOST_ENVIRONMENT,
++        )
++    except BaseException as error:
++        record["failure"] = repr(error)
++    finally:
++        try:
++            parent = {
++                "format": "component-ordinary-build-parent-cleanup/1",
++                "receipts": guardian.cleanup(root),
++            }
++            guardian.save(root / "parent-cleanup.json", parent)
++            record["parent_cleanup"] = {
++                "path": "parent-cleanup.json",
++                "byte_hash": sha256((root / "parent-cleanup.json").read_bytes()),
++            }
++        except BaseException as error:
++            record["failure"] = str(record["failure"]) + "; cleanup: " + repr(error)
++    observed: dict[str, int | None] = {}
++    complete: dict[str, bool] = {}
++    truncated: dict[str, bool | None] = {}
++    for name in ("stdout", "stderr"):
++        original = root / "container" / name
++        cap = LIMITS[name + "_bytes"]
++        if original.is_file() and not original.is_symlink():
++            size = original.stat().st_size
++            observed[name] = size
++            complete[name] = size <= cap
++            truncated[name] = False
++            # Retain observed overshoot as failure; never truncate into successful evidence.
++            shutil.copyfile(original, root / name)
++        else:
++            observed[name], complete[name], truncated[name] = None, False, None
++    for name in (
++        "intent.json",
++        "pre-existing.json",
++        "created.json",
++        "started.json",
++        "cleanup.json",
++        "stdout",
++        "stderr",
++    ):
++        path = root / "container" / name
++        if path.is_file() and not path.is_symlink():
++            record["guardian"][name] = {
++                "path": "container/" + name,
++                "byte_hash": sha256(path.read_bytes()),
++            }
++    artifact = root / "target" / value["mode"] / "uarch-engine"
++    if (
++        artifact.is_file()
++        and not artifact.is_symlink()
++        and 0 < artifact.stat().st_size <= 256 * 1024**2
++    ):
++        shutil.copyfile(artifact, root / "outputs/uarch-engine")
++        (root / "outputs/uarch-engine").chmod(0o555)
++    for artifact_file in sorted((root / "receipts").rglob("*")):
++        if artifact_file.is_symlink():
++            record["failure"] = "unsafe construction artifact"
++        elif artifact_file.is_file():
++            if artifact_file.stat().st_size > 64 * 1024**2:
++                record["failure"] = "construction artifact over limit"
++            else:
++                record["construction_artifacts"].append(
++                    {
++                        "path": str(artifact_file.relative_to(root)),
++                        "byte_hash": sha256(artifact_file.read_bytes()),
++                    }
++                )
++    guardian.save(root / "transport.json", record)
++    return {
++        "exit_code": cleanup.get("exit_code"),
++        "completed": record["failure"] is None and cleanup.get("reason") == "completed",
++        "timed_out": cleanup.get("reason") == "deadline",
++        "resource_failure": record["failure"],
++        "observed_bytes": observed,
++        "stream_complete": complete,
++        "stream_truncated": truncated,
++    }
++
++
++def construct(prepared: Path, output: Path, mode: str, consumers: dict[str, Any]) -> dict[str, Any]:
++    """Later build only: stage/recheck inputs, retain failures, freeze actual output.
++
++    The independent reviewer still freezes acceptance, required-check support and
++    startup assurance. This producer emits no accepted review or runtime authority.
++    """
++    import json
++    import shutil
++
++    from uarch_contract.hashing import canonical_json
++
++    from rkuarch.engines.native.component_build_review import (
++        SOURCE,
++        derive_declaration,
++        file_binding,
++    )
++    from rkuarch.engines.native.component_records import ComponentBuildReceiptV2
++    from validation.component.ordinary_build_acceptance import consume_build
++    from validation.component.ordinary_build_receipt import record_attempt
++
++    source = prepared / "source"
++    build_file = file_binding(source, "private-component/BuildInputs.json")
++    inputs = ComponentBuildInputsV3.model_validate_json((source / build_file["path"]).read_bytes())
++    engine = json.loads((source / "private-component/engine.json").read_bytes())
++    value = plan(prepared, output, mode, inputs)
++    create_outputs(value)
++    (output / "inputs").mkdir()
++    shutil.copytree(source, output / "inputs/source", symlinks=True)
++    shutil.copytree(prepared / "cache", output / "inputs/cache", symlinks=True)
++    for name in ("source.tar", "source-commit.raw"):
++        shutil.copyfile(prepared / name, output / "inputs" / name)
++    for item in [*consumers["external_files"], consumers["python_executable"]]:
++        target = output / "inputs/python" / item["path"]
++        target.parent.mkdir(parents=True, exist_ok=True)
++        shutil.copyfile(Path("/") / item["path"], target)
++    expected = {
++        "engine": engine,
++        "build_inputs": build_file,
++        "build_input_hash": content_hash(inputs),
++        "source_commit": inputs.source_commit,
++        "source_files": [v.model_dump(mode="json") for v in inputs.source_files],
++        "tool_inputs": inputs.tool_inputs_file.model_dump(mode="json"),
++        "tool_inputs_hash": inputs.tool_inputs_hash,
++        "mode_configs": [v.model_dump(mode="json") for v in inputs.mode_configs],
++        "generated_identity_output_paths": list(inputs.generated_identity_output_paths),
++        "consumers": consumers,
++        "consumer_hash": content_hash(consumers),
++    }
++    declaration = derive_declaration(output, expected, mode)
++    limits = {key: LIMITS[key] for key in ("timeout_s", "stdout_bytes", "stderr_bytes")}
++    (output / "plan.json").write_text(canonical_json(value))
++    receipt = record_attempt(
++        output, declaration, limits, lambda root, spec: transport(root, spec, value)
++    )
++    # Refuse changed staged inputs, including the accepted source cache, after return.
++    if derive_declaration(output, expected, mode) != declaration:
++        raise ValueError("ordinary inputs changed during construction")
++    expectation = {
++        "format": "component-ordinary-build-expectation/1",
++        "declaration": declaration,
++        "executable": receipt["executable"],
++        **limits,
++    }
++    (output / "expectation.json").write_text(canonical_json(expectation))
++    consumed = consume_build(output, receipt, expectation)
++    transport_record = json.loads((output / "transport.json").read_bytes())
++    verify_transport(output, transport_record, declaration, receipt)
++    (output / "consumption.json").write_text(canonical_json(consumed))
++    (output / "environment.json").write_text(canonical_json(declaration["environment"]))
++    outer = ComponentBuildReceiptV2.model_validate(
++        {
++            "format": "uarch-component-build-receipt/2",
++            "build_input_hash": content_hash(inputs),
++            "engine": engine,
++            "mode": mode,
++            "executable": receipt["executable"],
++            "image_digest": value["image_digest"],
++            "generated_identity": file_binding(
++                output, SOURCE + inputs.generated_identity_output_paths[0]
++            ),
++            "ordinary_receipt": file_binding(output, "ordinary-build-receipt.json"),
++            "environment": file_binding(output, "environment.json"),
++            "limitations": [
++                "producer evidence; not independent acceptance",
++                "no startup assurance or authority",
++            ],
++        }
++    )
++    # Per-build relative links must be rebased and independently frozen when assembling
++    # a two-mode runtime payload; old payloads/binaries are never silently repointed.
++    (output / "component-build-receipt.json").write_text(canonical_json(outer))
++    return consumed
++
++
++def assemble_links(destination: Path, builds: dict[str, Path]) -> dict[str, Any]:
++    """Stage two retained builds under one fresh root; never create an accepted review.
++
++    Targets are excluded: executables, logs, map/wrapper artifacts and all declared
++    inputs stay retained. Review/startup/authority records must be supplied separately.
++    """
++    import shutil
++
++    from uarch_contract.hashing import canonical_json
++
++    from rkuarch.engines.native.component_build_review import file_binding
++    from rkuarch.engines.native.component_records import ComponentBuildReceiptV2
++
++    if list(builds) != ["debug", "release"] or len({p.resolve() for p in builds.values()}) != 2:
++        raise ValueError("separate ordered build roots required")
++    if not destination.is_absolute() or any(
++        destination.resolve().is_relative_to(p.resolve())
++        or p.resolve().is_relative_to(destination.resolve())
++        for p in builds.values()
++    ):
++        raise ValueError("fresh disjoint assembly destination required")
++    shutil.copytree(builds["debug"] / "inputs/source", destination, symlinks=True)
++    rows, executables = [], []
++    for mode, source in builds.items():
++        prefix = "builds/" + mode + "/"
++        target = destination / prefix
++        shutil.copytree(source, target, ignore=shutil.ignore_patterns("target"), symlinks=True)
++        outer = ComponentBuildReceiptV2.model_validate_json(
++            (target / "component-build-receipt.json").read_bytes()
++        )
++        if outer.mode != mode:
++            raise ValueError("assembled build mode mismatch")
++        value = outer.model_dump(mode="json")
++        for name in ("executable", "ordinary_receipt", "environment"):
++            value[name]["path"] = prefix + value[name]["path"]
++        generated_path = value["generated_identity"]["path"]
++        if not generated_path.startswith("inputs/source/"):
++            raise ValueError("staged generated path required")
++        generated_path = generated_path.removeprefix("inputs/source/")
++        value["generated_identity"] = file_binding(destination, generated_path)
++        if value["generated_identity"]["byte_hash"] != outer.generated_identity.byte_hash:
++            raise ValueError("same generated bytes across both modes")
++        (target / "payload-build-receipt.json").write_text(canonical_json(value))
++        rows.append(
++            {
++                "mode": mode,
++                "root": prefix.rstrip("/"),
++                **{
++                    key: file_binding(destination, prefix + name)
++                    for key, name in (
++                        ("expectation", "expectation.json"),
++                        ("receipt", "ordinary-build-receipt.json"),
++                        ("transport", "transport.json"),
++                    )
++                },
++            }
++        )
++        executables.append(
++            {
++                "mode": mode,
++                "executable": value["executable"],
++                "receipt": file_binding(destination, prefix + "payload-build-receipt.json"),
++            }
++        )
++    result = {
++        "format": "component-ordinary-build-links/1",
++        "builds": rows,
++        "executables": executables,
++        "authority": None,
++        "startup_assurance": "not-supplied",
++        "required_checks_review": "not-supplied",
++    }
++    (destination / "ordinary-build-links.json").write_text(canonical_json(result))
++    return result
+--- a/native/tools/component_runtime_candidate.py
++++ b/native/tools/component_runtime_candidate.py
+@@ -16,10 +16,17 @@
+ import tarfile
+ from copy import deepcopy
+ from pathlib import Path
++from types import ModuleType
++from typing import Any
+ 
+ from uarch_contract.hashing import canonical_json, content_hash, sha256
+ 
+-from rkuarch.engines.native.component_records import ComponentBuildInputs, ComponentBuildTrust
++from rkuarch.engines.native.component_construction import construction_modes, invocation
++from rkuarch.engines.native.component_records import (
++    ComponentBuildInputsV3,
++    ComponentBuildTrust,
++    parse_component_build_inputs,
++)
+ from rkuarch.engines.native.records import ToolInputs
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+@@ -33,31 +40,33 @@
+     path.write_text(canonical_json(value))
+ 
+ 
+-def binding(root: Path, path: Path) -> dict:
++def binding(root: Path, path: Path) -> dict[str, Any]:
+     return {"path": str(path.relative_to(root)), "byte_hash": sha256(path.read_bytes())}
+ 
+ 
+-def wrapper(root: Path = ROOT):
++def wrapper(root: Path = ROOT) -> ModuleType:
+     path = root / "native/tools/component_candidate.py"
+     spec = importlib.util.spec_from_file_location("accepted_component_wrapper", path)
++    if spec is None or spec.loader is None:
++        raise ValueError("component wrapper source loader required")
+     module = importlib.util.module_from_spec(spec)
+     spec.loader.exec_module(module)
+     return module
+ 
+ 
+-def focused_ids(selection: dict) -> list[str]:
++def focused_ids(selection: dict[str, Any]) -> list[str]:
+     """Exact B final affected plan: 27 positives and 20 finite D3 definitions."""
+     plan = json.loads(
+         (
+             ROOT / "docs/reviews/U4-B-component-runtime-preparation-v1/private-final-plan.json"
+         ).read_bytes()
+     )
+-    ids = plan["cases"]
++    ids: list[str] = plan["cases"]
+     assert set(ids) <= {row["case_id"] for row in selection["rows"]}
+     return ids
+ 
+ 
+-def freeze(source: Path, commit: str) -> dict:
++def freeze(source: Path, commit: str) -> dict[str, Any]:
+     """Freeze from an already verified clean tracked export, before generated identity."""
+     from validation.component.runtime_selection import definitions
+ 
+@@ -95,7 +104,7 @@
+     tool_path = source / "docs/reviews/U4-A-K2-construction-v1/candidate-04/ToolInputs.json"
+     tools = ToolInputs.model_validate_json(tool_path.read_bytes())
+     assert tools.image_digest == IMAGE
+-    paths = []
++    paths: list[Path] = []
+     for parent in ("native", "src/rkuarch", "contract/uarch_contract", "validation"):
+         paths.extend(
+             p
+@@ -105,6 +114,7 @@
+             and "generated" not in p.parts
+         )
+     paths += [source / name for name in ("pyproject.toml", "uv.lock")]
++    paths.append(source / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
+     paths += [
+         source / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
+         for name in ("parallel_core.py", "resource_limits.py")
+@@ -118,9 +128,9 @@
+         for p in sorted(set(paths))
+     ]
+     model = [x for x in inventory if x["path"].startswith("native/crates/uarch-engine/src/")]
+-    build = ComponentBuildInputs.model_validate(
++    build = ComponentBuildInputsV3.model_validate(
+         {
+-            "format": "uarch-component-build-inputs/2",
++            "format": "uarch-component-build-inputs/3",
+             "source_commit": commit,
+             "source_files": inventory,
+             "trust_hash": content_hash(trust),
+@@ -129,36 +139,15 @@
+             "tool_inputs_file": binding(source, tool_path),
+             "model_source_paths": [x["path"] for x in model],
+             "model_inputs_hash": content_hash(model),
+-            "mode_configs": [
+-                {
+-                    "mode": mode,
+-                    "cargo_args": [
+-                        "rustc",
+-                        "--offline",
+-                        "--locked",
+-                        "-p",
+-                        "uarch-engine",
+-                        "--bin",
+-                        "uarch-engine",
+-                        "-vv",
+-                        "--message-format=json",
+-                    ]
+-                    + (["--release"] if mode == "release" else []),
+-                    "rustflags": tools.flags,
+-                }
+-                for mode in ("debug", "release")
+-            ],
++            "mode_configs": construction_modes(tools.flags),
+             "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
+-            "permitted_environment": {
+-                "CARGO_HOME": "/cargo-home",
+-                "CARGO_NET_OFFLINE": "true",
+-                "CARGO_TARGET_DIR": "/target",
+-                "RUSTUP_AUTO_INSTALL": "0",
+-                "LC_ALL": "C",
+-            },
+         }
+     )
+     write(out / "BuildInputs.json", build)
++    write(
++        out / "ordinary-build-recipe.json",
++        ordinary_recipe((out / "BuildInputs.json").read_bytes()),
++    )
+     engine = {
+         "name": "native",
+         "version": "native-stage/1",
+@@ -227,6 +216,9 @@
+     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
+     archive = out / "source.tar"
+     subprocess.run(["git", "archive", "-o", str(archive), commit], cwd=ROOT, check=True)
++    (out / "source-commit.raw").write_bytes(
++        subprocess.check_output(["git", "cat-file", "commit", commit], cwd=ROOT)
++    )
+     with tarfile.open(archive) as tar:
+         tar.extractall(out / "source", filter="data")
+     c = wrapper()
+@@ -238,24 +230,6 @@
+     for n in ("rustc-wrapper.sh", "linker.sh"):
+         shutil.copy2(ROOT / "docs/reviews/U4-A-K2-construction-v1/inputs" / n, out / "controls" / n)
+         (out / "controls" / n).chmod(0o555)
+-    assert (
+-        c.command(
+-            out,
+-            "image",
+-            [
+-                "/usr/bin/docker",
+-                "--host",
+-                "unix:///var/run/docker.sock",
+-                "image",
+-                "inspect",
+-                IMAGE,
+-                "--format",
+-                "{{.Id}} {{.Os}} {{.Architecture}}",
+-            ],
+-        )
+-        == 0
+-    )
+-    assert (out / "commands/image.stdout").read_text().strip() == IMAGE + " linux amd64"
+     engine = freeze(out / "source", commit)
+     write(
+         out / "preparation.json",
+@@ -269,28 +243,17 @@
+             "wrapper": binding(ROOT, ROOT / "native/tools/component_candidate.py"),
+         },
+     )
+-    for tool, argv in (
+-        ("rustc", [c.BIN + "rustc", "-vV"]),
+-        ("cargo", [c.BIN + "cargo", "-vV"]),
+-        ("rustfmt", [c.BIN + "rustfmt", "--version"]),
+-        ("clippy", [c.BIN + "clippy-driver", "--version"]),
+-        ("cargo-deny", ["/usr/local/cargo/bin/cargo-deny", "--version"]),
+-    ):
+-        assert c.command(out, "tool-" + tool, c.docker(out, "debug", "tool-" + tool) + argv) == 0
+-        assert (out / "commands" / ("tool-" + tool + ".stdout")).read_bytes() == (
+-            ROOT / "docs/reviews/U4-A-K2-C1-precise-v1" / (tool + ".stdout")
+-        ).read_bytes()
+ 
+ 
+ def verify(out: Path) -> None:
+     source = out / "source"
+-    build = ComponentBuildInputs.model_validate_json(
+-        (source / OUTPUT / "BuildInputs.json").read_bytes()
++    build = parse_component_build_inputs(
++        json.loads((source / OUTPUT / "BuildInputs.json").read_bytes())
+     )
+     for f in build.source_files:
+         assert sha256((source / f.path).read_bytes()) == f.byte_hash, f.path
+-    for f in (build.trust_file, build.tool_inputs_file):
+-        assert sha256((source / f.path).read_bytes()) == f.byte_hash
++    for file in (build.trust_file, build.tool_inputs_file):
++        assert sha256((source / file.path).read_bytes()) == file.byte_hash
+     engine = json.loads((source / OUTPUT / "engine.json").read_bytes())
+     assert engine["implementation_hash"] == content_hash(build)
+     generated = source / build.generated_identity_output_paths[0]
+@@ -304,45 +267,59 @@
+     )
+ 
+ 
+-def build(out: Path, mode: str) -> None:
+-    """Actual construction recipe; invoke the frozen export's copy of this tool."""
+-    source = out / "source"
+-    if ROOT.resolve() != source.resolve():
++def construction_recipe(build_input_bytes: bytes) -> dict[str, Any]:
++    """Bind exact /3 input bytes without inventing values or executing a build."""
++    build = ComponentBuildInputsV3.model_validate_json(build_input_bytes)
++    sources = [
++        value
++        for value in build.source_files
++        if value.path == "native/tools/component_runtime_candidate.py"
++    ]
++    if len(sources) != 1:
++        raise ValueError("exact preparation source required for construction recipe")
++    return {
++        "format": "component-capture-recipe/2",
++        "source_commit": build.source_commit,
++        "build_inputs_byte_hash": sha256(build_input_bytes),
++        "preparation_source": sources[0].model_dump(mode="json"),
++        "mode_configs": [value.model_dump(mode="json") for value in build.mode_configs],
++        "generated_identity_output_paths": list(build.generated_identity_output_paths),
++    }
++
++
++def production_invocation(
++    inputs: ComponentBuildInputsV3, mode: str
++) -> tuple[list[str], dict[str, str]]:
++    """Pure rendering of the exact declared production command, with no appended args."""
++    checked = ComponentBuildInputsV3.model_validate(inputs.model_dump(mode="json"))
++    return invocation([value.model_dump(mode="json") for value in checked.mode_configs], mode)
++
++
++def ordinary_recipe(build_input_bytes: bytes) -> dict[str, Any]:
++    """Finite ordinary declaration; optional historical capture is a separate API."""
++    result = construction_recipe(build_input_bytes)
++    result["format"] = "component-ordinary-build-recipe/1"
++    result["optional_construction_reads"] = "not-required"
++    result["startup_assurance"] = "separate-required-public-gate"
++    return result
++
++
++def build(out: Path, mode: str, build_root: Path) -> None:
++    """Later ordinary construction through B's harness and the bounded guardian.
++
++    No unit-test compilation is hidden in this production command. Required scoped
++    tests/clippy and independent review are separate retained obligations.
++    """
++    from native.tools.component_ordinary_build import construct
++
++    if ROOT.resolve() != (out / "source").resolve():
+         raise ValueError("build must use the exact frozen export recipe")
+     verify(out)
+-    c = wrapper(source)
+-    inputs = ComponentBuildInputs.model_validate_json(
+-        (source / OUTPUT / "BuildInputs.json").read_bytes()
+-    )
+-    config = next(x for x in inputs.mode_configs if x.mode == mode)
+-    command = c.docker(out, mode, mode + "-build") + [
+-        c.BIN + "cargo",
+-        *config.cargo_args,
+-        "--",
+-        "-C",
+-        "link-arg=-Wl,-Map=/receipts/" + mode + ".map",
+-    ]
+-    if c.command(out, mode + "-build", command):
+-        raise ValueError("private production executable construction failed")
+-    test = [
+-        c.BIN + "cargo",
+-        "test",
+-        "--offline",
+-        "--locked",
+-        "-p",
+-        "uarch-engine",
+-        "--lib",
+-        "--no-run",
+-        "--message-format=json",
+-    ] + (["--release"] if mode == "release" else [])
+-    if c.command(out, mode + "-test-build", c.docker(out, mode, mode + "-test-build") + test):
+-        raise ValueError("private unit executable construction failed")
++    construct(out, build_root, mode, imports(out / "source"))
+     verify(out)
+-    if c.inventory(out / "cache") != json.loads(c.CACHE_RECORD.read_bytes())["files"]:
+-        raise ValueError("accepted private cache changed")
+-
+-
+-def imports(root: Path, observation_root: Path | None = None) -> dict:
++
++
++def imports(root: Path, observation_root: Path | None = None) -> dict[str, Any]:
+     """Full project Python closure and stdlib/accepted dependency bytes, not caller modules."""
+     files = sorted(
+         {
+@@ -356,7 +333,8 @@
+         root / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
+         for name in ("parallel_core.py", "resource_limits.py")
+     )
+-    external = set()
++    files.append(root / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
++    external: set[Path] = set()
+     stdlib = Path(sysconfig.get_path("stdlib"))
+     external.update(p.resolve() for p in stdlib.rglob("*.py") if "site-packages" not in p.parts)
+     external.update(p.resolve() for p in (stdlib / "lib-dynload").glob("*.so"))
+@@ -369,6 +347,8 @@
+         "yaml",
+     ):
+         spec = importlib.util.find_spec(name)
++        if spec is None or spec.origin is None:
++            raise ValueError("accepted dependency origin required: " + name)
+         p = Path(spec.origin).resolve()
+         external.add(p)
+         if spec.submodule_search_locations:
+@@ -383,8 +363,8 @@
+         "independent_binding": binding(
+             root,
+             root
+-            / "docs/reviews/U4-A-component-activation-readiness-v1"
+-            / "prospective-consumer-bindings.json",
++            / "docs/reviews/U4-A-build-provenance-final-v1"
++            / "activation-consumer-bindings.json",
+         ),
+         "observation_contract": binding(
+             observation_root or root,
+@@ -397,12 +377,15 @@
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("action", choices=("prepare", "verify", "build"))
+     parser.add_argument("output", type=Path)
++    parser.add_argument("--build-root", type=Path)
+     parser.add_argument("--mode", choices=("debug", "release"), default="debug")
+     args = parser.parse_args()
+     if args.action == "prepare":
+         prepare(args.output)
+     elif args.action == "build":
+-        build(args.output, args.mode)
++        if args.build_root is None:
++            parser.error("build requires an exclusive --build-root")
++        build(args.output, args.mode, args.build_root)
+     else:
+         verify(args.output)
+ 
+--- a/native/tools/component_startup_inventory.py
++++ b/native/tools/component_startup_inventory.py
+@@ -13,6 +13,7 @@
+ import struct
+ import subprocess
+ from pathlib import Path
++from typing import Any
+ 
+ 
+ def digest(path: Path) -> str:
+@@ -24,7 +25,7 @@
+     path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n")
+ 
+ 
+-def copy_bound(source: Path, target: Path, expected: str) -> dict:
++def copy_bound(source: Path, target: Path, expected: str) -> dict[str, Any]:
+     data = source.read_bytes()
+     pin = hashlib.sha256(data).hexdigest()
+     if pin != expected.removeprefix("sha256:"):
+@@ -86,7 +87,24 @@
+     return None
+ 
+ 
+-def construct(source: Path, payload_path: Path, expected_payload: str, output: Path) -> dict:
++def project_files(source: Path) -> list[Path]:
++    """Exact project import inventory, including hash-checked runpy helpers."""
++    files = {
++        p
++        for folder in ("src/rkuarch", "contract/uarch_contract", "validation", "native/tools")
++        for p in (source / folder).rglob("*.py")
++    }
++    files.update(
++        source / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
++        for name in ("parallel_core.py", "resource_limits.py")
++    )
++    files.add(source / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
++    return sorted(files)
++
++
++def construct(
++    source: Path, payload_path: Path, expected_payload: str, output: Path
++) -> dict[str, Any]:
+     if digest(payload_path) != expected_payload.removeprefix("sha256:"):
+         raise ValueError("inherited payload digest")
+     source, output = source.resolve(strict=True), output.resolve()
+@@ -98,9 +116,8 @@
+     snapshot = output / "snapshot"
+     rows = []
+     project = snapshot / "project"
+-    for folder in ("src/rkuarch", "contract/uarch_contract", "validation", "native/tools"):
+-        for file in sorted((source / folder).rglob("*.py")):
+-            rows.append(copy_bound(file, project / file.relative_to(source), digest(file)))
++    for file in project_files(source):
++        rows.append(copy_bound(file, project / file.relative_to(source), digest(file)))
+     external = snapshot / "external"
+     for binding in consumer["external_files"]:
+         origin = Path("/") / binding["path"]
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_build_review.py
+@@ -0,0 +1,394 @@
++"""Finite component provenance adapter over B's independent ordinary-build consumer.
++
++Only declared inputs/observed outputs are checked. No build, startup, read closure,
++reviewer acceptance or authority is created by these records or functions.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import io
++import re
++import tarfile
++from pathlib import Path, PurePosixPath
++from typing import Any
++
++from uarch_contract.hashing import canonical_json, content_hash, sha256, strict_json_loads
++
++from .component_construction import invocation
++from .component_records import ComponentBuildInputsV3, ComponentBuildReceiptV2, ComponentBuildTrust
++from .host import _open, _read, _require
++from .records import FileBinding, ToolInputs
++
++SOURCE = "inputs/source/"
++CACHE = "inputs/cache/"
++PYTHON = "inputs/python/"
++CACHE_RECORD = "docs/reviews/U4-A-K2-C1-precise-v1/cache-inventory.json"
++CACHE_PIN = "sha256:ce219674649c7e77ce84806db559d8473a6c6a62b5bad7aa3ff0e93486f30148"
++TOOLS_PIN = "sha256:db8b8956f0c060416d0d3c6c11f8eccc6b3ece7433b5075cb093e602febcb73d"
++PRODUCER = "native/tools/component_runtime_candidate.py"
++GUARD_FILES = ("intent.json", "pre-existing.json", "created.json", "started.json", "cleanup.json")
++
++
++def file_binding(root: Path, name: str) -> dict[str, str]:
++    binding = FileBinding(path=name, byte_hash="sha256:" + "0" * 64)
++    import os
++
++    with _open(root, binding.path) as fd:
++        _require(os.fstat(fd).st_size <= 256 * 1024**2, "bounded provenance input")
++        with os.fdopen(os.dup(fd), "rb") as stream:
++            raw = stream.read()
++    return {"path": name, "byte_hash": sha256(raw)}
++
++
++def _prefixed(prefix: str, item: dict[str, Any]) -> dict[str, str]:
++    return {"path": prefix + item["path"], "byte_hash": item["byte_hash"]}
++
++
++def _git_object(kind: str, data: bytes) -> str:
++    return hashlib.sha1(kind.encode() + b" " + str(len(data)).encode() + b"\0" + data).hexdigest()
++
++
++def archive_tree(
++    archive: bytes, commit: bytes, expected_commit: str
++) -> tuple[str, dict[str, bytes]]:
++    """Derive Git tree from a retained export and verify its exact raw commit object.
++
++    No git invocation or archive extraction. Unsupported archive kinds refuse.
++    This assumes ordinary unfiltered git archive; export-subst/ignore would fail
++    the exact tree check rather than silently weakening it.
++    """
++    _require(_git_object("commit", commit) == expected_commit, "actual source commit object")
++    first = commit.split(b"\n", 1)[0]
++    _require(re.fullmatch(b"tree [0-9a-f]{40}", first) is not None, "source commit tree")
++    expected_tree = first[5:].decode()
++    entries: dict[str, tuple[str, bytes]] = {}
++    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:*") as stream:
++        for member in stream:
++            name = member.name.rstrip("/")
++            path = PurePosixPath(name)
++            _require(
++                bool(name)
++                and not path.is_absolute()
++                and ".." not in path.parts
++                and str(path) == name
++                and name not in entries,
++                "safe unique archive paths",
++            )
++            if member.isdir():
++                continue
++            if member.issym():
++                data, mode = member.linkname.encode(), "120000"
++            else:
++                _require(member.isfile(), "regular source archive members")
++                extracted = stream.extractfile(member)
++                _require(extracted is not None, "source archive member")
++                assert extracted is not None
++                data = extracted.read()
++                mode = "100755" if member.mode & 0o111 else "100644"
++            entries[name] = (mode, data)
++    _require(bool(entries), "nonempty source archive")
++
++    def tree(prefix: str) -> str:
++        names: dict[str, tuple[str, str]] = {}
++        for name, (mode, data) in entries.items():
++            if not name.startswith(prefix):
++                continue
++            head, separator, _ = name[len(prefix) :].partition("/")
++            if separator:
++                _require(
++                    head not in names or names[head][0] == "40000",
++                    "archive file/directory collision",
++                )
++                names[head] = ("40000", "")
++            else:
++                _require(
++                    head not in names or names[head][0] != "40000",
++                    "archive file/directory collision",
++                )
++                names[head] = (mode, _git_object("blob", data))
++        rows = []
++        for name in sorted(
++            names, key=lambda key: (key + ("/" if names[key][0] == "40000" else "")).encode()
++        ):
++            mode, pin = names[name]
++            if mode == "40000":
++                pin = tree(prefix + name + "/")
++            rows.append(mode.encode() + b" " + name.encode() + b"\0" + bytes.fromhex(pin))
++        return _git_object("tree", b"".join(rows))
++
++    actual = tree("")
++    _require(actual == expected_tree, "actual source archive/tree join")
++    return actual, {name: data for name, (_, data) in entries.items()}
++
++
++def derive_declaration(root: Path, expected: dict[str, Any], mode: str) -> dict[str, Any]:
++    """Derive B's complete expectations from typed payload/BuildInputs anchors."""
++    from validation.component.ordinary_build_acceptance import IMAGE, WARNING_POLICY
++
++    def read(item: dict[str, Any]) -> bytes:
++        return _read(root, FileBinding.model_validate(item))
++
++    build_file = _prefixed(SOURCE, expected["build_inputs"])
++    build = ComponentBuildInputsV3.model_validate_json(read(build_file))
++    _require(
++        content_hash(build) == expected["build_input_hash"], "ordinary BuildInputs content join"
++    )
++    _require(build.source_commit == expected["source_commit"], "ordinary source commit join")
++    _require(
++        [v.model_dump(mode="json") for v in build.source_files] == expected["source_files"],
++        "ordinary complete source inventory",
++    )
++    _require(
++        [v.model_dump(mode="json") for v in build.mode_configs] == expected["mode_configs"],
++        "ordinary mode declarations",
++    )
++    _require(
++        list(build.generated_identity_output_paths) == expected["generated_identity_output_paths"],
++        "ordinary generated paths",
++    )
++    tools_file = _prefixed(SOURCE, build.tool_inputs_file.model_dump(mode="json"))
++    _require(tools_file["byte_hash"] == TOOLS_PIN, "accepted ordinary ToolInputs bytes")
++    tools = ToolInputs.model_validate_json(read(tools_file))
++    _require(
++        content_hash(tools) == build.tool_inputs_hash == expected["tool_inputs_hash"],
++        "ordinary tool content join",
++    )
++    _require(
++        build.tool_inputs_file.model_dump(mode="json") == expected["tool_inputs"],
++        "ordinary tool binding join",
++    )
++    trust_file = _prefixed(SOURCE, build.trust_file.model_dump(mode="json"))
++    trust = ComponentBuildTrust.model_validate_json(read(trust_file))
++    _require(content_hash(trust) == build.trust_hash, "ordinary generated trust join")
++    model = [
++        v.model_dump(mode="json") for v in build.source_files if v.path in build.model_source_paths
++    ]
++    engine = expected["engine"]
++    _require(
++        engine["implementation_hash"] == content_hash(build)
++        and engine["compiler_lock_hash"] == content_hash(tools)
++        and engine["model"]["implementation_hash"]
++        == content_hash(model)
++        == build.model_inputs_hash,
++        "ordinary full engine/generated identity join",
++    )
++    archive = file_binding(root, "inputs/source.tar")
++    commit = file_binding(root, "inputs/source-commit.raw")
++    tree, members = archive_tree(read(archive), read(commit), build.source_commit)
++    sources = [_prefixed(SOURCE, v.model_dump(mode="json")) for v in build.source_files]
++    for source_item in build.source_files:
++        _require(
++            source_item.path in members
++            and sha256(members[source_item.path]) == source_item.byte_hash,
++            "source inventory/archive bytes",
++        )
++    tool_files = [trust_file]
++    for value in tools.model_dump(mode="json").values():
++        if isinstance(value, dict) and set(value) == {"path", "byte_hash"}:
++            tool_files.append(_prefixed(SOURCE, value))
++    tool_files += [
++        _prefixed(SOURCE, item.model_dump(mode="json"))
++        for item in (trust.semantics_file, trust.registry_file, trust.selection, *trust.profiles)
++    ]
++    # Trust/selection/profile inputs are generated before compilation and separately
++    # hash-bound by BuildTrust; all static tool metadata must match the source archive.
++    for item in [tools_file, *tool_files]:
++        name = item["path"][len(SOURCE) :]
++        if name in members:
++            _require(sha256(members[name]) == item["byte_hash"], "tool/archive bytes")
++        read(item)
++    cache_manifest = {"path": SOURCE + CACHE_RECORD, "byte_hash": CACHE_PIN}
++    cache = strict_json_loads(read(cache_manifest))
++    _require(
++        CACHE_RECORD in members and sha256(members[CACHE_RECORD]) == CACHE_PIN,
++        "accepted cache/archive join",
++    )
++    cache_files = [
++        {"path": CACHE + name, "byte_hash": "sha256:" + value["sha256"]}
++        for name, value in sorted(cache["files"].items())
++    ]
++    producer = next((item for item in sources if item["path"] == SOURCE + PRODUCER), None)
++    _require(producer is not None, "actual generated identity producer")
++    assert producer is not None
++    generated = file_binding(root, SOURCE + build.generated_identity_output_paths[0])
++    generated_bytes = (
++        'pub const ENGINE_JSON: &str = r###"'
++        + canonical_json(engine)
++        + '"###;\npub const TRUST_JSON: &str = r###"'
++        + canonical_json(trust)
++        + '"###;\n'
++    ).encode()
++    _require(read(generated) == generated_bytes, "typed generated identity bytes")
++    consumers = expected["consumers"]
++    _require(
++        content_hash(consumers) == expected["consumer_hash"], "ordinary complete consumer identity"
++    )
++    _require(bool(consumers["files"]), "ordinary nonempty consumer/source closure")
++    consumer_files = [_prefixed(SOURCE, item) for item in consumers["files"]]
++    source_map = {item["path"]: item["byte_hash"] for item in sources}
++    _require(
++        all(source_map.get(item["path"]) == item["byte_hash"] for item in consumer_files),
++        "ordinary consumer/source closure",
++    )
++    consumer_files += [
++        _prefixed(SOURCE, consumers[key]) for key in ("independent_binding", "observation_contract")
++    ]
++    consumer_files += [_prefixed(PYTHON, item) for item in consumers["external_files"]]
++    consumer_files.append(_prefixed(PYTHON, consumers["python_executable"]))
++    roles = {
++        "source_archive": [archive, commit],
++        "source_files": sources,
++        "build_inputs": [build_file],
++        "tool_inputs": [tools_file],
++        "tool_files": tool_files,
++        "dependency_lock": [_prefixed(SOURCE, tools.cargo_lock.model_dump(mode="json"))],
++        "cache_manifest": [cache_manifest],
++        "cache_files": cache_files,
++        "generated_inputs": [generated],
++        "producers": [producer],
++        "consumers": consumer_files,
++    }
++    for role, values in roles.items():
++        pins: dict[str, str] = {}
++        for item in values:
++            _require(
++                pins.setdefault(item["path"], item["byte_hash"]) == item["byte_hash"],
++                "conflicting input role binding",
++            )
++            read(item)
++        roles[role] = [{"path": path, "byte_hash": pin} for path, pin in sorted(pins.items())]
++    argv, environment = invocation(expected["mode_configs"], mode)
++    return {
++        "source_commit": build.source_commit,
++        "source_tree": tree,
++        "mode": mode,
++        "image_digest": IMAGE,
++        "argv": argv,
++        "environment": environment,
++        "inputs": roles,
++        "generated_producers": [
++            {
++                "output": generated,
++                "producer": producer,
++                "inputs": [build_file, trust_file, tools_file],
++            }
++        ],
++        "cargo_artifact": f"/target/{mode}/uarch-engine",
++        "warning_policy": WARNING_POLICY,
++    }
++
++
++def consume_provenance(
++    root: Path, record: dict[str, Any], expected: dict[str, Any]
++) -> list[FileBinding]:
++    """Verify both modes through B, then retain every nested file for host refresh."""
++    from native.tools.component_ordinary_build import LIMITS, verify_transport
++    from validation.component.ordinary_build_acceptance import consume_build
++
++    _require(
++        set(record) == {"format", "subject", "builds", "required_checks_review"},
++        "exact component build provenance",
++    )
++    _require(
++        record["format"] == "uarch-component-build-provenance/1",
++        "component build provenance version",
++    )
++    subject = {key: expected[key] for key in ("runtime_payload_byte_hash", "consumer_hash")}
++    _require(record["subject"] == subject, "component build provenance subject")
++    _require(
++        [item["mode"] for item in record["builds"]] == ["debug", "release"],
++        "both independent ordinary build modes",
++    )
++    files: dict[str, FileBinding] = {}
++
++    def read(item: dict[str, Any]) -> bytes:
++        binding = FileBinding.model_validate(item)
++        _require(
++            files.setdefault(binding.path, binding) == binding, "conflicting provenance binding"
++        )
++        return _read(root, binding)
++
++    for row, executable in zip(record["builds"], expected["executables"], strict=True):
++        _require(
++            set(row) == {"mode", "root", "expectation", "receipt", "transport"},
++            "exact mode provenance row",
++        )
++        prefix = FileBinding(path=row["root"] + "/file", byte_hash="sha256:" + "0" * 64).path[:-4]
++        build_root = root / row["root"]
++        _require(
++            build_root.resolve().is_relative_to(root.resolve()) and not build_root.is_symlink(),
++            "relative ordinary evidence root",
++        )
++        _require(executable["mode"] == row["mode"], "payload build mode order")
++        outer = ComponentBuildReceiptV2.model_validate_json(read(executable["receipt"]))
++        _require(
++            outer.engine.model_dump(mode="json") == expected["engine"]
++            and outer.build_input_hash == expected["build_input_hash"]
++            and outer.mode == row["mode"]
++            and outer.executable.model_dump(mode="json") == executable["executable"]
++            and outer.ordinary_receipt.model_dump(mode="json") == row["receipt"],
++            "ordinary payload/receipt/executable join",
++        )
++        for outer_file in (outer.generated_identity, outer.environment):
++            read(outer_file.model_dump(mode="json"))
++        _require(
++            row["receipt"]["path"] == prefix + "ordinary-build-receipt.json",
++            "ordinary receipt root join",
++        )
++        declaration = derive_declaration(build_root, expected, row["mode"])
++        wanted = strict_json_loads(read(row["expectation"]))
++        _require(
++            wanted["declaration"] == declaration, "typed independently derived ordinary declaration"
++        )
++        _require(
++            executable["executable"] == _prefixed(prefix, wanted["executable"]),
++            "ordinary payload actual executable",
++        )
++        _require(
++            all(
++                wanted[key] == LIMITS[key] for key in ("timeout_s", "stdout_bytes", "stderr_bytes")
++            ),
++            "ordinary fixed execution limits",
++        )
++        generated = declaration["inputs"]["generated_inputs"][0]
++        _require(
++            outer.generated_identity.path in expected["generated_identity_output_paths"]
++            and outer.generated_identity.byte_hash == generated["byte_hash"],
++            "ordinary outer generated identity",
++        )
++        _require(
++            strict_json_loads(_read(root, outer.environment)) == declaration["environment"],
++            "ordinary outer environment",
++        )
++        receipt = strict_json_loads(read(row["receipt"]))
++        consumed = consume_build(build_root, receipt, wanted)
++        for item in consumed["required_files"]:
++            read(_prefixed(prefix, item))
++        transport = strict_json_loads(read(row["transport"]))
++        for item in verify_transport(build_root, transport, declaration, receipt):
++            read(_prefixed(prefix, item))
++    checks = strict_json_loads(read(record["required_checks_review"]))
++    _require(
++        set(checks) == {"format", "subject", "required_checks", "evidence"}
++        and checks["format"] == "uarch-component-required-checks-review/1"
++        and checks["subject"]
++        == {
++            **subject,
++            "build_input_hash": expected["build_input_hash"],
++            "executables": expected["executables"],
++        }
++        and checks["required_checks"]
++        == [
++            "native-and-python-scope",
++            "independent-consumers-and-replay",
++            "lint-types-and-clippy-deny-warnings",
++        ]
++        and bool(checks["evidence"]),
++        "independently bound required test/warning review",
++    )
++    # This is independently reviewed support evidence pinned by runtime-review/2,
++    # not a success receipt generated by the build runner or an authority source.
++    for item in checks["evidence"]:
++        read(item)
++    return [files[path] for path in sorted(files)]
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_construction.py
+@@ -0,0 +1,82 @@
++"""Explicit production construction specification; pure data, never execution authority."""
++
++from __future__ import annotations
++
++from typing import Any, Literal
++
++from pydantic import model_validator
++from uarch_contract.common import FrozenModel
++
++BIN = "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/"
++CARGO = BIN + "cargo"
++FLAGS = ("-C", "debuginfo=1", "-C", "linker=/controls/linker.sh")
++
++
++def mode_spec(mode: str) -> dict[str, Any]:
++    if mode not in ("debug", "release"):
++        raise ValueError("explicit production construction mode")
++    return {
++        "mode": mode,
++        "cargo_args": [
++            "rustc",
++            "--offline",
++            "--locked",
++            "-p",
++            "uarch-engine",
++            "--bin",
++            "uarch-engine",
++            "-vv",
++            "--message-format=json",
++            *(["--release"] if mode == "release" else []),
++            "--",
++            "-C",
++            f"link-arg=-Wl,-Map=/receipts/{mode}.map",
++        ],
++        "rustflags": list(FLAGS),
++        "permitted_environment": {
++            "PATH": BIN + ":/usr/local/cargo/bin:/usr/bin:/bin",
++            "CARGO_HOME": "/cargo-home",
++            "CARGO_NET_OFFLINE": "true",
++            "CARGO_TARGET_DIR": "/target",
++            "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
++            "RUSTUP_AUTO_INSTALL": "0",
++            "LC_ALL": "C",
++            "RUSTC": BIN + "rustc",
++            "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
++            "RUSTFLAGS": " ".join(FLAGS),
++            "C2_RUN_TAG": mode + "-build",
++        },
++    }
++
++
++class ConstructionMode(FrozenModel):
++    mode: Literal["debug", "release"]
++    cargo_args: tuple[str, ...]
++    rustflags: tuple[str, ...]
++    permitted_environment: dict[str, str]
++
++    @model_validator(mode="after")
++    def exact(self) -> ConstructionMode:
++        if self.model_dump(mode="json") != mode_spec(self.mode):
++            raise ValueError("exact production construction specification required")
++        return self
++
++
++def construction_modes(flags: tuple[str, ...] | list[str]) -> list[dict[str, Any]]:
++    if tuple(flags) != FLAGS:
++        raise ValueError("accepted construction flags required")
++    return [mode_spec(mode) for mode in ("debug", "release")]
++
++
++def selected_mode(modes: list[dict[str, Any]], mode: str) -> ConstructionMode:
++    parsed = [ConstructionMode.model_validate(value) for value in modes]
++    if [value.mode for value in parsed] != ["debug", "release"]:
++        raise ValueError("exact ordered debug/release construction modes required")
++    if mode not in ("debug", "release"):
++        raise ValueError("explicit production construction mode")
++    return next(value for value in parsed if value.mode == mode)
++
++
++def invocation(modes: list[dict[str, Any]], mode: str) -> tuple[list[str], dict[str, str]]:
++    value = selected_mode(modes, mode)
++    return [CARGO, *value.cargo_args], dict(value.permitted_environment)
+--- a/src/rkuarch/engines/native/component_host.py
++++ b/src/rkuarch/engines/native/component_host.py
+@@ -26,13 +26,15 @@
+ from rkuarch.workload.mapped import loads_component_job
+ 
+ from .component_records import (
+-    ComponentBuildInputs,
+     ComponentBuildReceipt,
+     ComponentBuildTrust,
+     ComponentHostRecord,
+     ComponentHostSelector,
+     ComponentPayload,
++    parse_component_build_inputs,
++    parse_component_build_receipt,
+ )
++from .component_review import CheckedRuntimeReview
+ from .host import _open, _read, _require
+ from .records import FileBinding, ToolInputs
+ 
+@@ -221,7 +223,7 @@
+         return cls.model_validate(strict_json_loads(read(file)))
+ 
+     payload = record(ComponentPayload, binding)
+-    build = record(ComponentBuildInputs, payload.build_inputs)
++    build = parse_component_build_inputs(strict_json_loads(read(payload.build_inputs)))
+     trust = record(ComponentBuildTrust, build.trust_file)
+     tools = record(ToolInputs, build.tool_inputs_file)
+     _require(
+@@ -314,7 +316,7 @@
+         seen_cases.add((item.profile_hash, item.case_id))
+     _require(seen_cases == expected_cases, "complete component profile/case inventory")
+     for executable in payload.executables:
+-        receipt = record(ComponentBuildReceipt, executable.receipt)
++        receipt = parse_component_build_receipt(strict_json_loads(read(executable.receipt)))
+         _require(
+             receipt.engine == payload.engine
+             and receipt.mode == executable.mode
+@@ -325,14 +327,13 @@
+             receipt.generated_identity.path in build.generated_identity_output_paths,
+             "component generated identity path",
+         )
+-        for file in (
+-            receipt.executable,
+-            receipt.generated_identity,
+-            receipt.build_log,
+-            receipt.environment,
+-            receipt.loader_observations,
+-        ):
+-            read(file)
++        receipt_files = [receipt.executable, receipt.generated_identity, receipt.environment]
++        if isinstance(receipt, ComponentBuildReceipt):
++            receipt_files.extend((receipt.build_log, receipt.loader_observations))
++        else:
++            receipt_files.append(receipt.ordinary_receipt)
++        for receipt_file in receipt_files:
++            read(receipt_file)
+     source_pins = {x.path: x.byte_hash for x in build.source_files}
+     for file in payload.consumers.files:
+         _require(
+@@ -366,6 +367,60 @@
+     return prepared
+ 
+ 
++def provenance_expectations(prepared: _PreparedComponent) -> dict[str, Any]:
++    """Independently derive required joins from the already checked payload."""
++    from .component_records import ComponentBuildInputsV3
++
++    payload = prepared.payload
++    build = parse_component_build_inputs(
++        strict_json_loads(_read(prepared.root, payload.build_inputs))
++    )
++    _require(isinstance(build, ComponentBuildInputsV3), "review/2 requires BuildInputs/3")
++    return {
++        "runtime_payload_byte_hash": prepared.payload_file.byte_hash,
++        "engine": payload.engine.model_dump(mode="json"),
++        "build_inputs": payload.build_inputs.model_dump(mode="json"),
++        "build_input_hash": content_hash(build),
++        "source_commit": build.source_commit,
++        "source_files": [item.model_dump(mode="json") for item in build.source_files],
++        "tool_inputs": build.tool_inputs_file.model_dump(mode="json"),
++        "tool_inputs_hash": build.tool_inputs_hash,
++        "mode_configs": [item.model_dump(mode="json") for item in build.mode_configs],
++        "generated_identity_output_paths": list(build.generated_identity_output_paths),
++        "executables": [item.model_dump(mode="json") for item in payload.executables],
++        "consumer_hash": content_hash(payload.consumers),
++        "consumers": payload.consumers.model_dump(mode="json"),
++    }
++
++
++def checked_component_review(
++    prepared: _PreparedComponent, binding: FileBinding
++) -> CheckedRuntimeReview:
++    from .component_review import check_runtime_review
++
++    launchers = [
++        item
++        for item in prepared.payload.consumers.files
++        if item.path == "native/tools/component_trusted_start.py"
++    ]
++    _require(len(launchers) == 1, "bound component startup launcher required")
++    return check_runtime_review(
++        prepared.root,
++        strict_json_loads(_read(prepared.root, binding)),
++        expected=provenance_expectations(prepared),
++        launcher=launchers[0],
++    )
++
++
++def require_reviewed_startup(manifest_hash: str) -> None:
++    state = sys.modules.get("_rkuarch_trusted_startup")
++    _require(
++        state is not None
++        and getattr(state, "manifest_sha256", None) == manifest_hash.removeprefix("sha256:"),
++        "independent startup assurance/active manifest join required",
++    )
++
++
+ class ComponentSession:
+     """One independently authorized bounded session. Call budgets are not public permission."""
+ 
+@@ -375,11 +430,13 @@
+         authority_files: tuple[tuple[Path, FileBinding], ...],
+         *,
+         token: object,
++        startup_manifest_hash: str | None = None,
+     ) -> None:
+         _require(token is _AUTHORITY, "independent component authority required")
+         self._prepared = prepared
+         self._authority_files = authority_files
+         self._token = token
++        self._startup_manifest_hash = startup_manifest_hash
+         self._deadline = time.monotonic() + prepared.payload.budget.session_seconds
+         self._remaining = prepared.payload.budget.calls
+         self._lock = threading.Lock()
+@@ -389,6 +446,8 @@
+         for root, file in self._authority_files:
+             _read(root, file)
+         self._prepared.refresh()
++        if self._startup_manifest_hash is not None:
++            require_reviewed_startup(self._startup_manifest_hash)
+ 
+     def claim(self) -> _PreparedComponent:
+         _require(self._token is _AUTHORITY, "independent component authority required")
+@@ -429,19 +488,14 @@
+         },
+         "exact component human decision required",
+     )
+-    review = strict_json_loads(_read(root, record.independent_review))
+-    _require(
+-        isinstance(review, dict)
+-        and review.get("format") == "uarch-component-runtime-review/1"
+-        and review.get("subject") == subject
+-        and review.get("read_audit_complete") is True
+-        and review.get("selected_support_current") is True,
+-        "independent component runtime/read/currentness review required",
+-    )
+     prepared = _prepare_payload(root, record.payload, mode=mode, immutable=True)
++    review = checked_component_review(prepared, record.independent_review)
++    require_reviewed_startup(review.startup_manifest.byte_hash)
+     return ComponentSession(
+         prepared,
+         tuple((root, f) for f in (record_file, record.decision, record.independent_review))
+-        + ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(selector_raw))),),
++        + ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(selector_raw))),)
++        + tuple((root, file) for file in review.required_files),
+         token=_AUTHORITY,
+-    )
++        startup_manifest_hash=review.startup_manifest.byte_hash,
++    )
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_negative.py
+@@ -0,0 +1,287 @@
++"""UNAPPLIED v6 ordinary-image EOF successor. No native-site proof is inferred.
++
++Finite refusal-only transport. Requires a separately installed D3 decision.
++
++The public API accepts only a case ID. Neither raw stdin nor replacement profiles,
++expected errors, executable paths or a bypass flag are supplied by a caller.
++"""
++
++from __future__ import annotations
++
++import os
++import time
++from dataclasses import dataclass
++from pathlib import Path
++from threading import Lock
++from typing import Annotated, Any, Literal
++
++from pydantic import Field
++from uarch_contract.common import FrozenModel, NonEmpty
++from uarch_contract.hashing import sha256, strict_json_loads
++from uarch_contract.mapped import NativeTestProfile
++
++from rkuarch.engines.native.component_host import (
++    _prepare_payload,
++    _PreparedComponent,
++    checked_component_review,
++    require_reviewed_startup,
++)
++from rkuarch.engines.native.component_image import _save, exchange_image
++from rkuarch.engines.native.component_review import ComponentNegativeReview
++from rkuarch.engines.native.component_runner import require_negative_envelope
++from rkuarch.engines.native.host import _open, _read, _require
++from rkuarch.engines.native.records import FileBinding
++
++_SELECTOR = Path("/etc/rkuarch/component-negative-selector.json")
++_TOKEN = object()
++
++
++class ExpectedEnvelope(FrozenModel):
++    code: NonEmpty
++    message: NonEmpty
++    pointer: str | None
++
++
++class NegativeCase(FrozenModel):
++    case_id: NonEmpty
++    raw: FileBinding
++    profile: FileBinding
++    expected_envelope: ExpectedEnvelope
++    expectation_provenance: FileBinding
++    layer: Literal["profile", "resource-preflight"]
++
++
++class NegativeInventory(FrozenModel):
++    format: Literal["uarch-component-negative-inventory/2"]
++    cases: Annotated[tuple[NegativeCase, ...], Field(min_length=1)]
++
++
++class NegativeRecord(FrozenModel):
++    format: Literal["uarch-component-negative-record/2"]
++    runtime_payload: FileBinding
++    inventory: FileBinding
++    decision: FileBinding
++    review: FileBinding
++
++
++class NegativeSelector(FrozenModel):
++    format: Literal["uarch-component-negative-selector/2"]
++    repository: NonEmpty
++    record: FileBinding
++
++
++def _selected_raw(prepared: _PreparedComponent, case: NegativeCase) -> bytes:
++    raw = _read(prepared.root, case.raw)
++    _require(len(raw) <= prepared.payload.budget.stdin_bytes, "D3 stdin limit")
++    value = strict_json_loads(raw)
++    profile = NativeTestProfile.model_validate_json(_read(prepared.root, case.profile))
++    _require(value["engine"] == prepared.payload.engine.model_dump(mode="json"), "D3 engine join")
++    _require(
++        profile.format == "uarch-native-test-profile/2"
++        and value["profile"] == profile.model_dump(mode="json")
++        and value["admission"]["profile_hash"] == profile.profile_hash
++        and value["admission"]["case_id"] == case.case_id
++        and any(e.case_id == case.case_id for e in profile.entries),
++        "D3 independent profile join",
++    )
++    _require(
++        value["registry"] == strict_json_loads(_read(prepared.root, prepared.payload.registry)),
++        "D3 independent registry join",
++    )
++    provenance = strict_json_loads(_read(prepared.root, case.expectation_provenance))
++    _require(
++        provenance["case_id"] == case.case_id
++        and provenance["input_sha256"] == case.raw.byte_hash.split(":")[1]
++        and provenance["job_hash"] == value["job_hash"]
++        and provenance["engine"] == value["engine"]
++        and provenance["envelope"] == case.expected_envelope.model_dump(mode="json")
++        and provenance["runtime_entries_required"] == 0,
++        "D3 expectation input/envelope binding",
++    )
++    guard = provenance["native_guard_source"]
++    try:
++        guard_bytes = _read(
++            prepared.root, FileBinding(path=guard["path"], byte_hash="sha256:" + guard["sha256"])
++        )
++    except ValueError as error:
++        raise ValueError("D3 expectation guard source") from error
++    _require(
++        sha256(guard_bytes) == "sha256:" + guard["sha256"],
++        "D3 expectation guard source",
++    )
++    # No Python resource-success preflight: the finite independently bound refusal is the test.
++    # This function supplies no native prevalidation flag and computes no delays.
++    return raw
++
++
++def _consume_negative(
++    stdout: bytes, stderr: bytes, status: int, case: NegativeCase
++) -> dict[str, Any]:
++    return require_negative_envelope(
++        stdout, stderr, status, case.expected_envelope.model_dump(mode="json")
++    )
++
++
++@dataclass(frozen=True)
++class _PreparedNegative:
++    component: _PreparedComponent
++    inventory: NegativeInventory
++    checks: tuple[tuple[Path, FileBinding], ...]
++    startup_manifest_hash: str | None = None
++
++    def refresh(self) -> None:
++        self.component.refresh()
++        if self.startup_manifest_hash is not None:
++            require_reviewed_startup(self.startup_manifest_hash)
++        for root, binding in self.checks:
++            _read(root, binding)
++            with _open(root, binding.path) as fd:
++                _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 records required")
++        for case in self.inventory.cases:
++            _selected_raw(self.component, case)
++            for file in (case.raw, case.profile, case.expectation_provenance):
++                _read(self.component.root, file)
++                with _open(self.component.root, file.path) as fd:
++                    _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 cases required")
++
++
++class NegativeSession:
++    def __init__(self, prepared: _PreparedNegative, *, token: object) -> None:
++        _require(token is _TOKEN, "separate D3 authority required")
++        self._token = token
++        self._prepared = prepared
++        self._remaining = prepared.component.payload.budget.calls
++        self._deadline = time.monotonic() + prepared.component.payload.budget.session_seconds
++        self._lock = Lock()
++
++    def claim(self, case_id: str) -> tuple[_PreparedNegative, NegativeCase]:
++        with self._lock:
++            _require(self._token is _TOKEN, "separate D3 authority required")
++            matches = [c for c in self._prepared.inventory.cases if c.case_id == case_id]
++            _require(len(matches) == 1, "D3 immutable case ID required")
++            _require(
++                self._remaining > 0 and time.monotonic() < self._deadline, "D3 budget exhausted"
++            )
++            self._prepared.refresh()
++            self._remaining -= 1
++            return self._prepared, matches[0]
++
++
++def prepare_negative(*, mode: str) -> NegativeSession:
++    with _open(_SELECTOR.parent, _SELECTOR.name) as fd:
++        st = os.fstat(fd)
++        _require(st.st_uid == 0 and not st.st_mode & 0o022, "protected D3 selector required")
++        with os.fdopen(os.dup(fd), "rb") as stream:
++            raw = stream.read()
++    selector = NegativeSelector.model_validate_json(raw)
++    root = Path(selector.repository)
++    record = NegativeRecord.model_validate_json(_read(root, selector.record))
++    subject = {
++        "runtime_payload_byte_hash": record.runtime_payload.byte_hash,
++        "negative_inventory_byte_hash": record.inventory.byte_hash,
++    }
++    _require(
++        strict_json_loads(_read(root, record.decision))
++        == {
++            "format": "uarch-component-negative-human-decision/2",
++            "accepted_by": "Javid (@jjaffari)",
++            "reply": "yes",
++            "subject": subject,
++        },
++        "exact separate D3 human decision required",
++    )
++    review = ComponentNegativeReview.model_validate_json(_read(root, record.review))
++    _require(review.subject.model_dump(mode="json") == subject, "exact independent D3 subject")
++    component = _prepare_payload(root, record.runtime_payload, mode=mode, immutable=True)
++    runtime_review = checked_component_review(component, review.runtime_review)
++    require_reviewed_startup(runtime_review.startup_manifest.byte_hash)
++    for file in review.finite_refusals_evidence:
++        _read(root, file)
++    inventory = NegativeInventory.model_validate_json(_read(root, record.inventory))
++    ids = [c.case_id for c in inventory.cases]
++    _require(ids == sorted(set(ids)), "sorted unique D3 IDs required")
++    checks = tuple(
++        (root, f) for f in (selector.record, record.inventory, record.decision, record.review)
++    )
++    checks += ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(raw))),)
++    checks += tuple(
++        (root, file)
++        for file in (
++            review.runtime_review,
++            *runtime_review.required_files,
++            *review.finite_refusals_evidence,
++        )
++    )
++    prepared = _PreparedNegative(
++        component, inventory, checks, runtime_review.startup_manifest.byte_hash
++    )
++    prepared.refresh()
++    return NegativeSession(prepared, token=_TOKEN)
++
++
++def _run_negative_image(
++    prepared: _PreparedNegative,
++    case: NegativeCase,
++    evidence_root: Path,
++    *,
++    timeout_s: float,
++    repetition: int,
++) -> dict[str, Any]:
++    _require(type(repetition) is int and 0 <= repetition < 3, "D3 exact repetition")
++    component = prepared.component
++    raw = _selected_raw(component, case)
++    stdout, stderr, status, record = exchange_image(
++        component,
++        raw,
++        evidence_root,
++        timeout_s=timeout_s,
++        slot={"phase": "initial", "mode": component.mode, "repetition": repetition},
++        admitted={
++            "case_id": case.case_id,
++            "raw_input_sha256": sha256(raw).removeprefix("sha256:"),
++            "engine": component.payload.engine.model_dump(mode="json"),
++        },
++    )
++    record["slot"] = {"phase": "initial", "mode": component.mode, "repetition": repetition}
++    record["case_id"] = case.case_id
++    record["expected_envelope"] = case.expected_envelope.model_dump(mode="json")
++    record["expectation_provenance"] = case.expectation_provenance.model_dump(mode="json")
++    record["failure_stage"] = "negative-consumer"
++    record["zero_dispatch"] = "unobserved; exact envelope/source expectation is not entry evidence"
++    try:
++        error = _consume_negative(stdout, stderr, status, case)
++        prepared.refresh()
++        record["validation_passed"] = True
++        record["failure_stage"] = None
++        record["error"] = error
++    except Exception as failure:
++        record["validation_error"] = repr(failure)
++        raise
++    finally:
++        _save(evidence_root / "attempt.json", record)
++    return record
++
++
++def run_negative(
++    case_id: str, *, session: NegativeSession, evidence_root: Path, repetition: int = 0
++) -> dict[str, Any]:
++    _require(isinstance(session, NegativeSession), "separate D3 authority required")
++    prepared, case = session.claim(case_id)
++    record = _run_negative_image(
++        prepared,
++        case,
++        evidence_root,
++        timeout_s=session._deadline - time.monotonic(),
++        repetition=repetition,
++    )
++    try:
++        _require(time.monotonic() <= session._deadline, "D3 session deadline exhausted")
++    except Exception as error:
++        record.update(
++            validation_passed=False,
++            failure_stage="session-finalization",
++            finalization_error=repr(error),
++        )
++        _save(evidence_root / "attempt.json", record)
++        raise
++    return record
+--- a/src/rkuarch/engines/native/component_records.py
++++ b/src/rkuarch/engines/native/component_records.py
+@@ -1,11 +1,12 @@
+ """Additive component records. Valid shapes and construction pins are never authority."""
+ 
+-from typing import Annotated, Literal
++from typing import Annotated, Any, Literal
+ 
+ from pydantic import Field, model_validator
+ from uarch_contract.common import FrozenModel, Hash, NonEmpty
+ from uarch_contract.mapped import NativeEngineIdentity
+ 
++from .component_construction import ConstructionMode
+ from .records import FileBinding, GitCommit, ModeConfig, SourceInput
+ 
+ IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
+@@ -54,6 +55,43 @@
+         return self
+ 
+ 
++class ComponentBuildInputsV3(FrozenModel):
++    format: Literal["uarch-component-build-inputs/3"]
++    source_commit: GitCommit
++    source_files: Annotated[tuple[SourceInput, ...], Field(min_length=1)]
++    trust_hash: Hash
++    trust_file: FileBinding
++    tool_inputs_hash: Hash
++    tool_inputs_file: FileBinding
++    model_source_paths: Annotated[tuple[NonEmpty, ...], Field(min_length=1)]
++    model_inputs_hash: Hash
++    mode_configs: tuple[ConstructionMode, ConstructionMode]
++    generated_identity_output_paths: tuple[NonEmpty, ...]
++
++    @model_validator(mode="after")
++    def acyclic(self) -> "ComponentBuildInputsV3":
++        paths = [f.path for f in self.source_files]
++        if paths != sorted(set(paths)) or not set(self.model_source_paths) <= set(paths):
++            raise ValueError("complete sorted unique source/model inventory required")
++        if list(self.model_source_paths) != sorted(set(self.model_source_paths)):
++            raise ValueError("sorted unique model inventory required")
++        if self.generated_identity_output_paths != (
++            "native/crates/uarch-engine/generated/identity.rs",
++        ) or set(self.generated_identity_output_paths) & set(paths):
++            raise ValueError("acyclic explicit generated identity required")
++        if tuple(x.mode for x in self.mode_configs) != ("debug", "release"):
++            raise ValueError("separate debug/release configurations required")
++        return self
++
++
++def parse_component_build_inputs(value: Any) -> ComponentBuildInputs | ComponentBuildInputsV3:
++    if isinstance(value, dict) and value.get("format") == "uarch-component-build-inputs/2":
++        return ComponentBuildInputs.model_validate(value)
++    if isinstance(value, dict) and value.get("format") == "uarch-component-build-inputs/3":
++        return ComponentBuildInputsV3.model_validate(value)
++    raise ValueError("explicit supported component BuildInputs version required")
++
++
+ class ComponentBuildReceipt(FrozenModel):
+     format: Literal["uarch-component-build-receipt/1"]
+     build_input_hash: Hash
+@@ -75,6 +113,34 @@
+         return self
+ 
+ 
++class ComponentBuildReceiptV2(FrozenModel):
++    """Ordinary provenance link, independently checked before public review/2."""
++
++    format: Literal["uarch-component-build-receipt/2"]
++    build_input_hash: Hash
++    engine: NativeEngineIdentity
++    mode: Literal["debug", "release"]
++    executable: FileBinding
++    image_digest: Literal["sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"]
++    generated_identity: FileBinding
++    ordinary_receipt: FileBinding
++    environment: FileBinding
++    limitations: tuple[NonEmpty, ...]
++
++    @model_validator(mode="after")
++    def joined(self) -> "ComponentBuildReceiptV2":
++        require_component_engine(self.engine)
++        if self.engine.implementation_hash != self.build_input_hash:
++            raise ValueError("component executable/build identity mismatch")
++        return self
++
++
++def parse_component_build_receipt(value: object) -> ComponentBuildReceipt | ComponentBuildReceiptV2:
++    if isinstance(value, dict) and value.get("format") == "uarch-component-build-receipt/1":
++        return ComponentBuildReceipt.model_validate(value)
++    return ComponentBuildReceiptV2.model_validate(value)
++
++
+ class ComponentExecutable(FrozenModel):
+     mode: Literal["debug", "release"]
+     executable: FileBinding
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_review.py
+@@ -0,0 +1,136 @@
++"""Component-only review/2 data admission. Records are never execution authority.
++
++Build provenance, independently supplied startup assurance and optional historical
++read evidence remain separate. The installed selector/decision chain stays external.
++"""
++
++from __future__ import annotations
++
++from dataclasses import dataclass
++from pathlib import Path
++from typing import Annotated, Any, Literal
++
++from pydantic import BeforeValidator, Field
++from uarch_contract.common import FrozenModel, Hash
++from uarch_contract.hashing import strict_json_loads
++
++from .host import _read, _require
++from .records import FileBinding
++
++
++def _true(value: Any) -> Literal[True]:
++    if value is not True:
++        raise ValueError("exact true review verdict required")
++    return True
++
++
++Accepted = Annotated[Literal[True], BeforeValidator(_true)]
++Evidence = Annotated[tuple[FileBinding, ...], Field(min_length=1)]
++
++
++class RuntimeSubject(FrozenModel):
++    runtime_payload_byte_hash: Hash
++
++
++class StartupSubject(RuntimeSubject):
++    consumer_hash: Hash
++
++
++class ComponentRuntimeReview(FrozenModel):
++    format: Literal["uarch-component-runtime-review/2"]
++    subject: RuntimeSubject
++    build_provenance: FileBinding
++    startup_assurance: FileBinding
++    selected_support_current: Accepted
++    selected_support_evidence: Evidence
++    optional_read_evidence: FileBinding | None
++
++
++class ComponentStartupAssurance(FrozenModel):
++    format: Literal["uarch-component-startup-assurance/1"]
++    subject: StartupSubject
++    verdict: Literal["accepted"]
++    launcher: FileBinding
++    manifest: FileBinding
++    evidence: Evidence
++
++
++class NegativeSubject(RuntimeSubject):
++    negative_inventory_byte_hash: Hash
++
++
++class ComponentNegativeReview(FrozenModel):
++    format: Literal["uarch-component-negative-review/3"]
++    subject: NegativeSubject
++    runtime_review: FileBinding
++    finite_refusals_current: Accepted
++    finite_refusals_evidence: Evidence
++
++
++@dataclass(frozen=True)
++class CheckedRuntimeReview:
++    required_files: tuple[FileBinding, ...]
++    startup_manifest: FileBinding
++    optional_read_evidence: FileBinding | None
++
++
++def _consume_provenance(
++    root: Path, record: dict[str, Any], expected: dict[str, Any]
++) -> list[FileBinding]:
++    from .component_build_review import consume_provenance
++
++    return consume_provenance(root, record, expected)
++
++
++def check_runtime_review(
++    root: Path,
++    value: Any,
++    *,
++    expected: dict[str, Any],
++    launcher: FileBinding,
++) -> CheckedRuntimeReview:
++    """Validate bound review data; caller expectations come from the prepared payload.
++
++    No startup execution or assurance generation. Public host separately checks
++    actual trusted-start state, immutable placement and the genuine decision chain.
++    """
++    review = ComponentRuntimeReview.model_validate(value)
++    _require(
++        review.subject.runtime_payload_byte_hash == expected["runtime_payload_byte_hash"],
++        "component runtime review subject",
++    )
++    files: dict[str, FileBinding] = {}
++
++    def read(binding: FileBinding) -> bytes:
++        previous = files.setdefault(binding.path, binding)
++        _require(previous == binding, "conflicting review file binding")
++        return _read(root, binding)
++
++    provenance = strict_json_loads(read(review.build_provenance))
++    for binding in _consume_provenance(root, provenance, expected):
++        read(binding)
++    startup = ComponentStartupAssurance.model_validate(
++        strict_json_loads(read(review.startup_assurance))
++    )
++    _require(
++        startup.subject.runtime_payload_byte_hash == expected["runtime_payload_byte_hash"]
++        and startup.subject.consumer_hash == expected["consumer_hash"],
++        "separate startup assurance subject/consumer join",
++    )
++    _require(startup.launcher == launcher, "startup assurance launcher join")
++    for binding in (
++        startup.launcher,
++        startup.manifest,
++        *startup.evidence,
++        *review.selected_support_evidence,
++    ):
++        read(binding)
++    if review.optional_read_evidence is not None:
++        # Integrity only. Incomplete/absent optional reads grant nothing and do not
++        # defeat otherwise qualifying provenance/startup review.
++        read(review.optional_read_evidence)
++    return CheckedRuntimeReview(
++        tuple(files[path] for path in sorted(files)),
++        startup.manifest,
++        review.optional_read_evidence,
++    )
+--- a/src/rkuarch/engines/native/component_runner.py
++++ b/src/rkuarch/engines/native/component_runner.py
+@@ -205,14 +205,14 @@
+ 
+ 
+ def run_component(
+-    saved: Path, *, session: ComponentSession
++    saved: Path, *, session: ComponentSession, evidence_root: Path, repetition: int = 0
+ ) -> tuple[MappedEngineResult, dict[str, Any]]:
+-    if not isinstance(session, ComponentSession):
+-        raise ValueError("independent component authority required")
+-    prepared = session.claim()
+-    result = _run_prepared(saved, prepared)
+-    session.check()
+-    return result
++    """Prospective default image route; installation is a later explicit decision."""
++    from .component_image import run_component_image
++
++    return run_component_image(
++        saved, session=session, evidence_root=evidence_root, repetition=repetition
++    )
+ 
+ 
+ def replay_component(saved: Path, output: Path, *, session: ComponentSession) -> MappedEngineResult:
+--- /dev/null
++++ b/tests/unit/test_component_build_review.py
+@@ -0,0 +1,648 @@
++"""Synthetic finite build joins, no native/container/startup execution.
++
++Git objects and generated bytes are constructed independently. A two-file synthetic
++cache substitutes only the cache-policy pin; real accepted ToolInputs are used.
++This is adapter behavior evidence, not a new accepted cache or build receipt.
++"""
++
++from __future__ import annotations
++
++import io
++import json
++import subprocess
++import tarfile
++from pathlib import Path
++from typing import Any
++
++import pytest
++from uarch_contract.hashing import canonical_json, content_hash, sha256
++
++from native.tools import component_ordinary_build as ordinary
++from rkuarch.engines.native import component_build_review as adapter
++from rkuarch.engines.native.component_construction import construction_modes
++from rkuarch.engines.native.component_records import IMAGE, ComponentBuildInputsV3
++from validation.component import ordinary_build_acceptance as independent
++from validation.component import ordinary_build_receipt as harness
++from validation.component.runtime_campaign import helpers
++
++REPO = Path(__file__).resolve().parents[2]
++
++
++def put(root: Path, name: str, value: Any) -> dict[str, str]:
++    raw = value if isinstance(value, bytes) else canonical_json(value).encode()
++    file = root / name
++    file.parent.mkdir(parents=True, exist_ok=True)
++    file.write_bytes(raw)
++    return {"path": name, "byte_hash": sha256(raw)}
++
++
++def git(root: Path, *args: str, data: bytes | None = None) -> bytes:
++    return subprocess.check_output(["git", "-C", str(root), *args], input=data)
++
++
++def resources() -> dict[str, Any]:
++    policy = ordinary.resource_policy()
++    result: dict[str, Any] = helpers()["select_resources"](
++        [0, 1],
++        [(200000, 100000)],
++        8 * 1024**3,
++        [(8 * 1024**3, 0)],
++        reserve=policy["memory_reserve_bytes"],
++        per_worker=policy["per_worker_memory_bytes"],
++        tasks=1,
++    )
++    result.update(
++        mount="/sys/fs/cgroup",
++        membership="/",
++        mounted_root="/",
++        observed_cgroups=[
++            {
++                "path": "/sys/fs/cgroup",
++                "cpu.max": "200000 100000",
++                "memory.max": str(8 * 1024**3),
++                "memory.current": 0,
++            }
++        ],
++    )
++    return result
++
++
++def guard_record(root: Path, value: dict[str, Any], stdout: bytes, stderr: bytes) -> dict[str, Any]:
++    owner, cid = "a" * 32, "b" * 64
++    cleanup = dict(
++        format="private-container-cleanup/1",
++        owner=owner,
++        name="u4-private-" + owner,
++        container_id=cid,
++        stopped=True,
++        removed=True,
++        exit_code=0,
++        reason="completed",
++    )
++    rows = {
++        "intent.json": dict(
++            owner=owner,
++            name="u4-private-" + owner,
++            args=value["container_argv"],
++            timeout=600,
++            cap=ordinary.LIMITS["stdout_bytes"],
++            stderr_cap=ordinary.LIMITS["stderr_bytes"],
++            stdin=False,
++            environment=ordinary.HOST_ENVIRONMENT,
++        ),
++        "pre-existing.json": {"containers": [{"container_id": "c" * 64}]},
++        "created.json": dict(owner=owner, container_id=cid),
++        "started.json": dict(container_id=cid),
++        "cleanup.json": cleanup,
++        "stdout": stdout,
++        "stderr": stderr,
++    }
++    return dict(
++        format="component-ordinary-build-transport/1",
++        plan=value,
++        resources=resources(),
++        guardian={name: put(root, "container/" + name, data) for name, data in rows.items()},
++        parent_cleanup=put(
++            root,
++            "parent-cleanup.json",
++            {"format": "component-ordinary-build-parent-cleanup/1", "receipts": [cleanup]},
++        ),
++        failure=None,
++        construction_artifacts=[put(root, "receipts/" + value["mode"] + ".map", b"synthetic map")],
++    )
++
++
++@pytest.fixture
++def joined(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
++    source = tmp_path / "seed"
++    source.mkdir()
++    tool_name = "docs/reviews/U4-A-K2-construction-v1/candidate-04/ToolInputs.json"
++    tools = json.loads((REPO / tool_name).read_bytes())
++    put(source, tool_name, (REPO / tool_name).read_bytes())
++    for item in tools.values():
++        if isinstance(item, dict) and set(item) == {"path", "byte_hash"}:
++            put(source, item["path"], (REPO / item["path"]).read_bytes())
++    producer = put(source, adapter.PRODUCER, b"# synthetic inert producer\n")
++    code = put(source, "native/model.rs", b"// synthetic inert model\n")
++    cache_bytes = b"synthetic dependency bytes, not accepted cache"
++    cache = put(
++        source, adapter.CACHE_RECORD, {"files": {"fixture": {"sha256": sha256(cache_bytes)[7:]}}}
++    )
++    monkeypatch.setattr(adapter, "CACHE_PIN", cache["byte_hash"])
++    git(source, "init", "-q")
++    git(source, "add", ".")
++    tree = git(source, "write-tree").decode().strip()
++    commit_raw = (
++        f"tree {tree}\nauthor Synthetic <synthetic@invalid> 0 +0000\n"
++        "committer Synthetic <synthetic@invalid> 0 +0000\n\nSynthetic test only\n"
++    ).encode()
++    commit = (
++        git(source, "hash-object", "-t", "commit", "-w", "--stdin", data=commit_raw)
++        .decode()
++        .strip()
++    )
++    archive = git(source, "archive", commit)
++    trust = {
++        "format": "uarch-component-build-trust/2",
++        "purpose": "private-synthetic-tests-only",
++        "semantics_file": put(source, "synthetic-law", b"synthetic law"),
++        "registry_hash": sha256(b"registry"),
++        "registry_file": put(source, "registry", b"registry"),
++        "profiles": [put(source, "profile", b"profile")],
++        "selection": put(source, "selection", b"selection"),
++    }
++    source_files = [
++        {**item, "role": "config"} for item in sorted([code, producer], key=lambda v: v["path"])
++    ]
++    build = ComponentBuildInputsV3.model_validate(
++        {
++            "format": "uarch-component-build-inputs/3",
++            "source_commit": commit,
++            "source_files": source_files,
++            "trust_hash": content_hash(trust),
++            "trust_file": put(source, "trust.json", trust),
++            "tool_inputs_hash": content_hash(tools),
++            "tool_inputs_file": adapter.file_binding(source, tool_name),
++            "model_source_paths": [code["path"]],
++            "model_inputs_hash": content_hash([source_files[0]]),
++            "mode_configs": construction_modes(tools["flags"]),
++            "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
++        }
++    )
++    engine = {
++        "name": "native",
++        "version": "native-stage/1",
++        "implementation_hash": content_hash(build),
++        "compiler_lock_hash": content_hash(tools),
++        "model": {
++            "name": "native-intervals",
++            "version": "2",
++            "implementation_hash": build.model_inputs_hash,
++        },
++    }
++    generated_raw = (
++        'pub const ENGINE_JSON: &str = r###"'
++        + canonical_json(engine)
++        + '"###;\npub const TRUST_JSON: &str = r###"'
++        + canonical_json(trust)
++        + '"###;\n'
++    ).encode()
++    generated = put(tmp_path, build.generated_identity_output_paths[0], generated_raw)
++    build_file = put(source, "private-component/BuildInputs.json", build)
++    consumers = {
++        "independent_binding": put(source, "independent.json", {"synthetic": True}),
++        "observation_contract": put(source, "observation.json", {"synthetic": True}),
++        "files": [producer],
++        "external_files": [{"path": "lib.py", "byte_hash": sha256(b"python")}],
++        "python_executable": {"path": "python", "byte_hash": sha256(b"inert")},
++    }
++    expected: dict[str, Any] = dict(
++        engine=engine,
++        build_inputs=build_file,
++        build_input_hash=content_hash(build),
++        source_commit=commit,
++        source_files=source_files,
++        tool_inputs=build.tool_inputs_file.model_dump(mode="json"),
++        tool_inputs_hash=build.tool_inputs_hash,
++        mode_configs=[v.model_dump(mode="json") for v in build.mode_configs],
++        generated_identity_output_paths=list(build.generated_identity_output_paths),
++        consumers=consumers,
++        consumer_hash=content_hash(consumers),
++        runtime_payload_byte_hash=sha256(b"synthetic payload"),
++        executables=[],
++    )
++    rows = []
++    for mode in ("debug", "release"):
++        root = tmp_path / mode
++        for file in source.rglob("*"):
++            if file.is_file() and ".git" not in file.parts:
++                put(root, adapter.SOURCE + str(file.relative_to(source)), file.read_bytes())
++        put(root, "inputs/source.tar", archive)
++        put(root, "inputs/source-commit.raw", commit_raw)
++        put(root, "inputs/cache/fixture", cache_bytes)
++        put(root, "inputs/python/lib.py", b"python")
++        put(root, "inputs/python/python", b"inert")
++        put(root, adapter.SOURCE + generated["path"], generated_raw)
++        declaration = adapter.derive_declaration(root, expected, mode)
++        executable = put(root, "outputs/uarch-engine", b"not executable: " + mode.encode())
++        stdout = (
++            "\n".join(
++                json.dumps(v)
++                for v in [
++                    {
++                        "reason": "compiler-message",
++                        "message": {"level": "warning", "rendered": "synthetic warning"},
++                    },
++                    {
++                        "reason": "compiler-artifact",
++                        "target": {"name": "uarch-engine", "kind": ["bin"]},
++                        "executable": declaration["cargo_artifact"],
++                        "fresh": False,
++                    },
++                    {"reason": "build-finished", "success": True},
++                ]
++            )
++            + "\n"
++        ).encode()
++        stderr = b"ordinary progress; synthetic only\n"
++        receipt = dict(
++            format=independent.RECEIPT,
++            declaration=declaration,
++            output_root_id=("d" if mode == "debug" else "e") * 64,
++            target_before=[],
++            started_monotonic=1,
++            ended_monotonic=2,
++            deadline_monotonic=601,
++            exit_code=0,
++            completed=True,
++            timed_out=False,
++            resource_failure=None,
++            executable=executable,
++            input_observations=declaration["inputs"],
++            streams={
++                name: dict(
++                    put(root, name, data),
++                    observed_bytes=len(data),
++                    retained_bytes=len(data),
++                    truncated=False,
++                )
++                for name, data in (("stdout", stdout), ("stderr", stderr))
++            },
++        )
++        wanted = dict(
++            format=independent.EXPECTATION,
++            declaration=declaration,
++            executable=executable,
++            **{k: ordinary.LIMITS[k] for k in ("timeout_s", "stdout_bytes", "stderr_bytes")},
++        )
++
++        def outer(item: dict[str, str], mode: str = mode) -> dict[str, str]:
++            return {**item, "path": mode + "/" + item["path"]}
++
++        value = ordinary.plan(tmp_path / "prepared", root, mode, build)
++        rows.append(
++            dict(
++                mode=mode,
++                root=mode,
++                expectation=outer(put(root, "expectation.json", wanted)),
++                receipt=outer(put(root, "ordinary-build-receipt.json", receipt)),
++                transport=outer(
++                    put(root, "transport.json", guard_record(root, value, stdout, stderr))
++                ),
++            )
++        )
++        outer_receipt = dict(
++            format="uarch-component-build-receipt/2",
++            build_input_hash=content_hash(build),
++            engine=engine,
++            mode=mode,
++            executable=outer(executable),
++            image_digest=IMAGE,
++            generated_identity=generated,
++            ordinary_receipt=rows[-1]["receipt"],
++            environment=outer(put(root, "environment.json", declaration["environment"])),
++            limitations=["synthetic only"],
++        )
++        expected["executables"].append(
++            dict(
++                mode=mode,
++                executable=outer(executable),
++                receipt=put(tmp_path, mode + "/component-receipt.json", outer_receipt),
++            )
++        )
++    subject = {key: expected[key] for key in ("runtime_payload_byte_hash", "consumer_hash")}
++    support = put(tmp_path, "support.json", {"synthetic": "not a real check receipt"})
++    checks = put(
++        tmp_path,
++        "checks.json",
++        dict(
++            format="uarch-component-required-checks-review/1",
++            subject={
++                **subject,
++                "build_input_hash": expected["build_input_hash"],
++                "executables": expected["executables"],
++            },
++            required_checks=[
++                "native-and-python-scope",
++                "independent-consumers-and-replay",
++                "lint-types-and-clippy-deny-warnings",
++            ],
++            evidence=[support],
++        ),
++    )
++    record = dict(
++        format="uarch-component-build-provenance/1",
++        subject=subject,
++        builds=rows,
++        required_checks_review=checks,
++    )
++    return dict(root=tmp_path, expected=expected, record=record, build=build)
++
++
++def test_actual_independent_consumer_join_without_trace(joined: dict[str, Any]) -> None:
++    files = adapter.consume_provenance(joined["root"], joined["record"], joined["expected"])
++    paths = {v.path for v in files}
++    for mode in ("debug", "release"):
++        assert {
++            mode + "/" + name
++            for name in (
++                "inputs/source.tar",
++                "inputs/source-commit.raw",
++                "stdout",
++                "stderr",
++                "parent-cleanup.json",
++                "ordinary-build-receipt.json",
++                "inputs/cache/fixture",
++            )
++        } <= paths
++    assert "support.json" in paths
++    assert not any("trace" in p for p in paths)
++
++
++@pytest.mark.parametrize(
++    "change",
++    [
++        "generated",
++        "archive",
++        "tools",
++        "consumer",
++        "command",
++        "ordinary-failure",
++        "cleanup",
++        "resource",
++        "outer-command",
++        "missing-checks",
++    ],
++)
++def test_wrong_or_stale_joins_refuse(joined: dict[str, Any], change: str) -> None:
++    root, record, expected = joined["root"], joined["record"], joined["expected"]
++    row = record["builds"][0]
++    if change == "generated":
++        # derive_declaration reseals the file; wrong semantic bytes must still refuse.
++        (
++            root / "debug" / adapter.SOURCE / expected["generated_identity_output_paths"][0]
++        ).write_bytes(b"wrong generated identity")
++    elif change == "archive":
++        (root / "debug/inputs/source-commit.raw").write_bytes(b"wrong commit object")
++    elif change == "tools":
++        expected["tool_inputs_hash"] = sha256(b"wrong tools")
++    elif change == "consumer":
++        expected["consumers"]["files"] = []
++        expected["consumer_hash"] = content_hash(expected["consumers"])
++        record["subject"]["consumer_hash"] = expected["consumer_hash"]
++    elif change in ("command", "ordinary-failure"):
++        key = "expectation" if change == "command" else "receipt"
++        value = json.loads((root / row[key]["path"]).read_bytes())
++        if change == "command":
++            value["declaration"]["argv"].append("--release")
++        else:
++            value["completed"] = False
++        row[key] = put(root, row[key]["path"], value)
++        if key == "receipt":
++            outer = expected["executables"][0]["receipt"]
++            data = json.loads((root / outer["path"]).read_bytes())
++            data["ordinary_receipt"] = row[key]
++            expected["executables"][0]["receipt"] = put(root, outer["path"], data)
++    elif change == "missing-checks":
++        data = json.loads((root / "checks.json").read_bytes())
++        data["evidence"] = []
++        record["required_checks_review"] = put(root, "checks.json", data)
++    else:
++        value = json.loads((root / row["transport"]["path"]).read_bytes())
++        if change == "cleanup":
++            value["parent_cleanup"] = put(
++                root / "debug",
++                "parent-cleanup.json",
++                {"format": "component-ordinary-build-parent-cleanup/1", "receipts": []},
++            )
++        elif change == "resource":
++            value["resources"]["workers"] = 2
++        else:
++            value["plan"]["container_argv"].append("extra")
++        row["transport"] = put(root, row["transport"]["path"], value)
++    with pytest.raises((ValueError, OSError, AssertionError)):
++        adapter.consume_provenance(root, record, expected)
++
++
++def test_consistently_resealed_command_forgery_refuses(joined: dict[str, Any]) -> None:
++    root, row = joined["root"], joined["record"]["builds"][0]
++    for key in ("expectation", "receipt"):
++        value = json.loads((root / row[key]["path"]).read_bytes())
++        value["declaration"]["environment"]["C2_RUN_TAG"] = "release-build"
++        row[key] = put(root, row[key]["path"], value)
++    outer = joined["expected"]["executables"][0]["receipt"]
++    value = json.loads((root / outer["path"]).read_bytes())
++    value["ordinary_receipt"] = row["receipt"]
++    joined["expected"]["executables"][0]["receipt"] = put(root, outer["path"], value)
++    with pytest.raises(ValueError, match="independently derived ordinary declaration"):
++        adapter.consume_provenance(root, joined["record"], joined["expected"])
++
++
++def test_archive_tree_rejects_repacked_wrong_member(joined: dict[str, Any]) -> None:
++    root = joined["root"] / "debug/inputs"
++    original = (root / "source.tar").read_bytes()
++    changed = io.BytesIO()
++    with (
++        tarfile.open(fileobj=io.BytesIO(original)) as old,
++        tarfile.open(fileobj=changed, mode="w") as new,
++    ):
++        for member in old:
++            if member.isfile():
++                stream = old.extractfile(member)
++                assert stream is not None
++                data = stream.read()
++                if member.name == adapter.PRODUCER:
++                    data = b"changed"
++                    member.size = len(data)
++                new.addfile(member, io.BytesIO(data))
++            else:
++                new.addfile(member)
++    with pytest.raises(ValueError, match="archive/tree join"):
++        adapter.archive_tree(
++            changed.getvalue(),
++            (root / "source-commit.raw").read_bytes(),
++            joined["expected"]["source_commit"],
++        )
++
++
++@pytest.mark.parametrize("failure", [None, "nonzero", "deadline", "cleanup", "resource"])
++def test_actual_transport_harness_with_mocked_guardian(
++    joined: dict[str, Any],
++    monkeypatch: pytest.MonkeyPatch,
++    failure: str | None,
++) -> None:
++    from native.tools import component_container_guard as guardian
++    from validation.component import runtime_campaign
++
++    root = joined["root"] / "debug"
++    wanted = json.loads((root / "expectation.json").read_bytes())
++    # This test creates a second fresh output; copies only synthetic retained inputs.
++    import shutil
++
++    fresh = joined["root"] / "attempt"
++    fresh.mkdir()
++    shutil.copytree(root / "inputs", fresh / "inputs")
++    value = ordinary.plan(joined["root"] / "prepared", fresh, "debug", joined["build"])
++    (fresh / "receipts").mkdir()
++    selection = helpers()
++
++    def discover(*args: Any) -> dict[str, Any]:
++        if failure == "resource":
++            raise ValueError("synthetic insufficient resources")
++        return resources()
++
++    monkeypatch.setattr(runtime_campaign, "helpers", lambda: {**selection, "discover": discover})
++    calls: list[str] = []
++
++    def run(directory: Path, args: list[str], **kwargs: Any) -> dict[str, Any]:
++        calls.append("run")
++        assert kwargs["environment"] == ordinary.HOST_ENVIRONMENT
++        assert args == value["container_argv"]
++        ledger = guard_record(
++            fresh, value, (root / "stdout").read_bytes(), (root / "stderr").read_bytes()
++        )
++        cleanup: dict[str, Any] = json.loads(
++            (fresh / ledger["guardian"]["cleanup.json"]["path"]).read_bytes()
++        )
++        if failure == "nonzero":
++            cleanup["exit_code"] = 17
++        if failure == "deadline":
++            cleanup["reason"] = "deadline"
++        put(fresh, "container/cleanup.json", cleanup)
++        put(fresh, "target/debug/uarch-engine", (root / "outputs/uarch-engine").read_bytes())
++        return cleanup
++
++    def cleanup(scope: Path) -> list[dict[str, Any]]:
++        calls.append("cleanup")
++        assert scope == fresh
++        if failure == "cleanup":
++            raise ValueError("synthetic unresolved cleanup")
++        path = scope / "container/cleanup.json"
++        return [json.loads(path.read_bytes())] if path.exists() else []
++
++    monkeypatch.setattr(guardian, "run_container", run)
++    monkeypatch.setattr(guardian, "cleanup", cleanup)
++    receipt = harness.record_attempt(
++        fresh,
++        wanted["declaration"],
++        {k: ordinary.LIMITS[k] for k in ("timeout_s", "stdout_bytes", "stderr_bytes")},
++        lambda root, spec: ordinary.transport(root, spec, value),
++    )
++    assert calls[-1] == "cleanup"
++    assert (fresh / "ordinary-build-receipt.json").is_file()
++    assert (fresh / "transport.json").is_file()
++    if failure is None:
++        result = independent.consume_build(fresh, receipt, wanted)
++        assert result["clean_build_success"] is True
++        ordinary.verify_transport(
++            fresh,
++            json.loads((fresh / "transport.json").read_bytes()),
++            wanted["declaration"],
++            receipt,
++        )
++    else:
++        with pytest.raises(ValueError):
++            independent.consume_build(fresh, receipt, wanted)
++        if failure == "resource":
++            assert calls == ["cleanup"]
++
++
++def test_new_receipt_and_historical_reader_are_explicit(joined: dict[str, Any]) -> None:
++    from rkuarch.engines.native.component_records import parse_component_build_receipt
++
++    root = joined["root"]
++    value = json.loads((root / "debug/component-receipt.json").read_bytes())
++    assert parse_component_build_receipt(value).format == "uarch-component-build-receipt/2"
++    old = {**value, "format": "uarch-component-build-receipt/1"}
++    ordinary_receipt = old.pop("ordinary_receipt")
++    old.update(build_log=ordinary_receipt, loader_observations=ordinary_receipt)
++    assert parse_component_build_receipt(old).format == "uarch-component-build-receipt/1"
++    for wrong in ("uarch-component-build-receipt/3", "uarch-k2-build-receipt/1"):
++        with pytest.raises(ValueError):
++            parse_component_build_receipt({**value, "format": wrong})
++    # Legacy parsing alone cannot satisfy the new independently checked ordinary chain.
++    outer = joined["expected"]["executables"][0]
++    outer["receipt"] = put(root, "debug/component-receipt.json", old)
++    with pytest.raises(ValueError):
++        adapter.consume_provenance(root, joined["record"], joined["expected"])
++
++
++def test_later_construct_and_assembly_link_actual_harness(
++    joined: dict[str, Any],
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    """Exercise staging/producer links with an inert inline transport, never a build."""
++    import shutil
++
++    root, expected = joined["root"], joined["expected"]
++    prepared = root / "prepared"
++    shutil.copytree(root / "debug/inputs/source", prepared / "source")
++    shutil.copytree(root / "debug/inputs/cache", prepared / "cache")
++    for name in ("source.tar", "source-commit.raw"):
++        shutil.copyfile(root / "debug/inputs" / name, prepared / name)
++    put(prepared / "source", "private-component/engine.json", expected["engine"])
++    consumers = dict(expected["consumers"])
++    # Only inert local bytes substitute for Python snapshots; no process starts.
++    consumers["external_files"] = [
++        adapter.file_binding(Path("/"), str(root / "debug/inputs/python/lib.py")[1:])
++    ]
++    consumers["python_executable"] = adapter.file_binding(
++        Path("/"), str(root / "debug/inputs/python/python")[1:]
++    )
++
++    def callback(output: Path, spec: dict[str, Any], value: dict[str, Any]) -> dict[str, Any]:
++        mode = value["mode"]
++        assert spec["argv"] == value["child_argv"]
++        data = (root / mode / "stdout").read_bytes()
++        stderr = (root / mode / "stderr").read_bytes()
++        put(output, "stdout", data)
++        put(output, "stderr", stderr)
++        put(output, "outputs/uarch-engine", (root / mode / "outputs/uarch-engine").read_bytes())
++        put(output, "transport.json", guard_record(output, value, data, stderr))
++        return dict(
++            exit_code=0,
++            completed=True,
++            timed_out=False,
++            resource_failure=None,
++            observed_bytes={"stdout": len(data), "stderr": len(stderr)},
++            stream_complete={"stdout": True, "stderr": True},
++            stream_truncated={"stdout": False, "stderr": False},
++        )
++
++    monkeypatch.setattr(ordinary, "transport", callback)
++    builds = {mode: root / "first" / mode for mode in ("debug", "release")}
++    for mode, output in builds.items():
++        result = ordinary.construct(prepared, output, mode, consumers)
++        assert result["clean_build_success"] is True
++        assert result["startup_assurance"] == "not-assessed"
++        assert (output / "component-build-receipt.json").is_file()
++    destination = root / "assembled"
++    links = ordinary.assemble_links(destination, builds)
++    assert links["authority"] is None
++    assert links["startup_assurance"] == "not-supplied"
++    assert len(links["executables"]) == 2
++    for item in links["executables"]:
++        outer = json.loads((destination / item["receipt"]["path"]).read_bytes())
++        assert outer["executable"] == item["executable"]
++        assert outer["generated_identity"]["path"] == expected["generated_identity_output_paths"][0]
++        assert not (destination / "builds" / item["mode"] / "target").exists()
++    with pytest.raises(FileExistsError):
++        ordinary.assemble_links(destination, builds)
++
++
++def test_resealed_incomplete_receipt_requires_independent_consumer(joined: dict[str, Any]) -> None:
++    """Every outer link is refreshed; only the observed incomplete status must refuse."""
++    root, record, expected = joined["root"], joined["record"], joined["expected"]
++    row = record["builds"][0]
++    receipt = json.loads((root / row["receipt"]["path"]).read_bytes())
++    receipt["completed"] = False
++    row["receipt"] = put(root, row["receipt"]["path"], receipt)
++    outer_binding = expected["executables"][0]["receipt"]
++    outer = json.loads((root / outer_binding["path"]).read_bytes())
++    outer["ordinary_receipt"] = row["receipt"]
++    expected["executables"][0]["receipt"] = put(root, outer_binding["path"], outer)
++    checks = json.loads((root / record["required_checks_review"]["path"]).read_bytes())
++    checks["subject"]["executables"] = expected["executables"]
++    record["required_checks_review"] = put(root, "checks.json", checks)
++    with pytest.raises(ValueError, match="successful complete ordinary build status"):
++        adapter.consume_provenance(root, record, expected)
+--- /dev/null
++++ b/tests/unit/test_component_ordinary_build.py
+@@ -0,0 +1,106 @@
++"""Synthetic ordinary-build planning; no command, Docker, native or startup execution."""
++
++from pathlib import Path
++
++import pytest
++
++from native.tools import component_ordinary_build as ordinary
++from rkuarch.engines.native.component_construction import FLAGS, construction_modes
++from rkuarch.engines.native.component_records import ComponentBuildInputsV3
++
++
++def inputs() -> ComponentBuildInputsV3:
++    pin = "sha256:" + "1" * 64
++    source = "native/tools/component_runtime_candidate.py"
++    return ComponentBuildInputsV3.model_validate(
++        {
++            "format": "uarch-component-build-inputs/3",
++            "source_commit": "1" * 40,
++            "source_files": [{"path": source, "byte_hash": pin, "role": "config"}],
++            "trust_hash": pin,
++            "trust_file": {"path": "trust.json", "byte_hash": pin},
++            "tool_inputs_hash": pin,
++            "tool_inputs_file": {"path": "tools.json", "byte_hash": pin},
++            "model_source_paths": [source],
++            "model_inputs_hash": pin,
++            "mode_configs": construction_modes(FLAGS),
++            "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
++        }
++    )
++
++
++@pytest.mark.parametrize("mode", ["debug", "release"])
++def test_ordinary_plan_keeps_exact_command_without_tracing(tmp_path: Path, mode: str) -> None:
++    root, output = tmp_path / "prepared", tmp_path / "first" / mode
++    plan = ordinary.plan(root, output, mode, inputs())
++    args = plan["container_argv"]
++    assert args[-len(plan["child_argv"]) :] == plan["child_argv"]
++    assert args.count(f"link-arg=-Wl,-Map=/receipts/{mode}.map") == 1
++    assert plan["environment"]["C2_RUN_TAG"] == mode + "-build"
++    assert len(plan["environment"]) == 11
++    assert not any("strace" in arg or "canary" in arg for arg in args)
++    assert "capture-child" not in args
++    assert not output.exists()
++    assert plan["limits"]["timeout_s"] == 600
++    assert plan["layout"]["target"] == str(output / "target")
++    assert plan["layout"]["artifact"] == str(output / "target" / mode / "uarch-engine")
++
++
++@pytest.mark.parametrize("kind", ["relative", "source", "cache", "parent", "comma"])
++def test_ordinary_output_cannot_alias_inputs(tmp_path: Path, kind: str) -> None:
++    root = tmp_path / "prepared"
++    choices = {
++        "relative": Path("relative"),
++        "source": root / "source" / "output",
++        "cache": root / "cache",
++        "parent": tmp_path,
++        "comma": tmp_path / "bad,root",
++    }
++    with pytest.raises(ValueError, match="ordinary build roots"):
++        ordinary.plan(root, choices[kind], "debug", inputs())
++
++
++def test_fresh_outputs_refuse_existing_targets(tmp_path: Path) -> None:
++    output = tmp_path / "first" / "debug"
++    plan = ordinary.plan(tmp_path / "prepared", output, "debug", inputs())
++    ordinary.create_outputs(plan)
++    assert sorted(p.name for p in output.iterdir()) == ["receipts"]
++    (output / "receipts" / "stale").write_bytes(b"preserve")
++    with pytest.raises(FileExistsError):
++        ordinary.create_outputs(plan)
++    assert (output / "receipts" / "stale").read_bytes() == b"preserve"
++
++
++@pytest.mark.parametrize("explicit", [True, False])
++def test_guardian_environment_is_forwarded_without_launch(
++    tmp_path: Path,
++    monkeypatch: pytest.MonkeyPatch,
++    explicit: bool,
++) -> None:
++    """Only Popen is replaced; no child process, Docker or startup path executes."""
++    import json
++    import subprocess
++    from typing import Any
++
++    from native.tools import component_container_guard as guardian
++
++    calls: list[dict[str, Any]] = []
++
++    class Process:
++        def __init__(self, argv: list[str], **kwargs: Any) -> None:
++            calls.append(kwargs)
++            directory = Path(argv[-2])
++            guardian.save(directory / "cleanup.json", {"stopped": True, "removed": True})
++
++        def wait(self, *, timeout: float) -> None:
++            assert timeout == 635
++
++    monkeypatch.setattr(subprocess, "Popen", Process)
++    env = ordinary.HOST_ENVIRONMENT if explicit else None
++    result = guardian.run_container(tmp_path / "synthetic", ["inert"], timeout=600, environment=env)
++    assert result == {"stopped": True, "removed": True}
++    assert calls[0]["env"] == env
++    intent = json.loads((tmp_path / "synthetic/intent.json").read_bytes())
++    assert ("environment" in intent) == explicit
++    if explicit:
++        assert intent["environment"] == env
+--- /dev/null
++++ b/tests/unit/test_component_review.py
+@@ -0,0 +1,179 @@
++"""Synthetic review records only. No startup, native process or genuine authority."""
++
++from __future__ import annotations
++
++from copy import deepcopy
++from pathlib import Path
++from typing import Any
++
++import pytest
++from uarch_contract.hashing import canonical_json, content_hash, sha256
++
++from rkuarch.engines.native import component_review as review
++from rkuarch.engines.native.records import FileBinding
++
++
++@pytest.fixture
++def records(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
++    def put(name: str, value: Any) -> dict[str, str]:
++        raw = canonical_json(value).encode()
++        (tmp_path / name).write_bytes(raw)
++        return {"path": name, "byte_hash": sha256(raw)}
++
++    launcher = put("launcher.py", {"synthetic": "not executable"})
++    payload = put("payload.json", {"synthetic": "no executable"})
++    consumers = {"files": [launcher], "import_root": str(tmp_path)}
++    subject = {"runtime_payload_byte_hash": payload["byte_hash"]}
++    provenance = put("provenance.json", {"synthetic": "independent B seam mocked"})
++    evidence = put("evidence.json", {"synthetic": "not actual startup assurance"})
++    manifest = put("startup-manifest.json", {"synthetic": True})
++    startup = {
++        "format": "uarch-component-startup-assurance/1",
++        "subject": {**subject, "consumer_hash": content_hash(consumers)},
++        "verdict": "accepted",
++        "launcher": launcher,
++        "manifest": manifest,
++        "evidence": [evidence],
++    }
++    record = {
++        "format": "uarch-component-runtime-review/2",
++        "subject": subject,
++        "build_provenance": provenance,
++        "startup_assurance": put("startup.json", startup),
++        "selected_support_current": True,
++        "selected_support_evidence": [evidence],
++        "optional_read_evidence": None,
++    }
++    calls: list[Any] = []
++
++    def consume(root: Path, raw: Any, expected: Any) -> list[FileBinding]:
++        calls.append((root, raw, expected))
++        return [FileBinding.model_validate(evidence)]
++
++    monkeypatch.setattr(review, "_consume_provenance", consume)
++    expected = {**subject, "consumer_hash": content_hash(consumers)}
++    return dict(
++        root=tmp_path,
++        put=put,
++        record=record,
++        startup=startup,
++        calls=calls,
++        expected=expected,
++        launcher=FileBinding.model_validate(launcher),
++    )
++
++
++def checked(f: dict[str, Any]) -> Any:
++    return review.check_runtime_review(
++        f["root"], f["record"], expected=f["expected"], launcher=f["launcher"]
++    )
++
++
++def test_trace_absence_does_not_substitute_for_or_block_required_review(
++    records: dict[str, Any],
++) -> None:
++    result = checked(records)
++    assert len(records["calls"]) == 1
++    assert result.startup_manifest.path == "startup-manifest.json"
++    assert result.optional_read_evidence is None
++    assert {x.path for x in result.required_files} >= {
++        "provenance.json",
++        "startup.json",
++        "evidence.json",
++        "launcher.py",
++        "startup-manifest.json",
++    }
++    assert "read_audit_complete" not in records["record"]
++
++
++@pytest.mark.parametrize(
++    "field", ["build_provenance", "startup_assurance", "selected_support_evidence"]
++)
++def test_missing_required_review_refuses(records: dict[str, Any], field: str) -> None:
++    del records["record"][field]
++    with pytest.raises(ValueError):
++        checked(records)
++
++
++@pytest.mark.parametrize(
++    "mutation", ["old", "subject", "read-flag", "false-support", "numeric-support"]
++)
++def test_wrong_or_stale_review_refuses(records: dict[str, Any], mutation: str) -> None:
++    record = records["record"]
++    if mutation == "old":
++        record["format"] = "uarch-component-runtime-review/1"
++    elif mutation == "subject":
++        record["subject"]["runtime_payload_byte_hash"] = "sha256:" + "f" * 64
++    elif mutation == "read-flag":
++        record["read_audit_complete"] = True
++    else:
++        record["selected_support_current"] = False if mutation == "false-support" else 1
++    with pytest.raises(ValueError):
++        checked(records)
++
++
++@pytest.mark.parametrize("mutation", ["consumer", "payload", "launcher", "evidence", "verdict"])
++def test_startup_is_separate_exact_assurance(records: dict[str, Any], mutation: str) -> None:
++    value = deepcopy(records["startup"])
++    if mutation in ("consumer", "payload"):
++        key = "consumer_hash" if mutation == "consumer" else "runtime_payload_byte_hash"
++        value["subject"][key] = "sha256:" + "f" * 64
++    elif mutation == "launcher":
++        value["launcher"] = records["put"]("other-launcher.py", {"synthetic": "wrong"})
++    elif mutation == "evidence":
++        value["evidence"] = []
++    else:
++        value["verdict"] = "pending"
++    records["record"]["startup_assurance"] = records["put"]("startup.json", value)
++    with pytest.raises(ValueError):
++        checked(records)
++
++
++def test_optional_read_evidence_is_only_hash_bound(records: dict[str, Any]) -> None:
++    records["record"]["optional_read_evidence"] = records["put"](
++        "optional.json", {"read_audit_complete": False, "status": "NONE CAPTURED"}
++    )
++    result = checked(records)
++    assert result.optional_read_evidence is not None
++    assert result.optional_read_evidence.path == "optional.json"
++    assert (records["root"] / "optional.json").read_text().find("false") >= 0
++
++
++def test_bad_provenance_cannot_be_replaced_by_good_startup(
++    records: dict[str, Any], monkeypatch: pytest.MonkeyPatch
++) -> None:
++    def refuse(*args: Any) -> Any:
++        raise ValueError("synthetic independent build refusal")
++
++    monkeypatch.setattr(review, "_consume_provenance", refuse)
++    with pytest.raises(ValueError, match="independent build refusal"):
++        checked(records)
++
++
++def test_stale_required_evidence_refuses(records: dict[str, Any]) -> None:
++    (records["root"] / "evidence.json").write_text("changed")
++    with pytest.raises(ValueError, match="digest mismatch"):
++        checked(records)
++
++
++def test_D3_review_has_its_own_subject_and_runtime_review_link() -> None:
++    pin = "sha256:" + "1" * 64
++    binding = {"path": "synthetic.json", "byte_hash": pin}
++    value = {
++        "format": "uarch-component-negative-review/3",
++        "subject": {"runtime_payload_byte_hash": pin, "negative_inventory_byte_hash": pin},
++        "runtime_review": binding,
++        "finite_refusals_current": True,
++        "finite_refusals_evidence": [binding],
++    }
++    assert (
++        review.ComponentNegativeReview.model_validate(value).runtime_review.path == "synthetic.json"
++    )
++    for changed in (
++        {**value, "format": "uarch-component-negative-review/2"},
++        {**value, "finite_refusals_current": 1},
++        {**value, "finite_refusals_evidence": []},
++        {**value, "read_audit_complete": True},
++    ):
++        with pytest.raises(ValueError):
++            review.ComponentNegativeReview.model_validate(changed)
+--- a/tests/unit/test_component_runtime.py
++++ b/tests/unit/test_component_runtime.py
+@@ -1,5 +1,6 @@
+ """Synthetic component integration; no selector, human decision or public authority."""
+ 
++import inspect
+ import json
+ from copy import deepcopy
+ from pathlib import Path
+@@ -38,7 +39,12 @@
+     with pytest.raises((OSError, ValueError)):
+         component_host.prepare_component(mode="debug")
+     with pytest.raises(ValueError, match="component authority"):
+-        component_runner.run_component(tmp_path / "absent-job", session=object())
++        options = (
++            {"evidence_root": tmp_path / "evidence"}
++            if "evidence_root" in inspect.signature(component_runner.run_component).parameters
++            else {}
++        )
++        component_runner.run_component(tmp_path / "absent-job", session=object(), **options)
+ 
+ 
+ def test_component_route_is_job_selected_before_output_consumer():
+--- a/validation/component/runtime_checks.py
++++ b/validation/component/runtime_checks.py
+@@ -35,9 +35,14 @@
+             "contract/uarch_contract",
+             "validation/component",
+             "src/rkuarch/engines/native",
++            "native/tools",
+         )
+         for p in (source / folder).glob("*.py")
+         if not p.name.startswith("test_")
++    )
++    required.update(
++        "docs/reviews/U4-B-K2-parallel-first-use-v1/" + name
++        for name in ("parallel_core.py", "resource_limits.py")
+     )
+     need(required <= set(pins), "complete matching consumer/structural closure required")
+     for name, wanted in pins.items():
+--- a/validation/component/runtime_selection.py
++++ b/validation/component/runtime_selection.py
+@@ -220,4 +220,5 @@
+     (out / "selection.json").write_text(
+         json.dumps(value["selection"], indent=2, sort_keys=True) + "\n"
+     )
+-    return value["selection"]
++    selected: dict[str, Any] = value["selection"]
++    return selected

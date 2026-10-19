@@ -1,0 +1,62 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> src/rkuarch/engines/native/component_negative.py:9:1
+   |
+ 7 |   """
+ 8 |
+ 9 | / from __future__ import annotations
+10 | |
+11 | | import os
+12 | | import time
+13 | | from dataclasses import dataclass
+14 | | from pathlib import Path
+15 | | from threading import Lock
+16 | | from typing import Annotated, Any, Literal
+17 | |
+18 | | from pydantic import Field
+19 | | from uarch_contract.common import FrozenModel, NonEmpty
+20 | | from uarch_contract.hashing import sha256, strict_json_loads
+21 | | from uarch_contract.mapped import NativeTestProfile
+22 | |
+23 | | from rkuarch.engines.native.component_host import (
+24 | |     _prepare_payload, _PreparedComponent, checked_component_review, require_reviewed_startup,
+25 | | )
+26 | | from rkuarch.engines.native.component_review import ComponentNegativeReview
+27 | | from rkuarch.engines.native.component_runner import require_negative_envelope
+28 | | from rkuarch.engines.native.host import _open, _read, _require
+29 | | from rkuarch.engines.native.records import FileBinding
+30 | | from rkuarch.engines.native.component_image import exchange_image, _save
+   | |________________________________________________________________________^
+31 |
+32 |   _SELECTOR = Path("/etc/rkuarch/component-negative-selector.json")
+   |
+help: Organize imports
+   |
+23 | from rkuarch.engines.native.component_host import (
+   -     _prepare_payload, _PreparedComponent, checked_component_review, require_reviewed_startup,
+24 +     _prepare_payload,
+25 +     _PreparedComponent,
+26 +     checked_component_review,
+27 +     require_reviewed_startup,
+28 | )
+29 + from rkuarch.engines.native.component_image import _save, exchange_image
+30 | from rkuarch.engines.native.component_review import ComponentNegativeReview
+31 | from rkuarch.engines.native.component_runner import require_negative_envelope
+32 | from rkuarch.engines.native.host import _open, _read, _require
+33 | from rkuarch.engines.native.records import FileBinding
+   - from rkuarch.engines.native.component_image import exchange_image, _save
+34 |
+   |
+
+E501 Line too long (114 > 100)
+   --> src/rkuarch/engines/native/component_negative.py:100:101
+    |
+ 98 |     guard = provenance["native_guard_source"]
+ 99 |     try:
+100 |         guard_bytes = _read(prepared.root, FileBinding(path=guard["path"], byte_hash="sha256:" + guard["sha256"]))
+    |                                                                                                     ^^^^^^^^^^^^^^
+101 |     except ValueError as error:
+102 |         raise ValueError("D3 expectation guard source") from error
+    |
+
+Found 2 errors.
+[*] 1 fixable with the `--fix` option.

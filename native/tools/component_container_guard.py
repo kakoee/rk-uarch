@@ -189,6 +189,7 @@ def run_container(
     cap: int = 1024**2,
     stderr_cap: int | None = None,
     stdin_bytes: bytes | None = None,
+    environment: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     directory = directory.resolve()
     directory.mkdir(parents=True, exist_ok=False)
@@ -205,6 +206,7 @@ def run_container(
             "cap": cap,
             "stderr_cap": cap if stderr_cap is None else stderr_cap,
             "stdin": stdin_bytes is not None,
+            **({"environment": environment} if environment is not None else {}),
         },
     )
     read_fd, write_fd = os.pipe()
@@ -219,6 +221,7 @@ def run_container(
                 str(directory),
                 str(read_fd),
             ],
+            env=environment,
             pass_fds=(read_fd,),
             start_new_session=True,
             stdin=subprocess.DEVNULL,
