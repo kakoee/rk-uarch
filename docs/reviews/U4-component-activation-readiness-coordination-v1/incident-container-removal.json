@@ -1,0 +1,45 @@
+{
+  "what": "Reviewer error during the B-F2 fault probe cleanup: a label-wide 'docker rm -f' removed 7 PRE-EXISTING containers not created by this review, in addition to the one container the fault left running.",
+  "when_utc": "2026-10-19T00:41:22Z..00:41:23Z (docker destroy events)",
+  "state_before_removal": "all 7 'Exited (0) ~6 hours ago' (stopped, not removed), label rk-uarch.private-owner",
+  "containers": [
+    {
+      "container_id": "ba82b653f0d83e29d5260874cdb789d311a81157acfeaeee8f4c60c11c3cfdcf",
+      "name": "u4-private-527590721837464b8647709525cb0d69",
+      "owner": "527590721837464b8647709525cb0d69"
+    },
+    {
+      "container_id": "dc795c4091070586170ef23a0be97a44812a4320f0a0aba1aeaa7f9175fb62fe",
+      "name": "u4-private-6a135046cd4b49189f748947446288ae",
+      "owner": "6a135046cd4b49189f748947446288ae"
+    },
+    {
+      "container_id": "fdafb9246e20144fc0ae821e2f999c79dbe67f562c22dad29f3ffdf65ef69c85",
+      "name": "u4-private-c58d346b46d7463d88b2beed3cc6e6e5",
+      "owner": "c58d346b46d7463d88b2beed3cc6e6e5"
+    },
+    {
+      "container_id": "f42bf8c6443221d8bc61753e6ed53e1a47780c0b741472d47b4258adf002a48d",
+      "name": "u4-private-71e723a8ee20448cb954216c812f6f9f",
+      "owner": "71e723a8ee20448cb954216c812f6f9f"
+    },
+    {
+      "container_id": "f73aa8bbf979437e3d46d709597bf8a183c0918094a2e3a7ee88b16a94842bf7",
+      "name": "u4-private-0f26f6cb000b44c6a44f910325106dab",
+      "owner": "0f26f6cb000b44c6a44f910325106dab"
+    },
+    {
+      "container_id": "16ba6c38d51224a10ef206b0c984e3cf5a3797f602f28c808d21d33b49a9d591",
+      "name": "u4-private-f3ba3f4dfcd54b1383669ad736e56fb1",
+      "owner": "f3ba3f4dfcd54b1383669ad736e56fb1"
+    },
+    {
+      "container_id": "e0fca06268b09d8b18fce5eb49865fcf24cead03e93d69dec72ff2a9216d93bf",
+      "name": "u4-private-ecb43ba9c4d64cf1b90d86a308390388",
+      "owner": "ecb43ba9c4d64cf1b90d86a308390388"
+    }
+  ],
+  "origin": "unknown: owner tokens absent from A's resource-join archive (ad16a17a...), whose 12 container IDs differ, and absent from /tmp/u4-* run directories (searched read-only). Other sessions' scratch directories were not searched.",
+  "consequence": "their filesystems/logs are irrecoverable. No reviewed or published evidence referenced them (searched). No inference about B-F2 is drawn from their prior existence; Stage 3 introduces no new findings.",
+  "reviewer_created_container": "7d96cf39e582 (left running by the deliberate stop/remove fault) was removed in the same loop; final state: zero labelled and zero running containers"
+}
