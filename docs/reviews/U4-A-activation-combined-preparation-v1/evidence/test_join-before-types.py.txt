@@ -1,0 +1,101 @@
+"""Synthetic preparation/interface joins; no campaign, worker or native execution."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from native.tools import component_runtime_candidate as preparation
+from rkuarch.engines.native import component_image
+from validation.component import capture_monitor, ordinary_eof_campaign
+
+
+def test_import_inventory_covers_every_selected_consumer(tmp_path: Path) -> None:
+    # imports() only hashes files. This synthetic observation is not a runtime binding.
+    observation = tmp_path / preparation.OUTPUT / "observation-contract.json"
+    observation.parent.mkdir()
+    observation.write_text('{"synthetic": true}')
+    result = preparation.imports(preparation.ROOT, observation_root=tmp_path)
+    selected = preparation.ROOT / result["independent_binding"]["path"]
+    pins = json.loads(selected.read_bytes())["files"]
+    inventory = {row["path"]: row["byte_hash"].removeprefix("sha256:") for row in result["files"]}
+    missing = sorted(set(pins) - inventory.keys())
+    assert missing == [], f"selected consumers omitted from import inventory: {missing}"
+    assert all(inventory[name] == digest for name, digest in pins.items())
+    assert inventory[capture_monitor.PARSER] == capture_monitor.PARSER_HASH
+    for stem in ("ordinary_eof_campaign", "capture_monitor"):
+        assert f"validation/component/test_{stem}.py" in inventory
+        assert f"validation/component/test_{stem}.py" not in pins
+
+
+@pytest.mark.parametrize("kind", ["initial", "replay", "negative"])
+def test_session_adapter_delegates_exact_arguments(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    # Only entry functions are replaced; no session is constructed or authority claimed.
+    from rkuarch.engines.native import component_negative
+
+    calls: list[tuple[str, tuple[Any, ...], dict[str, Any]]] = []
+
+    def record(name: str) -> Any:
+        def call(*args: Any, **kwargs: Any) -> None:
+            calls.append((name, args, kwargs))
+
+        return call
+
+    monkeypatch.setattr(component_image, "run_component_image", record("initial"))
+    monkeypatch.setattr(component_image, "replay_component_image", record("replay"))
+    monkeypatch.setattr(component_negative, "run_negative", record("negative"))
+    sentinel, negative = object(), object()
+    provided: list[tuple[str, Any]] = []
+    slot = {"case_id": "synthetic", "mode": "release", "phase": kind, "repetition": 2}
+    row = {"case_id": "synthetic", "expected_layer": "refusal" if kind == "negative" else "result"}
+
+    def provider(value: Any) -> object:
+        provided.append(("positive", value))
+        return sentinel
+
+    def negative_provider(value: Any) -> object:
+        provided.append(("negative", value))
+        return negative
+
+    saved = tmp_path / "saved.json"
+    adapter = ordinary_eof_campaign.SessionAdapter(
+        {"synthetic": saved}, provider, negative_session_for=negative_provider
+    )
+    adapter.preflight({"rows": [row]}, dict(ordinary_eof_campaign.POLICY))
+    refs = [
+        {"path": str(tmp_path / f"initial-{i}.json"), "byte_hash": f"synthetic-{i}"}
+        for i in range(6)
+    ]
+    root = tmp_path / "attempt"
+    result = adapter.call(slot, row, root, refs if kind == "replay" else None, 1)
+    expected = (
+        "synthetic"
+        if kind == "negative"
+        else [(Path(r["path"]), r["byte_hash"]) for r in refs]
+        if kind == "replay"
+        else saved
+    )
+    assert result is None  # No adapter acceptance flag.
+    assert calls == [
+        (
+            kind,
+            (expected,),
+            {
+                "session": negative if kind == "negative" else sentinel,
+                "evidence_root": root,
+                "repetition": 2,
+            },
+        )
+    ]
+    assert provided == [("negative" if kind == "negative" else "positive", slot)]
+    assert not root.exists()
+    calls.clear()
+    provided.clear()
+    with pytest.raises(ValueError, match="remaining campaign deadline"):
+        adapter.call(slot, row, root, None, 0)
+    assert calls == provided == []

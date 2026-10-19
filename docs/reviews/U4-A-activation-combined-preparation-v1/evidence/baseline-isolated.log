@@ -1,0 +1,29 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 52, "sample": {"uarch_contract.mapped": "/tmp/u4-a-activation-combined-KggHnN/source/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-a-activation-combined-KggHnN/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-a-activation-combined-KggHnN/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-a-activation-combined-KggHnN/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_____________ test_import_inventory_covers_every_selected_consumer _____________
+
+tmp_path = PosixPath('/tmp/u4-a-activation-combined-KggHnN/baseline-isolated/test_import_inventory_covers_e0')
+
+    def test_import_inventory_covers_every_selected_consumer(tmp_path: Path) -> None:
+        # imports() only hashes files. This synthetic observation is not a runtime binding.
+        observation = tmp_path / preparation.OUTPUT / "observation-contract.json"
+        observation.parent.mkdir()
+        observation.write_text('{"synthetic": true}')
+        result = preparation.imports(preparation.ROOT, observation_root=tmp_path)
+        selected = preparation.ROOT / result["independent_binding"]["path"]
+        pins = json.loads(selected.read_bytes())["files"]
+        inventory = {row["path"]: row["byte_hash"].removeprefix("sha256:") for row in result["files"]}
+        missing = sorted(set(pins) - inventory.keys())
+>       assert missing == [], f"selected consumers omitted from import inventory: {missing}"
+E       AssertionError: selected consumers omitted from import inventory: ['docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py']
+E       assert ['docs/review...ce_canary.py'] == []
+E         
+E         Left contains one more item: 'docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py'
+E         Use -v to get more diff
+
+docs/reviews/U4-A-activation-combined-preparation-v1/probes/test_join.py:26: AssertionError
+=========================== short test summary info ============================
+FAILED docs/reviews/U4-A-activation-combined-preparation-v1/probes/test_join.py::test_import_inventory_covers_every_selected_consumer
+1 failed in 0.51s
