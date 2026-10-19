@@ -38,7 +38,7 @@ from .records import FileBinding, ToolInputs
 
 _SELECTOR = Path("/etc/rkuarch/component-host-selector.json")
 _AUTHORITY = object()
-_PROJECT = ("uarch_contract", "rkuarch", "validation")
+_PROJECT = ("uarch_contract", "rkuarch", "validation", "native")
 _EXTERNAL = (
     "pydantic",
     "pydantic_core",

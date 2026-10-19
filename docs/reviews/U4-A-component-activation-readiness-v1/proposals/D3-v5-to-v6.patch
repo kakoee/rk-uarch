@@ -1,0 +1,84 @@
+--- a/src/rkuarch/engines/native/component_negative.py
++++ b/src/rkuarch/engines/native/component_negative.py
+@@ -1,4 +1,4 @@
+-"""UNAPPLIED Stage 2 source-bound expectation successor. No native-site proof is inferred.
++"""UNAPPLIED v6 ordinary-image EOF successor. No native-site proof is inferred.
+ 
+ Finite refusal-only transport. Requires a separately installed D3 decision.
+ 
+@@ -24,7 +24,7 @@
+ from rkuarch.engines.native.component_runner import require_negative_envelope
+ from rkuarch.engines.native.host import _open, _read, _require
+ from rkuarch.engines.native.records import FileBinding
+-from rkuarch.engines.native.runner import Limits, _exchange
++from rkuarch.engines.native.component_image import exchange_image, _save
+ 
+ _SELECTOR = Path("/etc/rkuarch/component-negative-selector.json")
+ _TOKEN = object()
+@@ -204,26 +204,45 @@
+     return NegativeSession(prepared, token=_TOKEN)
+ 
+ 
+-def run_negative(case_id: str, *, session: NegativeSession) -> dict[str, Any]:
++def _run_negative_image(
++    prepared: _PreparedNegative, case: NegativeCase, evidence_root: Path,
++    *, timeout_s: float, repetition: int,
++) -> dict[str, Any]:
++    _require(type(repetition) is int and 0 <= repetition < 3, "D3 exact repetition")
++    component = prepared.component
++    raw = _selected_raw(component, case)
++    stdout, stderr, status, record = exchange_image(
++        component, raw, evidence_root, timeout_s=timeout_s,
++        slot={"phase": "initial", "mode": component.mode, "repetition": repetition},
++        admitted={"case_id": case.case_id, "raw_input_sha256": sha256(raw).removeprefix("sha256:"),
++                  "engine": component.payload.engine.model_dump(mode="json")})
++    record["slot"] = {"phase": "initial", "mode": component.mode, "repetition": repetition}
++    record["case_id"] = case.case_id
++    record["expected_envelope"] = case.expected_envelope.model_dump(mode="json")
++    record["expectation_provenance"] = case.expectation_provenance.model_dump(mode="json")
++    record["failure_stage"] = "negative-consumer"
++    record["zero_dispatch"] = "unobserved; exact envelope/source expectation is not entry evidence"
++    try:
++        error = _consume_negative(stdout, stderr, status, case)
++        prepared.refresh()
++        record["validation_passed"] = True
++        record["failure_stage"] = None
++        record["error"] = error
++    except Exception as failure:
++        record["validation_error"] = repr(failure)
++        raise
++    finally:
++        _save(evidence_root / "attempt.json", record)
++    return record
++
++
++def run_negative(
++    case_id: str, *, session: NegativeSession, evidence_root: Path, repetition: int = 0
++) -> dict[str, Any]:
+     _require(isinstance(session, NegativeSession), "separate D3 authority required")
+     prepared, case = session.claim(case_id)
+-    component = prepared.component
+-    raw = _selected_raw(component, case)
+-    b = component.payload.budget
+-    with component.executable() as fd:
+-        stdout, stderr, status = _exchange(
+-            fd, raw, Limits(b.timeout_s, b.stdin_bytes, b.stdout_bytes, b.stderr_bytes)
+-        )
+-    error = _consume_negative(stdout, stderr, status, case)
+-    prepared.refresh()
+-    selected = next(x for x in component.payload.executables if x.mode == component.mode)
+-    return {
+-        "case_id": case_id,
+-        "request_byte_hash": sha256(raw),
+-        "exit_code": status,
+-        "stdout_byte_hash": sha256(stdout),
+-        "stderr_byte_hash": sha256(stderr),
+-        "executable_byte_hash": selected.executable.byte_hash,
+-        "error": error,
+-        "zero_dispatch": "not established by envelope; separate native evidence required",
+-    }
++    record = _run_negative_image(
++        prepared, case, evidence_root, timeout_s=session._deadline - time.monotonic(),
++        repetition=repetition)
++    _require(time.monotonic() <= session._deadline, "D3 session deadline exhausted")
++    return record

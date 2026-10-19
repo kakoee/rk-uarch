@@ -1,0 +1,17 @@
+--- a/validation/component/runtime_checks.py
++++ b/validation/component/runtime_checks.py
+@@ -35,9 +35,14 @@
+             "contract/uarch_contract",
+             "validation/component",
+             "src/rkuarch/engines/native",
++            "native/tools",
+         )
+         for p in (source / folder).glob("*.py")
+         if not p.name.startswith("test_")
++    )
++    required.update(
++        "docs/reviews/U4-B-K2-parallel-first-use-v1/" + name
++        for name in ("parallel_core.py", "resource_limits.py")
+     )
+     need(required <= set(pins), "complete matching consumer/structural closure required")
+     for name, wanted in pins.items():

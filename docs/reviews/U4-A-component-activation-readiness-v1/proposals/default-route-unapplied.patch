@@ -1,0 +1,24 @@
+--- a/src/rkuarch/engines/native/component_runner.py
++++ b/src/rkuarch/engines/native/component_runner.py
+@@ -205,14 +205,14 @@
+ 
+ 
+ def run_component(
+-    saved: Path, *, session: ComponentSession
++    saved: Path, *, session: ComponentSession, evidence_root: Path, repetition: int = 0
+ ) -> tuple[MappedEngineResult, dict[str, Any]]:
+-    if not isinstance(session, ComponentSession):
+-        raise ValueError("independent component authority required")
+-    prepared = session.claim()
+-    result = _run_prepared(saved, prepared)
+-    session.check()
+-    return result
++    """Prospective default image route; installation is a later explicit decision."""
++    from .component_image import run_component_image
++
++    return run_component_image(
++        saved, session=session, evidence_root=evidence_root, repetition=repetition
++    )
+ 
+ 
+ def replay_component(saved: Path, output: Path, *, session: ComponentSession) -> MappedEngineResult:

@@ -106,6 +106,10 @@ def freeze(source: Path, commit: str) -> dict:
         )
     paths += [source / name for name in ("pyproject.toml", "uv.lock")]
     paths += [
+        source / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
+        for name in ("parallel_core.py", "resource_limits.py")
+    ]
+    paths += [
         source / "docs/reviews/U4-A-K2-construction-v1/inputs" / n
         for n in ("rustc-wrapper.sh", "linker.sh")
     ]
@@ -343,9 +347,14 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
     files = sorted(
         {
             p
-            for d in ("src/rkuarch", "contract/uarch_contract", "validation")
+            for d in ("src/rkuarch", "contract/uarch_contract", "validation", "native/tools")
             for p in (root / d).rglob("*.py")
         }
+    )
+    # Hash-checked runpy helpers are executable inputs, despite living under docs/.
+    files.extend(
+        root / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
+        for name in ("parallel_core.py", "resource_limits.py")
     )
     external = set()
     stdlib = Path(sysconfig.get_path("stdlib"))
@@ -368,13 +377,13 @@ def imports(root: Path, observation_root: Path | None = None) -> dict:
         "checker": "validation.component.observations_v3:check_v3",
         "observations": "uarch-native-observations/3",
         "import_root": str(root),
-        "files": [binding(root, p) for p in files],
+        "files": [binding(root, p) for p in sorted(set(files))],
         "external_files": [binding(Path("/"), p) for p in sorted(external)],
         "python_executable": binding(Path("/"), Path(sys.executable).resolve()),
         "independent_binding": binding(
             root,
             root
-            / "docs/reviews/U4-B-component-runtime-stage2-join-v1"
+            / "docs/reviews/U4-A-component-activation-readiness-v1"
             / "prospective-consumer-bindings.json",
         ),
         "observation_contract": binding(

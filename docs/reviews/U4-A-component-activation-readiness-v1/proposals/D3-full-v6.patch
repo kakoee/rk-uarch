@@ -1,0 +1,251 @@
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_negative.py
+@@ -0,0 +1,248 @@
++"""UNAPPLIED v6 ordinary-image EOF successor. No native-site proof is inferred.
++
++Finite refusal-only transport. Requires a separately installed D3 decision.
++
++The public API accepts only a case ID. Neither raw stdin nor replacement profiles,
++expected errors, executable paths or a bypass flag are supplied by a caller.
++"""
++
++from __future__ import annotations
++
++import os
++import time
++from dataclasses import dataclass
++from pathlib import Path
++from threading import Lock
++from typing import Annotated, Any, Literal
++
++from pydantic import Field
++from uarch_contract.common import FrozenModel, NonEmpty
++from uarch_contract.hashing import sha256, strict_json_loads
++from uarch_contract.mapped import NativeTestProfile
++
++from rkuarch.engines.native.component_host import _prepare_payload, _PreparedComponent
++from rkuarch.engines.native.component_runner import require_negative_envelope
++from rkuarch.engines.native.host import _open, _read, _require
++from rkuarch.engines.native.records import FileBinding
++from rkuarch.engines.native.component_image import exchange_image, _save
++
++_SELECTOR = Path("/etc/rkuarch/component-negative-selector.json")
++_TOKEN = object()
++
++
++class ExpectedEnvelope(FrozenModel):
++    code: NonEmpty
++    message: NonEmpty
++    pointer: str | None
++
++
++class NegativeCase(FrozenModel):
++    case_id: NonEmpty
++    raw: FileBinding
++    profile: FileBinding
++    expected_envelope: ExpectedEnvelope
++    expectation_provenance: FileBinding
++    layer: Literal["profile", "resource-preflight"]
++
++
++class NegativeInventory(FrozenModel):
++    format: Literal["uarch-component-negative-inventory/2"]
++    cases: Annotated[tuple[NegativeCase, ...], Field(min_length=1)]
++
++
++class NegativeRecord(FrozenModel):
++    format: Literal["uarch-component-negative-record/2"]
++    runtime_payload: FileBinding
++    inventory: FileBinding
++    decision: FileBinding
++    review: FileBinding
++
++
++class NegativeSelector(FrozenModel):
++    format: Literal["uarch-component-negative-selector/2"]
++    repository: NonEmpty
++    record: FileBinding
++
++
++def _selected_raw(prepared: _PreparedComponent, case: NegativeCase) -> bytes:
++    raw = _read(prepared.root, case.raw)
++    _require(len(raw) <= prepared.payload.budget.stdin_bytes, "D3 stdin limit")
++    value = strict_json_loads(raw)
++    profile = NativeTestProfile.model_validate_json(_read(prepared.root, case.profile))
++    _require(value["engine"] == prepared.payload.engine.model_dump(mode="json"), "D3 engine join")
++    _require(
++        profile.format == "uarch-native-test-profile/2"
++        and value["profile"] == profile.model_dump(mode="json")
++        and value["admission"]["profile_hash"] == profile.profile_hash
++        and value["admission"]["case_id"] == case.case_id
++        and any(e.case_id == case.case_id for e in profile.entries),
++        "D3 independent profile join",
++    )
++    _require(
++        value["registry"] == strict_json_loads(_read(prepared.root, prepared.payload.registry)),
++        "D3 independent registry join",
++    )
++    provenance = strict_json_loads(_read(prepared.root, case.expectation_provenance))
++    _require(
++        provenance["case_id"] == case.case_id
++        and provenance["input_sha256"] == case.raw.byte_hash.split(":")[1]
++        and provenance["job_hash"] == value["job_hash"]
++        and provenance["engine"] == value["engine"]
++        and provenance["envelope"] == case.expected_envelope.model_dump(mode="json")
++        and provenance["runtime_entries_required"] == 0,
++        "D3 expectation input/envelope binding",
++    )
++    guard = provenance["native_guard_source"]
++    try:
++        guard_bytes = _read(prepared.root, FileBinding(path=guard["path"], byte_hash="sha256:" + guard["sha256"]))
++    except ValueError as error:
++        raise ValueError("D3 expectation guard source") from error
++    _require(
++        sha256(guard_bytes)
++        == "sha256:" + guard["sha256"],
++        "D3 expectation guard source",
++    )
++    # No Python resource-success preflight: the finite independently bound refusal is the test.
++    # This function supplies no native prevalidation flag and computes no delays.
++    return raw
++
++
++def _consume_negative(
++    stdout: bytes, stderr: bytes, status: int, case: NegativeCase
++) -> dict[str, Any]:
++    return require_negative_envelope(
++        stdout, stderr, status, case.expected_envelope.model_dump(mode="json")
++    )
++
++
++@dataclass(frozen=True)
++class _PreparedNegative:
++    component: _PreparedComponent
++    inventory: NegativeInventory
++    checks: tuple[tuple[Path, FileBinding], ...]
++
++    def refresh(self) -> None:
++        self.component.refresh()
++        for root, binding in self.checks:
++            _read(root, binding)
++            with _open(root, binding.path) as fd:
++                _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 records required")
++        for case in self.inventory.cases:
++            _selected_raw(self.component, case)
++            for file in (case.raw, case.profile, case.expectation_provenance):
++                _read(self.component.root, file)
++                with _open(self.component.root, file.path) as fd:
++                    _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 cases required")
++
++
++class NegativeSession:
++    def __init__(self, prepared: _PreparedNegative, *, token: object) -> None:
++        _require(token is _TOKEN, "separate D3 authority required")
++        self._token = token
++        self._prepared = prepared
++        self._remaining = prepared.component.payload.budget.calls
++        self._deadline = time.monotonic() + prepared.component.payload.budget.session_seconds
++        self._lock = Lock()
++
++    def claim(self, case_id: str) -> tuple[_PreparedNegative, NegativeCase]:
++        with self._lock:
++            _require(self._token is _TOKEN, "separate D3 authority required")
++            matches = [c for c in self._prepared.inventory.cases if c.case_id == case_id]
++            _require(len(matches) == 1, "D3 immutable case ID required")
++            _require(
++                self._remaining > 0 and time.monotonic() < self._deadline, "D3 budget exhausted"
++            )
++            self._prepared.refresh()
++            self._remaining -= 1
++            return self._prepared, matches[0]
++
++
++def prepare_negative(*, mode: str) -> NegativeSession:
++    with _open(_SELECTOR.parent, _SELECTOR.name) as fd:
++        st = os.fstat(fd)
++        _require(st.st_uid == 0 and not st.st_mode & 0o022, "protected D3 selector required")
++        with os.fdopen(os.dup(fd), "rb") as stream:
++            raw = stream.read()
++    selector = NegativeSelector.model_validate_json(raw)
++    root = Path(selector.repository)
++    record = NegativeRecord.model_validate_json(_read(root, selector.record))
++    subject = {
++        "runtime_payload_byte_hash": record.runtime_payload.byte_hash,
++        "negative_inventory_byte_hash": record.inventory.byte_hash,
++    }
++    _require(
++        strict_json_loads(_read(root, record.decision))
++        == {
++            "format": "uarch-component-negative-human-decision/2",
++            "accepted_by": "Javid (@jjaffari)",
++            "reply": "yes",
++            "subject": subject,
++        },
++        "exact separate D3 human decision required",
++    )
++    review = strict_json_loads(_read(root, record.review))
++    _require(
++        review
++        == {
++            "format": "uarch-component-negative-review/2",
++            "subject": subject,
++            "read_audit_complete": True,
++            "finite_refusals_current": True,
++        },
++        "exact independent D3 review required",
++    )
++    component = _prepare_payload(root, record.runtime_payload, mode=mode, immutable=True)
++    inventory = NegativeInventory.model_validate_json(_read(root, record.inventory))
++    ids = [c.case_id for c in inventory.cases]
++    _require(ids == sorted(set(ids)), "sorted unique D3 IDs required")
++    checks = tuple(
++        (root, f) for f in (selector.record, record.inventory, record.decision, record.review)
++    )
++    checks += ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(raw))),)
++    prepared = _PreparedNegative(component, inventory, checks)
++    prepared.refresh()
++    return NegativeSession(prepared, token=_TOKEN)
++
++
++def _run_negative_image(
++    prepared: _PreparedNegative, case: NegativeCase, evidence_root: Path,
++    *, timeout_s: float, repetition: int,
++) -> dict[str, Any]:
++    _require(type(repetition) is int and 0 <= repetition < 3, "D3 exact repetition")
++    component = prepared.component
++    raw = _selected_raw(component, case)
++    stdout, stderr, status, record = exchange_image(
++        component, raw, evidence_root, timeout_s=timeout_s,
++        slot={"phase": "initial", "mode": component.mode, "repetition": repetition},
++        admitted={"case_id": case.case_id, "raw_input_sha256": sha256(raw).removeprefix("sha256:"),
++                  "engine": component.payload.engine.model_dump(mode="json")})
++    record["slot"] = {"phase": "initial", "mode": component.mode, "repetition": repetition}
++    record["case_id"] = case.case_id
++    record["expected_envelope"] = case.expected_envelope.model_dump(mode="json")
++    record["expectation_provenance"] = case.expectation_provenance.model_dump(mode="json")
++    record["failure_stage"] = "negative-consumer"
++    record["zero_dispatch"] = "unobserved; exact envelope/source expectation is not entry evidence"
++    try:
++        error = _consume_negative(stdout, stderr, status, case)
++        prepared.refresh()
++        record["validation_passed"] = True
++        record["failure_stage"] = None
++        record["error"] = error
++    except Exception as failure:
++        record["validation_error"] = repr(failure)
++        raise
++    finally:
++        _save(evidence_root / "attempt.json", record)
++    return record
++
++
++def run_negative(
++    case_id: str, *, session: NegativeSession, evidence_root: Path, repetition: int = 0
++) -> dict[str, Any]:
++    _require(isinstance(session, NegativeSession), "separate D3 authority required")
++    prepared, case = session.claim(case_id)
++    record = _run_negative_image(
++        prepared, case, evidence_root, timeout_s=session._deadline - time.monotonic(),
++        repetition=repetition)
++    _require(time.monotonic() <= session._deadline, "D3 session deadline exhausted")
++    return record
