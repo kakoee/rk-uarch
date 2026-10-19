@@ -1,0 +1,171 @@
+{
+  "$id": "component-eof-attempt/1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Producer record proposal. Source-labelled observations, not public acceptance or authority. Transport/admission failures may have null/missing observations. B must independently consume blobs and ledger.",
+  "properties": {
+    "admitted": {},
+    "argv": {},
+    "case_id": {},
+    "cleanup": {},
+    "container_id": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "deadline_exceeded": {
+      "type": "boolean"
+    },
+    "deadline_monotonic": {},
+    "ended_monotonic": {
+      "type": "number"
+    },
+    "engine": {},
+    "entry_evidence": {},
+    "error": {},
+    "executable_byte_hash": {},
+    "expectation_provenance": {},
+    "expected_envelope": {},
+    "failure_stage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finalization_error": {
+      "type": "string"
+    },
+    "format": {
+      "const": "component-eof-attempt/1"
+    },
+    "guardian_records": {},
+    "image": {
+      "const": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
+    },
+    "mode": {},
+    "payload_byte_hash": {},
+    "process_identity": {
+      "type": "string"
+    },
+    "raw_input": {},
+    "replay_descriptor": {},
+    "resources": {},
+    "runtime_entries": {
+      "const": null
+    },
+    "slot": {},
+    "started_monotonic": {},
+    "status": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "stderr": {
+      "properties": {
+        "byte_hash": {
+          "type": "string"
+        },
+        "observed_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        },
+        "retained_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash",
+        "observed_bytes",
+        "retained_bytes",
+        "truncated"
+      ],
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "stdout": {
+      "properties": {
+        "byte_hash": {
+          "type": "string"
+        },
+        "observed_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        },
+        "retained_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash",
+        "observed_bytes",
+        "retained_bytes",
+        "truncated"
+      ],
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "timeout_s": {},
+    "transport_complete": {
+      "type": "boolean"
+    },
+    "transport_error": {
+      "type": "string"
+    },
+    "transport_kind": {
+      "const": "ordinary-eof"
+    },
+    "validation_error": {
+      "type": "string"
+    },
+    "validation_passed": {
+      "type": "boolean"
+    },
+    "zero_dispatch": {}
+  },
+  "required": [
+    "format",
+    "transport_kind",
+    "engine",
+    "image",
+    "mode",
+    "payload_byte_hash",
+    "executable_byte_hash",
+    "raw_input",
+    "runtime_entries",
+    "entry_evidence",
+    "transport_complete",
+    "validation_passed",
+    "status",
+    "cleanup",
+    "argv",
+    "timeout_s",
+    "resources",
+    "started_monotonic",
+    "deadline_monotonic",
+    "failure_stage",
+    "guardian_records",
+    "slot",
+    "admitted"
+  ],
+  "type": "object"
+}
