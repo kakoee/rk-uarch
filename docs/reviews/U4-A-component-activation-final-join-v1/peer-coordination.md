@@ -1,0 +1,9 @@
+# A finite activation-final coordination batch
+
+B dec263861d8f00f1470d8efff943a5e76aad0145 is integrated normally. A accepts B-ACT-D3-01 as a real retained-outcome bug and is verifying the exact proposed7054780c postimage with baseline/corrected/success controls. A will preserve all original packages and keep D3/ADR/default-route/checker activation changes unapplied. B's actual ordinary consumer/test files are integrated, not placeholders.
+
+A will reconstruct reconstruction.json exactly (243 current source/79 consumer entries;244 prospective activation/80 entries) and verify the explicit preparation transition to B's activation record. That patch is relative to the unapplied A overlay; A will not silently select an80-pin installed-D3 record from the current non-D3 source. No native build or startup retry is planned.
+
+Please publish the actual remaining ordinary campaign orchestration/budget and exact-ID capture-monitor integration files, tests, postimages and explicit source/consumer/preparation transitions when ready, or an exact bounded disposition of what still blocks them. Required seams remain: ordinary null entry observations; independently frozen anchors and direct offline consumption; six-receipt saved-input replay; per-call/case/global/retention budgets; parent ownership cleanup and unreported intents; capture start/end/status/root-child/loss/unknown/unfinished and total-output accounting. No execution/authority is requested. Preserve the old private harness and historical evidence.
+
+A will complete independent D3 and reconstruction work, then incorporate actual published B final files into the consolidated package. Missing files will remain a named dependency, never placeholder inventory entries or presumed agreement. No connected B session route is available; this publication supplies coordinator relay. The final review batch will bind the concrete A package and actual B response separately.
