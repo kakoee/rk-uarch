@@ -1,0 +1,89 @@
+{
+  "status": "passed",
+  "group": "v3:cc0-v3",
+  "planned_calls": 12,
+  "validated_calls": 12,
+  "initial": 6,
+  "replay": 6,
+  "fresh_containers": 12,
+  "duration_ps": 121000,
+  "same_output_bytes": true,
+  "worker_count": 1,
+  "resources": {
+    "affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "available_memory_bytes": 11283951616,
+    "cgroup_memory_limits": [],
+    "cpu_quotas": [],
+    "effective_cpu_capacity": "16",
+    "limitations": "Visible cgroup limits, affinity and current MemAvailable only; namespace-hidden ancestors and competing future allocations are not inferred. No resource setting changed. Worker/container loss still stops the run. Docker per-call limits remain separately enforced; this is no host reservation.",
+    "membership": "/init.scope",
+    "memory_headroom_bytes": 11283951616,
+    "mount": "/sys/fs/cgroup",
+    "mounted_root": "/",
+    "observed_cgroups": [
+      {
+        "cpu.max": "max 100000",
+        "memory.current": 7577464832,
+        "memory.max": "max",
+        "path": "/sys/fs/cgroup/init.scope"
+      },
+      {
+        "interface": "hierarchy-root-no-bandwidth-or-memory-interface",
+        "path": "/sys/fs/cgroup"
+      }
+    ],
+    "parent_and_safety_reserve_bytes": 536870912,
+    "per_worker_budget_bytes": 1073741824,
+    "task_count": 1,
+    "workers": 1
+  },
+  "per_call_and_parent_cleanup_verified": true,
+  "six_initial_receipt_refs": [
+    {
+      "path": "calls/00000.json",
+      "sha256": "1c076110b7ab28a611c7a57985a10f13172d34332bc96491165e61b2c6a7603a"
+    },
+    {
+      "path": "calls/00001.json",
+      "sha256": "69fdf02f060cebbfb97a9b0fd7599f0afb9d2b8c2528e37071c82df29bb3d71b"
+    },
+    {
+      "path": "calls/00002.json",
+      "sha256": "a63802a5994114f0901c3edced577c7c03948ce14b007114bc1ae6a85e71d32c"
+    },
+    {
+      "path": "calls/00003.json",
+      "sha256": "d076c5a9eafb4cdb97b998b3aa6d7cbd1316ee4cb82967094210a4bf95f60929"
+    },
+    {
+      "path": "calls/00004.json",
+      "sha256": "ab2fa70bad23befab6dde15a43ccb0855094cf346680f7868ceb5f413a81d0d9"
+    },
+    {
+      "path": "calls/00005.json",
+      "sha256": "ae3f381ec16f5ef95388329df27cd283ed99bdcf795377dff64287e126229064"
+    }
+  ],
+  "observed_raw_sha256": "b1e18a200aacbebee3e784f395d1a5df06ccbbc7876780119536d549845c3ab9",
+  "observed_result_sha256": "adae39786543510b976f3211cf61ec3c517b66ac1990e8043fb61b4065a84245",
+  "acceptance_gate": false,
+  "public_authority": null,
+  "additional_native_executions_in_verifier": 0
+}
