@@ -49,7 +49,15 @@ def startup(tmp_path_factory):
     files = {}
     for parent in (project, stdlib):
         for f in parent.rglob("*"):
-            if f.is_file() and f.suffix in (".py", ".so") and "site-packages" not in f.parts:
+            # Ubuntu's stdlib includes links to /etc/sitecustomize.py and the
+            # libpython linker library. Neither belongs to these import roots.
+            # Do not widen the launcher's roots to include unrelated system paths.
+            if (
+                f.is_file()
+                and f.suffix in (".py", ".so")
+                and "site-packages" not in f.parts
+                and f.resolve().is_relative_to(parent.resolve())
+            ):
                 files[str(f.resolve())] = hashlib.sha256(f.read_bytes()).hexdigest()
     manifest = root / "startup.json"
     manifest.write_text(json.dumps({"roots": list(map(str, roots)), "files": files}))

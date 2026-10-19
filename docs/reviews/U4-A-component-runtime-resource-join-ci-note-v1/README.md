@@ -1,0 +1,11 @@
+# Publication integration note
+
+This supplements the [finite B confirmation batch](../U4-A-component-runtime-resource-join-v1/peer-confirmation.md) without changing any frozen package leaf.
+
+After source4d447ba0a75200fec09b07314ca8bee654224a66 was built and its12-slot group completed, and handoff2f00a786fd7e40780229e7fe8f3083a660a2943c was committed, main advanced to peer800d3b8cc1e54e1ffe705c65564d3e9c58eb6c01. That peer commit repairs synthetic CI fixtures and explicitly distinguishes current tests from frozen runtime candidates. It was integrated with an ordinary merge.
+
+The only conflict was test_component_runtime.py's expected binding path. The merged file is byte-identical to peer800d3b8, retaining its explicit synthetic current-source fixture. A's actual preparation tool still selects B's exact62-pin record. Four affected fixture/binding/acceptance tests and focused Ruff pass after the merge; no tests were skipped or source guards disabled. No startup test or blocked activity was run or transferred. Peer test/typing results remain inherited under its published record.
+
+The candidate source is still4d447ba, not the eventual merge tip. Two later peer files under validation are tests included by the BuildInputs inventory rule: test_installation_identity.py and test_stage2_selection.py. Their exact candidate/current hashes are in verification.json. All other235 candidate BuildInputs bytes and all62 consumer pins remain equal. Any future build from merged main must record these test bytes and its new source identity. Existing binaries are not relabelled as built from merged main, and no unnecessary new build/campaign was performed for this test-only integration.
+
+All13 frozen handoff leaves and its manifest remain exact, including source/build/payload/acceptance/campaign evidence. This note does not widen the twelve-slot private result or create public acceptance. B's requested finite confirmation remains against4d447ba and the frozen resource-join package, with this later test integration explicitly disclosed. A-F3, read-audit, D3/protected installation, genuine authority, deployment, human L1, U0024, /2 first-use restriction and closure boundaries remain unchanged.

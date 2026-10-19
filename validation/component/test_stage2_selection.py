@@ -6,6 +6,7 @@ from pathlib import Path
 
 from uarch_contract.hashing import content_hash
 
+from tests.component_current_identity import current_test_bindings
 from validation.component.installation_identity import installation_bindings, verify_postimages
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -26,7 +27,7 @@ def test_current_selection_and_historical_mapping() -> None:
     assert {row["old"]: row["new"] for row in s["old_to_new"]} == {
         row["case_id"]: row["case_id"] for row in old["cases"]
     }
-    installed = installation_bindings(ROOT, s)
+    installed = current_test_bindings(ROOT, installation_bindings(ROOT, s))
     for path, digest in (s["checker_bindings"] | s["test_bindings"]).items():
         assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == installed.get(path, digest)
     for row in s["candidate_files"]:

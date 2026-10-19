@@ -165,10 +165,27 @@ def prepared_payload(tmp_path, request):
         )["observation_contract"],
     )
     consumers = recipe.imports(ROOT, tmp_path)
-    binding_path = consumers["independent_binding"]["path"]
-    destination = tmp_path / binding_path
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(ROOT / binding_path, destination)
+    # This fixture exercises current source with a synthetic shell executable.
+    # Published candidate pins describe their frozen builds, not this test payload.
+    consumers["independent_binding"] = put(
+        "synthetic-consumer-binding.json",
+        {
+            "format": "component-synthetic-test-binding/1",
+            "execution_authority": False,
+            "binary_binding": None,
+            "files": {
+                f["path"]: f["byte_hash"].removeprefix("sha256:")
+                for f in consumers["files"]
+                if Path(f["path"]).parent.as_posix()
+                in (
+                    "contract/uarch_contract",
+                    "validation/component",
+                    "src/rkuarch/engines/native",
+                )
+                and not Path(f["path"]).name.startswith("test_")
+            },
+        },
+    )
     # The import recipe's expected observation file belongs to this synthetic data root.
     consumers["observation_contract"] = recipe.binding(
         tmp_path, tmp_path / "private-component/observation-contract.json"
@@ -494,7 +511,7 @@ def test_component_envelope_keeps_strict_framing(stdout, stderr, status):
 def test_current_independent_binding_is_prepared(prepared_payload):
     root, binding, payload, _ = prepared_payload
     assert payload["consumers"]["independent_binding"]["path"] == (
-        "docs/reviews/U4-B-component-runtime-stage2-join-v1/prospective-consumer-bindings.json"
+        "synthetic-consumer-binding.json"
     )
     prepared = component_host._prepare_payload(root, binding, mode="debug")
     assert {

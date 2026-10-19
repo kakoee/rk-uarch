@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from tests.component_current_identity import current_test_bindings
 from validation.component.installation_identity import (
     ADR,
     BINDING,
@@ -38,7 +39,7 @@ def test_exact_installed_and_component_text_control() -> None:
     assert digest(raw[48294:]) == ISSUE_APPENDIX_SHA
     verify_adr(raw)
     selection = json.loads((ROOT / SELECTION).read_text())
-    verify_postimages(ROOT, installation_bindings(ROOT, selection))
+    verify_postimages(ROOT, current_test_bindings(ROOT, installation_bindings(ROOT, selection)))
 
 
 @pytest.mark.parametrize(
