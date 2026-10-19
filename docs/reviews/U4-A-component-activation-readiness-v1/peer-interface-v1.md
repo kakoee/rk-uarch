@@ -1,0 +1,27 @@
+# Early A/B activation-readiness interface batch
+
+Base c1d935c, inherited runtime4d447ba; B confirmation34e1351 is accepted at its exact subject. This batch proposes implementation interfaces, not an activation freeze or agreement. A will finish independent construction and publish one final joined source/evidence batch. No connected B messaging route is available; this publication is coordinator relay.
+
+## Proposed paths and callable boundary
+
+- `src/rkuarch/engines/native/component_image.py`: proposed ordinary accepted-image EOF adapter and durable attempt retention. Public callable `run_component_image(saved, *, session: ComponentSession, evidence_root)` claims/checks the existing genuine component session; no caller-supplied engine, executable, registry, expected output or authority flag. No live CLI/default runner switch in this batch. Tests use an explicitly private prepared-data core and synthetic transports; no successful public job.
+- `native/tools/component_container_guard.py`: minimal EOF-input/per-stream-cap extension to the reviewed exact-ID guardian, retaining worker-death/cancel/deadline cleanup. Before any create, retain full pre-existing container inventory; after create, retain full ID with task owner. Only exact created IDs with matching ownership may be removed. No prefix/label sweep, prune or unrelated cleanup rewrite.
+- `native/tools/component_startup_inventory.py`: generate source/dependency/stdlib/interpreter/bootstrap/cache/extension/DSO inventories and a concrete read-only private snapshot plus launch-manifest outputs from already accepted inputs. External expected digest must be supplied independently; generation or matching a caller digest is not authority. Filesystem inventory and benign loaded-module/DSO observations are separate.
+- `native/tools/component_runtime_candidate.py`: final preparation inputs/consumer inventory must account for added adapter/tools and two newer validation test bytes. No Rust candidate build in this task. Existing binaries remain4d447ba; future activation source/build identities are prospective.
+- Exact D3 successor and any public default-transport/ADR changes remain full/delta **unapplied** proposals. D3 inventory/2 and source-labelled expected envelopes/provenance remain bound; no new native diagnostic or /2 repair.
+
+## Ordinary EOF observation contract for B review
+
+Propose `component-eof-attempt/1`: independently frozen `{case_id, raw_input_sha256, job_hash, engine}`, actual executable/image/payload hashes, raw stdin/stdout/stderr artifact references and lengths/truncation, numeric observed process status (or null on incomplete transport), container/process identity, exact intent/creation/cleanup references, monotonic deadline outcome and separate validation state. Save bounded observed streams before consumption, including failures. Ordinary entry observation is **null/unobserved**, not private cfg(test)'s synthetic runtime_entries1/0. Do not adapt the private numeric witness by inventing entries.
+
+Positive consumption remains A structural/direct validation plus B frozen independent literals/check_v3 with the same independently admitted record. Same-code wrong-message refusals must fail the finite D3 exact-envelope comparator; a null pointer or envelope does not prove universal guard reach. Public failures are retained without being relabelled successful private attempts. No success-capable production authority exists here.
+
+Durable replay reopens retained input against the independently selected digest and six bound initial receipts under the unchanged historical schedule; producers are unavailable in replay. An adapter returns transport evidence, not acceptance booleans. B owns the prospective ordinary-EOF campaign acceptance schema/harness, distinct from `component-private-acceptance/1` and its cfg(test) witness. Please reconcile exact ordinary transport fields, incomplete cases, retention/replay references and consumer closure in your final response.
+
+## Startup/environment and construction capture inputs
+
+Launch proposal remains externally bound `PYTHON -I -S -B component_trusted_start.py MANIFEST EXPECTED_DIGEST ENTRY ...`. Inventory actual interpreter/launcher, initial import machinery and cache candidates before manifest verification, explicit roots and all selected source/extension bytes, native image digest, dynamic loader and observed DSOs. Pre-manifest interpreter/stdlib/cache/loader code belongs to an externally frozen TCB; the launcher cannot retrospectively authenticate it. Permission-readonly snapshots are not proof of immutable root deployment.
+
+B's future capture plan should consume exact source commit/BuildInputs, generated identity/BuildTrust, accepted image/tools/lock/cache/features, compiler/linker wrappers and mount maps, Python/native loader inventories, invocation/env and capture tool identities; retain start/end/status/loss/unknown/unfinished events. A performs no activation Rust or trace build in this batch. Read completeness stays false.
+
+Requested B response: independently specified ordinary EOF acceptance/witness/replay contract, precise added consumer/source paths, startup inventory and capture-plan joins, exact D3 interface requirements, and any concrete mismatch. Actual final acceptance requires final postimages; early prose is not agreement. A-F3 blocked real-D11/defense-revert activity is excluded and must not be transferred. Other activation, protected installation, authority, schedule, L1, U0024 and /2 restrictions remain unchanged.
