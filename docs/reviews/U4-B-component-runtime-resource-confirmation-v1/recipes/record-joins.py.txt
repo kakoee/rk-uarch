@@ -1,0 +1,10 @@
+import hashlib,json
+from pathlib import Path
+O=Path('/tmp/u4-b-resource-confirmation-01');R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');E=O/'inherited/build';S=Path('/tmp/u4-a-runtime-resource-4d447ba/source');OLD=Path('/tmp/u4-a-runtime-stage2-46c5abb/source');h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();load=lambda p:json.loads(p.read_bytes())
+a=load(E/'acceptance.json');setup=load(E/'campaign/setup.json')['setup'];assert setup['execution_binding']==a['execution_binding'] and setup['pids_limit']==64 and setup['evidence_kind']=='private-synthetic-test';assert setup['input_hashes']=={'v3:cc0-v3':a['inputs']['v3:cc0-v3']['raw_input_sha256']}
+for n,pin in setup['files'].items():assert h(Path(n))==pin,n
+rows=load(R/'docs/reviews/U4-A-component-runtime-resource-join-v1/job-transitions.json');assert len(rows)==124 and len({r['case_id']for r in rows})==124
+for row in rows:
+ path=Path('private-component/jobs')/(row['case_id']+'.json');assert h(OLD/path)==row['before_sha256'] and h(S/path)==row['after_sha256'];assert row['fields']==['engine.implementation_hash','job_hash']
+result={'retained_setup_files_currently_match':len(setup['files']),'execution_and_selected_input_binding_exact':True,'published_job_transition_before_after_hashes_verified':124,'new_builds':0,'new_native_runs':0,'scope':'byte/currentness and receipt binding only; no construction-read or startup-attestation claim'}
+(O/'record-joins.json').write_text(json.dumps(result,indent=2)+'\n');print(result)

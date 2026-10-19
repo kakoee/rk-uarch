@@ -1,0 +1,14 @@
+import hashlib,io,json,subprocess,tarfile
+from pathlib import Path
+R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');O=Path('/tmp/u4-b-resource-confirmation-01');P=R/'docs/reviews/U4-A-component-runtime-resource-join-v1';h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();records=[]
+paths=['native/tools/component_runtime_candidate.py','tests/unit/test_component_runtime.py','validation/component/runtime_campaign.py','validation/component/runtime_resources.py','validation/component/test_runtime_resources.py']
+for revision,patch,names in [('1dd5c5206290e464df34308509e5d6cf75505d01','complete-source-transition.patch',paths),('71a1c75d20bf60493952be6c96c768c64a51f7eb','preparation-tool.patch',paths[:2])]:
+ dest=O/('reconstruct-'+revision[:7]);dest.mkdir();raw=subprocess.check_output(['git','archive',revision,'--','native','tests','validation'],cwd=R)
+ with tarfile.open(fileobj=io.BytesIO(raw))as t:t.extractall(dest,filter='data')
+ subprocess.run(['git','apply',str(P/patch)],cwd=dest,check=True)
+ for name in names:assert (dest/name).read_bytes()==(O/'source'/name).read_bytes(),name
+ records.append({'route':patch,'preimage':revision,'exact_postimages':{n:h(dest/n)for n in names}})
+old=json.loads((R/'docs/reviews/U4-B-component-native-audit-v1/source-audit-final.json').read_bytes())['selected_support'];assert len(old)==56
+for n,v in old.items():assert h(O/'source'/n)==v
+report={'patch_reconstruction':records,'selected_support_unchanged':56,'blocked_startup_activity':'not run','source_tree':'pinned4d447ba, not current main'}
+(O/'reconstruction.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

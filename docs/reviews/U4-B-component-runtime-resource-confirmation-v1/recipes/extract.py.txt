@@ -1,0 +1,16 @@
+import hashlib,json,tarfile,subprocess
+from pathlib import Path
+R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');P=R/'docs/reviews/U4-A-component-runtime-resource-join-v1';O=Path('/tmp/u4-b-resource-confirmation-01');h=lambda b:hashlib.sha256(b).hexdigest()
+m=json.loads((P/'manifest.json').read_bytes());idx=json.loads((P/'evidence-files.json').read_bytes())
+for n,v in m['files'].items():
+ b=(P/n).read_bytes();assert h(b)==v['sha256'] and len(b)==v['bytes'],n
+D=O/'inherited';D.mkdir()
+with tarfile.open(P/'evidence.tar.gz') as t:
+ members=t.getmembers();assert {v.name for v in members}==set(idx['files'])
+ for v in members:
+  assert v.isfile() and not Path(v.name).is_absolute() and '..'not in Path(v.name).parts
+  b=t.extractfile(v).read();pin=idx['files'][v.name];assert h(b)==pin['sha256'] and len(b)==pin['bytes'],v.name
+  f=D/v.name;f.parent.mkdir(parents=True,exist_ok=True);f.write_bytes(b)
+raw=subprocess.check_output(['git','archive','4d447ba0a75200fec09b07314ca8bee654224a66'],cwd=R);assert h(raw)=='5b1895a97249253cb1da3c8f55d47fd598807a6013b4e90c7fdad4374a6f9174'
+(O/'source.tar').write_bytes(raw);(O/'source').mkdir();subprocess.run(['tar','-xf',str(O/'source.tar'),'-C',str(O/'source')],check=True)
+v={'manifest_sha256':h((P/'manifest.json').read_bytes()),'package_leaves':len(m['files']),'archive_sha256':h((P/'evidence.tar.gz').read_bytes()),'archive_leaves':len(members),'source_archive_sha256':h(raw),'all_verified':True};(O/'archive-verification.json').write_text(json.dumps(v,indent=2)+'\n');print(v)

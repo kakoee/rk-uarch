@@ -1,0 +1,16 @@
+import hashlib,json
+from pathlib import Path
+O=Path('/tmp/u4-b-resource-confirmation-01');E=O/'inherited/build';load=lambda p:json.loads(p.read_bytes());report=[]
+for path in sorted((E/'campaign/calls').glob('*.json')):
+ r=load(path);scope=E/'adapter/containers'/path.stem;intent=load(scope/'intent.json');created=load(scope/'created.json');started=load(scope/'started.json');cleanup=load(scope/'cleanup.json');adapter=load(E/'adapter'/path.stem/'receipt.json')
+ assert intent['owner']==cleanup['owner']==r['cleanup']['owner'] and intent['name']==cleanup['name']
+ assert intent['timeout']==30 and intent['cap']==1024**2 and intent['args']==adapter['argv']
+ assert created['container_id']==started['container_id']==cleanup['container_id']==r['cleanup']['container_id']
+ assert all(r['cleanup'][k]==v for k,v in cleanup.items())
+ assert (scope/'stdout').read_bytes()==(E/'adapter'/path.stem/'harness.stdout').read_bytes()
+ assert (scope/'stderr').read_bytes()==(E/'adapter'/path.stem/'harness.stderr').read_bytes()
+ assert cleanup['reason']=='completed' and cleanup['exit_code']==0 and cleanup['stopped'] and cleanup['removed']
+ report.append({'slot':int(path.stem),'container_id':cleanup['container_id'],'owner':cleanup['owner'],'intent_sha256':hashlib.sha256((scope/'intent.json').read_bytes()).hexdigest(),'cleanup_sha256':hashlib.sha256((scope/'cleanup.json').read_bytes()).hexdigest()})
+assert len(report)==12
+out={'scope':'independent read-only verification of inherited guardian intent/create/start/cleanup receipts; no current Docker inspection or new native execution','per_call_timeout_seconds':30,'guardian_output_cap_bytes':1048576,'calls':report}
+(O/'retention.json').write_text(json.dumps(out,indent=2)+'\n');print('12 exact guardian ownership, timeout, creation, start, output and cleanup joins passed')

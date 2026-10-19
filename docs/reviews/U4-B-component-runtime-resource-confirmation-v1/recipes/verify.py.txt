@@ -1,0 +1,102 @@
+"""Read-only B confirmation. No build, adapter invocation or startup probe."""
+import hashlib,json,subprocess,ast
+from fractions import Fraction
+from pathlib import Path
+from uarch_contract.hashing import content_hash,canonical_json
+from rkuarch.engines.native.component_host import _prepare_payload
+from rkuarch.engines.native.records import FileBinding
+from native.tools.component_stage2_inputs import acceptance_record
+from validation.component.runtime_checks import verify_sources
+from validation.component.runtime_campaign import POLICY,schedule,verify_group
+from validation.component.runtime_evidence import consume_attempt,replay_admission
+from validation.component.checks import CheckFailure
+R=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');O=Path('/tmp/u4-b-resource-confirmation-01');P=R/'docs/reviews/U4-A-component-runtime-resource-join-v1';S=Path.cwd();E=O/'inherited/build';OLD=Path('/tmp/u4-a-runtime-stage2-46c5abb/source')
+load=lambda p:json.loads(p.read_bytes());h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+I=load(P/'identities.json');payload=load(S/'private-component/prospective-payload.json');build=load(S/payload['build_inputs']['path']);prior=load(OLD/'private-component/BuildInputs.json');summary=load(E/'build-summary.json');acc=load(E/'acceptance.json')
+assert build['source_commit']==I['runtime_source_commit']=='4d447ba0a75200fec09b07314ca8bee654224a66'
+assert content_hash(build)==payload['engine']['implementation_hash']==I['engine']['implementation_hash']
+assert content_hash(load(S/build['tool_inputs_file']['path']))==build['tool_inputs_hash']==I['engine']['compiler_lock_hash']==prior['tool_inputs_hash']
+assert content_hash([x for x in build['source_files']if x['path']in build['model_source_paths']])==build['model_inputs_hash']==prior['model_inputs_hash']
+before={x['path']:x for x in prior['source_files']};after={x['path']:x for x in build['source_files']};assert len(before)==235 and len(after)==237 and before.keys()<=after.keys()
+delta=[{'path':p,'before':before.get(p),'after':v}for p,v in after.items()if before.get(p)!=v];assert delta==I['BuildInputs']['delta'] and len(delta)==4
+for n,row in after.items():
+ assert 'sha256:'+h(S/n)==row['byte_hash'] and (S/n).read_bytes()==subprocess.check_output(['git','show','4d447ba:'+n],cwd=R),n
+for n,row in before.items():assert 'sha256:'+h(OLD/n)==row['byte_hash'],n
+pinsfile=S/I['consumer_binding']['path'];assert h(pinsfile)==I['consumer_binding']['sha256'];assert pinsfile.read_bytes()==(R/I['consumer_binding']['path']).read_bytes();pins=load(pinsfile)['files'];assert len(pins)==62;verify_sources(S,pins)
+transition=load(R/'docs/reviews/U4-B-component-runtime-stage2-join-v1/source-transition.json')
+for x in transition['source_delta']:assert h(S/x['path'])==x['postimage_sha256']
+assert h(S/'private-component/prospective-payload.json')==I['payload_sha256']
+assert h(E/'acceptance.json')==I['acceptance_sha256']
+binary=[]
+for owner,ident in [('new',I),('old',load(R/'docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2/identities.json'))]:
+ for mode,row in ident['modes'].items():
+  for kind in ('executable','test_executable'):
+   assert 'sha256:'+h(Path(row[kind]))==row[kind+'_byte_hash'];binary.append({'source':owner,'mode':mode,'kind':kind,'sha256':h(Path(row[kind]))})
+for x in payload['executables']:
+ rec=load(S/x['receipt']['path']);assert rec['engine']==payload['engine'] and rec['executable']==x['executable']
+ for item in [x['receipt'],x['executable'],rec['generated_identity']]:assert 'sha256:'+h(S/item['path'])==item['byte_hash']
+ generated=(S/rec['generated_identity']['path']).read_text();assert I['engine']['implementation_hash'] in generated
+selected=load(S/'private-component/selection.json');assert (S/'private-component/selection.json').read_bytes()==(OLD/'private-component/selection.json').read_bytes();rows={r['case_id']:r for r in selected['rows']}
+trans=load(S/'private-component/job-transitions.json');assert len(trans)==124
+for t in trans:
+ name=t['file']['path'];new=load(S/name);old=load(OLD/name);assert new['job_hash']==content_hash(new,exclude=('job_hash',))==t['private_build_job_hash'];assert 'sha256:'+h(S/name)==t['file']['byte_hash']
+ assert {k:v for k,v in new.items()if k not in ('engine','job_hash')}=={k:v for k,v in old.items()if k not in ('engine','job_hash')}
+ assert new['engine']==I['engine'];assert {k:v for k,v in new['engine'].items()if k!='implementation_hash'}=={k:v for k,v in old['engine'].items()if k!='implementation_hash'}
+negative=load(S/'private-component/negative-expectations.json');orig=load(R/'docs/reviews/U4-B-component-runtime-stage2-v1/negative-expectations-v1.json');assert [r['historical_expectation']for r in negative['rows']]==orig['rows']
+controls=[];prepared=None
+for kind in ('matching','old61','wrong-resource'):
+ file=S/f'private-component/binding-controls/{kind}-payload.json'
+ try:
+  value=_prepare_payload(S,FileBinding(path=str(file.relative_to(S)),byte_hash='sha256:'+h(file)),mode='debug');value.refresh();assert kind=='matching';prepared=value;assert len(value.payload.jobs)==104 and len(value.consumer_pins)==62;controls.append({'case':kind,'outcome':'accepted private preparation104/62'})
+ except CheckFailure as e:
+  assert kind!='matching';expected='complete matching consumer/structural closure required' if kind=='old61' else 'consumer source mismatch: validation/component/runtime_resources.py';assert expected in str(e);controls.append({'case':kind,'outcome':'identity refusal','reason':str(e)})
+assert prepared is not None
+# Matching control uses an alternate payload filename with identical bytes.
+original=_prepare_payload(S,FileBinding(path='private-component/prospective-payload.json',byte_hash='sha256:'+I['payload_sha256']),mode='debug')
+assert acceptance_record(original,summary,negative)==acc
+c=E/'campaign';complete=load(c/'complete.json');setup=load(c/'setup.json');budget=setup['resources'];slots=schedule(selected,['v3:cc0-v3']);assert len(slots)==12
+assert complete['complete'] and complete['completed_calls']==12 and complete['planned_calls']==12 and not complete['acceptance_gate'] and complete['policy']==POLICY
+assert complete['acceptance_sha256']==hashlib.sha256(canonical_json(acc).encode()).hexdigest()
+# Independently recompute policy arithmetic from the retained measurements.
+cpu=min([Fraction(len(budget['affinity']))]+[Fraction(q,p)for q,p in budget['cpu_quotas']]);memory=min([budget['available_memory_bytes']]+[max(0,m-u)for m,u in budget['cgroup_memory_limits']]);mem_workers=(memory-POLICY['memory_reserve_bytes'])//POLICY['per_worker_memory_bytes'];workers=min(len(complete['cases']),int(cpu),mem_workers,POLICY['max_workers'])
+assert str(cpu)==budget['effective_cpu_capacity'] and memory==budget['memory_headroom_bytes'] and workers==setup['workers']==budget['workers']==1 and budget['task_count']==1
+assert budget['parent_and_safety_reserve_bytes']==POLICY['memory_reserve_bytes'] and budget['per_worker_budget_bytes']==POLICY['per_worker_memory_bytes']
+assert budget['observed_cgroups'][0]['cpu.max']=='max 100000' and budget['observed_cgroups'][0]['memory.max']=='max' and budget['cpu_quotas']==budget['cgroup_memory_limits']==[]
+assert budget['membership']=='/init.scope' and budget['mounted_root']=='/' and budget['observed_cgroups'][-1]['interface']=='hierarchy-root-no-bandwidth-or-memory-interface'
+records=[];refs=[]
+for slot in slots:
+ name=f"{slot['ordinal']:05d}.json";rec=load(c/'calls'/name);attempt=load(c/'attempts'/name);metadata=load(c/'attempt-metadata'/name)
+ assert all(rec[k]==v for k,v in slot.items());assert rec['execution_binding']==acc['execution_binding'] and rec['validation_passed'] and rec['transport_complete']
+ for k,v in attempt.items():assert metadata[k]==v
+ assert {k:v for k,v in rec.items()if k not in ('validation_passed','outcome')}=={k:v for k,v in metadata.items()if k!='validation_passed'}
+ raw={k:rec[k]for k in ('status','process_identity','witness','cleanup')}
+ for key in ('raw_input','stdout','stderr'):
+  data=(c/rec[key+'_blob']).read_bytes();assert hashlib.sha256(data).hexdigest()==rec[key+'_sha256'] and len(data)==rec[key+'_length'] and rec[key+'_truncated'] is False;raw[key]=data
+ assert consume_attempt(raw,rows[slot['case_id']],slot,acc)=='success'
+ out=json.loads(raw['stdout']);assert out['duration_ps']==121000
+ w=rec['witness'];clean=rec['cleanup'];assert w['runtime_entries']==1 and w['executable_sha256']==acc['executables'][slot['mode']]
+ assert all(clean[k]is True for k in ('verified_stopped','stopped','removed')) and not clean['pre_remove_state']['Running'] and clean['reason']=='completed' and clean['process_identity']==rec['process_identity']
+ directory=E/'adapter'/f"{slot['ordinal']:05d}";native=load(directory/'receipt.json');assert native['container_id']==clean['container_id'] and native['runtime_entries']==1 and native['semantic_status']==0 and native['harness_exit_code']==0
+ for k,v in [('--network','none'),('--cpus','1'),('--memory','1g'),('--pids-limit','64'),('--ulimit','nofile=256:256')]:assert native['argv'][native['argv'].index(k)+1]==v
+ assert native['raw_input_byte_hash']=='sha256:'+rec['raw_input_sha256'] and native['semantic_output_byte_hash']=='sha256:'+rec['stdout_sha256']
+ assert (directory/'input/case.json').read_bytes()==raw['raw_input'] and (directory/'output/result/case.json').read_bytes()==raw['stdout']
+ if slot['phase']=='initial':refs.append({'path':'calls/'+name,'sha256':h(c/'calls'/name)})
+ records.append(rec)
+verify_group(records,replay=True);assert len({r['cleanup']['container_id']for r in records})==12
+parent=load(c/'cleanup.json');assert parent['verified_stopped'] and parent['outstanding']==[] and len(parent['containers'])==12
+for p in parent['containers']:
+ child=next(r['cleanup']for r in records if r['cleanup']['container_id']==p['container_id']);assert all(child[k]==v for k,v in p.items());assert p['stopped'] and p['removed'] and 'cleanup_error'not in p
+assert {p['container_id']for p in parent['containers']}=={r['cleanup']['container_id']for r in records}
+groups=list((c/'groups').glob('*/complete.json'));assert len(groups)==1 and load(groups[0])['slots']==list(range(12))
+descriptor=replay_admission(c,refs,rows['v3:cc0-v3'],acc);recorded=load(E/'replay-readback.json');assert descriptor['raw_input_sha256']==recorded['descriptor']['raw_input_sha256'] and descriptor['initial_receipts']==recorded['descriptor']['initial_receipts'];assert refs==load(P/'campaign-verification.json')['six_initial_receipt_refs']
+script=(O/'inherited/executed-recipes/campaign.py.txt').read_text();tree=ast.parse(script);invocations=[n for n in ast.walk(tree)if isinstance(n,ast.Call)and isinstance(n.func,ast.Name)and n.func.id=='run_private'];assert len(invocations)==1 and {x.arg for x in invocations[0].keywords}=={'acceptance','cases'}
+origins=load(E/'campaign-import-origins.json')['modules'];assert 'validation.component.runtime_resources'in origins
+for n,v in origins.items():assert Path(v['path']).is_relative_to(S) and 'sha256:'+h(Path(v['path']))==v['byte_hash']
+# Later CI fixtures are not part of the runtime build under review.
+main_diff=[]
+for n,v in after.items():
+ if 'sha256:'+h(R/n)!=v['byte_hash']:main_diff.append(n)
+assert sorted(main_diff)==['validation/component/test_installation_identity.py','validation/component/test_stage2_selection.py']
+assert all(h(R/n)==v for n,v in pins.items())
+res={'engineering_disposition':'ACCEPTED for the three pinned private engineering joins','runtime_source':I['runtime_source_commit'],'published_package_commit':'393d911484c33a298ebb61d82d7e5c2d19187418','package_manifest_sha256':h(P/'manifest.json'),'BuildInputs':{'total':237,'unchanged':233,'changed_existing':2,'added':2},'consumer_pins':62,'B_postimages_exact':3,'binary_hash_checks':binary,'engine':I['engine'],'payload_sha256':I['payload_sha256'],'acceptance_sha256':I['acceptance_sha256'],'positive_inventory':104,'job_identity_only_transitions':124,'original_negative_histories':20,'binding_controls':controls,'group':{'case':'v3:cc0-v3','calls_reconsumed':12,'initial':6,'durable_replays_inherited':6,'initial_references_reopened':6,'new_postrun_readback':1,'actual_calls_executed_by_B':0,'workers':workers,'cpu_capacity':str(cpu),'measured_memory_bytes':memory,'memory_worker_capacity_before_task_cap':mem_workers,'distinct_container_receipts':12,'per_call_and_parent_cleanup_receipts_verified':True,'input_sha256':records[0]['raw_input_sha256'],'result_sha256':records[0]['stdout_sha256'],'duration_ps':121000,'acceptance_gate':False},'later_main_BuildInputs_differences':main_diff,'later_main_other_entries_unchanged':235,'new_builds':0,'new_campaign_runs':0,'source_origin_check':'explicit pinned source, never moving main','A_F3':'DEFERRED; no blocked startup activity','construction_read_capture':'NONE','public_authority':None,'installation_authority':None,'independent_adversarial_acceptance':False}
+(O/'verification.json').write_text(json.dumps(res,indent=2)+'\n');print(json.dumps(res,indent=2))
