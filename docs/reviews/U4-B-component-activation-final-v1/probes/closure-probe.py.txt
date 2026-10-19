@@ -1,0 +1,11 @@
+import json,sys
+from pathlib import Path
+from validation.component.runtime_checks import verify_sources
+source,binding=Path(sys.argv[1]),Path(sys.argv[2]);pins=json.loads(binding.read_bytes())['files']
+verify_sources(source,pins)
+bad=dict(pins);bad.pop('native/tools/component_container_guard.py')
+try:verify_sources(source,bad)
+except ValueError as error:assert 'closure' in str(error)
+else:raise AssertionError('missing guardian pin accepted')
+verify_sources(source,pins)
+print(json.dumps({'binding':str(binding),'pins':len(pins),'valid':True,'missing_guardian_refused':True,'restored_valid':True,'scope':'offline closure only'}))

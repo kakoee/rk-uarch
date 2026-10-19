@@ -1,0 +1,119 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 51, "sample": {"uarch_contract.mapped": "/tmp/u4-b-activation-final-01/test-source/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-b-activation-final-01/test-source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-activation-final-01/test-source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-activation-final-01/test-source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+__________ test_d3_actual_schema_refusal_and_same_code_discrimination __________
+
+synthetic = (<function synthetic.<locals>.make at 0x7d3dd6a43f60>, {'bundle_hash': 'sha256:a8e384d696639056dc0c643c215183f992e8c45..., 'validation/component/transition_checks_v3.py': 'c3b38a8759a420660ea6f1c693fb0bdabca2a9291a37e1cec829a0bf141034d0'}))
+tmp_path = PosixPath('/tmp/u4-b-activation-final-01/pytest-fault/test_d3_actual_schema_refusal_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7d3dd6d24890>
+
+    def test_d3_actual_schema_refusal_and_same_code_discrimination(
+        synthetic: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Use actual unapplied D3 transport core; synthetic refusal, not Rust guard evidence."""
+        import importlib.util
+        import sys
+        from importlib.machinery import SourceFileLoader
+        from types import SimpleNamespace
+    
+        make, row, config, prepared = synthetic
+        # Capture the full-ledger synthetic guardian, then substitute only its semantic streams.
+        guard = cast(Any, component_image).run_container
+        envelope = {
+            "code": "CapacityExceeded",
+            "message": "DMA fragment count exceeds limit",
+            "pointer": None,
+        }
+        received = dict(envelope)
+    
+        def negative_guard(directory: Any, args: Any, **kwargs: Any) -> Any:
+            cleanup = guard(directory, args, **kwargs)
+            (directory / "stdout").write_bytes(b"")
+            (directory / "stderr").write_bytes(canonical_json(received).encode())
+            cleanup["exit_code"] = 2
+            put(directory / "cleanup.json", cleanup)
+            return cleanup
+    
+        monkeypatch.setattr(component_image, "run_container", negative_guard)
+        path = (
+            ROOT
+            / "docs/reviews/U4-A-component-activation-readiness-v1/proposals"
+            / "component_negative-v6.py.txt"
+        )
+        loader = SourceFileLoader("B_synthetic_D3_proposal", str(path))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        assert spec is not None
+        module = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, loader.name, module)
+        loader.exec_module(module)
+        admitted = config["inputs"][row["case_id"]]
+        source = "native/crates/uarch-engine/src/component_admission.rs"
+        source_hash = hashlib.sha256((ROOT / source).read_bytes()).hexdigest()
+        provenance = {
+            "case_id": row["case_id"],
+            "input_sha256": admitted["raw_input_sha256"],
+            "job_hash": admitted["job_hash"],
+            "engine": admitted["engine"],
+            "envelope": envelope,
+            "runtime_entries_required": 0,
+            "intended_guard": "synthetic exact-envelope wiring only",
+            "native_guard_source": {"path": source, "sha256": source_hash},
+            "evidence": "SYNTHETIC: no native input invalidity or guard reach claimed",
+        }
+        provenance_path = tmp_path / "synthetic-negative-provenance.json"
+        put(provenance_path, provenance)
+        pin = sha256(provenance_path.read_bytes())
+        case = module.NegativeCase(
+            case_id=row["case_id"],
+            raw={"path": "job.json", "byte_hash": "sha256:" + admitted["raw_input_sha256"]},
+            profile={
+                "path": "profile.json",
+                "byte_hash": sha256((tmp_path / "profile.json").read_bytes()),
+            },
+            expectation_provenance={"path": provenance_path.name, "byte_hash": pin},
+            expected_envelope=envelope,
+            layer="resource-preflight",
+        )
+        # Synthetic positive saved input drives a refusal transport mock. Do not claim D3 admission.
+        monkeypatch.setattr(module, "_selected_raw", lambda *args: (tmp_path / "job.json").read_bytes())
+        negative_row = dict(row, expected_layer="resource-preflight", expected_code=envelope["code"])
+        config["negatives"][row["case_id"]] = {
+            "admitted": admitted,
+            "expected_layer": "resource-preflight",
+            "envelope": envelope,
+            "intended_guard": provenance["intended_guard"],
+            "guard_source": source,
+            "guard_source_sha256": source_hash,
+            "provenance_path": str(provenance_path),
+            "provenance_sha256": pin.removeprefix("sha256:"),
+        }
+        dest = tmp_path / "negative"
+        module._run_negative_image(
+            SimpleNamespace(component=prepared, refresh=lambda: None),
+            case,
+            dest,
+            timeout_s=5,
+            repetition=0,
+        )
+        ref = reference(dest)
+        assert accept(ref, negative_row, config)["outcome"] == "CapacityExceeded"
+    
+        def forge(a: Any, root: Any) -> None:
+            data = canonical_json(dict(envelope, message="complete output byte limit")).encode()
+            for n in ("stderr", "container/stderr"):
+                (root / n).write_bytes(data)
+            a["stderr"].update(
+                byte_hash=sha256(data), observed_bytes=len(data), retained_bytes=len(data)
+            )
+            a["validation_passed"] = True
+    
+        forged = reseal(ref, forge)
+>       with pytest.raises(ValueError, match="exact intended refusal envelope"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+validation/component/test_ordinary_eof_acceptance.py:486: Failed
+=========================== short test summary info ============================
+FAILED validation/component/test_ordinary_eof_acceptance.py::test_d3_actual_schema_refusal_and_same_code_discrimination
+1 failed, 21 deselected in 0.80s

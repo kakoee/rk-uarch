@@ -1,0 +1,104 @@
+{
+  "source_inputs_verified": 241,
+  "declared_unchanged": 231,
+  "changes": [
+    {
+      "kind": "added",
+      "path": "docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py",
+      "previous_sha256": null,
+      "prospective_sha256": "bbe3746760753c388ac1fa3f3420016f008281a1014638863320e073e15348b1"
+    },
+    {
+      "kind": "added",
+      "path": "docs/reviews/U4-B-K2-parallel-first-use-v1/resource_limits.py",
+      "previous_sha256": null,
+      "prospective_sha256": "8dca3caa49d30eb54788d06f728e2a22fdabcb664fb92f78609f4539ccbdfa74"
+    },
+    {
+      "kind": "changed",
+      "path": "native/tools/component_container_guard.py",
+      "previous_sha256": "3843d50c525a933379f39ec5cd819dfb268420b280c050408d6251d023341746",
+      "prospective_sha256": "22d16bed74e1046451a56480d0fb0e6dce2f88d9905a6e26cab7ac3b99af9517"
+    },
+    {
+      "kind": "changed",
+      "path": "native/tools/component_runtime_candidate.py",
+      "previous_sha256": "eb1aaba95cac86aa27e9d62f470c160a075b3992ab8fc827fef0bfc886a6d669",
+      "prospective_sha256": "31dd486bc57c000f33ba2c4aeb71e6c43a6444427ed27d848f6a47573d33fe5e"
+    },
+    {
+      "kind": "added",
+      "path": "native/tools/component_startup_inventory.py",
+      "previous_sha256": null,
+      "prospective_sha256": "29b95aa2eb619ea1e8ce27ac7075c5706aa8ff98b7e0642f627bb94d20643f7d"
+    },
+    {
+      "kind": "changed",
+      "path": "native/tools/component_trusted_start.py",
+      "previous_sha256": "596fd12f5214cd7d074d73f24da359e76e38466579070e9faecad4affdb5e497",
+      "prospective_sha256": "8a43b7c2f63efb4166a9d77a58a04c3c373de08df87660dbdfca620a3d703636"
+    },
+    {
+      "kind": "changed",
+      "path": "src/rkuarch/engines/native/component_host.py",
+      "previous_sha256": "9eca709a769afb04d7f26638ccf8c9f61fb8f35e0e084df90f5b4f562b18f608",
+      "prospective_sha256": "6b45390a06c8802be7d13b681728165119674f76db0a5a1e1af500b22a7cd3a9"
+    },
+    {
+      "kind": "added",
+      "path": "src/rkuarch/engines/native/component_image.py",
+      "previous_sha256": null,
+      "prospective_sha256": "403cc6a092e5ab8c74f5a181dd4787e6ae7b4db9c505af8f8a3f351196fb62e9"
+    },
+    {
+      "kind": "changed",
+      "path": "validation/component/test_installation_identity.py",
+      "previous_sha256": "ff88f8022dedf7bf9dd828c9c25ca75a02ca2d220ddf7e19b4a2fa938a3700e3",
+      "prospective_sha256": "d1f4bd110308dd5337c57594da85fe10864d987d53acba3ebe60104d817a6ac3"
+    },
+    {
+      "kind": "changed",
+      "path": "validation/component/test_stage2_selection.py",
+      "previous_sha256": "ea511c6a43f9d31e97eb7a0de529d7e9eb1f420d5295f56ef83350223ec37849",
+      "prospective_sha256": "7cf3bea69a9cab4873e865edb123c11896754362fa1c4ccb5ea033892c08700a"
+    }
+  ],
+  "bootstrap_delta_paths": [
+    "docs/reviews/U4-A-component-activation-readiness-v1/prospective-consumer-bindings.json",
+    "native/tools/component_startup_inventory.py",
+    "native/tools/component_trusted_start.py"
+  ],
+  "startup": [
+    {
+      "name": "startup-package-draft",
+      "launch_status": 1,
+      "package_sha256": "45b5bc7eb9a2c9f97b9faef467810897c052417f422eb64bd71c6ce2231aecbe",
+      "manifest_sha256": "092d244e3e00cd22574a6c0ec14547d34b900f1a53cf4b0c9f61afe8f0996c26"
+    },
+    {
+      "name": "startup-package-final",
+      "launch_status": 1,
+      "package_sha256": "f2a7e6fd50044917cca506f77527b2334647ec105b45758a0402f69b730e3eb0",
+      "manifest_sha256": "16bdfc7a2c77bfa7684b75115b90a7eead8519e93639d221f74a142314439066"
+    },
+    {
+      "name": "startup-package-v2",
+      "launch_status": 0,
+      "package_sha256": "77acb6542bfbb341333b0474f1ef4caac009af188e2a9bdec55df17a5e17a41b",
+      "manifest_sha256": "447f394ccf891cd811fe33e9e3dfd6278feb08c9f52edbe7ddab37355a8cbccd",
+      "checked": {
+        "files": 992,
+        "bootstrap_tcb": 73,
+        "loader_configuration": 6,
+        "cache_candidates": 778,
+        "observed_mapped_files": 10,
+        "manifest_files": 1681
+      },
+      "missing": [],
+      "origin_count": 280,
+      "benign_inherited": true
+    }
+  ],
+  "original_B_leaves": 22,
+  "interpretation": "Inventory/readback only. A benign launch inherited. No native call, startup integrity activity, trace or authority."
+}

@@ -1,0 +1,33 @@
+import hashlib,json,subprocess,tarfile
+from pathlib import Path
+root=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');work=Path('/tmp/u4-b-activation-final-01');p=root/'docs/reviews/U4-A-component-activation-readiness-v1'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def load(p):return json.loads(p.read_bytes())
+assert sha(p/'manifest.json')=='0dda35134d12f3688d26909a33d9e336bbd8ec76c133b6aa6c5e5eeb01e8d139'
+m=load(p/'manifest.json')
+for n,v in m['files'].items():assert sha(p/n)==v['sha256'] and (p/n).stat().st_size==v['bytes'],n
+for label,commit in [('source',m['source_commit']),('combined',m['source_commit']),('pieces',m['source_commit'])]:
+ dest=work/label;dest.mkdir()
+ raw=subprocess.check_output(['git','archive',commit],cwd=root)
+ import io
+ with tarfile.open(fileobj=io.BytesIO(raw)) as t:t.extractall(dest,filter='data')
+e=work/'inherited';e.mkdir()
+with tarfile.open(p/'evidence.tar.gz') as t:
+ for member in t.getmembers():assert member.isfile() or member.isdir(),member.name
+ t.extractall(e,filter='data')
+files=load(p/'evidence-files.json')
+for n,v in files.items():assert sha(e/n)==v['sha256'] and (e/n).stat().st_size==v['bytes'],n
+ov=load(p/'overlay-bindings.json')
+subprocess.run(['git','apply',str(p/'proposals/activation-overlay-unapplied.patch')],cwd=work/'combined',check=True)
+for n in ov['patches']:subprocess.run(['git','apply',str(p/'proposals'/n)],cwd=work/'pieces',check=True)
+for n,h in ov['postimages'].items():assert sha(work/'combined'/n)==sha(work/'pieces'/n)==h,n
+for record,directory in [('prospective-consumer-bindings.json','source'),('overlay-consumer-bindings.json','combined')]:
+ for n,h in load(p/record)['files'].items():assert sha(work/directory/n)==h,n
+# The alternate D3 route starts from the preserved v5 postimage.
+d3=work/'d3';(d3/'src/rkuarch/engines/native').mkdir(parents=True)
+(d3/'src/rkuarch/engines/native/component_negative.py').write_bytes((root/'docs/reviews/U4-A-component-runtime-stage2-v1/final-join-v2/component_negative-v5.py.txt').read_bytes())
+subprocess.run(['git','apply',str(p/'proposals/D3-v5-to-v6.patch')],cwd=d3,check=True)
+assert sha(d3/'src/rkuarch/engines/native/component_negative.py')==ov['postimages']['src/rkuarch/engines/native/component_negative.py']
+s=load(p/'source-input-delta.json');print('inventory keys',list(s))
+print('verified manifest',len(m['files']),'archive',len(files),'postimages',len(ov['postimages']))
+(work/'audit-initial.json').write_text(json.dumps({'A_manifest':sha(p/'manifest.json'),'manifest_leaves':len(m['files']),'archive_leaves':len(files),'overlay_postimages':ov['postimages'],'patch_routes_equal':True,'D3_routes_equal':True,'consumer_pins':[78,79]},indent=2)+'\n')

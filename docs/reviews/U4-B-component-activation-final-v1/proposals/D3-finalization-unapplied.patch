@@ -1,0 +1,18 @@
+--- a/src/rkuarch/engines/native/component_negative.py
++++ b/src/rkuarch/engines/native/component_negative.py
+@@ -244,5 +244,14 @@
+     record = _run_negative_image(
+         prepared, case, evidence_root, timeout_s=session._deadline - time.monotonic(),
+         repetition=repetition)
+-    _require(time.monotonic() <= session._deadline, "D3 session deadline exhausted")
++    try:
++        _require(time.monotonic() <= session._deadline, "D3 session deadline exhausted")
++    except Exception as error:
++        record.update(
++            validation_passed=False,
++            failure_stage="session-finalization",
++            finalization_error=repr(error),
++        )
++        _save(evidence_root / "attempt.json", record)
++        raise
+     return record

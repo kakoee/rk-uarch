@@ -1,0 +1,42 @@
+"""Synthetic wrapper/retention probe. No native call or genuine session/authority."""
+import importlib.util
+import json
+import sys
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
+
+source, output, expectation = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+output.mkdir()
+loader = SourceFileLoader('synthetic_finalization_probe', str(source))
+spec = importlib.util.spec_from_loader(loader.name, loader)
+module = importlib.util.module_from_spec(spec)
+sys.modules[loader.name] = module
+loader.exec_module(module)
+
+class SyntheticSession:
+    _deadline = 1
+    def claim(self, case_id):
+        return None, None
+
+module.NegativeSession = SyntheticSession
+record = {'validation_passed': True, 'failure_stage': None}
+def private_stub(*args, **kwargs):
+    module._save(output / 'attempt.json', record)
+    return record
+module._run_negative_image = private_stub
+module.time = type('SyntheticClock', (), {'monotonic': staticmethod(lambda: 2)})
+try:
+    module.run_negative('synthetic', session=SyntheticSession(), evidence_root=output)
+except ValueError as error:
+    assert 'session deadline exhausted' in str(error)
+else:
+    raise AssertionError('deadline must refuse')
+saved = json.loads((output / 'attempt.json').read_bytes())
+gap = saved['validation_passed'] is True and saved['failure_stage'] is None
+assert gap == (expectation == 'gap'), saved
+if not gap:
+    assert saved['failure_stage'] == 'session-finalization'
+    assert saved['validation_passed'] is False
+    assert 'session deadline exhausted' in saved['finalization_error']
+print(json.dumps({'synthetic': True, 'expectation': expectation, 'gap_reproduced': gap,
+                  'saved': saved, 'native_execution': False, 'authority': None}))

@@ -1,0 +1,48 @@
+import hashlib,json,subprocess
+from pathlib import Path
+root=Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b');w=Path('/tmp/u4-b-activation-final-01');p=root/'docs/reviews/U4-A-component-activation-readiness-v1'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def load(p):return json.loads(p.read_bytes())
+s=load(p/'source-input-delta.json'); print('source entry example',next(iter(s['source_files'].items())))
+for n,h in s['source_files'].items():assert sha(w/'source'/n)==h,n
+changes=[]
+for row in s['changes']:
+ n=row['path'];assert sha(w/'source'/n)==row['prospective_sha256']
+ if row['previous_sha256'] is not None:
+  raw=subprocess.check_output(['git','show',s['inherited_source']+':'+n],cwd=root)
+  assert hashlib.sha256(raw).hexdigest()==row['previous_sha256']
+ changes.append(row)
+oldsource=load(root/'docs/reviews/U4-A-component-runtime-resource-join-v1/source-input-delta.json') if (root/'docs/reviews/U4-A-component-runtime-resource-join-v1/source-input-delta.json').exists() else None
+startup=[]
+for name in ('startup-package-draft','startup-package-final','startup-package-v2'):
+ directory=w/'inherited'/name;pack=load(directory/'package.json')
+ assert sha(directory/'launch.stdout')==pack['launch_stdout_sha256']
+ assert sha(directory/'launch.stderr')==pack['launch_stderr_sha256']
+ assert sha(directory/'bootstrap.stdout')==pack['bootstrap_observation_sha256']
+ assert sha(directory/'startup-manifest.json')==pack['manifest_sha256']
+ row={'name':name,'launch_status':pack['launch_status'],'package_sha256':sha(directory/'package.json'),'manifest_sha256':pack['manifest_sha256']}
+ if name=='startup-package-v2':
+  checked={}; missing=[]
+  for key in ('files','bootstrap_tcb','loader_configuration'):
+   for item in pack[key]:
+    path=Path(item['snapshot'])
+    if not path.exists():missing.append(str(path));continue
+    assert sha(path)==item['sha256'] and path.stat().st_size==item['bytes'],str(path)
+   checked[key]=len(pack[key])
+  for item in pack['cache_candidates']:
+   path=Path(item['snapshot']);assert sha(path)==item['sha256'],str(path)
+  for item in pack['observed_loaded_files']:
+   path=Path(item['path']);assert sha(path)==item['sha256'],str(path)
+  manifest=load(directory/'startup-manifest.json')
+  for path,pin in manifest['files'].items():assert sha(Path(path))==pin,path
+  observed=load(directory/'launch.stdout')
+  assert observed['site'] is False
+  checked.update(cache_candidates=len(pack['cache_candidates']),observed_mapped_files=len(pack['observed_loaded_files']),manifest_files=len(manifest['files']))
+  row.update(checked=checked,missing=missing,origin_count=len(observed['modules']),benign_inherited=True)
+ startup.append(row)
+bootstrap_delta=subprocess.check_output(['git','diff','--name-only','15736ada9e04bd1bdc7a07b87aed40b39adfad14','1f31669bc355267f7155aeef3dcf8af6796a839f'],cwd=root,text=True).splitlines()
+old=load(root/'docs/reviews/U4-B-component-activation-readiness-v1/manifest.json')
+for n,h in old['files'].items():assert sha(root/'docs/reviews/U4-B-component-activation-readiness-v1'/n)==h['sha256'],n
+result={'source_inputs_verified':len(s['source_files']),'declared_unchanged':s['unchanged_count'],'changes':changes,'bootstrap_delta_paths':bootstrap_delta,'startup':startup,'original_B_leaves':len(old['files']),'interpretation':'Inventory/readback only. A benign launch inherited. No native call, startup integrity activity, trace or authority.'}
+(w/'audit-rest.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({k:v for k,v in result.items() if k not in ('changes',)},indent=2))
