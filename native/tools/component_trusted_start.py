@@ -12,6 +12,7 @@ import importlib.util
 import json
 import sys
 import types
+import typing as _typing
 from pathlib import Path
 
 
@@ -91,6 +92,10 @@ def main():
             # Do not fall through to zip, editable or arbitrary path hooks.
             raise ModuleNotFoundError("trusted startup: unlisted module " + fullname)
 
+    # typing.io/re are stdlib-created compatibility pseudo-modules without specs.
+    # Import typing in the externally pinned bootstrap, then retain exact identities
+    # in baseline. Do not allow arbitrary spec-less post-manifest modules.
+    require(sys.modules["typing"] is _typing, "bootstrap typing identity")
     baseline = dict(sys.modules)
     finder = Finder()
     allowed = (machinery.BuiltinImporter, machinery.FrozenImporter, finder)

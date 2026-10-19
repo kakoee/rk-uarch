@@ -53,7 +53,7 @@ def write_manifest(path: Path, roots: list[Path], files: list[Path]) -> tuple[Pa
 
 # Benign observation only. Imports match the launcher's pre-manifest imports.
 # __cached__ is a possible cache pathname, NOT proof that its bytes were read.
-PROBE = """import hashlib,importlib,importlib.machinery,importlib.util,json,sys,types
+PROBE = """import hashlib,importlib,importlib.machinery,importlib.util,json,sys,types,typing
 from pathlib import Path
 modules={}
 for name,module in sorted(sys.modules.copy().items()):
