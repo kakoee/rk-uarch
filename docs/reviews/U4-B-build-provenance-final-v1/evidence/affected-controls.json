@@ -1,0 +1,67 @@
+{
+  "affected": {
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-build-provenance-final-01/direct/docs/reviews/U4-B-activation-orchestration-v1/probes/isolated_runner.py",
+      "/tmp/u4-b-build-provenance-final-01/direct",
+      "pytest",
+      "-q",
+      "tests/unit/test_component_build_review.py::test_wrong_or_stale_joins_refuse[generated]",
+      "tests/unit/test_component_build_review.py::test_wrong_or_stale_joins_refuse[archive]",
+      "tests/unit/test_component_build_review.py::test_wrong_or_stale_joins_refuse[tools]",
+      "tests/unit/test_component_build_review.py::test_wrong_or_stale_joins_refuse[consumer]",
+      "tests/unit/test_component_build_review.py::test_consistently_resealed_command_forgery_refuses",
+      "tests/unit/test_component_build_review.py::test_new_receipt_and_historical_reader_are_explicit",
+      "tests/unit/test_component_build_review.py::test_later_construct_and_assembly_link_actual_harness",
+      "--basetemp=/tmp/u4-b-build-provenance-final-01/pytest-affected"
+    ],
+    "exit_code": 0
+  },
+  "baseline": {
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-build-provenance-final-01/direct/docs/reviews/U4-B-activation-orchestration-v1/probes/isolated_runner.py",
+      "/tmp/u4-b-build-provenance-final-01/direct",
+      "pytest",
+      "-q",
+      "tests/unit/test_component_build_review.py::test_actual_independent_consumer_join_without_trace",
+      "tests/unit/test_component_build_review.py::test_resealed_incomplete_receipt_requires_independent_consumer",
+      "--basetemp=/tmp/u4-b-build-provenance-final-01/pytest-final-hook-baseline"
+    ],
+    "exit_code": 0
+  },
+  "disconnected": {
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-build-provenance-final-01/direct/docs/reviews/U4-B-activation-orchestration-v1/probes/isolated_runner.py",
+      "/tmp/u4-b-build-provenance-final-01/direct",
+      "pytest",
+      "-q",
+      "tests/unit/test_component_build_review.py::test_actual_independent_consumer_join_without_trace",
+      "tests/unit/test_component_build_review.py::test_resealed_incomplete_receipt_requires_independent_consumer",
+      "--basetemp=/tmp/u4-b-build-provenance-final-01/pytest-final-hook-disconnected"
+    ],
+    "exit_code": 1
+  },
+  "fault_sha256": "8836453fa619beb88923d6bca289ee01a22cb0f27d7322a78e2ec0e26067097f",
+  "original_sha256": "f243d404dd1acb5e3db88e7b72c62a583936b5e5e5860287b1e39e8005ba3597",
+  "restored": {
+    "command": [
+      "/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python",
+      "-I",
+      "/tmp/u4-b-build-provenance-final-01/direct/docs/reviews/U4-B-activation-orchestration-v1/probes/isolated_runner.py",
+      "/tmp/u4-b-build-provenance-final-01/direct",
+      "pytest",
+      "-q",
+      "tests/unit/test_component_build_review.py::test_actual_independent_consumer_join_without_trace",
+      "tests/unit/test_component_build_review.py::test_resealed_incomplete_receipt_requires_independent_consumer",
+      "--basetemp=/tmp/u4-b-build-provenance-final-01/pytest-final-hook-restored"
+    ],
+    "exit_code": 0
+  },
+  "restored_sha256": "f243d404dd1acb5e3db88e7b72c62a583936b5e5e5860287b1e39e8005ba3597",
+  "scope": "Synthetic fixtures and inline mock transport only; no native/Docker/startup invocation."
+}

@@ -1,0 +1,30 @@
+.F                                                                       [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 48, "sample": {"uarch_contract.mapped": "/tmp/u4-b-build-provenance-final-01/direct/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-b-build-provenance-final-01/direct/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-build-provenance-final-01/direct/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-build-provenance-final-01/direct/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+________ test_resealed_incomplete_receipt_requires_independent_consumer ________
+
+joined = {'root': PosixPath('/tmp/u4-b-build-provenance-final-01/pytest-final-hook-disconnected/test_resealed_incomplete_recei0...2_RUN_TAG': 'release-build'})), generated_identity_output_paths=('native/crates/uarch-engine/generated/identity.rs',))}
+
+    def test_resealed_incomplete_receipt_requires_independent_consumer(joined: dict[str, Any]) -> None:
+        """Every outer link is refreshed; only the observed incomplete status must refuse."""
+        root, record, expected = joined["root"], joined["record"], joined["expected"]
+        row = record["builds"][0]
+        receipt = json.loads((root / row["receipt"]["path"]).read_bytes())
+        receipt["completed"] = False
+        row["receipt"] = put(root, row["receipt"]["path"], receipt)
+        outer_binding = expected["executables"][0]["receipt"]
+        outer = json.loads((root / outer_binding["path"]).read_bytes())
+        outer["ordinary_receipt"] = row["receipt"]
+        expected["executables"][0]["receipt"] = put(root, outer_binding["path"], outer)
+        checks = json.loads((root / record["required_checks_review"]["path"]).read_bytes())
+        checks["subject"]["executables"] = expected["executables"]
+        record["required_checks_review"] = put(root, "checks.json", checks)
+>       with pytest.raises(ValueError, match="successful complete ordinary build status"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_component_build_review.py:647: Failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_component_build_review.py::test_resealed_incomplete_receipt_requires_independent_consumer
+1 failed, 1 passed in 0.75s

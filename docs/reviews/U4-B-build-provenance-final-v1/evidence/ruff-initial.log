@@ -1,0 +1,69 @@
+E501 Line too long (102 > 100)
+  --> docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:66:101
+   |
+64 |         (
+65 |             prep.ROOT
+66 |             / "docs/reviews/U4-A-construction-declarations-final-v1/inherited-external-inventory.json"
+   |                                                                                                     ^^
+67 |         ).read_bytes()
+68 |     )
+   |
+
+F811 Redefinition of unused `joined` from line 18
+   --> docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:115:5
+    |
+114 | def test_actual_provenance_review_without_trace_still_requires_startup(
+115 |     joined: dict[str, Any],
+    |     ^^^^^^ `joined` redefined here
+116 | ) -> None:
+117 |     record, launcher = review_fixture(joined)
+    |
+   ::: docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:18:52
+    |
+ 16 | from rkuarch.engines.native import component_host, component_review
+ 17 | from rkuarch.engines.native.records import FileBinding
+ 18 | from tests.unit.test_component_build_review import joined, put  # noqa: F401
+    |                                                    ------ previous definition of `joined` here
+ 19 | from validation.component.runtime_checks import verify_sources
+    |
+help: Remove definition: `joined`
+
+F811 Redefinition of unused `joined` from line 18
+   --> docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:131:53
+    |
+131 | def test_incomplete_optional_trace_stays_incomplete(joined: dict[str, Any]) -> None:
+    |                                                     ^^^^^^ `joined` redefined here
+132 |     record, launcher = review_fixture(joined)
+133 |     root = joined["root"]
+    |
+   ::: docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:18:52
+    |
+ 16 | from rkuarch.engines.native import component_host, component_review
+ 17 | from rkuarch.engines.native.records import FileBinding
+ 18 | from tests.unit.test_component_build_review import joined, put  # noqa: F401
+    |                                                    ------ previous definition of `joined` here
+ 19 | from validation.component.runtime_checks import verify_sources
+    |
+help: Remove definition: `joined`
+
+F811 Redefinition of unused `joined` from line 18
+   --> docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:152:53
+    |
+150 |     "relative", ["inputs/source/.cargo/config.toml", "inputs/cache/config.toml"]
+151 | )
+152 | def test_untracked_staged_configuration_must_refuse(joined: dict[str, Any], relative: str) -> None:
+    |                                                     ^^^^^^ `joined` redefined here
+153 |     root = joined["root"]
+154 |     baseline = adapter.consume_provenance(root, joined["record"], joined["expected"])
+    |
+   ::: docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:18:52
+    |
+ 16 | from rkuarch.engines.native import component_host, component_review
+ 17 | from rkuarch.engines.native.records import FileBinding
+ 18 | from tests.unit.test_component_build_review import joined, put  # noqa: F401
+    |                                                    ------ previous definition of `joined` here
+ 19 | from validation.component.runtime_checks import verify_sources
+    |
+help: Remove definition: `joined`
+
+Found 4 errors.

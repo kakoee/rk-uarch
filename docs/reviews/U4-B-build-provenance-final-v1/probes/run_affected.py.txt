@@ -1,0 +1,49 @@
+from pathlib import Path
+import difflib
+import hashlib
+import json
+import subprocess
+
+work = Path('/tmp/u4-b-build-provenance-final-01')
+root = work / 'direct'
+python = '/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python'
+base = [python, '-I', str(root / 'docs/reviews/U4-B-activation-orchestration-v1/probes/isolated_runner.py'), str(root), 'pytest', '-q']
+prefix = 'tests/unit/test_component_build_review.py::'
+def run(label, nodes):
+    command = base + [prefix + node for node in nodes] + ['--basetemp=' + str(work / ('pytest-' + label))]
+    with (work / (label + '.log')).open('w') as stream:
+        status = subprocess.run(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT).returncode
+    return {'command': command, 'exit_code': status}
+selected = ['test_wrong_or_stale_joins_refuse[' + value + ']' for value in ('generated', 'archive', 'tools', 'consumer')]
+selected += ['test_consistently_resealed_command_forgery_refuses', 'test_new_receipt_and_historical_reader_are_explicit', 'test_later_construct_and_assembly_link_actual_harness']
+report = {'scope': 'Synthetic fixtures and inline mock transport only; no native/Docker/startup invocation.', 'affected': run('affected', selected)}
+p = root / 'src/rkuarch/engines/native/component_build_review.py'
+original = p.read_bytes()
+assert hashlib.sha256(original).hexdigest() == 'f243d404dd1acb5e3db88e7b72c62a583936b5e5e5860287b1e39e8005ba3597'
+line = '        consumed = consume_build(build_root, receipt, wanted)'
+replacement = '''        consumed = {"required_files": [
+            item for rows in declaration["inputs"].values() for item in rows
+        ] + [{"path": v["path"], "byte_hash": v["byte_hash"]}
+             for v in receipt["streams"].values()] + [wanted["executable"]]}'''
+assert original.decode().count(line) == 1
+fault = original.decode().replace(line, replacement).encode()
+(work / 'final-hook-disconnection.patch').write_text(''.join(difflib.unified_diff(original.decode().splitlines(True), fault.decode().splitlines(True), fromfile='a/src/rkuarch/engines/native/component_build_review.py', tofile='b/src/rkuarch/engines/native/component_build_review.py')))
+nodes = ['test_actual_independent_consumer_join_without_trace', 'test_resealed_incomplete_receipt_requires_independent_consumer']
+report['baseline'] = run('final-hook-baseline', nodes)
+try:
+    p.write_bytes(fault)
+    report['disconnected'] = run('final-hook-disconnected', nodes)
+finally:
+    p.write_bytes(original)
+report['restored'] = run('final-hook-restored', nodes)
+report['original_sha256'] = hashlib.sha256(original).hexdigest()
+report['fault_sha256'] = hashlib.sha256(fault).hexdigest()
+report['restored_sha256'] = hashlib.sha256(p.read_bytes()).hexdigest()
+(work / 'affected-controls.json').write_text(json.dumps(report, indent=2, sort_keys=True) + '\n')
+print(json.dumps({key: value for key, value in report.items() if key.endswith('sha256') or key == 'scope'}))
+assert report['affected']['exit_code'] == report['baseline']['exit_code'] == report['restored']['exit_code'] == 0
+assert report['disconnected']['exit_code'] == 1
+assert 'DID NOT RAISE' in (work / 'final-hook-disconnected.log').read_text()
+assert report['original_sha256'] == report['restored_sha256']
+for label in ('affected', 'final-hook-baseline', 'final-hook-disconnected', 'final-hook-restored'):
+    print(label, (work / (label + '.log')).read_text())

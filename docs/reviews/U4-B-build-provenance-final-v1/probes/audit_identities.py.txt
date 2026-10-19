@@ -1,0 +1,78 @@
+from pathlib import Path
+import ast
+import hashlib
+import json
+import subprocess
+
+repo = Path('/home/jjaff/AI-infra-simulation/rk-uarch-u4-b')
+work = Path('/tmp/u4-b-build-provenance-final-01')
+source = '0212cb5d1488baefa9be9580a77d06c7bd3237b1'
+handoff = '945a3eab2e6c768e041f9f521b3c4f117429fb6f'
+package = 'docs/reviews/U4-A-build-provenance-final-v1'
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+def show(commit, path):
+    return subprocess.check_output(['git', 'show', commit + ':' + path], cwd=repo)
+def read(path):
+    return json.loads((repo / path).read_bytes())
+manifest = read(package + '/manifest.json')
+assert sha((repo / package / 'manifest.json').read_bytes()) == '0c47762ec6bdd51dedd72f9e19a1a59e08ec8bed23be20a00bf15ff86930e250'
+assert show(handoff, package + '/manifest.json') == show(source, package + '/manifest.json') == (repo / package / 'manifest.json').read_bytes()
+for name, row in manifest['files'].items():
+    path = package + '/' + name
+    raw = (repo / path).read_bytes()
+    assert sha(raw) == row['sha256'] and len(raw) == row['bytes']
+    assert raw == show(source, path)
+transition = read(package + '/source-transition.json')
+postimages = {}
+for name, row in transition['postimages'].items():
+    direct = (work / 'direct' / name).read_bytes()
+    other = (work / 'prior-then-delta' / name).read_bytes()
+    assert direct == other and sha(direct) == row['after']
+    assert sha(show(transition['base_commit'], name)) == row['before'] if row['before'] else True
+    current = (repo / name).read_bytes() if (repo / name).exists() else None
+    if row['disposition'] == 'unapplied':
+        assert (sha(current) if current else None) == row['before']
+    else:
+        assert current == direct
+    postimages[name] = dict(row, both_routes_exact=True, live_disposition_verified=True)
+for name, pin in transition['prospective_source_files'].items():
+    assert sha((work / 'direct' / name).read_bytes()) == sha((work / 'prior-then-delta' / name).read_bytes()) == pin
+checks = read(package + '/checks.json')
+for name, pin in checks['B_actual_unchanged_files'].items():
+    raw = show('81411e3dd64f4f85bbfce33d24aa903615823094', name)
+    assert sha(raw) == pin and (repo / name).read_bytes() == (work / 'direct' / name).read_bytes() == raw
+historical = read(package + '/evidence/historical-preservation.json')['manifests']
+prior = read(package + '/evidence/prior-B-confirmation-preserved.json')
+historical.append(dict(path=prior['manifest'], sha256=prior['sha256'], leaves=prior['leaves']))
+for row in historical:
+    p = repo / row['path']
+    assert sha(p.read_bytes()) == row['sha256']
+    value = json.loads(p.read_bytes())
+    assert len(value['files']) == row['leaves']
+    for name, binding in value['files'].items():
+        leaf = repo / name if name.startswith('docs/') or name.startswith('validation/') else p.parent / name
+        raw = leaf.read_bytes()
+        assert sha(raw) == binding['sha256'] and len(raw) == binding['bytes']
+unchanged = {}
+for folder, pattern in [('validation/component', '*capture*.py'), ('validation/component', '*ordinary_eof*.py')]:
+    for p in (repo / folder).glob(pattern):
+        name = str(p.relative_to(repo))
+        assert p.read_bytes() == show('aecc6a27e1533eee43e884380ed095cfc1edfd20', name) == (work / 'direct' / name).read_bytes()
+        unchanged[name] = sha(p.read_bytes())
+# Check the exact documented development annotation transition, not a startup invocation.
+p = work / 'direct/native/tools/component_startup_inventory.py'
+raw = p.read_text()
+prior_text = raw.replace('from typing import Any\n', '').replace(' -> dict[str, Any]:', ' -> dict:')
+prior_text = prior_text.replace('def construct(\n    source: Path, payload_path: Path, expected_payload: str, output: Path\n) -> dict:', 'def construct(source: Path, payload_path: Path, expected_payload: str, output: Path) -> dict:')
+assert sha(prior_text.encode()) == 'ecc932efedbda521e1ade2da92c1bf940e0ff040a22bbd7463f9aa936191db27'
+# The older publication also had an independently tested enumeration change; don't mislabel it annotation-only.
+def probe(text):
+    return next(n.value.value for n in ast.parse(text).body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'PROBE' for t in n.targets))
+assert probe(raw) == probe(show('aecc6a27e1533eee43e884380ed095cfc1edfd20', 'native/tools/component_startup_inventory.py').decode())
+p = 'validation/component/runtime_selection.py'
+old, new = (repo / p).read_text(), (work / 'direct' / p).read_text()
+assert new == old.replace('    return value["selection"]\n', '    selected: dict[str, Any] = value["selection"]\n    return selected\n')
+result = dict(format='B-final-provenance-identities/1', source=source, handoff=handoff, package=package, manifest_sha256=sha((repo/package/'manifest.json').read_bytes()), manifest_leaves=len(manifest['files']), postimages=postimages, source_count=len(transition['prospective_source_files']), B_unchanged=checks['B_actual_unchanged_files'], historical_manifests=historical, unchanged_optional_and_result_consumers=unchanged, startup_annotation_preimage='ecc932efedbda521e1ade2da92c1bf940e0ff040a22bbd7463f9aa936191db27', startup_probe_string_unchanged=True, runtime_selection_change='Unapplied local typed alias for the same returned selection; no definitions, selection data or behavior change.', installation=False, new_binary=None, authority=None)
+(work/'identities.json').write_text(json.dumps(result, indent=2, sort_keys=True)+'\n')
+print(json.dumps({'manifest_leaves':len(manifest['files']), 'postimages':len(postimages), 'sources':result['source_count'], 'historical_leaves':sum(v['leaves'] for v in historical), 'unchanged_capture_and_eof_files':len(unchanged)}))

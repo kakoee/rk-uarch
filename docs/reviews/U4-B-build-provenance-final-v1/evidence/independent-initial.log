@@ -1,0 +1,54 @@
+....FF                                                                   [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 52, "sample": {"uarch_contract.mapped": "/tmp/u4-b-build-provenance-final-01/direct/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-b-build-provenance-final-01/direct/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-build-provenance-final-01/direct/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-build-provenance-final-01/direct/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_ test_untracked_staged_configuration_must_refuse[inputs/source/.cargo/config.toml] _
+
+joined = {'root': PosixPath('/tmp/u4-b-build-provenance-final-01/pytest-independent/test_untracked_staged_configur0'), 'expecte...2_RUN_TAG': 'release-build'})), generated_identity_output_paths=('native/crates/uarch-engine/generated/identity.rs',))}
+relative = 'inputs/source/.cargo/config.toml'
+
+    @pytest.mark.parametrize(
+        "relative", ["inputs/source/.cargo/config.toml", "inputs/cache/config.toml"]
+    )
+    def test_untracked_staged_configuration_must_refuse(joined: dict[str, Any], relative: str) -> None:
+        root = joined["root"]
+        baseline = adapter.consume_provenance(root, joined["record"], joined["expected"])
+        assert baseline
+        path = root / "debug" / relative
+        assert not path.exists()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"# synthetic untracked configuration; never executed\n[build]\njobs = 1\n")
+        # Exact source/cache provenance must reject an extra build-visible input.
+        # No outer record/hash is changed; no native execution is attempted.
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:162: Failed
+__ test_untracked_staged_configuration_must_refuse[inputs/cache/config.toml] ___
+
+joined = {'root': PosixPath('/tmp/u4-b-build-provenance-final-01/pytest-independent/test_untracked_staged_configur1'), 'expecte...2_RUN_TAG': 'release-build'})), generated_identity_output_paths=('native/crates/uarch-engine/generated/identity.rs',))}
+relative = 'inputs/cache/config.toml'
+
+    @pytest.mark.parametrize(
+        "relative", ["inputs/source/.cargo/config.toml", "inputs/cache/config.toml"]
+    )
+    def test_untracked_staged_configuration_must_refuse(joined: dict[str, Any], relative: str) -> None:
+        root = joined["root"]
+        baseline = adapter.consume_provenance(root, joined["record"], joined["expected"])
+        assert baseline
+        path = root / "debug" / relative
+        assert not path.exists()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"# synthetic untracked configuration; never executed\n[build]\njobs = 1\n")
+        # Exact source/cache provenance must reject an extra build-visible input.
+        # No outer record/hash is changed; no native execution is attempted.
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py:162: Failed
+=========================== short test summary info ============================
+FAILED docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py::test_untracked_staged_configuration_must_refuse[inputs/source/.cargo/config.toml]
+FAILED docs/reviews/U4-B-build-provenance-final-v1/probes/test_final_join.py::test_untracked_staged_configuration_must_refuse[inputs/cache/config.toml]
+2 failed, 4 passed in 2.11s

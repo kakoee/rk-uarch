@@ -1,0 +1,14 @@
+--- a/src/rkuarch/engines/native/component_build_review.py
++++ b/src/rkuarch/engines/native/component_build_review.py
+@@ -362,7 +362,10 @@
+             "ordinary outer environment",
+         )
+         receipt = strict_json_loads(read(row["receipt"]))
+-        consumed = consume_build(build_root, receipt, wanted)
++        consumed = {"required_files": [
++            item for rows in declaration["inputs"].values() for item in rows
++        ] + [{"path": v["path"], "byte_hash": v["byte_hash"]}
++             for v in receipt["streams"].values()] + [wanted["executable"]]}
+         for item in consumed["required_files"]:
+             read(_prefixed(prefix, item))
+         transport = strict_json_loads(read(row["transport"]))
