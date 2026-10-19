@@ -1,0 +1,63 @@
+{
+  "B_publication": "567905c4c3110a69c860e19fdda4b7b5eafbe5c9",
+  "Docker": false,
+  "baseline": {
+    "log": "evidence/baseline-isolated.log",
+    "preparation_sha256": "5eb07277a2f062ae07a7c6abbf23d750fe3094e5bab6c93fcadc2dd05a0d6717",
+    "result": "1 expected behavioral failure: omitted parser"
+  },
+  "campaign": false,
+  "capture_worker": false,
+  "commands": {
+    "affected": "same runner on direct reconstructed overlay: pytest -q PACKAGE/probes/test_join.py::test_session_adapter_delegates_exact_arguments --basetemp=FRESH_AFFECTED",
+    "baseline": "VENV/bin/python -I EXPORT/docs/reviews/U4-B-activation-orchestration-v1/probes/isolated_runner.py EXPORT pytest -q PACKAGE/probes/test_join.py::test_import_inventory_covers_every_selected_consumer --basetemp=FRESH_BASELINE; exact B overlay before A delta",
+    "final": "same isolated runner on final overlay: pytest -q PACKAGE/probes/test_join.py validation/component/test_ordinary_eof_campaign.py::test_session_bridge_cannot_turn_objects_into_authority validation/component/test_capture_monitor.py::test_component_build_uses_explicit_recipe_companion --basetemp=FRESH_FINAL",
+    "lint": "ruff check PACKAGE/probes",
+    "preparation": "same runner: script EXPORT/PACKAGE/probes/verify_join.py INHERITED_4d447ba_OBSERVATION_ROOT OUTPUT_JSON",
+    "reconstruct": "python3 PACKAGE/probes/reconstruct.py REPOSITORY NEW_PRIVATE_DIRECTORY",
+    "types": "mypy --follow-imports=silent PACKAGE/probes/test_join.py"
+  },
+  "final_affected": {
+    "log": "evidence/adapter-after-types.log",
+    "result": "3 adapter cases passed; other3 unchanged passes reused",
+    "test_sha256": "84c3b268b00f4cb3b3a9b0104483d0e80ea6e3fc69a85b90ef99427a3bb5e8d9"
+  },
+  "final_initial": {
+    "log": "evidence/final-focused.log",
+    "result": "6 passed",
+    "test_sha256": "52fe6c4bd5ea571af07c0a6af4a87ab1657d7481a84f22b6218f9d05ba597a83"
+  },
+  "format": "A-combined-preparation-checks/1",
+  "inherited": {
+    "B33": "5eedcf0b40b0d5520e8c3ad87888f7dc16c964bd; no rerun",
+    "D3": "a2fe7c6e763dbdf5a0d5fa3991b7f230e353d84b / ae5e7821c66bdd87f7d813cda31368e62ec60810; B567905c agrees; no rerun",
+    "consumer": "dec263861d8f00f1470d8efff943a5e76aad0145; no rerun"
+  },
+  "native_execution": false,
+  "new_build": null,
+  "preparation": "matching83-pin closure and complete180-file project import inventory; two missing runtime modules and stale tool pin refused",
+  "reconstruction": "both249-source/83-consumer routes agree; current live247 and declared248 distinguished",
+  "remaining": [
+    "B final confirmation",
+    "exact construction argv/environment versus BuildInputs reconciliation",
+    "capture stderr diagnostic policy",
+    "A-F3 deferred",
+    "all three read gaps",
+    "incident impact unknown",
+    "installation/activation-build/deployment/authority/public-execution/human decisions separate"
+  ],
+  "runner_placement_development": "first run correctly refused live runner path; preserved; unchanged runner invoked from export thereafter",
+  "startup_retry": false,
+  "static": {
+    "mypy": "new test, --follow-imports=silent, pass",
+    "ruff": "three probes pass"
+  },
+  "test_typing_delta": {
+    "change": "cast only the observed call result to Any; assert each recorded list empty separately",
+    "implementation_changed": false,
+    "prior_diagnostics": [
+      "func-returns-value at adapter.call assignment",
+      "comparison-overlap between differently typed empty lists"
+    ]
+  }
+}
