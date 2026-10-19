@@ -1,0 +1,266 @@
+--- a/docs/build-spec.md
++++ b/docs/build-spec.md
+@@ -2528,6 +2528,15 @@
+ preparation producers outside engines. Imported mapped inputs bypass policy execution and
+ are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
+ component boundary; T (U7) delivers the first full product table. A small table may be
+ built earlier for a named use, but no full grid gates silicon. Passing G4/G7 is not a
+@@ -2690,6 +2699,15 @@
+ native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
+ readiness process for Blackhole before U-P15. Readiness does not require a full table.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
+ is compared with independent models only where abstractions and inputs match. Required L1
+ runs for each applicable admitted capability. L2 tool selection is optional and recorded
+@@ -2963,6 +2981,15 @@
+ - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+   U0023; full-table work is later, not a kernel prerequisite.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
+ EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
+@@ -3090,6 +3117,15 @@
+ Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
+ placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
+ 
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
++
+ TASK: execute only the authorized phase. B (U4a) implements the accepted small component
+ slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
+ U-P7 T in U7. Unsupported work refuses, never disappears from a claimed complete layer.
+@@ -3174,6 +3210,15 @@
+ releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains open if host
+ evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
+ any simulator-performance claim and final closure. No implied waiver from proceeding.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
+ admit npu-m256 at declared representative points, and execute G5's verification obligations.
+--- a/docs/decisions/U0011-the-native-engine-core.md
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -916,3 +916,81 @@
+ new wrapper/selection requirements are prospective B/coordinator-owned records. No old
+ K2 HostRecord, selector, placement or runtime authority authorizes new component identities.
+ Human installation, genuine L1, U0024 limits and later public authorization remain separate.
++
++## Build provenance scope amendment — prospective human installation
++
++This amendment implements Javid's direction to reconsider exhaustive construction-read
++tracing while preserving build identity, testing and reproducibility. It replaces the
++mandatory construction-read-capture prerequisite introduced in later U4 preparation
++proposals; it does not retrospectively alter their receipts or verdicts. Until human
++installation and the reviewed implementation transition, existing executable gates remain
++in force. A historical requirement preserved in an older proposal is not a competing
++requirement for the successor prepared under this amendment.
++
++### Required build and result provenance
++
++For a new admitted native candidate, retain an exact source commit/tree and declared
++source inventory, generated-input bytes and their producer identities, locked dependency
++versions/checksums/features, compiler/linker and image identities, and complete per-mode
++build commands and explicit environment. Build from a clean source export into fresh
++build-output directories using the accepted tools and verified dependency cache. A cache
++of verified dependency source archives is reusable; an unexplained prior target directory
++is not clean-build evidence. Record success/failure, exit status, ordinary stdout/stderr,
++resource/deadline outcomes, actual executable hashes and generated output identities.
++Do not silently substitute tools, dependencies, generated inputs or build flags.
++
++Each run binds the actual executable and relevant Python consumer identities, workload,
++hardware, assumptions/model and input identities, result bytes and executed checks. Future
++product tables bind their run/result records and preparation/assembly implementation.
++The provenance chain is table/result -> run -> executable -> build record -> source and
++inputs. These records attest declared inputs and observed outputs; they do not prove an
++exhaustive dynamic read set or independence from all ambient state. No self-authorizing
++build receipt, test-supplied identity or fabricated human/reviewer acceptance is permitted.
++
++Retain scope-appropriate native/Python tests, independent expectations and consumer checks,
++semantic fault/restoration controls, producer-disabled saved-input replay and required
++fresh-process/debug-release result determinism. Reuse unchanged evidence only with exact
++identity and scope justification. Clean rebuild verification is required for a claim of
++binary reproducibility: compare actual executable hashes from independent fresh-output
++builds of the same declared inputs/mode. Existing qualifying evidence may be reused;
++there is no repeated-build requirement for documentation-only changes. A mismatch must be
++investigated and reported, not normalized away or called bit-reproducible. Debug and release
++executables may differ; their comparable simulation results must meet existing determinism
++requirements. No exhaustive tracing is needed for this bounded reproducibility evidence.
++
++### Exhaustive construction tracing is optional
++
++Compiler/build-script/linker syscall tracing, canaries, construction-read closure and
++trace-specific diagnostic classification are optional investigations, not prerequisites
++for U4 build provenance, component activation or table provenance. This removes the added
++mandatory gate rather than deferring it to an automatic later sprint gate. A future need
++for stronger assurance requires its own justified scope and authorization.
++
++Preserve all historical trace files, NONE CAPTURED statuses and unresolved candidate-03
++records. Never set read_audit_complete=true on the strength of this amendment. Separate
++future build-provenance acceptance from optional read-audit status and from runtime startup
++assurance through an explicit reviewed record/consumer version transition. Reject stale,
++missing or mismatched required provenance; merely deleting the current boolean check is
++not an implementation of this policy. Current K2 records/authority are not migrated.
++
++Ordinary compiler progress and warnings are retained build diagnostics, not evidence of
++tracer loss and not automatically build failures. Keep actual compiler exit status, Cargo
++completion/artifact checks where applicable, lint/clippy warning policy, resource/deadline
++limits, complete bounded output retention and failure receipts. A truncated or incomplete
++required receipt cannot become success. The proposed empty compiler-stderr allowlists and
++per-line tracing-policy approval are not part of the ordinary build gate. Optional tracing
++must still report its own unknown/lost/incomplete evidence honestly; do not weaken an old
++trace parser to manufacture a pass.
++
++### Boundaries that do not change
++
++This amendment does not change simulator event/resource tracing or required runtime
++observations. It preserves exact executable/consumer selection, input/result admission,
++independent result checking, D3 refusal semantics, immutable deployment and genuine human
++authority. A-F3 startup-integrity assurance remains a separate unresolved public-first-use
++gate. No stopped verification is retried, reconstructed or transferred by this amendment.
++Trusted startup evidence cannot be inferred from a source hash, a clean build or a positive
++simulation run. Genuine L1 workings, the affected /2 restriction, incident disclosure,
++U0024 obligations, reference readiness and U4/G3a closure requirements are unchanged.
++No installation, native build/run, deployment, campaign or new authority is authorized by
++preparing or reviewing this amendment.
+--- a/docs/execution-plan.md
++++ b/docs/execution-plan.md
+@@ -239,6 +239,7 @@
+ | **Parallel progress** | If reference feasibility/access is unresolved, retain the open G3a/campaign gate and proceed only with independently ready U6 tasks; do not call U4/U5 closed |
+ | **Not in this sprint** | No C2 depth, threads, mandatory FP8/os-tiled/ragged grid or automatic silicon measurement authorization |
+ | **Effort** | Re-estimate M/K1/K2/B/R; old full-table T effort is not a current U4 forecast |
++| **Build provenance** | U0011 build-provenance scope amendment: declared source/tool/dependency/generated-input identities, clean builds, executable/run/result bindings and scoped reproducibility evidence remain required. Exhaustive construction-read tracing is optional; A-F3 startup assurance and all other activation gates remain separate. |
+ 
+ ### U5 · Silicon I: the large-core class
+ 
+--- a/docs/prompts/U-P11a-native-engine-kernel.md
++++ b/docs/prompts/U-P11a-native-engine-kernel.md
+@@ -37,6 +37,15 @@
+ - Correctness uses approved Linux with pinned tools and real executed CI tests. Runner
+   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
+   U0023; full-table work is later, not a kernel prerequisite.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
+ EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
+--- a/docs/prompts/U-P11b-native-engine-models-and-executor.md
++++ b/docs/prompts/U-P11b-native-engine-models-and-executor.md
+@@ -19,6 +19,15 @@
+ Mapping policy identifiers are provenance, not instructions for the native engine to invoke
+ Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
+ placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: execute only the authorized phase. B (U4a) implements the accepted small component
+ slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
+--- a/docs/prompts/U-P11c-native-engine-diagnostics-and-g5.md
++++ b/docs/prompts/U-P11c-native-engine-diagnostics-and-g5.md
+@@ -16,6 +16,15 @@
+ releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains open if host
+ evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
+ any simulator-performance claim and final closure. No implied waiver from proceeding.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
+ admit npu-m256 at declared representative points, and execute G5's verification obligations.
+--- a/docs/prompts/U-P7-mapping-grid-and-the-first-full-table.md
++++ b/docs/prompts/U-P7-mapping-grid-and-the-first-full-table.md
+@@ -14,6 +14,15 @@
+ Extend U2's saved-input path with the existing TaskGraph; policies are versioned
+ preparation producers outside engines. Imported mapped inputs bypass policy execution and
+ are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
+ component boundary; T (U7) delivers the first full product table. A small table may be
+--- a/docs/prompts/U-P8-L1-limits-and-L2-differential.md
++++ b/docs/prompts/U-P8-L1-limits-and-L2-differential.md
+@@ -21,6 +21,15 @@
+ measurements, cloud spend or silently fabricated fields. Identify contract extensions and
+ native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
+ readiness process for Blackhole before U-P15. Readiness does not require a full table.
++
++BUILD PROVENANCE (U0011 build-provenance scope amendment): retain declared source,
++compiler/dependency/generated-input identities, exact commands/environment, clean builds,
++executable-to-run/result bindings, independent verification and scoped reproducibility
++evidence. Exhaustive construction-read tracing is optional, not a build/table provenance
++gate. Ordinary build diagnostics remain recorded and checked under compiler/test policies;
++no trace-specific empty-stderr rule is required. Historical read-audit gaps stay unclaimed.
++A-F3 startup assurance, genuine authority and public-first-use prerequisites remain separate.
++This does not remove simulator event/resource observations or authorize new execution.
+ 
+ TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
+ is compared with independent models only where abstractions and inputs match. Required L1
