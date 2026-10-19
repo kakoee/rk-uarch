@@ -1,0 +1,196 @@
+{
+  "$defs": {
+    "ConstructionMode": {
+      "additionalProperties": false,
+      "properties": {
+        "cargo_args": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Cargo Args",
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "debug",
+            "release"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "permitted_environment": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Permitted Environment",
+          "type": "object"
+        },
+        "rustflags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rustflags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "mode",
+        "cargo_args",
+        "rustflags",
+        "permitted_environment"
+      ],
+      "title": "ConstructionMode",
+      "type": "object"
+    },
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "SourceInput": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "rust",
+            "canonicalization",
+            "schema",
+            "build-script",
+            "generator",
+            "python-build-helper",
+            "config",
+            "trust",
+            "tool-input"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash",
+        "role"
+      ],
+      "title": "SourceInput",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "uarch-component-build-inputs/3",
+      "title": "Format",
+      "type": "string"
+    },
+    "generated_identity_output_paths": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Generated Identity Output Paths",
+      "type": "array"
+    },
+    "mode_configs": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ConstructionMode"
+        },
+        {
+          "$ref": "#/$defs/ConstructionMode"
+        }
+      ],
+      "title": "Mode Configs",
+      "type": "array"
+    },
+    "model_inputs_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Model Inputs Hash",
+      "type": "string"
+    },
+    "model_source_paths": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Model Source Paths",
+      "type": "array"
+    },
+    "source_commit": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Source Commit",
+      "type": "string"
+    },
+    "source_files": {
+      "items": {
+        "$ref": "#/$defs/SourceInput"
+      },
+      "minItems": 1,
+      "title": "Source Files",
+      "type": "array"
+    },
+    "tool_inputs_file": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "tool_inputs_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Tool Inputs Hash",
+      "type": "string"
+    },
+    "trust_file": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "trust_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Trust Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "source_commit",
+    "source_files",
+    "trust_hash",
+    "trust_file",
+    "tool_inputs_hash",
+    "tool_inputs_file",
+    "model_source_paths",
+    "model_inputs_hash",
+    "mode_configs",
+    "generated_identity_output_paths"
+  ],
+  "title": "ComponentBuildInputsV3",
+  "type": "object"
+}

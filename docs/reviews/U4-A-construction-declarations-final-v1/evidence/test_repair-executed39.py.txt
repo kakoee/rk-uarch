@@ -1,0 +1,306 @@
+"""Synthetic declarations and command rendering only; no build, Docker or capture worker."""
+
+from __future__ import annotations
+
+import ast
+import copy
+import json
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+
+import pytest
+from uarch_contract.hashing import canonical_json, content_hash, sha256
+
+from native.tools import component_candidate as wrapper
+from native.tools import component_runtime_candidate as preparation
+from rkuarch.engines.native.component_construction import CARGO, FLAGS, construction_modes
+from rkuarch.engines.native.component_records import (
+    ComponentBuildInputs,
+    ComponentBuildInputsV3,
+    parse_component_build_inputs,
+)
+from validation.component import capture_diagnostics as diagnostic
+from validation.component import capture_monitor as monitor
+from validation.component import test_capture_diagnostics as diagnostic_fixtures
+from validation.component import test_capture_monitor as fixtures
+
+plan = fixtures.plan
+ROOT = preparation.ROOT
+
+
+def literal(mode: str) -> dict[str, Any]:
+    record = json.loads(
+        (
+            ROOT
+            / "docs/reviews/U4-B-activation-combined-confirmation-v1/evidence/construction.json"
+        ).read_bytes()
+    )
+    return next(row for row in record["rendered_from_source_ast_only"] if row["mode"] == mode)
+
+
+def put_input(plan: dict[str, Any], key: str, value: Any) -> None:
+    path = Path(plan["inputs"][key]["path"])
+    path.write_text(canonical_json(value))
+    plan["inputs"][key]["byte_hash"] = sha256(path.read_bytes())
+
+
+def configure(plan: dict[str, Any], mode: str, modes: list[dict[str, Any]]) -> None:
+    plan["format"] = "component-capture-plan/2"
+    policy_path = Path(plan["inputs"]["build_inputs"]["path"]).parent / "diagnostic-policy.json"
+    policy_path.write_bytes(
+        (
+            ROOT / "docs/reviews/U4-B-capture-diagnostics-v1/diagnostic-policy-proposal.json"
+        ).read_bytes()
+    )
+    plan["inputs"]["capture_diagnostic_policy"] = {
+        "path": str(policy_path),
+        "byte_hash": sha256(policy_path.read_bytes()),
+    }
+    build = json.loads(Path(plan["inputs"]["build_inputs"]["path"]).read_bytes())
+    build["format"] = "uarch-component-build-inputs/3"
+    build.pop("permitted_environment", None)
+    build["mode_configs"] = modes
+    put_input(plan, "build_inputs", build)
+    recipe = json.loads(Path(plan["inputs"]["construction_recipe"]["path"]).read_bytes())
+    recipe.update(
+        format="component-capture-recipe/2",
+        mode_configs=modes,
+        build_inputs_byte_hash=plan["inputs"]["build_inputs"]["byte_hash"],
+    )
+    recipe.pop("permitted_environment", None)
+    put_input(plan, "construction_recipe", recipe)
+    selected = next(row for row in modes if row["mode"] == mode)
+    plan["phase"] = mode
+    plan["child_argv"] = [CARGO, *selected["cargo_args"]]
+    plan["environment"] = selected["permitted_environment"]
+    put_input(plan, "environment", plan["environment"])
+
+
+def synthetic_build(modes: list[dict[str, Any]]) -> dict[str, Any]:
+    pin = "sha256:" + "1" * 64
+    source = "native/tools/component_runtime_candidate.py"
+    return {
+        "format": "uarch-component-build-inputs/3",
+        "source_commit": "1" * 40,
+        "source_files": [{"path": source, "byte_hash": pin, "role": "config"}],
+        "trust_hash": pin,
+        "trust_file": {"path": "synthetic-trust.json", "byte_hash": pin},
+        "tool_inputs_hash": pin,
+        "tool_inputs_file": {"path": "synthetic-tools.json", "byte_hash": pin},
+        "model_source_paths": [source],
+        "model_inputs_hash": pin,
+        "mode_configs": modes,
+        "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
+    }
+
+
+@pytest.mark.parametrize("mode", ["debug", "release"])
+def test_builder_wrapper_capture_agree(
+    plan: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str
+) -> None:
+    modes = construction_modes(FLAGS)
+    value = parse_component_build_inputs(synthetic_build(modes))
+    assert isinstance(value, ComponentBuildInputsV3)
+    # Ambient values must not influence either renderer.
+    monkeypatch.setenv("C2_RUN_TAG", "wrong-ambient")
+    monkeypatch.setenv("RUSTFLAGS", "wrong-ambient")
+    argv, environment = preparation.production_invocation(value, mode)
+    expected = literal(mode)
+    assert argv == expected["actual_source_argv"]
+    assert environment == expected["actual_source_environment"] and len(environment) == 11
+    assert argv.count("--") == 1
+    assert argv.count(f"link-arg=-Wl,-Map=/receipts/{mode}.map") == 1
+    assert argv.count("--release") == (1 if mode == "release" else 0)
+    entries = wrapper.container_environment("ignored-for-explicit-environment", environment)
+    assert dict(item.split("=", 1) for item in entries) == environment
+    assert len(entries) == len(set(entries)) == 11
+    # Evaluate the exact builder assignment, replacing only the container-prefix renderer.
+    tree = ast.parse(Path(preparation.__file__).read_bytes())
+    build = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "build")
+    assignment = next(
+        n.value
+        for n in build.body
+        if isinstance(n, ast.Assign)
+        and isinstance(n.targets[0], ast.Name)
+        and n.targets[0].id == "command"
+    )
+    seen = []
+
+    def prefix(*args: Any, **kwargs: Any) -> list[str]:
+        seen.append((args, kwargs))
+        return ["synthetic-container-prefix"]
+
+    command = eval(
+        compile(ast.Expression(assignment), "<actual-builder-assignment>", "eval"),
+        {
+            "c": SimpleNamespace(docker=prefix),
+            "out": tmp_path,
+            "mode": mode,
+            "argv": argv,
+            "environment": environment,
+        },
+    )
+    assert command == ["synthetic-container-prefix", *expected["actual_source_argv"]]
+    assert seen == [
+        ((tmp_path, mode, mode + "-build"), {"environment": expected["actual_source_environment"]})
+    ]
+    configure(plan, mode, modes)
+    monitor.verify_plan(plan)
+    outer = monitor.command(plan, tmp_path / "not-launched")
+    assert outer[-len(argv) :] == argv
+    start = outer.index("-i") + 1
+    assert dict(item.split("=", 1) for item in outer[start : start + 11]) == environment
+
+
+ATTACKS = [
+    "omit-" + key
+    for key in (
+        "PATH",
+        "CARGO_REGISTRIES_CRATES_IO_PROTOCOL",
+        "RUSTC",
+        "RUSTC_WRAPPER",
+        "RUSTFLAGS",
+        "C2_RUN_TAG",
+    )
+] + [
+    "omit-suffix",
+    "duplicate-suffix",
+    "duplicate-argument",
+    "wrong-mode-tag",
+    "wrong-mode-map",
+    "undeclared-environment",
+]
+
+
+@pytest.mark.parametrize("mode", ["debug", "release"])
+@pytest.mark.parametrize("attack", ATTACKS)
+def test_consistent_declaration_forgery_refused(plan: Any, mode: str, attack: str) -> None:
+    modes = construction_modes(FLAGS)
+    selected = next(row for row in modes if row["mode"] == mode)
+    environment = selected["permitted_environment"]
+    if attack.startswith("omit-") and attack != "omit-suffix":
+        del environment[attack.removeprefix("omit-")]
+    elif attack == "omit-suffix":
+        del selected["cargo_args"][-3:]
+    elif attack == "duplicate-suffix":
+        selected["cargo_args"] += selected["cargo_args"][-3:]
+    elif attack == "duplicate-argument":
+        selected["cargo_args"].insert(1, "--locked")
+    elif attack == "wrong-mode-tag":
+        environment["C2_RUN_TAG"] = ("release" if mode == "debug" else "debug") + "-build"
+    elif attack == "wrong-mode-map":
+        selected["cargo_args"][-1] = (
+            "link-arg=-Wl,-Map=/receipts/" + ("release" if mode == "debug" else "debug") + ".map"
+        )
+    else:
+        environment["UNDECLARED"] = "synthetic"
+    with pytest.raises(ValueError, match="exact production construction specification"):
+        parse_component_build_inputs(synthetic_build(modes))
+    # Reseal all matching claims so an unrelated hash/equality mismatch cannot mask the law.
+    configure(plan, mode, modes)
+    with pytest.raises(ValueError, match="exact production construction specification"):
+        monitor.verify_plan(plan)
+
+
+@pytest.mark.parametrize("field", ["argv", "environment", "version"])
+def test_recipe_equality_not_relaxed(plan: Any, field: str) -> None:
+    configure(plan, "debug", construction_modes(FLAGS))
+    if field == "argv":
+        plan["child_argv"].append("--locked")
+        message = "exact construction argv"
+    elif field == "environment":
+        plan["environment"] = dict(plan["environment"], UNDECLARED="1")
+        put_input(plan, "environment", plan["environment"])
+        message = "frozen clean environment"
+    else:
+        recipe = json.loads(Path(plan["inputs"]["construction_recipe"]["path"]).read_bytes())
+        recipe["format"] = "component-capture-recipe/1"
+        put_input(plan, "construction_recipe", recipe)
+        message = "recipe/BuildInputs version join"
+    with pytest.raises(ValueError, match=message):
+        monitor.verify_plan(plan)
+
+
+def test_historical_v2_serialization_and_production_refusal() -> None:
+    value = synthetic_build(construction_modes(FLAGS))
+    value["format"] = "uarch-component-build-inputs/2"
+    value["permitted_environment"] = {"LC_ALL": "C"}
+    for mode in value["mode_configs"]:
+        del mode["permitted_environment"]
+        del mode["cargo_args"][-3:]
+    legacy = ComponentBuildInputs.model_validate(copy.deepcopy(value))
+    parsed = parse_component_build_inputs(value)
+    assert type(parsed) is ComponentBuildInputs
+    assert parsed.model_dump_json() == legacy.model_dump_json()
+    assert content_hash(parsed) == content_hash(legacy)
+    with pytest.raises(ValueError):
+        preparation.production_invocation(parsed, "debug")  # type: ignore[arg-type]
+
+
+def test_recipe_is_derived_from_exact_versioned_input_bytes() -> None:
+    value = synthetic_build(construction_modes(FLAGS))
+    raw = canonical_json(value).encode()
+    recipe = preparation.construction_recipe(raw)
+    assert recipe["format"] == "component-capture-recipe/2"
+    assert recipe["source_commit"] == value["source_commit"]
+    assert recipe["build_inputs_byte_hash"] == sha256(raw)
+    assert recipe["preparation_source"] == value["source_files"][0]
+    assert recipe["generated_identity_output_paths"] == value["generated_identity_output_paths"]
+    assert "permitted_environment" not in recipe
+    for mode in recipe["mode_configs"]:
+        expected = literal(mode["mode"])
+        assert [CARGO, *mode["cargo_args"]] == expected["actual_source_argv"]
+        assert mode["permitted_environment"] == expected["actual_source_environment"]
+    # Byte hash, not parsed-object hash: whitespace is part of the frozen recipe join.
+    other = json.dumps(value, indent=2).encode()
+    assert preparation.construction_recipe(other)["build_inputs_byte_hash"] == sha256(other)
+    assert sha256(other) != recipe["build_inputs_byte_hash"]
+
+
+def test_recipe_requires_actual_preparation_inventory_entry() -> None:
+    value = synthetic_build(construction_modes(FLAGS))
+    value["source_files"][0]["path"] = "synthetic-other.py"
+    value["model_source_paths"] = ["synthetic-other.py"]
+    with pytest.raises(ValueError, match="exact preparation source required"):
+        preparation.construction_recipe(canonical_json(value).encode())
+
+
+@pytest.mark.parametrize("mode", ["debug", "release"])
+def test_split_stream_join_preserves_construction_and_refuses_loss(
+    plan: Any, tmp_path: Path, mode: str
+) -> None:
+    configure(plan, mode, construction_modes(FLAGS))
+    root, observed = diagnostic_fixtures.fixture(tmp_path / "synthetic-records", mode)
+    # Both raw trace exec records are rewritten to the actual declared argv. This is
+    # labelled synthetic text, not a run of the declared Cargo command.
+    trace = root / f"traces/{mode}.trace.100"
+    text = trace.read_text()
+    for old, new in (
+        (
+            diagnostic.wrapped_child(mode, observed["child_argv"]),
+            diagnostic.wrapped_child(mode, plan["child_argv"]),
+        ),
+        (observed["child_argv"], plan["child_argv"]),
+    ):
+        text = text.replace(diagnostic_fixtures.exec_line(old), diagnostic_fixtures.exec_line(new))
+    trace.write_text(text)
+    # Exact synthetic classification is confined to this fixture, never a real build policy.
+    plan["inputs"].update(observed["inputs"])
+    monitor.verify_plan(plan)
+    argv = monitor.command(plan, tmp_path / "not-launched")
+    child = diagnostic.wrapped_child(mode, plan["child_argv"])
+    assert argv[-len(child) :] == child
+    assert child[3] == "capture-child" and child[4:] == literal(mode)["actual_source_argv"]
+    assert (
+        child[2]
+        == f'set -C; exec 1>/receipts/{mode}.child.stdout 2>/receipts/{mode}.child.stderr; exec "$@"'
+    )
+    value = monitor.analyze(root, plan, 0)
+    assert value["diagnostics_accepted"], value
+    assert not value["read_audit_complete"] and value["authority"] is None
+    (root / "container/stderr").write_bytes(b"strace: records lost\n")
+    value = monitor.analyze(root, plan, 0)
+    assert not value["diagnostics_accepted"]
+    assert value["errors"] == ["tracer/bootstrap diagnostics or mixed output"]
+    assert (root / "container/stderr").read_bytes() == b"strace: records lost\n"

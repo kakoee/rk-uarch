@@ -1,0 +1,57 @@
+UP037 [*] Remove quotes from type annotation
+  --> src/rkuarch/engines/native/component_construction.py:59:24
+   |
+58 |     @model_validator(mode="after")
+59 |     def exact(self) -> "ConstructionMode":
+   |                        ^^^^^^^^^^^^^^^^^^
+60 |         if self.model_dump(mode="json") != mode_spec(self.mode):
+61 |             raise ValueError("exact production construction specification required")
+   |
+help: Remove quotes
+   |
+58 |     @model_validator(mode="after")
+   -     def exact(self) -> "ConstructionMode":
+59 +     def exact(self) -> ConstructionMode:
+60 |         if self.model_dump(mode="json") != mode_spec(self.mode):
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> validation/component/capture_monitor.py:7:1
+   |
+ 5 |   """
+ 6 |
+ 7 | / from __future__ import annotations
+ 8 | |
+ 9 | | import hashlib
+10 | | import json
+11 | | import multiprocessing
+12 | | import re
+13 | | import runpy
+14 | | import time
+15 | | from pathlib import Path
+16 | | from typing import Any
+17 | |
+18 | | from uarch_contract.hashing import canonical_json, sha256
+19 | |
+20 | | from rkuarch.engines.native.component_construction import invocation
+21 | |
+22 | | from native.tools import component_container_guard as guardian
+23 | | from validation.component.checks import need
+24 | | from validation.component.ordinary_eof_campaign import cleanup_owned
+25 | | from validation.component.runtime_campaign import helpers
+   | |_________________________________________________________^
+26 |
+27 |   ROOT = Path(__file__).resolve().parents[2]
+   |
+help: Organize imports
+   |
+19 |
+   - from rkuarch.engines.native.component_construction import invocation
+   -
+20 | from native.tools import component_container_guard as guardian
+21 + from rkuarch.engines.native.component_construction import invocation
+22 | from validation.component.checks import need
+   |
+
+Found 2 errors.
+[*] 2 fixable with the `--fix` option.

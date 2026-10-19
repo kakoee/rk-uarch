@@ -1,0 +1,21 @@
+F                                                                        [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 0, "sample": {}}
+
+=================================== FAILURES ===================================
+____________ test_startup_project_loop_includes_bound_docs_helpers _____________
+
+    def test_startup_project_loop_includes_bound_docs_helpers() -> None:
+        paths = {str(p.relative_to(ROOT)) for p in project_rows()}
+>       assert set(HELPERS) <= paths, sorted(set(HELPERS) - paths)
+E       AssertionError: ['docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py', 'docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py', 'docs/reviews/U4-B-K2-parallel-first-use-v1/resource_limits.py']
+E       assert {'docs/review...ce_limits.py'} <= {'contract/ua...rors.py', ...}
+E         
+E         Extra items in the left set:
+E         'docs/reviews/U4-B-K2-parallel-first-use-v1/parallel_core.py'
+E         'docs/reviews/U4-B-K2-parallel-first-use-v1/resource_limits.py'
+E         'docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py'
+
+docs/reviews/U4-A-construction-declarations-final-v1/probes/test_startup_inventory.py:35: AssertionError
+=========================== short test summary info ============================
+FAILED docs/reviews/U4-A-construction-declarations-final-v1/probes/test_startup_inventory.py::test_startup_project_loop_includes_bound_docs_helpers
+1 failed in 0.11s

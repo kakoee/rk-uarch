@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "cargo_args": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Cargo Args",
+      "type": "array"
+    },
+    "mode": {
+      "enum": [
+        "debug",
+        "release"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "permitted_environment": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Permitted Environment",
+      "type": "object"
+    },
+    "rustflags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rustflags",
+      "type": "array"
+    }
+  },
+  "required": [
+    "mode",
+    "cargo_args",
+    "rustflags",
+    "permitted_environment"
+  ],
+  "title": "ConstructionMode",
+  "type": "object"
+}

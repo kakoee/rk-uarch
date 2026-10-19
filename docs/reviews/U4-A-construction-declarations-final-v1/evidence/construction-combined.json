@@ -1,0 +1,176 @@
+{
+  "build_or_capture_executed": false,
+  "format": "A-construction-source-rendering/1",
+  "methods_not_called": [
+    "freeze",
+    "prepare",
+    "build",
+    "docker",
+    "command",
+    "run_capture"
+  ],
+  "modes": [
+    {
+      "actual_builder_assignment": [
+        "synthetic-container-prefix",
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "rustc",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--bin",
+        "uarch-engine",
+        "-vv",
+        "--message-format=json",
+        "--",
+        "-C",
+        "link-arg=-Wl,-Map=/receipts/debug.map"
+      ],
+      "declaration": {
+        "cargo_args": [
+          "rustc",
+          "--offline",
+          "--locked",
+          "-p",
+          "uarch-engine",
+          "--bin",
+          "uarch-engine",
+          "-vv",
+          "--message-format=json",
+          "--",
+          "-C",
+          "link-arg=-Wl,-Map=/receipts/debug.map"
+        ],
+        "mode": "debug",
+        "permitted_environment": {
+          "C2_RUN_TAG": "debug-build",
+          "CARGO_HOME": "/cargo-home",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+          "CARGO_TARGET_DIR": "/target",
+          "LC_ALL": "C",
+          "PATH": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+          "RUSTC": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+          "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
+          "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh",
+          "RUSTUP_AUTO_INSTALL": "0"
+        },
+        "rustflags": [
+          "-C",
+          "debuginfo=1",
+          "-C",
+          "linker=/controls/linker.sh"
+        ]
+      },
+      "exact_environment_passed_to_prefix": [
+        {
+          "environment": {
+            "C2_RUN_TAG": "debug-build",
+            "CARGO_HOME": "/cargo-home",
+            "CARGO_NET_OFFLINE": "true",
+            "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+            "CARGO_TARGET_DIR": "/target",
+            "LC_ALL": "C",
+            "PATH": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+            "RUSTC": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+            "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
+            "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh",
+            "RUSTUP_AUTO_INSTALL": "0"
+          },
+          "mode": "debug",
+          "tag": "debug-build"
+        }
+      ],
+      "mode": "debug",
+      "recipe_join_equal": true
+    },
+    {
+      "actual_builder_assignment": [
+        "synthetic-container-prefix",
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "rustc",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--bin",
+        "uarch-engine",
+        "-vv",
+        "--message-format=json",
+        "--release",
+        "--",
+        "-C",
+        "link-arg=-Wl,-Map=/receipts/release.map"
+      ],
+      "declaration": {
+        "cargo_args": [
+          "rustc",
+          "--offline",
+          "--locked",
+          "-p",
+          "uarch-engine",
+          "--bin",
+          "uarch-engine",
+          "-vv",
+          "--message-format=json",
+          "--release",
+          "--",
+          "-C",
+          "link-arg=-Wl,-Map=/receipts/release.map"
+        ],
+        "mode": "release",
+        "permitted_environment": {
+          "C2_RUN_TAG": "release-build",
+          "CARGO_HOME": "/cargo-home",
+          "CARGO_NET_OFFLINE": "true",
+          "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+          "CARGO_TARGET_DIR": "/target",
+          "LC_ALL": "C",
+          "PATH": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+          "RUSTC": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+          "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
+          "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh",
+          "RUSTUP_AUTO_INSTALL": "0"
+        },
+        "rustflags": [
+          "-C",
+          "debuginfo=1",
+          "-C",
+          "linker=/controls/linker.sh"
+        ]
+      },
+      "exact_environment_passed_to_prefix": [
+        {
+          "environment": {
+            "C2_RUN_TAG": "release-build",
+            "CARGO_HOME": "/cargo-home",
+            "CARGO_NET_OFFLINE": "true",
+            "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+            "CARGO_TARGET_DIR": "/target",
+            "LC_ALL": "C",
+            "PATH": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+            "RUSTC": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+            "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
+            "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh",
+            "RUSTUP_AUTO_INSTALL": "0"
+          },
+          "mode": "release",
+          "tag": "release-build"
+        }
+      ],
+      "mode": "release",
+      "recipe_join_equal": true
+    }
+  ],
+  "postimages": {
+    "native/tools/component_candidate.py": "04327f365aa9f3d54556f73d89715ea33bb18c5e08991c982c15623e9bc94b39",
+    "native/tools/component_runtime_candidate.py": "24271b51ffe564b01455059ca49e1831fe3576c99764b0f276755f1e97a61d58",
+    "src/rkuarch/engines/native/component_construction.py": "99e287d2e0b48e85024c7f0169d25b908b99fe37fc7d2dbd9221bafbacb53b6a",
+    "src/rkuarch/engines/native/component_host.py": "28709c19e7f7aa518e288c9bd8a78e3105f1e4e26328391c4c67d0b6f8295fa3",
+    "src/rkuarch/engines/native/component_records.py": "ee0e8b0d4a79940e23f512018f42a5c834274c2c8e68e07591eb8068441bd047",
+    "validation/component/capture_monitor.py": "fededdb91e2e37123a29b8015e75a91b70abb2802fb020ab29bc772280f5d359"
+  },
+  "real_BuildInputs_or_recipe_generated": false,
+  "synthetic": true
+}

@@ -1,0 +1,922 @@
+--- a/docs/decisions/U0011-the-native-engine-core.md
++++ b/docs/decisions/U0011-the-native-engine-core.md
+@@ -916,3 +916,49 @@
+ new wrapper/selection requirements are prospective B/coordinator-owned records. No old
+ K2 HostRecord, selector, placement or runtime authority authorizes new component identities.
+ Human installation, genuine L1, U0024 limits and later public authorization remain separate.
++
++
++## Prospective component ordinary-image activation amendment
++
++This addition requires exact separate human installation. It creates no execution
++permission. Historical component decisions, /2 consumers, selections and receipts
++retain their original subjects; K2 authority cannot authorize a component identity.
++
++The component /3 production route shall use the accepted digest-pinned native image
++and ordinary debug/release executables with one admitted saved stdin stream and EOF.
++Private cfg(test) witnesses shall not supply ordinary-process entry counts. Consume
++success through structural validation, the matching /3 checker and independently
++frozen literals/input/full-engine anchors. Retain bounded attempts and complete
++framing, streams, status, slot, resource and exact-created-ID cleanup evidence before
++interpretation. Reopen and independently consume all six bound initial receipts
++before replay; preserve failed attempts and the historical 124/1368 schedule.
++The 120/1344 proposal remains unapproved. Public acceptance requires a separately
++reviewed ordinary-EOF campaign contract and implementation, not private acceptance/1.
++
++The Python bootstrap (including typing's compatibility pseudo-modules), interpreter,
++stdlib/cache candidates, extensions, loader/DSOs and configuration require external
++immutable bindings. An externally supplied manifest digest is not self-authorizing;
++private read-only copies and a benign import launch do not establish immutable
++placement, exhaustive loaded-code assurance or A-F3 closure. The stopped real-D11
++startup-substitution/defense-revert activity remains deferred and must not be retried,
++transferred or replaced with an ordinary positive claim. Required unavailable evidence
++continues to block public first use unless separately resolved by the original reviewer
++and exact human decisions; this amendment supplies no waiver.
++
++D3 inventory/2, record/2, selector/2 and exact envelope/provenance laws remain separate.
++The prospective v6 adapter uses the same ordinary EOF transport but leaves entry/site
++observations unobserved. An expected zero-entry value, exact message, null pointer or
++source hash does not establish universal guard reach. D3 installation, review and
++execution permission require their own exact subject and decision.
++
++Before activation source freeze, reconcile A/B adapter, consumer, preparation,
++validation-test, startup and any installed proposal postimages. Then bind actual
++BuildInputs, generated identity, accepted tools/lock/cache/features and a reviewed
++full-ID capture ledger/monitor. No historical binary inherits later source identities.
++Capture/build execution, root placement, immutable public environment, genuine
++selector/HostRecord/profile authority and public campaign are separate gates. Missing
++construction reads and the three historical candidate-03 gaps remain unresolved.
++The /2 same-engine/same-instant acquired-release first-use restriction applies in all
++directions, including write/write and unclassified cases; no /2 repair or waiver is
++made. Genuine human L1 workings and U0024 remain unchanged; no qualification or U4
++closure follows.
+--- a/native/tools/component_candidate.py
++++ b/native/tools/component_candidate.py
+@@ -75,7 +75,9 @@
+     return run.returncode
+ 
+ 
+-def docker(scratch: Path, mode: str, tag: str) -> list[str]:
++def docker(
++    scratch: Path, mode: str, tag: str, *, environment: dict[str, str] | None = None
++) -> list[str]:
+     receipts = scratch / "receipts" / mode / tag
+     receipts.mkdir(parents=True, exist_ok=True)
+     args = [
+@@ -112,11 +114,23 @@
+     ]:
+         src.mkdir(parents=True, exist_ok=True)
+         args += ["--mount", f"type=bind,src={src},dst={dst}" + (",readonly" if ro else "")]
+-    return args + [
+-        "--entrypoint",
+-        "/usr/bin/env",
+-        IMAGE,
+-        "-i",
++    return (
++        args
++        + ["--entrypoint", "/usr/bin/env", IMAGE, "-i"]
++        + container_environment(tag, environment)
++    )
++
++
++def container_environment(tag: str, environment: dict[str, str] | None = None) -> list[str]:
++    """Exact replacement for declared production inputs; historical defaults stay unchanged."""
++    if environment is not None:
++        if not environment or any(
++            not key or "=" in key or "\x00" in key or "\x00" in value
++            for key, value in environment.items()
++        ):
++            raise ValueError("explicit bounded environment strings required")
++        return [key + "=" + value for key, value in sorted(environment.items())]
++    return [
+         "PATH=" + BIN + ":/usr/local/cargo/bin:/usr/bin:/bin",
+         "CARGO_HOME=/cargo-home",
+         "CARGO_NET_OFFLINE=true",
+--- a/native/tools/component_runtime_candidate.py
++++ b/native/tools/component_runtime_candidate.py
+@@ -19,7 +19,12 @@
+ 
+ from uarch_contract.hashing import canonical_json, content_hash, sha256
+ 
+-from rkuarch.engines.native.component_records import ComponentBuildInputs, ComponentBuildTrust
++from rkuarch.engines.native.component_construction import construction_modes, invocation
++from rkuarch.engines.native.component_records import (
++    ComponentBuildInputsV3,
++    ComponentBuildTrust,
++    parse_component_build_inputs,
++)
+ from rkuarch.engines.native.records import ToolInputs
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+@@ -105,6 +110,7 @@
+             and "generated" not in p.parts
+         )
+     paths += [source / name for name in ("pyproject.toml", "uv.lock")]
++    paths.append(source / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
+     paths += [
+         source / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
+         for name in ("parallel_core.py", "resource_limits.py")
+@@ -118,9 +124,9 @@
+         for p in sorted(set(paths))
+     ]
+     model = [x for x in inventory if x["path"].startswith("native/crates/uarch-engine/src/")]
+-    build = ComponentBuildInputs.model_validate(
++    build = ComponentBuildInputsV3.model_validate(
+         {
+-            "format": "uarch-component-build-inputs/2",
++            "format": "uarch-component-build-inputs/3",
+             "source_commit": commit,
+             "source_files": inventory,
+             "trust_hash": content_hash(trust),
+@@ -129,36 +135,15 @@
+             "tool_inputs_file": binding(source, tool_path),
+             "model_source_paths": [x["path"] for x in model],
+             "model_inputs_hash": content_hash(model),
+-            "mode_configs": [
+-                {
+-                    "mode": mode,
+-                    "cargo_args": [
+-                        "rustc",
+-                        "--offline",
+-                        "--locked",
+-                        "-p",
+-                        "uarch-engine",
+-                        "--bin",
+-                        "uarch-engine",
+-                        "-vv",
+-                        "--message-format=json",
+-                    ]
+-                    + (["--release"] if mode == "release" else []),
+-                    "rustflags": tools.flags,
+-                }
+-                for mode in ("debug", "release")
+-            ],
++            "mode_configs": construction_modes(tools.flags),
+             "generated_identity_output_paths": ["native/crates/uarch-engine/generated/identity.rs"],
+-            "permitted_environment": {
+-                "CARGO_HOME": "/cargo-home",
+-                "CARGO_NET_OFFLINE": "true",
+-                "CARGO_TARGET_DIR": "/target",
+-                "RUSTUP_AUTO_INSTALL": "0",
+-                "LC_ALL": "C",
+-            },
+         }
+     )
+     write(out / "BuildInputs.json", build)
++    write(
++        out / "construction-recipe.json",
++        construction_recipe((out / "BuildInputs.json").read_bytes()),
++    )
+     engine = {
+         "name": "native",
+         "version": "native-stage/1",
+@@ -284,8 +269,8 @@
+ 
+ def verify(out: Path) -> None:
+     source = out / "source"
+-    build = ComponentBuildInputs.model_validate_json(
+-        (source / OUTPUT / "BuildInputs.json").read_bytes()
++    build = parse_component_build_inputs(
++        json.loads((source / OUTPUT / "BuildInputs.json").read_bytes())
+     )
+     for f in build.source_files:
+         assert sha256((source / f.path).read_bytes()) == f.byte_hash, f.path
+@@ -304,6 +289,34 @@
+     )
+ 
+ 
++def construction_recipe(build_input_bytes: bytes) -> dict:
++    """Bind exact /3 input bytes without inventing values or executing a build."""
++    build = ComponentBuildInputsV3.model_validate_json(build_input_bytes)
++    sources = [
++        value
++        for value in build.source_files
++        if value.path == "native/tools/component_runtime_candidate.py"
++    ]
++    if len(sources) != 1:
++        raise ValueError("exact preparation source required for construction recipe")
++    return {
++        "format": "component-capture-recipe/2",
++        "source_commit": build.source_commit,
++        "build_inputs_byte_hash": sha256(build_input_bytes),
++        "preparation_source": sources[0].model_dump(mode="json"),
++        "mode_configs": [value.model_dump(mode="json") for value in build.mode_configs],
++        "generated_identity_output_paths": list(build.generated_identity_output_paths),
++    }
++
++
++def production_invocation(
++    inputs: ComponentBuildInputsV3, mode: str
++) -> tuple[list[str], dict[str, str]]:
++    """Pure rendering of the exact declared production command, with no appended args."""
++    checked = ComponentBuildInputsV3.model_validate(inputs.model_dump(mode="json"))
++    return invocation([value.model_dump(mode="json") for value in checked.mode_configs], mode)
++
++
+ def build(out: Path, mode: str) -> None:
+     """Actual construction recipe; invoke the frozen export's copy of this tool."""
+     source = out / "source"
+@@ -311,17 +324,11 @@
+         raise ValueError("build must use the exact frozen export recipe")
+     verify(out)
+     c = wrapper(source)
+-    inputs = ComponentBuildInputs.model_validate_json(
++    inputs = ComponentBuildInputsV3.model_validate_json(
+         (source / OUTPUT / "BuildInputs.json").read_bytes()
+     )
+-    config = next(x for x in inputs.mode_configs if x.mode == mode)
+-    command = c.docker(out, mode, mode + "-build") + [
+-        c.BIN + "cargo",
+-        *config.cargo_args,
+-        "--",
+-        "-C",
+-        "link-arg=-Wl,-Map=/receipts/" + mode + ".map",
+-    ]
++    argv, environment = production_invocation(inputs, mode)
++    command = c.docker(out, mode, mode + "-build", environment=environment) + argv
+     if c.command(out, mode + "-build", command):
+         raise ValueError("private production executable construction failed")
+     test = [
+@@ -356,6 +363,7 @@
+         root / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
+         for name in ("parallel_core.py", "resource_limits.py")
+     )
++    files.append(root / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
+     external = set()
+     stdlib = Path(sysconfig.get_path("stdlib"))
+     external.update(p.resolve() for p in stdlib.rglob("*.py") if "site-packages" not in p.parts)
+@@ -383,8 +391,8 @@
+         "independent_binding": binding(
+             root,
+             root
+-            / "docs/reviews/U4-A-component-activation-readiness-v1"
+-            / "prospective-consumer-bindings.json",
++            / "docs/reviews/U4-A-construction-declarations-final-v1"
++            / "activation-consumer-bindings.json",
+         ),
+         "observation_contract": binding(
+             observation_root or root,
+--- a/native/tools/component_startup_inventory.py
++++ b/native/tools/component_startup_inventory.py
+@@ -86,6 +86,21 @@
+     return None
+ 
+ 
++def project_files(source: Path) -> list[Path]:
++    """Exact project import inventory, including hash-checked runpy helpers."""
++    files = {
++        p
++        for folder in ("src/rkuarch", "contract/uarch_contract", "validation", "native/tools")
++        for p in (source / folder).rglob("*.py")
++    }
++    files.update(
++        source / "docs/reviews/U4-B-K2-parallel-first-use-v1" / name
++        for name in ("parallel_core.py", "resource_limits.py")
++    )
++    files.add(source / "docs/reviews/U4-B-K2-construction-audit-v1/trace_canary.py")
++    return sorted(files)
++
++
+ def construct(source: Path, payload_path: Path, expected_payload: str, output: Path) -> dict:
+     if digest(payload_path) != expected_payload.removeprefix("sha256:"):
+         raise ValueError("inherited payload digest")
+@@ -98,9 +113,8 @@
+     snapshot = output / "snapshot"
+     rows = []
+     project = snapshot / "project"
+-    for folder in ("src/rkuarch", "contract/uarch_contract", "validation", "native/tools"):
+-        for file in sorted((source / folder).rglob("*.py")):
+-            rows.append(copy_bound(file, project / file.relative_to(source), digest(file)))
++    for file in project_files(source):
++        rows.append(copy_bound(file, project / file.relative_to(source), digest(file)))
+     external = snapshot / "external"
+     for binding in consumer["external_files"]:
+         origin = Path("/") / binding["path"]
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_construction.py
+@@ -0,0 +1,82 @@
++"""Explicit production construction specification; pure data, never execution authority."""
++
++from __future__ import annotations
++
++from typing import Any, Literal
++
++from pydantic import model_validator
++from uarch_contract.common import FrozenModel
++
++BIN = "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/"
++CARGO = BIN + "cargo"
++FLAGS = ("-C", "debuginfo=1", "-C", "linker=/controls/linker.sh")
++
++
++def mode_spec(mode: str) -> dict[str, Any]:
++    if mode not in ("debug", "release"):
++        raise ValueError("explicit production construction mode")
++    return {
++        "mode": mode,
++        "cargo_args": [
++            "rustc",
++            "--offline",
++            "--locked",
++            "-p",
++            "uarch-engine",
++            "--bin",
++            "uarch-engine",
++            "-vv",
++            "--message-format=json",
++            *(["--release"] if mode == "release" else []),
++            "--",
++            "-C",
++            f"link-arg=-Wl,-Map=/receipts/{mode}.map",
++        ],
++        "rustflags": list(FLAGS),
++        "permitted_environment": {
++            "PATH": BIN + ":/usr/local/cargo/bin:/usr/bin:/bin",
++            "CARGO_HOME": "/cargo-home",
++            "CARGO_NET_OFFLINE": "true",
++            "CARGO_TARGET_DIR": "/target",
++            "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
++            "RUSTUP_AUTO_INSTALL": "0",
++            "LC_ALL": "C",
++            "RUSTC": BIN + "rustc",
++            "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
++            "RUSTFLAGS": " ".join(FLAGS),
++            "C2_RUN_TAG": mode + "-build",
++        },
++    }
++
++
++class ConstructionMode(FrozenModel):
++    mode: Literal["debug", "release"]
++    cargo_args: tuple[str, ...]
++    rustflags: tuple[str, ...]
++    permitted_environment: dict[str, str]
++
++    @model_validator(mode="after")
++    def exact(self) -> ConstructionMode:
++        if self.model_dump(mode="json") != mode_spec(self.mode):
++            raise ValueError("exact production construction specification required")
++        return self
++
++
++def construction_modes(flags: tuple[str, ...] | list[str]) -> list[dict[str, Any]]:
++    if tuple(flags) != FLAGS:
++        raise ValueError("accepted construction flags required")
++    return [mode_spec(mode) for mode in ("debug", "release")]
++
++
++def selected_mode(modes: list[dict[str, Any]], mode: str) -> ConstructionMode:
++    parsed = [ConstructionMode.model_validate(value) for value in modes]
++    if [value.mode for value in parsed] != ["debug", "release"]:
++        raise ValueError("exact ordered debug/release construction modes required")
++    if mode not in ("debug", "release"):
++        raise ValueError("explicit production construction mode")
++    return next(value for value in parsed if value.mode == mode)
++
++
++def invocation(modes: list[dict[str, Any]], mode: str) -> tuple[list[str], dict[str, str]]:
++    value = selected_mode(modes, mode)
++    return [CARGO, *value.cargo_args], dict(value.permitted_environment)
+--- a/src/rkuarch/engines/native/component_host.py
++++ b/src/rkuarch/engines/native/component_host.py
+@@ -26,12 +26,12 @@
+ from rkuarch.workload.mapped import loads_component_job
+ 
+ from .component_records import (
+-    ComponentBuildInputs,
+     ComponentBuildReceipt,
+     ComponentBuildTrust,
+     ComponentHostRecord,
+     ComponentHostSelector,
+     ComponentPayload,
++    parse_component_build_inputs,
+ )
+ from .host import _open, _read, _require
+ from .records import FileBinding, ToolInputs
+@@ -221,7 +221,7 @@
+         return cls.model_validate(strict_json_loads(read(file)))
+ 
+     payload = record(ComponentPayload, binding)
+-    build = record(ComponentBuildInputs, payload.build_inputs)
++    build = parse_component_build_inputs(strict_json_loads(read(payload.build_inputs)))
+     trust = record(ComponentBuildTrust, build.trust_file)
+     tools = record(ToolInputs, build.tool_inputs_file)
+     _require(
+--- /dev/null
++++ b/src/rkuarch/engines/native/component_negative.py
+@@ -0,0 +1,257 @@
++"""UNAPPLIED v6 ordinary-image EOF successor. No native-site proof is inferred.
++
++Finite refusal-only transport. Requires a separately installed D3 decision.
++
++The public API accepts only a case ID. Neither raw stdin nor replacement profiles,
++expected errors, executable paths or a bypass flag are supplied by a caller.
++"""
++
++from __future__ import annotations
++
++import os
++import time
++from dataclasses import dataclass
++from pathlib import Path
++from threading import Lock
++from typing import Annotated, Any, Literal
++
++from pydantic import Field
++from uarch_contract.common import FrozenModel, NonEmpty
++from uarch_contract.hashing import sha256, strict_json_loads
++from uarch_contract.mapped import NativeTestProfile
++
++from rkuarch.engines.native.component_host import _prepare_payload, _PreparedComponent
++from rkuarch.engines.native.component_runner import require_negative_envelope
++from rkuarch.engines.native.host import _open, _read, _require
++from rkuarch.engines.native.records import FileBinding
++from rkuarch.engines.native.component_image import exchange_image, _save
++
++_SELECTOR = Path("/etc/rkuarch/component-negative-selector.json")
++_TOKEN = object()
++
++
++class ExpectedEnvelope(FrozenModel):
++    code: NonEmpty
++    message: NonEmpty
++    pointer: str | None
++
++
++class NegativeCase(FrozenModel):
++    case_id: NonEmpty
++    raw: FileBinding
++    profile: FileBinding
++    expected_envelope: ExpectedEnvelope
++    expectation_provenance: FileBinding
++    layer: Literal["profile", "resource-preflight"]
++
++
++class NegativeInventory(FrozenModel):
++    format: Literal["uarch-component-negative-inventory/2"]
++    cases: Annotated[tuple[NegativeCase, ...], Field(min_length=1)]
++
++
++class NegativeRecord(FrozenModel):
++    format: Literal["uarch-component-negative-record/2"]
++    runtime_payload: FileBinding
++    inventory: FileBinding
++    decision: FileBinding
++    review: FileBinding
++
++
++class NegativeSelector(FrozenModel):
++    format: Literal["uarch-component-negative-selector/2"]
++    repository: NonEmpty
++    record: FileBinding
++
++
++def _selected_raw(prepared: _PreparedComponent, case: NegativeCase) -> bytes:
++    raw = _read(prepared.root, case.raw)
++    _require(len(raw) <= prepared.payload.budget.stdin_bytes, "D3 stdin limit")
++    value = strict_json_loads(raw)
++    profile = NativeTestProfile.model_validate_json(_read(prepared.root, case.profile))
++    _require(value["engine"] == prepared.payload.engine.model_dump(mode="json"), "D3 engine join")
++    _require(
++        profile.format == "uarch-native-test-profile/2"
++        and value["profile"] == profile.model_dump(mode="json")
++        and value["admission"]["profile_hash"] == profile.profile_hash
++        and value["admission"]["case_id"] == case.case_id
++        and any(e.case_id == case.case_id for e in profile.entries),
++        "D3 independent profile join",
++    )
++    _require(
++        value["registry"] == strict_json_loads(_read(prepared.root, prepared.payload.registry)),
++        "D3 independent registry join",
++    )
++    provenance = strict_json_loads(_read(prepared.root, case.expectation_provenance))
++    _require(
++        provenance["case_id"] == case.case_id
++        and provenance["input_sha256"] == case.raw.byte_hash.split(":")[1]
++        and provenance["job_hash"] == value["job_hash"]
++        and provenance["engine"] == value["engine"]
++        and provenance["envelope"] == case.expected_envelope.model_dump(mode="json")
++        and provenance["runtime_entries_required"] == 0,
++        "D3 expectation input/envelope binding",
++    )
++    guard = provenance["native_guard_source"]
++    try:
++        guard_bytes = _read(prepared.root, FileBinding(path=guard["path"], byte_hash="sha256:" + guard["sha256"]))
++    except ValueError as error:
++        raise ValueError("D3 expectation guard source") from error
++    _require(
++        sha256(guard_bytes)
++        == "sha256:" + guard["sha256"],
++        "D3 expectation guard source",
++    )
++    # No Python resource-success preflight: the finite independently bound refusal is the test.
++    # This function supplies no native prevalidation flag and computes no delays.
++    return raw
++
++
++def _consume_negative(
++    stdout: bytes, stderr: bytes, status: int, case: NegativeCase
++) -> dict[str, Any]:
++    return require_negative_envelope(
++        stdout, stderr, status, case.expected_envelope.model_dump(mode="json")
++    )
++
++
++@dataclass(frozen=True)
++class _PreparedNegative:
++    component: _PreparedComponent
++    inventory: NegativeInventory
++    checks: tuple[tuple[Path, FileBinding], ...]
++
++    def refresh(self) -> None:
++        self.component.refresh()
++        for root, binding in self.checks:
++            _read(root, binding)
++            with _open(root, binding.path) as fd:
++                _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 records required")
++        for case in self.inventory.cases:
++            _selected_raw(self.component, case)
++            for file in (case.raw, case.profile, case.expectation_provenance):
++                _read(self.component.root, file)
++                with _open(self.component.root, file.path) as fd:
++                    _require(not os.fstat(fd).st_mode & 0o222, "immutable D3 cases required")
++
++
++class NegativeSession:
++    def __init__(self, prepared: _PreparedNegative, *, token: object) -> None:
++        _require(token is _TOKEN, "separate D3 authority required")
++        self._token = token
++        self._prepared = prepared
++        self._remaining = prepared.component.payload.budget.calls
++        self._deadline = time.monotonic() + prepared.component.payload.budget.session_seconds
++        self._lock = Lock()
++
++    def claim(self, case_id: str) -> tuple[_PreparedNegative, NegativeCase]:
++        with self._lock:
++            _require(self._token is _TOKEN, "separate D3 authority required")
++            matches = [c for c in self._prepared.inventory.cases if c.case_id == case_id]
++            _require(len(matches) == 1, "D3 immutable case ID required")
++            _require(
++                self._remaining > 0 and time.monotonic() < self._deadline, "D3 budget exhausted"
++            )
++            self._prepared.refresh()
++            self._remaining -= 1
++            return self._prepared, matches[0]
++
++
++def prepare_negative(*, mode: str) -> NegativeSession:
++    with _open(_SELECTOR.parent, _SELECTOR.name) as fd:
++        st = os.fstat(fd)
++        _require(st.st_uid == 0 and not st.st_mode & 0o022, "protected D3 selector required")
++        with os.fdopen(os.dup(fd), "rb") as stream:
++            raw = stream.read()
++    selector = NegativeSelector.model_validate_json(raw)
++    root = Path(selector.repository)
++    record = NegativeRecord.model_validate_json(_read(root, selector.record))
++    subject = {
++        "runtime_payload_byte_hash": record.runtime_payload.byte_hash,
++        "negative_inventory_byte_hash": record.inventory.byte_hash,
++    }
++    _require(
++        strict_json_loads(_read(root, record.decision))
++        == {
++            "format": "uarch-component-negative-human-decision/2",
++            "accepted_by": "Javid (@jjaffari)",
++            "reply": "yes",
++            "subject": subject,
++        },
++        "exact separate D3 human decision required",
++    )
++    review = strict_json_loads(_read(root, record.review))
++    _require(
++        review
++        == {
++            "format": "uarch-component-negative-review/2",
++            "subject": subject,
++            "read_audit_complete": True,
++            "finite_refusals_current": True,
++        },
++        "exact independent D3 review required",
++    )
++    component = _prepare_payload(root, record.runtime_payload, mode=mode, immutable=True)
++    inventory = NegativeInventory.model_validate_json(_read(root, record.inventory))
++    ids = [c.case_id for c in inventory.cases]
++    _require(ids == sorted(set(ids)), "sorted unique D3 IDs required")
++    checks = tuple(
++        (root, f) for f in (selector.record, record.inventory, record.decision, record.review)
++    )
++    checks += ((_SELECTOR.parent, FileBinding(path=_SELECTOR.name, byte_hash=sha256(raw))),)
++    prepared = _PreparedNegative(component, inventory, checks)
++    prepared.refresh()
++    return NegativeSession(prepared, token=_TOKEN)
++
++
++def _run_negative_image(
++    prepared: _PreparedNegative, case: NegativeCase, evidence_root: Path,
++    *, timeout_s: float, repetition: int,
++) -> dict[str, Any]:
++    _require(type(repetition) is int and 0 <= repetition < 3, "D3 exact repetition")
++    component = prepared.component
++    raw = _selected_raw(component, case)
++    stdout, stderr, status, record = exchange_image(
++        component, raw, evidence_root, timeout_s=timeout_s,
++        slot={"phase": "initial", "mode": component.mode, "repetition": repetition},
++        admitted={"case_id": case.case_id, "raw_input_sha256": sha256(raw).removeprefix("sha256:"),
++                  "engine": component.payload.engine.model_dump(mode="json")})
++    record["slot"] = {"phase": "initial", "mode": component.mode, "repetition": repetition}
++    record["case_id"] = case.case_id
++    record["expected_envelope"] = case.expected_envelope.model_dump(mode="json")
++    record["expectation_provenance"] = case.expectation_provenance.model_dump(mode="json")
++    record["failure_stage"] = "negative-consumer"
++    record["zero_dispatch"] = "unobserved; exact envelope/source expectation is not entry evidence"
++    try:
++        error = _consume_negative(stdout, stderr, status, case)
++        prepared.refresh()
++        record["validation_passed"] = True
++        record["failure_stage"] = None
++        record["error"] = error
++    except Exception as failure:
++        record["validation_error"] = repr(failure)
++        raise
++    finally:
++        _save(evidence_root / "attempt.json", record)
++    return record
++
++
++def run_negative(
++    case_id: str, *, session: NegativeSession, evidence_root: Path, repetition: int = 0
++) -> dict[str, Any]:
++    _require(isinstance(session, NegativeSession), "separate D3 authority required")
++    prepared, case = session.claim(case_id)
++    record = _run_negative_image(
++        prepared, case, evidence_root, timeout_s=session._deadline - time.monotonic(),
++        repetition=repetition)
++    try:
++        _require(time.monotonic() <= session._deadline, "D3 session deadline exhausted")
++    except Exception as error:
++        record.update(
++            validation_passed=False,
++            failure_stage="session-finalization",
++            finalization_error=repr(error),
++        )
++        _save(evidence_root / "attempt.json", record)
++        raise
++    return record
+--- a/src/rkuarch/engines/native/component_records.py
++++ b/src/rkuarch/engines/native/component_records.py
+@@ -1,11 +1,12 @@
+ """Additive component records. Valid shapes and construction pins are never authority."""
+ 
+-from typing import Annotated, Literal
++from typing import Annotated, Any, Literal
+ 
+ from pydantic import Field, model_validator
+ from uarch_contract.common import FrozenModel, Hash, NonEmpty
+ from uarch_contract.mapped import NativeEngineIdentity
+ 
++from .component_construction import ConstructionMode
+ from .records import FileBinding, GitCommit, ModeConfig, SourceInput
+ 
+ IMAGE = "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523"
+@@ -52,6 +53,43 @@
+         if tuple(x.mode for x in self.mode_configs) != ("debug", "release"):
+             raise ValueError("separate debug/release configurations required")
+         return self
++
++
++class ComponentBuildInputsV3(FrozenModel):
++    format: Literal["uarch-component-build-inputs/3"]
++    source_commit: GitCommit
++    source_files: Annotated[tuple[SourceInput, ...], Field(min_length=1)]
++    trust_hash: Hash
++    trust_file: FileBinding
++    tool_inputs_hash: Hash
++    tool_inputs_file: FileBinding
++    model_source_paths: Annotated[tuple[NonEmpty, ...], Field(min_length=1)]
++    model_inputs_hash: Hash
++    mode_configs: tuple[ConstructionMode, ConstructionMode]
++    generated_identity_output_paths: tuple[NonEmpty, ...]
++
++    @model_validator(mode="after")
++    def acyclic(self) -> "ComponentBuildInputsV3":
++        paths = [f.path for f in self.source_files]
++        if paths != sorted(set(paths)) or not set(self.model_source_paths) <= set(paths):
++            raise ValueError("complete sorted unique source/model inventory required")
++        if list(self.model_source_paths) != sorted(set(self.model_source_paths)):
++            raise ValueError("sorted unique model inventory required")
++        if self.generated_identity_output_paths != (
++            "native/crates/uarch-engine/generated/identity.rs",
++        ) or set(self.generated_identity_output_paths) & set(paths):
++            raise ValueError("acyclic explicit generated identity required")
++        if tuple(x.mode for x in self.mode_configs) != ("debug", "release"):
++            raise ValueError("separate debug/release configurations required")
++        return self
++
++
++def parse_component_build_inputs(value: Any) -> ComponentBuildInputs | ComponentBuildInputsV3:
++    if isinstance(value, dict) and value.get("format") == "uarch-component-build-inputs/2":
++        return ComponentBuildInputs.model_validate(value)
++    if isinstance(value, dict) and value.get("format") == "uarch-component-build-inputs/3":
++        return ComponentBuildInputsV3.model_validate(value)
++    raise ValueError("explicit supported component BuildInputs version required")
+ 
+ 
+ class ComponentBuildReceipt(FrozenModel):
+--- a/src/rkuarch/engines/native/component_runner.py
++++ b/src/rkuarch/engines/native/component_runner.py
+@@ -205,14 +205,14 @@
+ 
+ 
+ def run_component(
+-    saved: Path, *, session: ComponentSession
++    saved: Path, *, session: ComponentSession, evidence_root: Path, repetition: int = 0
+ ) -> tuple[MappedEngineResult, dict[str, Any]]:
+-    if not isinstance(session, ComponentSession):
+-        raise ValueError("independent component authority required")
+-    prepared = session.claim()
+-    result = _run_prepared(saved, prepared)
+-    session.check()
+-    return result
++    """Prospective default image route; installation is a later explicit decision."""
++    from .component_image import run_component_image
++
++    return run_component_image(
++        saved, session=session, evidence_root=evidence_root, repetition=repetition
++    )
+ 
+ 
+ def replay_component(saved: Path, output: Path, *, session: ComponentSession) -> MappedEngineResult:
+--- a/validation/component/capture_monitor.py
++++ b/validation/component/capture_monitor.py
+@@ -18,6 +18,7 @@
+ from uarch_contract.hashing import canonical_json, sha256
+ 
+ from native.tools import component_container_guard as guardian
++from rkuarch.engines.native.component_construction import invocation
+ from validation.component.checks import need
+ from validation.component.ordinary_eof_campaign import cleanup_owned
+ from validation.component.runtime_campaign import helpers
+@@ -66,7 +67,8 @@
+ 
+ def verify_plan(plan: dict[str, Any]) -> None:
+     need(
+-        plan["format"] == "component-capture-plan/1" and plan["image"] == IMAGE,
++        plan["format"] in ("component-capture-plan/1", "component-capture-plan/2")
++        and plan["image"] == IMAGE,
+         "frozen capture format/image",
+     )
+     need(
+@@ -84,9 +86,17 @@
+             "environment",
+             "syscall_policy",
+             "construction_recipe",
+-        },
++        }
++        | (
++            {"capture_diagnostic_policy"} if plan["format"] == "component-capture-plan/2" else set()
++        ),
+         "complete frozen capture inputs",
+     )
++    if plan["format"] == "component-capture-plan/2":
++        from validation.component.capture_diagnostics import verify_policy
++
++        verify_policy(plan)
++        need(0 < plan["stream_bytes"] <= 65536, "bounded tracer/bootstrap channels")
+     for item in plan["inputs"].values():
+         path = Path(item["path"])
+         need(
+@@ -99,19 +109,33 @@
+     need(build["source_commit"] == plan["source_commit"], "capture BuildInputs source join")
+     recipe = json.loads(Path(plan["inputs"]["construction_recipe"]["path"]).read_bytes())
+     need(
+-        recipe["format"] == "component-capture-recipe/1"
++        recipe["format"] in ("component-capture-recipe/1", "component-capture-recipe/2")
+         and recipe["source_commit"] == plan["source_commit"]
+         and recipe["build_inputs_byte_hash"] == plan["inputs"]["build_inputs"]["byte_hash"],
+         "construction recipe source/build join",
+     )
+-    # Legacy component BuildInputs /1 omits fields carried by runtime BuildInputs /2.
+-    # Freeze them in an explicit additive companion, never rewrite old BuildInputs.
++    current = build.get("format") == "uarch-component-build-inputs/3"
++    need(
++        (recipe["format"] == "component-capture-recipe/2") == current,
++        "exact recipe/BuildInputs version join",
++    )
++    # Older /1-/2 declarations keep their existing equality rules; no legacy downgrade.
+     for key in ("permitted_environment", "mode_configs", "generated_identity_output_paths"):
+         need(key not in build or build[key] == recipe[key], "recipe cannot override BuildInputs")
+     need(recipe["preparation_source"] in build["source_files"], "recipe preparation source binding")
+     environment = json.loads(Path(plan["inputs"]["environment"]["path"]).read_bytes())
+-    need(
+-        environment == plan["environment"] == recipe["permitted_environment"]
++    if current:
++        need(plan["phase"] in ("debug", "release"), "production recipe requires construction mode")
++        need(
++            "permitted_environment" not in build and "permitted_environment" not in recipe,
++            "per-mode environment only",
++        )
++        argv, declared_environment = invocation(recipe["mode_configs"], plan["phase"])
++        need(plan["child_argv"] == argv, "exact construction argv")
++    else:
++        declared_environment = recipe["permitted_environment"]
++    need(
++        environment == plan["environment"] == declared_environment
+         and not any(k in environment for k in ("LD_PRELOAD", "LD_LIBRARY_PATH", "PYTHONPATH")),
+         "frozen clean environment",
+     )
+@@ -227,6 +251,11 @@
+ 
+ 
+ def command(plan: dict[str, Any], root: Path) -> list[str]:
++    child = plan["child_argv"]
++    if plan["format"] == "component-capture-plan/2":
++        from validation.component.capture_diagnostics import wrapped_child
++
++        child = wrapped_child(plan["phase"], child)
+     args = [
+         "--platform",
+         "linux/amd64",
+@@ -262,7 +291,7 @@
+         + [k + "=" + v for k, v in sorted(plan["environment"].items())]
+         + TRACER
+         + ["/receipts/" + plan["phase"] + ".trace"]
+-        + plan["child_argv"]
++        + child
+     )
+     return result
+ 
+@@ -278,6 +307,10 @@
+ 
+ 
+ def analyze(root: Path, plan: dict[str, Any], status: int) -> dict[str, Any]:
++    if plan["format"] == "component-capture-plan/2":
++        from validation.component.capture_diagnostics import inspect_capture
++
++        return inspect_capture(root, plan, status)
+     path = ROOT / PARSER
+     need(sha256(path.read_bytes()) == "sha256:" + PARSER_HASH, "strict parser identity")
+     parser = runpy.run_path(str(path))["parse"]
+@@ -334,6 +367,10 @@
+         started = True
+         while process.is_alive():
+             total, _ = inventory(root)
++            if plan["format"] == "component-capture-plan/2":
++                from validation.component.capture_diagnostics import enforce_stream_caps
++
++                enforce_stream_caps(root, plan)
+             if total >= plan["output_bytes"]:
+                 reason = "total output limit"
+             if time.monotonic() - start >= plan["seconds"]:
+@@ -391,6 +428,10 @@
+                 "capture process completion",
+             )
+             total, _ = inventory(root)
++            if plan["format"] == "component-capture-plan/2":
++                from validation.component.capture_diagnostics import enforce_stream_caps
++
++                enforce_stream_caps(root, plan)
+             need(
+                 total < plan["output_bytes"] and time.monotonic() - start < plan["seconds"],
+                 "capture final limits",
+@@ -398,6 +439,11 @@
+             need(reason is None, "capture monitor interrupted: " + str(reason))
+             verify_plan(plan)
+             coverage = analyze(root, plan, status)
++            if plan["format"] == "component-capture-plan/2":
++                need(
++                    coverage["diagnostics_accepted"] is True,
++                    "capture diagnostics refused: " + str(coverage["errors"]),
++                )
+         except BaseException as error:
+             reason = reason or repr(error)
+     try:
+@@ -412,7 +458,11 @@
+         total, rows = None, {}
+         reason = reason or repr(error)
+     record = {
+-        "format": "component-capture-receipt/1",
++        "format": (
++            "component-capture-receipt/2"
++            if plan["format"] == "component-capture-plan/2"
++            else "component-capture-receipt/1"
++        ),
+         "authority": None,
+         "started_ns": wall,
+         "ended_ns": time.time_ns(),
+--- a/validation/component/runtime_checks.py
++++ b/validation/component/runtime_checks.py
+@@ -35,9 +35,14 @@
+             "contract/uarch_contract",
+             "validation/component",
+             "src/rkuarch/engines/native",
++            "native/tools",
+         )
+         for p in (source / folder).glob("*.py")
+         if not p.name.startswith("test_")
++    )
++    required.update(
++        "docs/reviews/U4-B-K2-parallel-first-use-v1/" + name
++        for name in ("parallel_core.py", "resource_limits.py")
+     )
+     need(required <= set(pins), "complete matching consumer/structural closure required")
+     for name, wanted in pins.items():

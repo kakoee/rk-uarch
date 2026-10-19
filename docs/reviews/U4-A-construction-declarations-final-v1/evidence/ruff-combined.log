@@ -1,0 +1,31 @@
+B023 Function definition does not bind loop variable `observed`
+  --> docs/reviews/U4-A-construction-declarations-final-v1/probes/inspect_construction.py:40:9
+   |
+39 |     def substitute(*args: Any, **kwargs: Any) -> list[str]:
+40 |         observed.append({"mode": args[1], "tag": args[2], "environment": kwargs["environment"]})
+   |         ^^^^^^^^
+41 |         return ["synthetic-container-prefix"]
+   |
+
+E501 Line too long (105 > 100)
+  --> docs/reviews/U4-A-construction-declarations-final-v1/probes/inspect_construction.py:91:101
+   |
+89 | Path(sys.argv[1]).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+90 | print(
+91 |     "Rendered and joined debug/release declarations, actual builder expression and recipe; no execution."
+   |                                                                                                     ^^^^^
+92 | )
+   |
+
+E501 Line too long (101 > 100)
+   --> docs/reviews/U4-A-construction-declarations-final-v1/probes/test_repair.py:297:101
+    |
+295 |     assert (
+296 |         child[2]
+297 |         == f'set -C; exec 1>/receipts/{mode}.child.stdout 2>/receipts/{mode}.child.stderr; exec "$@"'
+    |                                                                                                     ^
+298 |     )
+299 |     value = monitor.analyze(root, plan, 0)
+    |
+
+Found 3 errors.

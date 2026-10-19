@@ -1,0 +1,134 @@
+"""Read/hash project inventories only; no snapshot, launcher, mutation or startup probe."""
+
+from __future__ import annotations
+
+import ast
+import hashlib
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+
+def digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def project_imports(root: Path) -> dict[str, str]:
+    tree = ast.parse((root / "native/tools/component_runtime_candidate.py").read_bytes())
+    function = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "imports")
+    stop = next(
+        i
+        for i, n in enumerate(function.body)
+        if isinstance(n, ast.Assign)
+        and isinstance(n.targets[0], ast.Name)
+        and n.targets[0].id == "external"
+    )
+    scope: dict[str, Any] = {"root": root}
+    exec(
+        compile(ast.Module(body=function.body[1:stop], type_ignores=[]), "<paths-only>", "exec"),
+        scope,
+    )
+    return {str(p.relative_to(root)): digest(p) for p in sorted(set(scope["files"]))}
+
+
+def startup_project(root: Path) -> dict[str, str]:
+    tree = ast.parse((root / "native/tools/component_startup_inventory.py").read_bytes())
+    functions = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+    scope: dict[str, Any] = {
+        "Path": Path,
+        "source": root,
+        "project": root,
+        "rows": [],
+        "copy_bound": lambda source, target, expected: source,
+        "digest": lambda path: "unused",
+    }
+    body: list[ast.stmt] = []
+    if "project_files" in functions:
+        body.append(functions["project_files"])
+    body.append(next(n for n in functions["construct"].body if isinstance(n, ast.For)))
+    exec(compile(ast.Module(body=body, type_ignores=[]), "<snapshot-paths-only>", "exec"), scope)
+    paths = scope["rows"]
+    assert len(paths) == len(set(paths))
+    return {str(p.relative_to(root)): digest(p) for p in sorted(paths)}
+
+
+def delta(before: dict[str, str], after: dict[str, str]) -> dict[str, Any]:
+    return {
+        "added": {k: v for k, v in after.items() if k not in before},
+        "changed": {
+            k: {"before": before[k], "after": v}
+            for k, v in after.items()
+            if k in before and before[k] != v
+        },
+        "removed": {k: v for k, v in before.items() if k not in after},
+    }
+
+
+def main() -> None:
+    prior, current, final, package, output = (Path(v).resolve() for v in sys.argv[1:])
+    roots = {
+        "accepted_prior_overlay": prior,
+        "current_committed_export": current,
+        "final_proposed_overlay": final,
+    }
+    records: dict[str, dict[str, Any]] = {}
+    for label, root in roots.items():
+        imported, startup = project_imports(root), startup_project(root)
+        records[label] = {
+            "imports": imported,
+            "startup_project": startup,
+            "import_count": len(imported),
+            "startup_project_count": len(startup),
+        }
+    final_imports = records["final_proposed_overlay"]["imports"]
+    assert final_imports == records["final_proposed_overlay"]["startup_project"]
+    consumer = json.loads((package / "activation-consumer-bindings.json").read_bytes())["files"]
+    assert all(final_imports.get(path) == pin for path, pin in consumer.items())
+    executed = json.loads((package / "evidence/post-startup-binding.json").read_bytes())
+    assert executed["project_import_inventory"] == final_imports
+    result = {
+        "format": "A-project-startup-inventory-transition/1",
+        "method": (
+            "AST path-list and first copy-loop evaluation only; copy/hash calls in loop "
+            "stubbed; actual selected file bytes then hashed"
+        ),
+        "inventories": records,
+        "from_prior": {
+            name: delta(
+                records["accepted_prior_overlay"][name], records["final_proposed_overlay"][name]
+            )
+            for name in ("imports", "startup_project")
+        },
+        "from_current": {
+            name: delta(
+                records["current_committed_export"][name], records["final_proposed_overlay"][name]
+            )
+            for name in ("imports", "startup_project")
+        },
+        "runtime_consumers": len(consumer),
+        "consumer_subset_and_hashes_match": True,
+        "existing_external_file_count": executed["external_files"],
+        "python_executable": executed["python_executable"],
+        "launcher_sha256": digest(final / "native/tools/component_trusted_start.py"),
+        "new_snapshot_or_startup_manifest": None,
+        "startup_or_bootstrap_execution": False,
+        "integrity_evidence": (
+            "No new evidence; A-F3 remains deferred. Project enumeration does not "
+            "verify interpreter/bootstrap/loader/cache/shell startup reads."
+        ),
+    }
+    output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    print(
+        json.dumps(
+            {
+                label: {k: v for k, v in record.items() if k.endswith("count")}
+                for label, record in records.items()
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

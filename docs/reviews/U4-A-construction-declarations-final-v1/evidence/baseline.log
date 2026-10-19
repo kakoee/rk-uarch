@@ -1,0 +1,136 @@
+FFFF                                                                     [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 28, "sample": {"uarch_contract.mapped": "/tmp/u4-a-construction-declarations-RFxng8/prior/direct/contract/uarch_contract/mapped.py"}}
+
+=================================== FAILURES ===================================
+______________ test_literal_construction_declarations[argv-debug] ______________
+
+mode = 'debug', field = 'argv'
+
+    @pytest.mark.parametrize("mode", ["debug", "release"])
+    @pytest.mark.parametrize("field", ["argv", "environment"])
+    def test_literal_construction_declarations(mode: str, field: str) -> None:
+        observed = json.loads(
+            (
+                ROOT
+                / "docs/reviews/U4-B-activation-combined-confirmation-v1/evidence/construction.json"
+            ).read_bytes()
+        )
+        expected = next(v for v in observed["rendered_from_source_ast_only"] if v["mode"] == mode)
+        values = declarations()
+        selected = next(v for v in values["modes"] if v["mode"] == mode)
+        if field == "argv":
+>           assert [expected["actual_source_argv"][0], *selected["cargo_args"]] == expected[
+                "actual_source_argv"
+            ]
+E           AssertionError: assert ['/usr/local/...-engine', ...] == ['/usr/local/...-engine', ...]
+E             
+E             Right contains 3 more items, first extra item: '--'
+E             Use -v to get more diff
+
+docs/reviews/U4-A-construction-declarations-v1/probes/test_declarations.py:59: AssertionError
+_____________ test_literal_construction_declarations[argv-release] _____________
+
+mode = 'release', field = 'argv'
+
+    @pytest.mark.parametrize("mode", ["debug", "release"])
+    @pytest.mark.parametrize("field", ["argv", "environment"])
+    def test_literal_construction_declarations(mode: str, field: str) -> None:
+        observed = json.loads(
+            (
+                ROOT
+                / "docs/reviews/U4-B-activation-combined-confirmation-v1/evidence/construction.json"
+            ).read_bytes()
+        )
+        expected = next(v for v in observed["rendered_from_source_ast_only"] if v["mode"] == mode)
+        values = declarations()
+        selected = next(v for v in values["modes"] if v["mode"] == mode)
+        if field == "argv":
+>           assert [expected["actual_source_argv"][0], *selected["cargo_args"]] == expected[
+                "actual_source_argv"
+            ]
+E           AssertionError: assert ['/usr/local/...-engine', ...] == ['/usr/local/...-engine', ...]
+E             
+E             Right contains 3 more items, first extra item: '--'
+E             Use -v to get more diff
+
+docs/reviews/U4-A-construction-declarations-v1/probes/test_declarations.py:59: AssertionError
+__________ test_literal_construction_declarations[environment-debug] ___________
+
+mode = 'debug', field = 'environment'
+
+    @pytest.mark.parametrize("mode", ["debug", "release"])
+    @pytest.mark.parametrize("field", ["argv", "environment"])
+    def test_literal_construction_declarations(mode: str, field: str) -> None:
+        observed = json.loads(
+            (
+                ROOT
+                / "docs/reviews/U4-B-activation-combined-confirmation-v1/evidence/construction.json"
+            ).read_bytes()
+        )
+        expected = next(v for v in observed["rendered_from_source_ast_only"] if v["mode"] == mode)
+        values = declarations()
+        selected = next(v for v in values["modes"] if v["mode"] == mode)
+        if field == "argv":
+            assert [expected["actual_source_argv"][0], *selected["cargo_args"]] == expected[
+                "actual_source_argv"
+            ]
+        else:
+>           assert (
+                selected.get("permitted_environment", values["shared"])
+                == expected["actual_source_environment"]
+            )
+E           AssertionError: assert {'CARGO_HOME'...LL': '0', ...} == {'C2_RUN_TAG'...'sparse', ...}
+E             
+E             Omitting 5 identical items, use -vv to show
+E             Right contains 6 more items:
+E             {'C2_RUN_TAG': 'debug-build',
+E              'CARGO_REGISTRIES_CRATES_IO_PROTOCOL': 'sparse',
+E              'PATH': '/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin',
+E              'RUSTC': '/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc',...
+E             
+E             ...Full output truncated (3 lines hidden), use '-vv' to show
+
+docs/reviews/U4-A-construction-declarations-v1/probes/test_declarations.py:63: AssertionError
+_________ test_literal_construction_declarations[environment-release] __________
+
+mode = 'release', field = 'environment'
+
+    @pytest.mark.parametrize("mode", ["debug", "release"])
+    @pytest.mark.parametrize("field", ["argv", "environment"])
+    def test_literal_construction_declarations(mode: str, field: str) -> None:
+        observed = json.loads(
+            (
+                ROOT
+                / "docs/reviews/U4-B-activation-combined-confirmation-v1/evidence/construction.json"
+            ).read_bytes()
+        )
+        expected = next(v for v in observed["rendered_from_source_ast_only"] if v["mode"] == mode)
+        values = declarations()
+        selected = next(v for v in values["modes"] if v["mode"] == mode)
+        if field == "argv":
+            assert [expected["actual_source_argv"][0], *selected["cargo_args"]] == expected[
+                "actual_source_argv"
+            ]
+        else:
+>           assert (
+                selected.get("permitted_environment", values["shared"])
+                == expected["actual_source_environment"]
+            )
+E           AssertionError: assert {'CARGO_HOME'...LL': '0', ...} == {'C2_RUN_TAG'...'sparse', ...}
+E             
+E             Omitting 5 identical items, use -vv to show
+E             Right contains 6 more items:
+E             {'C2_RUN_TAG': 'release-build',
+E              'CARGO_REGISTRIES_CRATES_IO_PROTOCOL': 'sparse',
+E              'PATH': '/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin',
+E              'RUSTC': '/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc',...
+E             
+E             ...Full output truncated (3 lines hidden), use '-vv' to show
+
+docs/reviews/U4-A-construction-declarations-v1/probes/test_declarations.py:63: AssertionError
+=========================== short test summary info ============================
+FAILED docs/reviews/U4-A-construction-declarations-v1/probes/test_declarations.py::test_literal_construction_declarations[argv-debug]
+FAILED docs/reviews/U4-A-construction-declarations-v1/probes/test_declarations.py::test_literal_construction_declarations[argv-release]
+FAILED docs/reviews/U4-A-construction-declarations-v1/probes/test_declarations.py::test_literal_construction_declarations[environment-debug]
+FAILED docs/reviews/U4-A-construction-declarations-v1/probes/test_declarations.py::test_literal_construction_declarations[environment-release]
+4 failed in 0.38s

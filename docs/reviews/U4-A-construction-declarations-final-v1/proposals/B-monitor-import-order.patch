@@ -1,0 +1,13 @@
+--- a/validation/component/capture_monitor.py
++++ b/validation/component/capture_monitor.py
+@@ -17,9 +17,8 @@
+ 
+ from uarch_contract.hashing import canonical_json, sha256
+ 
++from native.tools import component_container_guard as guardian
+ from rkuarch.engines.native.component_construction import invocation
+-
+-from native.tools import component_container_guard as guardian
+ from validation.component.checks import need
+ from validation.component.ordinary_eof_campaign import cleanup_owned
+ from validation.component.runtime_campaign import helpers
