@@ -1,0 +1,20 @@
+...F                                                                     [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 42, "sample": {"uarch_contract.mapped": "/tmp/u4-b-capture-diagnostics-01/source/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-b-capture-diagnostics-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-capture-diagnostics-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-capture-diagnostics-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+_________________ test_unrecorded_but_classified_bytes_refuse __________________
+
+tmp_path = PosixPath('/tmp/u4-b-capture-diagnostics-01/pytest-fault/test_unrecorded_but_classified0')
+
+    def test_unrecorded_but_classified_bytes_refuse(tmp_path: Path) -> None:
+        root, plan = fixture(tmp_path)
+        stream = root / "traces/debug.child.stderr"
+        stream.write_bytes(stream.read_bytes() * 2)
+        value = diagnostic.inspect_capture(root, plan, 0)
+>       assert not value["diagnostics_accepted"]
+E       assert not True
+
+validation/component/test_capture_diagnostics.py:298: AssertionError
+=========================== short test summary info ============================
+FAILED validation/component/test_capture_diagnostics.py::test_unrecorded_but_classified_bytes_refuse
+1 failed, 3 passed, 23 deselected in 0.38s

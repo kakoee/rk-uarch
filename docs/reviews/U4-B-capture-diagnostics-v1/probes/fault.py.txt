@@ -1,0 +1,15 @@
+from pathlib import Path
+import hashlib,json,subprocess
+root=Path('/tmp/u4-b-capture-diagnostics-01/source');w=root.parent;target=root/'validation/component/capture_diagnostics.py';old=target.read_bytes();needle='        need(b"".join(chunks) == raw[stream], "raw child bytes/write trace join")';assert old.decode().count(needle)==1
+runner=root/'docs/reviews/U4-B-activation-orchestration-v1/probes/isolated_runner.py';py='/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python'
+cmd=[py,'-I',str(runner),str(root),'pytest','-q','validation/component/test_capture_diagnostics.py','-k','unrecorded_but_classified_bytes or expected_separate_child_output']
+try:
+ target.write_text(old.decode().replace(needle,'        # targeted fault: omit retained-byte/write accounting equality'))
+ with (w/'fault-removed.log').open('w') as stream:r=subprocess.run(cmd+['--basetemp='+str(w/'pytest-fault')],stdout=stream,stderr=subprocess.STDOUT)
+ assert r.returncode==1
+ assert '1 failed, 3 passed' in (w/'fault-removed.log').read_text()
+finally:target.write_bytes(old)
+assert hashlib.sha256(target.read_bytes()).digest()==hashlib.sha256(old).digest()
+with (w/'fault-restored.log').open('w') as stream:r=subprocess.run(cmd+['--basetemp='+str(w/'pytest-restored')],stdout=stream,stderr=subprocess.STDOUT)
+assert r.returncode==0
+(w/'fault.json').write_text(json.dumps({'target':str(target),'restored_sha256':hashlib.sha256(old).hexdigest(),'removed_guard':'raw child bytes/write trace join','removed':'3 phase positives pass; unrecorded duplicate but classified stderr accepted, regression fails on assert not True','restored':'4 affected controls pass','kind':'offline synthetic semantic discrimination, not source pin or alternate refusal'},indent=2)+'\n')

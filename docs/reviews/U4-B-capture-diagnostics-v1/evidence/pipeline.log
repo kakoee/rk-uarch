@@ -1,0 +1,205 @@
+....FF                                                                   [100%]
+REVIEW-ORIGINS {"live_or_foreign": [], "project_modules": 49, "sample": {"uarch_contract.mapped": "/tmp/u4-b-capture-diagnostics-01/source/contract/uarch_contract/mapped.py", "validation.component.issue_checks": "/tmp/u4-b-capture-diagnostics-01/source/validation/component/issue_checks.py", "validation.component.observations_v3": "/tmp/u4-b-capture-diagnostics-01/source/validation/component/observations_v3.py", "validation.component.transition_checks_v3": "/tmp/u4-b-capture-diagnostics-01/source/validation/component/transition_checks_v3.py"}}
+
+=================================== FAILURES ===================================
+______ test_monitor_consumes_diagnostic_result_without_real_worker[False] ______
+
+tmp_path = PosixPath('/tmp/u4-b-capture-diagnostics-01/pytest-pipeline/test_monitor_consumes_diagnost0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7af8191d1040>
+corrupt = False
+
+    @pytest.mark.parametrize("corrupt", [False, True])
+    def test_monitor_consumes_diagnostic_result_without_real_worker(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, corrupt: bool
+    ) -> None:
+        from native.tools import component_container_guard
+        from validation.component import test_capture_diagnostics as records
+    
+        plan, _ = setup(tmp_path, monkeypatch, "debug")
+        policy = json.loads(Path(plan["inputs"]["capture_diagnostic_policy"]["path"]).read_bytes())
+        policy["build_stderr_lines"]["debug"] = ["   Compiling synthetic v0.0.0\n"]
+        put(plan, "capture_diagnostic_policy", policy)
+        emitted, old_plan = records.fixture(tmp_path / "emitted")
+        trace_path = emitted / "traces/debug.trace.100"
+        trace = (
+            trace_path.read_text()
+            .replace(
+                records.exec_line(diagnostic.wrapped_child("debug", old_plan["child_argv"])),
+                records.exec_line(diagnostic.wrapped_child("debug", plan["child_argv"])),
+            )
+            .replace(records.exec_line(old_plan["child_argv"]), records.exec_line(plan["child_argv"]))
+        )
+        trace_path.write_text(trace)
+    
+        def guardian(
+            directory: Path, args: list[str], *, timeout: float, cap: int, stderr_cap: int
+        ) -> dict[str, Any]:
+            directory.mkdir()
+            owner, cid = "a" * 32, "b" * 64
+            values = {
+                "intent.json": {
+                    "owner": owner,
+                    "name": "synthetic-" + owner,
+                    "args": args,
+                    "timeout": timeout,
+                    "cap": cap,
+                    "stderr_cap": stderr_cap,
+                    "stdin": False,
+                },
+                "pre-existing.json": {"containers": []},
+                "created.json": {"owner": owner, "container_id": cid},
+                "started.json": {"container_id": cid},
+                "cleanup.json": {
+                    "owner": owner,
+                    "container_id": cid,
+                    "stopped": True,
+                    "removed": True,
+                    "reason": "completed",
+                    "exit_code": 0,
+                },
+            }
+            for name, value in values.items():
+                (directory / name).write_text(canonical_json(value))
+            for name in ("stdout", "stderr"):
+                (directory / name).write_bytes(b"")
+            for source in (emitted / "traces").iterdir():
+                (directory.parent / "traces" / source.name).write_bytes(source.read_bytes())
+            if corrupt:
+                path = directory.parent / "traces/debug.child.stderr"
+                path.write_bytes(path.read_bytes() * 2)
+            return values["cleanup.json"]
+    
+        class InlineWorker:
+            def __init__(self, *, target: Any, args: Any):
+                self.target, self.args = target, args
+    
+            def start(self) -> None:
+                self.target(*self.args)
+    
+            def is_alive(self) -> bool:
+                return False
+    
+            def join(self, *_: Any) -> None:
+                pass
+    
+            def close(self) -> None:
+                pass
+    
+        class Context:
+            Process = InlineWorker
+    
+        monkeypatch.setattr(component_container_guard, "run_container", guardian)
+        monkeypatch.setattr(monitor.multiprocessing, "get_context", lambda _: Context())
+        monkeypatch.setattr(monitor, "helpers", lambda: {"safe_fork": lambda: None})
+        value = monitor.run_capture(plan, tmp_path / "mock-capture")
+        assert value["format"] == "component-capture-receipt/2"
+>       assert value["record_valid"] is (not corrupt)
+E       assert False is not False
+
+docs/reviews/U4-B-capture-diagnostics-v1/probes/test_construction_join.py:215: AssertionError
+______ test_monitor_consumes_diagnostic_result_without_real_worker[True] _______
+
+tmp_path = PosixPath('/tmp/u4-b-capture-diagnostics-01/pytest-pipeline/test_monitor_consumes_diagnost1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7af8191d07d0>
+corrupt = True
+
+    @pytest.mark.parametrize("corrupt", [False, True])
+    def test_monitor_consumes_diagnostic_result_without_real_worker(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, corrupt: bool
+    ) -> None:
+        from native.tools import component_container_guard
+        from validation.component import test_capture_diagnostics as records
+    
+        plan, _ = setup(tmp_path, monkeypatch, "debug")
+        policy = json.loads(Path(plan["inputs"]["capture_diagnostic_policy"]["path"]).read_bytes())
+        policy["build_stderr_lines"]["debug"] = ["   Compiling synthetic v0.0.0\n"]
+        put(plan, "capture_diagnostic_policy", policy)
+        emitted, old_plan = records.fixture(tmp_path / "emitted")
+        trace_path = emitted / "traces/debug.trace.100"
+        trace = (
+            trace_path.read_text()
+            .replace(
+                records.exec_line(diagnostic.wrapped_child("debug", old_plan["child_argv"])),
+                records.exec_line(diagnostic.wrapped_child("debug", plan["child_argv"])),
+            )
+            .replace(records.exec_line(old_plan["child_argv"]), records.exec_line(plan["child_argv"]))
+        )
+        trace_path.write_text(trace)
+    
+        def guardian(
+            directory: Path, args: list[str], *, timeout: float, cap: int, stderr_cap: int
+        ) -> dict[str, Any]:
+            directory.mkdir()
+            owner, cid = "a" * 32, "b" * 64
+            values = {
+                "intent.json": {
+                    "owner": owner,
+                    "name": "synthetic-" + owner,
+                    "args": args,
+                    "timeout": timeout,
+                    "cap": cap,
+                    "stderr_cap": stderr_cap,
+                    "stdin": False,
+                },
+                "pre-existing.json": {"containers": []},
+                "created.json": {"owner": owner, "container_id": cid},
+                "started.json": {"container_id": cid},
+                "cleanup.json": {
+                    "owner": owner,
+                    "container_id": cid,
+                    "stopped": True,
+                    "removed": True,
+                    "reason": "completed",
+                    "exit_code": 0,
+                },
+            }
+            for name, value in values.items():
+                (directory / name).write_text(canonical_json(value))
+            for name in ("stdout", "stderr"):
+                (directory / name).write_bytes(b"")
+            for source in (emitted / "traces").iterdir():
+                (directory.parent / "traces" / source.name).write_bytes(source.read_bytes())
+            if corrupt:
+                path = directory.parent / "traces/debug.child.stderr"
+                path.write_bytes(path.read_bytes() * 2)
+            return values["cleanup.json"]
+    
+        class InlineWorker:
+            def __init__(self, *, target: Any, args: Any):
+                self.target, self.args = target, args
+    
+            def start(self) -> None:
+                self.target(*self.args)
+    
+            def is_alive(self) -> bool:
+                return False
+    
+            def join(self, *_: Any) -> None:
+                pass
+    
+            def close(self) -> None:
+                pass
+    
+        class Context:
+            Process = InlineWorker
+    
+        monkeypatch.setattr(component_container_guard, "run_container", guardian)
+        monkeypatch.setattr(monitor.multiprocessing, "get_context", lambda _: Context())
+        monkeypatch.setattr(monitor, "helpers", lambda: {"safe_fork": lambda: None})
+        value = monitor.run_capture(plan, tmp_path / "mock-capture")
+        assert value["format"] == "component-capture-receipt/2"
+        assert value["record_valid"] is (not corrupt)
+        assert value["coverage"]["diagnostics_accepted"] is (not corrupt)
+        assert not value["read_audit_complete"]
+        if corrupt:
+>           assert value["coverage"]["errors"] == ["raw child bytes/write trace join"]
+E           AssertionError: assert ['unknown syscall record'] == ['raw child b...e trace join']
+E             
+E             At index 0 diff: 'unknown syscall record' != 'raw child bytes/write trace join'
+E             Use -v to get more diff
+
+docs/reviews/U4-B-capture-diagnostics-v1/probes/test_construction_join.py:219: AssertionError
+=========================== short test summary info ============================
+FAILED docs/reviews/U4-B-capture-diagnostics-v1/probes/test_construction_join.py::test_monitor_consumes_diagnostic_result_without_real_worker[False]
+FAILED docs/reviews/U4-B-capture-diagnostics-v1/probes/test_construction_join.py::test_monitor_consumes_diagnostic_result_without_real_worker[True]
+2 failed, 4 passed in 0.46s
