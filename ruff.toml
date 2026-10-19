@@ -1,6 +1,11 @@
 # Keep the adopted project's lint settings in pyproject.toml unchanged.
 extend = "pyproject.toml"
 
+[lint.isort]
+# Review probes may import proposed modules absent from the live source tree.
+# They still belong to this project's package; do not classify them per-file.
+known-first-party = ["rkuarch"]
+
 [lint.extend-per-file-ignores]
 # Immutable executed review probe, pinned by its package manifest at SHA256
 # 71c2ab5fa547fd7b2202a1d098bf43240b5e034546759f9f9f7bee39dd69f593.
