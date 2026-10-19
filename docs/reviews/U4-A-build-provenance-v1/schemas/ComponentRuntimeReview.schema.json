@@ -1,0 +1,92 @@
+{
+  "$defs": {
+    "FileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Byte Hash",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "byte_hash"
+      ],
+      "title": "FileBinding",
+      "type": "object"
+    },
+    "RuntimeSubject": {
+      "additionalProperties": false,
+      "properties": {
+        "runtime_payload_byte_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Runtime Payload Byte Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runtime_payload_byte_hash"
+      ],
+      "title": "RuntimeSubject",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "build_provenance": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "format": {
+      "const": "uarch-component-runtime-review/2",
+      "title": "Format",
+      "type": "string"
+    },
+    "optional_read_evidence": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FileBinding"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "selected_support_current": {
+      "const": true,
+      "title": "Selected Support Current",
+      "type": "boolean"
+    },
+    "selected_support_evidence": {
+      "items": {
+        "$ref": "#/$defs/FileBinding"
+      },
+      "minItems": 1,
+      "title": "Selected Support Evidence",
+      "type": "array"
+    },
+    "startup_assurance": {
+      "$ref": "#/$defs/FileBinding"
+    },
+    "subject": {
+      "$ref": "#/$defs/RuntimeSubject"
+    }
+  },
+  "required": [
+    "format",
+    "subject",
+    "build_provenance",
+    "startup_assurance",
+    "selected_support_current",
+    "selected_support_evidence",
+    "optional_read_evidence"
+  ],
+  "title": "ComponentRuntimeReview",
+  "type": "object"
+}
