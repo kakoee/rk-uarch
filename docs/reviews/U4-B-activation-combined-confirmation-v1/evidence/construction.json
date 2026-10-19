@@ -1,0 +1,137 @@
+{
+  "format": "B-final-construction-source-audit/1",
+  "methods_not_called": [
+    "freeze",
+    "prepare",
+    "build",
+    "docker",
+    "command"
+  ],
+  "pending_diagnostic_policy": "all stderr currently refuses; decide exact handling of expected canary/compiler diagnostics versus tracer loss/unknown diagnostics without discarding raw bytes or claiming independent loss count",
+  "preparation_sha256": "fd9750d45f9835fdd2b658e46dffaa330a1afd3832a28921eae1519d3cac502a",
+  "real_BuildInputs_or_recipe_generated": false,
+  "rendered_from_source_ast_only": [
+    {
+      "actual_source_argv": [
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "rustc",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--bin",
+        "uarch-engine",
+        "-vv",
+        "--message-format=json",
+        "--",
+        "-C",
+        "link-arg=-Wl,-Map=/receipts/debug.map"
+      ],
+      "actual_source_environment": {
+        "C2_RUN_TAG": "debug-build",
+        "CARGO_HOME": "/cargo-home",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+        "CARGO_TARGET_DIR": "/target",
+        "LC_ALL": "C",
+        "PATH": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+        "RUSTC": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
+        "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh",
+        "RUSTUP_AUTO_INSTALL": "0"
+      },
+      "declared_argv": [
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "rustc",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--bin",
+        "uarch-engine",
+        "-vv",
+        "--message-format=json"
+      ],
+      "declared_environment": {
+        "CARGO_HOME": "/cargo-home",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_TARGET_DIR": "/target",
+        "LC_ALL": "C",
+        "RUSTUP_AUTO_INSTALL": "0"
+      },
+      "mode": "debug",
+      "recipe_exact_equality": false,
+      "undeclared_environment": {
+        "C2_RUN_TAG": "debug-build",
+        "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+        "PATH": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+        "RUSTC": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
+        "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh"
+      }
+    },
+    {
+      "actual_source_argv": [
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "rustc",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--bin",
+        "uarch-engine",
+        "-vv",
+        "--message-format=json",
+        "--release",
+        "--",
+        "-C",
+        "link-arg=-Wl,-Map=/receipts/release.map"
+      ],
+      "actual_source_environment": {
+        "C2_RUN_TAG": "release-build",
+        "CARGO_HOME": "/cargo-home",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+        "CARGO_TARGET_DIR": "/target",
+        "LC_ALL": "C",
+        "PATH": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+        "RUSTC": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
+        "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh",
+        "RUSTUP_AUTO_INSTALL": "0"
+      },
+      "declared_argv": [
+        "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/cargo",
+        "rustc",
+        "--offline",
+        "--locked",
+        "-p",
+        "uarch-engine",
+        "--bin",
+        "uarch-engine",
+        "-vv",
+        "--message-format=json",
+        "--release"
+      ],
+      "declared_environment": {
+        "CARGO_HOME": "/cargo-home",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_TARGET_DIR": "/target",
+        "LC_ALL": "C",
+        "RUSTUP_AUTO_INSTALL": "0"
+      },
+      "mode": "release",
+      "recipe_exact_equality": false,
+      "undeclared_environment": {
+        "C2_RUN_TAG": "release-build",
+        "CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+        "PATH": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/:/usr/local/cargo/bin:/usr/bin:/bin",
+        "RUSTC": "/usr/local/rustup/toolchains/1.99.0-x86_64-unknown-linux-gnu/bin/rustc",
+        "RUSTC_WRAPPER": "/controls/rustc-wrapper.sh",
+        "RUSTFLAGS": "-C debuginfo=1 -C linker=/controls/linker.sh"
+      }
+    }
+  ],
+  "source_entries": 249,
+  "wrapper_sha256": "361a306200534cd5ff4ce501c36d150c5e8d6b02e005f32b4d6b7484eff06884"
+}
