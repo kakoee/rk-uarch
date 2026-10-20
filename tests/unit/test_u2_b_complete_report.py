@@ -1,5 +1,6 @@
 """Full report tests over actual saved A3 captures; synthetic reviews confer no accuracy."""
 
+import json
 import os
 import shutil
 import subprocess
@@ -157,16 +158,23 @@ def test_file_conflicts_are_preflighted_before_writing(tmp_path):
 def test_real_offline_loader_refuses_bad_closure(tmp_path, mutation):
     moved = tmp_path / "inputs"
     shutil.copytree(TABLE.parent, moved)
-    companion = next((moved / "artifacts").glob("*.json"))
+    # Request/hardware copies can be reconstructed; target a required companion,
+    # not whichever file the filesystem happens to enumerate first.
+    table = json.loads((moved / "table.json").read_bytes())
+    bundle_hash = table["artifacts"]["prepared_bundle_hash"]
+    companion = moved / "artifacts" / (bundle_hash.removeprefix("sha256:") + ".json")
     if mutation == "missing":
         companion.unlink()
+        refusal = "ArtifactMissing"
     else:
         companion.write_text("{}")
-    with pytest.raises(ValueError):
+        refusal = "ArtifactHashMismatch"
+    with pytest.raises(ValueError, match=refusal):
         write_report(
             moved / "table.json", html_path=tmp_path / "x.html", markdown_path=tmp_path / "x.md"
         )
     assert not (tmp_path / "x.html").exists()
+    assert not (tmp_path / "x.md").exists()
 
 
 def test_fresh_moved_producer_disabled_replay(tmp_path, reports):
