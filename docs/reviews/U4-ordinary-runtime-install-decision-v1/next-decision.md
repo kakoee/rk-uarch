@@ -1,6 +1,6 @@
 # Install the reviewed ordinary-runtime simplification
 
-Status: approved by Javid in this session; nothing installed.
+Status: human-installed and committed as `ceb300e1d1817c7c9f1ac4763751baaf743e6ba7`; coordinator verification passed.
 
 Approval: Javid replied “yes” to “Approve installing this exact transition,
 committing it normally, and publishing after receipt verification?”
@@ -88,3 +88,14 @@ Coordinator-added `ruff.toml` inside the review directory records only the exist
 lint diagnostics for 21 exact archived probe paths, so publication does not
 rewrite executed evidence or change production lint checks. This file is
 publication metadata, not independent reviewer evidence.
+
+## Installed checkpoint
+
+The human installed and committed the complete patch with normal Git commands.
+The coordinator reproduced its entire committed tree from the approved patch:
+`b0587cd622d1b9166da8efc20ce06ed987c55a26`. All reviewed changes match.
+A clean-export check verified private import origins and passed 32 ordinary-runtime
+and transport tests plus CI-form Ruff. Native builds and source-free installed
+smoke evidence were reused from the identical reviewed source, not rerun.
+See [installed.json](installed.json) and [test output](installed-focused-tests.txt).
+Publication is covered by the approval above. No U4 closure follows.
