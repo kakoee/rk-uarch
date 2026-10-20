@@ -1,0 +1,19 @@
+diff --git a/src/rkuarch/engines/native/transport.py b/src/rkuarch/engines/native/transport.py
+index 5b800d0..8f36f74 100644
+--- a/src/rkuarch/engines/native/transport.py
++++ b/src/rkuarch/engines/native/transport.py
+@@ -1,4 +1,4 @@
+-"""Bounded EOF subprocess I/O shared by ordinary execution and historical consumers."""
++"""Bounded EOF subprocess I/O for ordinary execution."""
+ from __future__ import annotations
+ 
+ import os
+@@ -101,7 +101,7 @@ def _decode_envelope(stdout: bytes, stderr: bytes, returncode: int, *,
+ 
+ def _exchange(
+     executable_fd: int, request: bytes, limits: Limits, *,
+-    protocol: str = "uarch-engine/3", test_only: bool = False,
++    protocol: str = "uarch-engine/4", test_only: bool = False,
+ ) -> tuple[bytes, bytes, int]:
+     """Concurrent bounded I/O; execute the selected descriptor and reap its process group."""
+     if len(request) > limits.stdin_bytes:

@@ -1,0 +1,26 @@
+# Coordinator publication metadata, not reviewer evidence.
+# Preserve immutable executed probes. These exact exceptions do not affect product code.
+extend = "../../../ruff.toml"
+
+[lint.extend-per-file-ignores]
+"probes/checker_ast_parity.py" = ["E501"]
+"probes/derive_timing.py" = ["B023", "E501"]
+"probes/hw_sweep.py" = ["E501", "I001"]
+"probes/installed_smoke.py" = ["E501", "F401", "I001"]
+"probes/make_mutants.py" = ["E501", "I001"]
+"probes/prepare_inputs.py" = ["E501"]
+"probes/smoke_driver.py" = ["E501"]
+"probes/transport_probe.py" = ["B008", "E501"]
+"probes/version_lock.py" = ["I001"]
+"recheck-808076a-independent/probes/checker_reach.py" = ["B007", "E501"]
+"recheck-808076a-independent/probes/modified_module_audit.py" = ["E501", "E741"]
+"recheck-808076a-independent/probes/native_mutation.py" = ["E501"]
+"recheck-808076a-independent/probes/python_controls.py" = ["E501"]
+"recheck-808076a-independent/probes/v2_replay.py" = ["E501", "I001"]
+"recheck-808076a/probes/cleanup_wiring_control.py" = ["I001"]
+"recheck-808076a/probes/docs_packaging.py" = ["E501", "E702", "I001"]
+"recheck-808076a/probes/f2_process_control.py" = ["I001"]
+"recheck-808076a/probes/final_integrity.py" = ["E501", "I001"]
+"recheck-808076a/probes/inventory.py" = ["E501", "E701", "E702"]
+"recheck-808076a/probes/native_controls.py" = ["E501"]
+"recheck-808076a/probes/python_controls.py" = ["E501"]

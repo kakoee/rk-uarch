@@ -1,0 +1,17 @@
+{"case": "hang with grandchild -> Timeout, group killed", "outcome": "OperationalFailure: Timeout", "elapsed_s": 2.0, "survivors": 0, "expected": "Timeout", "ok": true}
+{"case": "child exits, grandchild keeps stdout -> Timeout, group killed", "outcome": "OperationalFailure: Timeout", "elapsed_s": 2.0, "survivors": 0, "expected": "Timeout", "ok": true}
+{"case": "stdout over cap -> StdoutLimit", "outcome": "OperationalFailure: StdoutLimit", "elapsed_s": 0.0, "survivors": 0, "expected": "StdoutLimit", "ok": true}
+{"case": "stderr over cap -> StderrLimit", "outcome": "OperationalFailure: StderrLimit", "elapsed_s": 0.0, "survivors": 0, "expected": "StderrLimit", "ok": true}
+{"case": "status 3 -> ProtocolViolation", "outcome": "returned status=3 stdout=2B stderr=0B -> ProtocolViolation: status/stream mismatch", "elapsed_s": 0.0, "survivors": 0, "expected": "ProtocolViolation", "ok": true}
+{"case": "status 0 with stderr -> ProtocolViolation", "outcome": "returned status=0 stdout=2B stderr=4B -> ProtocolViolation: status/stream mismatch", "elapsed_s": 0.0, "survivors": 0, "expected": "ProtocolViolation", "ok": true}
+{"case": "status 2 with stdout -> ProtocolViolation", "outcome": "returned status=2 stdout=2B stderr=0B -> ProtocolViolation: status/stream mismatch", "elapsed_s": 0.0, "survivors": 0, "expected": "ProtocolViolation", "ok": true}
+{"case": "status 2 valid refusal -> decoded (NativeRefusal in consume)", "outcome": "returned status=2 stdout=0B stderr=51B -> decoded", "elapsed_s": 0.0, "survivors": 0, "expected": "decoded", "ok": true}
+{"case": "status 2 unknown code -> ProtocolViolation", "outcome": "returned status=2 stdout=0B stderr=44B -> ProtocolViolation: invalid complete canonical envelope", "elapsed_s": 0.0, "survivors": 0, "expected": "ProtocolViolation", "ok": true}
+{"case": "killed by SIGKILL -> OperationalFailure NativeExit:-9", "outcome": "returned status=-9 stdout=0B stderr=0B -> OperationalFailure: NativeExit:-9", "elapsed_s": 0.0, "survivors": 0, "expected": "NativeExit:-9", "ok": true}
+{"case": "status 1 -> OperationalFailure NativeExit:1", "outcome": "returned status=1 stdout=0B stderr=0B -> OperationalFailure: NativeExit:1", "elapsed_s": 0.0, "survivors": 0, "expected": "NativeExit:1", "ok": true}
+{"case": "does not read 1 MiB stdin, exits 0 silently -> ProtocolViolation", "outcome": "returned status=0 stdout=0B stderr=0B -> ProtocolViolation: invalid complete canonical envelope", "elapsed_s": 0.0, "survivors": 0, "expected": "ProtocolViolation", "ok": true}
+{"case": "success with detached grandchild (pipes closed) -> returns; descendant survives", "outcome": "returned status=0 stdout=2B stderr=0B -> decoded", "elapsed_s": 0.0, "survivors": 1, "expected": "returned status=0", "ok": true}
+{"case": "non-executable file -> SpawnFailure", "outcome": "OperationalFailure: SpawnFailure", "elapsed_s": 0.0, "survivors": 0, "expected": "SpawnFailure", "ok": true}
+{"case": "CLI with self-killing executable", "outcome": "exit=2 stderr=NativeExit:-9", "output_written": false, "ok": true}
+{"case": "CLI with missing executable", "outcome": "exit=2 stderr='/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/fake/missing'", "output_written": false, "ok": true}
+exit 0

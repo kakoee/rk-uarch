@@ -1,0 +1,23 @@
+   Compiling uarch-engine v0.0.1 (/work/native/crates/uarch-engine)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.55s
+     Running tests/ordinary.rs (/target/x86_64-unknown-linux-gnu/debug/deps/ordinary-70dd9340baf540a8)
+
+running 2 tests
+test ordinary_protocol_and_json_refusals ... ok
+test ordinary_production_and_fixture_are_deterministic ... FAILED
+
+failures:
+
+---- ordinary_production_and_fixture_are_deterministic stdout ----
+
+thread 'ordinary_production_and_fixture_are_deterministic' (326) panicked at crates/uarch-engine/tests/ordinary.rs:37:9:
+Output { status: ExitStatus(unix_wait_status(512)), stdout: "", stderr: "{\"code\":\"AdmissionMismatch\",\"message\":\"explicit test-only invocation must match job\",\"pointer\":\"/admission/invocation\"}" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    ordinary_production_and_fixture_are_deterministic
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test ordinary`

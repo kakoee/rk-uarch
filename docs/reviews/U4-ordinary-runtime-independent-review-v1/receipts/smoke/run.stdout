@@ -1,0 +1,446 @@
+{
+ "checks": [
+  {
+   "name": "absent:/home",
+   "ok": true
+  },
+  {
+   "name": "absent:/work",
+   "ok": true
+  },
+  {
+   "name": "absent:/cargo-home",
+   "ok": true
+  },
+  {
+   "name": "absent:/src",
+   "ok": true
+  },
+  {
+   "found": [],
+   "name": "no .git above cwd",
+   "ok": true
+  },
+  {
+   "name": "installed under runtime site-packages",
+   "ok": true,
+   "site": "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages"
+  },
+  {
+   "name": "no editable/pth hooks",
+   "ok": true
+  },
+  {
+   "name": "historical host modules absent",
+   "ok": true
+  },
+  {
+   "name": "cli-run:production.json:debug",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:production.json:release",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "duration_ps": 656000,
+   "eligibility": "component_only",
+   "name": "debug==release:production.json",
+   "ok": true,
+   "result_hash": "sha256:d1ee65a0aea2899061332faec0244fe68d91127f716309b5b6a0b836df03d309"
+  },
+  {
+   "name": "cli-replay-with-binary-present:production.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:test-synthetic-runtime-cc0-v3.json:debug",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:test-synthetic-runtime-cc0-v3.json:release",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "duration_ps": 121000,
+   "eligibility": "verification_only",
+   "name": "debug==release:test-synthetic-runtime-cc0-v3.json",
+   "ok": true,
+   "result_hash": "sha256:0af2cfabe39c0466932ddcbb89b0a3bbf71573d4f43acd515d450656c0558ada"
+  },
+  {
+   "name": "cli-replay-with-binary-present:test-synthetic-runtime-cc0-v3.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:test-synthetic-stage2-cc-v3.json:debug",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:test-synthetic-stage2-cc-v3.json:release",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "duration_ps": 147000,
+   "eligibility": "verification_only",
+   "name": "debug==release:test-synthetic-stage2-cc-v3.json",
+   "ok": true,
+   "result_hash": "sha256:d5eb79e9d98070697b69cd6c48ce18d3ac8b5ad3129a3d910f72a71dd7430eef"
+  },
+  {
+   "name": "cli-replay-with-binary-present:test-synthetic-stage2-cc-v3.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:test-synthetic-stage2-cc0-v3.json:debug",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:test-synthetic-stage2-cc0-v3.json:release",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "duration_ps": 121000,
+   "eligibility": "verification_only",
+   "name": "debug==release:test-synthetic-stage2-cc0-v3.json",
+   "ok": true,
+   "result_hash": "sha256:0af2cfabe39c0466932ddcbb89b0a3bbf71573d4f43acd515d450656c0558ada"
+  },
+  {
+   "name": "cli-replay-with-binary-present:test-synthetic-stage2-cc0-v3.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:test-synthetic-stage2-sr-v3.json:debug",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-run:test-synthetic-stage2-sr-v3.json:release",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "duration_ps": 146000,
+   "eligibility": "verification_only",
+   "name": "debug==release:test-synthetic-stage2-sr-v3.json",
+   "ok": true,
+   "result_hash": "sha256:aaaeb9e24b6c3a5464988b8040292b99d9d0506307613236d38c5abc3549d60a"
+  },
+  {
+   "name": "cli-replay-with-binary-present:test-synthetic-stage2-sr-v3.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli: production job with --test-only refused",
+   "ok": true,
+   "stderr": "AdmissionMismatch: explicit test-only invocation must match job\n"
+  },
+  {
+   "name": "cli: test job without --test-only refused",
+   "ok": true,
+   "stderr": "AdmissionMismatch: explicit test-only invocation must match job\n"
+  },
+  {
+   "code": "AdmissionMismatch",
+   "name": "native: test job without --test-only refused",
+   "ok": true,
+   "status": 2
+  },
+  {
+   "code": "AdmissionMismatch",
+   "name": "native: production job with --test-only refused",
+   "ok": true,
+   "status": 2
+  },
+  {
+   "code": null,
+   "name": "native: trailing newline accepted (EOF framing)",
+   "ok": true,
+   "status": 0
+  },
+  {
+   "name": "native: /3 argv refused",
+   "ok": true
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "UnsupportedHardware",
+   "expected_python": "UnsupportedHardware",
+   "name": "mutant:hw-altered-production",
+   "native_code": "UnsupportedHardware",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, UnsupportedHardware: [type=value_error, input_value={'admission': {'checkpoin...at': 1}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "accept",
+   "expected_python": "accept",
+   "name": "mutant:hw-altered-test",
+   "native_code": null,
+   "native_status": 0,
+   "ok": true,
+   "python": "accept"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "UnsupportedFrequency",
+   "expected_python": "UnsupportedFrequency",
+   "name": "mutant:clock-ratio-2",
+   "native_code": "UnsupportedFrequency",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, UnsupportedFrequency: [type=value_error, input_value={'admission': {'checkpoin...at': 1}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "UnsupportedInitialState",
+   "expected_python": "UnsupportedInitialState",
+   "name": "mutant:state-steady",
+   "native_code": "UnsupportedInitialState",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, UnsupportedInitialState: [type=value_error, input_value={'admission': {'checkpoin...at': 1}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "UnsupportedInitialState",
+   "expected_python": "UnsupportedInitialState",
+   "name": "mutant:state-fixture_resident",
+   "native_code": "UnsupportedInitialState",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, UnsupportedInitialState: [type=value_error, input_value={'admission': {'checkpoin...at': 1}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "UnsupportedInitialState",
+   "expected_python": "UnsupportedInitialState",
+   "name": "mutant:priming-1",
+   "native_code": "UnsupportedInitialState",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, UnsupportedInitialState: [type=value_error, input_value={'admission': {'checkpoin...at': 1}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidCarrier",
+   "expected_python": "ValidationError",
+   "name": "mutant:precision-fp8",
+   "native_code": "InvalidCarrier",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob precision Input should be 'bf16' [type=literal_error, input_value='fp8', input_type=str] For further information visit https://errors.pydantic.dev/2.13/v/literal_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidCarrier",
+   "expected_python": "ValidationError",
+   "name": "mutant:fidelity-noc1",
+   "native_code": "InvalidCarrier",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob fidelity_detail.noc Input should be 0 [type=literal_error, input_value=1, input_type=int] For further information visit https://errors.pydantic.dev/2.13/v/literal_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidCarrier",
+   "expected_python": "ValidationError",
+   "name": "mutant:package-version-0.0.2",
+   "native_code": "InvalidCarrier",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob engine.package_version Input should be '0.0.1' [type=literal_error, input_value='0.0.2', input_type=str] For further information visit https://errors.pydantic.dev/2.13/v/literal_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidCarrier",
+   "expected_python": "ValidationError",
+   "name": "mutant:model-version-1",
+   "native_code": "InvalidCarrier",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob engine.model.version Input should be '2' [type=literal_error, input_value='1', input_type=str] For further information visit https://errors.pydantic.dev/2.13/v/literal_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "CapacityExceeded|SramCapacityExceeded",
+   "expected_python": "CapacityExceeded|SramCapacityExceeded",
+   "name": "mutant:sram-capacity",
+   "native_code": "SramCapacityExceeded",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, SramCapacityExceeded: slot1: requested end 16777984; available 16777216 [type=value_error, input_value={'admission': {'checkpoin...at': 1}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.1"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "LiveBufferAlias",
+   "expected_python": "LiveBufferAlias",
+   "name": "mutant:live-alias",
+   "native_code": "LiveBufferAlias",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, LiveBufferAlias: sw/sx [type=value_error, input_value={'admission': {'checkpoin...at': 1}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidDependency",
+   "expected_python": "InvalidDependency",
+   "name": "mutant:dependency-dropped",
+   "native_code": "InvalidDependency",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, InvalidDependency: uninitialized operand [type=value_error, input_value={'admission': {'checkpoin...at': 1}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidCarrier",
+   "expected_python": "ValidationError",
+   "name": "mutant:units-fractional-bytes",
+   "native_code": "InvalidCarrier",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 3 validation errors for OrdinaryJob mapped_point.task_graph.buffers.6.size_bytes Input should be a valid integer [type=int_type, input_value=30.5, input_type=float] For further information visit https://errors.pydantic.dev/2.13/v/int_type workload_closure.points.0.task_graph.buffers.6.size_bytes Inp"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "UnsupportedCheckpointScope|UnsupportedHardware|UnsupportedInitialState",
+   "expected_python": "UnsupportedCheckpointScope|UnsupportedHardware",
+   "name": "mutant:transport-as-production",
+   "native_code": "UnsupportedCheckpointScope",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob workload_closure Value error, UnsupportedCheckpointScope: [type=value_error, input_value={'admission': {'checkpoin...xture'}, 'source': None}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "UnsupportedProtocol",
+   "expected_python": "ValidationError",
+   "name": "mutant:historical-v3",
+   "native_code": "UnsupportedProtocol",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 14 validation errors for OrdinaryJob protocol Input should be 'uarch-engine/4' [type=literal_error, input_value='uarch-engine/3', input_type=str] For further information visit https://errors.pydantic.dev/2.13/v/literal_error engine.version Input should be 'native-stage/2' [type=literal_error, input_"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidCarrier",
+   "expected_python": "ValidationError",
+   "name": "mutant:unknown-field",
+   "native_code": "InvalidCarrier",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob trace Extra inputs are not permitted [type=extra_forbidden, input_value=True, input_type=bool] For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidJson",
+   "expected_python": "ValueError",
+   "name": "mutant:truncated",
+   "native_code": "InvalidJson",
+   "native_status": 2,
+   "ok": true,
+   "python": "JSONDecodeError: Unterminated string starting at: line 1 column 33067 (char 33066)"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "accept-or-refuse",
+   "expected_python": "ProtocolViolation",
+   "name": "mutant:noncanonical-whitespace",
+   "native_code": null,
+   "native_status": 0,
+   "ok": true,
+   "python": "ProtocolViolation: canonical saved job required"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "InvalidJson",
+   "expected_python": "ValueError",
+   "name": "mutant:duplicate-key",
+   "native_code": "InvalidJson",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValueError: DuplicateJsonKey: seed"
+  },
+  {
+   "debug_release_same": true,
+   "expected_native": "ContentHashMismatch",
+   "expected_python": "ContentHashMismatch|ArtifactHashMismatch",
+   "name": "mutant:hash-stale",
+   "native_code": "ContentHashMismatch",
+   "native_status": 2,
+   "ok": true,
+   "python": "ValidationError: 1 validation error for OrdinaryJob Value error, ArtifactHashMismatch: /job_hash: expected sha256:98cae305182405fad4a6804851e406b44a2f342f26e90462b6bc59028660f149 [type=value_error, input_value={'admission': {'checkpoin...t': 1}, 'source': None}}, input_type=dict] For further information visit https:"
+  },
+  {
+   "name": "all rkuarch/uarch_contract modules from runtime",
+   "ok": true
+  }
+ ],
+ "failures": [],
+ "mode": "run",
+ "module_files": [
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/engines/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/engines/native/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/engines/native/ordinary.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/engines/native/transport.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/arithmetic.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/checks.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/issue_checks.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/matrix_order.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/observations_v3.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/phase_laws.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/transition_checks_v3.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/workload/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/workload/mapped.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/assumptions.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/common.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/comparison.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/derivation.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/errors.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/evidence.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/exports.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/fidelity.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/hardware.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/hashing.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/mapped.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/mapped_issue.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/model_card.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/model_shape.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/operators.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/ordinary.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/precision.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/prepared.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/registry.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/report_context.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/request.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/rotary_v2.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/sourced.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/table.py"
+ ],
+ "observations": {
+  "api-run hw-altered-test (native status 0)": "CheckFailure: mechanism duration",
+  "cli-run hw-altered-test": {
+   "exit": 2,
+   "stderr": "mechanism duration\n"
+  }
+ }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "name": "cleanup-checker-call-disabled",
+    "exit_code": 0,
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/unit/test_ordinary_native.py",
+      "tests/native/test_ordinary_process.py",
+      "validation/component/test_runtime_checks.py"
+    ]
+  },
+  {
+    "name": "cleanup-checker-call-restored",
+    "exit_code": 0,
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/unit/test_ordinary_native.py",
+      "tests/native/test_ordinary_process.py",
+      "validation/component/test_runtime_checks.py"
+    ]
+  }
+]

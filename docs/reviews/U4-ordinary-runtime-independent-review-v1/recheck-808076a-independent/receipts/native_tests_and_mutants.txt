@@ -1,0 +1,43 @@
+make native-test recipe (v2 Makefile):
+25:native-test: ; cd native && cargo test --locked --offline --all-features --target x86_64-unknown-linux-gnu
+
+== normal run (exact recipe, accepted image) ==
+{"mode": "versions", "id": "a27a7e5d1450eab1521f410ab2e09718f0677f33d89da258c4fe622ab25c3228", "attach": 0, "exit": 0, "oom": false, "error": ""}
+{"mode": "test", "id": "0c93cff740c810e4f43906bf4b6cc236fb7c0cab9b5c5b2f7c529d02a3ea0cba", "attach": 0, "exit": 0, "oom": false, "error": ""}
+{"mode": "debug", "id": "4adc50d0bf7f761a236b4f802260bda017f65e7194a8928f0c55630d2fdf3ac5", "attach": 0, "exit": 0, "oom": false, "error": ""}
+{"mode": "release", "id": "b31fc778b60708ae8e025af9ab50c756d50eb1a343f8f92617e95880bb1798a2", "attach": 0, "exit": 0, "oom": false, "error": ""}
+     Running unittests src/lib.rs (/target/x86_64-unknown-linux-gnu/debug/deps/uarch_engine-a0f06be953595107)
+test component_admission_tests::synthetic_stale_closure_refuses ... ok
+test protocol::ordinary_capability_tests::checker_hardware_domain ... ok
+test result: ok. 85 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.60s
+     Running unittests src/main.rs (/target/x86_64-unknown-linux-gnu/debug/deps/uarch_engine-4328cf7e3ba30a11)
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+     Running tests/ordinary.rs (/target/x86_64-unknown-linux-gnu/debug/deps/ordinary-70dd9340baf540a8)
+test ordinary_protocol_and_json_refusals ... ok
+test ordinary_production_and_fixture_are_deterministic ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+binaries:
+55c119d68d877958852837f00ac8122b12c2011e0675c90f9d6bbb1bf13e6ec3  debug/uarch-engine
+184a9649e3d39beffa0da66a6c392f7c53cf12d5db9d95ced8748f1e7b2eeaba  release/uarch-engine
+
+== mutant f1-pin-removed ==
+mutant f1-pin-removed: replaced 1 occurrence in native/crates/uarch-engine/src/component_admission.rs
+{"mode": "test", "id": "fee7c397d2aaeda1823a15df4a36a549478f07e6b783b6c146189fafee6bfbe5", "attach": 101, "exit": 101, "oom": false, "error": ""}
+     Running unittests src/lib.rs (/target/x86_64-unknown-linux-gnu/debug/deps/uarch_engine-a0f06be953595107)
+test protocol::ordinary_capability_tests::checker_hardware_domain ... FAILED
+thread 'protocol::ordinary_capability_tests::checker_hardware_domain' (1364) panicked at crates/uarch-engine/src/protocol.rs:96:39:
+test result: FAILED. 84 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.35s
+
+== mutant f3-main-no-stdout ==
+mutant f3-main-no-stdout: replaced 1 occurrence in native/crates/uarch-engine/src/main.rs
+{"mode": "test", "id": "8c07bc2050cf36c9d933bb2b46ad6a840f580caaec1f29ee2357eb9e10fb1e01", "attach": 101, "exit": 101, "oom": false, "error": ""}
+     Running unittests src/lib.rs (/target/x86_64-unknown-linux-gnu/debug/deps/uarch_engine-a0f06be953595107)
+test result: ok. 85 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.39s
+     Running unittests src/main.rs (/target/x86_64-unknown-linux-gnu/debug/deps/uarch_engine-4328cf7e3ba30a11)
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+     Running tests/ordinary.rs (/target/x86_64-unknown-linux-gnu/debug/deps/ordinary-70dd9340baf540a8)
+test ordinary_production_and_fixture_are_deterministic ... FAILED
+thread 'ordinary_production_and_fixture_are_deterministic' (1400) panicked at crates/uarch-engine/tests/ordinary.rs:39:67:
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s

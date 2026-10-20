@@ -1,0 +1,149 @@
+[
+ {
+  "name": "hw-altered-production",
+  "expect_python": "UnsupportedHardware",
+  "expect_native": "UnsupportedHardware",
+  "test_only": false,
+  "note": "job_overhead_cycles 32->16 under production"
+ },
+ {
+  "name": "hw-altered-test",
+  "expect_python": "accept",
+  "expect_native": "accept",
+  "test_only": true,
+  "note": "same hardware, explicit test-only path"
+ },
+ {
+  "name": "clock-ratio-2",
+  "expect_python": "UnsupportedFrequency",
+  "expect_native": "UnsupportedFrequency",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "state-steady",
+  "expect_python": "UnsupportedInitialState",
+  "expect_native": "UnsupportedInitialState",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "state-fixture_resident",
+  "expect_python": "UnsupportedInitialState",
+  "expect_native": "UnsupportedInitialState",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "priming-1",
+  "expect_python": "UnsupportedInitialState",
+  "expect_native": "UnsupportedInitialState",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "precision-fp8",
+  "expect_python": "ValidationError",
+  "expect_native": "InvalidCarrier",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "fidelity-noc1",
+  "expect_python": "ValidationError",
+  "expect_native": "InvalidCarrier",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "package-version-0.0.2",
+  "expect_python": "ValidationError",
+  "expect_native": "InvalidCarrier",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "model-version-1",
+  "expect_python": "ValidationError",
+  "expect_native": "InvalidCarrier",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "sram-capacity",
+  "expect_python": "CapacityExceeded|SramCapacityExceeded",
+  "expect_native": "CapacityExceeded|SramCapacityExceeded",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "live-alias",
+  "expect_python": "LiveBufferAlias",
+  "expect_native": "LiveBufferAlias",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "dependency-dropped",
+  "expect_python": "InvalidDependency",
+  "expect_native": "InvalidDependency",
+  "test_only": false,
+  "note": "compute c no longer waits for producer a of sx"
+ },
+ {
+  "name": "units-fractional-bytes",
+  "expect_python": "ValidationError",
+  "expect_native": "InvalidCarrier",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "transport-as-production",
+  "expect_python": "UnsupportedCheckpointScope|UnsupportedHardware",
+  "expect_native": "UnsupportedCheckpointScope|UnsupportedHardware|UnsupportedInitialState",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "historical-v3",
+  "expect_python": "ValidationError",
+  "expect_native": "UnsupportedProtocol",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "unknown-field",
+  "expect_python": "ValidationError",
+  "expect_native": "InvalidCarrier",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "truncated",
+  "expect_python": "ValueError",
+  "expect_native": "InvalidJson",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "noncanonical-whitespace",
+  "expect_python": "ProtocolViolation",
+  "expect_native": "accept-or-refuse",
+  "test_only": false,
+  "note": "Python requires canonical saved job; binary transport may parse"
+ },
+ {
+  "name": "duplicate-key",
+  "expect_python": "ValueError",
+  "expect_native": "InvalidJson",
+  "test_only": false,
+  "note": ""
+ },
+ {
+  "name": "hash-stale",
+  "expect_python": "ContentHashMismatch|ArtifactHashMismatch",
+  "expect_native": "ContentHashMismatch",
+  "test_only": false,
+  "note": ""
+ }
+]

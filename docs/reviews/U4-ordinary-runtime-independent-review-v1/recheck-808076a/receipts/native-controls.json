@@ -1,0 +1,179 @@
+[
+  {
+    "name": "normal-make-native-test",
+    "container_id": "e6ac25211fcc33a25bf08ec169827a3d51856c37d269d3d4f18656866fbe1c3f",
+    "command": [
+      "make",
+      "native-test"
+    ],
+    "expected": 0,
+    "attach_status": 127,
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 127,
+      "Error": "",
+      "StartedAt": "2026-10-20T05:25:07.68281268Z",
+      "FinishedAt": "2026-10-20T05:25:07.865918133Z"
+    },
+    "removed": true
+  },
+  {
+    "name": "normal-native-test-recipe",
+    "container_id": "7f1b02b169b41d1eaa30761fe3f774a08fac2f20e40598d93487fca1db9400e1",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--target",
+      "x86_64-unknown-linux-gnu"
+    ],
+    "expected": 0,
+    "attach_status": 0,
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-20T05:25:33.219488356Z",
+      "FinishedAt": "2026-10-20T05:25:52.189794499Z"
+    },
+    "removed": true
+  },
+  {
+    "name": "f1-native-pin-removed",
+    "container_id": "52f409a1429e9f4a378d585f715c74d545452e92408f8489649a0d4783058886",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--target",
+      "x86_64-unknown-linux-gnu",
+      "--lib",
+      "protocol::ordinary_capability_tests::checker_hardware_domain"
+    ],
+    "expected": 101,
+    "attach_status": 101,
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 101,
+      "Error": "",
+      "StartedAt": "2026-10-20T05:25:52.831079814Z",
+      "FinishedAt": "2026-10-20T05:25:54.305621003Z"
+    },
+    "removed": true
+  },
+  {
+    "name": "f1-native-restored",
+    "container_id": "d21bc94ecccf2dc8a1865be6d450e771c311aa42c13b7e1b05989afb4c924247",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--target",
+      "x86_64-unknown-linux-gnu",
+      "--lib",
+      "protocol::ordinary_capability_tests::checker_hardware_domain"
+    ],
+    "expected": 0,
+    "attach_status": 0,
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-20T05:25:54.966091565Z",
+      "FinishedAt": "2026-10-20T05:25:56.603265472Z"
+    },
+    "removed": true
+  },
+  {
+    "name": "f3-shipping-invocation-broken",
+    "container_id": "969011ac9af6ca2a9ebfcb423744890b9594086899517572f65fa21548266dc7",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--target",
+      "x86_64-unknown-linux-gnu",
+      "--test",
+      "ordinary"
+    ],
+    "expected": 101,
+    "attach_status": 101,
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 101,
+      "Error": "",
+      "StartedAt": "2026-10-20T05:25:57.208749238Z",
+      "FinishedAt": "2026-10-20T05:25:57.933772049Z"
+    },
+    "removed": true
+  },
+  {
+    "name": "f3-shipping-restored",
+    "container_id": "0a3a04fa48aef7569ee880e693c1ba16055e6afe181a66a08abb68e98d2a266f",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--target",
+      "x86_64-unknown-linux-gnu",
+      "--test",
+      "ordinary"
+    ],
+    "expected": 0,
+    "attach_status": 0,
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-20T05:25:58.591147969Z",
+      "FinishedAt": "2026-10-20T05:25:59.221286488Z"
+    },
+    "removed": true
+  }
+]

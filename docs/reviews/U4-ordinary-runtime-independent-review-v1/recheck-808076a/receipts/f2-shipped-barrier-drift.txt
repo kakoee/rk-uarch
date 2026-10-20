@@ -1,0 +1,53 @@
+.FFF                                                                     [100%]
+=================================== FAILURES ===================================
+______________ test_literal_expectation_is_not_retuned_by_result _______________
+
+    def test_literal_expectation_is_not_retuned_by_result():
+        job, result, row, kwargs = inputs()
+        row["expected"]["duration_ps"] += 1
+>       with pytest.raises(CheckFailure, match="literal duration_ps"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'literal duration_ps'
+E         Actual message: 'mechanism duration'
+
+validation/component/test_runtime_checks.py:72: AssertionError
+_________________ test_unknown_literal_is_not_silently_ignored _________________
+
+    def test_unknown_literal_is_not_silently_ignored():
+        job, result, row, kwargs = inputs()
+        row["expected"]["duration_sp"] = 1
+>       with pytest.raises(CheckFailure, match="unknown expectation keys"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'unknown expectation keys'
+E         Actual message: 'mechanism duration'
+
+validation/component/test_runtime_checks.py:79: AssertionError
+______________________ test_valid_saved_fixture_consumes _______________________
+
+    def test_valid_saved_fixture_consumes():
+        job, result, row, kwargs = inputs()
+>       consume_case(job, result, row, **kwargs)
+
+validation/component/test_runtime_checks.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+validation/component/test_runtime_checks.py:20: in consume_case
+    check_v3(job, result, expected)
+src/rkuarch/verification/component/observations_v3.py:199: in check_v3
+    need(a["end_ps"] == edge_after(hz, a["start_ps"], cycles), "mechanism duration")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False, detail = 'mechanism duration'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           rkuarch.verification.component.checks.CheckFailure: mechanism duration
+
+src/rkuarch/verification/component/checks.py:25: CheckFailure
+=========================== short test summary info ============================
+FAILED validation/component/test_runtime_checks.py::test_literal_expectation_is_not_retuned_by_result
+FAILED validation/component/test_runtime_checks.py::test_unknown_literal_is_not_silently_ignored
+FAILED validation/component/test_runtime_checks.py::test_valid_saved_fixture_consumes
+3 failed, 1 passed in 5.45s

@@ -1,0 +1,138 @@
+[
+  {
+    "name": "python-positive",
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/unit/test_ordinary_native.py",
+      "validation/component/test_phase_laws.py",
+      "validation/component/test_runtime_checks.py",
+      "validation/component/test_issue_checks.py",
+      "validation/component/test_matrix_order.py",
+      "tests/unit/test_u4_k2_process.py"
+    ],
+    "exit_code": 0,
+    "expected": 0
+  },
+  {
+    "name": "f1-python-pin-removed",
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/unit/test_ordinary_native.py",
+      "-k",
+      "test_test_only_checker_capability"
+    ],
+    "exit_code": 1,
+    "expected": 1
+  },
+  {
+    "name": "f1-python-restored",
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/unit/test_ordinary_native.py",
+      "-k",
+      "test_test_only_checker_capability"
+    ],
+    "exit_code": 0,
+    "expected": 0
+  },
+  {
+    "name": "f2-shipped-scalar-drift",
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "validation/component/test_phase_laws.py"
+    ],
+    "exit_code": 1,
+    "expected": 1
+  },
+  {
+    "name": "f2-shipped-barrier-drift",
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "validation/component/test_runtime_checks.py"
+    ],
+    "exit_code": 1,
+    "expected": 1
+  },
+  {
+    "name": "f2-original-compute-drift",
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/unit/test_ordinary_native.py",
+      "validation/component/test_phase_laws.py",
+      "validation/component/test_runtime_checks.py",
+      "validation/component/test_issue_checks.py",
+      "validation/component/test_matrix_order.py"
+    ],
+    "exit_code": 0,
+    "expected": 0
+  },
+  {
+    "name": "f2-checkers-restored",
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "validation/component/test_phase_laws.py",
+      "validation/component/test_runtime_checks.py",
+      "validation/component/test_issue_checks.py",
+      "validation/component/test_matrix_order.py"
+    ],
+    "exit_code": 0,
+    "expected": 0
+  },
+  {
+    "name": "cleanup-discovery",
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--collect-only"
+    ],
+    "exit_code": 0,
+    "expected": 0
+  }
+]

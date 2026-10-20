@@ -1,0 +1,32 @@
+[
+  {
+    "name": "f2-original-drift-with-process",
+    "exit_code": 1,
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/native/test_ordinary_process.py"
+    ],
+    "executable": "/tmp/u4-recheck-808076a-target/x86_64-unknown-linux-gnu/debug/uarch-engine"
+  },
+  {
+    "name": "ordinary-process-restored",
+    "exit_code": 0,
+    "command": [
+      "/tmp/rk-uarch-u4-correction/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/native/test_ordinary_process.py"
+    ],
+    "executable": "/tmp/u4-recheck-808076a-target/x86_64-unknown-linux-gnu/debug/uarch-engine"
+  }
+]

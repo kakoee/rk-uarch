@@ -1,0 +1,80 @@
+FF..FF                                                                   [100%]
+=================================== FAILURES ===================================
+________________ test_test_only_checker_capability[16-overhead] ________________
+
+field = 'overhead', value = 16
+
+    @pytest.mark.parametrize("field", ["overhead", "barrier"])
+    @pytest.mark.parametrize("value", [16, 32, 64])
+    def test_test_only_checker_capability(field, value):
+        from rkuarch.engines.native.ordinary import load_job
+    
+        saved = canonical_json(hardware_variant(field, value)).encode()
+        if value == 32:
+            assert load_job(saved, test_only=True).admission.eligibility == "verification_only"
+        else:
+>           with pytest.raises(ValueError, match="UnsupportedHardware"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/unit/test_ordinary_native.py:177: Failed
+________________ test_test_only_checker_capability[16-barrier] _________________
+
+field = 'barrier', value = 16
+
+    @pytest.mark.parametrize("field", ["overhead", "barrier"])
+    @pytest.mark.parametrize("value", [16, 32, 64])
+    def test_test_only_checker_capability(field, value):
+        from rkuarch.engines.native.ordinary import load_job
+    
+        saved = canonical_json(hardware_variant(field, value)).encode()
+        if value == 32:
+            assert load_job(saved, test_only=True).admission.eligibility == "verification_only"
+        else:
+>           with pytest.raises(ValueError, match="UnsupportedHardware"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/unit/test_ordinary_native.py:177: Failed
+________________ test_test_only_checker_capability[64-overhead] ________________
+
+field = 'overhead', value = 64
+
+    @pytest.mark.parametrize("field", ["overhead", "barrier"])
+    @pytest.mark.parametrize("value", [16, 32, 64])
+    def test_test_only_checker_capability(field, value):
+        from rkuarch.engines.native.ordinary import load_job
+    
+        saved = canonical_json(hardware_variant(field, value)).encode()
+        if value == 32:
+            assert load_job(saved, test_only=True).admission.eligibility == "verification_only"
+        else:
+>           with pytest.raises(ValueError, match="UnsupportedHardware"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/unit/test_ordinary_native.py:177: Failed
+________________ test_test_only_checker_capability[64-barrier] _________________
+
+field = 'barrier', value = 64
+
+    @pytest.mark.parametrize("field", ["overhead", "barrier"])
+    @pytest.mark.parametrize("value", [16, 32, 64])
+    def test_test_only_checker_capability(field, value):
+        from rkuarch.engines.native.ordinary import load_job
+    
+        saved = canonical_json(hardware_variant(field, value)).encode()
+        if value == 32:
+            assert load_job(saved, test_only=True).admission.eligibility == "verification_only"
+        else:
+>           with pytest.raises(ValueError, match="UnsupportedHardware"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/unit/test_ordinary_native.py:177: Failed
+=========================== short test summary info ============================
+FAILED tests/unit/test_ordinary_native.py::test_test_only_checker_capability[16-overhead]
+FAILED tests/unit/test_ordinary_native.py::test_test_only_checker_capability[16-barrier]
+FAILED tests/unit/test_ordinary_native.py::test_test_only_checker_capability[64-overhead]
+FAILED tests/unit/test_ordinary_native.py::test_test_only_checker_capability[64-barrier]
+4 failed, 2 passed, 12 deselected in 0.63s

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-ordinary-runtime-independent-review-v1/recheck-808076a/probes/native_controls.py", line 63, in <module>
+    run('normal-make-native-test', ['make','native-test'], 0, work='/work')
+  File "/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4-ordinary-runtime-independent-review-v1/recheck-808076a/probes/native_controls.py", line 39, in run
+    assert state['ExitCode'] == expected and p.returncode == expected, record
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'name': 'normal-make-native-test', 'container_id': 'e6ac25211fcc33a25bf08ec169827a3d51856c37d269d3d4f18656866fbe1c3f', 'command': ['make', 'native-test'], 'expected': 0, 'attach_status': 127, 'state': {'Status': 'exited', 'Running': False, 'Paused': False, 'Restarting': False, 'OOMKilled': False, 'Dead': False, 'Pid': 0, 'ExitCode': 127, 'Error': '', 'StartedAt': '2026-10-20T05:25:07.68281268Z', 'FinishedAt': '2026-10-20T05:25:07.865918133Z'}, 'removed': True}

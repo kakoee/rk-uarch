@@ -1,0 +1,201 @@
+{
+ "checks": [
+  {
+   "name": "absent:/home",
+   "ok": true
+  },
+  {
+   "name": "absent:/work",
+   "ok": true
+  },
+  {
+   "name": "absent:/cargo-home",
+   "ok": true
+  },
+  {
+   "name": "absent:/src",
+   "ok": true
+  },
+  {
+   "found": [],
+   "name": "no .git above cwd",
+   "ok": true
+  },
+  {
+   "name": "installed under runtime site-packages",
+   "ok": true,
+   "site": "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages"
+  },
+  {
+   "name": "no editable/pth hooks",
+   "ok": true
+  },
+  {
+   "name": "historical host modules absent",
+   "ok": true
+  },
+  {
+   "name": "native binary absent",
+   "ok": true
+  },
+  {
+   "name": "cli-replay-binary-free:production.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-replay-binary-free:test-synthetic-runtime-cc0-v3.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-replay-binary-free:test-synthetic-stage2-cc-v3.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-replay-binary-free:test-synthetic-stage2-cc0-v3.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "name": "cli-replay-binary-free:test-synthetic-stage2-sr-v3.json",
+   "ok": true,
+   "stderr": ""
+  },
+  {
+   "got": "ValueError: ResultBindingMismatch:",
+   "name": "replay-fault:cross-job-binding",
+   "ok": true
+  },
+  {
+   "got": "ValidationError: 1 validation error for OrdinaryResult engine.package_version Input should be '0.0.1' [type=literal_error, input_value='0.0.2', input_type=str] For further information visit https://errors.pydantic.dev",
+   "name": "replay-fault:result-package-version",
+   "ok": true
+  },
+  {
+   "got": "ProtocolViolation: invalid complete canonical envelope",
+   "name": "replay-fault:noncanonical-result",
+   "ok": true
+  },
+  {
+   "got": "ProtocolViolation: invalid complete canonical envelope",
+   "name": "replay-fault:empty-result",
+   "ok": true
+  },
+  {
+   "got": "ValueError",
+   "name": "replay-fault:test-result-without-test-flag",
+   "ok": true
+  },
+  {
+   "duration_ps": 640000,
+   "got": "CheckFailure: mechanism duration",
+   "independent_check_v3": "CheckFailure: mechanism duration",
+   "name": "replay-fault:wrong-law-relabelled",
+   "ok": true,
+   "structural_validate_result": "accepted"
+  },
+  {
+   "name": "replay-fault:wrong-law-relabelled under -OO",
+   "ok": true,
+   "stderr": "mechanism duration\n"
+  },
+  {
+   "name": "no mapping producer imported",
+   "ok": true
+  },
+  {
+   "name": "all rkuarch/uarch_contract modules from runtime",
+   "ok": true
+  }
+ ],
+ "failures": [],
+ "mode": "replay",
+ "module_files": [
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/engines/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/engines/native/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/engines/native/ordinary.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/engines/native/transport.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/arithmetic.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/checks.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/issue_checks.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/matrix_order.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/observations_v3.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/phase_laws.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/verification/component/transition_checks_v3.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/workload/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/rkuarch/workload/mapped.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/__init__.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/assumptions.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/common.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/comparison.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/derivation.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/errors.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/evidence.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/exports.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/fidelity.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/hardware.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/hashing.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/mapped.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/mapped_issue.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/model_card.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/model_shape.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/operators.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/ordinary.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/precision.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/prepared.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/registry.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/report_context.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/request.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/rotary_v2.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/sourced.py",
+  "/tmp/claude-1000/-home-jjaff-AI-infra-simulation-rk-uarch/a379048e-c9e1-4480-b743-e6cc6620785f/scratchpad/rt/env/lib/python3.12/site-packages/uarch_contract/table.py"
+ ],
+ "modules": [
+  "rkuarch",
+  "rkuarch.engines",
+  "rkuarch.engines.native",
+  "rkuarch.engines.native.ordinary",
+  "rkuarch.engines.native.transport",
+  "rkuarch.verification",
+  "rkuarch.verification.component",
+  "rkuarch.verification.component.arithmetic",
+  "rkuarch.verification.component.checks",
+  "rkuarch.verification.component.issue_checks",
+  "rkuarch.verification.component.matrix_order",
+  "rkuarch.verification.component.observations_v3",
+  "rkuarch.verification.component.phase_laws",
+  "rkuarch.verification.component.transition_checks_v3",
+  "rkuarch.workload",
+  "rkuarch.workload.mapped",
+  "uarch_contract",
+  "uarch_contract.assumptions",
+  "uarch_contract.common",
+  "uarch_contract.comparison",
+  "uarch_contract.derivation",
+  "uarch_contract.errors",
+  "uarch_contract.evidence",
+  "uarch_contract.exports",
+  "uarch_contract.fidelity",
+  "uarch_contract.hardware",
+  "uarch_contract.hashing",
+  "uarch_contract.mapped",
+  "uarch_contract.mapped_issue",
+  "uarch_contract.model_card",
+  "uarch_contract.model_shape",
+  "uarch_contract.operators",
+  "uarch_contract.ordinary",
+  "uarch_contract.precision",
+  "uarch_contract.prepared",
+  "uarch_contract.registry",
+  "uarch_contract.report_context",
+  "uarch_contract.request",
+  "uarch_contract.rotary_v2",
+  "uarch_contract.sourced",
+  "uarch_contract.table"
+ ]
+}

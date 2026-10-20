@@ -1,0 +1,38 @@
+F........                                                                [100%]
+=================================== FAILURES ===================================
+_______________________ test_positive_and_replay[False] ________________________
+
+executable = PosixPath('/tmp/u4-recheck-808076a-target/x86_64-unknown-linux-gnu/debug/uarch-engine')
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-676/test_positive_and_replay_False0')
+fixture = False
+
+    @pytest.mark.parametrize("fixture", [False, True])
+    def test_positive_and_replay(executable, tmp_path, fixture):
+        raw = job_data() if fixture else production_data()
+        saved, output = tmp_path / "job.json", tmp_path / "result.json"
+        saved.write_text(canonical_json(raw))
+>       result = run(saved, executable=executable, test_only=fixture)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/native/test_ordinary_process.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/rkuarch/engines/native/ordinary.py:101: in run
+    return consume(stdout, stderr, status, job=job)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/rkuarch/engines/native/ordinary.py:78: in consume
+    check_v3(
+src/rkuarch/verification/component/observations_v3.py:199: in check_v3
+    need(a["end_ps"] == edge_after(hz, a["start_ps"], cycles), "mechanism duration")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ok = False, detail = 'mechanism duration'
+
+    def need(ok: bool, detail: str) -> None:
+        if not ok:
+>           raise CheckFailure(detail)
+E           rkuarch.verification.component.checks.CheckFailure: mechanism duration
+
+src/rkuarch/verification/component/checks.py:25: CheckFailure
+=========================== short test summary info ============================
+FAILED tests/native/test_ordinary_process.py::test_positive_and_replay[False]
+1 failed, 8 passed in 1.26s
