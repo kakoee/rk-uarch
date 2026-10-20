@@ -54,5 +54,7 @@ def test_linkage_matches_locked_dependency_graph():
 def test_native_readme_describes_delivered_boundary():
     text = (ROOT / "native/README.md").read_text()
     assert "Binary: uarch-engine" not in text
-    for phrase in ("library target", "dispatch capability", "phase-2", "not a public"):
+    for phrase in (
+        "ordinary component JSON binary", "dispatch capability", "phase-2", "uarch-engine/4"
+    ):
         assert phrase in text

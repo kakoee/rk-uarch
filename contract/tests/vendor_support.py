@@ -94,9 +94,18 @@ def check_production_isolation(root: Path) -> None:
                         and [(alias.name, alias.asname) for alias in node.names]
                         == [("files", None)]
                     )
+                    # Distribution version metadata does not load executable modules.
+                    ordinary_version_metadata = (
+                        isinstance(node, ast.ImportFrom)
+                        and node.level == 0
+                        and node.module == "importlib.metadata"
+                        and [(alias.name, alias.asname) for alias in node.names]
+                        == [("version", None)]
+                    )
                     if (
                         any(name.split(".")[0] in forbidden for name in names)
                         and not fixed_proof_resources
+                        and not ordinary_version_metadata
                     ):
                         violations.append(node.lineno)
                 if isinstance(node, ast.Call):

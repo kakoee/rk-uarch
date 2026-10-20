@@ -17,6 +17,15 @@ releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains op
 evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
 any simulator-performance claim and final closure. No implied waiver from proceeding.
 
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
+
 TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
 admit npu-m256 at declared representative points, and execute G5's verification obligations.
 The bounded engine and this scope's verified inputs are prerequisites; TPU availability,

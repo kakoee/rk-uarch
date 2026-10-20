@@ -4,7 +4,7 @@ from copy import deepcopy
 
 import pytest
 
-from validation.component.checks import CheckFailure
+from rkuarch.verification.component.checks import CheckFailure
 from validation.component.corpus import base
 from validation.component.observations import check_observations
 

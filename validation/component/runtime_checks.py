@@ -1,52 +1,9 @@
-"""Offline /3 consumption: explicit input/source bindings, then structure and independent laws.
-
-No process invocation or authority creation. Historical /2 consumers remain byte frozen.
-"""
-
-from __future__ import annotations
-
-import hashlib
+"""Literal expectations for saved historical model-2 observations; no source gates."""
 from fractions import Fraction
-from pathlib import Path
 from typing import Any
 
-from uarch_contract.mapped import MappedEngineJob, validate_result
-
-from validation.component.checks import need
-from validation.component.observations_v3 import check_v3
+from rkuarch.verification.component.checks import need
 from validation.component.runtime_literals import check_extended_literals
-
-CHECKER = "validation.component.observations_v3:check_v3"
-
-
-def verify_sources(source: Path, pins: dict[str, str]) -> None:
-    need(bool(pins), "explicit prospective consumer closure required")
-    required = {
-        "contract/uarch_contract/mapped.py",
-        "contract/uarch_contract/mapped_issue.py",
-        "validation/component/runtime_checks.py",
-        "validation/component/observations_v3.py",
-        "validation/component/issue_checks.py",
-        "validation/component/transition_checks_v3.py",
-    }
-    required.update(
-        str(p.relative_to(source))
-        for folder in (
-            "contract/uarch_contract",
-            "validation/component",
-            "src/rkuarch/engines/native",
-        )
-        for p in (source / folder).glob("*.py")
-        if not p.name.startswith("test_")
-    )
-    need(required <= set(pins), "complete matching consumer/structural closure required")
-    for name, wanted in pins.items():
-        path = (source / name).resolve()
-        need(path.is_relative_to(source.resolve()), "consumer path escape")
-        need(
-            hashlib.sha256(path.read_bytes()).hexdigest() == wanted,
-            "consumer source mismatch: " + name,
-        )
 
 
 def assert_literals(job: dict[str, Any], result: dict[str, Any], expected: dict[str, Any]) -> None:
@@ -223,59 +180,3 @@ def assert_literals(job: dict[str, Any], result: dict[str, Any], expected: dict[
             if a["subphase"] == "dma_issue" and a["kind"] == "alignment"
         }
         need(causes == expected["credit_causes"], "literal a1 release attribution sets")
-
-
-def consume_case(
-    job: dict[str, Any],
-    result: dict[str, Any],
-    row: dict[str, Any],
-    *,
-    checker_id: str,
-    source: Path,
-    pins: dict[str, str],
-    expected: dict[str, Any],
-    input_sha256: str,
-    raw_input: bytes,
-    admitted: dict[str, Any] | None = None,
-) -> None:
-    # Caller must supply a separately frozen input binding; a caller hash is not authority.
-    import json
-
-    need(admitted is not None, "separately frozen admitted inventory required")
-    assert admitted is not None
-    need(
-        admitted["case_id"] == row["case_id"]
-        and admitted["raw_input_sha256"] == input_sha256
-        and admitted["job_hash"] == job["job_hash"]
-        and admitted["engine"] == job["engine"],
-        "separately frozen admitted input/engine",
-    )
-    model = job["engine"]["model"]
-    need(
-        (model["name"], model["version"], result["observations"]["format"], checker_id)
-        == ("native-intervals", "2", "uarch-native-observations/3", CHECKER),
-        "model/format/checker route",
-    )
-    need(
-        job["profile"]["format"] == "uarch-native-test-profile/2", "prospective profile/2 required"
-    )
-    entry = next(e for e in job["profile"]["entries"] if e["case_id"] == row["case_id"])
-    need(
-        entry["mapping_policy"] == job["workload_closure"]["mapping_policy"],
-        "exact prospective mapping policy promise",
-    )
-    need(
-        hashlib.sha256(raw_input).hexdigest() == input_sha256 and json.loads(raw_input) == job,
-        "exact selected input bytes",
-    )
-    need(
-        job["admission"]["case_id"] == row["case_id"]
-        and job["profile"]["profile_hash"] == row["profile"]["profile_hash"]
-        and job["point_hash"] == row["point_hash"]
-        and job["bundle_hash"] == row["bundle_hash"],
-        "selected definition/profile join",
-    )
-    verify_sources(source, pins)
-    validate_result(result, MappedEngineJob.model_validate(job))
-    check_v3(job, result, expected)
-    assert_literals(job, result, row["expected"])

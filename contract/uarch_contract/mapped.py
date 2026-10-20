@@ -7,7 +7,7 @@ Use explicit submodule imports; the legacy registry and package exports stay unc
 from __future__ import annotations
 
 from fractions import Fraction
-from typing import Annotated, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from pydantic import Field, StrictBool, StrictInt, StrictStr, model_validator
 
@@ -18,6 +18,9 @@ from .hashing import content_hash, spec_hash, verify_identity
 from .prepared import PreparedBundle, PreparedOp, Producer, Query, RankScope, validate_prepared_op
 from .rotary_v2 import PreparedBundleV2
 from .table import Counts, ExtCounts
+
+if TYPE_CHECKING:
+    from .ordinary import OrdinaryBundle, OrdinaryJob, OrdinaryResult
 
 U64 = Annotated[int, Field(strict=True, ge=0, le=18446744073709551615)]
 Positive = Annotated[int, Field(strict=True, ge=1, le=18446744073709551615)]
@@ -1278,6 +1281,14 @@ class MappedEngineResult(FrozenModel):
 
 def validate_result(value: object, job: MappedEngineJob) -> MappedEngineResult:
     r = MappedEngineResult.model_validate(value)
+    validate_result_semantics(r, job)
+    return r
+
+
+def validate_result_semantics(
+    r: MappedEngineResult | OrdinaryResult, job: MappedEngineJob | OrdinaryJob
+) -> None:
+    require(r.protocol == job.protocol, "ResultBindingMismatch")
     require(r.job_hash == job.job_hash and r.engine == job.engine, "ResultBindingMismatch")
     require(r.admission == job.admission, "AdmissionMismatch")
     if job.state_model == "resource_intervals/1":
@@ -1406,10 +1417,11 @@ def validate_result(value: object, job: MappedEngineJob) -> MappedEngineResult:
             "AttributionMismatch",
         )
         validate_component_observations(r, job)
-    return r
 
 
-def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
+def validate_component_observations(
+    r: MappedEngineResult | OrdinaryResult, job: MappedEngineJob | OrdinaryJob
+) -> None:
     """Structural witness joins; independent model-law checks remain required."""
     obs = r.observations
     require(
@@ -1881,7 +1893,9 @@ def validate_component_observations(r: MappedEngineResult, job: MappedEngineJob)
         )
 
 
-def validate_fixed_delay_observations(r: MappedEngineResult, job: MappedEngineJob) -> None:
+def validate_fixed_delay_observations(
+    r: MappedEngineResult | OrdinaryResult, job: MappedEngineJob | OrdinaryJob
+) -> None:
     """Proposed structural/causal consistency checks, not evidence of real execution."""
     obs = r.observations
     require(
@@ -2287,7 +2301,7 @@ def admit(
     return b
 
 
-def validate_resources(b: MappedBundle, p: MappedPoint) -> None:
+def validate_resources(b: MappedBundle | OrdinaryBundle, p: MappedPoint) -> None:
     g = p.task_graph
     raw = b.hardware_spec.model_dump(mode="json")
     core = raw["cores"]["core_type"]

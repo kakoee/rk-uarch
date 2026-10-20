@@ -13,8 +13,8 @@ from typing import Any
 
 from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, validate_result
 
-from validation.component.arithmetic import edge_after
-from validation.component.checks import (
+from rkuarch.verification.component.arithmetic import edge_after
+from rkuarch.verification.component.checks import (
     check_allocations,
     check_causal_path,
     check_credits,

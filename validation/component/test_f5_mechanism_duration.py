@@ -5,7 +5,7 @@ from copy import deepcopy
 import pytest
 from uarch_contract.mapped import validate_result
 
-from validation.component.checks import CheckFailure
+from rkuarch.verification.component.checks import CheckFailure
 from validation.component.consistent_carriers import EXPECTED, activity, control, synchronize
 from validation.component.observations_v2 import check_v2
 

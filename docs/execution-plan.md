@@ -239,6 +239,7 @@ Internal mechanics and independent derivations may overlap M; public protocol wi
 | **Parallel progress** | If reference feasibility/access is unresolved, retain the open G3a/campaign gate and proceed only with independently ready U6 tasks; do not call U4/U5 closed |
 | **Not in this sprint** | No C2 depth, threads, mandatory FP8/os-tiled/ragged grid or automatic silicon measurement authorization |
 | **Effort** | Re-estimate M/K1/K2/B/R; old full-table T effort is not a current U4 forecast |
+| **Ordinary execution / provenance** | Native remains in U4. Use installed software/engine/model versions and existing input/result hashes; no runtime dependency on executable hashes, development evidence, host authority records, custom startup assurance or construction tracing. U0011 basic-provenance simplification governs the explicit transition; simulator verification and U4b/G3a obligations remain. |
 
 ### U5 · Silicon I: the large-core class
 

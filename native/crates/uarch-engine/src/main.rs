@@ -1,13 +1,14 @@
-//! Fixed-delay public process boundary; one request, no discovery or engine selectors.
+//! Ordinary component process boundary: one EOF JSON request.
 #![forbid(unsafe_code)]
 use std::io::{Read, Write};
-use uarch_engine::protocol::{MAX_INPUT_BYTES, error_bytes, respond};
+use uarch_engine::protocol::{MAX_INPUT_BYTES, error_bytes, respond_with_test_mode};
 fn main() {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
-    if args != ["--protocol", "uarch-engine/3"] {
+    let test_only = args == ["--protocol", "uarch-engine/4", "--test-only"];
+    if !test_only && args != ["--protocol", "uarch-engine/4"] {
         let error = uarch_engine::Refusal {
             code: "UnsupportedProtocol",
-            message: "expected --protocol uarch-engine/3".into(),
+            message: "expected --protocol uarch-engine/4 [--test-only]".into(),
             pointer: "/protocol".into(),
         };
         if std::io::stderr().write_all(&error_bytes(&error)).is_err() {
@@ -23,7 +24,7 @@ fn main() {
     {
         std::process::exit(1);
     }
-    match respond(&input) {
+    match respond_with_test_mode(&input, test_only) {
         Ok(output) => {
             if std::io::stdout().write_all(&output).is_err() {
                 std::process::exit(1);

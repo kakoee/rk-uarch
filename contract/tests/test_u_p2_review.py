@@ -436,6 +436,17 @@ def test_f13_dynamic_vendor_access_and_tool_imports_are_refused(
         vendor_support.check_production_isolation(tmp_path)
 
 
+def test_distribution_version_metadata_is_not_dynamic_loading(tmp_path: Path) -> None:
+    from . import vendor_support
+
+    root = tmp_path / "src/rkuarch"
+    root.mkdir(parents=True)
+    (root / "__init__.py").write_text(
+        'from importlib.metadata import version\nPACKAGE_VERSION = version("rk-uarch")\n'
+    )
+    vendor_support.check_production_isolation(tmp_path)
+
+
 def test_production_isolation() -> None:
     from . import vendor_support
 

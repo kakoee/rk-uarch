@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from validation.component.checks import need
+from rkuarch.verification.component.checks import need
 
 METADATA = frozenset({"premise", "native_status", "representation"})
 INPUTS = frozenset({"capacity_bytes", "required_accumulator_bytes", "accumulator_bytes"})

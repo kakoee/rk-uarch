@@ -3,7 +3,7 @@
 from collections import defaultdict
 from typing import Any
 
-from validation.component.checks import need
+from rkuarch.verification.component.checks import need
 
 
 def phase_binding(j: dict[str, Any], a: Any) -> tuple[str, str, str | None, bool]:

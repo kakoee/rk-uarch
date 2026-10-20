@@ -1,41 +1,16 @@
-# Independent component verification preparation
+# Independent component verification
 
-`arithmetic.py` contains bounded scalar E3/E4 worksheets, no event scheduler. `corpus.py`
-constructs finite literal inputs from pinned installed carriers and old corrected fixtures;
-it imports neither A's mapper nor timing/count helpers. `cases.json` freezes their hashes
-and expected values. Generated profiles/registry are **unsigned prospective inputs**.
-No engine identity is invented and no predicted total is placed into an execution receipt.
+The active scalar worksheets and model-2 checker live in
+`src/rkuarch/verification/component/` and ship in the wheel. Current tests and consumers
+import that implementation directly. Run `make test-fast` for the Python selection and
+`make native-test` in the accepted pinned local environment for the shipping /4 binary
+paths. U0024 still defers hosted native execution.
 
-`checks.py` checks half-open union time, finite queue windows, inventory conservation,
-completed work, credits, allocation capacity/lifetimes and causal partition.
-`observations.py` consumes actual installed observations after strict result parsing;
-`selection.py` asserts finite case literals and six-way debug/release repetition.
-`reduction.py` retains actual-call budgets, binding checks and qualifying replay completeness;
-applicable discovery failures dominate even after passing replays.
-The optional native selection consumes actual released public outputs from
-`RKUARCH_B_COMPONENT_RESULTS`; absence skips. It is an observation-consumer harness,
-not an invented public component runner or proof of execution authority. Native refusals,
-transport receipts and public mutant/restored execution still require the released runner.
-
-Ordinary selection:
-
-```sh
-python -m pytest -q -rs validation/component -m 'not native'
-python -m validation.component.corpus
-```
-
-Use the existing pinned environment with this clone's `src`, `contract` and repository
-root importable. This session used the already installed main-clone CPython/packages and
-explicit Lane B paths; no packages were installed. See handoff checks for exact origins.
-The second command prints prospective identities, never execution receipts. `build()`
-returns exact candidate bundle/profile bytes for review and later genuine binding.
-
-Synthetic classes and tests explicitly say `SYNTHETIC CHECKER-ONLY`. They deliberately
-omit EngineResult protocol/hash/authority and cannot be confused with native success.
-Every mutation is bracketed by a correct positive and restored control. Missing/failed/
-unsupported/setup-error states are preserved; only complete nonempty passing required
-coverage reduces to passed. Native aggregate remains not_run; a surviving required mutant
-or applicable counterexample must dominate it as failed when actually observed.
+Historical /1 and /2 observation consumers, literal corpora and synthetic carrier builders
+remain for their semantic tests and saved evidence. They are not ordinary execution gates.
+Retired deployment, startup/construction assurance and campaign drivers have been removed;
+old reports and receipts describe the code at their recorded Git revisions. No historical
+campaign or stopped startup experiment is rerun by ordinary tests.
 
 ## Measurement conventions and limits
 

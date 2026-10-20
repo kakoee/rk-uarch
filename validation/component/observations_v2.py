@@ -8,8 +8,8 @@ from collections import defaultdict
 from fractions import Fraction
 from typing import Any
 
-from validation.component.arithmetic import ceil, edge_after
-from validation.component.checks import (
+from rkuarch.verification.component.arithmetic import ceil, edge_after
+from rkuarch.verification.component.checks import (
     check_allocations,
     check_credits,
     check_work,
@@ -19,7 +19,7 @@ from validation.component.checks import (
     union_time,
     unique,
 )
-from validation.component.phase_laws import channel
+from rkuarch.verification.component.phase_laws import channel
 from validation.component.transition_checks import check_transitions, phase_binding
 
 

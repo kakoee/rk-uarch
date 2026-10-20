@@ -8,9 +8,9 @@ from uarch_contract.mapped import MappedBundle
 from uarch_contract.prepared import PreparedOp, Producer
 
 from rkuarch.mapping.component import map_component
+from rkuarch.verification.component.arithmetic import resident
 from rkuarch.workload.component import component_point, prepare_component_bundle
 from rkuarch.workload.mapped import export_component_bundle, load_component_bundle
-from validation.component.arithmetic import resident
 from validation.component.corpus import base, read
 
 

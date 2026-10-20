@@ -1,0 +1,55 @@
+{
+  "$defs": {
+    "ModelVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "native-intervals",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "2",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "ModelVersion",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "$ref": "#/$defs/ModelVersion"
+    },
+    "name": {
+      "const": "native",
+      "title": "Name",
+      "type": "string"
+    },
+    "package_version": {
+      "const": "0.0.1",
+      "title": "Package Version",
+      "type": "string"
+    },
+    "version": {
+      "const": "native-stage/2",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "version",
+    "package_version",
+    "model"
+  ],
+  "title": "SoftwareIdentity",
+  "type": "object"
+}

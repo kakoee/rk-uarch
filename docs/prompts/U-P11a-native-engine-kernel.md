@@ -38,6 +38,15 @@ PHASES AND PREREQUISITES (name the phase in the handoff):
   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
   U0023; full-table work is later, not a kernel prerequisite.
 
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
+
 TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
 EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
 jobs; no subsystem models yet. U-P11b adds the bounded model stage.

@@ -1,17 +1,17 @@
 //! Complete admitted fixed-delay closure validation, independent of the Python caller.
+#[cfg(test)]
+use crate::{Delay, Job, carrier, wire};
 use crate::{
-    Delay, Job,
-    carrier::{self, Result, refuse},
-    hardware, wire,
+    carrier::{Result, refuse},
+    hardware,
 };
 use serde_json::Value;
+#[cfg(test)]
 use std::collections::{BTreeMap, BTreeSet};
+#[cfg(test)]
 const PRODUCTION: &str = "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9";
-pub(crate) struct Trust {
-    pub registry: String,
-    pub profiles: BTreeMap<String, BTreeSet<String>>,
-    pub engine: Value,
-}
+
+#[cfg(test)]
 pub(crate) struct Validated {
     pub raw: Value,
     pub jobs: Vec<Job>,
@@ -38,6 +38,7 @@ pub(crate) fn identity(v: &Value, key: &str) -> Result<()> {
         key,
     )
 }
+#[cfg(test)]
 fn sorted(values: Vec<Value>, code: &'static str) -> Result<()> {
     // Values are strings, integers, or pairs thereof. Never compare serialized
     // integers lexically. Callers that admit unbounded ints do not use this helper.
@@ -60,15 +61,19 @@ fn sorted(values: Vec<Value>, code: &'static str) -> Result<()> {
         "",
     )
 }
+#[cfg(test)]
 fn array(v: &Value) -> &Vec<Value> {
     v.as_array().expect("validated carrier array")
 }
+#[cfg(test)]
 fn text(v: &Value) -> &str {
     v.as_str().expect("validated carrier string")
 }
+#[cfg(test)]
 fn num(v: &Value) -> u64 {
     v.as_u64().expect("validated u64")
 }
+#[cfg(test)]
 fn profile(p: &mut Value) -> Result<()> {
     for e in p["entries"].as_array_mut().expect("shape") {
         hardware::validate(&mut e["hardware_spec"])?;
@@ -101,6 +106,7 @@ fn profile(p: &mut Value) -> Result<()> {
         "TestProfileMismatch",
     )
 }
+#[cfg(test)]
 fn point(p: &Value, owners: &[Value], selected: bool) -> Result<()> {
     let g = &p["task_graph"];
     identity(g, "graph_hash")?;
@@ -212,7 +218,8 @@ fn point(p: &Value, owners: &[Value], selected: bool) -> Result<()> {
     }
     Ok(())
 }
-pub(crate) fn validate(input: &str, trust: &Trust) -> Result<Validated> {
+#[cfg(test)]
+pub(crate) fn validate(input: &str) -> Result<Validated> {
     let v = wire::parse(&wire::normalize_integer_zero(input))
         .map_err(|e| refuse("InvalidJson", "", e))?;
     require(
@@ -388,21 +395,6 @@ pub(crate) fn validate(input: &str, trust: &Trust) -> Result<Validated> {
     }
     identity(&v, "job_hash")?;
     // External finite authority is checked separately from every content self-hash.
-    require(
-        v["registry"]["registry_hash"] == trust.registry,
-        "RegistryTrustMismatch",
-        "",
-    )?;
-    require(
-        a["profile_hash"] == v["profile"]["profile_hash"]
-            && trust
-                .profiles
-                .get(text(&a["profile_hash"]))
-                .is_some_and(|ids| ids.contains(text(&a["case_id"]))),
-        "TestProfileMismatch",
-        "",
-    )?;
-    require(v["engine"] == trust.engine, "EngineIdentityMismatch", "")?;
     let owner_ids: Vec<_> = owner_values.iter().map(num).collect();
     let job_ids: Vec<String> = array(&p["task_graph"]["jobs"])
         .iter()
@@ -477,73 +469,27 @@ pub(crate) fn validate(input: &str, trust: &Trust) -> Result<Validated> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    fn fixture() -> (Value, Trust) {
+    fn fixture() -> Value {
         let v: Value =
             serde_json::from_str(include_str!("../testdata/synthetic-kernel-job.json")).unwrap();
-        let trust = Trust {
-            registry: text(&v["registry"]["registry_hash"]).into(),
-            profiles: BTreeMap::from([(
-                text(&v["profile"]["profile_hash"]).into(),
-                BTreeSet::from([text(&v["admission"]["case_id"]).into()]),
-            )]),
-            engine: v["engine"].clone(),
-        };
-        (v, trust)
-    }
-    #[test]
-    #[ignore = "explicit private validation-only corpus; never calls Simulation/respond"]
-    fn frozen_full_corpus_validation_only() {
-        let root = std::path::PathBuf::from(
-            std::env::var("K2_CARRIER_CORPUS").expect("explicit private corpus"),
-        );
-        let authority: Value =
-            wire::parse(&std::fs::read_to_string(root.join("authority.json")).unwrap()).unwrap();
-        let t = Trust {
-            registry: text(&authority["trust"]["registry_hash"]).into(),
-            engine: authority["engine"].clone(),
-            profiles: array(&authority["trust"]["profiles"])
-                .iter()
-                .map(|p| {
-                    (
-                        text(&p["profile_hash"]).into(),
-                        array(&p["cases"])
-                            .iter()
-                            .map(|c| text(&c["case_id"]).into())
-                            .collect(),
-                    )
-                })
-                .collect(),
-        };
-        let index: Value =
-            wire::parse(&std::fs::read_to_string(root.join("index.json")).unwrap()).unwrap();
-        assert!(!array(&index).is_empty());
-        for name in array(&index) {
-            let bytes = std::fs::read_to_string(root.join(text(name))).unwrap();
-            let v = validate(&bytes, &t).unwrap_or_else(|e| panic!("{}: {:?}", name, e));
-            assert_eq!(wire::canonical(&v.raw).unwrap(), bytes);
-        }
-        println!(
-            "validated {} complete carriers; executed zero mapped jobs",
-            array(&index).len()
-        );
+        v
     }
     #[test]
     fn unselected_point_uses_complete_graph_carrier_laws_without_executing_it() {
-        let (_, t) = fixture();
         let text = include_str!("../testdata/synthetic-unselected-point.json");
-        validate(text, &t).unwrap();
+        validate(text).unwrap();
     }
     #[test]
     fn validate_synthetic_carrier_without_execution() {
-        let (v, t) = fixture();
-        let valid = validate(&wire::canonical(&v).unwrap(), &t).unwrap();
+        let v = fixture();
+        let valid = validate(&wire::canonical(&v).unwrap()).unwrap();
         assert_eq!(valid.raw, v);
         assert_eq!(valid.jobs.len(), 3);
         // This only validates a DTO. It never calls Simulation or public execution.
     }
     #[test]
     fn malformed_carriers_refuse_before_execution() {
-        let (v, t) = fixture();
+        let v = fixture();
         for (pointer, bad) in [
             ("/seed", serde_json::json!(true)),
             ("/seed", serde_json::json!(1.0)),
@@ -558,48 +504,18 @@ mod tests {
             let mut changed = v.clone();
             *changed.pointer_mut(pointer).unwrap() = bad;
             assert!(
-                validate(&wire::canonical(&changed).unwrap(), &t).is_err(),
+                validate(&wire::canonical(&changed).unwrap()).is_err(),
                 "{pointer}"
             );
         }
         let mut unknown = v.clone();
         unknown["workload_closure"]["hardware_spec"]["tdp_w"]["unexpected"] = Value::Null;
         assert_eq!(
-            validate(&wire::canonical(&unknown).unwrap(), &t)
+            validate(&wire::canonical(&unknown).unwrap())
                 .err()
                 .unwrap()
                 .code,
             "InvalidCarrier"
-        );
-    }
-    #[test]
-    fn content_rehash_is_not_external_trust() {
-        let (v, mut t) = fixture();
-        t.registry = "sha256:wrong".into();
-        assert_eq!(
-            validate(&wire::canonical(&v).unwrap(), &t)
-                .err()
-                .unwrap()
-                .code,
-            "RegistryTrustMismatch"
-        );
-        let (v, mut t) = fixture();
-        t.profiles.clear();
-        assert_eq!(
-            validate(&wire::canonical(&v).unwrap(), &t)
-                .err()
-                .unwrap()
-                .code,
-            "TestProfileMismatch"
-        );
-        let (v, mut t) = fixture();
-        t.engine["implementation_hash"] = Value::String("sha256:wrong".into());
-        assert_eq!(
-            validate(&wire::canonical(&v).unwrap(), &t)
-                .err()
-                .unwrap()
-                .code,
-            "EngineIdentityMismatch"
         );
     }
 }

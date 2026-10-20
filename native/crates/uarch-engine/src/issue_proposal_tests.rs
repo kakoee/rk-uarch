@@ -2,22 +2,12 @@
 use super::*;
 use crate::component_admission::Task;
 use serde_json::json;
-fn anchor(v: &Value) -> Trust {
-    Trust {
-        registry: v["registry"]["registry_hash"].as_str().unwrap().into(),
-        profiles: BTreeMap::from([(
-            v["profile"]["profile_hash"].as_str().unwrap().into(),
-            BTreeSet::from([v["admission"]["case_id"].as_str().unwrap().into()]),
-        )]),
-        engine: v["engine"].clone(),
-    }
-}
+
 fn fixture(id: &str) -> (Value, Admitted) {
     let all: Value =
         serde_json::from_str(include_str!("../testdata/synthetic-component-jobs.json")).unwrap();
     let v = all[id].clone();
-    let a =
-        component_admission::validate(&crate::wire::canonical(&v).unwrap(), &anchor(&v)).unwrap();
+    let a = component_admission::validate(&crate::wire::canonical(&v).unwrap()).unwrap();
     (v, a)
 }
 fn model_two(v: &mut Value) {
@@ -85,12 +75,8 @@ fn proposed_raw_gap_has_exact_issue_alignment_and_queues() {
     let mut v: Value =
         serde_json::from_str(include_str!("../testdata/synthetic-issue-core-gap.json")).unwrap();
     model_two(&mut v);
-    let r = execute_with_observations(
-        &crate::wire::canonical(&v).unwrap(),
-        &anchor(&v),
-        ObservationVersion::V3,
-    )
-    .unwrap();
+    let r = execute_with_observations(&crate::wire::canonical(&v).unwrap(), ObservationVersion::V3)
+        .unwrap();
     assert_eq!(r["observations"]["format"], "uarch-native-observations/3");
     let rows = r["observations"]["activities"]["records"]
         .as_array()
@@ -137,7 +123,7 @@ fn proposed_raw_gap_has_exact_issue_alignment_and_queues() {
 fn proposed_model_version_is_explicit_and_legacy_is_unchanged() {
     let (v, _) = fixture("D01");
     let raw = crate::wire::canonical(&v).unwrap();
-    let old = execute(&raw, &anchor(&v)).unwrap();
+    let old = execute(&raw).unwrap();
     assert_eq!(old["duration_ps"], 60000);
     assert_eq!(old["observations"]["format"], "uarch-native-observations/2");
     assert!(
@@ -148,16 +134,13 @@ fn proposed_model_version_is_explicit_and_legacy_is_unchanged() {
     let mut new_input = v.clone();
     model_two(&mut new_input);
     assert_eq!(
-        execute(
-            &crate::wire::canonical(&new_input).unwrap(),
-            &anchor(&new_input)
-        )
-        .unwrap_err()
-        .code,
+        execute(&crate::wire::canonical(&new_input).unwrap())
+            .unwrap_err()
+            .code,
         "InvalidCarrier"
     );
     assert_eq!(
-        execute_with_observations(&raw, &anchor(&v), ObservationVersion::V3)
+        execute_with_observations(&raw, ObservationVersion::V3)
             .unwrap_err()
             .code,
         "InvalidCarrier"
@@ -304,24 +287,12 @@ fn proposed_two_simultaneous_pending_credits_are_distinct_from_inflight() {
     assert!(r.pending_issue.values().all(BTreeSet::is_empty));
     assert!(r.inflight.values().all(BTreeSet::is_empty));
 }
-#[test]
-#[ignore = "explicit private unapplied model2 job/anchor/output paths"]
-fn proposal_file_probe() {
-    let raw = std::fs::read_to_string(std::env::var("ISSUE_JOB").unwrap()).unwrap();
-    let value: Value = serde_json::from_str(&raw).unwrap();
-    let result = execute_with_observations(&raw, &anchor(&value), ObservationVersion::V3).unwrap();
-    std::fs::write(
-        std::env::var("ISSUE_OUTPUT").unwrap(),
-        crate::wire::canonical(&result).unwrap(),
-    )
-    .unwrap();
-}
 
 #[test]
 fn proposed_v2_full_bytes_remain_frozen_for_compute_read_write() {
     {
         let (v, _) = fixture("C02");
-        let r = execute(&crate::wire::canonical(&v).unwrap(), &anchor(&v)).unwrap();
+        let r = execute(&crate::wire::canonical(&v).unwrap()).unwrap();
         assert_eq!(
             crate::hardware::digest(&r).unwrap(),
             "sha256:aa477f0f69c80aea072ae52b7b6c306597177ed5c95325b6ae0301564cfff4ce"
@@ -329,7 +300,7 @@ fn proposed_v2_full_bytes_remain_frozen_for_compute_read_write() {
     }
     {
         let (v, _) = fixture("D01");
-        let r = execute(&crate::wire::canonical(&v).unwrap(), &anchor(&v)).unwrap();
+        let r = execute(&crate::wire::canonical(&v).unwrap()).unwrap();
         assert_eq!(
             crate::hardware::digest(&r).unwrap(),
             "sha256:cdbae721a6966af5a33116fbd229aa776c13d02e768767fbfa56737df53de863"
@@ -337,7 +308,7 @@ fn proposed_v2_full_bytes_remain_frozen_for_compute_read_write() {
     }
     {
         let (v, _) = fixture("D02");
-        let r = execute(&crate::wire::canonical(&v).unwrap(), &anchor(&v)).unwrap();
+        let r = execute(&crate::wire::canonical(&v).unwrap()).unwrap();
         assert_eq!(
             crate::hardware::digest(&r).unwrap(),
             "sha256:ab579d0eca3929d4ebb4cccd87cba7eb2995c23a717c4b9aad7041e4f7d9ae4e"
@@ -363,8 +334,7 @@ fn proposed_added_endpoints_preserve_event_capacity_bound() {
 }
 
 fn ordering_probe(raw: &str, first: &str, second: &str) {
-    let v: Value = serde_json::from_str(raw).unwrap();
-    let result = execute_with_observations(raw, &anchor(&v), ObservationVersion::V3).unwrap();
+    let result = execute_with_observations(raw, ObservationVersion::V3).unwrap();
     let opportunities = result["observations"]["reservation_opportunities"]["records"]
         .as_array()
         .expect("actual reservation opportunities required");
@@ -488,8 +458,7 @@ fn proposed_order_terminal_phase_zero_batch_and_inline_epochs() {
 }
 
 fn stage2_result(raw: &str) -> Value {
-    let v: Value = serde_json::from_str(raw).unwrap();
-    execute_with_observations(raw, &anchor(&v), ObservationVersion::V3).unwrap()
+    execute_with_observations(raw, ObservationVersion::V3).unwrap()
 }
 fn stage2_mixed_causes(raw: &str, release: u64) {
     let r = stage2_result(raw);

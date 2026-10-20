@@ -4,7 +4,7 @@ from fractions import Fraction
 
 import pytest
 
-from validation.component.arithmetic import burst, dma, edge_after, resident, split
+from rkuarch.verification.component.arithmetic import burst, dma, edge_after, resident, split
 
 
 def test_resident_literals():

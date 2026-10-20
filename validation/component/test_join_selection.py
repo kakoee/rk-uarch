@@ -1,4 +1,4 @@
-"""Immutable future selection bindings; absence of authority is an explicit requirement."""
+"""Archived selection input identities; current source bytes are not release gates."""
 
 import hashlib
 import json
@@ -21,15 +21,6 @@ def test_exact_future_selection_and_historical_identity():
     rows = {x["case_id"]: x for x in selection["cases"]}
     for name, old in historical.items():
         assert all(rows[name][k] == v for k, v in old.items())
-    for path, digest in selection["checker_bindings"].items():
-        # Revision /2 binds the historical checker. Its sole changed file is archived
-        # byte-for-byte; revision /3 below activates the corrected current bindings.
-        source = (
-            ROOT / "docs/reviews/U4-B-component-stage2-v1/historical-observations_v2.py.txt"
-            if path == "validation/component/observations_v2.py"
-            else ROOT / path
-        )
-        assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
     for row in rows.values():
         assert row["native_status"] == "not_run"
         assert all(

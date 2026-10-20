@@ -6,7 +6,7 @@ from typing import Any
 
 from uarch_contract.mapped import MappedEngineJob, MappedEngineResult
 
-from validation.component.checks import need
+from rkuarch.verification.component.checks import need
 from validation.component.selection import assert_case
 
 ROOT = Path(__file__).resolve().parents[2]

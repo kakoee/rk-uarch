@@ -1,16 +1,11 @@
-"""Prospective component result assertions; bind to the released public runner at first use.
-
-This module never launches K2, generates authority, or writes native receipts. All required
-six-way calls, mutation/restoration calls, outcomes and raw bytes belong in the coordinator's
-future genuinely authorized B execution ledger. Missing calls remain not_run.
-"""
+"""Literal checks for saved historical component observations; no execution gates."""
 
 from fractions import Fraction
 from typing import Any
 
 from uarch_contract.mapped import MappedEngineJob, MappedEngineResult
 
-from validation.component.checks import need
+from rkuarch.verification.component.checks import need
 from validation.component.observations import consume
 
 
@@ -143,11 +138,3 @@ def assert_case(
                 ),
                 "write port",
             )
-
-
-def assert_replays(outputs: dict[tuple[str, int], bytes]) -> None:
-    need(
-        set(outputs) == {(mode, run) for mode in ("debug", "release") for run in range(3)},
-        "six actual replay calls required",
-    )
-    need(len(set(outputs.values())) == 1, "canonical result determinism")

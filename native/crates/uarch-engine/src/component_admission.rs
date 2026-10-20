@@ -1,8 +1,5 @@
 //! Independent component admission. No caller prevalidation or computed delays.
-use crate::{
-    admission::Trust,
-    carrier::{Result, refuse},
-};
+use crate::carrier::{Result, refuse};
 use serde_json::Value;
 use std::collections::BTreeMap;
 #[derive(Clone, Debug)]
@@ -329,6 +326,7 @@ fn owner_map(spec: &Value, g: &Value) -> Result<BTreeMap<String, u64>> {
         .map(|(i, k)| (k, i as u64))
         .collect())
 }
+#[cfg(test)]
 fn profile(v: &mut Value) -> Result<()> {
     for e in v["entries"].as_array_mut().expect("profile shape") {
         crate::hardware::validate(&mut e["hardware_spec"])?;
@@ -380,13 +378,22 @@ fn profile(v: &mut Value) -> Result<()> {
 const PRODUCTION: &str = "sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429caac07d9";
 #[derive(Clone, Copy)]
 pub(crate) enum ModelVersion {
+    #[cfg(test)]
     One,
     Two,
 }
-pub(crate) fn validate(input: &str, trust: &Trust) -> Result<Admitted> {
-    validate_model(input, trust, ModelVersion::One)
+#[cfg(test)]
+pub(crate) fn validate(input: &str) -> Result<Admitted> {
+    validate_model(input, ModelVersion::One)
 }
-pub(crate) fn validate_model(input: &str, trust: &Trust, model: ModelVersion) -> Result<Admitted> {
+#[cfg(test)]
+pub(crate) fn validate_model(input: &str, model: ModelVersion) -> Result<Admitted> {
+    validate_inner(input, false, model)
+}
+pub(crate) fn validate_ordinary(input: &str) -> Result<Admitted> {
+    validate_inner(input, true, ModelVersion::Two)
+}
+fn validate_inner(input: &str, ordinary: bool, _model: ModelVersion) -> Result<Admitted> {
     require(
         input.len() <= crate::protocol::MAX_INPUT_BYTES,
         "CapacityExceeded",
@@ -395,7 +402,12 @@ pub(crate) fn validate_model(input: &str, trust: &Trust, model: ModelVersion) ->
     let value = crate::wire::parse(&crate::wire::normalize_integer_zero(input))
         .map_err(|e| refuse("InvalidJson", "", e))?;
     require(
-        value["protocol"] == "uarch-engine/3",
+        value["protocol"]
+            == if ordinary {
+                "uarch-engine/4"
+            } else {
+                "uarch-engine/3"
+            },
         "UnsupportedProtocol",
         "uarch-engine/3",
     )?;
@@ -404,12 +416,28 @@ pub(crate) fn validate_model(input: &str, trust: &Trust, model: ModelVersion) ->
         "UnsupportedWorkloadScope",
         "component stage",
     )?;
-    let mut v = match model {
-        ModelVersion::One => crate::carrier::normalize_component(value)?,
-        ModelVersion::Two => crate::carrier::normalize_component_v3(value)?,
+    let mut v = if ordinary {
+        crate::carrier::normalize_ordinary(value)?
+    } else {
+        #[cfg(test)]
+        {
+            match _model {
+                ModelVersion::One => crate::carrier::normalize_component(value)?,
+                ModelVersion::Two => crate::carrier::normalize_component_v3(value)?,
+            }
+        }
+        #[cfg(not(test))]
+        {
+            return Err(refuse(
+                "UnsupportedProtocol",
+                "/protocol",
+                "uarch-engine/4 required",
+            ));
+        }
     };
     crate::hardware::validate(&mut v["workload_closure"]["hardware_spec"])?;
-    if !v["profile"].is_null() {
+    #[cfg(test)]
+    if !ordinary && !v["profile"].is_null() {
         profile(&mut v["profile"])?;
     }
     let b = &v["workload_closure"];
@@ -478,21 +506,24 @@ pub(crate) fn validate_model(input: &str, trust: &Trust, model: ModelVersion) ->
             )?;
         }
     }
-    identity(&v["registry"], "registry_hash")?;
-    sorted(
-        arr(&v["registry"]["test_only_specs"])
-            .iter()
-            .map(|e| txt(&e["hardware_spec_hash"]).into())
-            .collect(),
-        "TestProfileMismatch",
-    )?;
-    require(
-        !arr(&v["registry"]["test_only_specs"])
-            .iter()
-            .any(|e| e["hardware_spec_hash"] == PRODUCTION),
-        "TestProfileMismatch",
-        "baseline registered as test-only",
-    )?;
+    #[cfg(test)]
+    if !ordinary {
+        identity(&v["registry"], "registry_hash")?;
+        sorted(
+            arr(&v["registry"]["test_only_specs"])
+                .iter()
+                .map(|e| txt(&e["hardware_spec_hash"]).into())
+                .collect(),
+            "TestProfileMismatch",
+        )?;
+        require(
+            !arr(&v["registry"]["test_only_specs"])
+                .iter()
+                .any(|e| e["hardware_spec_hash"] == PRODUCTION),
+            "TestProfileMismatch",
+            "baseline registered as test-only",
+        )?;
+    }
     require(
         v["bundle_hash"] == b["bundle_hash"]
             && v["point_hash"] == p["payload_hash"]
@@ -545,27 +576,23 @@ pub(crate) fn validate_model(input: &str, trust: &Trust, model: ModelVersion) ->
         "component clock setup",
     )?;
     identity(&v, "job_hash")?;
-    require(
-        v["registry"]["registry_hash"] == trust.registry,
-        "RegistryTrustMismatch",
-        "external registry",
-    )?;
-    require(
-        v["engine"] == trust.engine,
-        "EngineIdentityMismatch",
-        "external engine",
-    )?;
+    if ordinary {
+        require(
+            v["engine"]
+                == serde_json::json!({
+                    "name":"native", "version":"native-stage/2", "package_version":env!("CARGO_PKG_VERSION"),
+                    "model":{"name":"native-intervals", "version":"2"}
+                }),
+            "EngineIdentityMismatch",
+            "supported software/model versions",
+        )?;
+    }
     require(
         a["checkpoint"] == "B",
         "UnsupportedCheckpointScope",
         "component checkpoint",
     )?;
     let test = a["invocation"] == "test";
-    require(
-        (!a["profile_hash"].is_null()) == test && (!a["case_id"].is_null()) == test,
-        "TestProfileMismatch",
-        "invocation/profile binding",
-    )?;
     require(
         a["eligibility"]
             == if test {
@@ -576,79 +603,7 @@ pub(crate) fn validate_model(input: &str, trust: &Trust, model: ModelVersion) ->
         "AdmissionMismatch",
         "eligibility",
     )?;
-    if test {
-        require(
-            !v["profile"].is_null(),
-            "TestProfileMismatch",
-            "profile required",
-        )?;
-        require(
-            a["profile_hash"] == v["profile"]["profile_hash"]
-                && trust
-                    .profiles
-                    .get(txt(&a["profile_hash"]))
-                    .is_some_and(|ids| ids.contains(txt(&a["case_id"]))),
-            "TestProfileMismatch",
-            "external profile/case",
-        )?;
-        let e = arr(&v["profile"]["entries"])
-            .iter()
-            .find(|e| e["case_id"] == a["case_id"])
-            .ok_or_else(|| refuse("TestProfileMismatch", "", "profile case absent"))?;
-        if e.get("mapping_policy").is_some() {
-            require(
-                e["mapping_policy"] == b["mapping_policy"],
-                "TestVariantNotAdmitted",
-                "profile mapping policy",
-            )?;
-        }
-        require(
-            e["clock_setup_hash"] == crate::hardware::digest(&v["clock_setup"])?,
-            "TestProfileMismatch",
-            "clock setup",
-        )?;
-        for (left, right) in [
-            (&a["checkpoint"], &e["checkpoint"]),
-            (&b["scope"]["kind"], &e["scope"]),
-            (&p["initial_state"], &e["initial_state"]),
-            (&p["priming_iterations"], &e["priming_iterations"]),
-            (&b["hardware_spec_hash"], &e["hardware_spec_hash"]),
-            (&p["frequency_ratio"], &e["frequency_ratio"]),
-            (&p["task_graph"]["graph_hash"], &e["graph_hash"]),
-            (&p["payload_hash"], &e["point_hash"]),
-            (&v["seed"], &e["seed"]),
-        ] {
-            require(
-                left == right,
-                "TestVariantNotAdmitted",
-                "profile entry join",
-            )?;
-        }
-        require(
-            e["expected_outcome"] == "success"
-                && arr(&p["task_graph"]["jobs"])
-                    .iter()
-                    .all(|j| arr(&e["allowed_job_kinds"]).contains(&j["kind"])),
-            "TestVariantNotAdmitted",
-            "negative profile is not admission",
-        )?;
-        if b["hardware_spec_hash"] != PRODUCTION {
-            require(
-                arr(&v["registry"]["test_only_specs"])
-                    .iter()
-                    .any(|e| e["hardware_spec_hash"] == b["hardware_spec_hash"]),
-                "TestProfileMismatch",
-                "unregistered variant",
-            )?;
-        }
-    } else {
-        require(
-            !arr(&v["registry"]["test_only_specs"])
-                .iter()
-                .any(|e| e["hardware_spec_hash"] == b["hardware_spec_hash"]),
-            "TestOnlyHardware",
-            "test hardware",
-        )?;
+    if !test {
         require(
             component,
             "UnsupportedCheckpointScope",
@@ -1416,6 +1371,12 @@ fn hardware_model(v: &Value) -> Result<Hardware> {
             && integer(&c["matrix_engine"]["array"]["cols"])? == 256,
         "UnsupportedHardware",
         "physical WS array",
+    )?;
+    require(
+        integer(&c["job_overhead_cycles"])? == 32
+            && integer(&h["sync"]["barrier_latency_cycles"])? == 32,
+        "UnsupportedHardware",
+        "model-2 checker requires 32-cycle job overhead and barrier latency",
     )?;
     // Cross-cancel before multiplication so reduced representable ratios do not overflow.
     let mut numer = [

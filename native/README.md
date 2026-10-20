@@ -2,8 +2,21 @@
 
 Spec: docs/build-spec.md §2.8 (and §2.9 for parallel execution). A Cargo workspace, built in
 the accepted engine container. Package `uarch-engine` now contains the `uarch_engine`
-library and the `uarch-engine` fixed-delay JSON binary under the approved K2 construction
-milestone. Actual public execution remains gated on an independently accepted human host record.
+library and the ordinary component JSON binary. Build with `make native`; no generated
+identity file, build archive or compiled case inventory is required. Use
+`uarch-engine --protocol uarch-engine/4` with one EOF-delimited job on stdin. Success is
+canonical JSON on stdout/status 0; semantic refusal is JSON on stderr/status 2; operational
+failure is nonzero. Test fixtures require the explicit `--test-only` argument. The Python
+`python -m rkuarch.engines.native.ordinary` consumer independently validates results and bounds process I/O/deadlines.
+The complete transition awaits human protected installation; see the README status.
+
+Current version/replay limit: `/4` accepts package version `0.0.1` only, without a local
+build identifier, and both run and replay require that installed version. It does not
+distinguish builds. Engine `native-stage/2` and model `native-intervals/2` identify the
+implemented semantics. A package version change requires a protected contract change and
+an explicit compatibility decision at that time; cross-version replay is not supported.
+Fixture admission also requires 32-cycle job overhead and 32-cycle barrier latency,
+the values supported by the independent checker. Other values refuse as `UnsupportedHardware`.
 
 ## Rules
 - Time is u64 picoseconds; next_edge() is the only time↔cycle conversion. Clocks are
@@ -38,20 +51,26 @@ milestone. Actual public execution remains gated on an independently accepted hu
 
 ## Delivery status and order
 
-The construction source and interfaces are in
-[the owned K2 package](../docs/reviews/U4-A-K2-construction-v1/peer-interface.md).
-Normal library/binary builds require an explicitly generated identity file in a private
-source export; an unbound checkout intentionally has no fallback engine identity.
-`native/tools/freeze_inputs.py` verifies source bytes against an explicit published commit.
-`native/tools/generate_identity.py` takes checked BuildInputs/ToolInputs/BuildTrust files and
-writes only the named identity output into that private export before Cargo is invoked.
-No generated identity or binary belongs in the live source tree. The exact build commands,
-image/cache/flags and two mode identities are recorded in the owned build handoff.
+The `/4` route uses engine `native-stage/2`, package version from Cargo/package metadata,
+and model `native-intervals` version `2` with observations `/3`. Input/request/prepared/result
+hashes remain data integrity checks. Historical K2 `/3` carriers, fixtures, schemas and
+oracle bytes remain unchanged and are refused on `/4`. Historical native semantic tests
+still exercise their internal admission paths. No historical authority can enable `/4`.
 
-Library unit tests operate on private mechanics and explicit synthetic validation controls;
-the public tests in `tests/native/test_u4_a_k2_public.py` are authored but not invoked during
-construction. No component model, final host authority, qualification or image distribution
-is released by a successful local build. Historical K1/C1/C2 evidence remains unchanged.
+Retired host/deployment gates, startup loaders, construction attestations and campaign
+drivers are removed. Historical reports, receipts, fixtures and oracle bytes remain;
+reconstructing their old operational tools requires the corresponding Git revision.
+Shared semantic validators and historical observation tests remain. The stopped startup
+experiment must not be rerun; its historical results do not qualify the new route. Export the `/4` Rust carrier with
+`python native/tools/export_ordinary.py`; `--check` is read-only. No oracle regeneration.
+
+Use the accepted local Rust 1.99.0 image, existing offline Cargo cache and Cargo.lock.
+`make native-test` runs normal Cargo tests, including the shipping /4 production and fixture
+process paths, deterministic repeats, explicit invocation/protocol refusals and hardware
+capability controls. Optional Python process checks accept `ORDINARY_NATIVE` pointing to
+that local binary. U0024 still defers hosted native execution.
+`cargo build/test --locked --offline --target x86_64-unknown-linux-gnu` are normal builds;
+record status and test results without requiring compiler-read traces or binary identity.
 
 U0023 separates K1 internal mechanics from K2 public schema wiring and correctness CI
 from controlled-host performance. U5/U8 silicon success is not a table-production gate.

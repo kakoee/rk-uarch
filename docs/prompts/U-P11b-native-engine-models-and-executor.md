@@ -20,6 +20,15 @@ Mapping policy identifiers are provenance, not instructions for the native engin
 Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
 placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
 
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
+
 TASK: execute only the authorized phase. B (U4a) implements the accepted small component
 slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
 U-P7 T in U7. Unsupported work refuses, never disappears from a claimed complete layer.

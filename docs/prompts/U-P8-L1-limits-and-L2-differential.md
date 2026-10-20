@@ -22,6 +22,15 @@ measurements, cloud spend or silently fabricated fields. Identify contract exten
 native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
 readiness process for Blackhole before U-P15. Readiness does not require a full table.
 
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
+
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
 is compared with independent models only where abstractions and inputs match. Required L1
 runs for each applicable admitted capability. L2 tool selection is optional and recorded

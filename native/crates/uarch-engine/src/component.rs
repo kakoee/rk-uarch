@@ -2,7 +2,6 @@
 //! No Python durations, expected rows, hardware work inferred from the input, or public trust.
 use crate::{
     Event, Kind, Wheel,
-    admission::Trust,
     carrier::{Result, refuse},
     component_admission::{self, Admitted, TaskKind},
     next_edge,
@@ -1022,8 +1021,9 @@ impl Runtime {
         Ok(self)
     }
 }
-pub(crate) fn execute(input: &str, trust: &Trust) -> Result<Value> {
-    execute_with_observations(input, trust, ObservationVersion::V2)
+#[cfg(test)]
+pub(crate) fn execute(input: &str) -> Result<Value> {
+    execute_with_observations(input, ObservationVersion::V2)
 }
 
 #[cfg(test)]
@@ -1035,16 +1035,9 @@ mod kernel_tests {
             serde_json::from_str(include_str!("../testdata/synthetic-component-jobs.json"))
                 .unwrap();
         let v = &all["D10-read"];
-        let trust = Trust {
-            registry: v["registry"]["registry_hash"].as_str().unwrap().into(),
-            profiles: BTreeMap::from([(
-                v["profile"]["profile_hash"].as_str().unwrap().into(),
-                BTreeSet::from([v["admission"]["case_id"].as_str().unwrap().into()]),
-            )]),
-            engine: v["engine"].clone(),
-        };
+
         let mut admitted =
-            component_admission::validate(&crate::wire::canonical(v).unwrap(), &trust).unwrap();
+            component_admission::validate(&crate::wire::canonical(v).unwrap()).unwrap();
         // Private typed-state probe, not a rehashed/authorized mapped job or a result carrier.
         admitted.hardware.hop_cycles = 0;
         let state = Runtime::new(&admitted).unwrap().run(&admitted).unwrap();
@@ -1064,20 +1057,26 @@ mod kernel_tests {
     }
 }
 
-// Installed model/observation seam; public launch still requires separate authority.
-pub(crate) fn execute_with_observations(
-    input: &str,
-    trust: &Trust,
-    version: ObservationVersion,
-) -> Result<Value> {
+// Historical observation replay seam for semantic tests only.
+#[cfg(test)]
+pub(crate) fn execute_with_observations(input: &str, version: ObservationVersion) -> Result<Value> {
     let v = match version {
-        ObservationVersion::V2 => component_admission::validate(input, trust)?,
-        ObservationVersion::V3 => component_admission::validate_model(
-            input,
-            trust,
-            component_admission::ModelVersion::Two,
-        )?,
+        ObservationVersion::V2 => component_admission::validate(input)?,
+        ObservationVersion::V3 => {
+            component_admission::validate_model(input, component_admission::ModelVersion::Two)?
+        }
     };
+    execute_admitted(v, version)
+}
+
+pub(crate) fn execute_ordinary(input: &str) -> Result<Value> {
+    execute_admitted(
+        component_admission::validate_ordinary(input)?,
+        ObservationVersion::V3,
+    )
+}
+
+fn execute_admitted(v: Admitted, version: ObservationVersion) -> Result<Value> {
     let expected = if version == ObservationVersion::V3 {
         "2"
     } else {

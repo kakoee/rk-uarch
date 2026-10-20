@@ -1,1 +1,1 @@
-"""Python side of the native engine. Lands in U-P11."""
+"""Ordinary native execution and saved-result replay."""

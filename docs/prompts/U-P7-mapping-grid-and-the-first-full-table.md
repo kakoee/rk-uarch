@@ -15,6 +15,15 @@ Extend U2's saved-input path with the existing TaskGraph; policies are versioned
 preparation producers outside engines. Imported mapped inputs bypass policy execution and
 are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
 
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
+
 TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
 component boundary; T (U7) delivers the first full product table. A small table may be
 built earlier for a named use, but no full grid gates silicon. Passing G4/G7 is not a

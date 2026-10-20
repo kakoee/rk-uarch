@@ -5,7 +5,7 @@ from fractions import Fraction
 
 import pytest
 
-from validation.component.checks import (
+from rkuarch.verification.component.checks import (
     CheckFailure,
     check_allocations,
     check_causal_path,
@@ -183,7 +183,7 @@ def test_reductions_preserve_failures_and_incomplete_coverage():
 
 
 def test_synthetic_prospective_nonclocked_population_controls():
-    from validation.component.checks import check_queue_domain
+    from rkuarch.verification.component.checks import check_queue_domain
 
     owners = {0: "channel:6", 1: "dma:0:0"}
     requests = {"r": dict(channel_id=6, dma_engine_id=0)}

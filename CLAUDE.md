@@ -15,7 +15,9 @@ stipulations it is conditional on. Detail is not accuracy.
 - native: `make native` · `make native-test` (approved Linux/pinned tools; controlled host for performance)
 - table/report workflow: [prepare → capture → independent review → assemble → table → report](docs/u2-workflow.md)
 - table help: `make table` · report help: `make report`; pass explicit CLI arguments with `ARGS='...'`
-- Published runtime remains analytic (including additive RoPE v2); native, grids and studies are planned.
+- The analytic runtime (including additive RoPE v2) is retained. Native bounded component execution
+  uses the ordinary /4 interface; grids, studies and full product tables remain planned.
+  The complete protected transition requires human installation; this is not qualification.
 - U0005/U0023: U3 design; U4a bounded kernel/models; U4b reference-suite readiness; U5 TPU;
   U6 expanded qualification; U7 full product tables; U8 Blackhole; U10 rk-sim integration.
   Silicon success is not a prerequisite for table production. No blanket runtime release.

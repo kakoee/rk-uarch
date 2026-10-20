@@ -1,4 +1,4 @@
-//! Native mechanics and fixed-delay JSON boundary. Host first-use authority is external.
+//! Native mechanics and ordinary component JSON boundary.
 #![forbid(unsafe_code)]
 #![deny(clippy::disallowed_types)]
 
@@ -43,13 +43,11 @@ mod wire;
 mod admission;
 mod hardware;
 
+#[cfg(test)]
 mod accounting;
 
 pub mod protocol;
 pub use carrier::Refusal;
-
-#[cfg(test)]
-mod peer_dto_tests;
 
 mod component;
 mod component_accounting;

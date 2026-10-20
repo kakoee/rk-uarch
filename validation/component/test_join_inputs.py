@@ -5,7 +5,7 @@ from copy import deepcopy
 import pytest
 from uarch_contract.mapped import MappedBundle, admit, validate_resources
 
-from validation.component.arithmetic import resident
+from rkuarch.verification.component.arithmetic import resident
 from validation.component.corpus import build, graph
 from validation.component.join_inputs import prospective_inputs, reseal
 

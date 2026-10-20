@@ -1,11 +1,11 @@
-"""Private transport helpers only. No successful public MappedEngineJob execution."""
+"""Bounded ordinary transport: concurrent I/O, cleanup and exact framing."""
 
 import os
 from pathlib import Path
 
 import pytest
 
-from rkuarch.engines.native.runner import (
+from rkuarch.engines.native.transport import (
     Limits,
     OperationalFailure,
     ProtocolViolation,

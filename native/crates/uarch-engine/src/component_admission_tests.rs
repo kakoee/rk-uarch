@@ -1,26 +1,16 @@
 //! PRIVATE SYNTHETIC admission only. Tests never dispatch or establish host authority.
 use crate::{
-    admission::Trust,
     component_admission::{self, TaskKind},
     hardware, wire,
 };
 use serde_json::{Value, json};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 fn fixture(id: &str) -> Value {
     let v: Value =
         serde_json::from_str(include_str!("../testdata/synthetic-component-jobs.json")).unwrap();
     v[id].clone()
 }
-fn trust(v: &Value) -> Trust {
-    Trust {
-        registry: v["registry"]["registry_hash"].as_str().unwrap().into(),
-        profiles: BTreeMap::from([(
-            v["profile"]["profile_hash"].as_str().unwrap().into(),
-            BTreeSet::from([v["admission"]["case_id"].as_str().unwrap().into()]),
-        )]),
-        engine: v["engine"].clone(),
-    }
-}
+
 fn seal(v: &mut Value, key: &str) {
     v.as_object_mut().unwrap().remove(key);
     v[key] = json!(hardware::digest(v).unwrap());
@@ -43,7 +33,7 @@ fn reseal(v: &mut Value) {
     seal(v, "job_hash");
 }
 fn check(v: &Value) -> crate::carrier::Result<component_admission::Admitted> {
-    component_admission::validate(&wire::canonical(v).unwrap(), &trust(v))
+    component_admission::validate(&wire::canonical(v).unwrap())
 }
 fn refusal(v: &Value, code: &str) {
     assert_eq!(check(v).unwrap_err().code, code);
@@ -84,27 +74,10 @@ fn synthetic_positive_inventory_is_nonempty() {
     assert_eq!(admitted, 78);
 }
 #[test]
-fn synthetic_stale_and_external_trust_are_distinct() {
+fn synthetic_stale_closure_refuses() {
     let mut v = fixture("C02");
     v["workload_closure"]["points"][0]["point_id"] = json!("changed");
     refusal(&v, "ContentHashMismatch");
-    let v = fixture("C02");
-    let mut t = trust(&v);
-    t.registry = "sha256:wrong".into();
-    assert_eq!(
-        component_admission::validate(&wire::canonical(&v).unwrap(), &t)
-            .unwrap_err()
-            .code,
-        "RegistryTrustMismatch"
-    );
-    t = trust(&v);
-    t.profiles.clear();
-    assert_eq!(
-        component_admission::validate(&wire::canonical(&v).unwrap(), &t)
-            .unwrap_err()
-            .code,
-        "TestProfileMismatch"
-    );
 }
 #[test]
 fn synthetic_full_point_resource_validation() {
@@ -129,28 +102,7 @@ fn synthetic_operand_access_precondition() {
     reseal(&mut v);
     refusal(&v, "InvalidCoverage");
 }
-#[test]
-fn synthetic_negative_profile_stops_before_resources() {
-    let mut v = fixture("C02");
-    v["profile"]["entries"][0]["expected_outcome"] = json!("CapacityExceeded");
-    v["workload_closure"]["points"][0]["task_graph"]["buffers"][0]["size_bytes"] = json!(999999999);
-    reseal(&mut v);
-    refusal(&v, "TestVariantNotAdmitted");
-}
-#[test]
-fn synthetic_profile_two_policy_and_format() {
-    let mut v = fixture("C02");
-    v["profile"]["format"] = json!("uarch-native-test-profile/2");
-    v["profile"]["entries"][0]["mapping_policy"] = v["workload_closure"]["mapping_policy"].clone();
-    reseal(&mut v);
-    check(&v).unwrap();
-    v["workload_closure"]["mapping_policy"]["buffer_depth"] = json!(1);
-    reseal(&mut v);
-    refusal(&v, "TestVariantNotAdmitted");
-    v["profile"]["format"] = json!("uarch-native-test-profile/1");
-    reseal(&mut v);
-    refusal(&v, "TestProfileMismatch");
-}
+
 #[test]
 fn synthetic_terminal_reader_and_capacity() {
     let mut v = fixture("C02");
@@ -262,14 +214,7 @@ fn synthetic_complete_operand_and_cold_output() {
     truncate_transfer(&mut write, "write");
     refusal(&write, "InvalidTransfer");
 }
-#[test]
-fn synthetic_unregistered_variant_refuses() {
-    let mut v = fixture("D10-read");
-    v["registry"]["test_only_specs"] = json!([]);
-    seal(&mut v["registry"], "registry_hash");
-    seal(&mut v, "job_hash");
-    refusal(&v, "TestProfileMismatch");
-}
+
 #[test]
 fn synthetic_buffer_end_overflow_refuses_without_panic() {
     let mut v = fixture("C02");
@@ -318,7 +263,7 @@ fn synthetic_distinct_transport_request_identity_restores_complete_inventory() {
     dma["fragments"][0]["request_id"] = json!("synthetic-distinct-fragment");
     reseal(&mut v);
     assert_eq!(check(&v).unwrap().graph.jobs.len(), 2);
-    let result = crate::component::execute(&wire::canonical(&v).unwrap(), &trust(&v)).unwrap();
+    let result = crate::component::execute(&wire::canonical(&v).unwrap()).unwrap();
     let rows = result["observations"]["dma"]["records"].as_array().unwrap();
     let ids: BTreeSet<_> = rows
         .iter()

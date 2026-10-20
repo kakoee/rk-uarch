@@ -9,7 +9,7 @@ from typing import Any
 
 from uarch_contract.hashing import content_hash
 
-from validation.component.checks import union_time
+from rkuarch.verification.component.checks import union_time
 from validation.component.synthetic_carrier import (
     synthetic_job,
     synthetic_port_pair,

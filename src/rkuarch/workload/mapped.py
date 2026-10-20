@@ -1,9 +1,8 @@
-"""Saved fixed-delay inputs using the installed M carriers and host-owned authority.
+"""Shared component validation and historical /3 saved-carrier helpers.
 
-The embedding host supplies reviewed anchors separately from caller content. There is
-no authority discovery, producer, executable lookup or subprocess here. Successful
-validation is not a public K2 release or an enduring launch capability: a future writer
-must revalidate current bytes and verify its executable against accepted build receipts.
+Ordinary /4 execution uses validate_component_completeness without host authority or
+build receipts. The explicit historical loaders retain /3 carrier validation for existing
+fixture and semantic tests; they neither select an executable nor launch a process.
 """
 
 from __future__ import annotations
@@ -24,6 +23,7 @@ from uarch_contract.mapped import (
     require,
     validate_job,
 )
+from uarch_contract.ordinary import OrdinaryBundle
 
 
 def loads_fixed_delay_job(
@@ -250,7 +250,7 @@ def export_component_job(
         stream.write(canonical_json(validated).encode("utf-8"))
 
 
-def validate_component_completeness(bundle: MappedBundle) -> None:
+def validate_component_completeness(bundle: MappedBundle | OrdinaryBundle) -> None:
     """Consumer guards after installed admission; no new carrier or relaxed law.
 
     The installed resource validator checks range bounds but does not prove a

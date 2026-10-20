@@ -36,21 +36,30 @@ pub(crate) fn cmp_integer(a: &str, b: &str) -> std::cmp::Ordering {
         }
     }
 }
+#[cfg(test)]
 pub(crate) fn normalize(mut value: Value) -> Result<Value> {
     let schema: Value =
         serde_json::from_str(include_str!("carriers.json")).expect("compiled schema");
     shape(&mut value, &schema, &schema, "")?;
     Ok(value)
 }
+#[cfg(test)]
 pub(crate) fn normalize_component(mut value: Value) -> Result<Value> {
     let schema: Value = serde_json::from_str(include_str!("component_carriers.json"))
         .expect("compiled component schema");
     shape(&mut value, &schema, &schema, "")?;
     Ok(value)
 }
+#[cfg(test)]
 pub(crate) fn normalize_component_v3(mut value: Value) -> Result<Value> {
     let schema: Value = serde_json::from_str(include_str!("component_carriers_v3.json"))
         .expect("compiled proposed component /3 schema");
+    shape(&mut value, &schema, &schema, "")?;
+    Ok(value)
+}
+pub(crate) fn normalize_ordinary(mut value: Value) -> Result<Value> {
+    let schema: Value = serde_json::from_str(include_str!("ordinary_carriers.json"))
+        .expect("compiled ordinary schema");
     shape(&mut value, &schema, &schema, "")?;
     Ok(value)
 }

@@ -16,7 +16,7 @@ from uarch_contract.mapped import (
     resolve_frequencies,
 )
 
-from validation.component.checks import union_time
+from rkuarch.verification.component.checks import union_time
 from validation.component.corpus import build
 
 

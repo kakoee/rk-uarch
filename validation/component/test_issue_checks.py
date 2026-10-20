@@ -4,8 +4,8 @@ from copy import deepcopy
 
 import pytest
 
-from validation.component import issue_checks as checks
-from validation.component.checks import CheckFailure
+from rkuarch.verification.component import issue_checks as checks
+from rkuarch.verification.component.checks import CheckFailure
 
 
 @pytest.mark.parametrize(

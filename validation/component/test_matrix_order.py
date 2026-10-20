@@ -4,7 +4,7 @@ from copy import deepcopy
 
 import pytest
 
-from validation.component.matrix_order import check_matrix_order
+from rkuarch.verification.component.matrix_order import check_matrix_order
 
 
 def projection():

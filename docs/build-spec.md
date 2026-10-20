@@ -519,6 +519,30 @@ A request for C2 that cannot be honoured degrades or raises as §7.4 says.
 
 ### 2.5 The engine protocol and the TaskGraph
 
+**Ordinary runtime boundary (U0011 simplification amendment).** The installed simulator
+accepts supported input data and returns validated versioned results. Basic provenance
+records software/engine/model versions and existing input/output hashes. The concrete component successor
+is `uarch-engine/4` with prepared bundle `/4`, engine `native-stage/2`, package version `0.0.1` and
+model `native-intervals` version `2`; it retains observation `/3` and the existing TaskGraph.
+`python -m rkuarch.engines.native.ordinary run --job JOB --executable BINARY --output RESULT` runs a saved job;
+`python -m rkuarch.engines.native.ordinary replay --job JOB --output RESULT` validates it with producers disabled.
+
+Current version/replay limit: `/4` accepts package version `0.0.1` only, without a local
+build identifier, and both run and replay require that installed version. It does not
+distinguish builds. Engine `native-stage/2` and model `native-intervals/2` identify the
+implemented semantics. A package version change requires a protected contract change and
+an explicit compatibility decision at that time; cross-version replay is not supported.
+Fixture admission also requires 32-cycle job overhead and 32-cycle barrier latency,
+the values supported by the independent checker. Other values refuse as `UnsupportedHardware`.
+
+Both require `--test-only` for fixtures. Historical `/3` is refused on this route.
+ No development
+source tree, build archive, executable digest, host acceptance chain, custom startup
+attestation or build-read trace is required to execute a job. This does not remove semantic
+validation or change model laws. Strict existing identity fields require an explicit
+reviewed schema transition, not fabricated placeholder hashes. Development verification
+and protected-file ownership remain separate from end-user runtime dependencies.
+
 Every engine runs as a subprocess: **`EngineJob` JSON in, `EngineResult` JSON out.** There is no
 foreign-function interface between the harness and any engine. `engines/protocol.py` defines
 both messages, `make gen` exports their JSON Schema to `src/rkuarch/engines/schema/`, and the
@@ -965,7 +989,9 @@ stipulations it is conditional on. Detail is not accuracy.
 - native: `make native` · `make native-test` (approved Linux/pinned tools; controlled host for performance)
 - table/report workflow: [prepare → capture → independent review → assemble → table → report](docs/u2-workflow.md)
 - table help: `make table` · report help: `make report`; pass explicit CLI arguments with `ARGS='...'`
-- Published runtime remains analytic (including additive RoPE v2); native, grids and studies are planned.
+- The analytic runtime (including additive RoPE v2) is retained. Native bounded component execution
+  uses the ordinary /4 interface; grids, studies and full product tables remain planned.
+  The complete protected transition requires human installation; this is not qualification.
 - U0005/U0023: U3 design; U4a bounded kernel/models; U4b reference-suite readiness; U5 TPU;
   U6 expanded qualification; U7 full product tables; U8 Blackhole; U10 rk-sim integration.
   Silicon success is not a prerequisite for table production. No blanket runtime release.
@@ -1284,7 +1310,9 @@ the engine container; `make native`, `make native-test`. Binary: uarch-engine
 
 ## Delivery status and order
 
-Native is planned, not yet implemented. U0005 selects one progressive production engine:
+Native bounded component execution is implemented through the ordinary /4 interface.
+The complete protected transition requires human installation; qualification remains separate.
+U0005 selects one progressive production engine:
 U3 design → U4a M plus K1, then K2/bounded models → U4b reference-suite readiness.
 U6 adds qualification at representative mesh points; U7 adds detail and full product tables. Independent mathematics and behavioral tests accompany each
 stage. No complete fork or second Python contention engine is a prerequisite. Optional
@@ -2528,6 +2556,15 @@ Extend U2's saved-input path with the existing TaskGraph; policies are versioned
 preparation producers outside engines. Imported mapped inputs bypass policy execution and
 are validated unchanged. No engine silently substitutes its own mapping or rebuilds work.
 
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
+
 TASK: run only the phase named in the handoff. M (U4a) delivers the approved mapped
 component boundary; T (U7) delivers the first full product table. A small table may be
 built earlier for a named use, but no full grid gates silicon. Passing G4/G7 is not a
@@ -2689,6 +2726,15 @@ unknowns and distinguish structural/timing assumptions from carrier placeholders
 measurements, cloud spend or silently fabricated fields. Identify contract extensions and
 native admission tasks for U-P11b R before U-P9 can freeze predictions. Repeat this
 readiness process for Blackhole before U-P15. Readiness does not require a full table.
+
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
 
 TASK: two rungs. L1: the model reduces to closed forms wherever those are exact. L2: it
 is compared with independent models only where abstractions and inputs match. Required L1
@@ -2964,6 +3010,15 @@ PHASES AND PREREQUISITES (name the phase in the handoff):
   registration does not gate K1/K2. Controlled-host performance and G5 automation follow
   U0023; full-table work is later, not a kernel prerequisite.
 
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
+
 TASK: the single-threaded Rust kernel and subprocess boundary of the one production engine:
 EngineJob JSON in, EngineResult JSON out through `uarch-engine`. Start with fixed-delay
 jobs; no subsystem models yet. U-P11b adds the bounded model stage.
@@ -3090,6 +3145,15 @@ Mapping policy identifiers are provenance, not instructions for the native engin
 Python mapping. Engine arbitration follows declared policies; it never changes tile shapes,
 placement, fusion or buffer assignment to fit a job. Reject unsupported supplied decisions.
 
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
+
 TASK: execute only the authorized phase. B (U4a) implements the accepted small component
 slice; R (U4b) extends the same engine to the actual U5 reference suite. Product tables are
 U-P7 T in U7. Unsupported work refuses, never disappears from a claimed complete layer.
@@ -3174,6 +3238,15 @@ G5 OUTCOMES: record correctness, performance and automation separately. Correctn
 releases dependent U7/G6/G3b/U10 work; full G5 requires all three and remains open if host
 evidence or executed self-hosted nightly is missing. Both are required for U9 entry,
 any simulator-performance claim and final closure. No implied waiver from proceeding.
+
+ORDINARY EXECUTION AND BASIC PROVENANCE (U0011 simplification amendment):
+Keep the native-first schedule. Use installed software/engine/model versions and existing
+hardware/request/prepared-input/result/table data hashes. Ordinary execution requires no
+development checkout/evidence, executable digest, host approval records, custom startup
+assurance or exhaustive build tracing. Preserve model/capability admission, actual input
+and result validation, independent tests and deterministic results. A-F3 is retired by
+scope change, not a passing verification; do not retry its stopped experiment. Use an
+explicit minimal schema transition, never dummy hashes or a new attestation framework.
 
 TASK: qualify the existing native core, not build it again. Complete diagnostics and traces,
 admit npu-m256 at declared representative points, and execute G5's verification obligations.

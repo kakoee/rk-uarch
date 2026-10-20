@@ -1,8 +1,7 @@
 //! PRIVATE SYNTHETIC unit anchors; no public authority or successful public invocation.
-use crate::{admission::Trust, component, wire};
+use crate::{component, wire};
 use serde_json::Value;
-use std::collections::{BTreeMap, BTreeSet};
-fn fixture(id: &str) -> (Value, Trust) {
+fn fixture(id: &str) -> Value {
     let all: Value =
         serde_json::from_str(include_str!("../testdata/synthetic-component-jobs.json")).unwrap();
     let v = if id == "SYNTHETIC-O2-transient" {
@@ -14,19 +13,11 @@ fn fixture(id: &str) -> (Value, Trust) {
         all[id].clone()
     };
     assert!(!v.is_null(), "missing synthetic case {id}");
-    let trust = Trust {
-        registry: v["registry"]["registry_hash"].as_str().unwrap().into(),
-        profiles: BTreeMap::from([(
-            v["profile"]["profile_hash"].as_str().unwrap().into(),
-            BTreeSet::from([v["admission"]["case_id"].as_str().unwrap().into()]),
-        )]),
-        engine: v["engine"].clone(),
-    };
-    (v, trust)
+    v
 }
 fn run(id: &str) -> Value {
-    let (v, t) = fixture(id);
-    component::execute(&wire::canonical(&v).unwrap(), &t).unwrap()
+    let v = fixture(id);
+    component::execute(&wire::canonical(&v).unwrap()).unwrap()
 }
 #[test]
 fn synthetic_compute_literals() {
@@ -53,17 +44,7 @@ fn synthetic_dma_literals() {
         assert_eq!(r["duration_ps"], end, "{id}");
     }
 }
-#[test]
-fn synthetic_no_external_trust_from_self_hash() {
-    let (v, mut t) = fixture("C02");
-    t.profiles.clear();
-    assert_eq!(
-        component::execute(&wire::canonical(&v).unwrap(), &t)
-            .unwrap_err()
-            .code,
-        "TestProfileMismatch"
-    );
-}
+
 #[test]
 fn synthetic_replay_is_complete_bytes() {
     for id in ["C02", "D01", "D08", "D14"] {
@@ -151,45 +132,6 @@ fn synthetic_rational_overflow_is_checked() {
     assert!(Ratio::new(u128::MAX, 1).unwrap().ceil().is_err());
     assert_eq!(Ratio::new(4, 6).unwrap(), Ratio::new(2, 3).unwrap());
 }
-#[test]
-#[ignore = "explicit PRIVATE SYNTHETIC output export; never public respond or host authority"]
-fn export_private_synthetic_results() {
-    let root = std::path::PathBuf::from(
-        std::env::var("COMPONENT_PRIVATE_OUTPUT").expect("explicit private output"),
-    );
-    std::fs::create_dir_all(&root).unwrap();
-    let all: Value =
-        serde_json::from_str(include_str!("../testdata/synthetic-component-jobs.json")).unwrap();
-    let mut names = vec![];
-    for id in all.as_object().unwrap().keys() {
-        if id == "D13-barrier" {
-            let (v, t) = fixture(id);
-            assert_eq!(
-                component::execute(&wire::canonical(&v).unwrap(), &t)
-                    .unwrap_err()
-                    .code,
-                "InvalidResource"
-            );
-            continue;
-        }
-        let result = run(id);
-        std::fs::write(
-            root.join(format!("{id}.json")),
-            wire::canonical(&result).unwrap(),
-        )
-        .unwrap();
-        names.push(id.clone());
-    }
-    let id = "SYNTHETIC-O2-transient";
-    std::fs::write(
-        root.join(format!("{id}.json")),
-        wire::canonical(&run(id)).unwrap(),
-    )
-    .unwrap();
-    names.push(id.into());
-    assert_eq!(names.len(), 79);
-    std::fs::write(root.join("index.json"), serde_json::to_vec(&names).unwrap()).unwrap();
-}
 
 #[test]
 fn synthetic_phase_inventory_and_completed_traffic() {
@@ -254,17 +196,10 @@ fn synthetic_transient_all_terminal_readers() {
 fn synthetic_installed_issue_core_gap_is_explicit_refusal() {
     let v: Value =
         serde_json::from_str(include_str!("../testdata/synthetic-issue-core-gap.json")).unwrap();
-    let t = Trust {
-        registry: v["registry"]["registry_hash"].as_str().unwrap().into(),
-        profiles: BTreeMap::from([(
-            v["profile"]["profile_hash"].as_str().unwrap().into(),
-            BTreeSet::from([v["admission"]["case_id"].as_str().unwrap().into()]),
-        )]),
-        engine: v["engine"].clone(),
-    };
-    crate::component_admission::validate(&wire::canonical(&v).unwrap(), &t).unwrap();
+
+    crate::component_admission::validate(&wire::canonical(&v).unwrap()).unwrap();
     assert_eq!(
-        component::execute(&wire::canonical(&v).unwrap(), &t)
+        component::execute(&wire::canonical(&v).unwrap())
             .unwrap_err()
             .code,
         "IncompleteObservations"

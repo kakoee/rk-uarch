@@ -4,8 +4,8 @@ from fractions import Fraction
 
 import pytest
 
-from validation.component.checks import CheckFailure
-from validation.component.phase_laws import channel, clocked, resident_phases, tight_chain
+from rkuarch.verification.component.checks import CheckFailure
+from rkuarch.verification.component.phase_laws import channel, clocked, resident_phases, tight_chain
 
 
 def test_resident_mechanism_literals():
@@ -45,7 +45,7 @@ def test_tight_zero_link_and_port_wait_without_busy_invention():
     [("service", "channel_service:6", 30), ("inflight", "dma_inflight:0", 12)],
 )
 def test_ordinary_clock_cannot_bypass_nonclocked_binding(domain, population, queue, owner):
-    from validation.component.checks import check_queue_domain
+    from rkuarch.verification.component.checks import check_queue_domain
 
     row = dict(
         queue_id=queue,

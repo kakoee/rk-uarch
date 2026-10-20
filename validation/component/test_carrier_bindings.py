@@ -129,7 +129,7 @@ def test_independent_mechanisms_on_real_synthetic_carrier():
     ],
 )
 def test_independent_mechanism_discrimination(fault):
-    from validation.component.checks import CheckFailure
+    from rkuarch.verification.component.checks import CheckFailure
     from validation.component.observations_v2 import check_v2
 
     j, r = control()

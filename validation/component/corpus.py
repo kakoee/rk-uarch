@@ -7,7 +7,6 @@ build, host and final job hashes remain null until a genuine component release e
 from __future__ import annotations
 
 import copy
-import hashlib
 import json
 from fractions import Fraction
 from pathlib import Path
@@ -17,7 +16,7 @@ from uarch_contract.hardware import HardwareSpec
 from uarch_contract.hashing import content_hash, spec_hash
 from uarch_contract.mapped import NativeTestProfile, NativeTestRegistry
 
-from validation.component.arithmetic import burst, ceil, dma, resident, split
+from rkuarch.verification.component.arithmetic import burst, ceil, dma, resident, split
 
 ROOT = Path(__file__).resolve().parents[2]
 REVISION = "B-component-corpus/1"
@@ -527,11 +526,10 @@ def materialize(name: str, b: dict[str, Any], expected: dict[str, Any]) -> dict[
         "profile_hash",
     )
     NativeTestProfile.model_validate(profile)
-    b["producer"] = dict(
-        name="B-literal-input-author",
-        version="1",
-        implementation_hash="sha256:" + hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-    )
+    # Reconstruct historical input bytes with their recorded producer metadata.
+    # This identifies the archived author, not this fixture helper's current source.
+    historical = ROOT / "native/crates/uarch-engine/testdata/synthetic-component-jobs.json"
+    b["producer"] = json.loads(historical.read_bytes())["C02"]["workload_closure"]["producer"]
     b["admission"] = dict(
         checkpoint="B",
         invocation="test",
