@@ -1,0 +1,33 @@
+import json,os,re,shutil,subprocess
+from pathlib import Path
+base=Path('/tmp/rk-uarch-u4-correction-smoke');base.mkdir(exist_ok=True)
+for d in ('inputs','outputs','bin'): (base/d).mkdir(exist_ok=True)
+for name in ('production.json','test.json'): shutil.copy2(Path('/tmp/rk-uarch-simplify/docs/reviews/U4-ordinary-runtime-implementation-v1/smoke-inputs')/name,base/'inputs'/name)
+shutil.copy2('/tmp/u4-correction-smoke.py',base/'inputs/smoke.py')
+for mode in ('debug','release'):
+ shutil.copy2(Path('/tmp/rk-uarch-u4-correction-build/target/x86_64-unknown-linux-gnu')/mode/'uarch-engine',base/'bin'/mode)
+runtime='/tmp/rk-uarch-u4-correction-runtime'
+image='sha256:9358444059ed78e2975ada2c189f1c1a3144a5c201be6e44'
+# Full image ID from local inspect only; no pulls/builds.
+image=subprocess.check_output(['docker','image','inspect','python:3.11-slim','--format','{{.Id}}'],text=True).strip()
+for mode in ('run','replay'):
+ args=['docker','create','--pull','never','--network','none','--read-only','--user',f'{os.getuid()}:{os.getgid()}',
+       '--cap-drop','ALL','--security-opt','no-new-privileges','--tmpfs','/tmp:exec','--tmpfs','/scratch','--workdir','/scratch',
+       '--mount',f'type=bind,src={runtime},dst={runtime},readonly',
+       '--mount',f'type=bind,src={base}/inputs,dst=/inputs,readonly',
+       '--mount',f'type=bind,src={base}/outputs,dst=/outputs',
+       '--env','PYTHONDONTWRITEBYTECODE=1']
+ if mode=='run': args+=['--mount',f'type=bind,src={base}/bin,dst=/native,readonly']
+ args+=['--entrypoint',runtime+'/env/bin/python',image,'/inputs/smoke.py',mode]
+ cid=subprocess.check_output(args,text=True).strip();assert re.fullmatch('[0-9a-f]{64}',cid)
+ try:
+  with (base/(mode+'.stdout')).open('w') as out, (base/(mode+'.stderr')).open('w') as err:
+   r=subprocess.run(['docker','start','--attach',cid],stdout=out,stderr=err,timeout=120)
+  inspected=json.loads(subprocess.check_output(['docker','inspect',cid]))[0]
+  record={'mode':mode,'container_id':cid,'image':inspected['Image'],'mounts':inspected['Mounts'],'state':inspected['State'],'attach_status':r.returncode}
+  (base/(mode+'-container.json')).write_text(json.dumps(record,indent=2)+'\n')
+  print(mode,r.returncode,(base/(mode+'.stderr')).read_text())
+  assert r.returncode==0 and inspected['State']['ExitCode']==0 and not inspected['State']['OOMKilled'] and not inspected['State']['Error']
+  report=json.loads((base/(mode+'.stdout')).read_text());print(json.dumps({'mode':mode,'cases':report['cases'],'negative_controls':len(report['negative_controls'])}))
+ finally:
+  subprocess.run(['docker','rm','--force',cid],check=True,stdout=subprocess.DEVNULL)

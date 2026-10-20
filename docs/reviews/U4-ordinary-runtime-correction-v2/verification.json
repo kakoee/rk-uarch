@@ -1,0 +1,36 @@
+{
+  "base": "12be87558c5a3312068ab1c5aa147fd95df232da",
+  "source_tree": "9a86cab622504e68746534c94e93b659cacf794d",
+  "transition_sha256": "b0de563bc3a6433b205649b3ed4db2861856636629dc715a18ff264f6eda4da4",
+  "commands": {
+    "integration": "env -u PYTHONPATH ORDINARY_NATIVE=/tmp/rk-uarch-u4-correction-build/target/x86_64-unknown-linux-gnu/debug/uarch-engine .venv/bin/python -m pytest -q -rs --durations=20 tests/unit/test_ordinary_native.py tests/native/test_ordinary_process.py tests/unit/test_u4*.py tests/unit/test_prompt_sync.py validation/component contract/tests --require-vendor -m 'not nightly and not silicon'",
+    "native": "cargo test --locked --offline --all-features --target x86_64-unknown-linux-gnu",
+    "ruff": ".venv/bin/ruff check .",
+    "mypy": ".venv/bin/mypy src contract/uarch_contract scripts",
+    "mypy_contract": ".venv/bin/mypy --no-explicit-package-bases contract/tests",
+    "imports": ".venv/bin/lint-imports",
+    "schema": [
+      "python -m uarch_contract.generate --check",
+      "python -m uarch_contract.generate_mapped --check",
+      "python -m uarch_contract.generate_ordinary --check",
+      "python native/tools/export_carriers.py --check",
+      "python native/tools/export_ordinary.py --check"
+    ]
+  },
+  "results": {
+    "python_passed": 1285,
+    "python_skipped": 2,
+    "native_unit_passed": 85,
+    "native_binary_tests_passed": 2,
+    "native_ignored": 0,
+    "discovery_collected": 2485,
+    "installed_negative_controls": 26,
+    "installed_durations_ps": {
+      "production": 656000,
+      "fixture": 121000
+    },
+    "debug_release_equal": true,
+    "binary_free_replay": true,
+    "task_containers_removed": 10
+  }
+}

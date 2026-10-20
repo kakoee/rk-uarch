@@ -1,0 +1,121 @@
+"""Source-free installed-package test driver, not a runtime launcher or trust policy."""
+import importlib.abc
+import importlib.metadata
+import json
+import subprocess
+import sys
+from copy import deepcopy
+from pathlib import Path
+
+opens=[]
+def audit(event,args):
+    if event=='open' and isinstance(args[0],str): opens.append(args[0])
+sys.addaudithook(audit)
+class NoProducers(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname in ('rkuarch.workload.component','rkuarch.workload.ordinary') or fullname.startswith(('rkuarch.mapping','tests.','validation.')):
+            raise AssertionError('producer/development import: '+fullname)
+sys.meta_path.insert(0,NoProducers())
+from uarch_contract.hashing import canonical_json,content_hash,strict_json_loads
+from rkuarch.engines.native.ordinary import run,replay,consume,load_job
+from rkuarch.verification.component.observations_v3 import check_v3
+from rkuarch.engines.native.ordinary import UNREPRESENTED
+runtime=Path('/tmp/rk-uarch-u4-correction-runtime')
+assert not Path('/tmp/rk-uarch-u4-correction').exists()
+assert not Path('/home/jjaff').exists()
+assert not Path('/work').exists()
+assert not Path('/cargo-home').exists()
+assert not list((runtime/'env/lib/python3.12/site-packages').glob('*editable*'))
+assert not (runtime/'env/lib/python3.12/site-packages/rkuarch/engines/native/component_host.py').exists()
+assert (runtime/'env/lib/python3.12/site-packages/rkuarch/schemas/ordinary/OrdinaryJob.json').exists()
+report={'mode':sys.argv[1],'python':sys.version,'versions':{x.metadata['Name']:x.version for x in importlib.metadata.distributions()},'cases':{},'negative_controls':[]}
+if sys.argv[1]=='run':
+    for name,test in [('production',False),('test',True)]:
+        saved=Path('/inputs')/(name+'.json')
+        raw=saved.read_bytes();job=load_job(raw,test_only=test)
+        outputs=[]
+        for mode in ('debug','release'):
+            result=run(saved,executable=Path('/native')/mode,test_only=test)
+            outputs.append(canonical_json(result).encode())
+            target=Path('/outputs')/(name+'-'+mode+'.json')
+            target.write_bytes(outputs[-1])
+            assert replay(saved,target,test_only=test)==result
+        assert outputs[0]==outputs[1]
+        report['cases'][name]={'duration_ps':result.duration_ps,'result_hash':result.result_hash,'debug_release_equal':True}
+        original=strict_json_loads(outputs[0])
+        for fault in ('model','binding','duration','observation'):
+            bad=deepcopy(original)
+            if fault=='model': bad['engine']['model']['version']='1'
+            elif fault=='binding': bad['job_hash']='sha256:'+'0'*64
+            elif fault=='duration': bad['duration_ps']+=1
+            else: bad['observations']['format']='uarch-native-observations/2'
+            bad['result_hash']=content_hash(bad,exclude=('result_hash',))
+            try: consume(canonical_json(bad).encode(),b'',0,job=job)
+            except ValueError: report['negative_controls'].append(name+'-output-'+fault)
+            else: raise AssertionError(fault+' accepted')
+        for status in (1,2,17,-9):
+            try: consume(outputs[0],b'',status,job=job)
+            except (ValueError,RuntimeError): report['negative_controls'].append(name+'-status-'+str(status))
+            else: raise AssertionError('nonzero exit accepted')
+    raw=strict_json_loads(Path('/inputs/production.json').read_bytes())
+    for fault,code in [('model','InvalidCarrier'),('hash','ContentHashMismatch'),('owner','InvalidResource'),('old','UnsupportedProtocol'),('profile','InvalidCarrier')]:
+        bad=deepcopy(raw)
+        if fault=='model': bad['engine']['model']['version']='1'
+        elif fault=='hash': bad['job_hash']='sha256:'+'0'*64
+        elif fault=='owner': bad['owners'][0]['resource']='unknown'
+        elif fault=='old': bad['protocol']='uarch-engine/3'
+        else: bad['profile']={}
+        if fault!='hash': bad['job_hash']=content_hash(bad,exclude=('job_hash',))
+        process=subprocess.run(['/native/release','--protocol','uarch-engine/4'],input=canonical_json(bad).encode(),capture_output=True,timeout=30)
+        assert process.returncode==2 and not process.stdout
+        assert strict_json_loads(process.stderr)['code']==code
+        report['negative_controls'].append('native-'+fault+':'+code)
+    from uarch_contract.hardware import HardwareSpec
+    from uarch_contract.hashing import spec_hash
+    from uarch_contract.mapped import hardware_projection
+    for field in ('overhead','barrier'):
+        for value in (16,64):
+            bad=strict_json_loads(Path('/inputs/test.json').read_bytes())
+            bundle=bad['workload_closure'];spec=bundle['hardware_spec']
+            quantity=spec['cores']['core_type']['job_overhead_cycles'] if field=='overhead' else spec['sync']['barrier_latency_cycles']
+            quantity['value']=value
+            hw=HardwareSpec.model_validate(spec)
+            bundle['hardware_spec']=hw.model_dump(mode='json')
+            bundle['hardware_spec_hash']=bad['hardware_spec_hash']=spec_hash(hw)
+            bad['hardware']=hardware_projection(hw).model_dump(mode='json')
+            bundle['bundle_hash']=content_hash(bundle,exclude=('bundle_hash',))
+            bad['bundle_hash']=bundle['bundle_hash']
+            bad['job_hash']=content_hash(bad,exclude=('job_hash',))
+            raw=canonical_json(bad).encode()
+            try: load_job(raw,test_only=True)
+            except ValueError as error: assert 'UnsupportedHardware' in str(error)
+            else: raise AssertionError('unsupported hardware accepted by Python')
+            for mode in ('debug','release'):
+                result=subprocess.run(['/native/'+mode,'--protocol','uarch-engine/4','--test-only'],input=raw,capture_output=True,timeout=30)
+                assert result.returncode==2 and not result.stdout
+                assert strict_json_loads(result.stderr)['code']=='UnsupportedHardware'
+            report['negative_controls'].append(field+'-'+str(value)+':UnsupportedHardware-Python-debug-release')
+    job=load_job(Path('/inputs/production.json').read_bytes())
+    bad=strict_json_loads(Path('/outputs/production-release.json').read_bytes())
+    phase=next(x for x in bad['observations']['activities']['records'] if x['kind']=='service' and x['subphase']=='compute_wave')
+    phase['end_ps']+=1
+    try: check_v3(job.model_dump(mode='json'),bad,{'unrepresented':UNREPRESENTED})
+    except ValueError: report['negative_controls'].append('independent-compute-law')
+    else: raise AssertionError('independent checker accepted wrong law')
+    cli=[str(runtime/'env/bin/python'),'-m','rkuarch.engines.native.ordinary']
+    subprocess.run([*cli,'run','--job','/inputs/production.json','--executable','/native/release','--output','/outputs/cli.json'],check=True,timeout=30)
+    assert Path('/outputs/cli.json').read_bytes()==Path('/outputs/production-release.json').read_bytes()
+    subprocess.run([*cli,'replay','--job','/inputs/production.json','--output','/outputs/cli.json'],check=True,timeout=30)
+    report['cli']='run/replay passed'
+else:
+    assert not Path('/native').exists()
+    for name,test in [('production',False),('test',True)]:
+        result=replay(Path('/inputs')/(name+'.json'),Path('/outputs')/(name+'-release.json'),test_only=test)
+        report['cases'][name]={'duration_ps':result.duration_ps,'result_hash':result.result_hash}
+    report['native_binary']='absent'
+report['module_files']=sorted({str(m.__file__) for n,m in sys.modules.items() if n.startswith(('rkuarch','uarch_contract')) and getattr(m,'__file__',None)})
+assert all(x.startswith(str(runtime)+'/') for x in report['module_files'])
+assert not any(n.startswith(('tests.','validation.','rkuarch.mapping')) for n in sys.modules)
+report['python_open_paths']=sorted(set(opens))
+assert not any('/.git/' in x or '/docs/' in x or '/cargo-home/' in x or '/rk-uarch-simplify-preview/' in x for x in opens)
+print(json.dumps(report,indent=2,sort_keys=True))

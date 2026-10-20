@@ -1,0 +1,246 @@
+........................................................................ [ 25%]
+..............................................................F....ss... [ 51%]
+.........................F.............................EEEEEEE.......... [ 77%]
+..............................................................           [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_all_historical_inputs_and_expectations_remain_distinct _
+
+    @pytest.fixture(scope="module")
+    def proposal():
+>       return prospective_inputs()
+               ^^^^^^^^^^^^^^^^^^^^
+
+validation/component/test_native_inputs.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def prospective_inputs() -> dict[str, Any]:
+        old = json.loads(HISTORY.read_text())
+        corpus = build()
+        items = {}
+        transitions = []
+        for row in old["cases"]:
+            name = row["case_id"]
+            if "input_path" in row:
+                source = ROOT / row["input_path"]
+                assert hashlib.sha256(source.read_bytes()).hexdigest() == row["input_sha256"]
+                raw = json.loads(source.read_text())
+                b = raw.get("bundle", raw)
+            else:
+                b = corpus["items"][name]["bundle"]
+>           assert b["bundle_hash"] == row["bundle_hash"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError
+
+validation/component/native_inputs.py:92: AssertionError
+_______ ERROR at setup of test_exact_p2_promise_and_external_anchor[C02] _______
+
+    @pytest.fixture(scope="module")
+    def proposal():
+>       return prospective_inputs()
+               ^^^^^^^^^^^^^^^^^^^^
+
+validation/component/test_native_inputs.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def prospective_inputs() -> dict[str, Any]:
+        old = json.loads(HISTORY.read_text())
+        corpus = build()
+        items = {}
+        transitions = []
+        for row in old["cases"]:
+            name = row["case_id"]
+            if "input_path" in row:
+                source = ROOT / row["input_path"]
+                assert hashlib.sha256(source.read_bytes()).hexdigest() == row["input_sha256"]
+                raw = json.loads(source.read_text())
+                b = raw.get("bundle", raw)
+            else:
+                b = corpus["items"][name]["bundle"]
+>           assert b["bundle_hash"] == row["bundle_hash"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError
+
+validation/component/native_inputs.py:92: AssertionError
+_______ ERROR at setup of test_exact_p2_promise_and_external_anchor[D01] _______
+
+    @pytest.fixture(scope="module")
+    def proposal():
+>       return prospective_inputs()
+               ^^^^^^^^^^^^^^^^^^^^
+
+validation/component/test_native_inputs.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def prospective_inputs() -> dict[str, Any]:
+        old = json.loads(HISTORY.read_text())
+        corpus = build()
+        items = {}
+        transitions = []
+        for row in old["cases"]:
+            name = row["case_id"]
+            if "input_path" in row:
+                source = ROOT / row["input_path"]
+                assert hashlib.sha256(source.read_bytes()).hexdigest() == row["input_sha256"]
+                raw = json.loads(source.read_text())
+                b = raw.get("bundle", raw)
+            else:
+                b = corpus["items"][name]["bundle"]
+>           assert b["bundle_hash"] == row["bundle_hash"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError
+
+validation/component/native_inputs.py:92: AssertionError
+___ ERROR at setup of test_exact_p2_promise_and_external_anchor[B-native-O2] ___
+
+    @pytest.fixture(scope="module")
+    def proposal():
+>       return prospective_inputs()
+               ^^^^^^^^^^^^^^^^^^^^
+
+validation/component/test_native_inputs.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def prospective_inputs() -> dict[str, Any]:
+        old = json.loads(HISTORY.read_text())
+        corpus = build()
+        items = {}
+        transitions = []
+        for row in old["cases"]:
+            name = row["case_id"]
+            if "input_path" in row:
+                source = ROOT / row["input_path"]
+                assert hashlib.sha256(source.read_bytes()).hexdigest() == row["input_sha256"]
+                raw = json.loads(source.read_text())
+                b = raw.get("bundle", raw)
+            else:
+                b = corpus["items"][name]["bundle"]
+>           assert b["bundle_hash"] == row["bundle_hash"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError
+
+validation/component/native_inputs.py:92: AssertionError
+_ ERROR at setup of test_exact_p2_promise_and_external_anchor[B2-C04-transient] _
+
+    @pytest.fixture(scope="module")
+    def proposal():
+>       return prospective_inputs()
+               ^^^^^^^^^^^^^^^^^^^^
+
+validation/component/test_native_inputs.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def prospective_inputs() -> dict[str, Any]:
+        old = json.loads(HISTORY.read_text())
+        corpus = build()
+        items = {}
+        transitions = []
+        for row in old["cases"]:
+            name = row["case_id"]
+            if "input_path" in row:
+                source = ROOT / row["input_path"]
+                assert hashlib.sha256(source.read_bytes()).hexdigest() == row["input_sha256"]
+                raw = json.loads(source.read_text())
+                b = raw.get("bundle", raw)
+            else:
+                b = corpus["items"][name]["bundle"]
+>           assert b["bundle_hash"] == row["bundle_hash"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError
+
+validation/component/native_inputs.py:92: AssertionError
+_ ERROR at setup of test_o2_private_job_keeps_true_transient_input_and_literal _
+
+    @pytest.fixture(scope="module")
+    def proposal():
+>       return prospective_inputs()
+               ^^^^^^^^^^^^^^^^^^^^
+
+validation/component/test_native_inputs.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def prospective_inputs() -> dict[str, Any]:
+        old = json.loads(HISTORY.read_text())
+        corpus = build()
+        items = {}
+        transitions = []
+        for row in old["cases"]:
+            name = row["case_id"]
+            if "input_path" in row:
+                source = ROOT / row["input_path"]
+                assert hashlib.sha256(source.read_bytes()).hexdigest() == row["input_sha256"]
+                raw = json.loads(source.read_text())
+                b = raw.get("bundle", raw)
+            else:
+                b = corpus["items"][name]["bundle"]
+>           assert b["bundle_hash"] == row["bundle_hash"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError
+
+validation/component/native_inputs.py:92: AssertionError
+_ ERROR at setup of test_resource_negatives_have_separate_positive_synthetic_profiles _
+
+    @pytest.fixture(scope="module")
+    def proposal():
+>       return prospective_inputs()
+               ^^^^^^^^^^^^^^^^^^^^
+
+validation/component/test_native_inputs.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def prospective_inputs() -> dict[str, Any]:
+        old = json.loads(HISTORY.read_text())
+        corpus = build()
+        items = {}
+        transitions = []
+        for row in old["cases"]:
+            name = row["case_id"]
+            if "input_path" in row:
+                source = ROOT / row["input_path"]
+                assert hashlib.sha256(source.read_bytes()).hexdigest() == row["input_sha256"]
+                raw = json.loads(source.read_text())
+                b = raw.get("bundle", raw)
+            else:
+                b = corpus["items"][name]["bundle"]
+>           assert b["bundle_hash"] == row["bundle_hash"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError
+
+validation/component/native_inputs.py:92: AssertionError
+=================================== FAILURES ===================================
+___________________________ test_exact_frozen_corpus ___________________________
+
+    def test_exact_frozen_corpus():
+>       assert manifest() == json.loads((ROOT / "validation/component/cases.json").read_bytes())
+E       AssertionError: assert {'revision': ...', ...}, ...]} == {'cases': [{'...tive receipt'}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'cases': [{'case_id': 'C01', 'hardware_spec_hash': 'sha256:3b7186f3e69d38723ec40f9a074b941934644ac57cc6f61d64865429ca...7cf465f28c0827bd', 'graph_hash': 'sha256:57dacefa802b9375c70ddb93fd77833d993ee6f9b5f0d2d74ba306a9f75d3e40', ...}, ...]} != {'cases': [{'authority': None, 'build_identity': None, 'bundle_hash': 'sha256:0258c871e88daf97279197f6c5de3bbdee4b659b...dle_hash': 'sha256:27e2a98b7e108b41a9ba01b3be2f0476fc4a43d3943ef60d06e3b5345adcfaea', 'case_id': 'C06-fit', ...}, ...]}
+E         Use -v to get more diff
+
+validation/component/test_corpus.py:17: AssertionError
+_____________ test_exact_future_selection_and_historical_identity ______________
+
+    def test_exact_future_selection_and_historical_identity():
+        selection = json.loads((PACKAGE / "execution-selection.json").read_text())
+        assert selection["selection_hash"] == content_hash(selection, exclude=("selection_hash",))
+        assert len(selection["cases"]) == 99
+        historical = {x["case_id"]: x for x in manifest()["cases"]}
+        rows = {x["case_id"]: x for x in selection["cases"]}
+        for name, old in historical.items():
+>           assert all(rows[name][k] == v for k, v in old.items())
+E           assert False
+E            +  where False = all(<generator object test_exact_future_selection_and_historical_identity.<locals>.<genexpr> at 0x7e6075ba3ae0>)
+
+validation/component/test_join_selection.py:23: AssertionError
+=========================== short test summary info ============================
+FAILED validation/component/test_corpus.py::test_exact_frozen_corpus - Assert...
+FAILED validation/component/test_join_selection.py::test_exact_future_selection_and_historical_identity
+ERROR validation/component/test_native_inputs.py::test_all_historical_inputs_and_expectations_remain_distinct
+ERROR validation/component/test_native_inputs.py::test_exact_p2_promise_and_external_anchor[C02]
+ERROR validation/component/test_native_inputs.py::test_exact_p2_promise_and_external_anchor[D01]
+ERROR validation/component/test_native_inputs.py::test_exact_p2_promise_and_external_anchor[B-native-O2]
+ERROR validation/component/test_native_inputs.py::test_exact_p2_promise_and_external_anchor[B2-C04-transient]
+ERROR validation/component/test_native_inputs.py::test_o2_private_job_keeps_true_transient_input_and_literal
+ERROR validation/component/test_native_inputs.py::test_resource_negatives_have_separate_positive_synthetic_profiles
+2 failed, 267 passed, 2 skipped, 7 errors in 43.17s

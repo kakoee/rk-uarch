@@ -1,0 +1,691 @@
+src/rkuarch/engines/native/transport.py:from __future__ import annotations
+src/rkuarch/engines/native/transport.py:import os
+src/rkuarch/engines/native/transport.py:import selectors
+src/rkuarch/engines/native/transport.py:import signal
+src/rkuarch/engines/native/transport.py:import subprocess
+src/rkuarch/engines/native/transport.py:import tempfile
+src/rkuarch/engines/native/transport.py:import time
+src/rkuarch/engines/native/transport.py:from dataclasses import dataclass
+src/rkuarch/engines/native/transport.py:from typing import Any
+src/rkuarch/engines/native/transport.py:from uarch_contract.hashing import canonical_json, strict_json_loads
+validation/component/native_check.py:import json
+validation/component/native_check.py:from pathlib import Path
+validation/component/native_check.py:from typing import Any
+validation/component/native_check.py:from uarch_contract.mapped import MappedEngineJob, MappedEngineResult
+validation/component/native_check.py:from validation.component.checks import need
+validation/component/native_check.py:from validation.component.selection import assert_case
+validation/component/runtime_campaign.py:from __future__ import annotations
+validation/component/runtime_campaign.py:import hashlib
+validation/component/runtime_campaign.py:import resource
+validation/component/runtime_campaign.py:import runpy
+validation/component/runtime_campaign.py:from functools import partial
+validation/component/runtime_campaign.py:from pathlib import Path
+validation/component/runtime_campaign.py:from typing import Any
+validation/component/runtime_campaign.py:from uarch_contract.hashing import canonical_json
+validation/component/runtime_campaign.py:from validation.component.runtime_evidence import STREAM_CAP, consume_attempt, replay_admission
+validation/component/runtime_campaign.py:from validation.component.runtime_resources import discover
+validation/component/test_carrier_bindings.py:from copy import deepcopy
+validation/component/test_carrier_bindings.py:import pytest
+validation/component/test_carrier_bindings.py:from uarch_contract.hashing import content_hash
+validation/component/test_carrier_bindings.py:from uarch_contract.mapped import validate_result
+validation/component/test_carrier_bindings.py:from validation.component.consistent_carriers import control as current_control
+validation/component/test_carrier_bindings.py:from validation.component.synthetic_carrier import synthetic_job
+validation/component/test_matrix_order.py:from copy import deepcopy
+validation/component/test_matrix_order.py:import pytest
+validation/component/test_matrix_order.py:from validation.component.matrix_order import check_matrix_order
+validation/component/test_reference_readiness.py:import json
+validation/component/test_reference_readiness.py:from uarch_contract.operators import Operator
+validation/component/test_reference_readiness.py:from validation.component.corpus import ROOT
+native/tools/component_candidate.py:from __future__ import annotations
+native/tools/component_candidate.py:import argparse
+native/tools/component_candidate.py:import hashlib
+native/tools/component_candidate.py:import json
+native/tools/component_candidate.py:import shutil
+native/tools/component_candidate.py:import subprocess
+native/tools/component_candidate.py:import time
+native/tools/component_candidate.py:from pathlib import Path
+native/tools/prepare_corpus.py:import hashlib
+native/tools/prepare_corpus.py:import importlib.util
+native/tools/prepare_corpus.py:import json
+native/tools/prepare_corpus.py:import shutil
+native/tools/prepare_corpus.py:import tempfile
+native/tools/prepare_corpus.py:from pathlib import Path
+native/tools/prepare_corpus.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/test_mapper_join.py:import copy
+validation/component/test_mapper_join.py:import pytest
+validation/component/test_mapper_join.py:from uarch_contract.hashing import canonical_json, content_hash
+validation/component/test_mapper_join.py:from uarch_contract.mapped import MappedBundle
+validation/component/test_mapper_join.py:from uarch_contract.prepared import PreparedOp, Producer
+validation/component/test_mapper_join.py:from rkuarch.mapping.component import map_component
+validation/component/test_mapper_join.py:from rkuarch.workload.component import component_point, prepare_component_bundle
+validation/component/test_mapper_join.py:from rkuarch.workload.mapped import export_component_bundle, load_component_bundle
+validation/component/test_mapper_join.py:from validation.component.arithmetic import resident
+validation/component/test_mapper_join.py:from validation.component.corpus import base, read
+validation/component/test_reduction.py:from copy import deepcopy
+validation/component/test_reduction.py:from validation.component.reduction import reduce_native
+native/tools/check_refusals.py:from __future__ import annotations
+native/tools/check_refusals.py:import argparse
+native/tools/check_refusals.py:import json
+native/tools/check_refusals.py:from pathlib import Path
+native/tools/check_refusals.py:from build_candidate import BIN, base, command, digest, write
+native/tools/check_refusals.py:from uarch_contract.hashing import canonical_json, sha256, strict_json_loads
+native/tools/check_refusals.py:from rkuarch.engines.native.records import BuildInputs
+native/tools/generate_identity.py:from __future__ import annotations
+native/tools/generate_identity.py:import argparse
+native/tools/generate_identity.py:import json
+native/tools/generate_identity.py:from pathlib import Path
+native/tools/generate_identity.py:from uarch_contract.hashing import canonical_json, content_hash, sha256, strict_json_loads
+native/tools/generate_identity.py:from uarch_contract.mapped import NativeEngineIdentity, NativeTestProfile, NativeTestRegistry
+native/tools/generate_identity.py:from rkuarch.engines.native.records import BuildInputs, BuildTrust, ToolInputs
+validation/component/reduction.py:from collections.abc import Mapping, Sequence
+validation/component/reduction.py:from typing import Any
+validation/component/test_capture_monitor.py:from __future__ import annotations
+validation/component/test_capture_monitor.py:import json
+validation/component/test_capture_monitor.py:import time
+validation/component/test_capture_monitor.py:from pathlib import Path
+validation/component/test_capture_monitor.py:from typing import Any
+validation/component/test_capture_monitor.py:import pytest
+validation/component/test_capture_monitor.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/test_capture_monitor.py:from validation.component import capture_monitor as monitor
+validation/component/matrix_order.py:from collections import defaultdict
+validation/component/matrix_order.py:from typing import Any
+validation/component/matrix_order.py:from validation.component.checks import need
+validation/component/test_lifetime_discrimination.py:import pytest
+validation/component/test_lifetime_discrimination.py:from uarch_contract.mapped import MappedBundle, admit, validate_resources
+validation/component/test_lifetime_discrimination.py:from validation.component.corpus import build, materialize
+validation/component/test_lifetime_discrimination.py:from validation.component.lifetime_inputs import lifetime_inputs
+validation/component/test_policy_boundaries.py:from copy import deepcopy
+validation/component/test_policy_boundaries.py:from pathlib import Path
+validation/component/test_policy_boundaries.py:from uarch_contract.mapped import MappedBundle, admit
+validation/component/test_policy_boundaries.py:from uarch_contract.prepared import PreparedOp
+validation/component/test_policy_boundaries.py:from rkuarch.mapping.component import map_component
+validation/component/test_policy_boundaries.py:from validation.component.corpus import build
+validation/component/test_policy_boundaries.py:from validation.component.join_inputs import reseal
+native/tools/build_candidate.py:from __future__ import annotations
+native/tools/build_candidate.py:import argparse
+native/tools/build_candidate.py:import importlib.util
+native/tools/build_candidate.py:import json
+native/tools/build_candidate.py:import shutil
+native/tools/build_candidate.py:import subprocess
+native/tools/build_candidate.py:import time
+native/tools/build_candidate.py:from pathlib import Path
+native/tools/build_candidate.py:from generate_identity import generate
+native/tools/build_candidate.py:from uarch_contract.hardware import HardwareSpec
+native/tools/build_candidate.py:from uarch_contract.hashing import canonical_json, content_hash, sha256, strict_json_loads
+native/tools/build_candidate.py:from uarch_contract.mapped import NativeEngineIdentity, hardware_projection, validate_job
+native/tools/build_candidate.py:from rkuarch.engines.native.records import BuildInputs
+native/tools/freeze_inputs.py:from __future__ import annotations
+native/tools/freeze_inputs.py:import argparse
+native/tools/freeze_inputs.py:import hashlib
+native/tools/freeze_inputs.py:import json
+native/tools/freeze_inputs.py:import subprocess
+native/tools/freeze_inputs.py:from pathlib import Path
+native/tools/freeze_inputs.py:from uarch_contract.hashing import canonical_json, content_hash, sha256, strict_json_loads
+native/tools/freeze_inputs.py:from rkuarch.engines.native.records import BuildInputs, BuildTrust, ToolInputs
+validation/component/phase_laws.py:from fractions import Fraction
+validation/component/phase_laws.py:from typing import Any
+validation/component/phase_laws.py:from validation.component.arithmetic import ceil, edge_after
+validation/component/phase_laws.py:from validation.component.checks import need
+src/rkuarch/engines/native/runner.py:from __future__ import annotations
+src/rkuarch/engines/native/runner.py:from pathlib import Path
+src/rkuarch/engines/native/runner.py:from typing import Any
+src/rkuarch/engines/native/runner.py:from uarch_contract.hashing import canonical_json, sha256, strict_json_loads
+src/rkuarch/engines/native/runner.py:from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, validate_result
+src/rkuarch/engines/native/runner.py:from rkuarch.workload.mapped import loads_fixed_delay_job
+src/rkuarch/engines/native/runner.py:from .transport import (
+src/rkuarch/engines/native/runner.py:from .transport import (
+src/rkuarch/engines/native/runner.py:from .transport import (
+src/rkuarch/engines/native/runner.py:from .transport import (
+src/rkuarch/engines/native/runner.py:from .transport import (
+src/rkuarch/engines/native/runner.py:from .transport import (
+src/rkuarch/engines/native/runner.py:from .transport import (
+validation/component/test_capture_diagnostics.py:from __future__ import annotations
+validation/component/test_capture_diagnostics.py:import json
+validation/component/test_capture_diagnostics.py:import subprocess
+validation/component/test_capture_diagnostics.py:import sys
+validation/component/test_capture_diagnostics.py:from pathlib import Path
+validation/component/test_capture_diagnostics.py:from typing import Any
+validation/component/test_capture_diagnostics.py:import pytest
+validation/component/test_capture_diagnostics.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/test_capture_diagnostics.py:from validation.component import capture_diagnostics as diagnostic
+validation/component/lifetime_inputs.py:from copy import deepcopy
+validation/component/lifetime_inputs.py:from typing import Any
+validation/component/lifetime_inputs.py:from validation.component.corpus import build, graph
+validation/component/lifetime_inputs.py:from validation.component.join_inputs import pair, reseal
+validation/component/transition_checks_v3.py:from collections import defaultdict
+validation/component/transition_checks_v3.py:from typing import Any
+validation/component/transition_checks_v3.py:from validation.component.checks import need
+validation/component/transition_checks_v3.py:from validation.component.issue_checks import credit_predecessors
+validation/component/test_join_selection.py:import hashlib
+validation/component/test_join_selection.py:import json
+validation/component/test_join_selection.py:from pathlib import Path
+validation/component/test_join_selection.py:from uarch_contract.hashing import content_hash
+validation/component/test_join_selection.py:from uarch_contract.mapped import MappedBundle, NativeTestProfile
+validation/component/test_join_selection.py:from validation.component.corpus import manifest
+native/tools/export_ordinary.py:import argparse
+native/tools/export_ordinary.py:import json
+native/tools/export_ordinary.py:from pathlib import Path
+native/tools/export_ordinary.py:from uarch_contract.ordinary import OrdinaryJob
+validation/component/test_phase_laws.py:from fractions import Fraction
+validation/component/test_phase_laws.py:import pytest
+validation/component/test_phase_laws.py:from validation.component.checks import CheckFailure
+validation/component/test_phase_laws.py:from validation.component.phase_laws import channel, clocked, resident_phases, tight_chain
+validation/component/ordinary_eof_campaign.py:from __future__ import annotations
+validation/component/ordinary_eof_campaign.py:import json
+validation/component/ordinary_eof_campaign.py:import signal
+validation/component/ordinary_eof_campaign.py:import time
+validation/component/ordinary_eof_campaign.py:from functools import partial
+validation/component/ordinary_eof_campaign.py:from pathlib import Path
+validation/component/ordinary_eof_campaign.py:from typing import Any, Protocol
+validation/component/ordinary_eof_campaign.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/ordinary_eof_campaign.py:from native.tools import component_container_guard as guardian
+validation/component/ordinary_eof_campaign.py:from validation.component.checks import need
+validation/component/ordinary_eof_campaign.py:from validation.component.ordinary_eof_acceptance import (
+validation/component/ordinary_eof_campaign.py:from validation.component.runtime_campaign import POLICY as POLICY
+validation/component/ordinary_eof_campaign.py:from validation.component.runtime_campaign import helpers as helpers
+validation/component/ordinary_eof_campaign.py:from validation.component.runtime_campaign import schedule
+validation/component/join_inputs.py:import hashlib
+validation/component/join_inputs.py:from copy import deepcopy
+validation/component/join_inputs.py:from pathlib import Path
+validation/component/join_inputs.py:from typing import Any
+validation/component/join_inputs.py:from validation.component.corpus import graph, materialize, resident_input, seal, two_tiles
+validation/component/test_arithmetic.py:from fractions import Fraction
+validation/component/test_arithmetic.py:import pytest
+validation/component/test_arithmetic.py:from validation.component.arithmetic import burst, dma, edge_after, resident, split
+validation/component/test_join_inputs.py:from copy import deepcopy
+validation/component/test_join_inputs.py:import pytest
+validation/component/test_join_inputs.py:from uarch_contract.mapped import MappedBundle, admit, validate_resources
+validation/component/test_join_inputs.py:from validation.component.arithmetic import resident
+validation/component/test_join_inputs.py:from validation.component.corpus import build, graph
+validation/component/test_join_inputs.py:from validation.component.join_inputs import prospective_inputs, reseal
+validation/component/transition_checks.py:from collections import defaultdict
+validation/component/transition_checks.py:from typing import Any
+validation/component/transition_checks.py:from validation.component.checks import need
+validation/component/test_ordinary_eof_campaign.py:from __future__ import annotations
+validation/component/test_ordinary_eof_campaign.py:import json
+validation/component/test_ordinary_eof_campaign.py:import time
+validation/component/test_ordinary_eof_campaign.py:from pathlib import Path
+validation/component/test_ordinary_eof_campaign.py:from typing import Any, cast
+validation/component/test_ordinary_eof_campaign.py:import pytest
+validation/component/test_ordinary_eof_campaign.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/test_ordinary_eof_campaign.py:from validation.component import ordinary_eof_campaign as campaign
+validation/component/test_ordinary_eof_campaign.py:from validation.component import test_ordinary_eof_acceptance as fixtures
+native/tools/export_carriers.py:import argparse
+native/tools/export_carriers.py:import json
+native/tools/export_carriers.py:from pathlib import Path
+native/tools/export_carriers.py:from uarch_contract.mapped import MappedEngineJob
+validation/component/test_accumulator_controls.py:from copy import deepcopy
+validation/component/test_accumulator_controls.py:import pytest
+validation/component/test_accumulator_controls.py:from uarch_contract.mapped import MappedBundle, admit, validate_resources
+validation/component/test_accumulator_controls.py:from validation.component.corpus import build, graph, materialize, two_tiles
+validation/component/test_accumulator_controls.py:from validation.component.join_inputs import prospective_inputs, reseal
+validation/component/ordinary_eof_acceptance.py:from __future__ import annotations
+validation/component/ordinary_eof_acceptance.py:import json
+validation/component/ordinary_eof_acceptance.py:import math
+validation/component/ordinary_eof_acceptance.py:import re
+validation/component/ordinary_eof_acceptance.py:import sys
+validation/component/ordinary_eof_acceptance.py:from fractions import Fraction
+validation/component/ordinary_eof_acceptance.py:from pathlib import Path
+validation/component/ordinary_eof_acceptance.py:from typing import Any
+validation/component/ordinary_eof_acceptance.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/ordinary_eof_acceptance.py:from validation.component.checks import need
+validation/component/ordinary_eof_acceptance.py:from validation.component.runtime_checks import CHECKER, consume_case, verify_sources
+validation/component/ordinary_eof_acceptance.py:from validation.component.runtime_evidence import STREAM_CAP, exact_refusal, parse
+validation/component/issue_checks.py:from typing import Any
+validation/component/issue_checks.py:from validation.component.arithmetic import edge_after
+validation/component/issue_checks.py:from validation.component.checks import need
+validation/component/test_issue_checks.py:from copy import deepcopy
+validation/component/test_issue_checks.py:import pytest
+validation/component/test_issue_checks.py:from validation.component import issue_checks as checks
+validation/component/test_issue_checks.py:from validation.component.checks import CheckFailure
+src/rkuarch/engines/native/host.py:from __future__ import annotations
+src/rkuarch/engines/native/host.py:import contextlib
+src/rkuarch/engines/native/host.py:import hashlib
+src/rkuarch/engines/native/host.py:import os
+src/rkuarch/engines/native/host.py:import stat
+src/rkuarch/engines/native/host.py:from collections.abc import Iterator
+src/rkuarch/engines/native/host.py:from dataclasses import dataclass
+src/rkuarch/engines/native/host.py:from pathlib import Path
+src/rkuarch/engines/native/host.py:from typing import Any
+src/rkuarch/engines/native/host.py:from uarch_contract.hashing import content_hash, sha256, strict_json_loads
+src/rkuarch/engines/native/host.py:from uarch_contract.mapped import MappedEngineJob, NativeTestProfile, NativeTestRegistry
+src/rkuarch/engines/native/host.py:from .records import (
+validation/component/test_ordinary_eof_acceptance.py:from __future__ import annotations
+validation/component/test_ordinary_eof_acceptance.py:import hashlib
+validation/component/test_ordinary_eof_acceptance.py:import json
+validation/component/test_ordinary_eof_acceptance.py:from copy import deepcopy
+validation/component/test_ordinary_eof_acceptance.py:from dataclasses import replace
+validation/component/test_ordinary_eof_acceptance.py:from pathlib import Path
+validation/component/test_ordinary_eof_acceptance.py:from typing import Any, cast
+validation/component/test_ordinary_eof_acceptance.py:import pytest
+validation/component/test_ordinary_eof_acceptance.py:from uarch_contract.hashing import canonical_json, content_hash, sha256
+validation/component/test_ordinary_eof_acceptance.py:from rkuarch.engines.native import component_host, component_image
+validation/component/test_ordinary_eof_acceptance.py:from rkuarch.engines.native.component_records import IMAGE
+validation/component/test_ordinary_eof_acceptance.py:from tests.unit import test_component_runtime as fixtures
+validation/component/test_ordinary_eof_acceptance.py:from validation.component import ordinary_eof_acceptance as consumer
+validation/component/test_ordinary_eof_acceptance.py:from validation.component.runtime_checks import CHECKER
+validation/component/ordinary_build_receipt.py:from __future__ import annotations
+validation/component/ordinary_build_receipt.py:import json
+validation/component/ordinary_build_receipt.py:import time
+validation/component/ordinary_build_receipt.py:import uuid
+validation/component/ordinary_build_receipt.py:from collections.abc import Callable
+validation/component/ordinary_build_receipt.py:from pathlib import Path
+validation/component/ordinary_build_receipt.py:from typing import Any
+validation/component/ordinary_build_receipt.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/ordinary_build_receipt.py:from validation.component.checks import need
+validation/component/ordinary_build_receipt.py:from validation.component.ordinary_build_acceptance import RECEIPT, _declaration
+validation/component/transient_carrier.py:from copy import deepcopy
+validation/component/transient_carrier.py:from typing import Any
+validation/component/transient_carrier.py:from uarch_contract.hashing import content_hash
+validation/component/transient_carrier.py:from uarch_contract.mapped import MappedBundle, MappedEngineJob, canonical_owners
+validation/component/transient_carrier.py:from validation.component.consistent_carriers import control, synchronize
+validation/component/transient_carrier.py:from validation.component.corpus import graph, materialize, resident_input
+validation/component/transient_carrier.py:from validation.component.synthetic_carrier import synthetic_job
+validation/component/synthetic_carrier.py:from fractions import Fraction
+validation/component/synthetic_carrier.py:from functools import cache
+validation/component/synthetic_carrier.py:from typing import Any
+validation/component/synthetic_carrier.py:from uarch_contract.hashing import content_hash
+validation/component/synthetic_carrier.py:from uarch_contract.mapped import (
+validation/component/synthetic_carrier.py:from validation.component.checks import union_time
+validation/component/synthetic_carrier.py:from validation.component.corpus import build
+native/tools/component_trusted_start.py:import hashlib
+native/tools/component_trusted_start.py:import importlib
+native/tools/component_trusted_start.py:import importlib.machinery as machinery
+native/tools/component_trusted_start.py:import importlib.util
+native/tools/component_trusted_start.py:import json
+native/tools/component_trusted_start.py:import sys
+native/tools/component_trusted_start.py:import types
+native/tools/component_trusted_start.py:import typing as _typing
+native/tools/component_trusted_start.py:from pathlib import Path
+src/rkuarch/engines/native/ordinary.py:from __future__ import annotations
+src/rkuarch/engines/native/ordinary.py:import argparse
+src/rkuarch/engines/native/ordinary.py:import os
+src/rkuarch/engines/native/ordinary.py:import sys
+src/rkuarch/engines/native/ordinary.py:from importlib.metadata import version
+src/rkuarch/engines/native/ordinary.py:from pathlib import Path
+src/rkuarch/engines/native/ordinary.py:from typing import get_args
+src/rkuarch/engines/native/ordinary.py:from uarch_contract.hashing import canonical_json, strict_json_loads
+src/rkuarch/engines/native/ordinary.py:from uarch_contract.mapped import ProfileEntry, require
+src/rkuarch/engines/native/ordinary.py:from uarch_contract.ordinary import OrdinaryJob, OrdinaryResult, validate_result
+src/rkuarch/engines/native/ordinary.py:from rkuarch.verification.component.observations_v3 import check_v3
+src/rkuarch/engines/native/ordinary.py:from rkuarch.workload.mapped import validate_component_completeness
+src/rkuarch/engines/native/ordinary.py:from .transport import (
+validation/component/installation_identity.py:import hashlib
+validation/component/installation_identity.py:import json
+validation/component/installation_identity.py:from pathlib import Path
+validation/component/installation_identity.py:from typing import Any
+src/rkuarch/engines/native/component_runner.py:from __future__ import annotations
+src/rkuarch/engines/native/component_runner.py:from pathlib import Path
+src/rkuarch/engines/native/component_runner.py:from typing import Any, get_args
+src/rkuarch/engines/native/component_runner.py:from uarch_contract.hashing import canonical_json, sha256, strict_json_loads
+src/rkuarch/engines/native/component_runner.py:from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, ProfileEntry, validate_result
+src/rkuarch/engines/native/component_runner.py:from .component_host import ComponentSession, _PreparedComponent, loads_runtime_job
+src/rkuarch/engines/native/component_runner.py:from .component_records import CHECKER, OBSERVATIONS
+src/rkuarch/engines/native/component_runner.py:from .host import _read, _require
+src/rkuarch/engines/native/component_runner.py:from .runner import (
+validation/component/test_installation_identity.py:from pathlib import Path
+validation/component/test_installation_identity.py:from validation.component.installation_identity import (
+validation/component/test_transient_lifetime.py:from copy import deepcopy
+validation/component/test_transient_lifetime.py:import pytest
+validation/component/test_transient_lifetime.py:from uarch_contract.mapped import validate_result
+validation/component/test_transient_lifetime.py:from validation.component.checks import CheckFailure
+validation/component/test_transient_lifetime.py:from validation.component.consistent_carriers import EXPECTED
+validation/component/test_transient_lifetime.py:from validation.component.observations_v2 import check_v2
+validation/component/test_transient_lifetime.py:from validation.component.transient_carrier import READY, SPANS, transient_attack, transient_control
+validation/component/ordinary_build_acceptance.py:from __future__ import annotations
+validation/component/ordinary_build_acceptance.py:import json
+validation/component/ordinary_build_acceptance.py:import math
+validation/component/ordinary_build_acceptance.py:import re
+validation/component/ordinary_build_acceptance.py:from pathlib import Path
+validation/component/ordinary_build_acceptance.py:from typing import Any
+validation/component/ordinary_build_acceptance.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/ordinary_build_acceptance.py:from validation.component.checks import need
+validation/component/ordinary_build_acceptance.py:from validation.component.ordinary_eof_acceptance import read_bound
+validation/component/test_ordinary_build_receipt.py:from __future__ import annotations
+validation/component/test_ordinary_build_receipt.py:from pathlib import Path
+validation/component/test_ordinary_build_receipt.py:from typing import Any
+validation/component/test_ordinary_build_receipt.py:import pytest
+validation/component/test_ordinary_build_receipt.py:from validation.component import ordinary_build_acceptance as acceptance
+validation/component/test_ordinary_build_receipt.py:from validation.component import ordinary_build_receipt as harness
+validation/component/test_ordinary_build_receipt.py:from validation.component.test_ordinary_build_acceptance import fixture
+native/tools/component_startup_inventory.py:from __future__ import annotations
+native/tools/component_startup_inventory.py:import argparse
+native/tools/component_startup_inventory.py:import hashlib
+native/tools/component_startup_inventory.py:import json
+native/tools/component_startup_inventory.py:import struct
+native/tools/component_startup_inventory.py:import subprocess
+native/tools/component_startup_inventory.py:from pathlib import Path
+native/tools/component_startup_inventory.py:from typing import Any
+native/tools/component_startup_inventory.py:from pathlib import Path
+validation/component/selection.py:from fractions import Fraction
+validation/component/selection.py:from typing import Any
+validation/component/selection.py:from uarch_contract.mapped import MappedEngineJob, MappedEngineResult
+validation/component/selection.py:from validation.component.checks import need
+validation/component/selection.py:from validation.component.observations import consume
+validation/component/corpus.py:from __future__ import annotations
+validation/component/corpus.py:import copy
+validation/component/corpus.py:import hashlib
+validation/component/corpus.py:import json
+validation/component/corpus.py:from fractions import Fraction
+validation/component/corpus.py:from pathlib import Path
+validation/component/corpus.py:from typing import Any, cast
+validation/component/corpus.py:from uarch_contract.hardware import HardwareSpec
+validation/component/corpus.py:from uarch_contract.hashing import content_hash, spec_hash
+validation/component/corpus.py:from uarch_contract.mapped import NativeTestProfile, NativeTestRegistry
+validation/component/corpus.py:from validation.component.arithmetic import burst, ceil, dma, resident, split
+src/rkuarch/engines/native/component_review.py:from __future__ import annotations
+src/rkuarch/engines/native/component_review.py:from dataclasses import dataclass
+src/rkuarch/engines/native/component_review.py:from pathlib import Path
+src/rkuarch/engines/native/component_review.py:from typing import Annotated, Any, Literal
+src/rkuarch/engines/native/component_review.py:from pydantic import BeforeValidator, Field
+src/rkuarch/engines/native/component_review.py:from uarch_contract.common import FrozenModel, Hash
+src/rkuarch/engines/native/component_review.py:from uarch_contract.hashing import strict_json_loads
+src/rkuarch/engines/native/component_review.py:from .host import _read, _require
+src/rkuarch/engines/native/component_review.py:from .records import FileBinding
+validation/component/test_human_inputs.py:import pytest
+validation/component/test_human_inputs.py:from validation.component.corpus import ROOT
+validation/component/test_stage2_selection.py:import hashlib
+validation/component/test_stage2_selection.py:import json
+validation/component/test_stage2_selection.py:from pathlib import Path
+validation/component/test_stage2_selection.py:from uarch_contract.hashing import content_hash
+native/tools/component_stage2_inputs.py:from __future__ import annotations
+native/tools/component_stage2_inputs.py:import hashlib
+native/tools/component_stage2_inputs.py:import json
+native/tools/component_stage2_inputs.py:import sys
+native/tools/component_stage2_inputs.py:from copy import deepcopy
+native/tools/component_stage2_inputs.py:from pathlib import Path
+native/tools/component_stage2_inputs.py:from typing import Any
+validation/component/observations_v3.py:from collections import defaultdict
+validation/component/observations_v3.py:from fractions import Fraction
+validation/component/observations_v3.py:from typing import Any
+validation/component/observations_v3.py:from validation.component.arithmetic import ceil, edge_after
+validation/component/observations_v3.py:from validation.component.checks import (
+validation/component/observations_v3.py:from validation.component.issue_checks import check_issue
+validation/component/observations_v3.py:from validation.component.matrix_order import check_matrix_order
+validation/component/observations_v3.py:from validation.component.phase_laws import channel
+validation/component/observations_v3.py:from validation.component.transition_checks_v3 import check_transitions, phase_binding
+validation/component/test_ordinary_build_acceptance.py:from __future__ import annotations
+validation/component/test_ordinary_build_acceptance.py:import copy
+validation/component/test_ordinary_build_acceptance.py:import json
+validation/component/test_ordinary_build_acceptance.py:from pathlib import Path
+validation/component/test_ordinary_build_acceptance.py:from typing import Any
+validation/component/test_ordinary_build_acceptance.py:import pytest
+validation/component/test_ordinary_build_acceptance.py:from uarch_contract.hashing import sha256
+validation/component/test_ordinary_build_acceptance.py:from validation.component import ordinary_build_acceptance as builds
+validation/component/runtime_selection.py:from __future__ import annotations
+validation/component/runtime_selection.py:import hashlib
+validation/component/runtime_selection.py:import json
+validation/component/runtime_selection.py:from collections import Counter
+validation/component/runtime_selection.py:from copy import deepcopy
+validation/component/runtime_selection.py:from pathlib import Path
+validation/component/runtime_selection.py:from typing import Any
+validation/component/runtime_selection.py:from uarch_contract.hashing import canonical_json, content_hash
+validation/component/runtime_selection.py:from uarch_contract.mapped import PRODUCTION_HARDWARE, NativeTestRegistry
+validation/component/runtime_selection.py:from validation.component.join_inputs import reseal
+validation/component/runtime_selection.py:from validation.component.native_inputs import policy_item, private_job, prospective_inputs
+src/rkuarch/engines/native/component_records.py:from typing import Annotated, Any, Literal
+src/rkuarch/engines/native/component_records.py:from pydantic import Field, model_validator
+src/rkuarch/engines/native/component_records.py:from uarch_contract.common import FrozenModel, Hash, NonEmpty
+src/rkuarch/engines/native/component_records.py:from uarch_contract.mapped import NativeEngineIdentity
+src/rkuarch/engines/native/component_records.py:from .component_construction import ConstructionMode
+src/rkuarch/engines/native/component_records.py:from .records import FileBinding, GitCommit, ModeConfig, SourceInput
+validation/component/test_f5_mechanism_duration.py:from copy import deepcopy
+validation/component/test_f5_mechanism_duration.py:import pytest
+validation/component/test_f5_mechanism_duration.py:from uarch_contract.mapped import validate_result
+validation/component/test_f5_mechanism_duration.py:from validation.component.checks import CheckFailure
+validation/component/test_f5_mechanism_duration.py:from validation.component.consistent_carriers import EXPECTED, activity, control, synchronize
+validation/component/test_f5_mechanism_duration.py:from validation.component.observations_v2 import check_v2
+validation/component/consistent_carriers.py:from copy import deepcopy
+validation/component/consistent_carriers.py:from typing import Any
+validation/component/consistent_carriers.py:from uarch_contract.hashing import content_hash
+validation/component/consistent_carriers.py:from validation.component.checks import union_time
+validation/component/consistent_carriers.py:from validation.component.synthetic_carrier import (
+validation/component/runtime_resources.py:from __future__ import annotations
+validation/component/runtime_resources.py:import os
+validation/component/runtime_resources.py:import re
+validation/component/runtime_resources.py:from collections.abc import Callable
+validation/component/runtime_resources.py:from pathlib import Path
+validation/component/runtime_resources.py:from typing import Any
+validation/component/test_observations.py:from copy import deepcopy
+validation/component/test_observations.py:import pytest
+validation/component/test_observations.py:from validation.component.checks import CheckFailure
+validation/component/test_observations.py:from validation.component.corpus import base
+validation/component/test_observations.py:from validation.component.observations import check_observations
+validation/component/observations_v2.py:from collections import defaultdict
+validation/component/observations_v2.py:from fractions import Fraction
+validation/component/observations_v2.py:from typing import Any
+validation/component/observations_v2.py:from validation.component.arithmetic import ceil, edge_after
+validation/component/observations_v2.py:from validation.component.checks import (
+validation/component/observations_v2.py:from validation.component.phase_laws import channel
+validation/component/observations_v2.py:from validation.component.transition_checks import check_transitions, phase_binding
+validation/component/checks.py:from __future__ import annotations
+validation/component/checks.py:from collections import defaultdict
+validation/component/checks.py:from collections.abc import Iterable, Mapping, Sequence
+validation/component/checks.py:from fractions import Fraction
+validation/component/checks.py:from typing import Any
+validation/component/test_corpus.py:import json
+validation/component/test_corpus.py:import pytest
+validation/component/test_corpus.py:from uarch_contract.mapped import MappedBundle, admit, validate_resources
+validation/component/test_corpus.py:from validation.component.corpus import ROOT, build, manifest
+src/rkuarch/engines/native/component_image.py:from __future__ import annotations
+src/rkuarch/engines/native/component_image.py:import os
+src/rkuarch/engines/native/component_image.py:import shutil
+src/rkuarch/engines/native/component_image.py:import time
+src/rkuarch/engines/native/component_image.py:from dataclasses import replace
+src/rkuarch/engines/native/component_image.py:from pathlib import Path
+src/rkuarch/engines/native/component_image.py:from typing import Any
+src/rkuarch/engines/native/component_image.py:from uarch_contract.hashing import canonical_json, sha256, strict_json_loads
+src/rkuarch/engines/native/component_image.py:from uarch_contract.mapped import MappedEngineResult
+src/rkuarch/engines/native/component_image.py:from native.tools.component_container_guard import run_container
+src/rkuarch/engines/native/component_image.py:from validation.component.runtime_campaign import POLICY, helpers
+src/rkuarch/engines/native/component_image.py:from .component_host import ComponentSession, _PreparedComponent
+src/rkuarch/engines/native/component_image.py:from .component_records import IMAGE
+src/rkuarch/engines/native/component_image.py:from .component_runner import _consume, _request
+src/rkuarch/engines/native/component_image.py:from .host import _require
+src/rkuarch/engines/native/component_image.py:from .runner import OperationalFailure
+validation/component/test_runtime_selection.py:import hashlib
+validation/component/test_runtime_selection.py:import json
+validation/component/test_runtime_selection.py:from collections import Counter
+validation/component/test_runtime_selection.py:import pytest
+validation/component/test_runtime_selection.py:from uarch_contract.mapped import PRODUCTION_HARDWARE, admit
+validation/component/test_runtime_selection.py:from validation.component.runtime_selection import HISTORY, PRIOR, ROOT, definitions
+validation/component/test_native_selection.py:import json
+validation/component/test_native_selection.py:import os
+validation/component/test_native_selection.py:from pathlib import Path
+validation/component/test_native_selection.py:import pytest
+validation/component/test_native_selection.py:from uarch_contract.mapped import MappedEngineJob, MappedEngineResult
+validation/component/test_native_selection.py:from validation.component.corpus import build
+validation/component/test_native_selection.py:from validation.component.selection import assert_case, assert_replays
+validation/component/observations.py:from __future__ import annotations
+validation/component/observations.py:from collections import defaultdict
+validation/component/observations.py:from fractions import Fraction
+validation/component/observations.py:from typing import Any
+validation/component/observations.py:from uarch_contract.mapped import MappedEngineJob, MappedEngineResult, validate_result
+validation/component/observations.py:from validation.component.arithmetic import edge_after
+validation/component/observations.py:from validation.component.checks import (
+validation/component/test_runtime_resources.py:import runpy
+validation/component/test_runtime_resources.py:from pathlib import Path
+validation/component/test_runtime_resources.py:import pytest
+validation/component/test_runtime_resources.py:from validation.component.runtime_resources import inspect_cgroups
+native/tools/component_runtime_candidate.py:from __future__ import annotations
+native/tools/component_runtime_candidate.py:import argparse
+native/tools/component_runtime_candidate.py:import importlib.util
+native/tools/component_runtime_candidate.py:import json
+native/tools/component_runtime_candidate.py:import shutil
+native/tools/component_runtime_candidate.py:import subprocess
+native/tools/component_runtime_candidate.py:import sys
+native/tools/component_runtime_candidate.py:import sysconfig
+native/tools/component_runtime_candidate.py:import tarfile
+native/tools/component_runtime_candidate.py:from copy import deepcopy
+native/tools/component_runtime_candidate.py:from pathlib import Path
+native/tools/component_runtime_candidate.py:from types import ModuleType
+native/tools/component_runtime_candidate.py:from typing import Any
+native/tools/component_runtime_candidate.py:from uarch_contract.hashing import canonical_json, content_hash, sha256
+native/tools/component_runtime_candidate.py:from rkuarch.engines.native.component_construction import construction_modes, invocation
+native/tools/component_runtime_candidate.py:from rkuarch.engines.native.component_records import (
+native/tools/component_runtime_candidate.py:from rkuarch.engines.native.records import ToolInputs
+validation/component/runtime_literals.py:from typing import Any
+validation/component/runtime_literals.py:from validation.component.checks import need
+native/tools/component_private_adapter.py:from __future__ import annotations
+native/tools/component_private_adapter.py:import json
+native/tools/component_private_adapter.py:from pathlib import Path
+native/tools/component_private_adapter.py:from typing import Any
+native/tools/component_private_adapter.py:from uarch_contract.hashing import sha256, strict_json_loads
+native/tools/component_private_adapter.py:from native.tools.component_container_guard import cleanup as cleanup_containers
+native/tools/component_private_adapter.py:from native.tools.component_container_guard import run_container
+native/tools/component_private_adapter.py:from rkuarch.engines.native.component_host import _prepare_payload
+native/tools/component_private_adapter.py:from rkuarch.engines.native.component_runner import _consume, require_negative_envelope
+native/tools/component_private_adapter.py:from rkuarch.engines.native.host import _read, _require
+native/tools/component_private_adapter.py:from rkuarch.engines.native.records import FileBinding
+validation/component/capture_monitor.py:from __future__ import annotations
+validation/component/capture_monitor.py:import hashlib
+validation/component/capture_monitor.py:import json
+validation/component/capture_monitor.py:import multiprocessing
+validation/component/capture_monitor.py:import re
+validation/component/capture_monitor.py:import runpy
+validation/component/capture_monitor.py:import time
+validation/component/capture_monitor.py:from pathlib import Path
+validation/component/capture_monitor.py:from typing import Any
+validation/component/capture_monitor.py:from uarch_contract.hashing import canonical_json, sha256
+validation/component/capture_monitor.py:from native.tools import component_container_guard as guardian
+validation/component/capture_monitor.py:from validation.component.checks import need
+validation/component/capture_monitor.py:from validation.component.ordinary_eof_campaign import cleanup_owned
+validation/component/capture_monitor.py:from validation.component.runtime_campaign import helpers
+src/rkuarch/engines/native/component_host.py:from __future__ import annotations
+src/rkuarch/engines/native/component_host.py:import contextlib
+src/rkuarch/engines/native/component_host.py:import hashlib
+src/rkuarch/engines/native/component_host.py:import os
+src/rkuarch/engines/native/component_host.py:import sys
+src/rkuarch/engines/native/component_host.py:import threading
+src/rkuarch/engines/native/component_host.py:import time
+src/rkuarch/engines/native/component_host.py:from collections.abc import Iterator
+src/rkuarch/engines/native/component_host.py:from dataclasses import dataclass
+src/rkuarch/engines/native/component_host.py:from pathlib import Path
+src/rkuarch/engines/native/component_host.py:from typing import Any
+src/rkuarch/engines/native/component_host.py:from uarch_contract.hashing import content_hash, sha256, strict_json_loads
+src/rkuarch/engines/native/component_host.py:from uarch_contract.mapped import (
+src/rkuarch/engines/native/component_host.py:from rkuarch.workload.mapped import loads_component_job
+src/rkuarch/engines/native/component_host.py:from .component_records import (
+src/rkuarch/engines/native/component_host.py:from .component_review import CheckedRuntimeReview
+src/rkuarch/engines/native/component_host.py:from .host import _open, _read, _require
+src/rkuarch/engines/native/component_host.py:from .records import FileBinding, ToolInputs
+validation/component/test_runtime_checks.py:import hashlib
+validation/component/test_runtime_checks.py:import json
+validation/component/test_runtime_checks.py:from copy import deepcopy
+validation/component/test_runtime_checks.py:from pathlib import Path
+validation/component/test_runtime_checks.py:import pytest
+validation/component/test_runtime_checks.py:from uarch_contract.hashing import canonical_json, content_hash
+validation/component/test_runtime_checks.py:from validation.component.checks import CheckFailure
+validation/component/test_runtime_checks.py:from validation.component.native_inputs import policy_item, private_job
+validation/component/test_runtime_checks.py:from validation.component.runtime_checks import CHECKER, consume_case
+native/tools/component_ordinary_build.py:from __future__ import annotations
+native/tools/component_ordinary_build.py:from pathlib import Path
+native/tools/component_ordinary_build.py:from typing import Any
+native/tools/component_ordinary_build.py:from uarch_contract.hashing import content_hash
+native/tools/component_ordinary_build.py:from rkuarch.engines.native.component_construction import invocation
+native/tools/component_ordinary_build.py:from rkuarch.engines.native.component_records import IMAGE, ComponentBuildInputsV3
+validation/component/test_consistent_observations.py:import pytest
+validation/component/test_consistent_observations.py:from uarch_contract.mapped import validate_result
+validation/component/test_consistent_observations.py:from validation.component.checks import CheckFailure
+validation/component/test_consistent_observations.py:from validation.component.consistent_carriers import EXPECTED, attack, control
+validation/component/test_consistent_observations.py:from validation.component.observations_v2 import check_v2
+validation/component/test_native_inputs.py:import json
+validation/component/test_native_inputs.py:from copy import deepcopy
+validation/component/test_native_inputs.py:import pytest
+validation/component/test_native_inputs.py:from uarch_contract.hashing import content_hash
+validation/component/test_native_inputs.py:from uarch_contract.mapped import MappedEngineJob, admit
+validation/component/test_native_inputs.py:from validation.component.native_inputs import HISTORY, private_job, prospective_inputs
+validation/component/native_inputs.py:import hashlib
+validation/component/native_inputs.py:import json
+validation/component/native_inputs.py:from copy import deepcopy
+validation/component/native_inputs.py:from pathlib import Path
+validation/component/native_inputs.py:from typing import Any
+validation/component/native_inputs.py:from uarch_contract.hashing import content_hash
+validation/component/native_inputs.py:from uarch_contract.mapped import (
+validation/component/native_inputs.py:from validation.component.corpus import build
+validation/component/native_inputs.py:from validation.component.synthetic_carrier import synthetic_job
+validation/component/native_inputs.py:from validation.component.transient_carrier import READY, SPANS, transient_control
+src/rkuarch/engines/native/records.py:from pathlib import Path
+src/rkuarch/engines/native/records.py:from typing import Annotated, Literal
+src/rkuarch/engines/native/records.py:from pydantic import Field, model_validator
+src/rkuarch/engines/native/records.py:from uarch_contract.common import FrozenModel, Hash, NonEmpty
+src/rkuarch/engines/native/records.py:from uarch_contract.mapped import NativeEngineIdentity
+validation/component/runtime_evidence.py:from __future__ import annotations
+validation/component/runtime_evidence.py:import hashlib
+validation/component/runtime_evidence.py:import json
+validation/component/runtime_evidence.py:from pathlib import Path
+validation/component/runtime_evidence.py:from typing import Any
+validation/component/runtime_evidence.py:from uarch_contract.hashing import canonical_json
+validation/component/runtime_evidence.py:from validation.component.checks import need
+validation/component/runtime_evidence.py:from validation.component.runtime_checks import CHECKER, consume_case, verify_sources
+validation/component/test_checks.py:from copy import deepcopy
+validation/component/test_checks.py:from fractions import Fraction
+validation/component/test_checks.py:import pytest
+validation/component/test_checks.py:from validation.component.checks import (
+validation/component/test_runtime_campaign.py:import json
+validation/component/test_runtime_campaign.py:import os
+validation/component/test_runtime_campaign.py:from copy import deepcopy
+validation/component/test_runtime_campaign.py:from pathlib import Path
+validation/component/test_runtime_campaign.py:import pytest
+validation/component/test_runtime_campaign.py:from uarch_contract.hashing import canonical_json
+validation/component/test_runtime_campaign.py:from validation.component.runtime_campaign import ROOT, digest, run_private, schedule
+validation/component/test_runtime_campaign.py:from validation.component.runtime_evidence import exact_refusal, replay_admission
+validation/component/test_runtime_campaign.py:from validation.component.test_runtime_checks import inputs
+validation/component/test_native_forgeries.py:import pytest
+validation/component/test_native_forgeries.py:from uarch_contract.mapped import validate_result
+validation/component/test_native_forgeries.py:from validation.component.checks import CheckFailure
+validation/component/test_native_forgeries.py:from validation.component.consistent_carriers import EXPECTED, control
+validation/component/test_native_forgeries.py:from validation.component.native_forgeries import forge
+validation/component/test_native_forgeries.py:from validation.component.observations_v2 import check_v2
+validation/component/test_native_forgeries.py:from validation.component.transient_carrier import transient_control
+src/rkuarch/engines/native/component_construction.py:from __future__ import annotations
+src/rkuarch/engines/native/component_construction.py:from typing import Any, Literal
+src/rkuarch/engines/native/component_construction.py:from pydantic import model_validator
+src/rkuarch/engines/native/component_construction.py:from uarch_contract.common import FrozenModel
+native/tools/component_container_guard.py:from __future__ import annotations
+native/tools/component_container_guard.py:import json
+native/tools/component_container_guard.py:import os
+native/tools/component_container_guard.py:import select
+native/tools/component_container_guard.py:import subprocess
+native/tools/component_container_guard.py:import sys
+native/tools/component_container_guard.py:import time
+native/tools/component_container_guard.py:import uuid
+native/tools/component_container_guard.py:from contextlib import ExitStack
+native/tools/component_container_guard.py:from pathlib import Path
+native/tools/component_container_guard.py:from typing import Any
+validation/component/arithmetic.py:from fractions import Fraction
+validation/component/native_forgeries.py:from copy import deepcopy
+validation/component/native_forgeries.py:from typing import Any
+validation/component/native_forgeries.py:from uarch_contract.hashing import content_hash
+validation/component/native_forgeries.py:from validation.component.consistent_carriers import synchronize
+src/rkuarch/engines/native/component_build_review.py:from __future__ import annotations
+src/rkuarch/engines/native/component_build_review.py:import hashlib
+src/rkuarch/engines/native/component_build_review.py:import io
+src/rkuarch/engines/native/component_build_review.py:import re
+src/rkuarch/engines/native/component_build_review.py:import tarfile
+src/rkuarch/engines/native/component_build_review.py:from pathlib import Path, PurePosixPath
+src/rkuarch/engines/native/component_build_review.py:from typing import Any
+src/rkuarch/engines/native/component_build_review.py:from uarch_contract.hashing import canonical_json, content_hash, sha256, strict_json_loads
+src/rkuarch/engines/native/component_build_review.py:from .component_construction import invocation
+src/rkuarch/engines/native/component_build_review.py:from .component_records import ComponentBuildInputsV3, ComponentBuildReceiptV2, ComponentBuildTrust
+src/rkuarch/engines/native/component_build_review.py:from .host import _open, _read, _require
+src/rkuarch/engines/native/component_build_review.py:from .records import FileBinding, ToolInputs
+validation/component/runtime_checks.py:from __future__ import annotations
+validation/component/runtime_checks.py:import hashlib
+validation/component/runtime_checks.py:from fractions import Fraction
+validation/component/runtime_checks.py:from pathlib import Path
+validation/component/runtime_checks.py:from typing import Any
+validation/component/runtime_checks.py:from uarch_contract.mapped import MappedEngineJob, validate_result
+validation/component/runtime_checks.py:from validation.component.checks import need
+validation/component/runtime_checks.py:from validation.component.observations_v3 import check_v3
+validation/component/runtime_checks.py:from validation.component.runtime_literals import check_extended_literals
+validation/component/capture_diagnostics.py:from __future__ import annotations
+validation/component/capture_diagnostics.py:import ast
+validation/component/capture_diagnostics.py:import json
+validation/component/capture_diagnostics.py:import re
+validation/component/capture_diagnostics.py:import runpy
+validation/component/capture_diagnostics.py:from pathlib import Path
+validation/component/capture_diagnostics.py:from typing import Any, cast
+validation/component/capture_diagnostics.py:from uarch_contract.hashing import sha256
+validation/component/capture_diagnostics.py:from validation.component import capture_monitor as legacy
+validation/component/capture_diagnostics.py:from validation.component.checks import need
