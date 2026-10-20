@@ -1,5 +1,7 @@
 # Implementation handoff for the same mapper and engine
 
+Revision 2 uses the user-approved 52-unit implementation scope and the complete nominal
+[model](MODEL.md), including numeric STUB estimates; the interface remains under review.
 This reconciles [NATIVE-WORK](../NATIVE-WORK.md) against actual installed /4 code at
 `c6438fe`. It replaces the old proposal's generic gaps with the following finite order.
 It is not implementation acceptance, another engine or a sequence of per-field approvals.
@@ -9,41 +11,46 @@ It is not implementation acceptance, another engine or a sequence of per-field a
 | Existing seam | Reuse | R change needed |
 | --- | --- | --- |
 | `contract/uarch_contract/ordinary.py` | Data hashes, versioned software identity, strict closure, result checks | Add an explicit R format/capability after protected review; current scope is B only, production npu-l4/cold/BF16, source=None |
-| `contract/uarch_contract/mapped.py` | TaskGraph dependency/coverage/lifetime vocabulary, original v2 source carriers | New reference hardware branch, MXU IDs, dtype/transfer/vector records, complete v2 source join; existing vector enum/steady State are not execution support |
+| `contract/uarch_contract/mapped.py` | TaskGraph dependency/coverage/lifetime vocabulary, original v2 source carriers | New reference hardware branch, MXU IDs, dtype/transfer/vector records, reuse v2 mathematical fields in an R closure without constructing a placeholder legacy HardwareSpec; existing vector enum/steady State are not execution support |
 | `src/rkuarch/workload/ordinary.py` | Ordinary job assembly and packaging | Currently calls component completeness, BF16 and clocked hardware projection. Dispatch completeness and hardware resolution by the new model, never skip them |
 | `src/rkuarch/mapping/component.py` | Deterministic graph assembly, topological dependency handling, explicit buffers | Extend the same mapping entry/module with a versioned R policy: 1 shared core/4 MXUs, M/N/K tiles, accumulator reuse/spill, vector/fused units, exact page spans; do not remove bounds and reuse old placements |
-| `src/rkuarch/workload/{producer_v2,prepared_v2,capacity_v2}.py` | Rotary coefficient/position and cache-key binding, complete mathematical graph and known capacities | Select one decoder group with correct repeat/edges, no forced head/tail. Add required microbenchmark vocabulary and INT32 storage; freeze exact finite coefficient bytes. Whole-model analytic bundles are not native sources by themselves |
+| `src/rkuarch/workload/{producer_v2,prepared_v2,capacity_v2}.py` | Rotary coefficient/position and cache-key binding, complete mathematical graph and known capacities | Select one decoder group with correct repeat/edges, no forced head/tail. Add required microbenchmark vocabulary and INT32 storage; bind the supplied exact coefficient bytes from inputs/. Whole-model analytic bundles are not native sources by themselves |
 | `native/crates/uarch-engine/src/{component,component_admission,component_accounting}.rs` | Kernel/event wheel, resource queues, dependencies, observed completed work, allocation lifetimes and deterministic event ordering | Explicit R admission and service branch in the same engine; separate matrix owner from core; vector/scalar work, aggregate HBM, partial sums and priming. `TaskKind` today has only Compute/Dma/Unicast/Barrier; Compute only carries M/K/N |
 | `src/rkuarch/verification/component/` | Packaged independent arithmetic/observation/checker design, retained issue-edge causes | One model-dispatched checker, R laws and records added; no importing native calculated durations as expected answers. B's phase/32-cycle laws must not validate R |
 | `src/rkuarch/engines/native/ordinary.py`, Rust ordinary boundary | Bounded process transport, data validation and saved replay | New schemas/dispatch shipped with package, reference refusal before events, complete result validation; preserve version/hash provenance without executable approvals |
-| Analytic `rotary_v2.counts` and U-C0 paths | Existing work conventions and aggregate/per-op baseline structure | Not an independent oracle and not a reference timing source. Add INT32/memory/scalar envelopes and missing precision conversions if used; no durations until timing inputs and first-consumer checks are ready |
+| Analytic `rotary_v2.counts` and U-C0 paths | Existing work conventions and aggregate/per-op baseline structure | Not an independent oracle and not a reference timing source. Add INT32/memory/scalar envelopes and missing precision conversions if used; use the proposed nominal STUB resolver/profile, preserve old profiles, and complete first-consumer checks before prediction |
 
 ## Finite implementation sequence
 
 1. **Install reviewed semantic changes, then reference admission.** The owner reviews the
    combined model/contract proposal in `protected-amendments.patch`. Implement the scoped
-   carriers and generated schemas under normal human ownership/U0002 procedures. Source
-   inventory/required-field validation may proceed without timing values. Reference
-   production refuses missing service laws, unsupported precision/work, false source joins,
+   carriers and generated schemas under normal human ownership/U0002 procedures. The nominal
+   model supplies all required values, including permitted numeric STUBs. Reference production
+   refuses genuinely missing fields, unsupported precision/work, false source joins,
    invalid placements and budgets before dispatch. Keep /4 and npu-l4 regression behavior.
    Do not install this preparation patch as authorization to execute reference predictions.
 2. **Matrix and mapping.** Implement M/N/K tiling for the six shapes and seven projection
-   families. Recommend 128-wide physical K/N matrix tiles and bounded M chunks as a starting
-   local policy; padding/reduction and actual TPU issue correspondence remain model assumptions.
+   families. Use the proposed 128-wide physical K/N slices and M chunks <=1024; partial windows
+   are VMEM-backed and charged to shared capacity/traffic. Follow MODEL exactly, not a
+   future unspecified timing law. Actual compiler correspondence remains unobserved.
    Stable lexicographic tile allocation across MXU 0..3; shared local-memory capacity, no
-   per-MXU VMEM replication. K tiles accumulate into one live logical output, with explicit
-   partial stores/reloads only when the mapping selects spill. Convert once at the final K
+   per-MXU VMEM replication. K tiles accumulate into one live logical output with the
+   explicit VMEM partial stores/reloads defined in MODEL; an additional spill is separately
+   mapped and accounted. Convert once at the final K
    boundary. BF16→FP32 and raw INT8→INT32 have distinct work/storage/service semantics.
    Validate sizes before allocating events; raise meaningful resource refusals, not silent
    retile. Bound graph expansion: a 256 MiB stream must not require one record per guessed
    256 B hardware request. Coalesce declared logical spans and keep tail information.
+   ARITHMETIC records the installed 64 MiB wire caps and concrete request-count expansion;
+   size finite R budgets with actual serialization, without removing required rows.
 3. **Vector and complete decoder.** Add explicit arithmetic, reductions, special functions
    and casts for RMSNorm, gated SiLU, residual, stable attention and RoPE. Reuse v2 rotary
    pairing/numeric policy/coefficient identities. Preserve all conversion boundaries even
    under fusion. QK/AV map to matrix work; stable softmax owns FP32 reductions and exp/divide.
    Retain causal useful versus padded/dense issued work separately. Full-layer graph has
    two norms/residuals, one Q/K rotation each, append before attention, FFN up/gate product
-   before down; omitting any contribution refuses completeness. No embedding/head required.
+   before down; omitting any contribution refuses completeness. No embedding/head required. Reuse the supplied coefficient/page-index data; keep
+   generation outside execution/replay, and do not construct a dummy legacy HardwareSpec.
 4. **Memory, KV and minimal kernel.** Implement read+reduction, runtime fill, real copy,
    reverse-page gather, valid-tail append and scalar add in the same TaskGraph path. Page
    indices and allocation versus useful bytes are explicit. Rotated K is stored once; V is
@@ -51,15 +58,15 @@ It is not implementation acceptance, another engine or a sequence of per-field a
    source/destination aliases refuse the selected unit. Aggregate HBM arbitration and
    request latency/concurrency are model inputs, not physical-channel guesses. Include the
    observable scalar output and device-startup law for the launch unit.
-5. **Steady state.** Preserve physical state across priming and measured iterations while
-   restoring the fixed logical invocation. Counters/attribution include only the reported
+5. **Steady state.** Preserve only declared SMEM metadata across priming and reported
+   iterations under the nominal reload policy; restore the fixed logical invocation. Counters/attribution include only the reported
    iteration. Scratch allocation/credits must not leak; KV valid length must not grow.
    Compare one versus two primes at every selected point, report mismatches with their
    cause; fixture_resident is not evidence of convergence. Match whatever device retention
    procedure is later established. No new mandatory device warm-up/sample counts.
 6. **Independent verification and integrated milestone.** At each seam use small literal
-   cases below; once numerical model inputs are resolved, run the agreed selection through
-   the ordinary shipping boundary. Three repeated fresh-process runs, debug/release equality,
+   cases below; after the interface is installed and implemented, run the approved selection
+   through the ordinary shipping boundary. Three repeated fresh-process runs, debug/release equality,
    producer-disabled saved replay, altered hashes/coverage/tails and malformed results must
    discriminate. Extend the one packaged checker and qualify critical-path attribution:
    interval parts sum to duration, cause identity and overlap/serialization are independently
@@ -75,11 +82,11 @@ It is not implementation acceptance, another engine or a sequence of per-field a
    by the pointer to this package. Actual prediction generation is U5 only. Human L1 GEMM
    and latency-bound DMA workings/review remain human work, independently available now.
 
-Steps 2–5's mathematical/mapping work and small synthetic fixtures can proceed together
-once their semantic interface is accepted; missing TPU service values block numerical
-reference admission, not all useful coding. This is one implementation milestone with
-appropriate seam tests, not an A/B handoff chain. If the human chooses a different model or
-target, revisit the dependent timing interface first rather than hardening the wrong one.
+Steps 2–5 proceed together once this semantic interface is accepted, using its nominal
+STUB values. No published-internal-parameter prerequisite remains. Keep TPU v5e. This is
+one substantial implementation milestone with appropriate seam tests and integrated
+independent verification, not an A/B handoff chain. See ARITHMETIC for further independent
+layout, reduction, service, staging and state examples; no second engine is introduced.
 
 ## Small independent examples to settle interfaces
 
@@ -99,10 +106,11 @@ It does not invoke an engine, return a predicted duration or certify native supp
 | Causal B=1,Hq=2,S=T=3,D=2 | 12 useful pairs, 96 QK+AV ops, 60 conventional softmax ops; dense issued work may exceed these | Apply triangular masking to decode S=1,T=3; treat masked dense work as no execution |
 | Memory read E=4 BF16 | Read=8 B, four widen casts, three FP32 sum adds, write=4 B | Report only input bytes and call the reduction free |
 
-Additional behavior expectations, once timing laws exist: same MXU tiles serialize;
+Additional behavior expectations under the proposed timing laws: same MXU tiles serialize;
 different MXUs may overlap only where shared issue/staging permits; four active MXUs cannot
-independently exceed the declared chip rate. Halving accumulator capacity across a chosen
-spill threshold must not shorten the same mapping and must expose extra local traffic.
+independently exceed the declared chip rate. An infeasible imported mapping refuses after an accumulator-window reduction. Compare
+a mapper-prepared explicit spill counterpart for the same mathematical work/policy and
+verify the extra local traffic and non-shortening expectation; never silently retile at runtime.
 Halving DMA outstanding capacity must not improve a latency-bound synthetic stream.
 These fixtures use explicit synthetic parameters, not TPU estimates and not a production
 `--test-only` workaround. Check zero-duration edge handling, same-time credit releases,

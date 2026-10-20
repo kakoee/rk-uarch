@@ -1,9 +1,11 @@
 # Finite benchmark agreement proposal, revision 2
 
-**52 proposed measured units; unsigned, unadmitted and unobserved.**
+**52 units approved by the user as implementation scope; final benchmark agreement,
+native admission and device observability remain pending.**
 [Machine-readable units](suite-proposed.json) specify dimensions, precision, work, native
 support, individual/fused status, mapping, state and device boundary for every selected unit.
 [All 70 dispositions](DISPOSITIONS.md) explain every retention, replacement, merge or omission.
+Timing assumptions now follow [MODEL.md](MODEL.md), including explicit numeric STUBs.
 The original [70-row JSON](../suite.json) remains byte-for-byte unchanged.
 
 | Class | Units | Coverage |
@@ -40,10 +42,10 @@ boundary deliberately includes a BF16 output rounding point before widening for 
 rotation, then BF16 rotated output; compiler fusion must preserve these semantics. RoPE
 uses full R=128, split-halves pairing, separate-round RNE/1, positions [2047] at decode and
 [0..127] at prefill. Recommend unscaled theta=10000 coefficients for this explicit synthetic
-8B-class shape. Produce and freeze one exact `RotaryCoefficients` bit-table and existing
-content identity during input preparation; no default generator during replay. Its bytes
-are **not supplied or authenticated by this package**. This is a finite input-preparation
-item, not a numeric hardware placeholder. The existing v2 coefficient and cache binding
+8B-class shape. The exact proposed `RotaryCoefficients` bit-table and existing content identity are now
+supplied in [inputs](inputs/README.md) and validated with the unchanged carrier. Bind these
+bytes in the later mapped input; no default generator during replay. They are workload
+data, not numeric hardware placeholders or a device-equivalence claim. The existing v2 coefficient and cache binding
 remains authoritative; do not insert fresh source-attestation requirements.
 
 Raw INT8 dots use signed int8 inputs restricted to [-7,7], INT32 accumulation/output, no

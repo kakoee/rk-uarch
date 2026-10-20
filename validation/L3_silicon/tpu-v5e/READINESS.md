@@ -1,6 +1,6 @@
 # TPU v5e reference readiness — prospective, 2026-10-16
 
-> **U4b reconciliation (2026-10-20):** the current consolidated proposal is [u4b/README.md](u4b/README.md). It refreshes source conflicts, proposes the minimum reference model and records the consequential timing blocker. This older dossier remains evidence history; it is not reference admission.
+> **U4b revision 2:** [the consolidated package](u4b/README.md) now provides a complete nominal model with reasoned numeric STUB estimates. The user approved its 52-unit implementation scope; the revised protected interface remains unapplied. The older published-value/target-deferral recommendation is withdrawn. This older dossier remains evidence history, not current admission policy.
 
 No reference admission, prediction, measurement, device reservation, spend or availability
 is asserted. This dossier prepares U-P11b R/U-P9/U-P10. The active

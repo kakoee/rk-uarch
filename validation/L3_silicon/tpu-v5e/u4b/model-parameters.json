@@ -1,0 +1,396 @@
+{
+  "revision": "tpu-v5e-premeasurement-model/2",
+  "status": "proposed; interface approval pending; no benchmark durations or accuracy evidence",
+  "published_facts": {
+    "tensorcore_count": {
+      "value": 1,
+      "unit": "count",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.cloud.google.com/tpu/docs/v5e",
+      "date": "2026-10-20",
+      "rationale": null
+    },
+    "mxu_count": {
+      "value": 4,
+      "unit": "count",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.cloud.google.com/tpu/docs/v5e",
+      "date": "2026-10-20",
+      "rationale": null
+    },
+    "mxu_rows": {
+      "value": 128,
+      "unit": "count",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.cloud.google.com/tpu/docs/system-architecture-tpu-vm",
+      "date": "2026-10-20",
+      "rationale": null
+    },
+    "mxu_cols": {
+      "value": 128,
+      "unit": "count",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.cloud.google.com/tpu/docs/system-architecture-tpu-vm",
+      "date": "2026-10-20",
+      "rationale": null
+    },
+    "bf16_peak_ops_per_s": {
+      "value": 197000000000000,
+      "unit": "op/s",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.cloud.google.com/tpu/docs/v5e",
+      "date": "2026-10-20",
+      "rationale": null
+    },
+    "int8_peak_ops_per_s": {
+      "value": 393000000000000,
+      "unit": "op/s",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.cloud.google.com/tpu/docs/v5e",
+      "date": "2026-10-20",
+      "rationale": null
+    },
+    "hbm_peak_bytes_per_s": {
+      "value": 858993459200,
+      "unit": "byte/s",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.cloud.google.com/tpu/docs/v5e",
+      "date": "2026-10-20",
+      "rationale": null
+    },
+    "vmem_capacity_bytes": {
+      "value": 134217728,
+      "unit": "byte",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.jax.dev/en/latest/pallas/tpu/hardware.html",
+      "date": "2026-10-20",
+      "rationale": null
+    },
+    "smem_capacity_bytes": {
+      "value": 1048576,
+      "unit": "byte",
+      "kind": "claim",
+      "provenance": "spec_derived",
+      "source": "https://docs.jax.dev/en/latest/pallas/tpu/hardware.html",
+      "date": "2026-10-20",
+      "rationale": null
+    }
+  },
+  "estimates": {
+    "hbm_capacity_bytes": {
+      "value_record": {
+        "value": 16000000000,
+        "unit": "byte",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Conservative decimal interpretation of Cloud 16 GB; unit conflict with JAX remains. A separate 12e9-byte model allocation budget avoids depending on the upper interpretation.",
+      "stress_values": [
+        16000000000,
+        17200000000
+      ],
+      "material_to": "capacity refusal only"
+    },
+    "bf16_mxu_mac_per_s": {
+      "value_record": {
+        "value": 24625000000000,
+        "unit": "MAC/s",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "197e12 / (2 operations per MAC * 4 MXUs); equal sustained shares at published peak is a model assumption, not four independently measured rates.",
+      "stress_values": [
+        12312500000000,
+        24625000000000
+      ],
+      "material_to": "matrix/projections/attention"
+    },
+    "int8_mxu_mac_per_s": {
+      "value_record": {
+        "value": 49125000000000,
+        "unit": "MAC/s",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "393e12 / (2 * 4); estimates the raw INT8 service rate independently of the BF16 format law.",
+      "stress_values": [
+        24562500000000,
+        49125000000000
+      ],
+      "material_to": "12 matrix controls: INT8 subset"
+    },
+    "matrix_fill_equivalent_macs": {
+      "value_record": {
+        "value": 4161536,
+        "unit": "MAC-equivalent",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "(128+128-2)*128*128 equivalent work from a generic systolic fill/drain model. This is delay-equivalent work, not executed MACs or a derived clock.",
+      "stress_values": [
+        2080768,
+        8323072
+      ],
+      "material_to": "small M and repeated K tiles"
+    },
+    "vmem_bytes_per_s": {
+      "value_record": {
+        "value": 16384000000000,
+        "unit": "byte/s",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Engineering service budget of four 4096-byte register streams per nominal 1 ns vector quantum; aggregate shared local-memory bandwidth, not a physical port count.",
+      "stress_values": [
+        4096000000000,
+        32768000000000
+      ],
+      "material_to": "operand staging, vectors, partial-sum traffic"
+    },
+    "hbm_latency_ps": {
+      "value_record": {
+        "value": 200000,
+        "unit": "ps",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Untuned engineering prior for a DRAM access plus on-chip/controller path, at hundreds-of-ns scale. Public Pallas documentation identifies high HBM latency but gives no v5e value.",
+      "stress_values": [
+        50000,
+        1000000
+      ],
+      "material_to": "small streams, gather and insufficient concurrency"
+    },
+    "hbm_issue_interval_ps": {
+      "value_record": {
+        "value": 1000,
+        "unit": "ps",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "One nominal control-service quantum per logical DMA issue; not a physical core period.",
+      "stress_values": [
+        250,
+        4000
+      ],
+      "material_to": "short logical spans and credit-bound traffic"
+    },
+    "hbm_max_outstanding": {
+      "value_record": {
+        "value": 32,
+        "unit": "count",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Logical model window: 32 * 8192 B = 256 KiB, enough to cover nominal bandwidth-delay product (~172 KiB); chosen to permit saturation, not an inferred physical credit count.",
+      "stress_values": [
+        8,
+        64
+      ],
+      "material_to": "HBM bandwidth/latency overlap"
+    },
+    "vector_tile_ps": {
+      "value_record": {
+        "value": 1000,
+        "unit": "ps",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "One ns for one 8x128 FP32 ordinary vector primitive is an explicit engineering scale prior. JAX supplies layout/relative cost, not this timing; no matrix-peak-to-VPU-rate inference.",
+      "stress_values": [
+        500,
+        4000
+      ],
+      "material_to": "all vector work, especially underfilled decode and reductions"
+    },
+    "vector_group_startup_ps": {
+      "value_record": {
+        "value": 2000,
+        "unit": "ps",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Two nominal vector quanta for group setup; charged once to an explicit vector group, not every primitive.",
+      "stress_values": [
+        1000,
+        8000
+      ],
+      "material_to": "small vector and conversion envelopes"
+    },
+    "reduction_cost_ratio": {
+      "value_record": {
+        "value": 2,
+        "unit": "ratio",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Pairwise reduction stage is assigned twice ordinary vector service, reflecting documented slower cross-lane reductions; numerical multiplier is an estimate.",
+      "stress_values": [
+        1,
+        4
+      ],
+      "material_to": "RMSNorm, softmax, read reductions"
+    },
+    "exp_cost_ratio": {
+      "value_record": {
+        "value": 4,
+        "unit": "ratio",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "JAX classifies exp as medium cost versus cheap add/multiply; factor four is an untuned model choice, not a measured instruction ratio.",
+      "stress_values": [
+        2,
+        16
+      ],
+      "material_to": "SiLU and softmax"
+    },
+    "reciprocal_cost_ratio": {
+      "value_record": {
+        "value": 4,
+        "unit": "ratio",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Division/reciprocal service is modeled at four ordinary vector quanta; compiler lowering may differ.",
+      "stress_values": [
+        2,
+        16
+      ],
+      "material_to": "SiLU and softmax"
+    },
+    "rsqrt_cost_ratio": {
+      "value_record": {
+        "value": 8,
+        "unit": "ratio",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Conservative multi-step reciprocal-square-root estimate; no claim of an eight-instruction v5e implementation.",
+      "stress_values": [
+        2,
+        32
+      ],
+      "material_to": "RMSNorm"
+    },
+    "scalar_op_ps": {
+      "value_record": {
+        "value": 1000,
+        "unit": "ps",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "One ns per scalar/index/control primitive as an engineering prior, unrelated to any asserted TPU clock.",
+      "stress_values": [
+        250,
+        4000
+      ],
+      "material_to": "page indices, issue control, tiny scalar benchmark"
+    },
+    "kernel_startup_ps": {
+      "value_record": {
+        "value": 1000000,
+        "unit": "ps",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "Weak engineering prior of 1 us for device executable entry/prologue/exit; chosen on a microsecond control scale, not from v5e measurements or host launch. The stress range is deliberately two orders wide and is not a physical bound.",
+      "stress_values": [
+        100000,
+        10000000
+      ],
+      "material_to": "dominates minimal launch and may dominate small operator units"
+    },
+    "barrier_latency_ps": {
+      "value_record": {
+        "value": 1000,
+        "unit": "ps",
+        "kind": "claim",
+        "provenance": "stub",
+        "source": null,
+        "date": null,
+        "rationale": null
+      },
+      "basis": "One scalar-service quantum for an explicitly mapped barrier; dependency edges alone incur no extra barrier cost.",
+      "stress_values": [
+        250,
+        4000
+      ],
+      "material_to": "explicit synchronization only"
+    }
+  },
+  "algorithms": {
+    "matrix_mapping": "one TensorCore; 4 MXUs; M chunks <=1024, N/K chunks <=128; stable output-tile round-robin; K slices kept on the same MXU; distinct useful and padded K/N extents",
+    "matrix_service": "per K slice: (issued_mac_count + matrix_fill_equivalent_macs) / per_MXU_MAC_rate; fill work is never an issued MAC count",
+    "capacity": "12e9 B HBM budget; 96 MiB shared VMEM; 512 KiB SMEM; per-MXU 512 KiB logical accumulator window backed by and charged to VMEM, not claimed physical accumulator SRAM",
+    "staging": "double-buffer operands and VMEM-backed partials; 64 KiB transient vector scratch budget reserved within VMEM; explicit reads/writes once per transfer, no hidden physical register capacity claim",
+    "hbm": "8192-byte maximum logical span; split at page and buffer boundaries, no crossing holes; one bandwidth server and shared 32-slot nominal window; latency before bandwidth service, credits held through completion",
+    "vector": "explicit logical 2D shapes; pad rows to 8 and columns to 128; integer tile count, per-operation cost ratios; explicit pairwise reduction stages; one shared vector owner",
+    "state": "fixed invocation; one prime then report; optional two-prime comparison; HBM payload inputs reloaded per invocation; only explicit SMEM coefficient-index/position/page-table metadata persists; full coefficient table stays in HBM",
+    "kernel_boundary": "one device program startup per declared benchmark invocation, also full layer once; no per-op or per-tile duplication; device observability still unknown",
+    "arbitration": "FIFO-ready tie order from existing event scheduler; scalar control issue precedes matrix/vector group dispatch; HBM issue uses its own serialized DMA issue resource",
+    "counts": "canonical semantic operation conventions separated from executed typed/padded primitives and service-only fill work; all casts and scale/mask work retained"
+  },
+  "unresolved_observation_inputs": [
+    "Actual XLA fusion/event membership and inclusion of device entry/prologue in the timed envelope; no credible numeric event-correspondence bound before compiler/device observation.",
+    "Actual usable memory and cross-invocation retention; model budgets and explicit residency give runnable assumptions, not observed compiler equivalence.",
+    "Physical clocks, channels, transaction size, bank/port organization and energy remain unknown and unrepresented; they are not mandatory inputs to this model."
+  ],
+  "stress_policy": "Diagnostic pre-measurement alternatives, not confidence intervals, required campaign rows or probability/physical bounds; no held-out tuning."
+}

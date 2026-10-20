@@ -72,6 +72,7 @@ def main():
         "correctness_only": 2,
     }
     assert all(value is None for value in proposal["signatures"].values())
+    assert proposal["implementation_scope"]["status"] == "approved"
     required = {
         "mathematics",
         "work",

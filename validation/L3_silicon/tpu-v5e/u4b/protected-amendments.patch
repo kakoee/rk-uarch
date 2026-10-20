@@ -1,204 +1,247 @@
 --- a/docs/decisions/U0011-the-native-engine-core.md
 +++ b/docs/decisions/U0011-the-native-engine-core.md
-@@ -1043,3 +1043,51 @@
+@@ -1043,3 +1043,54 @@
  Protected carriers and source install together from the exact combined proposal patch.
  The author may validate a disposable reconstruction; human installation and focused
  independent review remain outstanding. This does not establish U4, G3a or shipping closure.
 +
-+## Scoped TPU v5e R representation and workload preparation
++## TPU v5e R pre-measurement model with explicit STUB estimates
 +
-+This amendment proposes the semantic interface in `contract/tpu-v5e-r-interface.md` for
-+U0023's existing U4b consumer. It takes effect only through human installation; it grants
-+no engine execution, timing-source acceptance, suite signature, G3a or U4 closure.
-+The ordinary-runtime simplification above remains in force in full.
++This amendment defines the scoped model/interface in `contract/tpu-v5e-r-interface.md`
++for U0023's existing U4b consumer. It takes effect only through human installation. The
++user approved the 52-unit suite at `validation/L3_silicon/tpu-v5e/u4b/` as implementation
++scope, preserving six U-P9 classes and all required decoder work; that is not final
++benchmark acceptance or demonstrated device observability. The interface and implementation
++retain their normal protected review. No U4/G3a closure is asserted.
 +
-+Recommend one TensorCore with four 128x128 matrix resources sharing local memory, explicit
-+vector/reduction and scalar work, and an aggregate HBM interval model in the same native
-+engine and mapper. Four equal matrix shares/shared issue and aggregate memory are declared
-+model abstractions; they are not physical channel, arbitration or clock claims. Public
-+peaks establish bounds and selection inputs, not startup, vector, latency or issue laws.
-+Reference numeric inputs remain sourced claims; unknown required leaves refuse. No 1 Hz,
-+1x1, npu-l4 constant, reference stipulation or test-only prediction is permitted.
++U-P9 permits unpublished reference parameters represented as numeric STUB claims. Do not
++require published or independently established values for every internal parameter.
++Use existing SourcedValue conventions: published claims with sources; finite reasoned
++estimates with kind=claim, provenance=stub, source=null, date=null, rationale=null. Document
++their basis and limits in model assumptions/development records, not claim.rationale.
++No reference stipulation or new provenance kind. A missing required value refuses; an
++explicit numerical STUB does not. Never insert numeric sentinels for unknowns. Freeze the
++chosen model/values before measurements; no held-out tuning or accuracy from deterministic
++checks. Do not defer/change TPU v5e merely because internal hardware details are unpublished.
 +
-+The proposed `uarch-prepared/5`, `uarch-engine/5`, TaskGraph/2 and model version 3 make the
-+R extension explicit. The existing /4/model-2 component branch is unchanged. The exact
-+contract document bounds the additive mathematical vocabulary, INT32 storage, four-MXU
-+identity, logical memory spans, vector work, state and observation changes. Normal human
-+schema installation/generation, implementation and independent verification remain required;
-+this document alone installs no executable carrier or timing law.
++The model is one TensorCore/four 128x128 MXUs, shared local memory, explicit vector/reduction
++and control work, aggregate HBM service and finite state/lifetime semantics, inside the
++existing engine and mapper. Equal peak shares, generic fill-equivalent work, local-memory
++budgets, logical memory windows, vector layout/costs, entry overhead and residency are
++explicit model choices/estimates, not physical TPU facts. Service is in rational ps and
++work/s, without an undocumented clock derived from peak. Preserve B's clocked laws and
++next_edge. Physical channels/transactions/banks/clock/energy may remain unrepresented.
 +
-+For this R branch only, allow service parameters in absolute ps and work/s, rather than
-+requiring undocumented physical clocks, topology and DRAM internals that the selected
-+aggregate model does not represent. Preserve checked rational event arithmetic and B's
-+next_edge semantics. List unrepresented mechanisms and actual consumed leaves; unknown
-+physical transaction counts/energy are null. This does not assert full C1 capability or
-+alter qualification rules. A numerical timing model must be separately justified and
-+reviewed before reference prediction admission, including the analytic baseline's rates.
-+If it cannot be supplied before measurement, return a model/target deferral or change under
-+U0023 rather than tune to the held-out experiment or call C0 a complete native campaign.
++The finite nominal model has 9 published fact leaves and 17 estimated leaves; not every
++job necessarily reads all leaves. Record actual consumed STUBs at U-P9. The concrete
++law, recommended values, bases, workload sensitivity and independent arithmetic are in
++the U4b MODEL, parameter catalogue and arithmetic examples. Diagnostic ranges are not
++confidence intervals or hardware bounds. The weak entry/vector/control estimates remain
++visible and do not acquire evidence merely by being implemented.
 +
-+The finite proposal in `validation/L3_silicon/tpu-v5e/u4b/` has 52 measured units and an
-+explicit disposition for each of the historical 70 candidates. Required decoder work
-+survives attention and projection/rotary/cast fusion; optional head/tail controls and
-+separate tail timing are distinguished. It preserves all six original U-P9 classes,
-+>=6 matrix shapes per supported precision, three read/write/copy sizes, both decoder
-+modes, full-layer decode B=1/8/32 plus prefill, two page sizes and minimal device-kernel
-+coverage. Numerical shape replacement repairs a missing middle-intensity candidate.
-+The proposal is unsigned; final admitted-reference characterize binding and device
-+observability remain unresolved. No new sample-count gate is introduced.
++The explicit /5 prepared/engine, TaskGraph/2, model-3 and observations/4 transition preserves
++ordinary /4/model-2 and historical /2 restrictions. Extend the same OpSpec/PreparedOp and
++TaskGraph, not another engine/workload language. Include raw INT8/INT32 storage, four-MXU
++placement, complete decoder/RoPE/casts, logical memory/gather work, steady state and
++independent accounting/attribution/replay. The ordinary-runtime simplification remains
++in force: installed software versions and input/result data hashes, no executable/source
++attestation, host selectors, startup hardening, build tracing or runtime approval records.
 +
-+U-P9 owns the existing small prediction-ordering check and its synthetic history test;
-+U-P10 consumes it. U0024 remains active, with remote/native/nightly/performance debt
-+carried forward. Human L1 workings remain human work. No hardware access, pilot,
-+calibration, spend, campaign infrastructure or protected installation is authorized by
-+the preparation package.
++Once this interface is approved, proceed as one substantial implementation milestone with
++appropriate seam tests and integrated independent review, not small A/B handoff chains.
++Actual compiler/event/materialization/retention correspondence remains to be reconciled
++before final benchmark acceptance/freeze under U-P9/U-P10. No new campaign, sample gate,
++hardware access, spend, pilot, dependency installation or measurement is authorized.
++U-P9 owns check_ordering.py; U-P10 consumes it. U0024 remains active without CI polling.
++Human L1 workings stay human work, and neither local deterministic tests nor this decision
++claim silicon accuracy, remote qualification, G3a or U4 closure.
 --- /dev/null
 +++ b/contract/tpu-v5e-r-interface.md
-@@ -0,0 +1,147 @@
-+# TPU v5e R interface amendment
+@@ -0,0 +1,187 @@
++# TPU v5e R interface amendment — pre-measurement model
 +
-+Proposed with U0011's scoped reference amendment; effective only on human installation.
-+This is the exact semantic interface to implement, not executable schema admission.
-+Normal generated-schema review and U0002 generation/adoption remain required before code
-+installation. No ordinary reference job is executable merely because this text is installed.
++Proposed with U0011's scoped reference amendment; protected installation remains human work.
++This specifies the one semantic interface for a subsequent substantial implementation
++milestone, not an executable schema installation or a new approval process. The user has
++approved the unchanged 52 units as implementation scope only. Final benchmark acceptance,
++device observability, implementation verification and U4 closure are not asserted.
 +
-+## Version and compatibility boundary
++## Compatibility and ordinary execution
 +
-+Preserve ordinary /4, component model 2, TaskGraph/1 and observations/3 behavior unchanged.
-+Add R roots `uarch-prepared/5` and `uarch-engine/5`, `uarch-taskgraph/2`, model
-+`native-intervals` version `3` and engine `native-stage/3` in the same package/executable.
-+The software package version follows its actual installed release; never manufacture a
-+build identifier. R admission has checkpoint `R`, invocation `production|test`, and
-+eligibility `reference_suite|verification_only`; test pairs only with verification_only.
-+Version compatibility is explicit; /4 is not silently upgraded. No executable/source
-+hashes, HostRecords, selectors or external reviewer artifacts are runtime inputs.
++Keep ordinary /4, component model 2, TaskGraph/1 and observations/3 behavior unchanged.
++Add R roots `uarch-prepared/5`, `uarch-engine/5`, `uarch-taskgraph/2`, model
++`native-intervals` version `3`, engine `native-stage/3`, and R observations/4 in the same
++package and native executable. Use the actual installed package version. The R admission
++values are checkpoint `R`, invocation `production|test`, eligibility
++`reference_suite|verification_only`; test pairs only with verification_only. Numeric STUB
++reference estimates are permitted in ordinary production, not restricted to test invocation.
++Unsupported semantics and missing required inputs still refuse before events.
 +
-+Reuse the existing ordinary bundle/job/result data hashes, software/producer versions,
-+rank, assumptions, source closure, mapped points, owner identities, per-op and completed
-+work records. Validation and replay remain in the installed package. `source` for a decoder
-+point carries its authenticated original v2 mathematical graph, selected decoder group and
-+coefficient table. Head/tail work is not silently discarded from a whole-model request:
-+the selected scope is explicitly one decoder layer. Preserve existing provenance data
-+needed to interpret original v2 artifacts without adding new runtime attestation.
++Reuse ordinary software/producer versions, hardware/request/input/result data hashes,
++rank, assumptions, mapped points, coverage, buffer lifetimes and original mathematical
++source closure. R mathematical closure reuses the v2 graph/op/coefficient fields, with
++the stated R operand/vocabulary extension and an explicit selected single decoder group.
++It does not require constructing an old PreparedBundleV2 whose HardwareSpec demands
++physical clocks: never fill a dummy legacy hardware object to obtain mathematical inputs.
++New R preparation emits this closure directly; importing an existing v2 source preserves
++its original data identity without pretending it was produced for different hardware. A whole-model request cannot silently lose its embedding/head work.
++Preserve the provenance of existing v2 artifacts without adding executable/source/build
++hashes to ordinary execution. No review records, HostRecords/selectors, startup assurance,
++source tracing or development checkout is a runtime dependency. Replay uses supplied data,
++not a regenerated workload or coefficient table.
 +
-+## Narrow reference hardware branch
++## Finite reference and provenance fields
 +
-+Add `TpuV5eReference` as the R hardware branch rather than making every existing HardwareSpec
-+field optional. Its literal identity is `tpu-v5e`, design_status=`reference`. All physical
-+numbers carry SourcedValue provenance. A missing numeric leaf is represented as
-+`{value:null, kind:claim, provenance:stub, source:null, unit:<declared unit>}`; it is not a
-+permitted numeric input to a service law. Resolved required leaves must have compatible
-+units and a positive value (latency may be zero only with explicit source/model support).
-+Reference stipulations remain forbidden. Modeling policies and conservative allocation
-+limits are in assumptions, never relabeled physical claims.
++Add a scoped `TpuV5eReference` branch, identity `tpu-v5e`, design_status=`reference`, instead
++of relaxing all existing HardwareSpec fields. Its numeric fields use the **unchanged**
++SourcedValue semantics: finite numeric value and unit; claim/spec_derived with a source for
++published facts, or claim/stub with source=null, date=null, rationale=null for reasoned
++pre-measurement estimates. The estimate's basis and limitations belong in model assumptions
++and development documentation, not claim.rationale. No new provenance kind; no stipulations
++on reference hardware. An arithmetic allocation of a published peak remains STUB where the
++allocation/service interpretation is assumed. Do not demand measured/published provenance
++for every required internal parameter.
 +
-+The branch has this finite field inventory (no generic extra-fields map):
++Required numeric fields (the nominal values/bases are in the bounded U4b model proposal):
 +
-+| Group | Fields and types |
++| Group | Fields |
 +| --- | --- |
-+| Organization | `tensorcore_count`, `mxu_count`, `mxu_rows`, `mxu_cols`: sourced positive counts |
-+| Published bounds | `bf16_peak_ops_per_s`, `int8_peak_ops_per_s`, `hbm_peak_bytes_per_s`: sourced positive rates |
-+| Capacity | `hbm_capacity_bytes`, `vmem_capacity_bytes`, `smem_capacity_bytes`, `accumulator_bytes`, `operand_buffer_bytes`: sourced positive bytes or unknown |
-+| Matrix service | `bf16_mxu_mac_per_s`, `int8_mxu_mac_per_s`: sourced positive rates or unknown; `matrix_startup_ps`, `matrix_issue_interval_ps`: sourced nonnegative ps or unknown |
-+| Local transfer | `operand_bytes_per_s`, `vmem_bytes_per_s`: sourced positive byte/s or unknown |
-+| HBM service | `hbm_latency_ps`, `hbm_issue_interval_ps`: sourced nonnegative ps or unknown; `hbm_max_outstanding`: sourced positive count or unknown |
-+| Vector service | `arithmetic_ops_per_s`, `reduction_elements_per_s`, `exp_ops_per_s`, `reciprocal_ops_per_s`, `rsqrt_ops_per_s`, `cast_elements_per_s`: sourced positive rates or unknown; `vector_startup_ps`: sourced nonnegative ps or unknown |
-+| Scalar/control | `scalar_ops_per_s`: sourced positive rate or unknown; `kernel_startup_ps`, `barrier_latency_ps`: sourced nonnegative ps or unknown |
++| Published facts | `tensorcore_count`, `mxu_count`, `mxu_rows`, `mxu_cols` (count); `bf16_peak_ops_per_s`, `int8_peak_ops_per_s` (op/s); `hbm_peak_bytes_per_s` (byte/s); `vmem_capacity_bytes`, `smem_capacity_bytes` (byte) |
++| Capacity estimate | `hbm_capacity_bytes` (byte) |
++| Matrix estimates | `bf16_mxu_mac_per_s`, `int8_mxu_mac_per_s` (MAC/s); `matrix_fill_equivalent_macs` (MAC-equivalent, service only) |
++| Local service estimate | `vmem_bytes_per_s` (byte/s) |
++| HBM estimates | `hbm_latency_ps`, `hbm_issue_interval_ps` (ps); `hbm_max_outstanding` (count) |
++| Vector estimates | `vector_tile_ps`, `vector_group_startup_ps` (ps); `reduction_cost_ratio`, `exp_cost_ratio`, `reciprocal_cost_ratio`, `rsqrt_cost_ratio` (ratio) |
++| Control estimates | `scalar_op_ps`, `kernel_startup_ps`, `barrier_latency_ps` (ps) |
 +
-+This inventory is a proposed abstraction, not proof these parameters can be sourced.
-+No physical clock, physical channel count, 256-byte transaction, NoC route/port, DRAM
-+refresh timing or energy field is read by this branch. Unknown nominal HBM capacity may
-+be excluded from a timing read only if an explicit independently justified allocation
-+limit bounds every buffer and is disclosed; otherwise allocation admission also refuses.
-+Usable VMEM/SMEM budgets are explicit limits no larger than the resolved nominal capacity.
-+Accumulator/staging capacity cannot be replaced by VMEM/SMEM nominal capacity.
++These are 9 fact and 17 estimated leaves in the nominal proposal. Counts/byte capacities
++are strict positive integers; rates and nonzero nominal service parameters are finite
++positive numbers, represented exactly as rational service values when resolved. No
++hardware clock is inferred from peaks or populated with 1 Hz. No null numeric SourcedValue
++is introduced. A missing required field refuses with its name; a numeric STUB does not.
++Unknown unused physical clock/channel/transaction/bank/energy properties are named as
++unrepresented, not represented by a numeric sentinel. Result diagnostics that the model
++does not compute remain null. Enumerate the actual consumed STUB leaves for UNKNOWNS at
++prediction freeze; the 17-leaf model inventory is not automatically every job's read set.
 +
-+`assumptions` names this reference model, deterministic FIFO policy, shared-VMEM placement,
-+logical-span HBM addressing and finite allocation budgets. Four equal matrix service shares,
-+a single shared issue gate and aggregate HBM arbitration are **model choices**, not hardware
-+facts. The selected numerical source/model must justify each required resolved timing input;
-+public headline peaks do not populate these parameters automatically. Enumerate precisely
-+which leaves were used, which were missing and which mechanisms were unrepresented.
-+Production refuses any required unknown before executing events. No test-only bypass
-+creates a reference prediction. Unused energy/physical topology must not be reported as zero.
++The ordinary mapped assumptions carry the finite policies below plus allocation budgets
++and limitations, using a new model-specific assumptions revision. No external documentation
++file or reviewer record is consulted to execute a valid job. Policy values and numeric
++inputs participate in existing data identities; there is no new authority manifest.
 +
-+## Additive task and mathematical vocabulary
++## Mapped work, precision and resources
 +
-+Keep the existing OpSpec/PreparedOp and TaskGraph model; no second workload language.
-+R mathematical ops accept the existing projection/decoder and v2 rotary operators, plus
-+five narrowly specified OpSpec names for the selected microbenchmarks:
++Use the same OpSpec/PreparedOp and TaskGraph vocabulary, extended additively. Keep existing
++projection/decoder and v2 rotary mathematics. Add the five required microbenchmark OpSpec
++names: `stream_read_sum` (BF16 X[E] to FP32 scalar, E casts/E-1 adds), `stream_fill`
++(runtime BF16 scalar to distinct Y[E]), `stream_copy` (disjoint BF16 X/Y[E]), `paged_gather`
++(BF16 K/V pages, explicit int32 indices, valid extents, distinct BF16 contiguous outputs),
++and `scalar_add` (two FP32 scalar inputs and one FP32 result). No second workload IR.
 +
-+- `stream_read_sum`: BF16 X[E] to FP32 Y[1]; E widening conversions and E-1 sum adds.
-+- `stream_fill`: BF16 X[1] to BF16 Y[E]; runtime broadcast into distinct destination.
-+- `stream_copy`: BF16 X[E] to BF16 Y[E]; disjoint materialized input/output ranges.
-+- `paged_gather`: BF16 K/V pages, int32 page_index[P], BF16 contiguous K/V outputs;
-+  B,Hkv,D,valid_tokens,block_tokens dimensions and exact page index values, bounded by
-+  allocated page count. Valid payload and allocated bytes are separate.
-+- `scalar_add`: two FP32 scalar inputs and one FP32 scalar output.
++Isolated BF16/INT8 matrix controls reuse projection dot semantics with explicit M/K/N.
++Add int32 only to R storage/accumulator dtypes, not rk-sim's generic compute PrecisionFormat.
++Raw signed INT8 inputs in [-7,7], K<=4096, INT32 accumulation/output have no scales,
++requantization or hidden BF16 output conversion. BF16 final conversion occurs after the
++complete K chain. Projection-to-RoPE's declared intermediate BF16 rounding point remains.
 +
-+Isolated matrix controls use the existing projection dot semantics with explicit M/K/N;
-+INT8 controls are raw integer dots, not a quantized decoder. Add `int32` to R **storage and
-+accumulator dtypes**, not to the generic rk-sim PrecisionFormat compute enum. Signed INT8
-+inputs and INT32 output/accumulation have no scale operands in this scope. Maximum raw
-+input magnitude and K bound are explicit; overflow-prone work refuses.
++R matrix compute adds `matrix_engine_index` 0..3 with core_id=0. Output tiles (M<=1024,
++N<=128) round-robin the four owners in stable order. K slices <=128 stay on that owner,
++cover each reduction element exactly once and share one live partial buffer. Physical K/N
++are 128; M is the actual streamed row count. Useful/issued coverage, array padding, causal
++masking and conversion boundaries are explicit. Graph admission checks disjoint complete
++M/N/K partitions and dependencies, not merely equality of count sums.
 +
-+R TaskGraph matrix compute adds `matrix_engine_index` (integer 0..3; core_id=0), supports
-+K-reduction tile ranges and explicit partial-sum ownership. Matrix output conversion is
-+performed once after all K slices, unless the mathematical graph explicitly contains an
-+intermediate numeric boundary. Coverage validates a disjoint complete M/N/K partition,
-+not just a sum equal to expected operations. `physical_extents` distinguishes issued
-+padding from useful extents. Compiled masked work likewise stays distinct from useful
-+causal pairs. No engine reconstructs or silently changes supplied mapping decisions.
++Reserve each 512 KiB logical accumulator window inside the shared 96 MiB VMEM allocation
++budget, not in an invented physical accumulator capacity. HBM/SMEM model budgets are
++12e9 B / 512 KiB. Double-buffer operands within that same VMEM namespace. Each K slice
++writes the partial; later slices read it; final conversion reads it once. Charge these
++local transfers once. Register/dedicated-accumulator details remain unrepresented. Budgets
++are explicit mapper assumptions, not hardware claims. Infeasible supplied mappings refuse;
++only a newly supplied explicit spill/retile mapping can change placement.
 +
-+R vector/scalar tasks reference a mathematical op and explicit operand BufferRanges,
-+operation class, element count and reduction axis/group extent. Their closed operation
-+classes are add, multiply, compare, reduction_sum, reduction_max, exp, reciprocal, rsqrt,
-+cast, broadcast and index. Cast records specify both storage dtypes. Counts and axis
-+extents must be independently derivable from the bound mathematical op, not arbitrary
-+caller-supplied delays or trusted expected totals. Fusion preserves each member's ID,
-+work and numeric conversion points; it can remove only declared materializations.
++Vector tasks bind mathematical op/member IDs, BufferRanges, logical last-two-axis shape,
++leading multiplicity, typed primitive counts, reduction axes/stages and explicit fusion
++group. Closed primitive classes: add, subtract, multiply, compare, select, negate,
++reduction_sum, reduction_max, exp, reciprocal, rsqrt, cast, broadcast and index. Casts bind
++both storage dtypes. FP32 scalar math maps to a 1x1 vector shape; scalar/index/control
++work uses the control owner. Validate typed counts against bound mathematics rather than
++trusting caller durations or total-count assertions. Fusion may remove only declared
++materializations, never mathematical work or required rounding. Process 8x128 vector work
++tiles with at most 64 KiB transient logical scratch reserved inside VMEM. This is a software
++limit, not a physical register-file capacity; extra materializations/spills are explicit.
 +
-+R buffers use existing ranges/lifetime rules with spaces hbm, vmem, smem and accumulator.
-+MXU0..3 share the same VMEM namespace. R transfer records have logical source/destination
-+ranges, payload_bytes, direction, op ownership and ordered spans. Physical transaction
-+bytes/channel_id/route_id are absent in this aggregate model. Request boundaries are
-+explicit **logical service** boundaries selected by the mapping, not assertions of physical
-+transactions. Page tables, tails and copies cannot be synthesized during execution.
++Buffers/ranges retain lifetime and ownership rules; spaces are hbm, vmem and smem, with
++logical accumulator buffers tagged within vmem. Ordered transfer spans bind source,
++destination, direction, owner/op and payload. Split at maximum 8192 B, page/buffer boundaries
++and holes, preserving tails. These are logical service requests, not physical transactions;
++no fictitious 256 B transactions, channel IDs or NoC routes. Page table values and valid
++lengths are supplied and checked. Full coefficient data stays in HBM; only small indices/
++positions may persist in SMEM. Declared shared coefficient rows require both consumers.
 +
-+Retain fixed bounds and overflow checks, with budgets sized to the finite selected suite;
-+never silently truncate a graph. All malformed/unsupported data refuses before events.
++## Exact service laws and state
 +
-+## Service, state and result obligations
++Use one native scheduler/resource implementation with model-specific service rules:
 +
-+Within the same scheduler, staging/local transfers consume the declared byte service;
-+matrices consume their assigned MXU and shared issue gate; vector/scalar operations consume
-+their corresponding owner; HBM reads/writes share aggregate bandwidth and outstanding slots.
-+A proposed tile service consists of explicit staging, startup/fill-drain and issued work
-+intervals, with shared issue spacing, dependency/lifetime rules and only declared overlap.
-+The exact numerical law/source is still the U0011 model decision; schema syntax or a
-+ceiling-rate formula is not a verified timing law. Use checked rational ps arithmetic and
-+ceil only at declared event boundaries. Do not route ps through an invented 1 Hz clock.
-+Retain B's accepted next_edge behavior and issue-edge ordering in the clocked branch.
++1. Scalar control serializes matrix-slice/vector-group dispatch, one scalar_op_ps each;
++   explicitly supplied index instructions also occupy that owner. Separate MXUs can overlap.
++   Each matrix slice occupies its MXU for
++   `1e12*(M*K_physical*N_physical + matrix_fill_equivalent_macs)/mxu_mac_per_s` ps after
++   staging/dispatch. Four chosen shares cannot exceed the published chip peak. Fill is a
++   delay-equivalent penalty and contributes no executed MAC count. VMEM transfers use the
++   shared byte-rate server. Explicit graph dependencies and buffer lifetimes limit overlap.
++2. HBM issue requires a free logical window slot and its independent issue spacing. Earliest
++   bandwidth service is issue+hbm_latency_ps. Reads/writes share a rational bandwidth cursor;
++   service is payload*1e12/hbm_peak_bytes_per_s. Hold the slot through integer completion.
++   Keep the accepted release/issue tie ordering. VMEM endpoint traffic is charged separately;
++   do not also charge control per span unless the graph explicitly contains that work.
++3. A vector primitive on logical (r,c) uses ceil(r/8)*ceil(c/128) 8x128 tiles per leading
++   index. Cheap operations/casts/broadcast cost vector_tile_ps per tile; exp/reciprocal/rsqrt
++   use their multipliers. Group setup is charged once. Pairwise last-axis reduction stage s
++   has ceil(L/2^(s+1)) active outputs per row and costs padded tile count times
++   reduction_cost_ratio*vector_tile_ps. Stop after ceil(log2 L) stages; L=1 has none.
++   Forward odd tails without inventing combines. Keep true useful combines R*(L-1),
++   physical issued primitives and reduction critical dependencies distinct.
++4. Charge kernel_startup_ps once per declared benchmark invocation, including a full layer
++   once, not once per op/HLO/tile. It represents estimated device program entry/prologue/
++   exit, not host launch gaps. Only explicit barriers cost barrier_latency_ps; dependency
++   edges themselves are free. This boundary is modeled, not observed.
++5. Use checked rational ps, ceil at event completion and retain rational bandwidth cursors
++   to avoid per-span rounding drift. Preserve the same event ordering/overflow checks;
++   B's clocks/next_edge remain unchanged. No Python-supplied durations or second engine.
++6. Prime one fixed invocation, report the next, compare two primes. Reset logical context
++   and scratch/counters; retain only declared persistent SMEM metadata. Reload HBM payload
++   inputs each invocation by default. An explicitly modeled fixed point is not proof of
++   actual XLA retention or HBM traffic. Only the reported iteration contributes results.
 +
-+Steady execution primes one complete iteration internally and reports the next; a second
-+priming iteration is a comparison request. Persist declared physical residency and reset
-+logical invocation state, per-iteration counters and scratch lifetimes. Full-layer logical
-+KV length must not grow during warm-up of the same benchmark point. Only the reported
-+iteration contributes counts, timing and critical-path attribution.
++The nominal parameter catalogue supplies a complete value set including STUBs. Diagnostic
++sensitivity alternatives are not accuracy bounds or mandatory extra suite rows. Actual
++compiler/event/retention correspondence remains unresolved; do not force its acceptance
++by treating a source-level operation name or a warm-up call as an observation.
 +
-+New R observations carry actual executed matrix/vector/cast/scalar work and payload reads/
-+writes, operation ownership, resource intervals, allocations and dependency/blocking causes.
-+Physical transaction counts and unmodeled diagnostics are nullable, never manufactured.
-+Keep existing analytic convention totals (for example 5*attention_pairs and 6*RMSNorm_elements)
-+separate from typed executed primitive counts and conversion counts in R observations.
-+Derive each from the same bound mathematics and verify the relation; never charge an exp,
-+reduction and add identically just because the reporting convention calls each one op.
-+Include scale/mask and numeric conversion work even when a historical analytic convention
-+did not expose it. The /4 vector_ops equality must not be copied to an incompatible R
-+count projection. Analytic and native comparisons must use the same declared count meaning.
-+Preserve complete useful/issued counts, per-op work even for fused timing, total duration,
-+critical-path sum and deterministic result hashes. Do not reuse observations/3 if its
-+mandatory clock/transaction vocabulary cannot express these records; introduce R
-+observations/4 and dispatch the single independent checker by admitted model/format.
-+No result reports C1/accuracy solely from these types: verified timing semantics and the
-+reviewed fidelity projection are prerequisites; unmodeled/error/energy retain honest scope.
++## Counts, checking and claims
++
++R observations/4 record actual completed typed useful/issued work, semantic convention
++counts, conversion work, payload and local traffic, resource/queue/allocation intervals,
++state transitions and blocking causes. Keep service-only fill/control startup distinct
++from mathematical work. Do not copy the /4 vector-count equality if R semantic conventions
++and typed primitives differ. Preserve per-op work even when only enclosing timing exists.
++Physical transaction/energy/unmodeled diagnostics are null. The single installed checker
++dispatches by admitted model/format, verifies the numerical laws independently, and keeps
++B checks unchanged. Canonical data hashes, replay and deterministic output remain required.
++
++Preserve the retained U-C0 aggregate/per-op structure, with a versioned reference resolver:
++per-op useful compute time is matrix_ops/chip_peak plus typed useful primitive counts
++at effective rates (1024*1e12/vector_tile_ps, divided by special/reduction multipliers;
++scalar/index work uses scalar_op_ps). Memory time is mathematical operand HBM bytes/HBM rate for the admitted analytic scope,
++not dynamic native reload/partial traffic substituted to force agreement.
++Aggregate=max(sum compute, sum memory); per_op=sum(per-op maxima). C0 leaves native fill,
++padding, local staging, latency/credits, setup and dispatch/startup unrepresented; do not
++insert those native costs into C0 or alter historical analytic profiles. Separately check
++native duration against kernel startup once plus max occupied demand across exclusive
++native owners. This independent resource-demand lower bound is a test identity, not a
++new engine or a replacement for C0. Do not assert the old additive-compute C0 formula is
++a lower bound on every legal overlap. Numeric STUBs neither prohibit truthful model-fidelity reporting after applicable
++verification nor establish accuracy. Deterministic tests verify the implementation of
++assumed laws; they cannot validate those assumptions against TPU v5e. Default calibration
++remains STUB, error unknown, energy unverified. No prediction or U4 closure follows from
++installing or approving this interface document.

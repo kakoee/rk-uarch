@@ -1,3 +1,75 @@
+# Revision 2 evidence — explicit STUB model preparation
+
+Continues `0d817eebc8ff2668eae277eebc8475b09122406f` in the same clean isolated checkout.
+The user's subsequent instruction approves the 52 units as implementation scope only and
+withdraws the published/independently-established-parameter prerequisite. That approval
+is recorded verbatim in scope/limit terms, not as lane signatures or runtime authority.
+The revision-1 source-only timing blocker and target-deferral recommendation below are
+historical and superseded by MODEL/REFERENCE and the revised unapplied patch.
+
+## Observed in revision 2
+
+- Fetched origin/main and confirmed no intervening peer change before editing. Read the
+  actual `contract/uarch_contract/sourced.py` and assumptions carrier: a numeric STUB claim
+  has source=null; claims forbid rationale; value must be finite. The previous proposed
+  null-valued STUB object was not compatible and has been removed.
+- Revisited official Cloud v5e and JAX hardware/Pallas documentation. Published headline
+  facts are separated from layout-informed choices and engineering timing priors. No
+  published v5e performance measurements or held-out results were used to choose estimates.
+  No empirical accuracy or bounds are claimed for the nominal values/stress endpoints.
+- Prepared 9 fact and 17 numeric STUB records, exact service/state/work laws, VMEM-backed
+  partial semantics and a scoped mathematical-input path without dummy legacy HardwareSpec
+  values. Protected targets remain unchanged. `git apply --check` passed on the revised
+  two-file document/interface patch; no protected changes were installed.
+- `check_package.py` passed: historical 70 rows/dispositions, six classes, 52 selected units,
+  original shape worksheet and arithmetic intact, final signatures still null, and actual
+  implementation-scope approval recorded separately. A direct comparison against `0d817ee`
+  confirms all 52 benchmark objects are unchanged, as are the historical suite, dispositions
+  and shape worksheet.
+- `check_model.py` passed using only standard-library literal arithmetic: proposed record
+  consistency, matrix fill/useful/issued separation, partial traffic/capacity, vector padding,
+  reduction stages, norm/softmax/RoPE primitive distinctions, page tails/index bytes, logical
+  request credits, fractional rounding and once-per-invocation startup/state accounting.
+  These checks generate no benchmark durations and implement no event scheduler.
+- Prepared the exact theta=10000 FP32 coefficient table and reverse page-index arrays in
+  inputs/. `prepare_inputs.py --check` passed without regeneration. The actual unchanged
+  RotaryCoefficients carrier accepted the decompressed JSON; its content hash is recorded
+  in inputs/README. This is data preparation, not tensor execution or a prediction.
+- All 26 proposed value records passed the **actual unchanged SourcedValue** validator.
+  Explicit counterexamples rejected null, NaN, unsourced spec_derived, rationale on a claim,
+  and non-null source on a STUB. Module origin was checked as this isolated clone's
+  `contract/uarch_contract/sourced.py`, not the coordinator checkout's source.
+- Reused existing tests with the existing environment (no dependency installation):
+  `python -m pytest -q --require-vendor` selecting `test_sourced_refusals`,
+  `test_claim_error_cause`, `test_nested_reference_stipulation` from
+  `contract/tests/test_u_p1.py`, and `test_claim_round_trip`,
+  `test_proposed_stub_source_exception_is_explicit` from
+  `contract/tests/test_vendored_round_trip.py`: **14 passed**, no skipped/no-test substitute.
+- Ruff check/format checks passed for the preparation checkers and input recipe after formatting the
+  newly added checker. JSON/link/whitespace and patch checks passed. No native/analytic
+  duration test or broad campaign was justified by these documentation/preparation edits.
+
+The environment and sandbox workaround are as recorded below. Python/pytest/Ruff were
+already available; imports were pointed at this clone. Source inspection and agent-authored
+arithmetic do not count as independent reviewer acceptance or actual native R execution.
+A fresh export of the final commit is checked separately at publication.
+
+## Inherited and still unobserved
+
+Previous kernel/ordinary/rotary evidence remains inherited, not newly rerun. Human L1
+worksheets are untouched. Actual XLA event/fusion/retention/materialization correspondence
+and physical internal parameters not represented by this model remain unobserved. The
+nominal model now has explicit estimates, so missing vendor internals are not themselves
+an implementation gate. Only interface review is pending before the requested substantial
+implementation milestone; final benchmark acceptance and normal implementation/verification
+obligations still apply. No device access/spend, measurements, held-out tuning, protected
+installation, new authority framework, CI polling, remote/performance qualification or
+G3a/U4 closure occurred.
+
+---
+
+## Revision 1 record, retained as history
+
 # Observed and inherited evidence
 
 Author preparation checks on 2026-10-20; no independent reviewer pass is claimed.

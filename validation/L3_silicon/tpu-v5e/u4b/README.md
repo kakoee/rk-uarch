@@ -1,55 +1,52 @@
-# U4b consolidated reference and workload handoff
+# U4b consolidated model and implementation proposal, revision 2
 
-**Preparation complete; reference timing admission and G3a/U4 remain open.**
-Baseline: `c6438fe42fe458fc8f75af884c9c04b95ff4f96a`. Author proposal, 2026-10-20.
-No lane/human signatures, native extension, predictions or device observations are claimed.
+**The 52-unit implementation scope is approved. The revised model/interface awaits review.**
+Continues published package `0d817eebc8ff2668eae277eebc8475b09122406f` (2026-10-20).
+The user's approval covers required work and six benchmark classes, not device
+observability, final benchmark acceptance, protected installation or U4 closure.
 
-Recommend **52 measured units** preserving all six original U-P9 classes and required
-decoder work. Preserve the original 70-row proposal; every candidate has a disposition.
-Recommend one TensorCore/four MXUs with shared local memory and explicit vector/scalar/HBM
-work in the existing engine. Published data is insufficient for credible timing of the
-complete suite: matrix startup/issue, vector service, memory latency/concurrency and device
-startup remain consequential unknowns. Proceed with the specified structural/operator work;
-keep numerical reference admission blocked until an independently justified timing model
-is selected. Do not substitute npu-l4 properties or `--test-only` execution.
+Recommend a complete pre-measurement interval model for TPU v5e in the existing native
+engine: four matrix resources sharing local memory, explicit vector/reduction/control
+work, aggregate HBM latency/bandwidth/window service, and declared state behavior. It uses
+**9 published fact leaves and 17 numeric STUB estimates**, with bases, sensitivity ranges
+and limitations. A numeric STUB is a supported provenance convention, not a reason to
+refuse reference execution. The earlier published/independently-established-value gate
+and target-deferral recommendation are withdrawn.
 
-Read this as one package:
-
-| Artifact | Purpose |
+| Artifact | Concrete handoff |
 | --- | --- |
-| [REFERENCE.md](REFERENCE.md) | Reconciled primary evidence, source conflicts, smallest representation and specific prediction blocker |
-| [SUITE.md](SUITE.md), [suite-proposed.json](suite-proposed.json) | Finite 52-unit proposal; every unit's dimensions, mathematics, precision, native needs, fusion, mapping/state and device boundary |
-| [DISPOSITIONS.md](DISPOSITIONS.md), [candidate-dispositions.json](candidate-dispositions.json) | All 70 historical rows retained, replaced, merged or omitted with a reason |
-| [shape-regimes.json](shape-regimes.json) | Count-only U0001 bin worksheet, including the matrix-shape repair and decoder projection regimes; final characterize binding remains pending |
-| [protected-amendments.patch](protected-amendments.patch) | Exact unapplied U0011 addition and narrow contract interface document; no protected file changed |
-| [IMPLEMENTATION.md](IMPLEMENTATION.md) | Finite implementation order, reusable code/tests, independent arithmetic and behavioral checks, and U-P9 ordering ownership |
-| [EVIDENCE.md](EVIDENCE.md) | Observed checks versus inherited evidence and remaining limitations |
+| [MODEL.md](MODEL.md), [model-parameters.json](model-parameters.json) | Recommended parameter values, exact service laws, fact/estimate/model-choice separation, material uncertainties and remaining observation gaps |
+| [REFERENCE.md](REFERENCE.md) | Primary-source reconciliation and limits on reusing component constants |
+| [SUITE.md](SUITE.md), [suite-proposed.json](suite-proposed.json) | The unchanged 52 units; actual implementation-scope approval recorded separately from final agreement |
+| [DISPOSITIONS.md](DISPOSITIONS.md), [candidate-dispositions.json](candidate-dispositions.json) | Unchanged disposition of all 70 historical candidates |
+| [shape-regimes.json](shape-regimes.json) | Count-only shape coverage; final admitted-reference characterization still pending |
+| [protected-amendments.patch](protected-amendments.patch) | Exact unapplied U0011/interface amendment, corrected to admit numeric STUBs and use the existing provenance conventions |
+| [IMPLEMENTATION.md](IMPLEMENTATION.md) | One substantial implementation milestone, finite sequence and reusable test/code inventory |
+| [ARITHMETIC.md](ARITHMETIC.md), [check_model.py](check_model.py) | Independent finite service/count/traffic/reduction/rounding examples, without engine execution or TPU duration predictions |
+| [inputs](inputs/README.md), [prepare_inputs.py](prepare_inputs.py) | Exact proposed FP32 coefficient table and page indices, validated using the existing coefficient carrier |
+| [EVIDENCE.md](EVIDENCE.md), [check_package.py](check_package.py) | Observed versus inherited checks; preserved historical suite and scope checks |
 
-## Decisions to resolve together
+## Decision for review, with recommendation
 
-1. **Model/target:** retain TPU v5e with this complete workload and require independently
-   justified pre-measurement timing laws before numerical admission (recommended). Approve
-   source-independent implementation now. If no such model/source can be provided, explicitly
-   defer the TPU prediction milestone or change the target/model requirement under U0023.
-   A peak-only surrogate cannot predict the required vector/launch/gather behavior. This
-   is the actual consequential blocker, not a request to choose arbitrary numbers.
-2. **Protected representation and finite scope:** review the one unapplied patch together
-   with the 52-unit suite. Recommend the scoped absolute-time interval representation,
-   four MXUs/shared VMEM, raw INT8 dots with INT32 storage, BF16 decoder, fused attention and
-   Q/K rotary envelopes, and 16/32-token page sizes. The contract patch is a concrete semantic
-   document, **not generated Python/Rust carriers**. Human installation and later exact
-   executable schema review are still required; no conditional runtime approval is invented.
-   The two lane agreements remain unsigned. Confirm the consuming rk-sim plan's primary
-   block size when agreeing scope; vendored code has no universal block-size default.
+Approve this revised model/interface as a whole for implementation, including the explicit
+STUB estimates and chosen local-memory/reload abstractions. The nominal catalogue is fully
+populated; it does not require published values for undocumented internals. Its weakest
+prior is device entry at 1 us (diagnostic alternatives 0.1..10 us), followed by absolute
+vector/control costs. These may be poor predictions; they are neither measured nor hidden.
+The stress endpoints are not physical/error bounds. Deterministic checks establish only
+that the implementation follows the chosen laws.
 
-Runtime/compiler pinning, exact coefficient artifact bytes, allocation budgets and observed
-fusion/state/counters are finite implementation/measurement-preparation work, not separate
-requests for human answers to every field. If unavailable observability forces a scope
-change, bring that concrete change back before prediction freeze. Device access/spend and
-any pilot remain separately unauthorized; historical sample/warm-up proposals are not gates.
+No additional scope or target decision is needed. Keep TPU v5e and all 52 approved units.
+Actual XLA/event/materialization/retention correspondence has no demonstrated bound yet;
+these are later observation/input-reconciliation obligations, not missing nominal model
+parameters. Exact proposed coefficient bytes and page indices are now supplied; binding them into
+the new mapped inputs remains part of implementation. Human L1 workings remain human work.
 
-Ordinary runtime stays installed and unchanged. Preserve B laws and historical /2 restrictions.
-No executable attestation, startup hardening, source tracing, host selectors, root deployment,
-second engine, general hardware framework or campaign infrastructure is introduced.
-Human L1 worksheets remain untouched. U0024 is still in force: native remote CI/nightly,
-performance qualification and final closure remain pending; do not poll GitHub CI.
+Once this interface is approved, proceed with the single substantive implementation and
+integrated independent verification described in IMPLEMENTATION, rather than a sequence of
+small A/B handoffs. The patch specifies semantics; generated executable carriers/schemas
+are still implementation work under normal human protection. No new approval framework.
+
+Ordinary installed execution/basic provenance, B laws, historical /2 restrictions and U0024
+remain intact. No device access/spend, measurements, held-out tuning, dependency installation,
+protected installation, CI polling, performance qualification or G3a/U4 closure is claimed.
