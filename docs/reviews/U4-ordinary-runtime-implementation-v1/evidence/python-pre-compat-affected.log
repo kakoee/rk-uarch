@@ -1,0 +1,197 @@
+........................................................................ [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 19%]
+........................................................................ [ 24%]
+..........................ss............................................ [ 29%]
+.....................s.................................................. [ 34%]
+........................................................................ [ 39%]
+........................................................................ [ 44%]
+........................................................................ [ 48%]
+........................................................................ [ 53%]
+F....................................................................... [ 58%]
+........................................................................ [ 63%]
+.............................................F.......................... [ 68%]
+........................................................................ [ 73%]
+........................................................................ [ 78%]
+........................................................................ [ 83%]
+........................................................................ [ 88%]
+........................................................................ [ 92%]
+............................................................F........... [ 97%]
+................................                                         [100%]
+=================================== FAILURES ===================================
+________________ test_current_snapshot_generator_compatibility _________________
+
+snapshot = PosixPath('/tmp/rk-uarch-simplify-preview/contract/vendor/rk-sim@1e5706e0ebfcc67c1a7333079a35b75f693e9963')
+
+    def test_current_snapshot_generator_compatibility(snapshot: Path) -> None:
+        from scripts.vendor_rk import check_generator
+    
+>       check_generator(snapshot)
+
+contract/tests/test_committed_snapshot.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/vendor_rk.py:487: in check_generator
+    check_snapshot_inputs(root, check_support=True)
+scripts/vendor_rk.py:507: in check_snapshot_inputs
+    checked = load_inputs(
+scripts/u2_inputs.py:184: in load_inputs
+    u2_support.verify(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+expected = {'contract/__init__.py': '1478f478a29736b35bf58587af92deb4a25cd5437d466cd5ce4d19630228feba', 'contract/fixtures/model_...ract/fixtures/model_shapes/mixtral-8x7b.json': 'fcb15c9c3ceda4a0f686ccbb7cf00553681c82fe9ca095f9de2429c62cf1a6a8', ...}
+policy = {'format': 'uarch-input-support/2', 'selection': 'generator-imports-and-data/1'}
+root = PosixPath('/tmp/rk-uarch-simplify-preview')
+
+    def verify(expected: dict[str, str], *, policy: object = POLICY, root: Path = ROOT) -> None:
+        if policy != POLICY:
+            raise ValueError("unrecognized input support policy")
+        actual = inventory(root=root)
+        if set(actual) != set(expected):
+            raise ValueError("input support inventory changed")
+        for name, digest in expected.items():
+            if actual[name] != digest:
+>               raise ValueError("input support bytes changed: " + name)
+E               ValueError: input support bytes changed: pyproject.toml
+
+scripts/u2_support.py:156: ValueError
+_______ test_current_canonical_is_exact_adopted_1008_four_real_refusals ________
+
+    def test_current_canonical_is_exact_adopted_1008_four_real_refusals() -> None:
+        root = ui.ADOPTED
+        assert vr.digest((root / "MANIFEST.json").read_bytes()) == CURRENT_MANIFEST
+        assert root == ROOT / "contract/vendor" / f"rk-sim@{vr.PIN}"
+        assert not (root / "SYNTHETIC-REFERENCE").exists()
+>       audit = u2_refresh.audit_candidate(root)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+contract/tests/test_u2_historical_snapshot.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/u2_refresh.py:98: in audit_candidate
+    vr.check_snapshot_inputs(root, check_support=True)
+scripts/vendor_rk.py:507: in check_snapshot_inputs
+    checked = load_inputs(
+scripts/u2_inputs.py:184: in load_inputs
+    u2_support.verify(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+expected = {'contract/__init__.py': '1478f478a29736b35bf58587af92deb4a25cd5437d466cd5ce4d19630228feba', 'contract/fixtures/model_...ract/fixtures/model_shapes/mixtral-8x7b.json': 'fcb15c9c3ceda4a0f686ccbb7cf00553681c82fe9ca095f9de2429c62cf1a6a8', ...}
+policy = {'format': 'uarch-input-support/2', 'selection': 'generator-imports-and-data/1'}
+root = PosixPath('/tmp/rk-uarch-simplify-preview')
+
+    def verify(expected: dict[str, str], *, policy: object = POLICY, root: Path = ROOT) -> None:
+        if policy != POLICY:
+            raise ValueError("unrecognized input support policy")
+        actual = inventory(root=root)
+        if set(actual) != set(expected):
+            raise ValueError("input support inventory changed")
+        for name, digest in expected.items():
+            if actual[name] != digest:
+>               raise ValueError("input support bytes changed: " + name)
+E               ValueError: input support bytes changed: pyproject.toml
+
+scripts/u2_support.py:156: ValueError
+__________________________ test_production_isolation ___________________________
+
+    def test_production_isolation() -> None:
+        from . import vendor_support
+    
+>       vendor_support.check_production_isolation(v.ROOT)
+
+contract/tests/test_u_p2_review.py:442: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/tmp/rk-uarch-simplify-preview')
+
+    def check_production_isolation(root: Path) -> None:
+        """Conservative source guard, not a proof against arbitrary obfuscated execution.
+    
+        Only the fixed schema discovery and byte-pinned local JSON import are allowed.
+        Import-linter separately checks the static import graph.
+        """
+        import ast
+        import hashlib
+    
+        for directory in (root / "src", root / "contract/uarch_contract"):
+            for path in sorted(directory.rglob("*.py")):
+                tree = ast.parse(path.read_text())
+                violations = []
+                schema_generator = path == root / "contract/uarch_contract/generate.py"
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.Import, ast.ImportFrom)):
+                        names = (
+                            [a.name for a in node.names]
+                            if isinstance(node, ast.Import)
+                            else [node.module or ""]
+                        )
+                        forbidden = {"rk", "scripts"} | (set() if schema_generator else {"importlib"})
+                        fixed_proof_resources = (
+                            path == root / "src/rkuarch/provenance/proof_raw.py"
+                            and hashlib.sha256(path.read_bytes()).hexdigest()
+                            == "9f47439f058417e24fcf2891f996d7b9428a69c4c8825c5e3188936c6d659c15"
+                            and isinstance(node, ast.ImportFrom)
+                            and node.level == 0
+                            and node.module == "importlib.resources"
+                            and [(alias.name, alias.asname) for alias in node.names]
+                            == [("files", None)]
+                        )
+                        if (
+                            any(name.split(".")[0] in forbidden for name in names)
+                            and not fixed_proof_resources
+                        ):
+                            violations.append(node.lineno)
+                    if isinstance(node, ast.Call):
+                        name = (
+                            node.func.id
+                            if isinstance(node.func, ast.Name)
+                            else node.func.attr
+                            if isinstance(node.func, ast.Attribute)
+                            else ""
+                        )
+                        local_schema_call = schema_generator and ast.dump(node) == ast.dump(
+                            ast.parse(
+                                'importlib.import_module(f"uarch_contract.{name}")', mode="eval"
+                            ).body
+                        )
+                        if (
+                            name in {"exec", "eval", "__import__", "import_module", "VendorLoader"}
+                            and not local_schema_call
+                        ):
+                            violations.append(node.lineno)
+                    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                        if any(
+                            value in node.value
+                            for value in ("contract/vendor", "rk-sim@", "scripts.vendor_rk")
+                        ):
+                            violations.append(node.lineno)
+                if violations:
+>                   raise ValueError(f"production vendor isolation: {path}:{sorted(set(violations))}")
+E                   ValueError: production vendor isolation: /tmp/rk-uarch-simplify-preview/src/rkuarch/engines/native/ordinary.py:[11]
+
+contract/tests/vendor_support.py:127: ValueError
+============================= slowest 20 durations =============================
+24.26s call     validation/component/test_ordinary_eof_acceptance.py::test_six_replay_sources_and_twelve_slot_parent_join
+16.53s call     validation/component/test_ordinary_eof_campaign.py::test_mock_twelve_slots_replay_and_parent_cleanup
+9.03s call     validation/component/test_runtime_campaign.py::test_replay_rejects_incomplete_misbound_and_corrupt_retained_evidence
+8.33s call     validation/component/test_runtime_campaign.py::test_actual_consumption_and_durable_replay_with_producer_unavailable
+8.29s call     validation/component/test_runtime_campaign.py::test_campaign_rejects_and_preserves_failed_group[group-drift-fresh process identity]
+8.19s setup    validation/component/test_runtime_selection.py::test_complete_history_and_distinct_d13
+6.48s call     validation/component/test_ordinary_eof_campaign.py::test_failed_group_preserves_attempts_and_refuses_completion[replay]
+4.87s call     validation/component/test_ordinary_eof_acceptance.py::test_replay_slot_and_process_population
+4.69s call     tests/unit/test_u4_a_component_mapper.py::test_sixteen_max_shape_ops
+3.45s setup    validation/component/test_native_inputs.py::test_all_historical_inputs_and_expectations_remain_distinct
+2.41s call     validation/component/test_lifetime_discrimination.py::test_unmasked_lifetime[B3-use-before-A3b-before production]
+2.26s call     validation/component/test_carrier_bindings.py::test_real_synthetic_control
+2.20s call     validation/component/test_lifetime_discrimination.py::test_unmasked_lifetime[B3-use-unordered-A3c-before production]
+2.19s call     validation/component/test_corpus.py::test_schema_resource_controls
+2.15s call     validation/component/test_lifetime_discrimination.py::test_unmasked_lifetime[B3-false-writer-disjoint-accumulator producer]
+2.06s call     validation/component/test_lifetime_discrimination.py::test_unmasked_lifetime[B3-terminal-partial-A1-final consumers]
+1.51s call     validation/component/test_ordinary_eof_acceptance.py::test_structural_and_literal_refusals_without_hash_mask
+1.50s call     tests/unit/test_u4_a_component_mapper.py::test_producer_disabled_relocation_three_processes
+1.42s call     validation/component/test_runtime_campaign.py::test_campaign_rejects_and_preserves_failed_group[missing-receipt-FileNotFoundError]
+1.36s call     validation/component/test_join_selection.py::test_exact_future_selection_and_historical_identity
+=========================== short test summary info ============================
+SKIPPED [1] validation/component/test_human_inputs.py:12: H-L1-DMA-01: actual human working absent; applicable L1 acceptance blocked
+SKIPPED [1] validation/component/test_human_inputs.py:12: H-L1-GEMM-01: actual human working absent; applicable L1 acceptance blocked
+SKIPPED [1] validation/component/test_native_selection.py:24: B-native: actual released component engine/build/authority/results absent
+3 failed, 1466 passed, 3 skipped in 214.95s (0:03:34)

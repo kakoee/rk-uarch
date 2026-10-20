@@ -1,0 +1,24 @@
+import os, subprocess, json
+from pathlib import Path
+root=Path('/tmp/rk-uarch-simplify-preview'); out=Path('/tmp/rk-uarch-simplify-checks');out.mkdir(exist_ok=True)
+python='/tmp/rk-uarch-simplify/.venv/bin/python'
+env=dict(os.environ,PYTHONPATH=str(root/'src')+':'+str(root/'contract'))
+commands={
+'ruff':[python,'-m','ruff','check','.'],
+'mypy':[python,'-m','mypy','src','contract/uarch_contract','scripts'],
+'mypy-contract':[python,'-m','mypy','--no-explicit-package-bases','contract/tests'],
+'imports':['/tmp/rk-uarch-simplify/.venv/bin/lint-imports'],
+'schema':[python,'-m','uarch_contract.generate','--check'],
+'schema-mapped':[python,'-m','uarch_contract.generate_mapped','--check'],
+'schema-ordinary':[python,'-m','uarch_contract.generate_ordinary','--check'],
+'native-schema':[python,'native/tools/export_ordinary.py','--check'],
+'prompt-sync':[python,'-m','pytest','-q','tests/unit/test_prompt_sync.py'],
+}
+records=[]
+for name,cmd in commands.items():
+ with (out/(name+'.log')).open('w') as f:
+  r=subprocess.run(cmd,cwd=root,env=env,stdout=f,stderr=subprocess.STDOUT,timeout=180)
+ print(name,r.returncode,(out/(name+'.log')).read_text()[-1500:])
+ records.append({'name':name,'command':cmd,'status':r.returncode})
+(out/'static.json').write_text(json.dumps(records,indent=2)+'\n')
+raise SystemExit(any(x['status'] for x in records))

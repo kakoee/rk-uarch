@@ -1,0 +1,93 @@
+[
+  {
+    "name": "ruff",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/python",
+      "-m",
+      "ruff",
+      "check",
+      "."
+    ],
+    "status": 0
+  },
+  {
+    "name": "mypy",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/python",
+      "-m",
+      "mypy",
+      "src",
+      "contract/uarch_contract",
+      "scripts"
+    ],
+    "status": 0
+  },
+  {
+    "name": "mypy-contract",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/python",
+      "-m",
+      "mypy",
+      "--no-explicit-package-bases",
+      "contract/tests"
+    ],
+    "status": 0
+  },
+  {
+    "name": "imports",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/lint-imports"
+    ],
+    "status": 0
+  },
+  {
+    "name": "schema",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/python",
+      "-m",
+      "uarch_contract.generate",
+      "--check"
+    ],
+    "status": 0
+  },
+  {
+    "name": "schema-mapped",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/python",
+      "-m",
+      "uarch_contract.generate_mapped",
+      "--check"
+    ],
+    "status": 0
+  },
+  {
+    "name": "schema-ordinary",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/python",
+      "-m",
+      "uarch_contract.generate_ordinary",
+      "--check"
+    ],
+    "status": 0
+  },
+  {
+    "name": "native-schema",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/python",
+      "native/tools/export_ordinary.py",
+      "--check"
+    ],
+    "status": 0
+  },
+  {
+    "name": "prompt-sync",
+    "command": [
+      "/tmp/rk-uarch-simplify/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/unit/test_prompt_sync.py"
+    ],
+    "status": 0
+  }
+]

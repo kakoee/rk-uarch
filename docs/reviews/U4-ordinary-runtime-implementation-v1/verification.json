@@ -1,0 +1,149 @@
+{
+  "base_commit": "669bdb0f7032e8955dbd0daaea059b733d4aa250",
+  "reconstructed_source_tree": "b0f1755e52bfe1a3a7ee6f3b37da77a4f8ce3ac0",
+  "transition_patch_sha256": "80224d607fea488ee36ded7198a861941f05a41b5e7bf3280369514ee3e48527",
+  "installation": "Complete source/protected transition unapplied; human installation and independent review pending",
+  "executed": [
+    {
+      "scope": "final affected integrated regression",
+      "exit_code": 0,
+      "passed": 1470,
+      "skipped": 3
+    },
+    {
+      "scope": "U2 policy and analytic-report environment recheck",
+      "exit_code": 0,
+      "passed": 153
+    },
+    {
+      "scope": "native semantic regression",
+      "exit_code": 0,
+      "passed": 90,
+      "ignored": 5
+    },
+    {
+      "scope": "initial broad regression, retained as nonzero",
+      "exit_code": 1,
+      "passed": 2721,
+      "failed": 25,
+      "errors": 21,
+      "skipped": 36,
+      "deselected": 286
+    },
+    {
+      "scope": "installed execution and binary-free replay",
+      "exit_code": 0,
+      "supported_production_ps": 656000,
+      "test_fixture_ps": 121000,
+      "debug_release_bytes_equal": true,
+      "negative_controls": 22
+    }
+  ],
+  "static": [
+    {
+      "name": "ruff",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "."
+      ],
+      "status": 0
+    },
+    {
+      "name": "mypy",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/python",
+        "-m",
+        "mypy",
+        "src",
+        "contract/uarch_contract",
+        "scripts"
+      ],
+      "status": 0
+    },
+    {
+      "name": "mypy-contract",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/python",
+        "-m",
+        "mypy",
+        "--no-explicit-package-bases",
+        "contract/tests"
+      ],
+      "status": 0
+    },
+    {
+      "name": "imports",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/lint-imports"
+      ],
+      "status": 0
+    },
+    {
+      "name": "schema",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate",
+        "--check"
+      ],
+      "status": 0
+    },
+    {
+      "name": "schema-mapped",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate_mapped",
+        "--check"
+      ],
+      "status": 0
+    },
+    {
+      "name": "schema-ordinary",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/python",
+        "-m",
+        "uarch_contract.generate_ordinary",
+        "--check"
+      ],
+      "status": 0
+    },
+    {
+      "name": "native-schema",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/python",
+        "native/tools/export_ordinary.py",
+        "--check"
+      ],
+      "status": 0
+    },
+    {
+      "name": "prompt-sync",
+      "command": [
+        "/tmp/rk-uarch-simplify/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/unit/test_prompt_sync.py"
+      ],
+      "status": 0
+    }
+  ],
+  "not_claimed": [
+    "independent review",
+    "U4/G3a closure",
+    "hosted CI",
+    "A-F3 pass",
+    "resolution of historical B-PROV-STAGING-01",
+    "human L1 completion",
+    "shipping approval"
+  ],
+  "remaining": [
+    "H-L1-DMA-01 and H-L1-GEMM-01 working absent",
+    "historical observations /2 restriction",
+    "focused independent review and human protected installation"
+  ]
+}
