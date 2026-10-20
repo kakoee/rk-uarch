@@ -1,5 +1,7 @@
 # TPU v5e reference readiness — prospective, 2026-10-16
 
+> **U4b reconciliation (2026-10-20):** the current consolidated proposal is [u4b/README.md](u4b/README.md). It refreshes source conflicts, proposes the minimum reference model and records the consequential timing blocker. This older dossier remains evidence history; it is not reference admission.
+
 No reference admission, prediction, measurement, device reservation, spend or availability
 is asserted. This dossier prepares U-P11b R/U-P9/U-P10. The active
 `hw/references/tpu-v5e.yaml` does not exist at the inspected main; historical 1 Hz/1×1

@@ -1,5 +1,7 @@
 # Proposed TPU v5e benchmark agreement, revision 1
 
+> **Historical revision 1:** preserve this 70-row proposal and `suite.json`. The current finite proposal and all row dispositions are in [u4b/README.md](u4b/README.md): 52 units, still unsigned. Its handoff also corrects ordering ownership: U-P9 owns `check_ordering.py`; U-P10 consumes it.
+
 **Not signed or admitted.** Lane B agent proposal, 2026-10-16. Lane A signature: pending.
 Human target/access decision: pending. No prediction or result files exist in this package.
 The exact list is [suite.json](suite.json); each row binds work, measurement unit, timing,

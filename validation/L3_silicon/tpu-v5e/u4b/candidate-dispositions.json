@@ -1,0 +1,556 @@
+[
+  {
+    "candidate_id": "matrix-bf16-01",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-bf16-01"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-bf16-02",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-bf16-02"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-bf16-03",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-bf16-03"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-bf16-04",
+    "disposition": "replace_shape",
+    "selected_units": [
+      "matrix-bf16-04"
+    ],
+    "reason": "Replace redundant full/low 256-cube with 1024-cube to cover full/middle intensity, particularly the missing BF16 middle bin."
+  },
+  {
+    "candidate_id": "matrix-bf16-05",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-bf16-05"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-bf16-06",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-bf16-06"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-int8-01",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-int8-01"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-int8-02",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-int8-02"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-int8-03",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-int8-03"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-int8-04",
+    "disposition": "replace_shape",
+    "selected_units": [
+      "matrix-int8-04"
+    ],
+    "reason": "Replace redundant full/low 256-cube with 1024-cube to cover full/middle intensity, particularly the missing BF16 middle bin."
+  },
+  {
+    "candidate_id": "matrix-int8-05",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-int8-05"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "matrix-int8-06",
+    "disposition": "retain",
+    "selected_units": [
+      "matrix-int8-06"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-read-1048576",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-read-1048576"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-read-16777216",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-read-16777216"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-read-268435456",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-read-268435456"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-write-1048576",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-write-1048576"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-write-16777216",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-write-16777216"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-write-268435456",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-write-268435456"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-copy-1048576",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-copy-1048576"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-copy-16777216",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-copy-16777216"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "memory-copy-268435456",
+    "disposition": "retain",
+    "selected_units": [
+      "memory-copy-268435456"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-q_projection-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-q_projection-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-k_projection-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-k_projection-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-v_projection-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-v_projection-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-qk_score-decode",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-attention_fused-decode"
+    ],
+    "reason": "QK, softmax and AV remain explicit required work in the selected attention envelope; avoid duplicate silicon verdicts and fictitious score HBM traffic."
+  },
+  {
+    "candidate_id": "operator-softmax-decode",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-attention_fused-decode"
+    ],
+    "reason": "QK, softmax and AV remain explicit required work in the selected attention envelope; avoid duplicate silicon verdicts and fictitious score HBM traffic."
+  },
+  {
+    "candidate_id": "operator-av_application-decode",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-attention_fused-decode"
+    ],
+    "reason": "QK, softmax and AV remain explicit required work in the selected attention envelope; avoid duplicate silicon verdicts and fictitious score HBM traffic."
+  },
+  {
+    "candidate_id": "operator-output_projection-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-output_projection-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-normalization-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-normalization-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-residual_addition-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-residual_addition-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-ffn_up-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-ffn_up-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-ffn_gate-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-ffn_gate-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-ffn_down-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-ffn_down-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-activation-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-activation-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-kv_write-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-kv_write-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-embedding-decode",
+    "disposition": "omit_optional",
+    "selected_units": [],
+    "reason": "Optional head/tail control outside the decoder; no native head/tail extension required by this package."
+  },
+  {
+    "candidate_id": "operator-lm_head-decode",
+    "disposition": "omit_optional",
+    "selected_units": [],
+    "reason": "Optional head/tail control outside the decoder; no native head/tail extension required by this package."
+  },
+  {
+    "candidate_id": "operator-attention_fused-decode",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-attention_fused-decode"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-rope-decode",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-q_projection-decode",
+      "operator-k_projection-decode"
+    ],
+    "reason": "Partition Q and new-K rotary/cast work between their projection parents; each tensor counted once; no separate timing control required."
+  },
+  {
+    "candidate_id": "operator-cast-bf16-fp32-decode",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-q_projection-decode",
+      "operator-k_projection-decode"
+    ],
+    "reason": "Partition Q and new-K rotary/cast work between their projection parents; each tensor counted once; no separate timing control required."
+  },
+  {
+    "candidate_id": "operator-cast-fp32-bf16-decode",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-q_projection-decode",
+      "operator-k_projection-decode"
+    ],
+    "reason": "Partition Q and new-K rotary/cast work between their projection parents; each tensor counted once; no separate timing control required."
+  },
+  {
+    "candidate_id": "operator-q_projection-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-q_projection-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-k_projection-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-k_projection-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-v_projection-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-v_projection-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-qk_score-prefill",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-attention_fused-prefill"
+    ],
+    "reason": "QK, softmax and AV remain explicit required work in the selected attention envelope; avoid duplicate silicon verdicts and fictitious score HBM traffic."
+  },
+  {
+    "candidate_id": "operator-softmax-prefill",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-attention_fused-prefill"
+    ],
+    "reason": "QK, softmax and AV remain explicit required work in the selected attention envelope; avoid duplicate silicon verdicts and fictitious score HBM traffic."
+  },
+  {
+    "candidate_id": "operator-av_application-prefill",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-attention_fused-prefill"
+    ],
+    "reason": "QK, softmax and AV remain explicit required work in the selected attention envelope; avoid duplicate silicon verdicts and fictitious score HBM traffic."
+  },
+  {
+    "candidate_id": "operator-output_projection-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-output_projection-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-normalization-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-normalization-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-residual_addition-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-residual_addition-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-ffn_up-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-ffn_up-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-ffn_gate-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-ffn_gate-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-ffn_down-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-ffn_down-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-activation-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-activation-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-kv_write-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-kv_write-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-embedding-prefill",
+    "disposition": "omit_optional",
+    "selected_units": [],
+    "reason": "Optional head/tail control outside the decoder; no native head/tail extension required by this package."
+  },
+  {
+    "candidate_id": "operator-lm_head-prefill",
+    "disposition": "omit_optional",
+    "selected_units": [],
+    "reason": "Optional head/tail control outside the decoder; no native head/tail extension required by this package."
+  },
+  {
+    "candidate_id": "operator-attention_fused-prefill",
+    "disposition": "retain",
+    "selected_units": [
+      "operator-attention_fused-prefill"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "operator-rope-prefill",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-q_projection-prefill",
+      "operator-k_projection-prefill"
+    ],
+    "reason": "Partition Q and new-K rotary/cast work between their projection parents; each tensor counted once; no separate timing control required."
+  },
+  {
+    "candidate_id": "operator-cast-bf16-fp32-prefill",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-q_projection-prefill",
+      "operator-k_projection-prefill"
+    ],
+    "reason": "Partition Q and new-K rotary/cast work between their projection parents; each tensor counted once; no separate timing control required."
+  },
+  {
+    "candidate_id": "operator-cast-fp32-bf16-prefill",
+    "disposition": "merge",
+    "selected_units": [
+      "operator-q_projection-prefill",
+      "operator-k_projection-prefill"
+    ],
+    "reason": "Partition Q and new-K rotary/cast work between their projection parents; each tensor counted once; no separate timing control required."
+  },
+  {
+    "candidate_id": "layer-b1-s1",
+    "disposition": "retain",
+    "selected_units": [
+      "layer-b1-s1"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "layer-b8-s1",
+    "disposition": "retain",
+    "selected_units": [
+      "layer-b8-s1"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "layer-b32-s1",
+    "disposition": "retain",
+    "selected_units": [
+      "layer-b32-s1"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "layer-b1-s128",
+    "disposition": "retain",
+    "selected_units": [
+      "layer-b1-s128"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "gather-p16-c2048",
+    "disposition": "retain",
+    "selected_units": [
+      "gather-p16-c2048"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "gather-p16-c2049",
+    "disposition": "correctness_only",
+    "selected_units": [],
+    "reason": "Retain partial-tail arithmetic and refusal tests at both page sizes; full/tail timed cross-product is not required."
+  },
+  {
+    "candidate_id": "gather-p32-c2048",
+    "disposition": "retain",
+    "selected_units": [
+      "gather-p32-c2048"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  },
+  {
+    "candidate_id": "gather-p32-c2049",
+    "disposition": "correctness_only",
+    "selected_units": [],
+    "reason": "Retain partial-tail arithmetic and refusal tests at both page sizes; full/tail timed cross-product is not required."
+  },
+  {
+    "candidate_id": "launch-minimal",
+    "disposition": "retain",
+    "selected_units": [
+      "launch-minimal"
+    ],
+    "reason": "Required class and distinct selected work/shape."
+  }
+]

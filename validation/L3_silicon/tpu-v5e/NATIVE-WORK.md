@@ -1,5 +1,7 @@
 # Exact R work needed for the proposed suite
 
+> **Current implementation handoff:** [u4b/IMPLEMENTATION.md](u4b/IMPLEMENTATION.md) reconciles this checklist with installed ordinary /4 code and the finite revision-2 suite. The historical checklist below is preserved; no native support is asserted.
+
 This is a representation/implementation checklist, not installed contract changes. Every
 row in suite.json has native_status=not_run. Current B allows only npu-l4/ratio1/TP1/BF16
 q_projection with K,N≤256 and M≤1024; TPU hardware and all listed 8B dimensions remain
