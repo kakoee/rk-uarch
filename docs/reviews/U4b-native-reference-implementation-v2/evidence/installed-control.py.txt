@@ -1,0 +1,56 @@
+"""Small installed B1/B2 controls; no source imports, suite runs or parameter changes."""
+import hashlib
+import importlib.abc
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+root=Path(__file__).resolve().parent
+python='/tmp/u4b-correction-installed/bin/python'
+engine=Path('/tmp/u4b-correction-installed/bin/uarch-engine')
+expected_site=Path('/tmp/u4b-correction-installed/lib/python3.12/site-packages')
+import rkuarch.workload.reference as workload
+import uarch_contract.reference as contract
+assert Path(workload.__file__).is_relative_to(expected_site)
+assert Path(contract.__file__).is_relative_to(expected_site)
+assert not any('rk-uarch-u4b-correction-v2' in s for s in sys.path)
+hardware=workload.nominal_hardware().model_dump(mode='json')
+assert hardware==json.loads(Path(workload.__file__).with_name('tpu_v5e.json').read_text())
+assert Path.cwd()==root
+record=dict(workload_origin=workload.__file__,contract_origin=contract.__file__,packaged_nominal_loaded=True,cwd=str(Path.cwd()))
+env=dict(os.environ,PATH='/usr/bin:/bin');env.pop('PYTHONPATH',None)
+assert shutil.which('uarch-engine',path=env['PATH']) is None
+# Immutable existing nominal job/result; execute ordinary CLI from outside a checkout.
+saved=Path('/tmp/rk-uarch-u4b-installed-use/job.json')
+expected=Path('/tmp/rk-uarch-u4b-installed-use/result.json')
+new=root/'nominal-result-outside.json'
+run=subprocess.run([python,'-m','rkuarch.engines.native.ordinary','run','--job',str(saved),'--output',str(new),'--executable',str(engine)],env=env,cwd=root,capture_output=True,text=True)
+assert run.returncode==0,run.stderr
+assert new.read_bytes()==expected.read_bytes()
+record['nominal_cli_run_equal_saved_result']=True
+# Block producers before importing the shipping replay entry point.
+guard='''import importlib.abc,sys,runpy
+class NoProducer(importlib.abc.MetaPathFinder):
+ def find_spec(self,fullname,path=None,target=None):
+  if fullname.startswith(('rkuarch.mapping','rkuarch.workload.reference','rkuarch.workload.producer','rkuarch.workload.prepared','rkuarch.workload.capacity')):
+   raise ImportError('producer disabled: '+fullname)
+sys.meta_path.insert(0,NoProducer())
+runpy.run_module('rkuarch.engines.native.ordinary',run_name='__main__')
+'''
+def replay(job,result,*,test=False):
+ args=[python,'-c',guard,'replay','--job',str(job),'--output',str(result)]
+ if test:args+=['--test-only']
+ return subprocess.run(args,env=env,cwd=root,capture_output=True,text=True)
+nominal=replay(saved,new);assert nominal.returncode==0,nominal.stderr
+fixture=Path('/tmp/u4b-correction-fixture')
+good=replay(fixture/'job.json',fixture/'result.json',test=True)
+bad=replay(fixture/'job.json',fixture/'bad-result.json',test=True)
+restored=replay(fixture/'job.json',fixture/'result.json',test=True)
+assert good.returncode==restored.returncode==0,(good.stderr,restored.stderr)
+assert bad.returncode==2 and 'first activity dependency readiness' in bad.stderr,bad.stderr
+record.update(nominal_cli_replay=nominal.returncode,legal_equality_replay=good.returncode,forged_cli_replay=bad.returncode,forgery_refusal=bad.stderr.strip(),positive_after_fault=restored.returncode,producer_imports_blocked=True,replay_path_has_no_engine=True)
+record['saved_files_sha256']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in (saved,expected,fixture/'job.json',fixture/'result.json',fixture/'bad-result.json')}
+print(json.dumps(record,indent=2))

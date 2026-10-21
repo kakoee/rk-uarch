@@ -1,0 +1,41 @@
+from pathlib import Path
+import hashlib,json,os,subprocess
+root=Path('/tmp/rk-uarch-u4b-correction-v2')
+p=root/'src/rkuarch/verification/component/reference.py'
+original=p.read_bytes()
+guard=b'''        require(
+            obs["jobs"][task_index][1] >= job_ready
+            and (first_ready >= job_ready if hbm_read else first_ready == job_ready),
+            "IncompleteObservations",
+            "first activity dependency readiness",
+        )
+'''
+assert original.count(guard)==1
+python='/home/jjaff/AI-infra-simulation/rk-uarch/.venv/bin/python'
+native='/tmp/rk-uarch-u4b-published-build/target/x86_64-unknown-linux-gnu/debug/uarch-engine'
+review=Path('/home/jjaff/AI-infra-simulation/rk-uarch/docs/reviews/U4b-native-reference-independent-review-v1')
+fixture=Path('/tmp/u4b-correction-fixture');fixture.mkdir(exist_ok=False)
+env=dict(os.environ,PYTHONPATH='contract:src',REFERENCE_NATIVE=native)
+def run(args,log):
+ done=subprocess.run(args,cwd=root,env=env,capture_output=True,text=True)
+ Path('/tmp/u4b-correction-'+log+'.log').write_text(done.stdout+done.stderr)
+ return done.returncode
+assert run([python,str(review/'probes/synthetic.py'),native,str(fixture)],'synthetic')==0
+record={'corrected_checker_sha256':hashlib.sha256(original).hexdigest(),'removal':'only the new require(...) dependency-readiness guard; tests, fixtures, native and other checks unchanged'}
+try:
+ p.write_bytes(original.replace(guard,b''))
+ record['ablated_checker_sha256']=hashlib.sha256(p.read_bytes()).hexdigest()
+ record['reviewer_forgery_accepted_exit']=run([python,str(review/'probes/dependency_violation.py'),str(fixture)],'ablated-probe')
+ record['regression_exit']=run([python,'-m','pytest','-q','tests/reference/test_process.py','-k','dependency_readiness'],'ablated-regression')
+ assert record['reviewer_forgery_accepted_exit']==0
+ assert record['regression_exit']==1
+ assert Path('/tmp/u4b-correction-ablated-regression.log').read_text().count('Failed: DID NOT RAISE ValueError')==2
+finally:
+ p.write_bytes(original)
+ record['restored_checker_sha256']=hashlib.sha256(p.read_bytes()).hexdigest()
+ assert p.read_bytes()==original
+record['restored_regression_exit']=run([python,'-m','pytest','-q','tests/reference/test_process.py','-k','dependency_readiness'],'restored-regression')
+record['restored_probe_exit']=run([python,str(review/'probes/dependency_violation.py'),str(fixture)],'restored-probe')
+assert record['restored_regression_exit']==0 and record['restored_probe_exit']==1
+Path('/tmp/u4b-correction-ablation.json').write_text(json.dumps(record,indent=2)+'\n')
+print(json.dumps(record,indent=2))

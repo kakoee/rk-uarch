@@ -1,0 +1,82 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_dependency_readiness_rejects_impossible_schedule[checker] ________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-731/test_dependency_readiness_reje0')
+boundary = 'checker'
+
+    @pytest.mark.parametrize("boundary", ["checker", "replay"])
+    def test_dependency_readiness_rejects_impossible_schedule(tmp_path, boundary):
+        job = synthetic_scalar_job()
+        saved = tmp_path / "job.json"
+        saved.write_text(canonical_json(job))
+        good = run(saved, executable=BIN, test_only=True).model_dump(mode="json")
+        raw_job = job.model_dump(mode="json")
+        assert good["duration_ps"] == 42
+        assert good["observations"]["jobs"][2][2] == 26  # W input arrival
+        assert good["observations"]["jobs"][3] == [26, 26, 29]  # equality is legal
+        # HBM's first read issues exactly at readiness, the second legally waits for spacing.
+        assert good["observations"]["jobs"][1][:2] == [11, 11]
+        assert good["observations"]["jobs"][2][:2] == [11, 12]
+        assert good["observations"]["activities"][1]["ready_ps"] == 11
+        assert good["observations"]["activities"][2]["ready_ps"] == 12
+        bad = dependency_violation(raw_job, good)
+        assert bad["observations"]["jobs"][3] == [26, 25, 28]
+        assert bad["duration_ps"] == 41
+    
+        def check(result):
+            if boundary == "checker":
+                check_reference(raw_job, result)
+            else:
+                output = tmp_path / "result.json"
+                output.write_text(canonical_json(result))
+                replay(saved, output, test_only=True)
+    
+        check(good)
+>       with pytest.raises(ValueError, match="first activity dependency readiness"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/reference/test_process.py:602: Failed
+________ test_dependency_readiness_rejects_impossible_schedule[replay] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-jjaff/pytest-731/test_dependency_readiness_reje1')
+boundary = 'replay'
+
+    @pytest.mark.parametrize("boundary", ["checker", "replay"])
+    def test_dependency_readiness_rejects_impossible_schedule(tmp_path, boundary):
+        job = synthetic_scalar_job()
+        saved = tmp_path / "job.json"
+        saved.write_text(canonical_json(job))
+        good = run(saved, executable=BIN, test_only=True).model_dump(mode="json")
+        raw_job = job.model_dump(mode="json")
+        assert good["duration_ps"] == 42
+        assert good["observations"]["jobs"][2][2] == 26  # W input arrival
+        assert good["observations"]["jobs"][3] == [26, 26, 29]  # equality is legal
+        # HBM's first read issues exactly at readiness, the second legally waits for spacing.
+        assert good["observations"]["jobs"][1][:2] == [11, 11]
+        assert good["observations"]["jobs"][2][:2] == [11, 12]
+        assert good["observations"]["activities"][1]["ready_ps"] == 11
+        assert good["observations"]["activities"][2]["ready_ps"] == 12
+        bad = dependency_violation(raw_job, good)
+        assert bad["observations"]["jobs"][3] == [26, 25, 28]
+        assert bad["duration_ps"] == 41
+    
+        def check(result):
+            if boundary == "checker":
+                check_reference(raw_job, result)
+            else:
+                output = tmp_path / "result.json"
+                output.write_text(canonical_json(result))
+                replay(saved, output, test_only=True)
+    
+        check(good)
+>       with pytest.raises(ValueError, match="first activity dependency readiness"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/reference/test_process.py:602: Failed
+=========================== short test summary info ============================
+FAILED tests/reference/test_process.py::test_dependency_readiness_rejects_impossible_schedule[checker]
+FAILED tests/reference/test_process.py::test_dependency_readiness_rejects_impossible_schedule[replay]
+2 failed, 29 deselected in 0.44s
