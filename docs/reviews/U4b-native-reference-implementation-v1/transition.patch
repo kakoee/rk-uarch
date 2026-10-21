@@ -15410,10 +15410,10 @@ index 0000000..a1afdf2
 +}
 diff --git a/tests/reference/test_process.py b/tests/reference/test_process.py
 new file mode 100644
-index 0000000..b4a7812
+index 0000000..b91be43
 --- /dev/null
 +++ b/tests/reference/test_process.py
-@@ -0,0 +1,489 @@
+@@ -0,0 +1,499 @@
 +"""Focused ordinary-process R checks with literal arithmetic and fault controls."""
 +
 +import json
@@ -15679,6 +15679,12 @@ index 0000000..b4a7812
 +                edge = dict(before=before, after=after)
 +                if edge not in g["dependencies"]:
 +                    g["dependencies"].append(edge)
++        for buffer in g["buffers"]:
++            if buffer["producer_id"] == victim["id"]:
++                buffer["producer_id"] = None
++            buffer["final_consumer_ids"] = [
++                x for x in buffer["final_consumer_ids"] if x != victim["id"]
++            ]
 +    elif fault == "producer_edge":
 +        g["dependencies"] = [e for e in g["dependencies"] if e["after"] != dots[0]["id"]]
 +    elif fault == "window":
@@ -15686,7 +15692,9 @@ index 0000000..b4a7812
 +    else:
 +        b["hardware_spec"]["kernel_startup_ps"].update(provenance="spec_derived", source=None)
 +    reseal(data)
-+    with pytest.raises(ValueError):
++    with pytest.raises(
++        ValueError, match="mandatory accumulator traffic" if fault == "missing_partial" else None
++    ):
 +        ReferenceJob.model_validate(data)
 +    p = subprocess.run(
 +        [str(BIN), "--protocol", "uarch-engine/5"],
@@ -15696,6 +15704,8 @@ index 0000000..b4a7812
 +        timeout=30,
 +    )
 +    assert p.returncode == 2 and not p.stdout, (fault, p.returncode, p.stderr[:500])
++    if fault == "missing_partial":
++        assert b"mandatory accumulator traffic" in p.stderr
 +
 +
 +def coefficients():

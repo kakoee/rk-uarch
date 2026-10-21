@@ -141,7 +141,9 @@ campaign retains its original native binary; that last admission-only tightening
 change successful service, mapping or observations. Its rehashed omission fault and ordinary
 positive/spill cases pass against the final binary. Exact supplied page-index bytes are
 used by gather preparation; their unchanged values are recorded in baseline-preservation.json.
-No completed campaign case was restarted. Observational timing was added to subsequent
+The omission fixture was further tightened to preserve unrelated buffer references and
+assert the specific mandatory-traffic refusal at both boundaries; its final focused rerun
+passed (`evidence/partial-control.txt`). No completed campaign case was restarted. Observational timing was added to subsequent
 workers during the layer-b8 case at the user's request; it changes no checking law. No hardware parameter was tuned to make a check pass.
 
 ## Remaining human and external work
@@ -151,4 +153,4 @@ worksheets are not supplied or signed by this author. The source-level suite sti
 compiler/event/mapping/state correspondence and both lane signatures before final benchmark
 acceptance and any U5 freeze. U-P9 owns ordering/frozen predictions; U-P10 owns measurement.
 Remote/controlled-host obligations stay as stated in U0024/U0023. No device access, spending,
-measurement, frozen predictions, final benchmark acceptance or U4 closure occurred here.
+silicon measurement, frozen predictions, final benchmark acceptance or U4 closure occurred here.
