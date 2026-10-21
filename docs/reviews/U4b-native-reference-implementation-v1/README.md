@@ -139,6 +139,10 @@ of all result content except the changed input identities and prime count reuses
 checks for the second result; that result's own identity and new bindings are checked too.
 No nominal duration table or simulated output corpus is published as U5 predictions.
 
+The [runtime breakdown](RUNTIME.md) separates preparation, native process time, parsing/
+validation, independent checking and replay. It recommends small everyday tests and an
+eight-unit installed smoke selection; unrelated changes do not trigger the full campaign.
+
 Author verification does not constitute independent review. Human protected installation,
 independent implementation review, human L1 worksheets, the U0024 remote/controlled-host
 obligations, compiler/event/state correspondence, both benchmark lane signatures and final

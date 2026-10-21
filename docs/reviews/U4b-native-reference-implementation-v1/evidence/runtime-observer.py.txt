@@ -1,0 +1,26 @@
+"""Read-only /proc sampling of current campaign children, without restarting work."""
+import json,time,os
+from pathlib import Path
+parent=17944
+out=Path('/tmp/rk-uarch-u4b-integration/process-timings.jsonl')
+clock=os.sysconf('SC_CLK_TCK'); active={}
+def emit(x):
+    with out.open('a') as f: f.write(json.dumps(x,sort_keys=True)+'\n')
+while Path(f'/proc/{parent}').exists():
+    now=float(Path('/proc/uptime').read_text().split()[0]); seen=set()
+    try: children=Path(f'/proc/{parent}/task/{parent}/children').read_text().split()
+    except FileNotFoundError: break
+    for pid in children:
+        try:
+            stat=Path(f'/proc/{pid}/stat').read_text().split(); cmd=Path(f'/proc/{pid}/cmdline').read_bytes().split(b'\0'); cmd=[c.decode() for c in cmd if c]
+            status=Path(f'/proc/{pid}/status').read_text().splitlines(); hwm=next((int(s.split()[1]) for s in status if s.startswith('VmHWM:')),0)
+            start=float(stat[21])/clock
+            fds={n:os.readlink(f'/proc/{pid}/fd/{n}') for n in ('0','1')}
+        except (FileNotFoundError,ProcessLookupError,PermissionError): continue
+        seen.add(pid)
+        x=active.setdefault(pid,dict(pid=int(pid),command=cmd,streams=fds,start_uptime_s=start,first_observed_uptime_s=now,peak_rss_kib_lower_bound=0))
+        x.update(last_observed_uptime_s=now,wall_s_lower_bound=now-start,peak_rss_kib_lower_bound=max(x['peak_rss_kib_lower_bound'],hwm))
+    for pid in set(active)-seen:
+        x=active.pop(pid); x.update(kind='measured_proc_sample',wall_s_upper_bound=now-x['start_uptime_s'],sampling_interval_s=0.5);emit(x)
+    time.sleep(.5)
+for x in active.values(): emit(x)

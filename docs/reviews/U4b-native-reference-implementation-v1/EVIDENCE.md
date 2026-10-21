@@ -20,8 +20,17 @@ install its protected changes.
 | Third-party licence and patch checks | 3 tests passed; reverse/forward chain verified | `evidence/licences.txt`, `evidence/third-party-patches.txt` |
 | Preserved peer report-test correction | 2 affected tests passed | `evidence/peer-report.txt` |
 | Noneditable installed CLI run and replay, outside the source tree | Passed with an ordinarily copied native executable | `evidence/installed-use.json` |
-| Approved all-52 campaign | In progress; completed cases are preserved | Final receipt will be attached after the running campaign completes |
-| Exact published proposal reconstruction/recheck | Pending fresh published-source reconstruction | Final receipt follows |
+| Approved all-52 campaign | 52 passed, all six classes; no completed case restarted | `evidence/integration.jsonl`, `evidence/integration-complete.json` |
+| Exact published proposal reconstruction/recheck | Passed on exact published source proposal | `POST-PUBLISH.md` |
+
+The completed campaign covered 156 fresh release processes, 52 debug processes, 52
+additional two-prime processes, 52 installed producer-disabled replays and 52 complete
+normalized priming comparisons. Actual maxima are 422,176 tasks, 192,935,120 input bytes,
+1,541,250 activities and 467,173,575 output bytes, all within the finite reference caps.
+All retained analytic comparisons were nonshorter for this selected scope; they remain
+comparisons under the stated model, not a universal proof or silicon validation.
+See `evidence/integration-summary.json` and [runtime breakdown](RUNTIME.md). No completed
+case was restarted after the user's continuation request.
 
 The zero-test Rust binary/doc-test targets are not counted as passes. No CI status was
 polled. No dependency, golden expectation or vendor content was regenerated. Unchanged
