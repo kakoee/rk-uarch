@@ -1,0 +1,34 @@
+E501 Line too long (103 > 100)
+   --> contract/uarch_contract/reference_laws.py:756:101
+    |
+754 |         if task["kind"] == "compute":
+755 |             d = task["tile_extents"]
+756 |             required_partials[(task["op_id"], task["accumulator_buffer_id"], 4 * d["M"] * d["N"])] += 2
+    |                                                                                                     ^^^
+757 |         elif task["kind"] == "local_transfer" and task["purpose"] == "partial":
+758 |             src, dst = task["source"], task["destination"]
+    |
+
+E501 Line too long (101 > 100)
+   --> contract/uarch_contract/reference_laws.py:770:101
+    |
+768 |             )
+769 |             mapped_partials[(task["op_id"], src["buffer_id"], src["size_bytes"])] += 1
+770 |     require(mapped_partials == required_partials, "InvalidTransfer", "mandatory accumulator traffic")
+    |                                                                                                     ^
+771 |     byop: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+772 |     for task in g["jobs"]:
+    |
+
+E501 Line too long (103 > 100)
+   --> validation/reference/run_integration.py:235:101
+    |
+233 |                         wall_s=time.perf_counter() - start,
+234 |                         kind="measured_wall_seconds",
+235 |                         scope="process including admission, native execution and output serialization",
+    |                                                                                                     ^^^
+236 |                     )
+237 |                 )
+    |
+
+Found 3 errors.
