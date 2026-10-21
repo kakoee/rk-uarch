@@ -6190,10 +6190,10 @@ index 0000000..81e88c9
 +    return actual
 diff --git a/contract/uarch_contract/reference_laws.py b/contract/uarch_contract/reference_laws.py
 new file mode 100644
-index 0000000..68b34cd
+index 0000000..f7e9d88
 --- /dev/null
 +++ b/contract/uarch_contract/reference_laws.py
-@@ -0,0 +1,932 @@
+@@ -0,0 +1,936 @@
 +"""Finite R input laws. No producer imports, timing scheduler or device claims."""
 +
 +from collections import Counter, defaultdict, deque
@@ -6949,7 +6949,9 @@ index 0000000..68b34cd
 +    for task in g["jobs"]:
 +        if task["kind"] == "compute":
 +            d = task["tile_extents"]
-+            required_partials[(task["op_id"], task["accumulator_buffer_id"], 4 * d["M"] * d["N"])] += 2
++            required_partials[
++                (task["op_id"], task["accumulator_buffer_id"], 4 * d["M"] * d["N"])
++            ] += 2
 +        elif task["kind"] == "local_transfer" and task["purpose"] == "partial":
 +            src, dst = task["source"], task["destination"]
 +            sb, db = buffers[src["buffer_id"]], buffers[dst["buffer_id"]]
@@ -6963,7 +6965,9 @@ index 0000000..68b34cd
 +                "typed accumulator traffic",
 +            )
 +            mapped_partials[(task["op_id"], src["buffer_id"], src["size_bytes"])] += 1
-+    require(mapped_partials == required_partials, "InvalidTransfer", "mandatory accumulator traffic")
++    require(
++        mapped_partials == required_partials, "InvalidTransfer", "mandatory accumulator traffic"
++    )
 +    byop: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
 +    for task in g["jobs"]:
 +        byop[task["op_id"]].append(task)
@@ -16035,7 +16039,7 @@ index 0000000..a52ee68
 +        assert large_hash(value) == content_hash(value)
 diff --git a/validation/reference/run_integration.py b/validation/reference/run_integration.py
 new file mode 100644
-index 0000000..64f2a9a
+index 0000000..32775d5
 --- /dev/null
 +++ b/validation/reference/run_integration.py
 @@ -0,0 +1,285 @@
@@ -16273,7 +16277,7 @@ index 0000000..64f2a9a
 +                        executable=str(binary),
 +                        wall_s=time.perf_counter() - start,
 +                        kind="measured_wall_seconds",
-+                        scope="process including admission, native execution and output serialization",
++                        scope="process: admission, execution and output serialization",
 +                    )
 +                )
 +                + "\n"
