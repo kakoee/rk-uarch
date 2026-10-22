@@ -1,6 +1,6 @@
 # TPU v5e reference readiness — prospective, 2026-10-16
 
-> **U4b revision 2:** [the consolidated package](u4b/README.md) now provides a complete nominal model with reasoned numeric STUB estimates. The user approved its 52-unit implementation scope; the revised protected interface remains unapplied. The older published-value/target-deferral recommendation is withdrawn. This older dossier remains evidence history, not current admission policy.
+> **Current status, 2026-10-22:** the nominal reference model and 52-unit implementation are installed and independently reviewed. Use [BENCHMARK-PLAN.md](BENCHMARK-PLAN.md) for current evidence and remaining measurement-readiness work. The dossier below is dated evidence history: its absent-admission/uninstalled statements and published-value gate are superseded, not current execution restrictions. Physical observability, final benchmark agreement and accuracy are not established by installation.
 
 No reference admission, prediction, measurement, device reservation, spend or availability
 is asserted. This dossier prepares U-P11b R/U-P9/U-P10. The active

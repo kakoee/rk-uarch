@@ -1,6 +1,6 @@
 # Proposed TPU v5e benchmark agreement, revision 1
 
-> **Historical revision 1:** preserve this 70-row proposal and `suite.json`. The current finite proposal and all row dispositions are in [u4b/README.md](u4b/README.md): 52 units approved as implementation scope, with final benchmark agreement and observability still pending. Its handoff also corrects ordering ownership: U-P9 owns `check_ordering.py`; U-P10 consumes it.
+> **Historical revision 1:** the 70-row proposal and `suite.json` below remain evidence history. The installed selection is 52 units. Use [BENCHMARK-PLAN.md](BENCHMARK-PLAN.md) for current execution status, all selected IDs, proposed device comparisons and remaining agreement; [u4b/DISPOSITIONS.md](u4b/DISPOSITIONS.md) accounts for all 70 candidates. Pending claims below describe 2026-10-16, not today's installed simulator.
 
 **Not signed or admitted.** Lane B agent proposal, 2026-10-16. Lane A signature: pending.
 Human target/access decision: pending. No prediction or result files exist in this package.

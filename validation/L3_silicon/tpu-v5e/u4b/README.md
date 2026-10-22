@@ -1,52 +1,34 @@
-# U4b consolidated model and implementation proposal, revision 2
+# U4b model and 52-unit suite — installed
 
-**The 52-unit implementation scope is approved. The revised model/interface awaits review.**
-Continues published package `0d817eebc8ff2668eae277eebc8475b09122406f` (2026-10-20).
-The user's approval covers required work and six benchmark classes, not device
-observability, final benchmark acceptance, protected installation or U4 closure.
+The complete reviewed v2 implementation was human-installed at `3626273` and published
+with verification at `6d443e1` on 2026-10-22. It implements the approved nominal TPU v5e
+model and all 52 selected units in the existing native engine. B1 and B2 are resolved;
+F3/F4/F6 remain explicit limitations, and F5's staging behavior is disclosed.
 
-Recommend a complete pre-measurement interval model for TPU v5e in the existing native
-engine: four matrix resources sharing local memory, explicit vector/reduction/control
-work, aggregate HBM latency/bandwidth/window service, and declared state behavior. It uses
-**9 published fact leaves and 17 numeric STUB estimates**, with bases, sensitivity ranges
-and limitations. A numeric STUB is a supported provenance convention, not a reason to
-refuse reference execution. The earlier published/independently-established-value gate
-and target-deferral recommendation are withdrawn.
+**Current benchmark and measurement status:** [BENCHMARK-PLAN.md](../BENCHMARK-PLAN.md).
+It connects all 52 IDs to the saved campaign and proposed device envelopes, and separates
+completed simulator verification from pending measurement agreement and human L1 workings.
+Installation is not TPU accuracy validation, G3a acceptance or U4 closure.
 
-| Artifact | Concrete handoff |
+| Artifact | Role |
 | --- | --- |
-| [MODEL.md](MODEL.md), [model-parameters.json](model-parameters.json) | Recommended parameter values, exact service laws, fact/estimate/model-choice separation, material uncertainties and remaining observation gaps |
-| [REFERENCE.md](REFERENCE.md) | Primary-source reconciliation and limits on reusing component constants |
-| [SUITE.md](SUITE.md), [suite-proposed.json](suite-proposed.json) | The unchanged 52 units; actual implementation-scope approval recorded separately from final agreement |
-| [DISPOSITIONS.md](DISPOSITIONS.md), [candidate-dispositions.json](candidate-dispositions.json) | Unchanged disposition of all 70 historical candidates |
-| [shape-regimes.json](shape-regimes.json) | Count-only shape coverage; final admitted-reference characterization still pending |
-| [protected-amendments.patch](protected-amendments.patch) | Exact unapplied U0011/interface amendment, corrected to admit numeric STUBs and use the existing provenance conventions |
-| [IMPLEMENTATION.md](IMPLEMENTATION.md) | One substantial implementation milestone, finite sequence and reusable test/code inventory |
-| [ARITHMETIC.md](ARITHMETIC.md), [check_model.py](check_model.py) | Independent finite service/count/traffic/reduction/rounding examples, without engine execution or TPU duration predictions |
-| [inputs](inputs/README.md), [prepare_inputs.py](prepare_inputs.py) | Exact proposed FP32 coefficient table and page indices, validated using the existing coefficient carrier |
-| [EVIDENCE.md](EVIDENCE.md), [check_package.py](check_package.py) | Observed versus inherited checks; preserved historical suite and scope checks |
+| [MODEL.md](MODEL.md), [model-parameters.json](model-parameters.json) | Approved nominal laws and catalogue: nine fact leaves and 17 numeric STUB estimates; no silicon accuracy claim |
+| [REFERENCE.md](REFERENCE.md) | Dated source reconciliation and rationale; proposal-era statements are historical |
+| [SUITE.md](SUITE.md), [suite-proposed.json](suite-proposed.json) | Exact 52-unit definitions and planned device envelopes; original JSON status/signature fields are preserved, with current status in BENCHMARK-PLAN |
+| [DISPOSITIONS.md](DISPOSITIONS.md), [candidate-dispositions.json](candidate-dispositions.json) | All 70 historical candidates accounted for without expanding the selected suite |
+| [shape-regimes.json](shape-regimes.json) | Count-only coverage; final preparation-interface reconciliation remains explicit |
+| [inputs](inputs/README.md) | Supplied RoPE coefficient table and gather indices used by preparation |
+| [ARITHMETIC.md](ARITHMETIC.md), [check_model.py](check_model.py) | Independent arithmetic and catalogue consistency checks; not human L1 workings |
+| [EVIDENCE.md](EVIDENCE.md), [check_package.py](check_package.py) | Historical proposal checks, preserved with their original scope |
+| [IMPLEMENTATION.md](IMPLEMENTATION.md), [protected-amendments.patch](protected-amendments.patch) | Historical implementation plan and early amendment; do not apply that old patch over the installed implementation |
 
-## Decision for review, with recommendation
+The [complete v2 handoff](../../../../docs/reviews/U4b-native-reference-implementation-v2/README.md)
+and [human installation record](../../../../docs/reviews/U4b-native-reference-install-decision-v1/next-decision.md)
+are the implementation references. The original model proposal began at `0d817ee` and
+was revised at `180c6b9`; those historical records are not current installation instructions.
 
-Approve this revised model/interface as a whole for implementation, including the explicit
-STUB estimates and chosen local-memory/reload abstractions. The nominal catalogue is fully
-populated; it does not require published values for undocumented internals. Its weakest
-prior is device entry at 1 us (diagnostic alternatives 0.1..10 us), followed by absolute
-vector/control costs. These may be poor predictions; they are neither measured nor hidden.
-The stress endpoints are not physical/error bounds. Deterministic checks establish only
-that the implementation follows the chosen laws.
-
-No additional scope or target decision is needed. Keep TPU v5e and all 52 approved units.
-Actual XLA/event/materialization/retention correspondence has no demonstrated bound yet;
-these are later observation/input-reconciliation obligations, not missing nominal model
-parameters. Exact proposed coefficient bytes and page indices are now supplied; binding them into
-the new mapped inputs remains part of implementation. Human L1 workings remain human work.
-
-Once this interface is approved, proceed with the single substantive implementation and
-integrated independent verification described in IMPLEMENTATION, rather than a sequence of
-small A/B handoffs. The patch specifies semantics; generated executable carriers/schemas
-are still implementation work under normal human protection. No new approval framework.
-
-Ordinary installed execution/basic provenance, B laws, historical /2 restrictions and U0024
-remain intact. No device access/spend, measurements, held-out tuning, dependency installation,
-protected installation, CI polling, performance qualification or G3a/U4 closure is claimed.
+Ordinary installed execution and basic software/model/input provenance remain in use.
+No executable attestation, custom startup assurance or build tracing is reinstated.
+The nominal model may be inaccurate; its STUB estimates, compiler-chosen mapping and
+unobserved device behavior remain visible. Predictions, device work, U0024 qualification
+and U4 closure have not been performed by updating this page.

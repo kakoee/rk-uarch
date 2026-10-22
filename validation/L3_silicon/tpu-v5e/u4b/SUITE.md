@@ -1,7 +1,9 @@
-# Finite benchmark agreement proposal, revision 2
+# Selected 52-unit suite and proposed measurement agreement
 
-**52 units approved by the user as implementation scope; final benchmark agreement,
-native admission and device observability remain pending.**
+**Native implementation installed and reviewed; final device benchmark agreement and
+observability remain pending.** [Current status and all 52 correspondences](../BENCHMARK-PLAN.md)
+record the completed simulator campaign separately from prospective device measurements.
+The machine-readable proposal and its historical status fields remain unchanged.
 [Machine-readable units](suite-proposed.json) specify dimensions, precision, work, native
 support, individual/fused status, mapping, state and device boundary for every selected unit.
 [All 70 dispositions](DISPOSITIONS.md) explain every retention, replacement, merge or omission.
@@ -121,10 +123,11 @@ Fused-envelope traffic, compiler padding, reduction-special-function throughput 
 NoC/DRAM load regimes still need their own scope match. INT8 coverage is isolated dots only.
 
 `uarch characterize` currently calls analytic `capture()` and emits timing predictions;
-it is not a count-only entry point. Also no valid TPU HardwareSpec exists. Running it with
+it is not a count-only entry point. The reference uses TpuV5eReference rather than a TPU HardwareSpec. Running it with
 npu-l4 or invented clock/vector inputs would not establish TPU shape coverage and would
 violate this task's no-predictions boundary. Thus U-P9's final **characterize binding is
-not satisfied here**. After the model decision and admitted reference, reuse that command
-on the exact prepared selection before freeze, and reconcile its per-op scopes against
-this worksheet. If new bins appear, amend the finite selection explicitly rather than
+not satisfied here**. The reference model is now installed, with its own TpuV5eReference input rather than
+HardwareSpec. Reconcile this older command instruction with the installed reference
+preparation and analytic baseline before freeze; do not silently treat the count-only
+worksheet as a completed characterize invocation. If new bins appear, amend the finite selection explicitly rather than
 starting a full grid. No waived shape requirement or fabricated characterize receipt.

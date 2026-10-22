@@ -48,11 +48,11 @@ project closure retain their required evidence. See [the ADR and Reza/owner runb
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | Local K1 review/corrections and the separate approved M/policy installation preparation. Remote native CI and infrastructure deferred under U0024; no automatic K2 implementation release |
+| **Next** | Reconcile the installed 52-unit reference suite with the existing U5 measurement agreement, complete the two human L1 workings, and finish U4 closeout evidence. [Current benchmark plan](../validation/L3_silicon/tpu-v5e/BENCHMARK-PLAN.md). No prediction freeze or device measurement authorized by this status update |
 | **U1 done** | Published `u01-end` at `1e9e794a84c5173812c23a1cf2fc04b85e6f6831` |
 | **U2 done** | Accepted closeout and `u02-end` at `79bc1f0`; approved cleanup preserved the evidence archive and branch history |
 | **U3 done** | Human `u03-end` at `6d39a234a14855c86ca54b795501a0b0b2618d7b`, published and verified; final CI passed. [Closeout](reviews/U3-closeout.md). Historical incomplete report outcomes remain explicit |
-| **U4 started** | K1 implementation and local A/B checks published; exact M/tool choices accepted. Remote qualification remains pending; M protected installation/artifact lifecycle and G3a remain incomplete |
+| **U4 in progress** | Native component execution and the ordinary-runtime simplification are installed. The reviewed U4b nominal reference implementation and 52-unit suite were installed at `3626273`, verified/published at `6d443e1`. Human L1 and final reference/measurement agreement remain open; G3a/U4 closure and U0024 qualification are not claimed |
 | **Not started** | U5–U11 |
 | **Runner pending** | Registration and executed manual nightly remain unverified. Not a correctness-development prerequisite under U0023; controlled-host performance and G5 nightly qualification remain pending |
 
