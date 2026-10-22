@@ -422,3 +422,62 @@ pub(crate) fn sourced(v: &Value) -> Result<Value, String> {
 pub(crate) fn legacy_number(v: Value) -> Result<f64, String> {
     legacy_float(v).map_err(|e| e.to_string())
 }
+
+/// Same canonical bytes, append-only serialization for large reference payloads.
+/// The optional exclusion applies only to the root identity field.
+pub(crate) fn canonical_large(v: &Value, exclude: Option<&str>) -> Result<String, String> {
+    fn append(v: &Value, out: &mut String, exclude: Option<&str>) -> Result<(), String> {
+        match v {
+            Value::Array(items) => {
+                out.push('[');
+                for (i, item) in items.iter().enumerate() {
+                    if i > 0 {
+                        out.push(',');
+                    }
+                    append(item, out, None)?;
+                }
+                out.push(']');
+            }
+            Value::Object(items) => {
+                out.push('{');
+                let mut keys: Vec<_> = items
+                    .keys()
+                    .filter(|k| Some(k.as_str()) != exclude)
+                    .collect();
+                keys.sort();
+                for (i, key) in keys.iter().enumerate() {
+                    if i > 0 {
+                        out.push(',');
+                    }
+                    out.push_str(&serde_json::to_string(key).map_err(|e| e.to_string())?);
+                    out.push(':');
+                    append(&items[*key], out, None)?;
+                }
+                out.push('}');
+            }
+            _ => out.push_str(&canonical(v)?),
+        }
+        Ok(())
+    }
+    let mut out = String::new();
+    append(v, &mut out, exclude)?;
+    Ok(out)
+}
+
+#[cfg(test)]
+mod large_canonical_tests {
+    #[test]
+    fn same_bytes_and_root_only_exclusion() {
+        let value=super::parse(r#"{"z":-0.0,"a":[1,1.0,1e-7,1e20,"λ",null],"identity":"root","nested":{"identity":"keep"}}"#).unwrap();
+        assert_eq!(
+            super::canonical_large(&value, None).unwrap(),
+            super::canonical(&value).unwrap()
+        );
+        let mut omitted = value.clone();
+        omitted.as_object_mut().unwrap().remove("identity");
+        assert_eq!(
+            super::canonical_large(&value, Some("identity")).unwrap(),
+            super::canonical(&omitted).unwrap()
+        );
+    }
+}

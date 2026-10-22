@@ -1,0 +1,213 @@
+{
+  "$defs": {
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "barrier_latency_ps": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "bf16_mxu_mac_per_s": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "bf16_peak_ops_per_s": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "design_status": {
+      "const": "reference",
+      "title": "Design Status",
+      "type": "string"
+    },
+    "exp_cost_ratio": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "hbm_capacity_bytes": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "hbm_issue_interval_ps": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "hbm_latency_ps": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "hbm_max_outstanding": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "hbm_peak_bytes_per_s": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "identity": {
+      "const": "tpu-v5e",
+      "title": "Identity",
+      "type": "string"
+    },
+    "int8_mxu_mac_per_s": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "int8_peak_ops_per_s": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "kernel_startup_ps": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "matrix_fill_equivalent_macs": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "mxu_cols": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "mxu_count": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "mxu_rows": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "reciprocal_cost_ratio": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "reduction_cost_ratio": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "rsqrt_cost_ratio": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "scalar_op_ps": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "smem_capacity_bytes": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "tensorcore_count": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "vector_group_startup_ps": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "vector_tile_ps": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "vmem_bytes_per_s": {
+      "$ref": "#/$defs/SourcedValue"
+    },
+    "vmem_capacity_bytes": {
+      "$ref": "#/$defs/SourcedValue"
+    }
+  },
+  "required": [
+    "identity",
+    "design_status",
+    "tensorcore_count",
+    "mxu_count",
+    "mxu_rows",
+    "mxu_cols",
+    "bf16_peak_ops_per_s",
+    "int8_peak_ops_per_s",
+    "hbm_peak_bytes_per_s",
+    "vmem_capacity_bytes",
+    "smem_capacity_bytes",
+    "hbm_capacity_bytes",
+    "bf16_mxu_mac_per_s",
+    "int8_mxu_mac_per_s",
+    "matrix_fill_equivalent_macs",
+    "vmem_bytes_per_s",
+    "hbm_latency_ps",
+    "hbm_issue_interval_ps",
+    "hbm_max_outstanding",
+    "vector_tile_ps",
+    "vector_group_startup_ps",
+    "reduction_cost_ratio",
+    "exp_cost_ratio",
+    "reciprocal_cost_ratio",
+    "rsqrt_cost_ratio",
+    "scalar_op_ps",
+    "kernel_startup_ps",
+    "barrier_latency_ps"
+  ],
+  "title": "TpuV5eReference",
+  "type": "object"
+}

@@ -6,6 +6,8 @@ use crate::{
 use serde_json::{Value, json};
 pub const MAX_INPUT_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_OUTPUT_BYTES: usize = 64 * 1024 * 1024;
+pub const MAX_REFERENCE_INPUT_BYTES: usize = 256 * 1024 * 1024;
+pub const MAX_REFERENCE_OUTPUT_BYTES: usize = 512 * 1024 * 1024;
 pub const MAX_JOBS: usize = 100_000;
 pub const MAX_OWNERS: usize = 100_000;
 pub const MAX_EVENTS: usize = 1_000_000;
@@ -15,19 +17,37 @@ pub fn respond(input: &[u8]) -> Result<Vec<u8>> {
 }
 
 pub fn respond_with_test_mode(input: &[u8], test_only: bool) -> Result<Vec<u8>> {
-    if input.len() > MAX_INPUT_BYTES {
+    respond_for_protocol(input, test_only, None)
+}
+
+pub fn respond_for_protocol(
+    input: &[u8],
+    test_only: bool,
+    expected: Option<&str>,
+) -> Result<Vec<u8>> {
+    if input.len() > MAX_REFERENCE_INPUT_BYTES {
         return Err(refuse("CapacityExceeded", "", "input byte limit"));
     }
     let text = std::str::from_utf8(input).map_err(|e| refuse("InvalidJson", "", e.to_string()))?;
     // Malformed input is rejected before model execution.
     let raw = wire::parse(&wire::normalize_integer_zero(text))
         .map_err(|e| refuse("InvalidJson", "", e))?;
-    if raw["protocol"] != "uarch-engine/4" {
+    if raw["protocol"] != "uarch-engine/4" && raw["protocol"] != "uarch-engine/5" {
         return Err(refuse(
             "UnsupportedProtocol",
             "/protocol",
             "uarch-engine/4 required; historical formats use their historical executables",
         ));
+    }
+    if expected.is_some_and(|protocol| raw["protocol"] != protocol) {
+        return Err(refuse(
+            "UnsupportedProtocol",
+            "/protocol",
+            "CLI and request protocol differ",
+        ));
+    }
+    if raw["protocol"] == "uarch-engine/4" && input.len() > MAX_INPUT_BYTES {
+        return Err(refuse("CapacityExceeded", "", "component input byte limit"));
     }
     if (raw["admission"]["invocation"] == "test") != test_only {
         return Err(refuse(
@@ -36,11 +56,26 @@ pub fn respond_with_test_mode(input: &[u8], test_only: bool) -> Result<Vec<u8>> 
             "explicit test-only invocation must match job",
         ));
     }
-    let result = crate::component::execute_ordinary(text)?;
-    let bytes = wire::canonical(&result)
-        .map_err(|e| refuse("InternalError", "", e))?
-        .into_bytes();
-    if bytes.len() > MAX_OUTPUT_BYTES {
+    let reference = raw["protocol"] == "uarch-engine/5";
+    let result = if reference {
+        crate::component::execute_reference_value(raw)?
+    } else {
+        crate::component::execute_ordinary(text)?
+    };
+    let bytes = (if reference {
+        wire::canonical_large(&result, None)
+    } else {
+        wire::canonical(&result)
+    })
+    .map_err(|e| refuse("InternalError", "", e))?
+    .into_bytes();
+    if bytes.len()
+        > if reference {
+            MAX_REFERENCE_OUTPUT_BYTES
+        } else {
+            MAX_OUTPUT_BYTES
+        }
+    {
         return Err(refuse("CapacityExceeded", "", "complete output byte limit"));
     }
     Ok(bytes)

@@ -1,5 +1,8 @@
 use crate::Error;
-use std::{cmp::Reverse, collections::BinaryHeap};
+use std::{
+    cmp::Reverse,
+    collections::{BTreeSet, BinaryHeap},
+};
 
 #[repr(u16)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -91,6 +94,8 @@ pub struct Wheel {
     near: Vec<BinaryHeap<Entry>>,
     far: Vec<BinaryHeap<Entry>>,
     overflow: BinaryHeap<Entry>,
+    active_near: BTreeSet<usize>,
+    active_far: BTreeSet<usize>,
     promoted: u64,
 }
 impl Wheel {
@@ -98,8 +103,15 @@ impl Wheel {
         if max_freq_hz == 0 {
             return Err(Error::InvalidClock);
         }
+        Self::with_bucket_width_ps((1_000_000_000_000 / max_freq_hz).max(1))
+    }
+    /// Queue indexing width, not a hardware clock or service parameter.
+    pub fn with_bucket_width_ps(width_ps: u64) -> Result<Self, Error> {
+        if width_ps == 0 {
+            return Err(Error::InvalidClock);
+        }
         Ok(Self {
-            width_ps: (1_000_000_000_000 / max_freq_hz).max(1),
+            width_ps,
             now_ps: 0,
             last_key: None,
             phase_floor: 0,
@@ -108,6 +120,8 @@ impl Wheel {
             near: (0..SLOTS).map(|_| BinaryHeap::new()).collect(),
             far: (0..SLOTS).map(|_| BinaryHeap::new()).collect(),
             overflow: BinaryHeap::new(),
+            active_near: BTreeSet::new(),
+            active_far: BTreeSet::new(),
             promoted: 0,
         })
     }
@@ -116,9 +130,13 @@ impl Wheel {
         let base = self.now_ps / self.width_ps;
         // Compare block numbers, avoiding time multiplication and u64 horizon overflow.
         if tick / SLOTS == base / SLOTS {
-            self.near[(tick % SLOTS) as usize].push(entry);
+            let slot = (tick % SLOTS) as usize;
+            self.active_near.insert(slot);
+            self.near[slot].push(entry);
         } else if tick / (SLOTS * SLOTS) == base / (SLOTS * SLOTS) {
-            self.far[((tick / SLOTS) % SLOTS) as usize].push(entry);
+            let slot = ((tick / SLOTS) % SLOTS) as usize;
+            self.active_far.insert(slot);
+            self.far[slot].push(entry);
         } else {
             self.overflow.push(entry);
         }
@@ -177,9 +195,10 @@ impl Wheel {
         Ok(Event::new(self.now_ps, seq, target, kind, 2, payload))
     }
     fn minimum(&self) -> Option<Entry> {
-        self.near
+        self.active_near
             .iter()
-            .chain(self.far.iter())
+            .map(|&i| &self.near[i])
+            .chain(self.active_far.iter().map(|&i| &self.far[i]))
             .filter_map(|h| h.peek().copied())
             .chain(self.overflow.peek().copied())
             .max()
@@ -209,9 +228,13 @@ impl Wheel {
             self.promoted += 1;
             self.place(e);
         }
+        self.active_far.remove(&slot);
         let removed = self.near[(base % SLOTS) as usize]
             .pop()
             .expect("minimum promoted");
+        if self.near[(base % SLOTS) as usize].is_empty() {
+            self.active_near.remove(&((base % SLOTS) as usize));
+        }
         debug_assert_eq!(removed, entry);
         self.arena.remove(removed.0.1)
     }

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 from uarch_contract.assumptions import AssumptionSet
 from uarch_contract.hashing import canonical_json, strict_json_loads
@@ -57,3 +58,10 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def resolve_reference(bundle: Any) -> Any:
+    """Explicit versioned reference profile; historical analytic dispatch is unchanged."""
+    from .reference import resolve_reference as resolve
+
+    return resolve(bundle)

@@ -15,6 +15,7 @@ from typing import get_args
 from uarch_contract.hashing import canonical_json, strict_json_loads
 from uarch_contract.mapped import ProfileEntry, require
 from uarch_contract.ordinary import OrdinaryJob, OrdinaryResult, validate_result
+from uarch_contract.reference import ReferenceJob, ReferenceResult
 
 from rkuarch.verification.component.observations_v3 import check_v3
 from rkuarch.workload.mapped import validate_component_completeness
@@ -35,6 +36,9 @@ CODES = (
     | {"InvalidBank", "InvalidPreparedGraph", "UnexpectedClosure", "TestOnlyHardware"}
 ) - {"success"}
 DEFAULT_LIMITS = Limits()
+REFERENCE_LIMITS = Limits(
+    timeout_s=600, stdin_bytes=256 * 1024 * 1024, stdout_bytes=512 * 1024 * 1024
+)
 UNREPRESENTED = [
     "diagnostics/dram_row_hit_ratio",
     "diagnostics/energy_pj",
@@ -54,8 +58,14 @@ def _read(path: Path, cap: int) -> bytes:
     return raw
 
 
-def load_job(raw: bytes, *, test_only: bool = False) -> OrdinaryJob:
-    job = OrdinaryJob.model_validate(strict_json_loads(raw))
+def load_job(raw: bytes, *, test_only: bool = False) -> OrdinaryJob | ReferenceJob:
+    value = strict_json_loads(raw)
+    if value.get("protocol") == "uarch-engine/5":
+        from .reference import load_reference_job
+
+        del value
+        return load_reference_job(raw, test_only=test_only)
+    job = OrdinaryJob.model_validate(value)
     require(
         (job.admission.invocation == "test") == test_only,
         "AdmissionMismatch",
@@ -68,7 +78,13 @@ def load_job(raw: bytes, *, test_only: bool = False) -> OrdinaryJob:
     return job
 
 
-def consume(stdout: bytes, stderr: bytes, status: int, *, job: OrdinaryJob) -> OrdinaryResult:
+def consume(
+    stdout: bytes, stderr: bytes, status: int, *, job: OrdinaryJob | ReferenceJob
+) -> OrdinaryResult | ReferenceResult:
+    if isinstance(job, ReferenceJob):
+        from .reference import consume_reference
+
+        return consume_reference(stdout, stderr, status, job=job)
     # Revalidate mutable nested data before binding output to it.
     job = OrdinaryJob.model_validate(job.model_dump(mode="json"))
     value = _decode_envelope(stdout, stderr, status, codes=CODES)
@@ -87,14 +103,20 @@ def consume(stdout: bytes, stderr: bytes, status: int, *, job: OrdinaryJob) -> O
 
 def run(
     saved: Path, *, executable: Path, test_only: bool = False, limits: Limits = DEFAULT_LIMITS
-) -> OrdinaryResult:
-    raw = _read(saved, limits.stdin_bytes)
+) -> OrdinaryResult | ReferenceResult:
+    raw = _read(
+        saved, REFERENCE_LIMITS.stdin_bytes if limits is DEFAULT_LIMITS else limits.stdin_bytes
+    )
     job = load_job(raw, test_only=test_only)
+    if limits is DEFAULT_LIMITS and job.protocol == "uarch-engine/5":
+        limits = REFERENCE_LIMITS
+    if len(raw) > limits.stdin_bytes:
+        raise OperationalFailure("FileLimit")
     # The user selects an ordinary installed executable. No executable digest is needed.
     fd = os.open(executable, os.O_RDONLY)
     try:
         stdout, stderr, status = _exchange(
-            fd, raw, limits, protocol="uarch-engine/4", test_only=test_only
+            fd, raw, limits, protocol=job.protocol, test_only=test_only
         )
     finally:
         os.close(fd)
@@ -103,8 +125,15 @@ def run(
 
 def replay(
     saved: Path, output: Path, *, test_only: bool = False, limits: Limits = DEFAULT_LIMITS
-) -> OrdinaryResult:
-    job = load_job(_read(saved, limits.stdin_bytes), test_only=test_only)
+) -> OrdinaryResult | ReferenceResult:
+    raw = _read(
+        saved, REFERENCE_LIMITS.stdin_bytes if limits is DEFAULT_LIMITS else limits.stdin_bytes
+    )
+    job = load_job(raw, test_only=test_only)
+    if limits is DEFAULT_LIMITS and job.protocol == "uarch-engine/5":
+        limits = REFERENCE_LIMITS
+    if len(raw) > limits.stdin_bytes:
+        raise OperationalFailure("FileLimit")
     return consume(_read(output, limits.stdout_bytes), b"", 0, job=job)
 
 
@@ -123,7 +152,13 @@ def main() -> None:
         if args.command == "run":
             result = run(args.job, executable=args.executable, test_only=args.test_only)
             with args.output.open("xb") as stream:
-                stream.write(canonical_json(result).encode())
+                if isinstance(result, ReferenceResult):
+                    from uarch_contract.reference_json import blocks
+
+                    for block in blocks(result):
+                        stream.write(block)
+                else:
+                    stream.write(canonical_json(result).encode())
         else:
             replay(args.job, args.output, test_only=args.test_only)
     except (ValueError, RuntimeError, OSError) as error:

@@ -51,9 +51,12 @@ fn synthetic_typed_admission_literals() {
             n: 7
         }
     ));
-    assert_eq!(a.hardware.freq, [1_000_000_000; 3]);
+    assert_eq!(a.hardware.as_ref().unwrap().freq, [1_000_000_000; 3]);
     assert_eq!(
-        (a.hardware.channel_step_num, a.hardware.channel_step_den),
+        (
+            a.hardware.as_ref().unwrap().channel_step_num,
+            a.hardware.as_ref().unwrap().channel_step_den
+        ),
         (159744, 71)
     );
 }

@@ -1043,3 +1043,62 @@ Old results are neither migrated silently nor regenerated. The analytic path is 
 Protected carriers and source install together from the exact combined proposal patch.
 The author may validate a disposable reconstruction; human installation and focused
 independent review remain outstanding. This does not establish U4, G3a or shipping closure.
+
+## TPU v5e R pre-measurement model with explicit STUB estimates
+
+This amendment defines the scoped model/interface in `contract/tpu-v5e-r-interface.md`
+for U0023's existing U4b consumer. It takes effect only through human installation. The
+user approved the 52-unit suite at `validation/L3_silicon/tpu-v5e/u4b/` as implementation
+scope, preserving six U-P9 classes and all required decoder work; that is not final
+benchmark acceptance or demonstrated device observability. The interface and implementation
+retain their normal protected review. No U4/G3a closure is asserted.
+
+U-P9 permits unpublished reference parameters represented as numeric STUB claims. Do not
+require published or independently established values for every internal parameter.
+Use existing SourcedValue conventions: published claims with sources; finite reasoned
+estimates with kind=claim, provenance=stub, source=null, date=null, rationale=null. Document
+their basis and limits in model assumptions/development records, not claim.rationale.
+No reference stipulation or new provenance kind. A missing required value refuses; an
+explicit numerical STUB does not. Never insert numeric sentinels for unknowns. Freeze the
+chosen model/values before measurements; no held-out tuning or accuracy from deterministic
+checks. Do not defer/change TPU v5e merely because internal hardware details are unpublished.
+
+The model is one TensorCore/four 128x128 MXUs, shared local memory, explicit vector/reduction
+and control work, aggregate HBM service and finite state/lifetime semantics, inside the
+existing engine and mapper. Equal peak shares, generic fill-equivalent work, local-memory
+budgets, logical memory windows, vector layout/costs, entry overhead and residency are
+explicit model choices/estimates, not physical TPU facts. Service is in rational ps and
+work/s, without an undocumented clock derived from peak. Preserve B's clocked laws and
+next_edge. Physical channels/transactions/banks/clock/energy may remain unrepresented.
+
+The finite nominal model has 9 published fact leaves and 17 estimated leaves; not every
+job necessarily reads all leaves. Record actual consumed STUBs at U-P9. The concrete
+law, recommended values, bases, workload sensitivity and independent arithmetic are in
+the U4b MODEL, parameter catalogue and arithmetic examples. Diagnostic ranges are not
+confidence intervals or hardware bounds. The weak entry/vector/control estimates remain
+visible and do not acquire evidence merely by being implemented.
+
+The explicit /5 prepared/engine, TaskGraph/2, model-3 and observations/4 transition preserves
+ordinary /4/model-2 and historical /2 restrictions. Extend the same OpSpec/PreparedOp and
+TaskGraph, not another engine/workload language. Include raw INT8/INT32 storage, four-MXU
+placement, complete decoder/RoPE/casts, logical memory/gather work, steady state and
+independent accounting/attribution/replay. The ordinary-runtime simplification remains
+in force: installed software versions and input/result data hashes, no executable/source
+attestation, host selectors, startup hardening, build tracing or runtime approval records.
+
+Once this interface is approved, proceed as one substantial implementation milestone with
+appropriate seam tests and integrated independent review, not small A/B handoff chains.
+Actual compiler/event/materialization/retention correspondence remains to be reconciled
+before final benchmark acceptance/freeze under U-P9/U-P10. No new campaign, sample gate,
+hardware access, spend, pilot, dependency installation or measurement is authorized.
+U-P9 owns check_ordering.py; U-P10 consumes it. U0024 remains active without CI polling.
+Human L1 workings stay human work, and neither local deterministic tests nor this decision
+claim silicon accuracy, remote qualification, G3a or U4 closure.
+
+
+The user subsequently approved the consolidated nominal model/interface at
+`180c6b9fb5df6af46f5df3601c7c895a79ac8d23` for the single substantial implementation
+milestone, including numeric STUB estimates. The concrete implementation is handed off in
+`docs/reviews/U4b-native-reference-implementation-v1/`; its full transition remains subject
+to the existing human installation procedure. This records implementation scope, not
+silicon accuracy, benchmark observability, frozen predictions, U4 closure or runtime authority.

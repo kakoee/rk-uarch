@@ -77,6 +77,7 @@ pub(crate) struct Phase {
     pub category: &'static str,
     pub domain: Option<usize>,
     pub cycles: u64,
+    pub service: Option<Ratio>,
     pub occupies: bool,
     pub contended: bool,
 }
@@ -107,6 +108,7 @@ pub(crate) struct Dispatch {
 pub(crate) enum ObservationVersion {
     V2,
     V3,
+    V4,
 }
 #[derive(Clone, Debug)]
 pub(crate) struct Sequence {
@@ -197,6 +199,7 @@ pub(crate) struct Runtime {
     channels: BTreeMap<u64, Ratio>,
     inflight: BTreeMap<u64, BTreeSet<usize>>,
     now: u64,
+    reference_state: Option<reference_runtime::ReferenceState>,
 }
 fn endpoint(a: &Activity, completion: bool) -> Kind {
     let (start, end) = if a.alignment {
@@ -213,6 +216,7 @@ fn endpoint(a: &Activity, completion: bool) -> Kind {
             "ack" => (Kind::TaskReady, Kind::DmaDone),
             "dma_issue" => (Kind::TaskReady, Kind::DmaIssue),
             "barrier" => (Kind::SyncArrive, Kind::BarrierRelease),
+            name if name.starts_with("r_") => (Kind::OwnerGrant, Kind::ComputeDone),
             _ => unreachable!("typed phase"),
         }
     };
@@ -223,6 +227,9 @@ impl Runtime {
         Self::new_version(v, ObservationVersion::V2)
     }
     fn new_version(v: &Admitted, observations: ObservationVersion) -> Result<Self> {
+        if observations == ObservationVersion::V4 {
+            return Self::new_reference(v);
+        }
         let mut r = Self {
             observations,
             reservation_opportunities: vec![],
@@ -245,21 +252,32 @@ impl Runtime {
             per_job: vec![Counts::default(); v.graph.jobs.len()],
             duration: 0,
             max_live_events: 0,
-            wheel: Wheel::new(*v.hardware.freq.iter().max().unwrap()).map_err(|_| overflow())?,
+            wheel: Wheel::new(
+                *v.hardware
+                    .as_ref()
+                    .expect("component hardware")
+                    .freq
+                    .iter()
+                    .max()
+                    .unwrap(),
+            )
+            .map_err(|_| overflow())?,
             pending_count: 0,
             busy: BTreeMap::new(),
             last: BTreeMap::new(),
             channels: BTreeMap::new(),
             inflight: BTreeMap::new(),
             now: 0,
+            reference_state: None,
         };
-        let h = &v.hardware;
+        let h = v.hardware.as_ref().expect("component hardware");
         let phase = |name, owner, category, domain, cycles, occupies, contended| Phase {
             name,
             owner,
             category,
             domain,
             cycles,
+            service: None,
             occupies,
             contended,
         };
@@ -286,6 +304,7 @@ impl Runtime {
                 credit_causes: vec![],
             };
             match &t.kind {
+                TaskKind::Reference { .. } => unreachable!("reference constructor"),
                 TaskKind::Compute { core, m, k, n } => {
                     if v.owners[&format!("matrix:{core}")] != t.owner {
                         return Err(refuse("InvalidResource", "", "typed matrix owner"));
@@ -464,6 +483,7 @@ impl Runtime {
         let events_per_sequence = match observations {
             ObservationVersion::V2 => 24,
             ObservationVersion::V3 => 28,
+            ObservationVersion::V4 => unreachable!(),
         };
         if r.sequences.len() > crate::protocol::MAX_EVENTS / events_per_sequence {
             return Err(refuse(
@@ -508,7 +528,7 @@ impl Runtime {
     }
     fn causes(&self, s: usize, start: u64, resource: Option<usize>) -> Vec<(usize, &'static str)> {
         let sequence = &self.sequences[s];
-        let mut causes = vec![];
+        let mut causes = self.reference_issue_causes(s);
         if let Some(&previous) = sequence.activities.last()
             && self.activities[previous].end == start
         {
@@ -538,7 +558,17 @@ impl Runtime {
         if !self.sequences[s].activities.is_empty() {
             return;
         }
-        for &(before, after) in &v.graph.dependencies {
+        let reference_edges;
+        let edges = if let Some(before) = self.reference_predecessors(self.sequences[s].job) {
+            reference_edges = before
+                .iter()
+                .map(|&x| (x, self.sequences[s].job))
+                .collect::<Vec<_>>();
+            &reference_edges
+        } else {
+            &v.graph.dependencies
+        };
+        for &(before, after) in edges {
             if after == self.sequences[s].job && self.jobs[before].end == Some(start) {
                 for &seq in &self.jobs[before].sequences {
                     if let Some(&a) = self.sequences[seq].activities.last()
@@ -590,9 +620,11 @@ impl Runtime {
         self.sequences[s].activities.push(index);
         if self.jobs[job].start.is_none() {
             self.jobs[job].start = Some(self.now);
-            for (i, b) in v.graph.buffers.iter().enumerate() {
-                if !b.persistent && b.producer == Some(job) {
-                    self.allocations[i].start = Some(self.now);
+            if !self.reference_alloc_start(job) {
+                for (i, b) in v.graph.buffers.iter().enumerate() {
+                    if !b.persistent && b.producer == Some(job) {
+                        self.allocations[i].start = Some(self.now);
+                    }
                 }
             }
         }
@@ -612,7 +644,11 @@ impl Runtime {
         let clocked = p.domain.is_some() && !(p.name.ends_with("_noc") && !p.occupies);
         self.sequences[s].active = true;
         if clocked {
-            let end = edge(v.hardware.freq[p.domain.unwrap()], self.now, 0)?;
+            let end = edge(
+                v.hardware.as_ref().expect("component hardware").freq[p.domain.unwrap()],
+                self.now,
+                0,
+            )?;
             let a = self.activity(v, s, p, true, (ready, end, previous, None))?;
             self.schedule(v, a)?;
         } else {
@@ -638,7 +674,9 @@ impl Runtime {
         }
         self.sequences[s].service_ready = false;
         self.sequences[s].active = true;
-        let (end, ratio) = if p.name == "channel_service" {
+        let (end, ratio) = if p.service.is_some() {
+            self.reference_service(s, &p, ready)?
+        } else if p.name == "channel_service" {
             let lo = self
                 .channels
                 .get(&p.owner)
@@ -646,8 +684,14 @@ impl Runtime {
                 .unwrap_or(Ratio::integer(0))
                 .max_integer(ready)?;
             let hi = lo.plus(Ratio::new(
-                v.hardware.channel_step_num,
-                v.hardware.channel_step_den,
+                v.hardware
+                    .as_ref()
+                    .expect("component hardware")
+                    .channel_step_num,
+                v.hardware
+                    .as_ref()
+                    .expect("component hardware")
+                    .channel_step_den,
             )?)?;
             self.channels.insert(p.owner, hi);
             (hi.ceil()?, Some((lo, hi)))
@@ -656,7 +700,8 @@ impl Runtime {
         } else {
             (
                 edge(
-                    v.hardware.freq[p.domain.expect("clocked service")],
+                    v.hardware.as_ref().expect("component hardware").freq
+                        [p.domain.expect("clocked service")],
                     self.now,
                     p.cycles,
                 )?,
@@ -696,21 +741,33 @@ impl Runtime {
             return Ok(());
         }
         let p = self.activities[a].phase.clone();
-        if matches!(p.name, "read_port" | "write_port" | "channel_service") {
+        if matches!(p.name, "read_port" | "write_port" | "channel_service")
+            || (p.service.is_some() && p.contended && p.name != "r_vector_setup")
+        {
             self.busy.remove(&p.owner);
             self.last.insert(p.owner, a);
+        }
+        if p.name == "r_hbm" {
+            self.reference_release(s, a);
         }
         self.sequences[s].step += 1;
         self.sequences[s].active = false;
         self.sequences[s].ready = self.now;
         if self.sequences[s].step < self.sequences[s].phases.len() {
+            self.reference_queue(s);
             return Ok(());
         }
         self.sequences[s].end = Some(self.now);
+        if p.name == "r_vector" || p.name == "r_reduction" || p.name == "r_vector_setup" {
+            self.busy.remove(&5);
+            self.last.insert(5, a);
+        }
         // Terminal transitions can release a credit or complete a dependency.
         // A phase-0 batch coalesces before reserve; inline completion is seen next loop.
         self.eligibility_dirty = true;
-        if let Some(engine) = self.sequences[s].engine {
+        if self.reference_state.is_none()
+            && let Some(engine) = self.sequences[s].engine
+        {
             self.inflight
                 .get_mut(&engine)
                 .expect("acquired credit")
@@ -745,7 +802,7 @@ impl Runtime {
                 c.sram_read = c.unicast;
                 c.sram_write = c.unicast;
             }
-            TaskKind::Barrier => {}
+            TaskKind::Barrier | TaskKind::Reference { .. } => {}
         }
         self.counts.merge(&c)?;
         self.per_job[j].merge(&c)?;
@@ -755,18 +812,25 @@ impl Runtime {
             .all(|&x| self.sequences[x].end.is_some())
         {
             self.jobs[j].end = Some(self.now);
-            for (i, b) in v.graph.buffers.iter().enumerate() {
-                if !b.persistent
-                    && !b.consumers.is_empty()
-                    && b.consumers.iter().all(|&u| self.jobs[u].end.is_some())
-                {
-                    self.allocations[i].end.get_or_insert(self.now);
+            self.reference_complete(v, j);
+            if !self.reference_alloc_end(v, j) {
+                for (i, b) in v.graph.buffers.iter().enumerate() {
+                    if !b.persistent
+                        && !b.consumers.is_empty()
+                        && b.consumers.iter().all(|&u| self.jobs[u].end.is_some())
+                    {
+                        self.allocations[i].end.get_or_insert(self.now);
+                    }
                 }
             }
         }
         Ok(())
     }
     fn ready_jobs(&mut self, v: &Admitted) {
+        if self.reference_state.is_some() {
+            self.reference_ready(v);
+            return;
+        }
         for j in 0..self.jobs.len() {
             if self.jobs[j].ready.is_none() {
                 let before: Vec<_> = v
@@ -823,7 +887,12 @@ impl Runtime {
             if let Some(engine) = self.sequences[s].engine {
                 let acquired = self.inflight.get(&engine).map_or(0, BTreeSet::len);
                 let pending = self.pending_issue.get(&engine).map_or(0, BTreeSet::len);
-                if (acquired + pending) as u64 >= v.hardware.credit_limit {
+                if (acquired + pending) as u64
+                    >= v.hardware
+                        .as_ref()
+                        .expect("component hardware")
+                        .credit_limit
+                {
                     continue;
                 }
                 // Strict eligibility uses reservation time, never the later aligned issue edge.
@@ -840,7 +909,12 @@ impl Runtime {
                                 && x.end.is_none_or(|t| t >= self.now)
                         })
                         .collect();
-                    if before.len() as u64 == v.hardware.credit_limit {
+                    if before.len() as u64
+                        == v.hardware
+                            .as_ref()
+                            .expect("component hardware")
+                            .credit_limit
+                    {
                         self.sequences[s].credit_causes = before
                             .iter()
                             .filter(|(_, x)| {
@@ -866,6 +940,9 @@ impl Runtime {
         Ok(changed)
     }
     fn issue(&mut self, v: &Admitted) -> Result<bool> {
+        if self.reference_state.is_some() {
+            return self.reference_issue(v);
+        }
         if self.observations == ObservationVersion::V3 {
             return self.reserve(v);
         }
@@ -888,7 +965,11 @@ impl Runtime {
         for (_, _, _, s) in ready {
             let engine = self.sequences[s].engine;
             let at = if engine.is_some() {
-                edge(v.hardware.freq[0], self.sequences[s].ready, 0)?
+                edge(
+                    v.hardware.as_ref().expect("component hardware").freq[0],
+                    self.sequences[s].ready,
+                    0,
+                )?
             } else {
                 self.sequences[s].ready
             };
@@ -897,7 +978,12 @@ impl Runtime {
             }
             if let Some(engine) = engine {
                 let live = self.inflight.entry(engine).or_default();
-                if live.len() as u64 >= v.hardware.credit_limit {
+                if live.len() as u64
+                    >= v.hardware
+                        .as_ref()
+                        .expect("component hardware")
+                        .credit_limit
+                {
                     continue;
                 }
                 // Credit evidence records occupants just before this timestamp, not an arbitrary old request.
@@ -913,7 +999,12 @@ impl Runtime {
                                 && x.end.is_none_or(|t| t >= self.now)
                         })
                         .collect();
-                    if before.len() as u64 == v.hardware.credit_limit {
+                    if before.len() as u64
+                        == v.hardware
+                            .as_ref()
+                            .expect("component hardware")
+                            .credit_limit
+                    {
                         self.sequences[s].credit_causes = before
                             .iter()
                             .filter(|(_, x)| x.end == Some(self.now))
@@ -947,27 +1038,30 @@ impl Runtime {
             loop {
                 self.ready_jobs(v);
                 let issued = self.issue(v)?;
-                let mut ready: Vec<_> = self
-                    .sequences
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, s)| {
-                        (s.issue.is_some() || s.reservation.is_some())
-                            && s.end.is_none()
-                            && !s.active
-                            && s.ready <= self.now
-                    })
-                    .map(|(i, s)| {
-                        (
-                            s.ready,
-                            s.engine.unwrap_or(0),
-                            s.request
-                                .clone()
-                                .unwrap_or_else(|| v.graph.jobs[s.job].id.clone()),
-                            i,
-                        )
-                    })
-                    .collect();
+                let mut ready: Vec<_> = if self.reference_state.is_some() {
+                    self.reference_runnable()
+                } else {
+                    self.sequences
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, s)| {
+                            (s.issue.is_some() || s.reservation.is_some())
+                                && s.end.is_none()
+                                && !s.active
+                                && s.ready <= self.now
+                        })
+                        .map(|(i, s)| {
+                            (
+                                s.ready,
+                                s.engine.unwrap_or(0),
+                                s.request
+                                    .clone()
+                                    .unwrap_or_else(|| v.graph.jobs[s.job].id.clone()),
+                                i,
+                            )
+                        })
+                        .collect()
+                };
                 ready.sort();
                 // Resolve every uncontended crossing before same-time FIFO acquisitions.
                 let selected = ready
@@ -985,6 +1079,7 @@ impl Runtime {
                     })
                     .map(|x| x.3);
                 if let Some(s) = selected {
+                    self.reference_dequeue(s);
                     if self.sequences[s].service_ready {
                         self.service(v, s, self.sequences[s].ready, None)?;
                     } else {
@@ -994,17 +1089,34 @@ impl Runtime {
                     break;
                 }
             }
-            if self.jobs.iter().all(|j| j.end.is_some()) {
+            if self.reference_state.as_ref().map_or_else(
+                || self.jobs.iter().all(|j| j.end.is_some()),
+                |r| r.completed == self.jobs.len(),
+            ) {
                 self.duration = self.now;
                 break;
             }
-            let wake = self
-                .sequences
-                .iter()
-                .filter(|s| s.enabled && s.issue.is_none() && s.engine.is_some())
-                .filter_map(|s| edge(v.hardware.freq[0], s.ready, 0).ok())
-                .filter(|&t| t > self.now)
-                .min();
+            let wake = if let Some(r) = &self.reference_state {
+                if !r.pending.is_empty() && r.issue_next > self.now {
+                    Some(r.issue_next)
+                } else {
+                    None
+                }
+            } else {
+                self.sequences
+                    .iter()
+                    .filter(|s| s.enabled && s.issue.is_none() && s.engine.is_some())
+                    .filter_map(|s| {
+                        edge(
+                            v.hardware.as_ref().expect("component hardware").freq[0],
+                            s.ready,
+                            0,
+                        )
+                        .ok()
+                    })
+                    .filter(|&t| t > self.now)
+                    .min()
+            };
             self.now = match (self.wheel.peek().map(|e| e.t_ps), wake) {
                 (Some(a), Some(b)) => a.min(b),
                 (Some(a), None) => a,
@@ -1039,7 +1151,7 @@ mod kernel_tests {
         let mut admitted =
             component_admission::validate(&crate::wire::canonical(v).unwrap()).unwrap();
         // Private typed-state probe, not a rehashed/authorized mapped job or a result carrier.
-        admitted.hardware.hop_cycles = 0;
+        admitted.hardware.as_mut().unwrap().hop_cycles = 0;
         let state = Runtime::new(&admitted).unwrap().run(&admitted).unwrap();
         let phases: Vec<_> = state
             .activities
@@ -1062,6 +1174,7 @@ mod kernel_tests {
 pub(crate) fn execute_with_observations(input: &str, version: ObservationVersion) -> Result<Value> {
     let v = match version {
         ObservationVersion::V2 => component_admission::validate(input)?,
+        ObservationVersion::V4 => return execute_reference(input),
         ObservationVersion::V3 => {
             component_admission::validate_model(input, component_admission::ModelVersion::Two)?
         }
@@ -1093,7 +1206,7 @@ fn execute_admitted(v: Admitted, version: ObservationVersion) -> Result<Value> {
     }
     let state = match version {
         ObservationVersion::V2 => Runtime::new(&v)?,
-        ObservationVersion::V3 => Runtime::new_version(&v, version)?,
+        ObservationVersion::V3 | ObservationVersion::V4 => Runtime::new_version(&v, version)?,
     };
     let runtime = state.run(&v)?;
     crate::component_accounting::construct(&v, &runtime)
@@ -1101,3 +1214,30 @@ fn execute_admitted(v: Admitted, version: ObservationVersion) -> Result<Value> {
 #[cfg(test)]
 #[path = "issue_proposal_tests.rs"]
 mod issue_proposal_tests;
+
+#[path = "reference_runtime.rs"]
+mod reference_runtime;
+#[cfg(test)]
+pub(crate) fn execute_reference(input: &str) -> Result<Value> {
+    execute_reference_admitted(crate::reference::admit(input)?)
+}
+pub(crate) fn execute_reference_value(raw: Value) -> Result<Value> {
+    execute_reference_admitted(crate::reference::admit_value(raw)?)
+}
+fn execute_reference_admitted(v: Admitted) -> Result<Value> {
+    let primes = v.raw["workload_closure"]["points"][0]["priming_iterations"]
+        .as_u64()
+        .unwrap();
+    let mut state = None;
+    let mut metadata = BTreeSet::new();
+    for iteration in 0..=primes {
+        let mut runtime = Runtime::new_version(&v, ObservationVersion::V4)?;
+        runtime.reference_set_metadata(metadata);
+        let runtime = runtime.run(&v)?;
+        metadata = runtime.reference_metadata().1.clone();
+        if iteration == primes {
+            state = Some(runtime);
+        }
+    }
+    crate::reference::construct(&v, &state.unwrap())
+}

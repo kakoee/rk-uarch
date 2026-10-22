@@ -25,6 +25,7 @@ from uarch_contract.ordinary import (
     SoftwareProducer,
 )
 from uarch_contract.prepared import PreparedOp, RankScope
+from uarch_contract.reference import ReferenceBundle, ReferenceJob
 
 from rkuarch.workload.mapped import validate_component_completeness
 
@@ -41,11 +42,16 @@ def software_identity() -> SoftwareIdentity:
 
 
 def prepare_job(
-    bundle: OrdinaryBundle,
+    bundle: OrdinaryBundle | ReferenceBundle,
     *,
     point_hash: str,
-) -> OrdinaryJob:
+) -> OrdinaryJob | ReferenceJob:
     """Assemble a selected prepared point unchanged, with installed software versions."""
+    if isinstance(bundle, ReferenceBundle):
+        from .reference import prepare_job as prepare_reference_job
+
+        require(bundle.points[0].payload_hash == point_hash, "MissingCoverage")
+        return prepare_reference_job(bundle)
     bundle = OrdinaryBundle.model_validate(bundle.model_dump(mode="json"))
     validate_component_completeness(bundle)
     points = [p for p in bundle.points if p.payload_hash == point_hash]

@@ -18,10 +18,10 @@ fn model_two(v: &mut Value) {
 // Direct typed-state synthesis after real baseline admission. No result-carrier claim.
 fn boundary(write: bool, ready: u64, cap: u64, independent: bool) -> Admitted {
     let (_, mut a) = fixture(if write { "D02" } else { "D01" });
-    a.hardware.freq[1] = 1_000_000_000_000;
-    a.hardware.hop_cycles = 2000;
-    a.hardware.barrier_cycles = ready;
-    a.hardware.credit_limit = cap;
+    a.hardware.as_mut().unwrap().freq[1] = 1_000_000_000_000;
+    a.hardware.as_mut().unwrap().hop_cycles = 2000;
+    a.hardware.as_mut().unwrap().barrier_cycles = ready;
+    a.hardware.as_mut().unwrap().credit_limit = cap;
     let mut second = a.graph.jobs[0].clone();
     second.id = "second".into();
     if let TaskKind::Dma {
@@ -248,7 +248,7 @@ fn proposed_cap_one_pending_reservation_prevents_double_issue() {
 #[test]
 fn proposed_zero_alignment_has_no_new_issue_rate_cap() {
     let (_, mut a) = fixture("D07");
-    a.hardware.credit_limit = 64;
+    a.hardware.as_mut().unwrap().credit_limit = 64;
     let r = Runtime::new_version(&a, ObservationVersion::V3)
         .unwrap()
         .run(&a)
@@ -414,7 +414,7 @@ fn proposed_order_terminal_phase_zero_batch_and_inline_epochs() {
     // Private typed state: isolate two terminal transitions, not mapped admission.
     for cycles in [0, 32] {
         let (_, mut a) = fixture("D01");
-        a.hardware.barrier_cycles = cycles;
+        a.hardware.as_mut().unwrap().barrier_cycles = cycles;
         a.graph.jobs = (0..2)
             .map(|i| Task {
                 id: format!("barrier-{i}"),

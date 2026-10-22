@@ -76,3 +76,24 @@ U0023 separates K1 internal mechanics from K2 public schema wiring and correctne
 from controlled-host performance. U5/U8 silicon success is not a table-production gate.
 G5-correctness alone gates U7/G6/G3b/U10; full G5, U9 entry, simulator-performance
 claims and final closure still require controlled-host evidence and self-hosted nightly.
+
+## TPU v5e reference extension
+
+After the coherent U4b human-installed transition, the same ordinary component JSON binary
+also accepts `--protocol uarch-engine/5` for the approved reference model. It uses the same
+runtime, event ordering and resource machinery with rational reference service laws;
+component `/4` behavior remains available. `/5` consumes an explicit saved reference graph
+and returns observations/4. Numeric STUB claims are valid production inputs, not an
+accuracy claim or a reason to require a test-only executable.
+
+The reference mapper, source joins, memory/state policy and packaged independent checker
+are specified in `contract/tpu-v5e-r-interface.md`. The consolidated implementation and
+human-installation handoff is `docs/reviews/U4b-native-reference-implementation-v1/`.
+`python native/export_reference_carriers.py --check` checks the compiled reference input
+schema against its protected carrier definition. This is a build-time data/schema check;
+execution and replay do not read source files, build records or reviewer artifacts.
+
+Reference input/output caps are 256/512 MiB; the selected largest graph is tested with its
+complete observations. The Python ordinary execution/replay entry point dispatches both
+protocols, and the wheel ships the independent checker and reference schemas. Select a
+normal executable path; no executable-attestation or deployment-authority step is required.

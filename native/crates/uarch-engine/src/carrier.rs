@@ -138,6 +138,12 @@ fn shape(v: &mut Value, s: &Value, root: &Value, path: &str) -> Result<()> {
                             && s.bytes()
                                 .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
                     }),
+                    "^[0-9a-f]{8}$" => {
+                        text.len() == 8
+                            && text
+                                .bytes()
+                                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+                    }
                     "^[0-9a-f]{40}$" => {
                         text.len() == 40
                             && text
@@ -291,6 +297,13 @@ fn shape(v: &mut Value, s: &Value, root: &Value, path: &str) -> Result<()> {
     }
     Ok(())
 }
+pub(crate) fn normalize_reference(mut value: Value) -> Result<Value> {
+    let schema: Value =
+        serde_json::from_str(include_str!("reference_carriers.json")).expect("reference schema");
+    shape(&mut value, &schema, &schema, "")?;
+    Ok(value)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

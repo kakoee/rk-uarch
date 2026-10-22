@@ -1,0 +1,533 @@
+{
+  "$defs": {
+    "CriticalPart": {
+      "additionalProperties": false,
+      "properties": {
+        "activity": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Activity",
+          "type": "integer"
+        },
+        "cause": {
+          "enum": [
+            "service",
+            "issue_spacing"
+          ],
+          "title": "Cause",
+          "type": "string"
+        },
+        "end_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "End Ps",
+          "type": "integer"
+        },
+        "start_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start Ps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "activity",
+        "start_ps",
+        "end_ps",
+        "cause"
+      ],
+      "title": "CriticalPart",
+      "type": "object"
+    },
+    "ReferenceActivity": {
+      "additionalProperties": false,
+      "properties": {
+        "causes": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Causes",
+          "type": "array"
+        },
+        "end_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "End Ps",
+          "type": "integer"
+        },
+        "occupies": {
+          "title": "Occupies",
+          "type": "boolean"
+        },
+        "owner": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Owner",
+          "type": "integer"
+        },
+        "phase": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Phase",
+          "type": "string"
+        },
+        "ratio_end": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "maximum": 340282366920938463463374607431768211455,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "maximum": 340282366920938463463374607431768211455,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ratio End"
+        },
+        "ratio_start": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "maximum": 340282366920938463463374607431768211455,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "maximum": 340282366920938463463374607431768211455,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ratio Start"
+        },
+        "ready_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Ready Ps",
+          "type": "integer"
+        },
+        "sequence": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "start_ps": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Start Ps",
+          "type": "integer"
+        },
+        "task": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Task",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "task",
+        "sequence",
+        "phase",
+        "owner",
+        "ready_ps",
+        "start_ps",
+        "end_ps",
+        "occupies",
+        "ratio_start",
+        "ratio_end",
+        "causes"
+      ],
+      "title": "ReferenceActivity",
+      "type": "object"
+    },
+    "ReferenceModelVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "native-intervals",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "3",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "ReferenceModelVersion",
+      "type": "object"
+    },
+    "ReferenceObservations": {
+      "additionalProperties": false,
+      "properties": {
+        "activities": {
+          "items": {
+            "$ref": "#/$defs/ReferenceActivity"
+          },
+          "title": "Activities",
+          "type": "array"
+        },
+        "allocation_intervals": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Allocation Intervals",
+          "type": "array"
+        },
+        "context_after": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Context After",
+          "type": "integer"
+        },
+        "context_before": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Context Before",
+          "type": "integer"
+        },
+        "critical_path": {
+          "items": {
+            "$ref": "#/$defs/CriticalPart"
+          },
+          "title": "Critical Path",
+          "type": "array"
+        },
+        "format": {
+          "const": "uarch-native-observations/4",
+          "title": "Format",
+          "type": "string"
+        },
+        "jobs": {
+          "items": {
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Jobs",
+          "type": "array"
+        },
+        "max_live_events": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Max Live Events",
+          "type": "integer"
+        },
+        "persistent_after": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Persistent After",
+          "type": "array"
+        },
+        "persistent_before": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Persistent Before",
+          "type": "array"
+        },
+        "priming_iterations": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Priming Iterations",
+          "type": "integer"
+        },
+        "sequences": {
+          "items": {
+            "maxItems": 4,
+            "minItems": 4,
+            "prefixItems": [
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 18446744073709551615,
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Sequences",
+          "type": "array"
+        },
+        "state_after": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "State After",
+          "type": "string"
+        },
+        "state_before": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "State Before",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "activities",
+        "jobs",
+        "sequences",
+        "allocation_intervals",
+        "critical_path",
+        "priming_iterations",
+        "state_before",
+        "state_after",
+        "max_live_events",
+        "persistent_before",
+        "persistent_after",
+        "context_before",
+        "context_after"
+      ],
+      "title": "ReferenceObservations",
+      "type": "object"
+    },
+    "ReferenceSoftwareIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "$ref": "#/$defs/ReferenceModelVersion"
+        },
+        "name": {
+          "const": "native",
+          "title": "Name",
+          "type": "string"
+        },
+        "package_version": {
+          "const": "0.0.1",
+          "title": "Package Version",
+          "type": "string"
+        },
+        "version": {
+          "const": "native-stage/3",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "package_version",
+        "model"
+      ],
+      "title": "ReferenceSoftwareIdentity",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bundle_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Bundle Hash",
+      "type": "string"
+    },
+    "calibration": {
+      "const": "stub",
+      "title": "Calibration",
+      "type": "string"
+    },
+    "consumed_stubs": {
+      "items": {
+        "minLength": 1,
+        "pattern": "\\S",
+        "type": "string"
+      },
+      "title": "Consumed Stubs",
+      "type": "array"
+    },
+    "counts": {
+      "patternProperties": {
+        "\\S": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "propertyNames": {
+        "minLength": 1
+      },
+      "title": "Counts",
+      "type": "object"
+    },
+    "duration_ps": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Duration Ps",
+      "type": "integer"
+    },
+    "energy": {
+      "const": "unverified",
+      "title": "Energy",
+      "type": "string"
+    },
+    "energy_pj": {
+      "title": "Energy Pj",
+      "type": "null"
+    },
+    "engine": {
+      "$ref": "#/$defs/ReferenceSoftwareIdentity"
+    },
+    "error": {
+      "const": "unknown",
+      "title": "Error",
+      "type": "string"
+    },
+    "job_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Job Hash",
+      "type": "string"
+    },
+    "observations": {
+      "$ref": "#/$defs/ReferenceObservations"
+    },
+    "per_op_counts": {
+      "patternProperties": {
+        "\\S": {
+          "patternProperties": {
+            "\\S": {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "type": "object"
+        }
+      },
+      "propertyNames": {
+        "minLength": 1
+      },
+      "title": "Per Op Counts",
+      "type": "object"
+    },
+    "physical_transactions": {
+      "title": "Physical Transactions",
+      "type": "null"
+    },
+    "point_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Point Hash",
+      "type": "string"
+    },
+    "protocol": {
+      "const": "uarch-engine/5",
+      "title": "Protocol",
+      "type": "string"
+    },
+    "result_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Result Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "protocol",
+    "result_hash",
+    "job_hash",
+    "bundle_hash",
+    "point_hash",
+    "engine",
+    "duration_ps",
+    "counts",
+    "per_op_counts",
+    "consumed_stubs",
+    "calibration",
+    "error",
+    "energy",
+    "physical_transactions",
+    "energy_pj",
+    "observations"
+  ],
+  "title": "ReferenceResult",
+  "type": "object"
+}

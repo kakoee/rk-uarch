@@ -1,0 +1,2356 @@
+{
+  "$defs": {
+    "BufferRange": {
+      "additionalProperties": false,
+      "properties": {
+        "buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Buffer Id",
+          "type": "string"
+        },
+        "offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset Bytes",
+          "type": "integer"
+        },
+        "size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "buffer_id",
+        "offset_bytes",
+        "size_bytes"
+      ],
+      "title": "BufferRange",
+      "type": "object"
+    },
+    "Calibration": {
+      "enum": [
+        "measured",
+        "spec_derived",
+        "estimated",
+        "stub"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "Coverage": {
+      "additionalProperties": false,
+      "properties": {
+        "group_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Group Id"
+        },
+        "job_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Job Id",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "repeat_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Repeat Index",
+          "type": "integer"
+        },
+        "tile_extents": {
+          "$ref": "#/$defs/Extent"
+        },
+        "tile_origin": {
+          "$ref": "#/$defs/Tile"
+        }
+      },
+      "required": [
+        "job_id",
+        "op_id",
+        "group_id",
+        "repeat_index",
+        "tile_origin",
+        "tile_extents"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "Dependency": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "After",
+          "type": "string"
+        },
+        "before": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Before",
+          "type": "string"
+        }
+      },
+      "required": [
+        "before",
+        "after"
+      ],
+      "title": "Dependency",
+      "type": "object"
+    },
+    "Extent": {
+      "additionalProperties": false,
+      "properties": {
+        "K": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "K",
+          "type": "integer"
+        },
+        "M": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "M",
+          "type": "integer"
+        },
+        "N": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "N",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "M",
+        "K",
+        "N"
+      ],
+      "title": "Extent",
+      "type": "object"
+    },
+    "KvAccess": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "minimum": 1,
+          "title": "Block Size Tokens",
+          "type": "integer"
+        },
+        "context_tokens": {
+          "minimum": 1,
+          "title": "Context Tokens",
+          "type": "integer"
+        },
+        "last_page_valid_tokens": {
+          "minimum": 1,
+          "title": "Last Page Valid Tokens",
+          "type": "integer"
+        },
+        "pages_per_sequence": {
+          "minimum": 1,
+          "title": "Pages Per Sequence",
+          "type": "integer"
+        },
+        "read_policy": {
+          "const": "valid_tokens",
+          "title": "Read Policy",
+          "type": "string"
+        },
+        "write_policy": {
+          "const": "append_valid_tokens",
+          "title": "Write Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "block_size_tokens",
+        "context_tokens",
+        "last_page_valid_tokens",
+        "pages_per_sequence",
+        "read_policy",
+        "write_policy"
+      ],
+      "title": "KvAccess",
+      "type": "object"
+    },
+    "LocalTransfer": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/$defs/BufferRange"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "local_transfer",
+          "title": "Kind",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "partial",
+            "staging",
+            "spill",
+            "materialization"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/BufferRange"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "source",
+        "destination",
+        "purpose"
+      ],
+      "title": "LocalTransfer",
+      "type": "object"
+    },
+    "MappingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "buffer_depth": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Buffer Depth",
+          "type": "integer"
+        },
+        "name": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "buffer_depth"
+      ],
+      "title": "MappingPolicy",
+      "type": "object"
+    },
+    "Padding": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "minLength": 1,
+          "title": "Dimension",
+          "type": "string"
+        },
+        "logical": {
+          "minimum": 1,
+          "title": "Logical",
+          "type": "integer"
+        },
+        "physical": {
+          "minimum": 1,
+          "title": "Physical",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dimension",
+        "logical",
+        "physical"
+      ],
+      "title": "Padding",
+      "type": "object"
+    },
+    "Primitive": {
+      "additionalProperties": false,
+      "properties": {
+        "cols": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Cols",
+          "type": "integer"
+        },
+        "destination_dtype": {
+          "anyOf": [
+            {
+              "enum": [
+                "bf16",
+                "fp32",
+                "int8",
+                "int32"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Destination Dtype"
+        },
+        "kind": {
+          "enum": [
+            "add",
+            "subtract",
+            "multiply",
+            "compare",
+            "select",
+            "negate",
+            "reduction_sum",
+            "reduction_max",
+            "exp",
+            "reciprocal",
+            "rsqrt",
+            "cast",
+            "broadcast",
+            "index"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "leading": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Leading",
+          "type": "integer"
+        },
+        "repeat": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Repeat",
+          "type": "integer"
+        },
+        "rows": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "source_dtype": {
+          "anyOf": [
+            {
+              "enum": [
+                "bf16",
+                "fp32",
+                "int8",
+                "int32"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Dtype"
+        }
+      },
+      "required": [
+        "kind",
+        "rows",
+        "cols",
+        "leading",
+        "repeat",
+        "source_dtype",
+        "destination_dtype"
+      ],
+      "title": "Primitive",
+      "type": "object"
+    },
+    "Producer": {
+      "additionalProperties": false,
+      "properties": {
+        "implementation_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Implementation Hash",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "implementation_hash",
+        "name",
+        "version"
+      ],
+      "title": "Producer",
+      "type": "object"
+    },
+    "RankScope": {
+      "additionalProperties": false,
+      "properties": {
+        "collectives": {
+          "const": "excluded",
+          "title": "Collectives",
+          "type": "string"
+        },
+        "equivalent_ranks": {
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Equivalent Ranks",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "balanced_tp_representative",
+            "balanced_tp_selected_rank"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "rank_index": {
+          "minimum": 0,
+          "title": "Rank Index",
+          "type": "integer"
+        },
+        "tp": {
+          "minimum": 1,
+          "title": "Tp",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "collectives",
+        "equivalent_ranks",
+        "kind",
+        "rank_index",
+        "tp"
+      ],
+      "title": "RankScope",
+      "type": "object"
+    },
+    "ReferenceAdmission": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "const": "R",
+          "title": "Checkpoint",
+          "type": "string"
+        },
+        "eligibility": {
+          "enum": [
+            "reference_suite",
+            "verification_only"
+          ],
+          "title": "Eligibility",
+          "type": "string"
+        },
+        "invocation": {
+          "enum": [
+            "production",
+            "test"
+          ],
+          "title": "Invocation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "checkpoint",
+        "invocation",
+        "eligibility"
+      ],
+      "title": "ReferenceAdmission",
+      "type": "object"
+    },
+    "ReferenceAssumptions": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulator_window_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Accumulator Window Bytes",
+          "type": "integer"
+        },
+        "assumptions_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Assumptions Hash",
+          "type": "string"
+        },
+        "hbm_budget_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Hbm Budget Bytes",
+          "type": "integer"
+        },
+        "limitations": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "matrix_kn_slice": {
+          "const": 128,
+          "title": "Matrix Kn Slice",
+          "type": "integer"
+        },
+        "matrix_m_chunk": {
+          "maximum": 1024,
+          "minimum": 1,
+          "title": "Matrix M Chunk",
+          "type": "integer"
+        },
+        "max_request_bytes": {
+          "const": 8192,
+          "title": "Max Request Bytes",
+          "type": "integer"
+        },
+        "reload_policy": {
+          "const": "payload-every-invocation",
+          "title": "Reload Policy",
+          "type": "string"
+        },
+        "revision": {
+          "const": "tpu-v5e-premeasurement/3",
+          "title": "Revision",
+          "type": "string"
+        },
+        "smem_budget_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Smem Budget Bytes",
+          "type": "integer"
+        },
+        "transient_scratch_bytes": {
+          "const": 65536,
+          "title": "Transient Scratch Bytes",
+          "type": "integer"
+        },
+        "vector_cols": {
+          "const": 128,
+          "title": "Vector Cols",
+          "type": "integer"
+        },
+        "vector_rows": {
+          "const": 8,
+          "title": "Vector Rows",
+          "type": "integer"
+        },
+        "vmem_budget_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Vmem Budget Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "assumptions_hash",
+        "revision",
+        "hbm_budget_bytes",
+        "vmem_budget_bytes",
+        "smem_budget_bytes",
+        "accumulator_window_bytes",
+        "transient_scratch_bytes",
+        "max_request_bytes",
+        "matrix_m_chunk",
+        "matrix_kn_slice",
+        "vector_rows",
+        "vector_cols",
+        "reload_policy",
+        "limitations"
+      ],
+      "title": "ReferenceAssumptions",
+      "type": "object"
+    },
+    "ReferenceBarrier": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "barrier",
+          "title": "Kind",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "participant_job_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Participant Job Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "participant_job_ids"
+      ],
+      "title": "ReferenceBarrier",
+      "type": "object"
+    },
+    "ReferenceBuffer": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulator": {
+          "title": "Accumulator",
+          "type": "boolean"
+        },
+        "alignment_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Alignment Bytes",
+          "type": "integer"
+        },
+        "bank": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bank"
+        },
+        "channel_id": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Channel Id"
+        },
+        "core_id": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Core Id"
+        },
+        "dtype": {
+          "enum": [
+            "bf16",
+            "fp32",
+            "int8",
+            "int32"
+          ],
+          "title": "Dtype",
+          "type": "string"
+        },
+        "final_consumer_ids": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Final Consumer Ids",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "initial_residency": {
+          "enum": [
+            "uninitialized",
+            "preloaded"
+          ],
+          "title": "Initial Residency",
+          "type": "string"
+        },
+        "layout": {
+          "enum": [
+            "contiguous",
+            "tile-packed",
+            "paged"
+          ],
+          "title": "Layout",
+          "type": "string"
+        },
+        "offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Offset Bytes",
+          "type": "integer"
+        },
+        "op_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Op Id"
+        },
+        "operand": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Operand"
+        },
+        "persistent": {
+          "title": "Persistent",
+          "type": "boolean"
+        },
+        "producer_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Producer Id"
+        },
+        "size_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "slot_index": {
+          "anyOf": [
+            {
+              "enum": [
+                0,
+                1
+              ],
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Slot Index"
+        },
+        "space": {
+          "enum": [
+            "hbm",
+            "vmem",
+            "smem"
+          ],
+          "title": "Space",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "space",
+        "size_bytes",
+        "alignment_bytes",
+        "core_id",
+        "channel_id",
+        "offset_bytes",
+        "bank",
+        "op_id",
+        "operand",
+        "slot_index",
+        "initial_residency",
+        "producer_id",
+        "final_consumer_ids",
+        "dtype",
+        "persistent",
+        "layout",
+        "accumulator"
+      ],
+      "title": "ReferenceBuffer",
+      "type": "object"
+    },
+    "ReferenceBundle": {
+      "additionalProperties": false,
+      "properties": {
+        "admission": {
+          "$ref": "#/$defs/ReferenceAdmission"
+        },
+        "assumptions": {
+          "$ref": "#/$defs/ReferenceAssumptions"
+        },
+        "assumptions_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Assumptions Hash",
+          "type": "string"
+        },
+        "bundle_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Bundle Hash",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-prepared/5",
+          "title": "Format",
+          "type": "string"
+        },
+        "hardware_spec": {
+          "$ref": "#/$defs/TpuV5eReference"
+        },
+        "hardware_spec_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Hardware Spec Hash",
+          "type": "string"
+        },
+        "mapping_policy": {
+          "$ref": "#/$defs/MappingPolicy"
+        },
+        "mapping_scope": {
+          "const": "task_graph",
+          "title": "Mapping Scope",
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/ReferencePoint"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "title": "Points",
+          "type": "array"
+        },
+        "producer": {
+          "$ref": "#/$defs/SoftwareProducer"
+        },
+        "rank": {
+          "$ref": "#/$defs/RankScope"
+        },
+        "source": {
+          "$ref": "#/$defs/ReferenceSource"
+        }
+      },
+      "required": [
+        "format",
+        "bundle_hash",
+        "producer",
+        "hardware_spec",
+        "hardware_spec_hash",
+        "assumptions",
+        "assumptions_hash",
+        "rank",
+        "mapping_scope",
+        "mapping_policy",
+        "source",
+        "admission",
+        "points"
+      ],
+      "title": "ReferenceBundle",
+      "type": "object"
+    },
+    "ReferenceCompute": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulator_buffer_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Accumulator Buffer Id",
+          "type": "string"
+        },
+        "accumulator_dtype": {
+          "enum": [
+            "fp32",
+            "int32"
+          ],
+          "title": "Accumulator Dtype",
+          "type": "string"
+        },
+        "core_id": {
+          "const": 0,
+          "title": "Core Id",
+          "type": "integer"
+        },
+        "dataflow": {
+          "enum": [
+            "weight_stationary",
+            "output_stationary"
+          ],
+          "title": "Dataflow",
+          "type": "string"
+        },
+        "engine": {
+          "const": "matrix",
+          "title": "Engine",
+          "type": "string"
+        },
+        "group_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Group Id"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "compute",
+          "title": "Kind",
+          "type": "string"
+        },
+        "leading_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Leading Index",
+          "type": "integer"
+        },
+        "matrix_engine_index": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Matrix Engine Index",
+          "type": "integer"
+        },
+        "member": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Member",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "operand_buffers": {
+          "patternProperties": {
+            "\\S": {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operand Buffers",
+          "type": "object"
+        },
+        "operand_dtypes": {
+          "patternProperties": {
+            "\\S": {
+              "enum": [
+                "bf16",
+                "fp32",
+                "int8",
+                "int32"
+              ],
+              "type": "string"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operand Dtypes",
+          "type": "object"
+        },
+        "physical_extents": {
+          "$ref": "#/$defs/Extent"
+        },
+        "repeat_index": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Repeat Index",
+          "type": "integer"
+        },
+        "tile_extents": {
+          "$ref": "#/$defs/Extent"
+        },
+        "tile_origin": {
+          "$ref": "#/$defs/Tile"
+        },
+        "valid_pairs": {
+          "anyOf": [
+            {
+              "maximum": 18446744073709551615,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Valid Pairs"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "group_id",
+        "repeat_index",
+        "core_id",
+        "engine",
+        "tile_origin",
+        "tile_extents",
+        "physical_extents",
+        "operand_buffers",
+        "operand_dtypes",
+        "accumulator_buffer_id",
+        "accumulator_dtype",
+        "dataflow",
+        "matrix_engine_index",
+        "valid_pairs",
+        "member",
+        "leading_index"
+      ],
+      "title": "ReferenceCompute",
+      "type": "object"
+    },
+    "ReferenceControl": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "instructions": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Instructions",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "control",
+          "title": "Kind",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "page_entries": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Page Entries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "instructions",
+        "page_entries"
+      ],
+      "title": "ReferenceControl",
+      "type": "object"
+    },
+    "ReferenceDma": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "$ref": "#/$defs/BufferRange"
+        },
+        "direction": {
+          "enum": [
+            "read",
+            "write"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "dma_engine_id": {
+          "const": 0,
+          "title": "Dma Engine Id",
+          "type": "integer"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "dma",
+          "title": "Kind",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "payload_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "source": {
+          "$ref": "#/$defs/BufferRange"
+        },
+        "spans": {
+          "items": {
+            "$ref": "#/$defs/TransferSpan"
+          },
+          "minItems": 1,
+          "title": "Spans",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "dma_engine_id",
+        "direction",
+        "source",
+        "destination",
+        "payload_bytes",
+        "spans"
+      ],
+      "title": "ReferenceDma",
+      "type": "object"
+    },
+    "ReferenceModelVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "native-intervals",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "const": "3",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "ReferenceModelVersion",
+      "type": "object"
+    },
+    "ReferenceOpSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "dimensions": {
+          "patternProperties": {
+            "\\S": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Dimensions",
+          "type": "object"
+        },
+        "operands": {
+          "patternProperties": {
+            "\\S": {
+              "$ref": "#/$defs/ReferenceOperand"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Operands",
+          "type": "object"
+        },
+        "operator": {
+          "enum": [
+            "q_projection",
+            "k_projection",
+            "v_projection",
+            "output_projection",
+            "ffn_up",
+            "ffn_gate",
+            "ffn_down",
+            "normalization",
+            "residual_addition",
+            "activation",
+            "kv_write",
+            "qk_score",
+            "softmax",
+            "av_application",
+            "attention_fused",
+            "rotary_embedding",
+            "stream_read_sum",
+            "stream_fill",
+            "stream_copy",
+            "paged_gather",
+            "scalar_add"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "reduction_axes": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Reduction Axes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operator",
+        "dimensions",
+        "operands",
+        "reduction_axes"
+      ],
+      "title": "ReferenceOpSpec",
+      "type": "object"
+    },
+    "ReferenceOperand": {
+      "additionalProperties": false,
+      "properties": {
+        "block_size_tokens": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Size Tokens"
+        },
+        "dimensions": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "dtype": {
+          "enum": [
+            "bf16",
+            "fp32",
+            "int8",
+            "int32"
+          ],
+          "title": "Dtype",
+          "type": "string"
+        },
+        "layout": {
+          "enum": [
+            "contiguous",
+            "paged"
+          ],
+          "title": "Layout",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dtype",
+        "dimensions",
+        "layout"
+      ],
+      "title": "ReferenceOperand",
+      "type": "object"
+    },
+    "ReferencePoint": {
+      "additionalProperties": false,
+      "properties": {
+        "initial_state": {
+          "enum": [
+            "steady",
+            "cold"
+          ],
+          "title": "Initial State",
+          "type": "string"
+        },
+        "payload_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Payload Hash",
+          "type": "string"
+        },
+        "point_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Point Id",
+          "type": "string"
+        },
+        "priming_iterations": {
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Priming Iterations",
+          "type": "integer"
+        },
+        "task_graph": {
+          "$ref": "#/$defs/TaskGraphV2"
+        }
+      },
+      "required": [
+        "point_id",
+        "payload_hash",
+        "task_graph",
+        "initial_state",
+        "priming_iterations"
+      ],
+      "title": "ReferencePoint",
+      "type": "object"
+    },
+    "ReferencePreparedOp": {
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 0,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "embedding_local_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Embedding Local Tokens"
+        },
+        "fusion": {
+          "enum": [
+            "none",
+            "qk_softmax_av"
+          ],
+          "title": "Fusion",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kv_access": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KvAccess"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operand_access": {
+          "additionalProperties": {
+            "enum": [
+              "read",
+              "write",
+              "read_write"
+            ],
+            "type": "string"
+          },
+          "title": "Operand Access",
+          "type": "object"
+        },
+        "padding": {
+          "items": {
+            "$ref": "#/$defs/Padding"
+          },
+          "minItems": 0,
+          "title": "Padding",
+          "type": "array"
+        },
+        "replication": {
+          "items": {
+            "$ref": "#/$defs/Replication"
+          },
+          "minItems": 0,
+          "title": "Replication",
+          "type": "array"
+        },
+        "rotary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RotaryBinding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spec": {
+          "$ref": "#/$defs/ReferenceOpSpec"
+        },
+        "weight_copies": {
+          "minimum": 1,
+          "title": "Weight Copies",
+          "type": "integer"
+        },
+        "work_repeat": {
+          "minimum": 1,
+          "title": "Work Repeat",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "depends_on",
+        "embedding_local_tokens",
+        "fusion",
+        "id",
+        "kv_access",
+        "operand_access",
+        "padding",
+        "replication",
+        "spec",
+        "weight_copies",
+        "work_repeat",
+        "rotary"
+      ],
+      "title": "ReferencePreparedOp",
+      "type": "object"
+    },
+    "ReferenceSoftwareIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "$ref": "#/$defs/ReferenceModelVersion"
+        },
+        "name": {
+          "const": "native",
+          "title": "Name",
+          "type": "string"
+        },
+        "package_version": {
+          "const": "0.0.1",
+          "title": "Package Version",
+          "type": "string"
+        },
+        "version": {
+          "const": "native-stage/3",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "package_version",
+        "model"
+      ],
+      "title": "ReferenceSoftwareIdentity",
+      "type": "object"
+    },
+    "ReferenceSource": {
+      "additionalProperties": false,
+      "properties": {
+        "attention_mask": {
+          "enum": [
+            "full_square",
+            "causal"
+          ],
+          "title": "Attention Mask",
+          "type": "string"
+        },
+        "coefficients": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RotaryCoefficients"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "context_after": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Context After",
+          "type": "integer"
+        },
+        "context_before": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Context Before",
+          "type": "integer"
+        },
+        "kv_key_encoding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RotaryEncoding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ops": {
+          "items": {
+            "$ref": "#/$defs/ReferencePreparedOp"
+          },
+          "minItems": 1,
+          "title": "Ops",
+          "type": "array"
+        },
+        "page_indices": {
+          "items": {
+            "maximum": 18446744073709551615,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "title": "Page Indices",
+          "type": "array"
+        },
+        "scalar_inputs": {
+          "patternProperties": {
+            "\\S": {
+              "type": "number"
+            }
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Scalar Inputs",
+          "type": "object"
+        },
+        "scope": {
+          "enum": [
+            "individual",
+            "decoder"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "source_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_hash",
+        "scalar_inputs",
+        "scope",
+        "ops",
+        "attention_mask",
+        "coefficients",
+        "kv_key_encoding",
+        "page_indices",
+        "context_before",
+        "context_after"
+      ],
+      "title": "ReferenceSource",
+      "type": "object"
+    },
+    "Replication": {
+      "additionalProperties": false,
+      "properties": {
+        "dimension": {
+          "minLength": 1,
+          "title": "Dimension",
+          "type": "string"
+        },
+        "global_extent": {
+          "minimum": 1,
+          "title": "Global Extent",
+          "type": "integer"
+        },
+        "rank_extent": {
+          "minimum": 1,
+          "title": "Rank Extent",
+          "type": "integer"
+        },
+        "replicas": {
+          "minimum": 1,
+          "title": "Replicas",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dimension",
+        "global_extent",
+        "rank_extent",
+        "replicas"
+      ],
+      "title": "Replication",
+      "type": "object"
+    },
+    "RotaryBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "coefficients_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Coefficients Hash",
+          "type": "string"
+        },
+        "input_op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Input Op Id",
+          "type": "string"
+        },
+        "numeric_policy": {
+          "const": "fp32-separate-round-rne/1",
+          "title": "Numeric Policy",
+          "type": "string"
+        },
+        "pairing": {
+          "enum": [
+            "adjacent",
+            "split_halves"
+          ],
+          "title": "Pairing",
+          "type": "string"
+        },
+        "position_ids": {
+          "items": {
+            "items": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Position Ids",
+          "type": "array"
+        },
+        "target": {
+          "enum": [
+            "q",
+            "k"
+          ],
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target",
+        "coefficients_hash",
+        "pairing",
+        "numeric_policy",
+        "position_ids",
+        "input_op_id"
+      ],
+      "title": "RotaryBinding",
+      "type": "object"
+    },
+    "RotaryCoefficients": {
+      "additionalProperties": false,
+      "properties": {
+        "coefficients_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Coefficients Hash",
+          "type": "string"
+        },
+        "cos_bits": {
+          "items": {
+            "items": {
+              "pattern": "^[0-9a-f]{8}$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Cos Bits",
+          "type": "array"
+        },
+        "dtype": {
+          "const": "fp32",
+          "title": "Dtype",
+          "type": "string"
+        },
+        "format": {
+          "const": "uarch-rotary-coefficients/1",
+          "title": "Format",
+          "type": "string"
+        },
+        "position_count": {
+          "minimum": 1,
+          "title": "Position Count",
+          "type": "integer"
+        },
+        "producer": {
+          "$ref": "#/$defs/Producer"
+        },
+        "rotary_dim": {
+          "minimum": 1,
+          "title": "Rotary Dim",
+          "type": "integer"
+        },
+        "sin_bits": {
+          "items": {
+            "items": {
+              "pattern": "^[0-9a-f]{8}$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Sin Bits",
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "coefficients_hash",
+        "position_count",
+        "rotary_dim",
+        "dtype",
+        "cos_bits",
+        "sin_bits",
+        "producer"
+      ],
+      "title": "RotaryCoefficients",
+      "type": "object"
+    },
+    "RotaryEncoding": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_key_state": {
+          "const": "rotated-before-store",
+          "title": "Cache Key State",
+          "type": "string"
+        },
+        "coefficients_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Coefficients Hash",
+          "type": "string"
+        },
+        "kind": {
+          "const": "rope-precomputed/1",
+          "title": "Kind",
+          "type": "string"
+        },
+        "numeric_policy": {
+          "const": "fp32-separate-round-rne/1",
+          "title": "Numeric Policy",
+          "type": "string"
+        },
+        "pairing": {
+          "enum": [
+            "adjacent",
+            "split_halves"
+          ],
+          "title": "Pairing",
+          "type": "string"
+        },
+        "position_policy": {
+          "const": "zero-origin-contiguous/1",
+          "title": "Position Policy",
+          "type": "string"
+        },
+        "rotary_dim": {
+          "minimum": 1,
+          "title": "Rotary Dim",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "rotary_dim",
+        "pairing",
+        "coefficients_hash",
+        "position_policy",
+        "cache_key_state",
+        "numeric_policy"
+      ],
+      "title": "RotaryEncoding",
+      "type": "object"
+    },
+    "SoftwareProducer": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "SoftwareProducer",
+      "type": "object"
+    },
+    "SourcedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "kind": {
+          "default": "claim",
+          "enum": [
+            "claim",
+            "stipulation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Calibration"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rationale"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "title": "SourcedValue",
+      "type": "object"
+    },
+    "TaskGraphV2": {
+      "additionalProperties": false,
+      "properties": {
+        "arbitration": {
+          "const": "fifo-ready/1",
+          "title": "Arbitration",
+          "type": "string"
+        },
+        "buffers": {
+          "items": {
+            "$ref": "#/$defs/ReferenceBuffer"
+          },
+          "title": "Buffers",
+          "type": "array"
+        },
+        "coverage": {
+          "items": {
+            "$ref": "#/$defs/Coverage"
+          },
+          "title": "Coverage",
+          "type": "array"
+        },
+        "dependencies": {
+          "items": {
+            "$ref": "#/$defs/Dependency"
+          },
+          "title": "Dependencies",
+          "type": "array"
+        },
+        "format": {
+          "const": "uarch-taskgraph/2",
+          "title": "Format",
+          "type": "string"
+        },
+        "graph_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Graph Hash",
+          "type": "string"
+        },
+        "jobs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "barrier": "#/$defs/ReferenceBarrier",
+                "compute": "#/$defs/ReferenceCompute",
+                "control": "#/$defs/ReferenceControl",
+                "dma": "#/$defs/ReferenceDma",
+                "local_transfer": "#/$defs/LocalTransfer",
+                "vector": "#/$defs/VectorTask"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ReferenceCompute"
+              },
+              {
+                "$ref": "#/$defs/VectorTask"
+              },
+              {
+                "$ref": "#/$defs/ReferenceDma"
+              },
+              {
+                "$ref": "#/$defs/LocalTransfer"
+              },
+              {
+                "$ref": "#/$defs/ReferenceControl"
+              },
+              {
+                "$ref": "#/$defs/ReferenceBarrier"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Jobs",
+          "type": "array"
+        },
+        "routes": {
+          "maxItems": 0,
+          "minItems": 0,
+          "title": "Routes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "graph_hash",
+        "buffers",
+        "jobs",
+        "dependencies",
+        "coverage",
+        "routes",
+        "arbitration"
+      ],
+      "title": "TaskGraphV2",
+      "type": "object"
+    },
+    "Tile": {
+      "additionalProperties": false,
+      "properties": {
+        "K": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "K",
+          "type": "integer"
+        },
+        "M": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "M",
+          "type": "integer"
+        },
+        "N": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "N",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "M",
+        "K",
+        "N"
+      ],
+      "title": "Tile",
+      "type": "object"
+    },
+    "TpuV5eReference": {
+      "additionalProperties": false,
+      "properties": {
+        "barrier_latency_ps": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bf16_mxu_mac_per_s": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "bf16_peak_ops_per_s": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "design_status": {
+          "const": "reference",
+          "title": "Design Status",
+          "type": "string"
+        },
+        "exp_cost_ratio": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "hbm_capacity_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "hbm_issue_interval_ps": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "hbm_latency_ps": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "hbm_max_outstanding": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "hbm_peak_bytes_per_s": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "identity": {
+          "const": "tpu-v5e",
+          "title": "Identity",
+          "type": "string"
+        },
+        "int8_mxu_mac_per_s": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "int8_peak_ops_per_s": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "kernel_startup_ps": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "matrix_fill_equivalent_macs": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "mxu_cols": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "mxu_count": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "mxu_rows": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "reciprocal_cost_ratio": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "reduction_cost_ratio": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "rsqrt_cost_ratio": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "scalar_op_ps": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "smem_capacity_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "tensorcore_count": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "vector_group_startup_ps": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "vector_tile_ps": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "vmem_bytes_per_s": {
+          "$ref": "#/$defs/SourcedValue"
+        },
+        "vmem_capacity_bytes": {
+          "$ref": "#/$defs/SourcedValue"
+        }
+      },
+      "required": [
+        "identity",
+        "design_status",
+        "tensorcore_count",
+        "mxu_count",
+        "mxu_rows",
+        "mxu_cols",
+        "bf16_peak_ops_per_s",
+        "int8_peak_ops_per_s",
+        "hbm_peak_bytes_per_s",
+        "vmem_capacity_bytes",
+        "smem_capacity_bytes",
+        "hbm_capacity_bytes",
+        "bf16_mxu_mac_per_s",
+        "int8_mxu_mac_per_s",
+        "matrix_fill_equivalent_macs",
+        "vmem_bytes_per_s",
+        "hbm_latency_ps",
+        "hbm_issue_interval_ps",
+        "hbm_max_outstanding",
+        "vector_tile_ps",
+        "vector_group_startup_ps",
+        "reduction_cost_ratio",
+        "exp_cost_ratio",
+        "reciprocal_cost_ratio",
+        "rsqrt_cost_ratio",
+        "scalar_op_ps",
+        "kernel_startup_ps",
+        "barrier_latency_ps"
+      ],
+      "title": "TpuV5eReference",
+      "type": "object"
+    },
+    "TransferSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "destination_offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Destination Offset Bytes",
+          "type": "integer"
+        },
+        "payload_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 1,
+          "title": "Payload Bytes",
+          "type": "integer"
+        },
+        "source_offset_bytes": {
+          "maximum": 18446744073709551615,
+          "minimum": 0,
+          "title": "Source Offset Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_offset_bytes",
+        "destination_offset_bytes",
+        "payload_bytes"
+      ],
+      "title": "TransferSpan",
+      "type": "object"
+    },
+    "VectorTask": {
+      "additionalProperties": false,
+      "properties": {
+        "core_id": {
+          "const": 0,
+          "title": "Core Id",
+          "type": "integer"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Id",
+          "type": "string"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/BufferRange"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "kind": {
+          "const": "vector",
+          "title": "Kind",
+          "type": "string"
+        },
+        "member": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Member",
+          "type": "string"
+        },
+        "op_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Op Id",
+          "type": "string"
+        },
+        "outputs": {
+          "items": {
+            "$ref": "#/$defs/BufferRange"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "primitives": {
+          "items": {
+            "$ref": "#/$defs/Primitive"
+          },
+          "minItems": 1,
+          "title": "Primitives",
+          "type": "array"
+        },
+        "scratch_bytes": {
+          "maximum": 65536,
+          "minimum": 0,
+          "title": "Scratch Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "op_id",
+        "member",
+        "core_id",
+        "primitives",
+        "inputs",
+        "outputs",
+        "scratch_bytes"
+      ],
+      "title": "VectorTask",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "admission": {
+      "$ref": "#/$defs/ReferenceAdmission"
+    },
+    "bundle_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Bundle Hash",
+      "type": "string"
+    },
+    "engine": {
+      "$ref": "#/$defs/ReferenceSoftwareIdentity"
+    },
+    "job_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Job Hash",
+      "type": "string"
+    },
+    "point_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Point Hash",
+      "type": "string"
+    },
+    "protocol": {
+      "const": "uarch-engine/5",
+      "title": "Protocol",
+      "type": "string"
+    },
+    "seed": {
+      "maximum": 18446744073709551615,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "workload_closure": {
+      "$ref": "#/$defs/ReferenceBundle"
+    }
+  },
+  "required": [
+    "protocol",
+    "job_hash",
+    "bundle_hash",
+    "point_hash",
+    "engine",
+    "workload_closure",
+    "admission",
+    "seed"
+  ],
+  "title": "ReferenceJob",
+  "type": "object"
+}

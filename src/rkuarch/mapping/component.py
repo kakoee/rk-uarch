@@ -400,3 +400,10 @@ def map_component(
             job["owner_id"] = owners["barrier:" + job["id"]]
     data["graph_hash"] = content_hash(data, exclude=("graph_hash",))
     return TaskGraph.model_validate(data)
+
+
+def map_reference(*args: Any, **kwargs: Any) -> Any:
+    """Versioned R policy; existing component mapping stays unchanged."""
+    from .reference import map_reference as reference_policy
+
+    return reference_policy(*args, **kwargs)

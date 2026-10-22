@@ -6,7 +6,8 @@ use std::collections::BTreeMap;
 pub(crate) struct Admitted {
     pub raw: Value,
     pub graph: Graph,
-    pub hardware: Hardware,
+    pub hardware: Option<Hardware>,
+    pub reference: Option<crate::reference::ReferenceHardware>,
     pub owners: BTreeMap<String, u64>,
 }
 #[derive(Clone, Debug)]
@@ -47,6 +48,9 @@ pub(crate) enum TaskKind {
         route: usize,
     },
     Barrier,
+    Reference {
+        sequences: Vec<crate::reference::ReferenceSequence>,
+    },
 }
 #[derive(Clone, Debug)]
 pub(crate) struct Fragment {
@@ -654,7 +658,8 @@ fn validate_inner(input: &str, ordinary: bool, _model: ModelVersion) -> Result<A
     Ok(Admitted {
         raw: v,
         graph,
-        hardware,
+        hardware: Some(hardware),
+        reference: None,
         owners,
     })
 }
