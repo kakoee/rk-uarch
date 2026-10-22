@@ -96,7 +96,14 @@ staging slot. The reviewer reported 862.2 microseconds for one simulated gather 
 latency. This is a mapping/model observation, not a TPU measurement or a demonstrated
 physical bottleneck. Predictions must carry this limitation into U5.
 
-## What remains outside this result
+## U4 acceptance and what remains outside this result
+
+Javid [accepted the U4 scope](reviews/U4-closeout-acceptance.md) on 2026-10-22: the
+52-benchmark agreement and existing reference APIs are accepted by the human in place of
+outstanding A/B signatures. Actual compiler/device correspondence moves to U5 measurement
+work, with predictions frozen before measured timing is observed. Unverified diagnostics
+will not support causal claims. This resolves the U4 scope decisions; the closeout tag
+awaits completed CI. It does not claim device accuracy or deferred qualification.
 
 U5 freezes predictions before measurements and compares device intervals at the agreed
 benchmark boundaries. TPU compilation may fuse, split or eliminate work; a local mapping

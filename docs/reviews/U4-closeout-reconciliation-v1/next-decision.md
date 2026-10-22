@@ -1,4 +1,10 @@
-# Remaining U4 closeout decisions
+# Historical U4 closeout proposal — superseded by acceptance
+
+Javid [accepted the final scope](../U4-closeout-acceptance.md) on 2026-10-22.
+The text below preserves the earlier proposal. In particular, its requirement to confirm
+actual device correspondence before prediction freeze was **not** the final decision:
+the accepted boundary puts it in U5 measurement work, preserving prediction-first order.
+No repeat approval is required.
 
 This is prepared decision text, **not an approval record**. The implementation, corrected
 human L1 workings, benchmark correspondence, documentation and prediction-order check are

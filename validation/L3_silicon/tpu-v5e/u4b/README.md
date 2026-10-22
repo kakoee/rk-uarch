@@ -7,8 +7,10 @@ F3/F4/F6 remain explicit limitations, and F5's staging behavior is disclosed.
 
 **Current benchmark and measurement status:** [BENCHMARK-PLAN.md](../BENCHMARK-PLAN.md).
 It connects all 52 IDs to the saved campaign and proposed device envelopes, and separates
-completed simulator verification from pending measurement agreement and human L1 workings.
-Installation is not TPU accuracy validation, G3a acceptance or U4 closure.
+completed simulator verification from later device observations. Javid accepted the
+52-unit agreement, reference APIs and assisted L1 workings; the
+[closeout acceptance](../../../../docs/reviews/U4-closeout-acceptance.md) records the exact
+G3a adjustment. The U4 tag awaits completed CI. Installation is not TPU accuracy validation.
 
 | Artifact | Role |
 | --- | --- |
@@ -16,7 +18,7 @@ Installation is not TPU accuracy validation, G3a acceptance or U4 closure.
 | [REFERENCE.md](REFERENCE.md) | Dated source reconciliation and rationale; proposal-era statements are historical |
 | [SUITE.md](SUITE.md), [suite-proposed.json](suite-proposed.json) | Exact 52-unit definitions and planned device envelopes; original JSON status/signature fields are preserved, with current status in BENCHMARK-PLAN |
 | [DISPOSITIONS.md](DISPOSITIONS.md), [candidate-dispositions.json](candidate-dispositions.json) | All 70 historical candidates accounted for without expanding the selected suite |
-| [shape-regimes.json](shape-regimes.json) | Count-only coverage; final preparation-interface reconciliation remains explicit |
+| [shape-regimes.json](shape-regimes.json) | Count-only coverage; Javid accepted the reference-API preparation route |
 | [inputs](inputs/README.md) | Supplied RoPE coefficient table and gather indices used by preparation |
 | [ARITHMETIC.md](ARITHMETIC.md), [check_model.py](check_model.py) | Independent arithmetic and catalogue consistency checks; not human L1 workings |
 | [EVIDENCE.md](EVIDENCE.md), [check_package.py](check_package.py) | Historical proposal checks, preserved with their original scope |

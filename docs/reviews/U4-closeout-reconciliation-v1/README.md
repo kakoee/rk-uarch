@@ -1,6 +1,11 @@
 # U4 closeout reconciliation
 
 Date: 2026-10-22. Baseline: `85e7552f3ab0784f8f8bb6f7beccb7843e299ce8`.
+Javid [accepted the final scope](../U4-closeout-acceptance.md) on 2026-10-22. The remaining
+publication step is the tag after completed CI. Earlier pending-decision language below
+is the reconciliation history; actual device correspondence now belongs to U5 measurement
+work, not a new pre-freeze inspection task.
+
 This is the finite closeout pass requested by Javid. It adds no model, suite unit, native
 campaign, review cycle, authority service or qualification requirement. U4 is not tagged
 closed by this record.

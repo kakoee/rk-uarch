@@ -12,6 +12,16 @@ PREREQUISITES: G3a, the frozen exact suite/predictions and separately authorized
 access/spend. G3b tables are not an input. Missing access leaves U5 open; independent
 engine/table development can continue without a physical-validation claim.
 
+U4 CLOSEOUT ADJUSTMENT (Javid, 2026-10-22):
+Read docs/reviews/U4-closeout-acceptance.md and the human-accepted 52-unit BENCHMARK-PLAN.md.
+During separately authorized measurement work, confirm compiler/event membership,
+materialization and state against the frozen subject. A mismatched or unobservable
+comparison is incomparable, not a silently changed workload or prediction. Preserve
+prediction-before-measurement discipline and never tune to observed timing in this task.
+Unverified diagnostics cannot support causal claims; any relied-on diagnostic allocation
+still needs its existing scoped verification. Human acceptance replaces the outstanding
+A/B suite signatures only. Access/spend and U0024 obligations remain separate.
+
 TASK: measure the reference chip, compare against the frozen predictions, and let the ledger,
 and only the ledger, decide what the model card may say.
 

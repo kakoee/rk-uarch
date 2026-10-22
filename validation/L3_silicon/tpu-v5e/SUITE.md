@@ -1,5 +1,7 @@
 # Proposed TPU v5e benchmark agreement, revision 1
 
+> **Human acceptance, 2026-10-22:** Javid accepted the unchanged current 52-unit agreement and reference APIs in place of outstanding A/B signatures. Actual compiler/device correspondence remains U5 measurement work, with predictions frozen first. [Acceptance and scope](../../../docs/reviews/U4-closeout-acceptance.md). The dated proposal below is preserved as history.
+
 > **Historical revision 1:** the 70-row proposal and `suite.json` below remain evidence history. The installed selection is 52 units. Use [BENCHMARK-PLAN.md](BENCHMARK-PLAN.md) for current execution status, all selected IDs, proposed device comparisons and remaining agreement; [u4b/DISPOSITIONS.md](u4b/DISPOSITIONS.md) accounts for all 70 candidates. Pending claims below describe 2026-10-16, not today's installed simulator.
 
 **Not signed or admitted.** Lane B agent proposal, 2026-10-16. Lane A signature: pending.

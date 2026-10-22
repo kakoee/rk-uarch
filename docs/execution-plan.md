@@ -48,11 +48,11 @@ project closure retain their required evidence. See [the ADR and Reza/owner runb
 | **U0 done** | Tagged `u00-end` at `a5a4cc4`: bootstrap, protected files, build-spec Rev 2, pushed to the private remote |
 | **Accepted** | 2026-10-03: both founders accept the Rev 2.1 fixes from `docs/reviews/rev2-plan-review.md` (and Revs 2.2–2.3) |
 | **rk-sim pin** | `1e5706e0ebfcc67c1a7333079a35b75f693e9963` (rk-sim `main`, verified 2026-10-04), fixed for U1 so U-P1 and U-P2 use the same baseline; U-P1 records it in ADR U0001 |
-| **Next** | Reconcile the installed 52-unit reference suite with the existing U5 measurement agreement, record final benchmark agreement and the scope of G4 diagnostic reliance; accepted L1 workings and applicable evidence are reconciled. [Current benchmark plan](../validation/L3_silicon/tpu-v5e/BENCHMARK-PLAN.md). No prediction freeze or device measurement authorized by this status update |
+| **Next** | Publish `u04-end` after completed CI is accounted for. Then U5 prediction/measurement preparation follows the [accepted scope](reviews/U4-closeout-acceptance.md); no additional U4 implementation or review cycle. No device access/spend or measurement is authorized by this status update |
 | **U1 done** | Published `u01-end` at `1e9e794a84c5173812c23a1cf2fc04b85e6f6831` |
 | **U2 done** | Accepted closeout and `u02-end` at `79bc1f0`; approved cleanup preserved the evidence archive and branch history |
 | **U3 done** | Human `u03-end` at `6d39a234a14855c86ca54b795501a0b0b2618d7b`, published and verified; final CI passed. [Closeout](reviews/U3-closeout.md). Historical incomplete report outcomes remain explicit |
-| **U4 in progress** | Native component execution and the ordinary-runtime simplification are installed. The reviewed U4b nominal reference implementation and 52-unit suite were installed at `3626273`, verified/published at `6d443e1`. The two L1 workings are human-validated with disclosed AI assistance; L1 evidence is reconciled and prediction-order checking is implemented. Final reference/measurement agreement and the scope of G4 diagnostic reliance remain open; see [closeout reconciliation](reviews/U4-closeout-reconciliation-v1/README.md). G3a/U4 closure and U0024 qualification are not claimed |
+| **U4 accepted; tag pending CI** | Javid accepted the unchanged 52-unit agreement, reference APIs and adjusted G3a boundary on 2026-10-22. Human acceptance replaces outstanding A/B signatures; actual compiler/device correspondence belongs to U5 measurement work with predictions frozen first. L1 workings and evidence are reconciled. [Acceptance and limitations](reviews/U4-closeout-acceptance.md). No device accuracy, remote-native or performance qualification claimed |
 | **Not started** | U5–U11 |
 | **Runner pending** | Registration and executed manual nightly remain unverified. Not a correctness-development prerequisite under U0023; controlled-host performance and G5 nightly qualification remain pending |
 
@@ -371,7 +371,14 @@ stationary Little's law at first qualifying claim. U-P6/build-spec hold the exac
 DMA/clock statements. The prospective U0002 policy is selected; its code/migration remain
 uninstalled and separately authorized. U4 is not released by U3 decision recording.
 
-**G3a · Silicon-suite readiness (U4b).** Gates U5 prediction freeze, not product tables:
+**G3a · Silicon-suite readiness (U4b).** Gates U5 prediction freeze, not product tables.
+For the unchanged 52-unit TPU suite, Javid
+[accepted the bounded U4 closeout adjustment](reviews/U4-closeout-acceptance.md) on
+2026-10-22: human acceptance replaces the outstanding A/B signatures; installed reference
+APIs replace the incompatible legacy characterize command; actual compiler/device
+correspondence is checked during U5 measurement work, preserving prediction-first order.
+Unverified diagnostics cannot support causal claims. These explicit exceptions govern
+the following original gate text; absent device observations are not claimed as completed:
 - usable sourced TPU reference, explicit unknowns and structural assumptions, representability
   and measurement-observability review; required native formats/operators admitted;
 - complete required suite work, including decoder/RoPE/casts/KV/traffic where applicable;

@@ -1,7 +1,12 @@
 # Installed U4b suite and planned TPU comparisons
 
 Current reconciliation, 2026-10-22. This connects existing workload definitions to the
-existing U5 measurement plan; it adds no workloads, timing laws or acceptance gates.
+existing U5 measurement plan; it adds no workloads or timing laws.
+Javid [accepted this unchanged agreement](../../../docs/reviews/U4-closeout-acceptance.md)
+on 2026-10-22, replacing outstanding A/B signatures with human acceptance. The reference
+APIs are accepted; actual compiler/device correspondence is checked in U5 measurement
+work, with predictions frozen before measured timing. Unverified diagnostics cannot
+support causal claims. U4 technical scope is accepted; the tag awaits completed CI.
 
 The complete reviewed v2 implementation was human-installed at `36262735ba21cc75c9373216ed89153e6f31c2d6`
 and published with its verification record at `6d443e1`. The [installation record](../../../docs/reviews/U4b-native-reference-install-decision-v1/next-decision.md)
@@ -15,7 +20,8 @@ The current implementation selection is the **52 IDs in [u4b/suite-proposed.json
 The filename and its prospective status fields are preserved because they are inputs to
 published evidence. Its `native_status: not_run` and empty signatures describe the old
 proposal, not today's simulator execution status. This document supplies current status;
-it does not invent final benchmark signatures or device evidence.
+the human acceptance supplies the current agreement without inventing A/B signatures or
+device evidence.
 
 The older [suite.json](suite.json) is the historical 70-candidate proposal. Do not execute
 both lists or combine their counts. [All 70 dispositions](u4b/DISPOSITIONS.md) account for
@@ -65,8 +71,9 @@ These are the already proposed boundaries, not new experimental requirements:
   host-device transfer. Resolve how the nominal `kernel_startup_ps` term corresponds to
   that interval; it is a STUB device-entry cost, not a measured host-launch time.
 - Record actual event membership where the compiler fuses, splits or eliminates work.
-  If the declared unit cannot be timed meaningfully, return that concrete unit/target
-  decision before freezing its prediction. Do not silently substitute a smaller unit.
+  If device observations show the declared unit cannot be timed meaningfully, mark that
+  comparison incomparable and return the concrete unit/target decision. Preserve the frozen
+  prediction; do not silently substitute a smaller unit or tune after seeing timing.
 - Keep precision, coefficients, masks and required rounding points. Archive compiler
   FLOPs/bytes separately from physical counters; absent counters remain unavailable.
 - Warm up the declared workload and preserve its logical inputs: decode repeats prior
@@ -161,16 +168,16 @@ state are retained in the linked selection rather than redefined here.
 | --- | --- | --- |
 | Native representation and selected execution | Installed and reviewed, with the limits above | U4b implementation; no new campaign here |
 | Human L1 DMA and GEMM workings | Javid explicitly accepted the [DMA](../../L1_limits/hand/H-L1-DMA-01.md) and [GEMM](../../L1_limits/hand/H-L1-GEMM-01.md) workings as human-validated calculations using AI assistance | Human-working acceptance is recorded with exact attribution. Applicable simulator L1 evidence remains separately assessed; no new native pass or physical-chip validation is inferred |
-| Final benchmark agreement and measurement observability | Proposed envelopes exist for all 52; compiler/event/state correspondence and signatures remain pending | Existing A/B benchmark agreement before U-P9 freeze; no signature is synthesized by this reconciliation |
-| Shape coverage and characterize interface | [Count-only regimes](u4b/shape-regimes.json) exist; old `uarch characterize` wording assumes a HardwareSpec, whereas installed reference uses TpuV5eReference | [Concrete existing-API route](../../../docs/reviews/U4-closeout-reconciliation-v1/README.md) prepared for final agreement; no new engine or invented physical fields |
+| Final benchmark agreement and measurement observability | All 52 envelopes accepted by Javid; human acceptance replaces outstanding A/B signatures. Actual compiler/event/state correspondence remains unobserved | U5 measurement work, preserving prediction-before-measurement; mismatched envelopes are incomparable, not silently revised |
+| Shape coverage and characterize interface | [Count-only regimes](u4b/shape-regimes.json) exist; old `uarch characterize` wording assumes a HardwareSpec, whereas installed reference uses TpuV5eReference | [Existing-API route](../../../docs/reviews/U4-closeout-reconciliation-v1/README.md) accepted by Javid; no new engine or invented physical fields |
 | Prediction ordering | Implemented in the existing CI job; synthetic histories check strict ancestry and immutable bytes, including results without predictions | Original U-P9/U-P10 requirement. No current predictions or measurements; infrastructure alone does not close G3a |
 | Prediction freeze | Not performed by U4 campaign or this document | [U-P9](../../../docs/prompts/U-P9-large-core-reference-and-frozen-predictions.md), before any measurement |
 | Device kit, access and measurement | Not executed here | [U-P10](../../../docs/prompts/U-P10-large-core-measurement-and-the-ledger.md); hardware access/spend separately authorized |
 | Remote/native/nightly and controlled-host qualification | Deferred under U0024 | Existing deferral; no local run is labelled a hosted or performance qualification |
 
-This is a readiness reconciliation, not G3a acceptance, U4 closure or permission to measure.
-The [closeout reconciliation](../../../docs/reviews/U4-closeout-reconciliation-v1/README.md)
-binds the accepted L1 workings to the existing arithmetic/native evidence and documents
-the finite benchmark-agreement and diagnostic decisions still needed before closure. The two human-validated workings are now accepted with disclosed assistance.
+The [human acceptance](../../../docs/reviews/U4-closeout-acceptance.md) resolves the U4
+agreement and G3a scope decisions. Publication of the closeout tag awaits completed CI;
+this is not permission to measure. The [reconciliation](../../../docs/reviews/U4-closeout-reconciliation-v1/README.md)
+binds the accepted AI-assisted L1 workings to existing arithmetic/native evidence.
 Optional trace output, runtime optimization and compatibility cleanup remain separate
 follow-ups, not new prerequisites for accepting the installed implementation.

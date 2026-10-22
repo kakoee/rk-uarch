@@ -1,5 +1,7 @@
 # TPU v5e reference readiness — prospective, 2026-10-16
 
+> **Human acceptance, 2026-10-22:** Javid accepted the unchanged current 52-unit agreement and reference APIs in place of outstanding A/B signatures. Actual compiler/device correspondence remains U5 measurement work, with predictions frozen first. [Acceptance and scope](../../../docs/reviews/U4-closeout-acceptance.md). The dated proposal below is preserved as history.
+
 > **Current status, 2026-10-22:** the nominal reference model and 52-unit implementation are installed and independently reviewed. Use [BENCHMARK-PLAN.md](BENCHMARK-PLAN.md) for current evidence and remaining measurement-readiness work. The dossier below is dated evidence history: its absent-admission/uninstalled statements and published-value gate are superseded, not current execution restrictions. Physical observability, final benchmark agreement and accuracy are not established by installation.
 
 No reference admission, prediction, measurement, device reservation, spend or availability

@@ -1,7 +1,9 @@
-# Selected 52-unit suite and proposed measurement agreement
+# Selected 52-unit suite and human-accepted measurement agreement
 
-**Native implementation installed and reviewed; final device benchmark agreement and
-observability remain pending.** [Current status and all 52 correspondences](../BENCHMARK-PLAN.md)
+**Native implementation installed and reviewed; Javid accepted the unchanged agreement
+on 2026-10-22 in place of outstanding A/B signatures.**
+[Exact acceptance](../../../../docs/reviews/U4-closeout-acceptance.md). Actual device
+correspondence remains for U5 measurement work, preserving prediction-first discipline. [Current status and all 52 correspondences](../BENCHMARK-PLAN.md)
 record the completed simulator campaign separately from prospective device measurements.
 The machine-readable proposal and its historical status fields remain unchanged.
 [Machine-readable units](suite-proposed.json) specify dimensions, precision, work, native
@@ -96,11 +98,12 @@ same engine, exclude its counts/time, report the next, and compare a second-prim
 Do not preload everything as a substitute. The compiler/device retention behavior remains
 unobserved; a state mismatch stays an explicit limitation or blocks that comparison.
 
-Later agreement binds optimized HLO, runtime/compiler versions, flags, numeric policy,
+The U5 measurement record binds optimized HLO, runtime/compiler versions, flags, numeric policy,
 materialized buffers, static FLOPs/bytes, device event interval and available counters.
 Static compiler byte estimates are not physical HBM counters. Every current observability
 cell is `not_demonstrated`; if an envelope is eliminated, further fused, or cannot be timed,
-return a concrete changed unit/target decision **before** its prediction freeze. No assumed
+record that comparison as incomparable and return a concrete changed unit/target decision.
+Preserve the frozen prediction; do not silently replace its subject after observing timing. No assumed
 XLA event, pilot or measurement is claimed. Historical 10 warm-ups/30 samples remain proposals,
 not acceptance gates. Human access/budget and later observation permissions remain separate.
 
@@ -125,9 +128,9 @@ NoC/DRAM load regimes still need their own scope match. INT8 coverage is isolate
 `uarch characterize` currently calls analytic `capture()` and emits timing predictions;
 it is not a count-only entry point. The reference uses TpuV5eReference rather than a TPU HardwareSpec. Running it with
 npu-l4 or invented clock/vector inputs would not establish TPU shape coverage and would
-violate this task's no-predictions boundary. Thus U-P9's final **characterize binding is
-not satisfied here**. The reference model is now installed, with its own TpuV5eReference input rather than
-HardwareSpec. Reconcile this older command instruction with the installed reference
-preparation and analytic baseline before freeze; do not silently treat the count-only
-worksheet as a completed characterize invocation. If new bins appear, amend the finite selection explicitly rather than
+violate this task's no-predictions boundary. Javid accepted the existing reference preparation and analytic APIs as the replacement
+for this incompatible command instruction. The reference model is installed with its own
+TpuV5eReference input rather than HardwareSpec. Use the
+[documented route](../../../../docs/reviews/U4-closeout-reconciliation-v1/README.md);
+this does not claim a completed legacy characterize invocation. If new bins appear, amend the finite selection explicitly rather than
 starting a full grid. No waived shape requirement or fabricated characterize receipt.

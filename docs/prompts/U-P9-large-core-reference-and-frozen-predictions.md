@@ -23,6 +23,16 @@ separate. No full table or G3b prerequisite. Do not fix engine gaps in this free
 No pilot measurements are authorized; prospective development/held-out policy would need
 a separate decision. A successful G4 verdict is not required for later table production.
 
+U4 CLOSEOUT ADJUSTMENT (Javid, 2026-10-22):
+Read docs/reviews/U4-closeout-acceptance.md and the current BENCHMARK-PLAN.md.
+For this unchanged 52-unit suite, Javid's human agreement replaces the outstanding A/B
+signatures. Use the installed reference preparation and U-C0 APIs instead of the legacy
+HardwareSpec characterize path. Actual compiler/device correspondence belongs to U5's
+measurement work; it is not another pre-freeze device-inspection gate. Freeze predictions
+before measurements. No observed device timing, pilot, new campaign or engine changes
+are authorized here. These scoped exceptions supersede the older agreement/observability
+wording below; other requirements and U0024 remain.
+
 TASK: produce, and COMMIT BEFORE ANY MEASUREMENT EXISTS, uarch's predictions for a suite of
 microbenchmarks on Google Cloud TPU v5e, the large-core reference. This prompt never sees a
 measurement. That is its whole design.
