@@ -160,16 +160,17 @@ state are retained in the linked selection rather than redefined here.
 | Item | Current status | Existing owner/boundary |
 | --- | --- | --- |
 | Native representation and selected execution | Installed and reviewed, with the limits above | U4b implementation; no new campaign here |
-| Human L1 DMA and GEMM workings | Both working files remain absent | Human derivations under [U-P8](../../../docs/prompts/U-P8-L1-limits-and-L2-differential.md); [input-only questions](../../../docs/reviews/U4-B-verification-inputs-v1/human-worksheet-inputs.md) |
+| Human L1 DMA and GEMM workings | Javid explicitly accepted the [DMA](../../L1_limits/hand/H-L1-DMA-01.md) and [GEMM](../../L1_limits/hand/H-L1-GEMM-01.md) workings as human-validated calculations using AI assistance | Human-working acceptance is recorded with exact attribution. Applicable simulator L1 evidence remains separately assessed; no new native pass or physical-chip validation is inferred |
 | Final benchmark agreement and measurement observability | Proposed envelopes exist for all 52; compiler/event/state correspondence and signatures remain pending | Existing A/B benchmark agreement before U-P9 freeze; no signature is synthesized by this reconciliation |
-| Shape coverage and characterize interface | [Count-only regimes](u4b/shape-regimes.json) exist; old `uarch characterize` wording assumes a HardwareSpec, whereas installed reference uses TpuV5eReference | Reconcile the existing U-P9 preparation instruction with the installed reference path; no new engine, invented physical fields or silent waiver |
-| Prediction ordering | `validation/L3_silicon/check_ordering.py` remains absent at this reconciliation | U-P9 owns the small history-order check; U-P10 consumes it. G3a readiness remains open, not waived |
+| Shape coverage and characterize interface | [Count-only regimes](u4b/shape-regimes.json) exist; old `uarch characterize` wording assumes a HardwareSpec, whereas installed reference uses TpuV5eReference | [Concrete existing-API route](../../../docs/reviews/U4-closeout-reconciliation-v1/README.md) prepared for final agreement; no new engine or invented physical fields |
+| Prediction ordering | Implemented in the existing CI job; synthetic histories check strict ancestry and immutable bytes, including results without predictions | Original U-P9/U-P10 requirement. No current predictions or measurements; infrastructure alone does not close G3a |
 | Prediction freeze | Not performed by U4 campaign or this document | [U-P9](../../../docs/prompts/U-P9-large-core-reference-and-frozen-predictions.md), before any measurement |
 | Device kit, access and measurement | Not executed here | [U-P10](../../../docs/prompts/U-P10-large-core-measurement-and-the-ledger.md); hardware access/spend separately authorized |
 | Remote/native/nightly and controlled-host qualification | Deferred under U0024 | Existing deferral; no local run is labelled a hosted or performance qualification |
 
 This is a readiness reconciliation, not G3a acceptance, U4 closure or permission to measure.
-The next useful work is the finite benchmark-agreement clarification and the two human
-workings, followed by closeout documentation once the existing requirements are met.
+The [closeout reconciliation](../../../docs/reviews/U4-closeout-reconciliation-v1/README.md)
+binds the accepted L1 workings to the existing arithmetic/native evidence and documents
+the finite benchmark-agreement and diagnostic decisions still needed before closure. The two human-validated workings are now accepted with disclosed assistance.
 Optional trace output, runtime optimization and compatibility cleanup remain separate
 follow-ups, not new prerequisites for accepting the installed implementation.

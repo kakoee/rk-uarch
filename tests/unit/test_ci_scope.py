@@ -203,3 +203,10 @@ def test_actual_ci_collection_partitions_default_selection(tmp_path):
     default_nodes = collect(["-q", "-m", marker])
     assert python_nodes.isdisjoint(contract_nodes)
     assert python_nodes | contract_nodes == default_nodes
+
+
+def test_ordering_runs_even_when_predictions_are_missing():
+    jobs = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())["jobs"]
+    steps = jobs["ordering"]["steps"]
+    assert steps[0]["with"]["fetch-depth"] == 0
+    assert steps[1]["run"] == "python3 validation/L3_silicon/check_ordering.py"
