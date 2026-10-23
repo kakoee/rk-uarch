@@ -1,8 +1,46 @@
-# Proposed TPU v5e benchmark agreement, revision 1
+# TPU v5e benchmark agreement — accepted 52-unit U5 freeze
 
 > **Human acceptance, 2026-10-22:** Javid accepted the unchanged current 52-unit agreement and reference APIs in place of outstanding A/B signatures. Actual compiler/device correspondence remains U5 measurement work, with predictions frozen first. [Acceptance and scope](../../../docs/reviews/U4-closeout-acceptance.md). The dated proposal below is preserved as history.
 
 > **Historical revision 1:** the 70-row proposal and `suite.json` below remain evidence history. The installed selection is 52 units. Use [BENCHMARK-PLAN.md](BENCHMARK-PLAN.md) for current execution status, all selected IDs, proposed device comparisons and remaining agreement; [u4b/DISPOSITIONS.md](u4b/DISPOSITIONS.md) accounts for all 70 candidates. Pending claims below describe 2026-10-16, not today's installed simulator.
+
+
+## Operative U5 agreement (recorded before prediction generation)
+
+**Human agreement: Javid, 2026-10-22**, replacing Lane A and Lane B signatures
+for this unchanged suite, exactly as recorded in the linked acceptance. Neither lane's
+signature is invented. Lane A owns prediction freezing; Lane B owns the measurement kit.
+The operative list is the 52 IDs and complete per-row work/envelopes in
+[u4b/suite-proposed.json](u4b/suite-proposed.json), interpreted by
+[BENCHMARK-PLAN.md](BENCHMARK-PLAN.md). Historical pending fields are superseded only
+by the human acceptance; no suite shapes or boundaries change here.
+
+Coverage: 12 matrix (six shapes each BF16/raw INT8), nine memory (read/write/copy at
+1/16/256 MiB), 24 operator envelopes (12 decode and 12 prefill), four full layers
+(decode B=1/8/32 and prefill S=128), two paged gathers (16/32 tokens), and one
+minimal scalar-add device envelope. Fused attention covers QK/scale/mask/softmax/AV;
+Q and K projection envelopes include their respective RoPE and casts. The 8B-class
+layer uses H=4096, Hq=32, Hkv=8, D=128 and FFN=14336, TP1.
+
+The accepted [shape worksheet](u4b/shape-regimes.json) spans low/middle/high nominal
+arithmetic-intensity regimes and underfilled/full matrix arrays, including 4096³
+beyond decoder-only shapes. These are count-based bins, not observed utilization.
+Installed reference preparation and U-C0 APIs replace the legacy HardwareSpec
+characterize command under the explicit closeout adjustment.
+
+Every unit is **device-side only**, from first included activity to last completion,
+including internal gaps, excluding host dispatch/launch gaps, compilation and transfers.
+Every mapping match is **compiler-chosen**. The supplied local ws-rowsplit/3 graph is
+not asserted to equal XLA. Initial state is **steady**, with one native priming iteration
+and unchanged logical inputs for the next invocation. Device warm-up/sample counts remain
+Lane B's kit agreement; simulator priming does not prove device retention. Compiler FLOPs,
+bytes and event membership are unobserved and must be recorded separately during U5
+measurement. Incomparable device envelopes retain their original frozen predictions.
+
+No TPU timing, pilot or device inspection is part of this freeze. Diagnostics retain F3/F6
+verification limits; F4's /4 error-code limitation and F5's serialized staging remain.
+
+## Historical proposal (preserved)
 
 **Not signed or admitted.** Lane B agent proposal, 2026-10-16. Lane A signature: pending.
 Human target/access decision: pending. No prediction or result files exist in this package.
