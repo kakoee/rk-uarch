@@ -131,3 +131,16 @@ def test_shallow_clone_refuses(repo, tmp_path):
     result = check(clone)
     assert result.returncode != 0
     assert 'full Git history required' in result.stderr
+
+
+@pytest.mark.parametrize('name', ['artifacts/dot.job.json.gz', 'artifacts/dot.native.json.gz',
+                                 'UNKNOWNS.md'])
+def test_frozen_support_bytes_cannot_be_changed_then_restored(repo, name):
+    path = 'validation/L3_silicon/chip/predictions/' + name
+    commit(repo, {PREDICTION: '{}', path: 'frozen bytes'}, 'FROZEN PREDICTIONS: dot')
+    assert check(repo).returncode == 0
+    commit(repo, {path: 'replacement'}, 'replace support data')
+    commit(repo, {path: 'frozen bytes'}, 'restore support data')
+    result = check(repo)
+    assert result.returncode != 0
+    assert 'changed or deleted' in result.stderr

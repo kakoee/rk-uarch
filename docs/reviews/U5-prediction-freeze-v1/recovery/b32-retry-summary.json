@@ -1,0 +1,80 @@
+{
+  "after": {
+    "MemAvailable": 22110040064,
+    "MemTotal": 25199566848,
+    "SwapFree": 12884901888,
+    "SwapTotal": 12884901888,
+    "swap_used_bytes": 0
+  },
+  "artifact_sizes": [
+    {
+      "artifact": "artifacts/layer-b32-s1.job.json.gz",
+      "case": "layer-b32-s1",
+      "compressed_bytes": 10581579,
+      "event": "artifact_sizes",
+      "timestamp_utc": "2026-10-23T19:53:00Z",
+      "uncompressed_bytes": 192935120
+    },
+    {
+      "artifact": "artifacts/layer-b32-s1.native.json.gz",
+      "case": "layer-b32-s1",
+      "compressed_bytes": 54141287,
+      "event": "artifact_sizes",
+      "timestamp_utc": "2026-10-23T19:53:18Z",
+      "uncompressed_bytes": 467173575
+    }
+  ],
+  "before": {
+    "MemAvailable": 22126919680,
+    "MemTotal": 25199566848,
+    "SwapFree": 12884901888,
+    "SwapTotal": 12884901888,
+    "swap_used_bytes": 0
+  },
+  "case": "layer-b32-s1",
+  "case_wall_s_inclusive": 482.58621338599994,
+  "caveats": [
+    "Case and launcher wall times are inclusive; do not add component times to them.",
+    "Process-tree RSS is a sampled approximate sum; shared pages may count twice and peaks may be missed.",
+    "Native lifetime peak uses Linux wait rusage; sampled native RSS/HWM are separate observations.",
+    "Python peaks are worker lifetime SELF high-water marks, excluding the native child."
+  ],
+  "cli_exit_status": 0,
+  "external_combined_peak_rss_bytes_approx": 12845232128,
+  "external_native_peak_observed_hwm_bytes": 12568608768,
+  "external_native_peak_sampled_rss_bytes": 12568608768,
+  "launcher_wall_s_inclusive": 483.383742538,
+  "maximum_sampled_swap_used_bytes": 0,
+  "minimum_sampled_available_memory_bytes": 9314816000,
+  "native_exit_status": 0,
+  "native_peak_rss_bytes": 12568608768,
+  "python_worker_peak_rss_bytes": {
+    "analytic": 9597767680,
+    "assemble": 41603072,
+    "independent_check": 4352262144,
+    "native": 1172885504,
+    "validate_input": 9790734336,
+    "validate_output": 5380911104
+  },
+  "separate_stage_wall_s": {
+    "analytic_input_decoding": 2.6246324980000963,
+    "analytic_resolution": 84.05364015200007,
+    "compression_job": 4.349994598999956,
+    "compression_native": 18.183413341999994,
+    "independent_check": 28.122402439999973,
+    "input_validation": 119.05794532300001,
+    "job_revalidation": 97.38178311399997,
+    "native_invocation": 41.396272598999985,
+    "native_output_persistence": 0.6065321160000394,
+    "output_serialization_check": 26.64594497799999,
+    "output_validation": 52.4830959489999,
+    "saved_input_copy": 0.36757394999995086,
+    "summary_serialization": 0.011133106999977826
+  },
+  "status": "complete",
+  "supervisor_stop": false,
+  "unmeasured": [
+    "mapping and preparation reused from completed prior attempt",
+    "native internal parsing/admission, simulation, output construction, validation and serialization"
+  ]
+}

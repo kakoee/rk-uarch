@@ -1,0 +1,248 @@
+{
+  "artifacts": {
+    "native_output": {
+      "path": "artifacts/memory-write-268435456.native.json.gz",
+      "sha256": "sha256:6d6874e1e2883a96a1aa89de98190c32dcbace947db04855b4b63cf7d22c15d2",
+      "uncompressed_sha256": "sha256:fa5166d8c783d561df5fd29ac65f6be38b6b550256cefdcadaa04a3c92a5839e"
+    },
+    "prepared_job": {
+      "path": "artifacts/memory-write-268435456.job.json.gz",
+      "sha256": "sha256:2f6df1df6c07fd7d5e3cfb354fde19f884d5a6f98ba495911e3c83797d944d2a",
+      "uncompressed_sha256": "sha256:f7495e279608cf2827f4a55fc6f1cc7fef68757d0269533dfc504b96f4eb1497"
+    }
+  },
+  "benchmark": {
+    "benchmark_class": "memory",
+    "compiler_counts": "archive optimized HLO FLOPs and bytes separately from hardware counters",
+    "id": "memory-write-268435456",
+    "initial_state": "steady",
+    "mapping": "chunked explicit HBM spans and shared VMEM staging; compiler-chosen; requested HBM endpoints require later proof of actual transfers",
+    "mapping_match": "compiler-chosen",
+    "mathematics": "broadcast one runtime BF16 scalar to E=payload_bytes/2 distinct destination elements",
+    "measurement_unit": "device interval for scalar read/broadcast and materialized destination write; no constant folding",
+    "native_status": "not_run",
+    "native_support": [
+      "reference HBM transfers",
+      "steady state",
+      "materialization and alias checks",
+      "vector/reduction work where specified"
+    ],
+    "observability": "not_demonstrated",
+    "precision_policy": "BF16 payload, FP32 matrix accumulation/reductions/rotary; BF16 materialized outputs unless specified; required conversions retained",
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "status": "proposed; not signed; not admitted",
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer",
+    "unit_kind": "fused_unit",
+    "work": {
+      "action": "write",
+      "dtype": "bf16",
+      "elements": 134217728,
+      "payload_bytes": 268435456
+    }
+  },
+  "benchmark_class": "memory",
+  "bytes_convention": "native=executed HBM payload read+write; U-C0=logical operand HBM bytes; local VMEM bytes separate; physical transactions unavailable",
+  "calibration": "stub",
+  "compiler_reported": {
+    "bytes": null,
+    "flops": null,
+    "status": "not_observed"
+  },
+  "energy": "unverified",
+  "engine": {
+    "model": {
+      "name": "native-intervals",
+      "version": "3"
+    },
+    "name": "native",
+    "package_version": "0.0.1",
+    "version": "native-stage/3"
+  },
+  "error": "unknown",
+  "format": "uarch-tpu-v5e-frozen-prediction/1",
+  "id": "memory-write-268435456",
+  "initial_state": "steady",
+  "limitations": [
+    "Unvalidated STUB timing",
+    "Compiler mapping and device event boundary unobserved",
+    "Tile-packed matrix HBM layout; explicit score/probability materialization and BF16 AV probability conversion",
+    "Register/bank/channel/energy behavior unrepresented",
+    "F3 non-HBM arbitration and F6 critical-path causal adjacency incompletely verified",
+    "F4 direct oversized /4 error-code difference retained",
+    "F5 gather/attention/activation packing serialized through one staging slot",
+    "No silicon evidence or error estimate; compiler correspondence is future measurement work"
+  ],
+  "mapping_match": "compiler-chosen",
+  "mapping_policy": {
+    "buffer_depth": 2,
+    "name": "ws-rowsplit",
+    "version": "3"
+  },
+  "measurement_unit": "device interval for scalar read/broadcast and materialized destination write; no constant folding",
+  "native": {
+    "consumed_stubs": [
+      "bf16_mxu_mac_per_s",
+      "hbm_capacity_bytes",
+      "hbm_issue_interval_ps",
+      "hbm_latency_ps",
+      "hbm_max_outstanding",
+      "int8_mxu_mac_per_s",
+      "kernel_startup_ps",
+      "scalar_op_ps",
+      "vector_group_startup_ps",
+      "vector_tile_ps",
+      "vmem_bytes_per_s"
+    ],
+    "counts": {
+      "hbm_read_bytes": 8192,
+      "hbm_write_bytes": 268435456,
+      "issued_broadcast": 1073741824,
+      "semantic_matrix_ops": 0,
+      "semantic_vector_ops": 0,
+      "useful_broadcast": 134217728,
+      "vmem_bytes": 268443648
+    },
+    "diagnostics": "complete observations in artifacts.native_output; F3/F6 causal limits apply",
+    "duration_ps": 1626898304,
+    "duration_s": 0.001626898304,
+    "per_op_counts": {
+      "memory-write-268435456": {
+        "hbm_read_bytes": 8192,
+        "hbm_write_bytes": 268435456,
+        "issued_broadcast": 1073741824,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 0,
+        "useful_broadcast": 134217728,
+        "vmem_bytes": 268443648
+      }
+    },
+    "predicted_bytes": 268443648,
+    "predicted_flops": 0,
+    "predicted_integer_ops": 0,
+    "result_hash": "sha256:2d1a963e4b114994cdeaec2a97e54a15fb7c6e5ccfd8e0ce64fe254fb5c0b303"
+  },
+  "native_level": {
+    "checkpoint": "R",
+    "composite_ceiling": "C1",
+    "description": "native interval model/3; no physical channel, bank or NoC model",
+    "eligibility": "reference_suite"
+  },
+  "prepared_input": {
+    "assumptions_hash": "sha256:d33b5e556a2877bf7381c79d001a8496a70811f78aba42ded4e1f9de340f0ee3",
+    "bundle_hash": "sha256:aa97dceb4952c2a3834640ed4dd4b3e3a4aaf0abb86344ffd057263f2af74997",
+    "job_hash": "sha256:b5bf0bb09458e986e0c2d828871fd842fdf0cc535741e294fe06aac27f3273e2",
+    "point_hash": "sha256:677573682cef62feb7280a8ba3410cab5dc0180130f427cb10dd34de8ea2b21a",
+    "producer": {
+      "name": "rk-uarch",
+      "version": "0.0.1"
+    },
+    "source_hash": "sha256:d992a186918cdde161a3f1e1b298d7136c5ddc0f558f432fb51a93d5cbfca447"
+  },
+  "provenance": {
+    "acceptance_commit": "68844bb08bf4c9d0494d52fb517cbf68b2db7cc4",
+    "generator_sha256": "sha256:928c7176ba4e11d27afe8f80cf7ddc3fc4f26c3f51ccf39ae544e803777c6f91",
+    "image_digest": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+    "image_digest_kind": "local Docker image ID; build container only; not a registry RepoDigest",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "measurement_access": "none",
+    "module_origins": {
+      "rkuarch.engines.analytic.reference": "/tmp/u5-freeze/source/src/rkuarch/engines/analytic/reference.py",
+      "rkuarch.workload.reference": "/tmp/u5-freeze/source/src/rkuarch/workload/reference.py",
+      "uarch_contract.reference": "/tmp/u5-freeze/source/contract/uarch_contract/reference.py"
+    },
+    "native_executable_origin": "/tmp/u5-freeze/build/target/x86_64-unknown-linux-gnu/release/uarch-engine",
+    "native_runtime": "local Linux/WSL host, release executable built from fresh committed export",
+    "os_release": {
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "LOGO": "ubuntu-logo",
+      "NAME": "Ubuntu",
+      "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "UBUNTU_CODENAME": "noble",
+      "VERSION": "24.04.4 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "VERSION_ID": "24.04"
+    },
+    "package_versions": {
+      "numpy": "2.5.3",
+      "pydantic": "2.13.5",
+      "rk-uarch": "0.0.1"
+    },
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "remote_qualification": "pending under U0024",
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "source_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_agreement_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_sha256": "sha256:36c5f91c386ca08bbc541e8f30b674f4789a02df86536062061c649cd6f76677"
+  },
+  "run_conditions": {
+    "priming_iterations": 1,
+    "seed": 0,
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "timed_invocations": 1,
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer"
+  },
+  "spec_hash": "sha256:1c2da438983a8ce585bb25372ef252f94851d45f39db39a8325245c1637bb8a2",
+  "u_c0": {
+    "aggregate": {
+      "duration_ps": 312500002.32830644,
+      "duration_ps_exact": {
+        "denominator": 4194304,
+        "numerator": 1310720009765625
+      },
+      "predicted_bytes": 268435458,
+      "predicted_flops": 0,
+      "predicted_integer_ops": 0
+    },
+    "ops": {
+      "memory-write-268435456": {
+        "compute_ps_exact": {
+          "denominator": 1,
+          "numerator": 131072000
+        },
+        "duration_ps": 312500002.32830644,
+        "duration_ps_exact": {
+          "denominator": 4194304,
+          "numerator": 1310720009765625
+        },
+        "memory_ps_exact": {
+          "denominator": 4194304,
+          "numerator": 1310720009765625
+        },
+        "predicted_bytes": 268435458,
+        "predicted_flops": 0,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "broadcast": 134217728
+        }
+      }
+    },
+    "per_op": {
+      "duration_ps": 312500002.32830644,
+      "duration_ps_exact": {
+        "denominator": 4194304,
+        "numerator": 1310720009765625
+      },
+      "predicted_bytes": 268435458,
+      "predicted_flops": 0,
+      "predicted_integer_ops": 0
+    },
+    "profile": "u-c0-tpu-v5e/1",
+    "unrepresented": [
+      "matrix_fill",
+      "padding",
+      "vmem_staging",
+      "hbm_latency_and_credits",
+      "vector_setup",
+      "dispatch",
+      "kernel_startup"
+    ]
+  },
+  "work_convention": "source-level FMA=2, scalar arithmetic/special function=1; casts, broadcasts, comparisons/selects/index work excluded; INT8 dot is integer_ops, not FLOPs"
+}

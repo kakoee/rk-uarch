@@ -1,0 +1,852 @@
+{
+  "artifacts": {
+    "native_output": {
+      "path": "artifacts/layer-b1-s1.native.json.gz",
+      "sha256": "sha256:26c8b5f41594b581cfe338ab4dcf4c4596d55d4759537dea8a56be10670145c6",
+      "uncompressed_sha256": "sha256:ba4c0f0fd28ed876c14d089c5e2800776c358b02f2b956ca579a4617cc1b3d5e"
+    },
+    "prepared_job": {
+      "path": "artifacts/layer-b1-s1.job.json.gz",
+      "sha256": "sha256:ef4d0faf9914953453b15ef5b7ab7687ed4c718edb59f08ce71d2db52d52e0e6",
+      "uncompressed_sha256": "sha256:a3f19a19015d36d7f4437fea96265f1d98fa65b3cdcf757d9d121db4fbf29091"
+    }
+  },
+  "benchmark": {
+    "benchmark_class": "end-to-end",
+    "compiler_counts": "archive optimized HLO FLOPs and bytes separately from hardware counters",
+    "id": "layer-b1-s1",
+    "initial_state": "steady",
+    "mapping": "deterministic supplied tiles on one TensorCore with four MXU IDs and shared VMEM; compiler-chosen comparison, not a matched-layout claim",
+    "mapping_match": "compiler-chosen",
+    "mathematics": "RMSNorm -> Q/K/V projections -> Q/new-K RoPE -> KV append -> paged causal attention -> output projection -> residual -> RMSNorm -> up/gate -> gated SiLU -> down -> residual; two norms and two residuals, one layer, no embedding/head",
+    "measurement_unit": "whole single-layer device interval with KV outputs materialized; encompass compiler fusions once; weights, input activation and prior KV preplaced",
+    "native_status": "not_run",
+    "native_support": [
+      "all selected decoder operators",
+      "one complete dependency graph",
+      "buffer reuse and capacity",
+      "steady state reset semantics",
+      "complete counts and critical path attribution"
+    ],
+    "observability": "not_demonstrated",
+    "precision_policy": "BF16 payload, FP32 matrix accumulation/reductions/rotary; BF16 materialized outputs unless specified; required conversions retained",
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "status": "proposed; not signed; not admitted",
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer",
+    "unit_kind": "fused_unit",
+    "work": {
+      "R": 128,
+      "batch": 1,
+      "block_tokens": 16,
+      "epsilon": 1e-05,
+      "head_dim": 128,
+      "hidden": 4096,
+      "intermediate": 14336,
+      "kv_heads": 8,
+      "layers": 1,
+      "mask": "causal",
+      "new_tokens": 1,
+      "pairing": "split_halves",
+      "precision": "bf16",
+      "prior_tokens": 2047,
+      "query_heads": 32,
+      "tp": 1
+    }
+  },
+  "benchmark_class": "end-to-end",
+  "bytes_convention": "native=executed HBM payload read+write; U-C0=logical operand HBM bytes; local VMEM bytes separate; physical transactions unavailable",
+  "calibration": "stub",
+  "compiler_reported": {
+    "bytes": null,
+    "flops": null,
+    "status": "not_observed"
+  },
+  "energy": "unverified",
+  "engine": {
+    "model": {
+      "name": "native-intervals",
+      "version": "3"
+    },
+    "name": "native",
+    "package_version": "0.0.1",
+    "version": "native-stage/3"
+  },
+  "error": "unknown",
+  "format": "uarch-tpu-v5e-frozen-prediction/1",
+  "id": "layer-b1-s1",
+  "initial_state": "steady",
+  "limitations": [
+    "Unvalidated STUB timing",
+    "Compiler mapping and device event boundary unobserved",
+    "Tile-packed matrix HBM layout; explicit score/probability materialization and BF16 AV probability conversion",
+    "Register/bank/channel/energy behavior unrepresented",
+    "F3 non-HBM arbitration and F6 critical-path causal adjacency incompletely verified",
+    "F4 direct oversized /4 error-code difference retained",
+    "F5 gather/attention/activation packing serialized through one staging slot",
+    "No silicon evidence or error estimate; compiler correspondence is future measurement work"
+  ],
+  "mapping_match": "compiler-chosen",
+  "mapping_policy": {
+    "buffer_depth": 2,
+    "name": "ws-rowsplit",
+    "version": "3"
+  },
+  "measurement_unit": "whole single-layer device interval with KV outputs materialized; encompass compiler fusions once; weights, input activation and prior KV preplaced",
+  "native": {
+    "consumed_stubs": [
+      "bf16_mxu_mac_per_s",
+      "exp_cost_ratio",
+      "hbm_capacity_bytes",
+      "hbm_issue_interval_ps",
+      "hbm_latency_ps",
+      "hbm_max_outstanding",
+      "int8_mxu_mac_per_s",
+      "kernel_startup_ps",
+      "matrix_fill_equivalent_macs",
+      "reciprocal_cost_ratio",
+      "reduction_cost_ratio",
+      "rsqrt_cost_ratio",
+      "scalar_op_ps",
+      "vector_group_startup_ps",
+      "vector_tile_ps",
+      "vmem_bytes_per_s"
+    ],
+    "counts": {
+      "hbm_read_bytes": 482447360,
+      "hbm_write_bytes": 9177088,
+      "issued_add": 187392,
+      "issued_cast": 1648640,
+      "issued_exp": 638976,
+      "issued_matrix_ops": 469762048,
+      "issued_multiply": 1497088,
+      "issued_negate": 114688,
+      "issued_reciprocal": 147456,
+      "issued_reduction_max": 720896,
+      "issued_reduction_sum": 798720,
+      "issued_rsqrt": 2048,
+      "issued_select": 524288,
+      "issued_subtract": 529408,
+      "matrix_ops": 469762048,
+      "scalar_instructions": 256,
+      "semantic_matrix_ops": 469762048,
+      "semantic_vector_ops": 486400,
+      "useful_add": 25090,
+      "useful_cast": 215040,
+      "useful_exp": 79872,
+      "useful_multiply": 194562,
+      "useful_negate": 14336,
+      "useful_reciprocal": 14368,
+      "useful_reduction_max": 65504,
+      "useful_reduction_sum": 73694,
+      "useful_rsqrt": 2,
+      "useful_select": 65536,
+      "useful_subtract": 68096,
+      "vmem_bytes": 506304512
+    },
+    "diagnostics": "complete observations in artifacts.native_output; F3/F6 causal limits apply",
+    "duration_ps": 2150258475,
+    "duration_s": 0.002150258475,
+    "per_op_counts": {
+      "append": {
+        "hbm_read_bytes": 4608,
+        "hbm_write_bytes": 4096,
+        "scalar_instructions": 128,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 0,
+        "vmem_bytes": 8704
+      },
+      "attention": {
+        "hbm_read_bytes": 42615296,
+        "hbm_write_bytes": 8937472,
+        "issued_cast": 557056,
+        "issued_exp": 524288,
+        "issued_matrix_ops": 33554432,
+        "issued_multiply": 1048576,
+        "issued_reciprocal": 32768,
+        "issued_reduction_max": 720896,
+        "issued_reduction_sum": 720896,
+        "issued_select": 524288,
+        "issued_subtract": 524288,
+        "matrix_ops": 33554432,
+        "scalar_instructions": 128,
+        "semantic_matrix_ops": 33554432,
+        "semantic_vector_ops": 327680,
+        "useful_cast": 69632,
+        "useful_exp": 65536,
+        "useful_multiply": 131072,
+        "useful_reciprocal": 32,
+        "useful_reduction_max": 65504,
+        "useful_reduction_sum": 65504,
+        "useful_select": 65536,
+        "useful_subtract": 65536,
+        "vmem_bytes": 52601344
+      },
+      "down": {
+        "hbm_read_bytes": 118386688,
+        "hbm_write_bytes": 36864,
+        "issued_cast": 32768,
+        "issued_matrix_ops": 117440512,
+        "matrix_ops": 117440512,
+        "semantic_matrix_ops": 117440512,
+        "semantic_vector_ops": 0,
+        "useful_cast": 4096,
+        "vmem_bytes": 122093568
+      },
+      "gate": {
+        "hbm_read_bytes": 118366208,
+        "hbm_write_bytes": 36864,
+        "issued_cast": 114688,
+        "issued_matrix_ops": 117440512,
+        "matrix_ops": 117440512,
+        "semantic_matrix_ops": 117440512,
+        "semantic_vector_ops": 0,
+        "useful_cast": 14336,
+        "vmem_bytes": 122073088
+      },
+      "k": {
+        "hbm_read_bytes": 8462336,
+        "hbm_write_bytes": 10240,
+        "issued_cast": 8192,
+        "issued_matrix_ops": 8388608,
+        "matrix_ops": 8388608,
+        "semantic_matrix_ops": 8388608,
+        "semantic_vector_ops": 0,
+        "useful_cast": 1024,
+        "vmem_bytes": 8734720
+      },
+      "k_rope": {
+        "hbm_read_bytes": 2560,
+        "hbm_write_bytes": 2048,
+        "issued_add": 1024,
+        "issued_cast": 2048,
+        "issued_multiply": 4096,
+        "issued_subtract": 1024,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 3072,
+        "useful_add": 512,
+        "useful_cast": 2048,
+        "useful_multiply": 2048,
+        "useful_subtract": 512,
+        "vmem_bytes": 4608
+      },
+      "norm1": {
+        "hbm_read_bytes": 16384,
+        "hbm_write_bytes": 8192,
+        "issued_add": 1024,
+        "issued_cast": 98304,
+        "issued_multiply": 99328,
+        "issued_reduction_sum": 38912,
+        "issued_rsqrt": 1024,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 24576,
+        "useful_add": 1,
+        "useful_cast": 12288,
+        "useful_multiply": 12289,
+        "useful_reduction_sum": 4095,
+        "useful_rsqrt": 1,
+        "vmem_bytes": 24576
+      },
+      "norm2": {
+        "hbm_read_bytes": 16384,
+        "hbm_write_bytes": 8192,
+        "issued_add": 1024,
+        "issued_cast": 98304,
+        "issued_multiply": 99328,
+        "issued_reduction_sum": 38912,
+        "issued_rsqrt": 1024,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 24576,
+        "useful_add": 1,
+        "useful_cast": 12288,
+        "useful_multiply": 12289,
+        "useful_reduction_sum": 4095,
+        "useful_rsqrt": 1,
+        "vmem_bytes": 24576
+      },
+      "out": {
+        "hbm_read_bytes": 33824768,
+        "hbm_write_bytes": 16384,
+        "issued_cast": 32768,
+        "issued_matrix_ops": 33554432,
+        "matrix_ops": 33554432,
+        "semantic_matrix_ops": 33554432,
+        "semantic_vector_ops": 0,
+        "useful_cast": 4096,
+        "vmem_bytes": 34889728
+      },
+      "q": {
+        "hbm_read_bytes": 33824768,
+        "hbm_write_bytes": 16384,
+        "issued_cast": 32768,
+        "issued_matrix_ops": 33554432,
+        "matrix_ops": 33554432,
+        "semantic_matrix_ops": 33554432,
+        "semantic_vector_ops": 0,
+        "useful_cast": 4096,
+        "vmem_bytes": 34889728
+      },
+      "q_rope": {
+        "hbm_read_bytes": 8704,
+        "hbm_write_bytes": 8192,
+        "issued_add": 4096,
+        "issued_cast": 8192,
+        "issued_multiply": 16384,
+        "issued_subtract": 4096,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 12288,
+        "useful_add": 2048,
+        "useful_cast": 8192,
+        "useful_multiply": 8192,
+        "useful_subtract": 2048,
+        "vmem_bytes": 16896
+      },
+      "residual1": {
+        "hbm_read_bytes": 16384,
+        "hbm_write_bytes": 8192,
+        "issued_add": 32768,
+        "issued_cast": 98304,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 4096,
+        "useful_add": 4096,
+        "useful_cast": 12288,
+        "vmem_bytes": 24576
+      },
+      "residual2": {
+        "hbm_read_bytes": 16384,
+        "hbm_write_bytes": 8192,
+        "issued_add": 32768,
+        "issued_cast": 98304,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 4096,
+        "useful_add": 4096,
+        "useful_cast": 12288,
+        "vmem_bytes": 24576
+      },
+      "silu": {
+        "hbm_read_bytes": 57344,
+        "hbm_write_bytes": 28672,
+        "issued_add": 114688,
+        "issued_cast": 344064,
+        "issued_exp": 114688,
+        "issued_multiply": 229376,
+        "issued_negate": 114688,
+        "issued_reciprocal": 114688,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 86016,
+        "useful_add": 14336,
+        "useful_cast": 43008,
+        "useful_exp": 14336,
+        "useful_multiply": 28672,
+        "useful_negate": 14336,
+        "useful_reciprocal": 14336,
+        "vmem_bytes": 86016
+      },
+      "up": {
+        "hbm_read_bytes": 118366208,
+        "hbm_write_bytes": 36864,
+        "issued_cast": 114688,
+        "issued_matrix_ops": 117440512,
+        "matrix_ops": 117440512,
+        "semantic_matrix_ops": 117440512,
+        "semantic_vector_ops": 0,
+        "useful_cast": 14336,
+        "vmem_bytes": 122073088
+      },
+      "v": {
+        "hbm_read_bytes": 8462336,
+        "hbm_write_bytes": 10240,
+        "issued_cast": 8192,
+        "issued_matrix_ops": 8388608,
+        "matrix_ops": 8388608,
+        "semantic_matrix_ops": 8388608,
+        "semantic_vector_ops": 0,
+        "useful_cast": 1024,
+        "vmem_bytes": 8734720
+      }
+    },
+    "predicted_bytes": 491624448,
+    "predicted_flops": 470232068,
+    "predicted_integer_ops": 0,
+    "result_hash": "sha256:d9f9f6e3179362200f9d09db77d5b37a931af650b42f69df39890964a5298494"
+  },
+  "native_level": {
+    "checkpoint": "R",
+    "composite_ceiling": "C1",
+    "description": "native interval model/3; no physical channel, bank or NoC model",
+    "eligibility": "reference_suite"
+  },
+  "prepared_input": {
+    "assumptions_hash": "sha256:d33b5e556a2877bf7381c79d001a8496a70811f78aba42ded4e1f9de340f0ee3",
+    "bundle_hash": "sha256:b2d36fcedc7bfde61f3235f13fdfb7dfd50869a670bda319a06be4e1b46346ff",
+    "job_hash": "sha256:90ce3de51b20cd7b15fe1578aa8dd5d77f942fe7bc403b714a95781e64eaa198",
+    "point_hash": "sha256:873d921d661f446132fcff77f5c5cf51e52b93418726d955e195caa399fb8e0f",
+    "producer": {
+      "name": "rk-uarch",
+      "version": "0.0.1"
+    },
+    "source_hash": "sha256:c46341067188a765c9a4baf859e5db0949b9cc7b28d2b4e1bf6f22e533b1abe7"
+  },
+  "provenance": {
+    "acceptance_commit": "68844bb08bf4c9d0494d52fb517cbf68b2db7cc4",
+    "generator_sha256": "sha256:928c7176ba4e11d27afe8f80cf7ddc3fc4f26c3f51ccf39ae544e803777c6f91",
+    "image_digest": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+    "image_digest_kind": "local Docker image ID; build container only; not a registry RepoDigest",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "measurement_access": "none",
+    "module_origins": {
+      "rkuarch.engines.analytic.reference": "/tmp/u5-freeze/source/src/rkuarch/engines/analytic/reference.py",
+      "rkuarch.workload.reference": "/tmp/u5-freeze/source/src/rkuarch/workload/reference.py",
+      "uarch_contract.reference": "/tmp/u5-freeze/source/contract/uarch_contract/reference.py"
+    },
+    "native_executable_origin": "/tmp/u5-freeze/build/target/x86_64-unknown-linux-gnu/release/uarch-engine",
+    "native_runtime": "local Linux/WSL host, release executable built from fresh committed export",
+    "os_release": {
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "LOGO": "ubuntu-logo",
+      "NAME": "Ubuntu",
+      "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "UBUNTU_CODENAME": "noble",
+      "VERSION": "24.04.4 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "VERSION_ID": "24.04"
+    },
+    "package_versions": {
+      "numpy": "2.5.3",
+      "pydantic": "2.13.5",
+      "rk-uarch": "0.0.1"
+    },
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "remote_qualification": "pending under U0024",
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "source_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_agreement_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_sha256": "sha256:36c5f91c386ca08bbc541e8f30b674f4789a02df86536062061c649cd6f76677"
+  },
+  "run_conditions": {
+    "priming_iterations": 1,
+    "seed": 0,
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "timed_invocations": 1,
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer"
+  },
+  "spec_hash": "sha256:1c2da438983a8ce585bb25372ef252f94851d45f39db39a8325245c1637bb8a2",
+  "u_c0": {
+    "aggregate": {
+      "duration_ps": 518038272.857666,
+      "duration_ps_exact": {
+        "denominator": 4096,
+        "numerator": 2121884765625
+      },
+      "predicted_bytes": 444991488,
+      "predicted_flops": 470232068,
+      "predicted_integer_ops": 0
+    },
+    "ops": {
+      "append": {
+        "compute_ps_exact": {
+          "denominator": 1,
+          "numerator": 128000
+        },
+        "duration_ps": 128000.0,
+        "duration_ps_exact": {
+          "denominator": 1,
+          "numerator": 128000
+        },
+        "memory_ps_exact": {
+          "denominator": 16384,
+          "numerator": 166015625
+        },
+        "predicted_bytes": 8704,
+        "predicted_flops": 0,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {}
+      },
+      "attention": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 223462432
+        },
+        "duration_ps": 9785294.532775879,
+        "duration_ps_exact": {
+          "denominator": 16384,
+          "numerator": 160322265625
+        },
+        "memory_ps_exact": {
+          "denominator": 16384,
+          "numerator": 160322265625
+        },
+        "predicted_bytes": 8405504,
+        "predicted_flops": 33882112,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 33554432,
+        "useful_primitives": {
+          "cast": 69632,
+          "exp": 65536,
+          "multiply": 131072,
+          "reciprocal": 32,
+          "reduction_max": 65504,
+          "reduction_sum": 65504,
+          "select": 65536,
+          "subtract": 65536
+        }
+      },
+      "down": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 118228512
+        },
+        "duration_ps": 136761665.34423828,
+        "duration_ps_exact": {
+          "denominator": 2048,
+          "numerator": 280087890625
+        },
+        "memory_ps_exact": {
+          "denominator": 2048,
+          "numerator": 280087890625
+        },
+        "predicted_bytes": 117477376,
+        "predicted_flops": 117440512,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 117440512,
+        "useful_primitives": {
+          "cast": 4096
+        }
+      },
+      "gate": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 120198512
+        },
+        "duration_ps": 136761665.34423828,
+        "duration_ps_exact": {
+          "denominator": 2048,
+          "numerator": 280087890625
+        },
+        "memory_ps_exact": {
+          "denominator": 2048,
+          "numerator": 280087890625
+        },
+        "predicted_bytes": 117477376,
+        "predicted_flops": 117440512,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 117440512,
+        "useful_primitives": {
+          "cast": 14336
+        }
+      },
+      "k": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 8585608
+        },
+        "duration_ps": 9777545.928955078,
+        "duration_ps_exact": {
+          "denominator": 4096,
+          "numerator": 40048828125
+        },
+        "memory_ps_exact": {
+          "denominator": 4096,
+          "numerator": 40048828125
+        },
+        "predicted_bytes": 8398848,
+        "predicted_flops": 8388608,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 8388608,
+        "useful_primitives": {
+          "cast": 1024
+        }
+      },
+      "k_rope": {
+        "compute_ps_exact": {
+          "denominator": 1,
+          "numerator": 5000
+        },
+        "duration_ps": 5364.418029785156,
+        "duration_ps_exact": {
+          "denominator": 16384,
+          "numerator": 87890625
+        },
+        "memory_ps_exact": {
+          "denominator": 16384,
+          "numerator": 87890625
+        },
+        "predicted_bytes": 4608,
+        "predicted_flops": 3072,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "add": 512,
+          "cast": 2048,
+          "multiply": 2048,
+          "subtract": 512
+        }
+      },
+      "norm1": {
+        "compute_ps_exact": {
+          "denominator": 16,
+          "numerator": 512125
+        },
+        "duration_ps": 32007.8125,
+        "duration_ps_exact": {
+          "denominator": 16,
+          "numerator": 512125
+        },
+        "memory_ps_exact": {
+          "denominator": 1024,
+          "numerator": 29296875
+        },
+        "predicted_bytes": 24576,
+        "predicted_flops": 16386,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "add": 1,
+          "cast": 12288,
+          "multiply": 12289,
+          "reduction_sum": 4095,
+          "rsqrt": 1
+        }
+      },
+      "norm2": {
+        "compute_ps_exact": {
+          "denominator": 16,
+          "numerator": 512125
+        },
+        "duration_ps": 32007.8125,
+        "duration_ps_exact": {
+          "denominator": 16,
+          "numerator": 512125
+        },
+        "memory_ps_exact": {
+          "denominator": 1024,
+          "numerator": 29296875
+        },
+        "predicted_bytes": 24576,
+        "predicted_flops": 16386,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "add": 1,
+          "cast": 12288,
+          "multiply": 12289,
+          "reduction_sum": 4095,
+          "rsqrt": 1
+        }
+      },
+      "out": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 34342432
+        },
+        "duration_ps": 39081573.486328125,
+        "duration_ps_exact": {
+          "denominator": 512,
+          "numerator": 20009765625
+        },
+        "memory_ps_exact": {
+          "denominator": 512,
+          "numerator": 20009765625
+        },
+        "predicted_bytes": 33570816,
+        "predicted_flops": 33554432,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 33554432,
+        "useful_primitives": {
+          "cast": 4096
+        }
+      },
+      "q": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 34342432
+        },
+        "duration_ps": 39081573.486328125,
+        "duration_ps_exact": {
+          "denominator": 512,
+          "numerator": 20009765625
+        },
+        "memory_ps_exact": {
+          "denominator": 512,
+          "numerator": 20009765625
+        },
+        "predicted_bytes": 33570816,
+        "predicted_flops": 33554432,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 33554432,
+        "useful_primitives": {
+          "cast": 4096
+        }
+      },
+      "q_rope": {
+        "compute_ps_exact": {
+          "denominator": 1,
+          "numerator": 20000
+        },
+        "duration_ps": 20000.0,
+        "duration_ps_exact": {
+          "denominator": 1,
+          "numerator": 20000
+        },
+        "memory_ps_exact": {
+          "denominator": 16384,
+          "numerator": 322265625
+        },
+        "predicted_bytes": 16896,
+        "predicted_flops": 12288,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "add": 2048,
+          "cast": 8192,
+          "multiply": 8192,
+          "subtract": 2048
+        }
+      },
+      "residual1": {
+        "compute_ps_exact": {
+          "denominator": 1,
+          "numerator": 16000
+        },
+        "duration_ps": 28610.2294921875,
+        "duration_ps_exact": {
+          "denominator": 1024,
+          "numerator": 29296875
+        },
+        "memory_ps_exact": {
+          "denominator": 1024,
+          "numerator": 29296875
+        },
+        "predicted_bytes": 24576,
+        "predicted_flops": 4096,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "add": 4096,
+          "cast": 12288
+        }
+      },
+      "residual2": {
+        "compute_ps_exact": {
+          "denominator": 1,
+          "numerator": 16000
+        },
+        "duration_ps": 28610.2294921875,
+        "duration_ps_exact": {
+          "denominator": 1024,
+          "numerator": 29296875
+        },
+        "memory_ps_exact": {
+          "denominator": 1024,
+          "numerator": 29296875
+        },
+        "predicted_bytes": 24576,
+        "predicted_flops": 4096,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "add": 4096,
+          "cast": 12288
+        }
+      },
+      "silu": {
+        "compute_ps_exact": {
+          "denominator": 1,
+          "numerator": 210000
+        },
+        "duration_ps": 210000.0,
+        "duration_ps_exact": {
+          "denominator": 1,
+          "numerator": 210000
+        },
+        "memory_ps_exact": {
+          "denominator": 2048,
+          "numerator": 205078125
+        },
+        "predicted_bytes": 86016,
+        "predicted_flops": 86016,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "add": 14336,
+          "cast": 43008,
+          "exp": 14336,
+          "multiply": 28672,
+          "negate": 14336,
+          "reciprocal": 14336
+        }
+      },
+      "up": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 120198512
+        },
+        "duration_ps": 136761665.34423828,
+        "duration_ps_exact": {
+          "denominator": 2048,
+          "numerator": 280087890625
+        },
+        "memory_ps_exact": {
+          "denominator": 2048,
+          "numerator": 280087890625
+        },
+        "predicted_bytes": 117477376,
+        "predicted_flops": 117440512,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 117440512,
+        "useful_primitives": {
+          "cast": 14336
+        }
+      },
+      "v": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 8585608
+        },
+        "duration_ps": 9777545.928955078,
+        "duration_ps_exact": {
+          "denominator": 4096,
+          "numerator": 40048828125
+        },
+        "memory_ps_exact": {
+          "denominator": 4096,
+          "numerator": 40048828125
+        },
+        "predicted_bytes": 8398848,
+        "predicted_flops": 8388608,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 8388608,
+        "useful_primitives": {
+          "cast": 1024
+        }
+      }
+    },
+    "per_op": {
+      "duration_ps": 518273129.8980713,
+      "duration_ps_exact": {
+        "denominator": 8192,
+        "numerator": 4245693480125
+      },
+      "predicted_bytes": 444991488,
+      "predicted_flops": 470232068,
+      "predicted_integer_ops": 0
+    },
+    "profile": "u-c0-tpu-v5e/1",
+    "unrepresented": [
+      "matrix_fill",
+      "padding",
+      "vmem_staging",
+      "hbm_latency_and_credits",
+      "vector_setup",
+      "dispatch",
+      "kernel_startup"
+    ]
+  },
+  "work_convention": "source-level FMA=2, scalar arithmetic/special function=1; casts, broadcasts, comparisons/selects/index work excluded; INT8 dot is integer_ops, not FLOPs"
+}

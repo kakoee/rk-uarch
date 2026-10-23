@@ -1,0 +1,254 @@
+{
+  "artifacts": {
+    "native_output": {
+      "path": "artifacts/memory-read-1048576.native.json.gz",
+      "sha256": "sha256:6b54a68bba66b90e41f8d1bc6bfcbd821d5363507efdc846b2ced39aff88d76f",
+      "uncompressed_sha256": "sha256:9482ad9b2099c2a229a938035aca0db5dd9f46a345abf6a95cbbff211ff156cd"
+    },
+    "prepared_job": {
+      "path": "artifacts/memory-read-1048576.job.json.gz",
+      "sha256": "sha256:3d71005a7fcb2a8dd4205d7f3d8d8e3f71bb4b2f972d54ea00f87ca061bb9e1c",
+      "uncompressed_sha256": "sha256:17a132f558cdab1fbc4c5e1c80e77f90731b320077db500edd29d500afc76bcb"
+    }
+  },
+  "benchmark": {
+    "benchmark_class": "memory",
+    "compiler_counts": "archive optimized HLO FLOPs and bytes separately from hardware counters",
+    "id": "memory-read-1048576",
+    "initial_state": "steady",
+    "mapping": "chunked explicit HBM spans and shared VMEM staging; compiler-chosen; requested HBM endpoints require later proof of actual transfers",
+    "mapping_match": "compiler-chosen",
+    "mathematics": "FP32 sum of E=payload_bytes/2 runtime BF16 elements: E casts and E-1 adds; materialize one FP32 scalar",
+    "measurement_unit": "whole device interval for input read, widening, reduction and scalar store; report reduction as included work",
+    "native_status": "not_run",
+    "native_support": [
+      "reference HBM transfers",
+      "steady state",
+      "materialization and alias checks",
+      "vector/reduction work where specified"
+    ],
+    "observability": "not_demonstrated",
+    "precision_policy": "BF16 payload, FP32 matrix accumulation/reductions/rotary; BF16 materialized outputs unless specified; required conversions retained",
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "status": "proposed; not signed; not admitted",
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer",
+    "unit_kind": "fused_unit",
+    "work": {
+      "action": "read",
+      "dtype": "bf16",
+      "elements": 524288,
+      "payload_bytes": 1048576
+    }
+  },
+  "benchmark_class": "memory",
+  "bytes_convention": "native=executed HBM payload read+write; U-C0=logical operand HBM bytes; local VMEM bytes separate; physical transactions unavailable",
+  "calibration": "stub",
+  "compiler_reported": {
+    "bytes": null,
+    "flops": null,
+    "status": "not_observed"
+  },
+  "energy": "unverified",
+  "engine": {
+    "model": {
+      "name": "native-intervals",
+      "version": "3"
+    },
+    "name": "native",
+    "package_version": "0.0.1",
+    "version": "native-stage/3"
+  },
+  "error": "unknown",
+  "format": "uarch-tpu-v5e-frozen-prediction/1",
+  "id": "memory-read-1048576",
+  "initial_state": "steady",
+  "limitations": [
+    "Unvalidated STUB timing",
+    "Compiler mapping and device event boundary unobserved",
+    "Tile-packed matrix HBM layout; explicit score/probability materialization and BF16 AV probability conversion",
+    "Register/bank/channel/energy behavior unrepresented",
+    "F3 non-HBM arbitration and F6 critical-path causal adjacency incompletely verified",
+    "F4 direct oversized /4 error-code difference retained",
+    "F5 gather/attention/activation packing serialized through one staging slot",
+    "No silicon evidence or error estimate; compiler correspondence is future measurement work"
+  ],
+  "mapping_match": "compiler-chosen",
+  "mapping_policy": {
+    "buffer_depth": 2,
+    "name": "ws-rowsplit",
+    "version": "3"
+  },
+  "measurement_unit": "whole device interval for input read, widening, reduction and scalar store; report reduction as included work",
+  "native": {
+    "consumed_stubs": [
+      "bf16_mxu_mac_per_s",
+      "hbm_capacity_bytes",
+      "hbm_issue_interval_ps",
+      "hbm_latency_ps",
+      "hbm_max_outstanding",
+      "int8_mxu_mac_per_s",
+      "kernel_startup_ps",
+      "reduction_cost_ratio",
+      "scalar_op_ps",
+      "vector_group_startup_ps",
+      "vector_tile_ps",
+      "vmem_bytes_per_s"
+    ],
+    "counts": {
+      "hbm_read_bytes": 1048576,
+      "hbm_write_bytes": 4,
+      "issued_cast": 4194304,
+      "issued_reduction_sum": 4296704,
+      "semantic_matrix_ops": 0,
+      "semantic_vector_ops": 524287,
+      "useful_cast": 524288,
+      "useful_reduction_sum": 524287,
+      "vmem_bytes": 1048644
+    },
+    "diagnostics": "complete observations in artifacts.native_output; F3/F6 causal limits apply",
+    "duration_ps": 14000801,
+    "duration_s": 1.4000801e-05,
+    "per_op_counts": {
+      "memory-read-1048576": {
+        "hbm_read_bytes": 1048576,
+        "hbm_write_bytes": 4,
+        "issued_cast": 4194304,
+        "issued_reduction_sum": 4296704,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 524287,
+        "useful_cast": 524288,
+        "useful_reduction_sum": 524287,
+        "vmem_bytes": 1048644
+      }
+    },
+    "predicted_bytes": 1048580,
+    "predicted_flops": 524287,
+    "predicted_integer_ops": 0,
+    "result_hash": "sha256:9726bca509674656ef1e235bebba8831b4cc390fbab55e847bf342f5f46191f3"
+  },
+  "native_level": {
+    "checkpoint": "R",
+    "composite_ceiling": "C1",
+    "description": "native interval model/3; no physical channel, bank or NoC model",
+    "eligibility": "reference_suite"
+  },
+  "prepared_input": {
+    "assumptions_hash": "sha256:d33b5e556a2877bf7381c79d001a8496a70811f78aba42ded4e1f9de340f0ee3",
+    "bundle_hash": "sha256:bbd0eaa6805c1239566e53167fa9cb027d1cb6baeaab544257a8172c36dee2ad",
+    "job_hash": "sha256:ae400d07c89efbe3b6abb1d99b6a2d4caf5d9edf82fba261160e023e2cbe996a",
+    "point_hash": "sha256:7af9f4962ce772b3ba1df874a41fe501dbb7013ffc0235cb3168a8a9e81e8265",
+    "producer": {
+      "name": "rk-uarch",
+      "version": "0.0.1"
+    },
+    "source_hash": "sha256:443650cfc19fca58f0d35958e2b2a0746f9647b091a394cebbd8ca9cc394cb87"
+  },
+  "provenance": {
+    "acceptance_commit": "68844bb08bf4c9d0494d52fb517cbf68b2db7cc4",
+    "generator_sha256": "sha256:928c7176ba4e11d27afe8f80cf7ddc3fc4f26c3f51ccf39ae544e803777c6f91",
+    "image_digest": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+    "image_digest_kind": "local Docker image ID; build container only; not a registry RepoDigest",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "measurement_access": "none",
+    "module_origins": {
+      "rkuarch.engines.analytic.reference": "/tmp/u5-freeze/source/src/rkuarch/engines/analytic/reference.py",
+      "rkuarch.workload.reference": "/tmp/u5-freeze/source/src/rkuarch/workload/reference.py",
+      "uarch_contract.reference": "/tmp/u5-freeze/source/contract/uarch_contract/reference.py"
+    },
+    "native_executable_origin": "/tmp/u5-freeze/build/target/x86_64-unknown-linux-gnu/release/uarch-engine",
+    "native_runtime": "local Linux/WSL host, release executable built from fresh committed export",
+    "os_release": {
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "LOGO": "ubuntu-logo",
+      "NAME": "Ubuntu",
+      "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "UBUNTU_CODENAME": "noble",
+      "VERSION": "24.04.4 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "VERSION_ID": "24.04"
+    },
+    "package_versions": {
+      "numpy": "2.5.3",
+      "pydantic": "2.13.5",
+      "rk-uarch": "0.0.1"
+    },
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "remote_qualification": "pending under U0024",
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "source_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_agreement_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_sha256": "sha256:36c5f91c386ca08bbc541e8f30b674f4789a02df86536062061c649cd6f76677"
+  },
+  "run_conditions": {
+    "priming_iterations": 1,
+    "seed": 0,
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "timed_invocations": 1,
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer"
+  },
+  "spec_hash": "sha256:1c2da438983a8ce585bb25372ef252f94851d45f39db39a8325245c1637bb8a2",
+  "u_c0": {
+    "aggregate": {
+      "duration_ps": 1535998.046875,
+      "duration_ps_exact": {
+        "denominator": 64,
+        "numerator": 98303875
+      },
+      "predicted_bytes": 1048580,
+      "predicted_flops": 524287,
+      "predicted_integer_ops": 0
+    },
+    "ops": {
+      "memory-read-1048576": {
+        "compute_ps_exact": {
+          "denominator": 64,
+          "numerator": 98303875
+        },
+        "duration_ps": 1535998.046875,
+        "duration_ps_exact": {
+          "denominator": 64,
+          "numerator": 98303875
+        },
+        "memory_ps_exact": {
+          "denominator": 2097152,
+          "numerator": 2560009765625
+        },
+        "predicted_bytes": 1048580,
+        "predicted_flops": 524287,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "cast": 524288,
+          "reduction_sum": 524287
+        }
+      }
+    },
+    "per_op": {
+      "duration_ps": 1535998.046875,
+      "duration_ps_exact": {
+        "denominator": 64,
+        "numerator": 98303875
+      },
+      "predicted_bytes": 1048580,
+      "predicted_flops": 524287,
+      "predicted_integer_ops": 0
+    },
+    "profile": "u-c0-tpu-v5e/1",
+    "unrepresented": [
+      "matrix_fill",
+      "padding",
+      "vmem_staging",
+      "hbm_latency_and_credits",
+      "vector_setup",
+      "dispatch",
+      "kernel_startup"
+    ]
+  },
+  "work_convention": "source-level FMA=2, scalar arithmetic/special function=1; casts, broadcasts, comparisons/selects/index work excluded; INT8 dot is integer_ops, not FLOPs"
+}

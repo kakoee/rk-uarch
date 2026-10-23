@@ -27,7 +27,9 @@ def evidence(path: str) -> tuple[str, str] | None:
     parts = PurePosixPath(path).parts
     if len(parts) < 5 or parts[:2] != ('validation', 'L3_silicon'):
         return None
-    if parts[3] == 'predictions' and path.endswith('.json') and len(parts) == 5:
+    # Prepared inputs, simulator diagnostics and unknown inventories are part of
+    # the immutable prediction archive too, including compressed nested artifacts.
+    if parts[3] == 'predictions':
         return 'prediction', path
     if parts[3] == 'results':
         # A flat <id>.json receipt or raw files under <id>/ map to <id>.json.

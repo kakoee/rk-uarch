@@ -1,0 +1,271 @@
+{
+  "artifacts": {
+    "native_output": {
+      "path": "artifacts/operator-output_projection-decode.native.json.gz",
+      "sha256": "sha256:b5f1f13245adf768c826ca87207d8536353aca666e7f5dc62cc21de1a25027f7",
+      "uncompressed_sha256": "sha256:fb9f1fb0b771702318cefe4018acc49d3cc980c05ad758e5ac1df9b895905047"
+    },
+    "prepared_job": {
+      "path": "artifacts/operator-output_projection-decode.job.json.gz",
+      "sha256": "sha256:293752657259a0f57fe41b246ecdf57348539d920d0b1d31e601b00057bb2564",
+      "uncompressed_sha256": "sha256:e184c55bafa6bbc6c63849b16604703436e489665d04be9726ddc00ea8fe4516"
+    }
+  },
+  "benchmark": {
+    "benchmark_class": "operator",
+    "compiler_counts": "archive optimized HLO FLOPs and bytes separately from hardware counters",
+    "id": "operator-output_projection-decode",
+    "initial_state": "steady",
+    "mapping": "deterministic supplied tiles on one TensorCore with four MXU IDs and shared VMEM; compiler-chosen comparison, not a matched-layout claim",
+    "mapping_match": "compiler-chosen",
+    "mathematics": "Y[M,N]=X[M,K]@W[K,N]; 2*M*K*N operations",
+    "measurement_unit": "whole compiled dot with required layout/padding/output conversion; materialized BF16 output",
+    "native_status": "not_run",
+    "native_support": [
+      "reference admission",
+      "complete operator work",
+      "explicit materialized buffers",
+      "steady state",
+      "M/N/K tiling",
+      "partial sums",
+      "precision conversion"
+    ],
+    "observability": "not_demonstrated",
+    "precision_policy": "BF16 payload, FP32 matrix accumulation/reductions/rotary; BF16 materialized outputs unless specified; required conversions retained",
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "status": "proposed; not signed; not admitted",
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer",
+    "unit_kind": "individual_operation",
+    "work": {
+      "K": 4096,
+      "M": 1,
+      "N": 4096,
+      "batch": 1,
+      "block_tokens": 16,
+      "head_dim": 128,
+      "hidden": 4096,
+      "intermediate": 14336,
+      "kv_heads": 8,
+      "layers": 1,
+      "mode": "decode",
+      "new_tokens": 1,
+      "operator": "output_projection",
+      "precision": "bf16",
+      "prior_tokens": 2047,
+      "query_heads": 32,
+      "total_tokens": 2048,
+      "tp": 1,
+      "vocab": 128256
+    }
+  },
+  "benchmark_class": "operator",
+  "bytes_convention": "native=executed HBM payload read+write; U-C0=logical operand HBM bytes; local VMEM bytes separate; physical transactions unavailable",
+  "calibration": "stub",
+  "compiler_reported": {
+    "bytes": null,
+    "flops": null,
+    "status": "not_observed"
+  },
+  "energy": "unverified",
+  "engine": {
+    "model": {
+      "name": "native-intervals",
+      "version": "3"
+    },
+    "name": "native",
+    "package_version": "0.0.1",
+    "version": "native-stage/3"
+  },
+  "error": "unknown",
+  "format": "uarch-tpu-v5e-frozen-prediction/1",
+  "id": "operator-output_projection-decode",
+  "initial_state": "steady",
+  "limitations": [
+    "Unvalidated STUB timing",
+    "Compiler mapping and device event boundary unobserved",
+    "Tile-packed matrix HBM layout; explicit score/probability materialization and BF16 AV probability conversion",
+    "Register/bank/channel/energy behavior unrepresented",
+    "F3 non-HBM arbitration and F6 critical-path causal adjacency incompletely verified",
+    "F4 direct oversized /4 error-code difference retained",
+    "F5 gather/attention/activation packing serialized through one staging slot",
+    "No silicon evidence or error estimate; compiler correspondence is future measurement work"
+  ],
+  "mapping_match": "compiler-chosen",
+  "mapping_policy": {
+    "buffer_depth": 2,
+    "name": "ws-rowsplit",
+    "version": "3"
+  },
+  "measurement_unit": "whole compiled dot with required layout/padding/output conversion; materialized BF16 output",
+  "native": {
+    "consumed_stubs": [
+      "bf16_mxu_mac_per_s",
+      "hbm_capacity_bytes",
+      "hbm_issue_interval_ps",
+      "hbm_latency_ps",
+      "hbm_max_outstanding",
+      "int8_mxu_mac_per_s",
+      "kernel_startup_ps",
+      "matrix_fill_equivalent_macs",
+      "scalar_op_ps",
+      "vector_group_startup_ps",
+      "vector_tile_ps",
+      "vmem_bytes_per_s"
+    ],
+    "counts": {
+      "hbm_read_bytes": 33816576,
+      "hbm_write_bytes": 8192,
+      "issued_cast": 32768,
+      "issued_matrix_ops": 33554432,
+      "matrix_ops": 33554432,
+      "semantic_matrix_ops": 33554432,
+      "semantic_vector_ops": 0,
+      "useful_cast": 4096,
+      "vmem_bytes": 34873344
+    },
+    "diagnostics": "complete observations in artifacts.native_output; F3/F6 causal limits apply",
+    "duration_ps": 57528522,
+    "duration_s": 5.7528522e-05,
+    "per_op_counts": {
+      "operator-output_projection-decode": {
+        "hbm_read_bytes": 33816576,
+        "hbm_write_bytes": 8192,
+        "issued_cast": 32768,
+        "issued_matrix_ops": 33554432,
+        "matrix_ops": 33554432,
+        "semantic_matrix_ops": 33554432,
+        "semantic_vector_ops": 0,
+        "useful_cast": 4096,
+        "vmem_bytes": 34873344
+      }
+    },
+    "predicted_bytes": 33824768,
+    "predicted_flops": 33554432,
+    "predicted_integer_ops": 0,
+    "result_hash": "sha256:8df75be75ba457bf9c3ad5e31bec57206b770de31fe4a1ba8e934e3b16a91184"
+  },
+  "native_level": {
+    "checkpoint": "R",
+    "composite_ceiling": "C1",
+    "description": "native interval model/3; no physical channel, bank or NoC model",
+    "eligibility": "reference_suite"
+  },
+  "prepared_input": {
+    "assumptions_hash": "sha256:d33b5e556a2877bf7381c79d001a8496a70811f78aba42ded4e1f9de340f0ee3",
+    "bundle_hash": "sha256:8ed3dd218d87aedafb7afb8fd3957d5227b0049f3fd4d72f2079867a08dc502e",
+    "job_hash": "sha256:5a5b83fdade4eef0df4c08f4449d7e735babdede521561b7ce6dd30dcdac8356",
+    "point_hash": "sha256:3ce2050141c2c479e48e23df4c87f676bcef2de01f405c7be69741670e82624b",
+    "producer": {
+      "name": "rk-uarch",
+      "version": "0.0.1"
+    },
+    "source_hash": "sha256:ce8f0472fbc9cfda0892d6ded0ef78ccd294a638dde913b163dc06b119a60f8e"
+  },
+  "provenance": {
+    "acceptance_commit": "68844bb08bf4c9d0494d52fb517cbf68b2db7cc4",
+    "generator_sha256": "sha256:928c7176ba4e11d27afe8f80cf7ddc3fc4f26c3f51ccf39ae544e803777c6f91",
+    "image_digest": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+    "image_digest_kind": "local Docker image ID; build container only; not a registry RepoDigest",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "measurement_access": "none",
+    "module_origins": {
+      "rkuarch.engines.analytic.reference": "/tmp/u5-freeze/source/src/rkuarch/engines/analytic/reference.py",
+      "rkuarch.workload.reference": "/tmp/u5-freeze/source/src/rkuarch/workload/reference.py",
+      "uarch_contract.reference": "/tmp/u5-freeze/source/contract/uarch_contract/reference.py"
+    },
+    "native_executable_origin": "/tmp/u5-freeze/build/target/x86_64-unknown-linux-gnu/release/uarch-engine",
+    "native_runtime": "local Linux/WSL host, release executable built from fresh committed export",
+    "os_release": {
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "LOGO": "ubuntu-logo",
+      "NAME": "Ubuntu",
+      "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "UBUNTU_CODENAME": "noble",
+      "VERSION": "24.04.4 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "VERSION_ID": "24.04"
+    },
+    "package_versions": {
+      "numpy": "2.5.3",
+      "pydantic": "2.13.5",
+      "rk-uarch": "0.0.1"
+    },
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "remote_qualification": "pending under U0024",
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "source_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_agreement_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_sha256": "sha256:36c5f91c386ca08bbc541e8f30b674f4789a02df86536062061c649cd6f76677"
+  },
+  "run_conditions": {
+    "priming_iterations": 1,
+    "seed": 0,
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "timed_invocations": 1,
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer"
+  },
+  "spec_hash": "sha256:1c2da438983a8ce585bb25372ef252f94851d45f39db39a8325245c1637bb8a2",
+  "u_c0": {
+    "aggregate": {
+      "duration_ps": 39081573.486328125,
+      "duration_ps_exact": {
+        "denominator": 512,
+        "numerator": 20009765625
+      },
+      "predicted_bytes": 33570816,
+      "predicted_flops": 33554432,
+      "predicted_integer_ops": 0
+    },
+    "ops": {
+      "operator-output_projection-decode": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 34342432
+        },
+        "duration_ps": 39081573.486328125,
+        "duration_ps_exact": {
+          "denominator": 512,
+          "numerator": 20009765625
+        },
+        "memory_ps_exact": {
+          "denominator": 512,
+          "numerator": 20009765625
+        },
+        "predicted_bytes": 33570816,
+        "predicted_flops": 33554432,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 33554432,
+        "useful_primitives": {
+          "cast": 4096
+        }
+      }
+    },
+    "per_op": {
+      "duration_ps": 39081573.486328125,
+      "duration_ps_exact": {
+        "denominator": 512,
+        "numerator": 20009765625
+      },
+      "predicted_bytes": 33570816,
+      "predicted_flops": 33554432,
+      "predicted_integer_ops": 0
+    },
+    "profile": "u-c0-tpu-v5e/1",
+    "unrepresented": [
+      "matrix_fill",
+      "padding",
+      "vmem_staging",
+      "hbm_latency_and_credits",
+      "vector_setup",
+      "dispatch",
+      "kernel_startup"
+    ]
+  },
+  "work_convention": "source-level FMA=2, scalar arithmetic/special function=1; casts, broadcasts, comparisons/selects/index work excluded; INT8 dot is integer_ops, not FLOPs"
+}

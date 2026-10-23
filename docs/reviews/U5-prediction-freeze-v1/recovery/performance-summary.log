@@ -1,0 +1,34 @@
+# Observed developer runtime and memory
+
+Host measurements from `performance.jsonl`, not simulated chip timing. GiB = 2^30
+bytes, MiB = 2^20 bytes. Each row is one sequential attempt. Stage times below are
+separate completed-stage wall times; the case column is inclusive and must not be
+added to them. Failed incomplete phases are unmeasured. Validation/checking includes
+the unchanged independent checker; internal subdivisions are unmeasured. Preparation
+includes its validators, and analytic resolution includes its own bundle validation.
+
+| Case / attempt | Status | Case wall s (inclusive) | Mapping s | Preparation s | Native invocation s | Input validation + revalidation s | Output validation + independent check s | Analytic decoding + resolution s | Serialization/check + persistence s | Compression s |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| layer-b32-s1 / 1 | failure | 217.39 | unmeasured | unmeasured | unmeasured | unmeasured | unmeasured | unmeasured | unmeasured | unmeasured |
+| layer-b32-s1 / 2 | failure | 516.82 | 129.05 | 205.98 | unmeasured | unmeasured | unmeasured | unmeasured | 30.15 | unmeasured |
+| layer-b32-s1 / 3 | failure | 246.45 | unmeasured | unmeasured | unmeasured | 214.81 | unmeasured | unmeasured | unmeasured | unmeasured |
+| layer-b1-s128 / 4 | complete | 316.63 | 44.95 | 78.59 | 14.37 | 81.03 | 30.17 | 36.99 | 16.77 | 6.59 |
+| gather-p16-c2048 / 5 | complete | 24.61 | 1.80 | 2.50 | 1.41 | 2.76 | 4.71 | 1.07 | 2.22 | 0.66 |
+| gather-p32-c2048 / 6 | complete | 21.60 | 1.41 | 1.93 | 1.55 | 2.19 | 4.55 | 0.82 | 2.10 | 0.63 |
+| launch-minimal / 7 | complete | 8.20 | 0.12 | 0.04 | 0.02 | 0.08 | 0.02 | 0.02 | 0.03 | 0.02 |
+
+Python peak is the largest final `RUSAGE_SELF` value across that case's short-lived
+workers. Native peak is the sole child process's wait rusage, including its launch
+footprint. A killed worker's final Python peak is unavailable. Combined RSS is an
+**approximate sampled sum**, and may double-count shared pages or miss brief peaks.
+
+| Case / attempt | Python peak GiB | Native peak GiB | Combined peak GiB (approx.) | Available GiB before → after | Swap used MiB before → after | Input MiB raw → gzip | Output MiB raw → gzip |
+| --- | ---: | ---: | ---: | --- | --- | --- | --- |
+| layer-b32-s1 / 1 | unmeasured | unmeasured | 9.74 | 11.64 → 11.57 | 0.00 → 0.00 | unmeasured → unmeasured | unmeasured → unmeasured |
+| layer-b32-s1 / 2 | unmeasured | unmeasured | 10.51 | 11.61 → 8.67 | 0.00 → 4.54 | unmeasured → unmeasured | unmeasured → unmeasured |
+| layer-b32-s1 / 3 | unmeasured | unmeasured | 9.98 | 11.62 → 2.44 | 4.54 → 4.54 | unmeasured → unmeasured | unmeasured → unmeasured |
+| layer-b1-s128 / 4 | 6.17 | 4.04 | 6.15 | 11.61 → 11.61 | 4.54 → 4.54 | 40.00 → 3.08 | 168.49 → 18.26 |
+| gather-p16-c2048 / 5 | 0.39 | 0.62 | 0.51 | 11.60 → 11.60 | 4.54 → 4.54 | 4.18 → 0.22 | 26.77 → 2.59 |
+| gather-p32-c2048 / 6 | 0.35 | 0.58 | 0.35 | 11.61 → 11.61 | 4.54 → 4.54 | 3.41 → 0.20 | 25.52 → 2.38 |
+| launch-minimal / 7 | 0.08 | 0.04 | 0.00 | 11.61 → 11.61 | 4.54 → 4.54 | 0.02 → 0.00 | 0.01 → 0.00 |
+

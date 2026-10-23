@@ -12,6 +12,8 @@ full Git history. Predictions are `<chip>/predictions/<id>.json`; a result recei
 `<chip>/results/<id>.json`, with any accompanying raw files under `<chip>/results/<id>/`.
 Every result file needs its prediction's addition commit as a **strict ancestor**.
 Independent branches and same-commit additions do not establish prediction-first order.
+All files under predictions/, including compressed prepared jobs, simulator outputs and
+unknown inventories, are immutable and require the same freeze commit subject.
 Prediction additions require the existing `FROZEN PREDICTIONS:` subject prefix. The checker
 also refuses edits/deletions of committed prediction and result bytes, including changes
 later reverted. Unknown flat result layouts refuse instead of bypassing the check.
@@ -22,3 +24,9 @@ results alone cannot skip it. Empty history reports infrastructure readiness onl
 history cannot prove that someone did not measure privately before committing; the
 original separation of prediction and measurement work remains necessary. No current
 U4 verification output is silently converted into a U5 frozen prediction.
+
+
+The TPU v5e U5 freeze uses Javid's explicit 2026-10-22 human acceptance in place of
+outstanding lane signatures for the unchanged 52 units. See its [operative agreement](tpu-v5e/SUITE.md)
+and [archive/replay guide](tpu-v5e/freeze/README.md). No compiler/device observation is
+inferred from that acceptance or from native simulator outputs.

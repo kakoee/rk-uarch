@@ -1,0 +1,453 @@
+{
+  "artifacts": {
+    "native_output": {
+      "path": "artifacts/operator-q_projection-prefill.native.json.gz",
+      "sha256": "sha256:da005158dc5e053fde6db71ddfcce339486247511c65c346c9a0837118c4fd63",
+      "uncompressed_sha256": "sha256:d3dd5351af845123b93f3d29c1a85654723e63652709df4cd0e146adfc4c3eb6"
+    },
+    "prepared_job": {
+      "path": "artifacts/operator-q_projection-prefill.job.json.gz",
+      "sha256": "sha256:a67126c48e9b7bc9cb499e347364e4cde6d80bce3a9cdfb27a9d1db84db53688",
+      "uncompressed_sha256": "sha256:5200f48ff313ca2aeae14dbb8b3ed017dd2a571931fe5ae623bcf53c1a1d45f9"
+    }
+  },
+  "benchmark": {
+    "benchmark_class": "operator",
+    "compiler_counts": "archive optimized HLO FLOPs and bytes separately from hardware counters",
+    "id": "operator-q_projection-prefill",
+    "initial_state": "steady",
+    "mapping": "deterministic supplied tiles on one TensorCore with four MXU IDs and shared VMEM; compiler-chosen comparison, not a matched-layout claim",
+    "mapping_match": "compiler-chosen",
+    "mathematics": "Y[M,N]=X[M,K]@W[K,N]; 2*M*K*N operations; projection BF16 output -> FP32 -> rotary (3*M*heads*R arithmetic ops) -> BF16; 2*M*heads*R rotary casts plus matrix output cast; cos/sin input traffic retained",
+    "measurement_unit": "whole projection plus Q rotation envelope, including all numeric boundaries; K output is rotated before separate KV append",
+    "native_status": "not_run",
+    "native_support": [
+      "reference admission",
+      "complete operator work",
+      "explicit materialized buffers",
+      "steady state",
+      "M/N/K tiling",
+      "partial sums",
+      "precision conversion",
+      "PreparedOpV2 rotary binding",
+      "coefficient gathering",
+      "projection/rotation fusion accounting"
+    ],
+    "observability": "not_demonstrated",
+    "precision_policy": "BF16 payload, FP32 matrix accumulation/reductions/rotary; BF16 materialized outputs unless specified; required conversions retained",
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "status": "proposed; not signed; not admitted",
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer",
+    "unit_kind": "fused_unit",
+    "work": {
+      "K": 4096,
+      "M": 128,
+      "N": 4096,
+      "R": 128,
+      "batch": 1,
+      "block_tokens": 16,
+      "head_dim": 128,
+      "heads": 32,
+      "hidden": 4096,
+      "intermediate": 14336,
+      "kv_heads": 8,
+      "layers": 1,
+      "mode": "prefill",
+      "new_tokens": 128,
+      "operator": "q_projection",
+      "pairing": "split_halves",
+      "positions": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127
+      ],
+      "precision": "bf16",
+      "prior_tokens": 0,
+      "query_heads": 32,
+      "total_tokens": 128,
+      "tp": 1,
+      "vocab": 128256
+    }
+  },
+  "benchmark_class": "operator",
+  "bytes_convention": "native=executed HBM payload read+write; U-C0=logical operand HBM bytes; local VMEM bytes separate; physical transactions unavailable",
+  "calibration": "stub",
+  "compiler_reported": {
+    "bytes": null,
+    "flops": null,
+    "status": "not_observed"
+  },
+  "energy": "unverified",
+  "engine": {
+    "model": {
+      "name": "native-intervals",
+      "version": "3"
+    },
+    "name": "native",
+    "package_version": "0.0.1",
+    "version": "native-stage/3"
+  },
+  "error": "unknown",
+  "format": "uarch-tpu-v5e-frozen-prediction/1",
+  "id": "operator-q_projection-prefill",
+  "initial_state": "steady",
+  "limitations": [
+    "Unvalidated STUB timing",
+    "Compiler mapping and device event boundary unobserved",
+    "Tile-packed matrix HBM layout; explicit score/probability materialization and BF16 AV probability conversion",
+    "Register/bank/channel/energy behavior unrepresented",
+    "F3 non-HBM arbitration and F6 critical-path causal adjacency incompletely verified",
+    "F4 direct oversized /4 error-code difference retained",
+    "F5 gather/attention/activation packing serialized through one staging slot",
+    "No silicon evidence or error estimate; compiler correspondence is future measurement work"
+  ],
+  "mapping_match": "compiler-chosen",
+  "mapping_policy": {
+    "buffer_depth": 2,
+    "name": "ws-rowsplit",
+    "version": "3"
+  },
+  "measurement_unit": "whole projection plus Q rotation envelope, including all numeric boundaries; K output is rotated before separate KV append",
+  "native": {
+    "consumed_stubs": [
+      "bf16_mxu_mac_per_s",
+      "hbm_capacity_bytes",
+      "hbm_issue_interval_ps",
+      "hbm_latency_ps",
+      "hbm_max_outstanding",
+      "int8_mxu_mac_per_s",
+      "kernel_startup_ps",
+      "matrix_fill_equivalent_macs",
+      "scalar_op_ps",
+      "vector_group_startup_ps",
+      "vector_tile_ps",
+      "vmem_bytes_per_s"
+    ],
+    "counts": {
+      "hbm_read_bytes": 68222976,
+      "hbm_write_bytes": 2097152,
+      "issued_add": 524288,
+      "issued_cast": 1572864,
+      "issued_matrix_ops": 4294967296,
+      "issued_multiply": 2097152,
+      "issued_subtract": 524288,
+      "matrix_ops": 4294967296,
+      "semantic_matrix_ops": 4294967296,
+      "semantic_vector_ops": 1572864,
+      "useful_add": 262144,
+      "useful_cast": 1572864,
+      "useful_multiply": 1048576,
+      "useful_subtract": 262144,
+      "vmem_bytes": 204537856
+    },
+    "diagnostics": "complete observations in artifacts.native_output; F3/F6 causal limits apply",
+    "duration_ps": 113268460,
+    "duration_s": 0.00011326846,
+    "per_op_counts": {
+      "q": {
+        "hbm_read_bytes": 67108864,
+        "hbm_write_bytes": 1048576,
+        "issued_cast": 524288,
+        "issued_matrix_ops": 4294967296,
+        "matrix_ops": 4294967296,
+        "semantic_matrix_ops": 4294967296,
+        "semantic_vector_ops": 0,
+        "useful_cast": 524288,
+        "vmem_bytes": 202375168
+      },
+      "q_rope": {
+        "hbm_read_bytes": 1114112,
+        "hbm_write_bytes": 1048576,
+        "issued_add": 524288,
+        "issued_cast": 1048576,
+        "issued_multiply": 2097152,
+        "issued_subtract": 524288,
+        "semantic_matrix_ops": 0,
+        "semantic_vector_ops": 1572864,
+        "useful_add": 262144,
+        "useful_cast": 1048576,
+        "useful_multiply": 1048576,
+        "useful_subtract": 262144,
+        "vmem_bytes": 2162688
+      }
+    },
+    "predicted_bytes": 70320128,
+    "predicted_flops": 4296540160,
+    "predicted_integer_ops": 0,
+    "result_hash": "sha256:575504c1e2537b21785fa5960facc63bf49bf6b97a81edf0e9593bea1af83fa8"
+  },
+  "native_level": {
+    "checkpoint": "R",
+    "composite_ceiling": "C1",
+    "description": "native interval model/3; no physical channel, bank or NoC model",
+    "eligibility": "reference_suite"
+  },
+  "prepared_input": {
+    "assumptions_hash": "sha256:d33b5e556a2877bf7381c79d001a8496a70811f78aba42ded4e1f9de340f0ee3",
+    "bundle_hash": "sha256:7f61b5a7ca7e0047921cf5be8a0b69d8644d44d2b28c46afb70b07b1dfcca4b5",
+    "job_hash": "sha256:c3c60b19a608fb210e282f967025552aa863d509df0299af22c63ccc15fa13a4",
+    "point_hash": "sha256:f2c1e3cad06f177f5c5572f5a67812d0ff0601af9fadb6d3e72c5e0e149f7c47",
+    "producer": {
+      "name": "rk-uarch",
+      "version": "0.0.1"
+    },
+    "source_hash": "sha256:ebead128d3c46303942c4badde71147748bfd0c5b51c699f60b307720f2ca3be"
+  },
+  "provenance": {
+    "acceptance_commit": "68844bb08bf4c9d0494d52fb517cbf68b2db7cc4",
+    "generator_sha256": "sha256:928c7176ba4e11d27afe8f80cf7ddc3fc4f26c3f51ccf39ae544e803777c6f91",
+    "image_digest": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+    "image_digest_kind": "local Docker image ID; build container only; not a registry RepoDigest",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "measurement_access": "none",
+    "module_origins": {
+      "rkuarch.engines.analytic.reference": "/tmp/u5-freeze/source/src/rkuarch/engines/analytic/reference.py",
+      "rkuarch.workload.reference": "/tmp/u5-freeze/source/src/rkuarch/workload/reference.py",
+      "uarch_contract.reference": "/tmp/u5-freeze/source/contract/uarch_contract/reference.py"
+    },
+    "native_executable_origin": "/tmp/u5-freeze/build/target/x86_64-unknown-linux-gnu/release/uarch-engine",
+    "native_runtime": "local Linux/WSL host, release executable built from fresh committed export",
+    "os_release": {
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "LOGO": "ubuntu-logo",
+      "NAME": "Ubuntu",
+      "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "UBUNTU_CODENAME": "noble",
+      "VERSION": "24.04.4 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "VERSION_ID": "24.04"
+    },
+    "package_versions": {
+      "numpy": "2.5.3",
+      "pydantic": "2.13.5",
+      "rk-uarch": "0.0.1"
+    },
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "remote_qualification": "pending under U0024",
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "source_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_agreement_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_sha256": "sha256:36c5f91c386ca08bbc541e8f30b674f4789a02df86536062061c649cd6f76677"
+  },
+  "run_conditions": {
+    "priming_iterations": 1,
+    "seed": 0,
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "timed_invocations": 1,
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer"
+  },
+  "spec_hash": "sha256:1c2da438983a8ce585bb25372ef252f94851d45f39db39a8325245c1637bb8a2",
+  "u_c0": {
+    "aggregate": {
+      "duration_ps": 44021606.4453125,
+      "duration_ps_exact": {
+        "denominator": 128,
+        "numerator": 5634765625
+      },
+      "predicted_bytes": 37814272,
+      "predicted_flops": 4296540160,
+      "predicted_integer_ops": 0
+    },
+    "ops": {
+      "q": {
+        "compute_ps_exact": {
+          "denominator": 197,
+          "numerator": 4395831296
+        },
+        "duration_ps": 41503906.25,
+        "duration_ps_exact": {
+          "denominator": 4,
+          "numerator": 166015625
+        },
+        "memory_ps_exact": {
+          "denominator": 4,
+          "numerator": 166015625
+        },
+        "predicted_bytes": 35651584,
+        "predicted_flops": 4294967296,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 4294967296,
+        "useful_primitives": {
+          "cast": 524288
+        }
+      },
+      "q_rope": {
+        "compute_ps_exact": {
+          "denominator": 1,
+          "numerator": 2560000
+        },
+        "duration_ps": 2560000.0,
+        "duration_ps_exact": {
+          "denominator": 1,
+          "numerator": 2560000
+        },
+        "memory_ps_exact": {
+          "denominator": 128,
+          "numerator": 322265625
+        },
+        "predicted_bytes": 2162688,
+        "predicted_flops": 1572864,
+        "predicted_integer_ops": 0,
+        "useful_matrix_ops": 0,
+        "useful_primitives": {
+          "add": 262144,
+          "cast": 1048576,
+          "multiply": 1048576,
+          "subtract": 262144
+        }
+      }
+    },
+    "per_op": {
+      "duration_ps": 44063906.25,
+      "duration_ps_exact": {
+        "denominator": 4,
+        "numerator": 176255625
+      },
+      "predicted_bytes": 37814272,
+      "predicted_flops": 4296540160,
+      "predicted_integer_ops": 0
+    },
+    "profile": "u-c0-tpu-v5e/1",
+    "unrepresented": [
+      "matrix_fill",
+      "padding",
+      "vmem_staging",
+      "hbm_latency_and_credits",
+      "vector_setup",
+      "dispatch",
+      "kernel_startup"
+    ]
+  },
+  "work_convention": "source-level FMA=2, scalar arithmetic/special function=1; casts, broadcasts, comparisons/selects/index work excluded; INT8 dot is integer_ops, not FLOPs"
+}

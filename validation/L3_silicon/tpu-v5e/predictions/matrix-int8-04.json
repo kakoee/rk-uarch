@@ -1,0 +1,249 @@
+{
+  "artifacts": {
+    "native_output": {
+      "path": "artifacts/matrix-int8-04.native.json.gz",
+      "sha256": "sha256:9fb8a5cd3a6892c9938d7a8fb04299fde1f07dabcba7fce9c115d67490373b2a",
+      "uncompressed_sha256": "sha256:ca5ba21dae67754a6a2e07add49c6af3cbf15cc89976502cebcec36220c21dda"
+    },
+    "prepared_job": {
+      "path": "artifacts/matrix-int8-04.job.json.gz",
+      "sha256": "sha256:9678dd241aed4d098d57741cbcce980c77f3a5a849504cc2713dd7658c46f992",
+      "uncompressed_sha256": "sha256:722ba92e90720d9c90ccd653b778fd47e955373026c4711de30c1b551f703696"
+    }
+  },
+  "benchmark": {
+    "benchmark_class": "matrix",
+    "compiler_counts": "archive optimized HLO FLOPs and bytes separately from hardware counters",
+    "id": "matrix-int8-04",
+    "initial_state": "steady",
+    "mapping": "deterministic supplied tiles on one TensorCore with four MXU IDs and shared VMEM; compiler-chosen comparison, not a matched-layout claim",
+    "mapping_match": "compiler-chosen",
+    "mathematics": "Y[M,N] = X[M,K] @ W[K,N]; 2*M*K*N useful operations; padding and layout separately counted",
+    "measurement_unit": "single compiled dot including required layout/padding/output conversion",
+    "native_status": "not_run",
+    "native_support": [
+      "reference admission",
+      "M/N/K tiling",
+      "partial-sum lifetime",
+      "four MXU arbitration",
+      "precision-specific matrix service",
+      "output materialization"
+    ],
+    "observability": "not_demonstrated",
+    "precision_policy": "signed int8 X/W with values in [-7,7], exact int32 accumulator and output; raw integer dot, no scales, quantization or dequantization inside boundary",
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "status": "proposed; not signed; not admitted",
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer",
+    "unit_kind": "individual_operation",
+    "work": {
+      "K": 1024,
+      "M": 1024,
+      "N": 1024,
+      "precision": "int8"
+    }
+  },
+  "benchmark_class": "matrix",
+  "bytes_convention": "native=executed HBM payload read+write; U-C0=logical operand HBM bytes; local VMEM bytes separate; physical transactions unavailable",
+  "calibration": "stub",
+  "compiler_reported": {
+    "bytes": null,
+    "flops": null,
+    "status": "not_observed"
+  },
+  "energy": "unverified",
+  "engine": {
+    "model": {
+      "name": "native-intervals",
+      "version": "3"
+    },
+    "name": "native",
+    "package_version": "0.0.1",
+    "version": "native-stage/3"
+  },
+  "error": "unknown",
+  "format": "uarch-tpu-v5e-frozen-prediction/1",
+  "id": "matrix-int8-04",
+  "initial_state": "steady",
+  "limitations": [
+    "Unvalidated STUB timing",
+    "Compiler mapping and device event boundary unobserved",
+    "Tile-packed matrix HBM layout; explicit score/probability materialization and BF16 AV probability conversion",
+    "Register/bank/channel/energy behavior unrepresented",
+    "F3 non-HBM arbitration and F6 critical-path causal adjacency incompletely verified",
+    "F4 direct oversized /4 error-code difference retained",
+    "F5 gather/attention/activation packing serialized through one staging slot",
+    "No silicon evidence or error estimate; compiler correspondence is future measurement work"
+  ],
+  "mapping_match": "compiler-chosen",
+  "mapping_policy": {
+    "buffer_depth": 2,
+    "name": "ws-rowsplit",
+    "version": "3"
+  },
+  "measurement_unit": "single compiled dot including required layout/padding/output conversion",
+  "native": {
+    "consumed_stubs": [
+      "bf16_mxu_mac_per_s",
+      "hbm_capacity_bytes",
+      "hbm_issue_interval_ps",
+      "hbm_latency_ps",
+      "hbm_max_outstanding",
+      "int8_mxu_mac_per_s",
+      "kernel_startup_ps",
+      "matrix_fill_equivalent_macs",
+      "scalar_op_ps",
+      "vmem_bytes_per_s"
+    ],
+    "counts": {
+      "hbm_read_bytes": 9437184,
+      "hbm_write_bytes": 4194304,
+      "issued_matrix_ops": 2147483648,
+      "matrix_ops": 2147483648,
+      "semantic_matrix_ops": 2147483648,
+      "semantic_vector_ops": 0,
+      "vmem_bytes": 80740352
+    },
+    "diagnostics": "complete observations in artifacts.native_output; F3/F6 causal limits apply",
+    "duration_ps": 63539565,
+    "duration_s": 6.3539565e-05,
+    "per_op_counts": {
+      "dot": {
+        "hbm_read_bytes": 9437184,
+        "hbm_write_bytes": 4194304,
+        "issued_matrix_ops": 2147483648,
+        "matrix_ops": 2147483648,
+        "semantic_matrix_ops": 2147483648,
+        "semantic_vector_ops": 0,
+        "vmem_bytes": 80740352
+      }
+    },
+    "predicted_bytes": 13631488,
+    "predicted_flops": 0,
+    "predicted_integer_ops": 2147483648,
+    "result_hash": "sha256:bdf9ab1a14b1d3918933f73752bd2c041a463484ccc65922a935aa823c1bb376"
+  },
+  "native_level": {
+    "checkpoint": "R",
+    "composite_ceiling": "C1",
+    "description": "native interval model/3; no physical channel, bank or NoC model",
+    "eligibility": "reference_suite"
+  },
+  "prepared_input": {
+    "assumptions_hash": "sha256:d33b5e556a2877bf7381c79d001a8496a70811f78aba42ded4e1f9de340f0ee3",
+    "bundle_hash": "sha256:665d1754d8c369b918986aee5fd5d14d8c27e654e8c26f27a8efdb790fa8c6aa",
+    "job_hash": "sha256:16a5d6b4e9d2ab61dec488e86aa14fe09bd1573e226fb0534f4b499a180a2530",
+    "point_hash": "sha256:c008b8ac6e156911f11370172aebfae87a6c39219963342cf4b53cf1e9b8fa3a",
+    "producer": {
+      "name": "rk-uarch",
+      "version": "0.0.1"
+    },
+    "source_hash": "sha256:3a98bd666076e2d660f20bf9dbcd22d3011d0c622c1354fae17522a904c6f36a"
+  },
+  "provenance": {
+    "acceptance_commit": "68844bb08bf4c9d0494d52fb517cbf68b2db7cc4",
+    "generator_sha256": "sha256:928c7176ba4e11d27afe8f80cf7ddc3fc4f26c3f51ccf39ae544e803777c6f91",
+    "image_digest": "sha256:e9f69f41498334be985ed4d25973fe3fa3f6519e58c73e6a7b8397d871fa0523",
+    "image_digest_kind": "local Docker image ID; build container only; not a registry RepoDigest",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "measurement_access": "none",
+    "module_origins": {
+      "rkuarch.engines.analytic.reference": "/tmp/u5-freeze/source/src/rkuarch/engines/analytic/reference.py",
+      "rkuarch.workload.reference": "/tmp/u5-freeze/source/src/rkuarch/workload/reference.py",
+      "uarch_contract.reference": "/tmp/u5-freeze/source/contract/uarch_contract/reference.py"
+    },
+    "native_executable_origin": "/tmp/u5-freeze/build/target/x86_64-unknown-linux-gnu/release/uarch-engine",
+    "native_runtime": "local Linux/WSL host, release executable built from fresh committed export",
+    "os_release": {
+      "BUG_REPORT_URL": "https://bugs.launchpad.net/ubuntu/",
+      "HOME_URL": "https://www.ubuntu.com/",
+      "ID": "ubuntu",
+      "ID_LIKE": "debian",
+      "LOGO": "ubuntu-logo",
+      "NAME": "Ubuntu",
+      "PRETTY_NAME": "Ubuntu 24.04.4 LTS",
+      "PRIVACY_POLICY_URL": "https://www.ubuntu.com/legal/terms-and-policies/privacy-policy",
+      "SUPPORT_URL": "https://help.ubuntu.com/",
+      "UBUNTU_CODENAME": "noble",
+      "VERSION": "24.04.4 LTS (Noble Numbat)",
+      "VERSION_CODENAME": "noble",
+      "VERSION_ID": "24.04"
+    },
+    "package_versions": {
+      "numpy": "2.5.3",
+      "pydantic": "2.13.5",
+      "rk-uarch": "0.0.1"
+    },
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.14 (main, Sep  1 2026, 14:16:52) [Clang 22.1.3 ]",
+    "remote_qualification": "pending under U0024",
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "source_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_agreement_commit": "4961e945bfd13cd6b91ddf7f8895af7727676803",
+    "suite_sha256": "sha256:36c5f91c386ca08bbc541e8f30b674f4789a02df86536062061c649cd6f76677"
+  },
+  "run_conditions": {
+    "priming_iterations": 1,
+    "seed": 0,
+    "state_procedure": "fixed shapes and addresses; prime once in native simulation, measure next invocation; compare a second priming iteration; reset logical KV length/append destination each invocation",
+    "timed_invocations": 1,
+    "timing": "device-only; exclude compilation, host dispatch and host-device transfer"
+  },
+  "spec_hash": "sha256:1c2da438983a8ce585bb25372ef252f94851d45f39db39a8325245c1637bb8a2",
+  "u_c0": {
+    "aggregate": {
+      "duration_ps": 7324218.75,
+      "duration_ps_exact": {
+        "denominator": 4,
+        "numerator": 29296875
+      },
+      "predicted_bytes": 6291456,
+      "predicted_flops": 0,
+      "predicted_integer_ops": 2147483648
+    },
+    "ops": {
+      "dot": {
+        "compute_ps_exact": {
+          "denominator": 393,
+          "numerator": 2147483648
+        },
+        "duration_ps": 7324218.75,
+        "duration_ps_exact": {
+          "denominator": 4,
+          "numerator": 29296875
+        },
+        "memory_ps_exact": {
+          "denominator": 4,
+          "numerator": 29296875
+        },
+        "predicted_bytes": 6291456,
+        "predicted_flops": 0,
+        "predicted_integer_ops": 2147483648,
+        "useful_matrix_ops": 2147483648,
+        "useful_primitives": {
+          "cast": 0
+        }
+      }
+    },
+    "per_op": {
+      "duration_ps": 7324218.75,
+      "duration_ps_exact": {
+        "denominator": 4,
+        "numerator": 29296875
+      },
+      "predicted_bytes": 6291456,
+      "predicted_flops": 0,
+      "predicted_integer_ops": 2147483648
+    },
+    "profile": "u-c0-tpu-v5e/1",
+    "unrepresented": [
+      "matrix_fill",
+      "padding",
+      "vmem_staging",
+      "hbm_latency_and_credits",
+      "vector_setup",
+      "dispatch",
+      "kernel_startup"
+    ]
+  },
+  "work_convention": "source-level FMA=2, scalar arithmetic/special function=1; casts, broadcasts, comparisons/selects/index work excluded; INT8 dot is integer_ops, not FLOPs"
+}
