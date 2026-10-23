@@ -1,8 +1,9 @@
 # U-P9 handoff — complete 52-unit prediction freeze
 
 All **52 accepted predictions, 104 compressed canonical artifacts and the final STUB
-inventory** are complete and belong to the single `FROZEN PREDICTIONS:` commit carrying
-this handoff. The agreement/source commit is
+inventory** were frozen together in
+[`d366a7e40b3493337d6be8e89af972a23f6ab2c5`](https://github.com/kakoee/rk-uarch/commit/d366a7e40b3493337d6be8e89af972a23f6ab2c5),
+`FROZEN PREDICTIONS: TPU v5e accepted 52-unit reference suite`. The agreement/source commit is
 `4961e945bfd13cd6b91ddf7f8895af7727676803`, preceding all prediction generation. No TPU,
 compiler or device timing/counter measurements were read, requested or run. No engine,
 model, hardware, mapping, contract or accepted workload changed.
@@ -80,11 +81,12 @@ overhead. These are options, not automatic work or new acceptance requirements.
   artifacts and the inventory as immutable prediction evidence. Synthetic histories
   reject early/same-commit results and changes later restored to their original bytes.
 
-Commit all 157 prediction-namespace files together with the `FROZEN PREDICTIONS:` subject,
-using the installed standard ownership/frozen-prediction hooks. Check history ordering
-on that commit, then publish with a normal fast-forward push after rechecking origin.
-No hook bypass or human-override flag is needed or used. No prediction byte may change
-after that commit. Remote CI/native/nightly and controlled-host performance evidence
+All 157 prediction-namespace files were committed together using the installed standard
+ownership/frozen-prediction hooks. The [committed history check](recovery/final-history-check.log)
+verified ordering and immutable history for all 157 evidence files. Publication targets
+`origin/main` with a normal fast-forward push; the remote was rechecked at
+`68844bb08bf4c9d0494d52fb517cbf68b2db7cc4` before commitment. No hook bypass or
+human-override flag was used. No prediction byte may change after the freeze commit. Remote CI/native/nightly and controlled-host performance evidence
 remain deferred under U0024; local checks do not claim those passes or final qualification.
 
 ## Lane B handoff and claim limits

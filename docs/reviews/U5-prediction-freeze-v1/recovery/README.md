@@ -206,8 +206,8 @@ All **52 predictions and 104 archives** now pass the [final audit](final-archive
 All 153 pre-retry files, including the original 141 survivor files, remain byte-identical.
 The earlier `archive-audit.json` and `.log` are historical 51-case receipts, superseded by
 `final-archive-audit.json` and `.log`. `current-history-check.log` is the earlier
-infrastructure-only result before the freeze commit; history must be checked again on the
-committed freeze. The final inventory counts all 17 unchanged numerical
+infrastructure-only result before the freeze commit; [final-history-check.log](final-history-check.log)
+records the passing check on `d366a7e40b3493337d6be8e89af972a23f6ab2c5` for all 157 evidence files. The final inventory counts all 17 unchanged numerical
 STUBs and the 16 actually reported consumed. Final acceptance is recorded separately in
 [final-acceptance.log](final-acceptance.log). The existing native small-case equality tests
 were not rerun solely to obtain telemetry; earlier equality/replay/refusal verification
